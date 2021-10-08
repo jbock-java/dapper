@@ -1,0 +1,125 @@
+plugins {
+    id('java-library')
+    id('maven-publish')
+    id('signing')
+}
+
+group = 'io.github.jbock-java'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+    options.compilerArgs << '--release'
+    options.compilerArgs << '11'
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = true
+}
+
+dependencies {
+    api('io.github.jbock-java:either:1.5')
+    testImplementation('org.mockito:mockito-core:3.12.4')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Version': project.properties['version']
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events('failed')
+    }
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set('sources')
+}
+
+artifacts {
+    archives(javadocJar, sourcesJar)
+}
+
+// https://central.sonatype.org/pages/gradle.html
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'dapper'
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'dapper'
+                packaging = 'jar'
+                description = 'dapper annotations and utils'
+                url = 'https://github.com/jbock-java/dapper'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'Various'
+                        name = 'Various'
+                        email = 'jbock-java@gmx.de'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    url = 'https://github.com/jbock-java/jbock'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = System.getenv('OSS_USER')
+                password = System.getenv('OSS_PASS')
+            }
+        }
+    }
+}
+
+// https://docs.gradle.org/current/userguide/signing_plugin.html
+signing {
+    def signingKey = findProperty('signingKey')
+    def signingPassword = findProperty('signingPassword')
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
