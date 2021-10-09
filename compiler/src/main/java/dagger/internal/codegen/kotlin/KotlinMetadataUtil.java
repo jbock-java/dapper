@@ -16,22 +16,15 @@
 
 package dagger.internal.codegen.kotlin;
 
-import dagger.internal.codegen.extension.DaggerCollectors;
-
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
 
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
 
-  private final KotlinMetadataFactory metadataFactory;
-
   @Inject
-  KotlinMetadataUtil(KotlinMetadataFactory metadataFactory) {
-    this.metadataFactory = metadataFactory;
+  KotlinMetadataUtil() {
   }
 
   /**
@@ -54,41 +47,6 @@ public final class KotlinMetadataUtil {
 
   /* Returns {@code true} if this type element is a Kotlin Companion Object. */
   public boolean isCompanionObjectClass(TypeElement typeElement) {
-    return false;
-  }
-
-  /* Returns {@code true} if this type element has a Kotlin Companion Object. */
-  public boolean hasEnclosedCompanionObject(TypeElement typeElement) {
-    return false;
-  }
-
-  /* Returns the Companion Object element enclosed by the given type element. */
-  public TypeElement getEnclosedCompanionObject(TypeElement typeElement) {
-    return metadataFactory
-        .create(typeElement)
-        .classMetadata()
-        .companionObjectName()
-        .map(
-            companionObjectName ->
-                ElementFilter.typesIn(typeElement.getEnclosedElements()).stream()
-                    .filter(
-                        innerType -> innerType.getSimpleName().contentEquals(companionObjectName))
-                    .collect(DaggerCollectors.onlyElement()))
-        .get();
-  }
-
-  /**
-   * Returns {@code true} if the given type element was declared <code>private</code> in its Kotlin
-   * source.
-   */
-  public boolean isVisibilityPrivate(TypeElement typeElement) {
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the <code>@JvmStatic</code> annotation is present in the given element.
-   */
-  public static boolean isJvmStaticPresent(ExecutableElement element) {
     return false;
   }
 }
