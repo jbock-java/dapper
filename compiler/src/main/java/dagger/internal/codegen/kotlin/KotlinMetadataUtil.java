@@ -59,8 +59,7 @@ public final class KotlinMetadataUtil {
 
   /* Returns {@code true} if this type element has a Kotlin Companion Object. */
   public boolean hasEnclosedCompanionObject(TypeElement typeElement) {
-    return hasMetadata(typeElement)
-        && metadataFactory.create(typeElement).classMetadata().companionObjectName().isPresent();
+    return false;
   }
 
   /* Returns the Companion Object element enclosed by the given type element. */
