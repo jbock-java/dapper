@@ -21,7 +21,6 @@ import dagger.Module;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ModuleDescriptor;
-import dagger.internal.codegen.kotlin.KotlinMetadataFactory;
 import dagger.internal.codegen.validation.AnyBindingMethodValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
@@ -57,8 +56,4 @@ interface ProcessingRoundCacheModule {
   @Binds
   @IntoSet
   ClearableCache componentCreatorValidator(ComponentCreatorValidator cache);
-
-  @Binds
-  @IntoSet
-  ClearableCache kotlinMetadata(KotlinMetadataFactory cache);
 }
