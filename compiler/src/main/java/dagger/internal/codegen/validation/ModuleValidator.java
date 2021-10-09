@@ -240,9 +240,6 @@ public final class ModuleValidator {
     validateReferencedSubcomponents(module, moduleKind, builder);
     validateNoScopeAnnotationsOnModuleElement(module, moduleKind, builder);
     validateSelfCycles(module, builder);
-    if (metadataUtil.hasEnclosedCompanionObject(module)) {
-      validateCompanionModule(module, builder);
-    }
 
     if (builder.build().isClean()
         && bindingGraphValidator.shouldDoFullBindingGraphValidation(module)) {
@@ -642,44 +639,6 @@ public final class ModuleValidator {
                       }
                     },
                     null));
-  }
-
-  private void validateCompanionModule(
-      TypeElement module, ValidationReport.Builder<TypeElement> builder) {
-    checkArgument(metadataUtil.hasEnclosedCompanionObject(module));
-    TypeElement companionModule = metadataUtil.getEnclosedCompanionObject(module);
-    List<ExecutableElement> companionModuleMethods =
-        methodsIn(companionModule.getEnclosedElements());
-    List<ExecutableElement> companionBindingMethods = new ArrayList<>();
-    for (ExecutableElement companionModuleMethod : companionModuleMethods) {
-      if (anyBindingMethodValidator.isBindingMethod(companionModuleMethod)) {
-        builder.addSubreport(anyBindingMethodValidator.validate(companionModuleMethod));
-        companionBindingMethods.add(companionModuleMethod);
-      }
-
-      // On normal modules only overriding other binding methods is disallowed, but for companion
-      // objects we are prohibiting any override. For this can rely on checking the @Override
-      // annotation since the Kotlin compiler will always produce them for overriding methods.
-      if (isAnnotationPresent(companionModuleMethod, Override.class)) {
-        builder.addError(
-            "Binding method in companion object may not override another method.",
-            companionModuleMethod);
-      }
-
-      // TODO(danysantiago): Be strict about the usage of @JvmStatic, i.e. tell user to remove it.
-    }
-
-    ImmutableListMultimap<Name, ExecutableElement> bindingMethodsByName =
-        Multimaps.index(companionBindingMethods, ExecutableElement::getSimpleName);
-    validateMethodsWithSameName(builder, bindingMethodsByName);
-
-    // If there are provision methods, then check the visibility. Companion objects are composed by
-    // an inner class and a static field, it is not enough to check the visibility on the type
-    // element or the field, therefore we check the metadata.
-    if (!companionBindingMethods.isEmpty() && metadataUtil.isVisibilityPrivate(companionModule)) {
-      builder.addError(
-          "A Companion Module with binding methods cannot be private.", companionModule);
-    }
   }
 
   private void validateModuleBindings(
