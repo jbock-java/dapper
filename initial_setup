@@ -33,6 +33,7 @@ mv $SDIR/java/dagger/*.java core/src/main/java/dagger
 mkdir -p compiler/src/main/java/dagger/internal
 
 mv $SDIR/java/dagger/internal/codegen compiler/src/main/java/dagger/internal
+rm -rf compiler/src/main/java/dagger/internal/codegen/javac
 
 for S in model spi producers; do
   mv $SDIR/java/dagger/$S compiler/src/main/java/dagger/$S
