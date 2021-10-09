@@ -16,20 +16,14 @@
 
 package dagger.internal.codegen.kotlin;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import dagger.internal.codegen.extension.DaggerCollectors;
 
 import javax.inject.Inject;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
-import java.lang.annotation.Annotation;
-
-import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
 
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
@@ -47,21 +41,6 @@ public final class KotlinMetadataUtil {
    */
   public boolean hasMetadata(Element element) {
     return false;
-  }
-
-  /**
-   * Returns the synthetic annotations of a Kotlin property.
-   *
-   * <p>Note that this method only looks for additional annotations in the synthetic property
-   * method, if any, of a Kotlin property and not for annotations in its backing field.
-   */
-  public ImmutableCollection<? extends AnnotationMirror> getSyntheticPropertyAnnotations(
-      VariableElement fieldElement, Class<? extends Annotation> annotationType) {
-    return metadataFactory
-        .create(fieldElement)
-        .getSyntheticAnnotationMethod(fieldElement)
-        .map(methodElement -> getAnnotatedAnnotations(methodElement, annotationType).asList())
-        .orElse(ImmutableList.of());
   }
 
   /**
@@ -86,11 +65,6 @@ public final class KotlinMetadataUtil {
   /* Returns {@code true} if this type element is a Kotlin Companion Object. */
   public boolean isCompanionObjectClass(TypeElement typeElement) {
     return false;
-  }
-
-  /** Returns {@code true} if this type element is a Kotlin object or companion object. */
-  public boolean isObjectOrCompanionObjectClass(TypeElement typeElement) {
-    return isObjectClass(typeElement) || isCompanionObjectClass(typeElement);
   }
 
   /* Returns {@code true} if this type element has a Kotlin Companion Object. */
