@@ -116,9 +116,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     report.printMessagesTo(messager);
     if (report.isClean()) {
       generateForMethodsIn(module);
-      if (metadataUtil.hasEnclosedCompanionObject(module)) {
-        generateForMethodsIn(metadataUtil.getEnclosedCompanionObject(module));
-      }
     }
     processedModuleElements.add(module);
   }
