@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 
 /** Utility class for interacting with Kotlin Metadata. */
@@ -41,15 +40,6 @@ public final class KotlinMetadataUtil {
    */
   public boolean hasMetadata(Element element) {
     return false;
-  }
-
-  /**
-   * Returns {@code true} if the synthetic method for annotations is missing. This can occur when
-   * the Kotlin metadata of the property reports that it contains a synthetic method for annotations
-   * but such method is not found since it is synthetic and ignored by the processor.
-   */
-  public boolean isMissingSyntheticPropertyForAnnotations(VariableElement fieldElement) {
-    return metadataFactory.create(fieldElement).isMissingSyntheticAnnotationMethod(fieldElement);
   }
 
   /** Returns {@code true} if this type element is a Kotlin Object. */
