@@ -16,10 +16,7 @@
 
 package dagger.internal.codegen;
 
-import static net.ltgt.gradle.incap.IncrementalAnnotationProcessorType.ISOLATING;
-
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -52,12 +49,10 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.lang.model.SourceVersion;
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessor;
 
 /**
  * The annotation processor responsible for generating the classes that drive the Dagger 2.0
@@ -65,8 +60,6 @@ import net.ltgt.gradle.incap.IncrementalAnnotationProcessor;
  *
  * <p>TODO(gak): give this some better documentation
  */
-@IncrementalAnnotationProcessor(ISOLATING)
-@AutoService(Processor.class)
 public class ComponentProcessor extends BasicAnnotationProcessor {
   private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
