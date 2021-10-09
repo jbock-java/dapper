@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [[ ! -f dagger-dagger-2.37.tar.gz ]]; then
+  curl -o dagger-dagger-2.37.tar.gz 'https://codeload.github.com/google/dagger/tar.gz/refs/tags/dagger-2.37'
+fi
+
+if [[ ! -d dagger-dagger-2.37 ]]; then
+  tar xzf dagger-dagger-2.37.tar.gz
+fi
+
+
+
