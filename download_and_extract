@@ -4,9 +4,32 @@ if [[ ! -f dagger-dagger-2.37.tar.gz ]]; then
   curl -o dagger-dagger-2.37.tar.gz 'https://codeload.github.com/google/dagger/tar.gz/refs/tags/dagger-2.37'
 fi
 
-if [[ ! -d dagger-dagger-2.37 ]]; then
+SDIR=dagger-dagger-2.37
+
+if [[ ! -d $SDIR ]]; then
   tar xzf dagger-dagger-2.37.tar.gz
 fi
 
+if [[ ! -d $SDIR ]]; then
+  echo "something is wrong, $SDIR should exist"
+  exit 1
+fi
 
+for S in 'BUILD' '*.jar' '*.png'; do
+  find $SDIR -name "$S" -delete
+done
 
+mkdir -p core/src/main/java/dagger
+
+for S in internal assisted multibindings; do
+  mkdir core/src/main/java/dagger/$S
+  mv $SDIR/java/dagger/$S/*.java core/src/main/java/dagger/$S
+done
+
+mv $SDIR/java/dagger/*.java core/src/main/java/dagger
+mkdir -p compiler/src/main/java/dagger/internal
+mv $SDIR/java/dagger/internal/codegen compiler/src/main/java/dagger/internal
+
+rm -rf $SDIR
+
+echo "Done"
