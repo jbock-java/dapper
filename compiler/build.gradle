@@ -40,11 +40,10 @@ shadowJar {
         exclude('javax.annotation:jsr250-api:.*')
     }
     archiveClassifier.set('')
-    relocate('dagger', 'net.jbock.dagger')
-    relocate('com.squareup.javapoet', 'net.jbock.javapoet')
-    relocate('com.google', 'net.jbock.google')
-    relocate('org.checkerframework', 'net.jbock.org.checkerframework')
-    relocate('javax.inject', 'net.jbock.javax.inject')
+    relocate('com.squareup.javapoet', 'dapper.javapoet')
+    relocate('com.google', 'dapper.google')
+    relocate('org.checkerframework', 'dapper.org.checkerframework')
+    relocate('javax.inject', 'dapper.javax.inject')
 }
 
 dependencies {
@@ -53,6 +52,11 @@ dependencies {
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.guava:guava:30.1.1-jre')
     shadow(core)
+    implementation('com.google.auto.value:auto-value-annotations:1.8.2')
+    annotationProcessor('com.google.auto.value:auto-value:1.8.2')
+    implementation('org.checkerframework:checker-qual:3.18.1')
+    implementation('org.checkerframework:checker-compat-qual:2.5.5')
+    annotationProcessor('org.checkerframework:checker:3.18.1')
     implementation('com.google.dagger:dagger:2.36')
     annotationProcessor('com.google.dagger:dagger-compiler:2.36')
     implementation('javax.annotation:jsr250-api:1.0')
