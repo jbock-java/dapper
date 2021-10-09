@@ -24,6 +24,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Qualifier;
 
 /**

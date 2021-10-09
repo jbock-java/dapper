@@ -188,7 +188,7 @@ public final class ComponentImplementation {
   /**
    * Returns the {@link ShardImplementation} for each binding in this graph.
    *
-   * <p>Each shard contains approximately {@link CompilerOptions#keysPerComponentShard()} bindings.
+   * <p>Each shard contains approximately {@link CompilerOptions#keysPerComponentShard(TypeElement)} bindings.
    *
    * <p>If more than 1 shard is needed, we iterate the strongly connected nodes to make sure of two
    * things: 1) bindings are put in shards in reverse topological order (i.e., bindings in Shard{i}
@@ -310,7 +310,7 @@ public final class ComponentImplementation {
   /**
    * Returns the shard for a given {@link Binding}.
    *
-   * <p>Each set of {@link CompilerOptions#keysPerShard()} will get its own shard instance.
+   * <p>Each set of {@link CompilerOptions#keysPerComponentShard(TypeElement)} will get its own shard instance.
    */
   public ShardImplementation shardImplementation(Binding binding) {
     checkState(shardsByBinding.containsKey(binding), "No shard in %s for: %s", name(), binding);

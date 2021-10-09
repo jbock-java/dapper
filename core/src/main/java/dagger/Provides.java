@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * method's return type is bound to its returned value. The {@linkplain Component component}
  * implementation will pass dependencies to the method as parameters.
  *
- * <h3>Nullability</h3>
+ * <h2>Nullability</h2>
  *
  * <p>Dagger forbids injecting {@code null} by default. Component implementations that invoke
  * {@code @Provides} methods that return {@code null} will throw a {@link NullPointerException}

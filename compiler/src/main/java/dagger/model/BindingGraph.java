@@ -53,13 +53,13 @@ import javax.lang.model.element.TypeElement;
  *       dagger.producers.ProducerModule#subcomponents()} ()}
  * </ul>
  *
- * In the case of a {@link BindingGraph} representing a module, the root {@link ComponentNode} will
+ * <p>In the case of a {@link BindingGraph} representing a module, the root {@link ComponentNode} will
  * actually represent the module type. The graph will also be a {@linkplain #isFullBindingGraph()
  * full binding graph}, which means it will contain all bindings in all modules, as well as nodes
  * for their dependencies. Otherwise it will contain only bindings that are reachable from at least
  * one {@linkplain #entryPointEdges() entry point}.
  *
- * <h3>Nodes</h3>
+ * <h2>Nodes</h2>
  *
  * <p>There is a <b>{@link Binding}</b> for each owned binding in the graph. If a binding is owned
  * by more than one component, there is one binding object for that binding for every owning
