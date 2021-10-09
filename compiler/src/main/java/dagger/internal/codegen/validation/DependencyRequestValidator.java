@@ -16,14 +16,10 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreElements.asVariable;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
-import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
-import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.WILDCARD;
 
 import com.google.auto.common.MoreElements;
@@ -34,14 +30,11 @@ import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.RequestKind;
-import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
@@ -52,19 +45,13 @@ import javax.lang.model.type.TypeMirror;
 final class DependencyRequestValidator {
   private final MembersInjectionValidator membersInjectionValidator;
   private final InjectionAnnotations injectionAnnotations;
-  private final KotlinMetadataUtil metadataUtil;
-  private final DaggerElements elements;
 
   @Inject
   DependencyRequestValidator(
       MembersInjectionValidator membersInjectionValidator,
-      InjectionAnnotations injectionAnnotations,
-      KotlinMetadataUtil metadataUtil,
-      DaggerElements elements) {
+      InjectionAnnotations injectionAnnotations) {
     this.membersInjectionValidator = membersInjectionValidator;
     this.injectionAnnotations = injectionAnnotations;
-    this.metadataUtil = metadataUtil;
-    this.elements = elements;
   }
 
   /**
@@ -77,33 +64,8 @@ final class DependencyRequestValidator {
       // Don't validate assisted parameters. These are not dependency requests.
       return;
     }
-    if (missingQualifierMetadata(requestElement)) {
-      report.addError(
-          "Unable to read annotations on an injected Kotlin property. The Dagger compiler must"
-              + " also be applied to any project containing @Inject properties.",
-          requestElement);
-
-      // Skip any further validation if we don't have valid metadata for a type that needs it.
-      return;
-    }
 
     new Validator(report, requestElement, requestType).validate();
-  }
-
-  /** Returns {@code true} if a kotlin inject field is missing metadata about its qualifiers. */
-  private boolean missingQualifierMetadata(Element requestElement) {
-    if (requestElement.getKind() == ElementKind.FIELD
-        // static injected fields are not supported, no need to get qualifier from kotlin metadata
-        && !requestElement.getModifiers().contains(STATIC)
-        && metadataUtil.hasMetadata(requestElement)
-        && metadataUtil.isMissingSyntheticPropertyForAnnotations(asVariable(requestElement))) {
-      Optional<TypeElement> membersInjector =
-          Optional.ofNullable(
-              elements.getTypeElement(
-                  membersInjectorNameForType(asType(requestElement.getEnclosingElement()))));
-      return !membersInjector.isPresent();
-    }
-    return false;
   }
 
   private final class Validator {
