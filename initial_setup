@@ -27,9 +27,16 @@ for S in internal assisted multibindings; do
 done
 
 mv $SDIR/java/dagger/*.java core/src/main/java/dagger
+
+# Done with core, now doing compiler
+
 mkdir -p compiler/src/main/java/dagger/internal
+
 mv $SDIR/java/dagger/internal/codegen compiler/src/main/java/dagger/internal
 
-rm -rf $SDIR
+for S in model spi producers; do
+  mv $SDIR/java/dagger/$S compiler/src/main/java/dagger/$S
+done
 
 echo "Done"
+
