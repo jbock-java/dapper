@@ -33,25 +33,46 @@ import org.junit.runners.JUnit4;
 @SuppressWarnings("unused") // contains a variety things used by the compilation rule for testing
 public class AccessibilityTest {
   /* test data */
-  public AccessibilityTest() {}
-  protected AccessibilityTest(Object o) {}
-  AccessibilityTest(Object o1, Object o2) {}
-  private AccessibilityTest(Object o1, Object o2, Object o3) {}
+  public AccessibilityTest() {
+  }
+
+  protected AccessibilityTest(Object o) {
+  }
+
+  AccessibilityTest(Object o1, Object o2) {
+  }
+
+  private AccessibilityTest(Object o1, Object o2, Object o3) {
+  }
 
   public String publicField;
   protected String protectedField;
   String packagePrivateField;
   private String privateField;
 
-  public void publicMethod() {}
-  protected void protectedMethod() {}
-  void packagePrivateMethod() {}
-  private void privateMethod() {}
+  public void publicMethod() {
+  }
 
-  public static final class PublicNestedClass {}
-  protected static final class ProtectedNestedClass {}
-  static final class PackagePrivateNestedClass {}
-  private static final class PrivateNestedClass {}
+  protected void protectedMethod() {
+  }
+
+  void packagePrivateMethod() {
+  }
+
+  private void privateMethod() {
+  }
+
+  public static final class PublicNestedClass {
+  }
+
+  protected static final class ProtectedNestedClass {
+  }
+
+  static final class PackagePrivateNestedClass {
+  }
+
+  private static final class PrivateNestedClass {
+  }
 
   @Rule
   public final CompilationRule compilationRule = new CompilationRule();
@@ -78,20 +99,20 @@ public class AccessibilityTest {
   @Test
   public void isElementAccessibleFrom_protectedMethod() {
     Element member = getMemberNamed("protectedMethod");
-    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen")).isTrue();
+    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen.langmodel")).isTrue();
     assertThat(isElementAccessibleFrom(member, "not.dagger.internal.codegen")).isFalse();
   }
 
   @Test
   public void isElementAccessibleFrom_packagePrivateMethod() {
     Element member = getMemberNamed("packagePrivateMethod");
-    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen")).isTrue();
+    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen.langmodel")).isTrue();
     assertThat(isElementAccessibleFrom(member, "not.dagger.internal.codegen")).isFalse();
   }
 
   @Test
   public void isElementAccessibleFrom_privateMethod() {
-    Element member = getMemberNamed( "privateMethod");
+    Element member = getMemberNamed("privateMethod");
     assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen")).isFalse();
     assertThat(isElementAccessibleFrom(member, "not.dagger.internal.codegen")).isFalse();
   }
@@ -105,14 +126,14 @@ public class AccessibilityTest {
   @Test
   public void isElementAccessibleFrom_protectedField() {
     Element member = getMemberNamed("protectedField");
-    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen")).isTrue();
+    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen.langmodel")).isTrue();
     assertThat(isElementAccessibleFrom(member, "not.dagger.internal.codegen")).isFalse();
   }
 
   @Test
   public void isElementAccessibleFrom_packagePrivateField() {
     Element member = getMemberNamed("packagePrivateField");
-    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen")).isTrue();
+    assertThat(isElementAccessibleFrom(member, "dagger.internal.codegen.langmodel")).isTrue();
     assertThat(isElementAccessibleFrom(member, "not.dagger.internal.codegen")).isFalse();
   }
 
