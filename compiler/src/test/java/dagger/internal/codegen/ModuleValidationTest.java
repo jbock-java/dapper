@@ -28,6 +28,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.tools.JavaFileObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -377,6 +378,7 @@ public final class ModuleValidationTest {
         .onLineContaining("@Singleton");
   }
 
+  @Ignore("issue #3")
   @Test
   public void moduleIncludesSelfCycle() {
     JavaFileObject module =

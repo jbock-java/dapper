@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -663,6 +664,7 @@ public class AssistedFactoryErrorsTest {
         .onLine(8);
   }
 
+  @Ignore("issue #3")
   @Test
   public void testScopedAssistedInjection() {
     JavaFileObject foo =

@@ -41,6 +41,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -2462,6 +2463,7 @@ public class ComponentProcessorTest {
         .containsElementsIn(expectedPattern);
   }
 
+  @Ignore("issue #3")
   @Test
   public void justInTimeAtInjectConstructor_hasGeneratedQualifier() {
     JavaFileObject injected =
@@ -2545,6 +2547,7 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
+  @Ignore("issue #3")
   @Test
   public void moduleHasGeneratedQualifier() {
     JavaFileObject module =
