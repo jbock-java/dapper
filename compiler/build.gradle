@@ -9,7 +9,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(15))
     }
 }
 
@@ -64,13 +64,14 @@ dependencies {
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
+    testImplementation('org.junit.vintage:junit-vintage-engine:5.8.1')
     testImplementation('org.mockito:mockito-core:3.12.4')
 }
 
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'net.jbock.dapper',
+                'Automatic-Module-Name': 'dapper.compiler',
                 'Implementation-Version': project.properties['version']
         )
     }
@@ -127,9 +128,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/jbock-java/jbock.git'
-                    developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
-                    url = 'https://github.com/jbock-java/jbock'
+                    connection = 'scm:git:https://github.com/jbock-java/dapper.git'
+                    developerConnection = 'scm:git:https://github.com/jbock-java/dapper.git'
+                    url = 'https://github.com/jbock-java/dapper'
                 }
             }
         }

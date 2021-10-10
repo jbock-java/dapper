@@ -8,7 +8,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(15))
     }
 }
 
@@ -98,9 +98,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/jbock-java/jbock.git'
-                    developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
-                    url = 'https://github.com/jbock-java/jbock'
+                    connection = 'scm:git:https://github.com/jbock-java/dapper.git'
+                    developerConnection = 'scm:git:https://github.com/jbock-java/dapper.git'
+                    url = 'https://github.com/jbock-java/dapper'
                 }
             }
         }
