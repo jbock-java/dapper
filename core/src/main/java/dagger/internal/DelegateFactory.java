@@ -18,7 +18,7 @@ package dagger.internal;
 
 import static dagger.internal.Preconditions.checkNotNull;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A DelegateFactory that is used to stitch Provider/Lazy indirection based dependency cycles.

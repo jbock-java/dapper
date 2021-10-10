@@ -22,7 +22,7 @@ import static java.util.Collections.unmodifiableMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * An {@code abstract} {@link Factory} implementation used to implement {@link Map} bindings.

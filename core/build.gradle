@@ -34,7 +34,7 @@ tasks.withType(GenerateModuleMetadata) {
 }
 
 dependencies {
-    implementation 'javax.inject:javax.inject:1'
+    api('jakarta.inject:jakarta.inject-api:2.0.1.RC1')
     testImplementation('org.mockito:mockito-core:3.12.4')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
 }

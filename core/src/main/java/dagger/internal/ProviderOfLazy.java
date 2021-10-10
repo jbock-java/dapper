@@ -19,7 +19,7 @@ package dagger.internal;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Lazy;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Provider} of {@link Lazy} instances that each delegate to a given {@link Provider}.

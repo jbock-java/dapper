@@ -17,9 +17,9 @@
 package dagger.internal;
 
 import dagger.Provides;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Scope;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.inject.Scope;
 
 /**
  * An {@linkplain Scope unscoped} {@link Provider}. While a {@link Provider} <i>may</i> apply

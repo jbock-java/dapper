@@ -18,7 +18,7 @@ package dagger.internal;
 
 import dagger.Lazy;
 import java.util.Map;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Factory} implementation used to implement {@link Map} bindings. This factory returns a

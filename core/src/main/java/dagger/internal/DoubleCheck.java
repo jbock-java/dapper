@@ -19,7 +19,7 @@ package dagger.internal;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Lazy;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Lazy} and {@link Provider} implementation that memoizes the value returned from a

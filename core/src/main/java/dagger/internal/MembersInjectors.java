@@ -19,7 +19,7 @@ package dagger.internal;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.MembersInjector;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Basic {@link MembersInjector} implementations used by the framework.

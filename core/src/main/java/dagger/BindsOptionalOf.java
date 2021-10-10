@@ -23,9 +23,9 @@ import dagger.internal.Beta;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Qualifier;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.inject.Qualifier;
 
 /**
  * Annotates methods that declare bindings for {@code Optional} containers of values from bindings

@@ -18,7 +18,7 @@ package dagger.internal;
 
 import static dagger.internal.Preconditions.checkNotNull;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Provider} implementation that memoizes the result of another {@link Provider} using

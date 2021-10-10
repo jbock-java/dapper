@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
  *
  * <ul>
  *   <li>Must be {@code abstract}.
- *   <li>May be {@linkplain javax.inject.Scope scoped}.
- *   <li>May be {@linkplain javax.inject.Qualifier qualified}.
+ *   <li>May be {@linkplain jakarta.inject.Scope scoped}.
+ *   <li>May be {@linkplain jakarta.inject.Qualifier qualified}.
  *   <li>Must have a single parameter whose type is assignable to the return type. The return type
  *       declares the bound type (just as it would for a {@literal @}{@link dagger.Provides} method)
  *       and the parameter is the type to which it is bound.

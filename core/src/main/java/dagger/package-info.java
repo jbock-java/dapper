@@ -23,7 +23,7 @@
  *
  * <p>The entry point into the API is the {@link Component}, which annotates abstract types for
  * Dagger 2 to implement. The dependency graph is configured using annotations such as {@link
- * Module}, {@link Provides} and {@link javax.inject.Inject}.
+ * Module}, {@link Provides} and {@link jakarta.inject.Inject}.
  *
  * <p>{@code dagger.internal.codegen.ComponentProcessor} is the processor responsible for generating
  * the implementation. Dagger uses the annotation procesor {@linkplain java.util.ServiceLoader
