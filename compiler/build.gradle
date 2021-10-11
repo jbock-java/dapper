@@ -23,6 +23,7 @@ compileJava {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1064' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -52,13 +53,13 @@ dependencies {
     implementation('com.google.guava:guava:30.1.1-jre')
     implementation('com.google.googlejavaformat:google-java-format:1.11.0')
     shadow(core)
+    shadow('javax.inject:javax.inject:1')
     implementation('com.google.auto.value:auto-value-annotations:1.8.2')
     annotationProcessor('com.google.auto.value:auto-value:1.8.2')
     implementation('org.checkerframework:checker-qual:3.18.1')
     implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    implementation('com.google.dagger:dagger:2.36')
-    annotationProcessor('com.google.dagger:dagger-compiler:2.36')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:0.9')
     implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
