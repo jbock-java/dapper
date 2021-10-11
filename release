@@ -20,8 +20,7 @@ if [[ -z "$VERSION" ]]; then
 fi
 
 git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew clean compiler:test examples:test
-./gradlew -Pversion=${VERSION} ${MODULE}:publish
+./gradlew clean -Pversion=${VERSION} ${MODULE}:publish
 
 if [[ "compiler" != "$MODULE" ]]; then
   echo "Upload successful."
