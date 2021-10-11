@@ -55,7 +55,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** Reports errors for dependency cycles. */

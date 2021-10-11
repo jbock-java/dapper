@@ -19,7 +19,7 @@ package dagger.internal.codegen.writing;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.squareup.javapoet.CodeBlock;
-import dagger.internal.InstanceFactory;
+import dagger.internal.codegen.my.InstanceFactory;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import java.util.function.Supplier;
 

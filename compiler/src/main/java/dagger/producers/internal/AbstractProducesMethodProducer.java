@@ -25,7 +25,7 @@ import dagger.producers.monitoring.ProducerMonitor;
 import dagger.producers.monitoring.ProducerToken;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import java.util.concurrent.Executor;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**

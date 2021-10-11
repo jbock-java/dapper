@@ -19,9 +19,9 @@ package dagger.producers.internal;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import dagger.internal.DoubleCheck;
+import dagger.internal.codegen.my.DoubleCheck;
 import dagger.producers.Producer;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A DelegateProducer that is used to stitch Producer indirection during initialization across

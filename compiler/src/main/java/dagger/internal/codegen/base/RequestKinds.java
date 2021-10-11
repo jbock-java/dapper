@@ -41,7 +41,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@link RequestKind}s. */

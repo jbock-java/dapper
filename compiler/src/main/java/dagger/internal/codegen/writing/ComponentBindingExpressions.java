@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
@@ -281,7 +280,7 @@ public final class ComponentBindingExpressions {
   }
 
   /**
-   * Returns a binding expression that uses a {@link javax.inject.Provider} for provision bindings
+   * Returns a binding expression that uses a {@code Provider} for provision bindings
    * or a {@link dagger.producers.Producer} for production bindings.
    */
   private BindingExpression frameworkInstanceBindingExpression(ContributionBinding binding) {
@@ -365,7 +364,7 @@ public final class ComponentBindingExpressions {
    * cached} can use a {@link DelegateBindingExpression}.
    *
    * <p>In fastInit mode, use an {@link SwitchingProviders inner switching provider} unless
-   * that provider's case statement will simply call {@code get()} on another {@link Provider} (in
+   * that provider's case statement will simply call {@code get()} on another {@code Provider} (in
    * which case, just use that Provider directly).
    *
    * <p>Otherwise, return a {@link FrameworkInstanceBindingExpression}.

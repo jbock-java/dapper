@@ -22,7 +22,6 @@ import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 import dagger.Lazy;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import javax.inject.Provider;
 
 /**
  * Represents the different kinds of {@link javax.lang.model.type.TypeMirror types} that may be
@@ -35,13 +34,13 @@ public enum RequestKind {
   /** A default request for an instance. E.g.: {@code FooType} */
   INSTANCE,
 
-  /** A request for a {@link Provider}. E.g.: {@code Provider<FooType>} */
+  /** A request for a {@code Provider}. E.g.: {@code Provider<FooType>} */
   PROVIDER,
 
   /** A request for a {@link Lazy}. E.g.: {@code Lazy<FooType>} */
   LAZY,
 
-  /** A request for a {@link Provider} of a {@link Lazy}. E.g.: {@code Provider<Lazy<FooType>>} */
+  /** A request for a {@code Provider} of a {@link Lazy}. E.g.: {@code Provider<Lazy<FooType>>} */
   PROVIDER_OF_LAZY,
 
   /**

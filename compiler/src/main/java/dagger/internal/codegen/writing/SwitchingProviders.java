@@ -47,11 +47,11 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.Key;
 import dagger.model.RequestKind;
+import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -97,7 +97,7 @@ final class SwitchingProviders {
   }
 
   /**
-   * Returns the binding expression for a binding that satisfies a {@link Provider} requests with a
+   * Returns the binding expression for a binding that satisfies a {@code Provider} requests with a
    * inner {@code SwitchingProvider} class.
    */
   BindingExpression newBindingExpression(ContributionBinding binding) {

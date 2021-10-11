@@ -71,7 +71,7 @@ abstract class FrameworkInstanceBindingExpression extends BindingExpression {
    *
    * <p>This is used in {@link #getDependencyExpression(ClassName)} when determining the type of a
    * factory. Normally if the {@link ContributionBinding#contributedType()} is not accessible from
-   * the component, the type of the expression will be a raw {@link javax.inject.Provider}. However,
+   * the component, the type of the expression will be a raw {@code Provider}. However,
    * if the factory is created inline, even if contributed type is not accessible, javac will still
    * be able to determine the type that is returned from the {@code Foo_Factory.create()} method.
    */

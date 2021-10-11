@@ -29,7 +29,7 @@ import dagger.producers.Produced;
 import dagger.producers.Producer;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Producer} implementation used to implement {@link Map} bindings. This producer returns a

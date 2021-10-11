@@ -25,7 +25,7 @@ import dagger.MembersInjector;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
 import java.util.Set;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /**

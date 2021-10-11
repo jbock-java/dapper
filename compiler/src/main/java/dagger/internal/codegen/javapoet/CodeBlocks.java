@@ -82,8 +82,8 @@ public final class CodeBlocks {
   }
 
   /**
-   * Returns an anonymous {@link javax.inject.Provider} class with the single {@link
-   * javax.inject.Provider#get()} method that returns the given {@code expression}.
+   * Returns an anonymous {@code Provider} class with the single {@code
+   * Provider#get()} method that returns the given {@code expression}.
    */
   public static CodeBlock anonymousProvider(Expression expression) {
     // More of a precondition check that the type Provider is parameterized with is a DeclaredType
@@ -93,8 +93,8 @@ public final class CodeBlocks {
   }
 
   /**
-   * Returns an anonymous {@link javax.inject.Provider} class with the single {@link
-   * javax.inject.Provider#get()} method implemented by {@code body}.
+   * Returns an anonymous {@code Provider} class with the single {@code
+   * Provider#get()} method implemented by {@code body}.
    */
   public static CodeBlock anonymousProvider(TypeName providedType, CodeBlock body) {
     return CodeBlock.of(

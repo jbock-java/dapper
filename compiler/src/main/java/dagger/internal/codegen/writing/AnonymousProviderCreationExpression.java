@@ -32,7 +32,7 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 
 /**
- * A {@link javax.inject.Provider} creation expression for an anonymous inner class whose
+ * A {@code Provider} creation expression for an anonymous inner class whose
  * {@code get()} method returns the expression for an instance binding request for its key.
  */
 final class AnonymousProviderCreationExpression

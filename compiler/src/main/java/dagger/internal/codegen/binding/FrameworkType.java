@@ -27,7 +27,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
-import dagger.internal.DoubleCheck;
+import dagger.internal.codegen.my.DoubleCheck;
 import dagger.internal.ProviderOfLazy;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.javapoet.Expression;
@@ -38,12 +38,12 @@ import dagger.producers.Produced;
 import dagger.producers.Producer;
 import dagger.producers.internal.Producers;
 import java.util.Optional;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** One of the core types initialized as fields in a generated component. */
 public enum FrameworkType {
-  /** A {@link Provider}. */
+  /** A {@code Provider}. */
   PROVIDER {
     @Override
     public CodeBlock to(RequestKind requestKind, CodeBlock from) {

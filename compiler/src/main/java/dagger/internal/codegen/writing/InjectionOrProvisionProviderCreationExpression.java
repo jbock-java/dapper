@@ -28,10 +28,10 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
- * A {@link Provider} creation expression for an {@link javax.inject.Inject @Inject}-constructed
+ * A {@code Provider} creation expression for an {@link javax.inject.Inject @Inject}-constructed
  * class or a {@link dagger.Provides @Provides}-annotated module method.
  */
 // TODO(dpb): Resolve with ProducerCreationExpression.

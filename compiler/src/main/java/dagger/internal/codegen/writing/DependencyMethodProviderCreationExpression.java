@@ -45,7 +45,7 @@ import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstan
 import javax.lang.model.element.Element;
 
 /**
- * A {@link javax.inject.Provider} creation expression for a provision method on a component's
+ * A {@code Provider} creation expression for a provision method on a component's
  * {@linkplain dagger.Component#dependencies()} dependency}.
  */
 // TODO(dpb): Resolve with DependencyMethodProducerCreationExpression.

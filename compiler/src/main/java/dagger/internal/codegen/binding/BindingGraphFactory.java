@@ -70,7 +70,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

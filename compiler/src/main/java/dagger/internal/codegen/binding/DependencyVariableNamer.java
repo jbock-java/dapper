@@ -25,12 +25,11 @@ import dagger.Lazy;
 import dagger.model.DependencyRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Provider;
 
 /**
  * Picks a reasonable name for what we think is being provided from the variable name associated
  * with the {@link DependencyRequest}.  I.e. strips out words like "lazy" and "provider" if we
- * believe that those refer to {@link Lazy} and {@link Provider} rather than the type being
+ * believe that those refer to {@link Lazy} and {@code Provider} rather than the type being
  * provided.
  */
 //TODO(gak): develop the heuristics to get better names

@@ -93,7 +93,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   }
 
   /**
-   * Returns an unscoped creation expression for a {@link javax.inject.Provider} for provision
+   * Returns an unscoped creation expression for a {@code Provider} for provision
    * bindings or a {@link dagger.producers.Producer} for production bindings.
    */
   FrameworkInstanceCreationExpression create(ContributionBinding binding) {

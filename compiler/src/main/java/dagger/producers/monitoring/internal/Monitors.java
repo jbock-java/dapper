@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * Utility methods relating to monitoring, for use in generated producers code.

@@ -60,7 +60,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

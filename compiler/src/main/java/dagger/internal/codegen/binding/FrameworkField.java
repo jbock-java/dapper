@@ -49,7 +49,7 @@ public abstract class FrameworkField {
   /**
    * Creates a framework field.
    *
-   * @param frameworkClassName the name of the framework class (e.g., {@link javax.inject.Provider})
+   * @param frameworkClassName the name of the framework class (e.g., {@code Provider})
    * @param valueTypeName the name of the type parameter of the framework class (e.g., {@code Foo}
    *     for {@code Provider<Foo>}
    * @param fieldName the name of the field

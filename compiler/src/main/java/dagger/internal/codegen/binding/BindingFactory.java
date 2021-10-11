@@ -71,7 +71,7 @@ import dagger.producers.Producer;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

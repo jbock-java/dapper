@@ -22,7 +22,7 @@ import static dagger.producers.internal.Producers.producerFromProvider;
 import com.google.common.collect.ImmutableMap;
 import dagger.producers.Producer;
 import java.util.Map;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * An {@code abstract} {@link Producer} implementation used to implement {@link Map} bindings.

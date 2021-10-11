@@ -42,7 +42,8 @@ public class ProductionComponentProcessorTest {
     this.compilerMode = compilerMode;
   }
 
-  @Test public void componentOnConcreteClass() {
+  @Test
+  public void componentOnConcreteClass() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -55,7 +56,8 @@ public class ProductionComponentProcessorTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void componentOnEnum() {
+  @Test
+  public void componentOnEnum() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -71,7 +73,8 @@ public class ProductionComponentProcessorTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void componentOnAnnotation() {
+  @Test
+  public void componentOnAnnotation() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -85,7 +88,8 @@ public class ProductionComponentProcessorTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void nonModuleModule() {
+  @Test
+  public void nonModuleModule() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -232,17 +236,17 @@ public class ProductionComponentProcessorTest {
                 "",
                 GeneratedLines.generatedImports(
                     "import com.google.common.util.concurrent.ListenableFuture;",
-                    "import dagger.internal.DoubleCheck;",
-                    "import dagger.internal.InstanceFactory;",
-                    "import dagger.internal.MemoizedSentinel;",
                     "import dagger.internal.Preconditions;",
-                    "import dagger.internal.SetFactory;",
+                    "import dagger.internal.codegen.my.DoubleCheck;",
+                    "import dagger.internal.codegen.my.InstanceFactory;",
+                    "import dagger.internal.codegen.my.MemoizedSentinel;",
+                    "import dagger.internal.codegen.my.SetFactory;",
                     "import dagger.producers.Producer;",
                     "import dagger.producers.internal.CancellationListener;",
                     "import dagger.producers.internal.Producers;",
                     "import dagger.producers.monitoring.ProductionComponentMonitor;",
-                    "import java.util.concurrent.Executor;",
-                    "import javax.inject.Provider;"),
+                    "import jakarta.inject.Provider;",
+                    "import java.util.concurrent.Executor;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
                 "final class DaggerTestClass_SimpleComponent",
@@ -429,16 +433,16 @@ public class ProductionComponentProcessorTest {
                 "",
                 GeneratedLines.generatedImports(
                     "import com.google.common.util.concurrent.ListenableFuture;",
-                    "import dagger.internal.DoubleCheck;",
-                    "import dagger.internal.InstanceFactory;",
                     "import dagger.internal.Preconditions;",
-                    "import dagger.internal.SetFactory;",
+                    "import dagger.internal.codegen.my.DoubleCheck;",
+                    "import dagger.internal.codegen.my.InstanceFactory;",
+                    "import dagger.internal.codegen.my.SetFactory;",
                     "import dagger.producers.Producer;",
                     "import dagger.producers.internal.CancellationListener;",
                     "import dagger.producers.internal.Producers;",
                     "import dagger.producers.monitoring.ProductionComponentMonitor;",
-                    "import java.util.concurrent.Executor;",
-                    "import javax.inject.Provider;"),
+                    "import jakarta.inject.Provider;",
+                    "import java.util.concurrent.Executor;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
                 "final class DaggerTestClass_SimpleComponent",
@@ -539,7 +543,8 @@ public class ProductionComponentProcessorTest {
         .hasSourceEquivalentTo(generatedComponent);
   }
 
-  @Test public void nullableProducersAreNotErrors() {
+  @Test
+  public void nullableProducersAreNotErrors() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",

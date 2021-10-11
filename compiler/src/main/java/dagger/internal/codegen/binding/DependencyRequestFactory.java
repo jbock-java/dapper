@@ -43,7 +43,6 @@ import dagger.model.RequestKind;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -233,7 +232,7 @@ public final class DependencyRequestFactory {
    * Returns {@code true} if a given request element allows null values. {@link
    * RequestKind#INSTANCE} requests must be annotated with {@code @Nullable} in order to allow null
    * values. All other request kinds implicitly allow null values because they are are wrapped
-   * inside {@link Provider}, {@link Lazy}, etc.
+   * inside {@code Provider}, {@link Lazy}, etc.
    */
   private boolean allowsNull(RequestKind kind, Optional<DeclaredType> nullableType) {
     return nullableType.isPresent() || !kind.equals(INSTANCE);

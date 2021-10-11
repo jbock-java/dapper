@@ -42,9 +42,9 @@ import dagger.model.Key;
 import dagger.producers.Producer;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Provider;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.lang.model.type.DeclaredType;
 
 /**
@@ -118,7 +118,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
                 MapType.from(key).valuesAreTypeOf(Producer.class)
                     && !plainValueMapMultibindings.containsKey(keyFactory.unwrapMapValueType(key))
                     && !providerValueMapMultibindings.containsKey(
-                        keyFactory.rewrapMapKey(key, Producer.class, Provider.class).get()));
+                    keyFactory.rewrapMapKey(key, Producer.class, Provider.class).get()));
 
     return new ImmutableSet.Builder<dagger.model.Binding>()
         .addAll(plainValueMapMultibindings.values())
@@ -172,7 +172,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
   }
 
   private static ImmutableSetMultimap<Equivalence.Wrapper<DeclaredType>, ContributionBinding>
-      indexByMapKeyAnnotationType(ImmutableSet<ContributionBinding> contributions) {
+  indexByMapKeyAnnotationType(ImmutableSet<ContributionBinding> contributions) {
     return ImmutableSetMultimap.copyOf(
         Multimaps.index(
             contributions,

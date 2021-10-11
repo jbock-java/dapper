@@ -79,10 +79,6 @@ import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind;
-import dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind;
 import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.model.RequestKind;
@@ -344,15 +340,15 @@ public final class ComponentImplementation {
   }
 
   private static ImmutableMap<ComponentImplementation, FieldSpec>
-      createComponentFieldsByImplementation(
-          ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
+  createComponentFieldsByImplementation(
+      ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
     checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
     ImmutableList.Builder<ComponentImplementation> builder = ImmutableList.builder();
     for (ComponentImplementation curr = componentImplementation;
-        curr != null;
-        curr = curr.parent.orElse(null)) {
+         curr != null;
+         curr = curr.parent.orElse(null)) {
       builder.add(curr);
     }
     // For better readability when adding these fields/parameters to generated code, we collect the
@@ -540,6 +536,7 @@ public final class ComponentImplementation {
 
     // TODO(ronshapiro): see if we can remove this method and instead inject it in the objects that
     // need it.
+
     /** Returns the binding graph for the component being generated. */
     public BindingGraph graph() {
       return graph;
@@ -569,12 +566,14 @@ public final class ComponentImplementation {
     }
 
     // TODO(dpb): Consider taking FieldSpec, and returning identical FieldSpec with unique name?
+
     /** Adds the given field to the component. */
     public void addField(FieldSpecKind fieldKind, FieldSpec fieldSpec) {
       fieldSpecsMap.put(fieldKind, fieldSpec);
     }
 
     // TODO(dpb): Consider taking MethodSpec, and returning identical MethodSpec with unique name?
+
     /** Adds the given method to the component. */
     public void addMethod(MethodSpecKind methodKind, MethodSpec methodSpec) {
       methodSpecsMap.put(methodKind, methodSpec);
@@ -629,8 +628,8 @@ public final class ComponentImplementation {
       String baseMethodName =
           bindingName
               + (request.isRequestKind(RequestKind.INSTANCE)
-                  ? ""
-                  : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
+              ? ""
+              : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
       return getUniqueMethodName(baseMethodName);
     }
 
@@ -961,11 +960,11 @@ public final class ComponentImplementation {
     private boolean shouldPropagateCancellationToParent() {
       return parent.isPresent()
           && parent
-              .get()
-              .componentDescriptor()
-              .cancellationPolicy()
-              .map(policy -> policy.fromSubcomponents().equals(PROPAGATE))
-              .orElse(false);
+          .get()
+          .componentDescriptor()
+          .cancellationPolicy()
+          .map(policy -> policy.fromSubcomponents().equals(PROPAGATE))
+          .orElse(false);
     }
 
     /**

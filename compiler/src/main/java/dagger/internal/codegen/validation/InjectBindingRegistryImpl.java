@@ -48,6 +48,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
+import jakarta.inject.Provider;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -55,7 +56,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -92,8 +92,8 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
     void generateBindings(SourceFileGenerator<B> generator) throws SourceFileGenerationException {
       for (B binding = bindingsRequiringGeneration.poll();
-          binding != null;
-          binding = bindingsRequiringGeneration.poll()) {
+           binding != null;
+           binding = bindingsRequiringGeneration.poll()) {
         checkState(!binding.unresolved().isPresent());
         if (injectValidatorWhenGeneratingCode.isValidType(binding.key().type())) {
           generator.generate(binding);

@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * A {@link Producer} implementation used to implement {@link Map} bindings. This producer returns a

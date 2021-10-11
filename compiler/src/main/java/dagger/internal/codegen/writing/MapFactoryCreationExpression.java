@@ -32,7 +32,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** A factory creation expression for a multibound map. */
