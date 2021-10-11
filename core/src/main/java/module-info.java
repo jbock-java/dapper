@@ -1,4 +1,4 @@
-module dapper {
+module dagger {
 
   requires transitive java.compiler;
   requires jakarta.inject;
