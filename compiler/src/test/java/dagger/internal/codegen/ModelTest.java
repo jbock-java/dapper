@@ -49,7 +49,7 @@ public final class ModelTest {
             "package test;",
             "",
             "import javax.inject.Inject;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "final class B {",
             "  @Inject B(Provider<A> a) {}",

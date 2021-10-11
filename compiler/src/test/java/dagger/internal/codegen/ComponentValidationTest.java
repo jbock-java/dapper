@@ -126,7 +126,7 @@ public final class ComponentValidationTest {
             "",
             "import dagger.Component;",
             "import dagger.Lazy;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Component",
             "interface TestComponent {",

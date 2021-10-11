@@ -57,16 +57,16 @@ public final class TypeNames {
   public static final ClassName INJECTED_FIELD_SIGNATURE =
       ClassName.get("dagger.internal", "InjectedFieldSignature");
   public static final ClassName INSTANCE_FACTORY =
-      ClassName.get("dagger.internal", "InstanceFactory");
+      ClassName.get("dagger.internal.codegen.my", "InstanceFactory");
   public static final ClassName MAP_FACTORY = ClassName.get("dagger.internal.codegen.my", "MapFactory");
   public static final ClassName MAP_PROVIDER_FACTORY =
-      ClassName.get("dagger.internal", "MapProviderFactory");
+      ClassName.get("dagger.internal.codegen.my", "MapProviderFactory");
   public static final ClassName MEMBERS_INJECTOR = ClassName.get("dagger", "MembersInjector");
   public static final ClassName MEMBERS_INJECTORS =
-      ClassName.get("dagger.internal", "MembersInjectors");
+      ClassName.get("dagger.internal.codegen.my", "MembersInjectors");
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName PROVIDER_OF_LAZY =
-      ClassName.get("dagger.internal", "ProviderOfLazy");
+      ClassName.get("dagger.internal.codegen.my", "ProviderOfLazy");
   public static final ClassName SET_FACTORY = ClassName.get("dagger.internal.codegen.my", "SetFactory");
   public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal.codegen.my", "SingleCheck");
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");

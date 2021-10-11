@@ -28,7 +28,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
 import dagger.internal.codegen.my.DoubleCheck;
-import dagger.internal.ProviderOfLazy;
+import dagger.internal.codegen.my.ProviderOfLazy;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;

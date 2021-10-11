@@ -84,7 +84,8 @@ final class DaggerModuleMethodSubject extends Subject {
               "import dagger.multibindings.*;",
               "import dagger.producers.*;",
               "import java.util.*;",
-              "import javax.inject.*;");
+              "import javax.inject.*;",
+              "import jakarta.inject.Provider;");
   private String declaration;
   private ImmutableList<JavaFileObject> additionalSources = ImmutableList.of();
 

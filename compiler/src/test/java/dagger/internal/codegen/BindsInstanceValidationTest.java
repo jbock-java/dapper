@@ -143,7 +143,7 @@ public final class BindsInstanceValidationTest {
             "",
             "import dagger.BindsInstance;",
             "import dagger.producers.Producer;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "interface BindsInstanceFrameworkType {",
             "  @BindsInstance void bindsProvider(Provider<Object> objectProvider);",

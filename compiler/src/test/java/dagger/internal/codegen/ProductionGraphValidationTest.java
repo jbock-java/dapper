@@ -215,7 +215,7 @@ public class ProductionGraphValidationTest {
             "import dagger.producers.Produces;",
             "import dagger.producers.ProductionComponent;",
             "import java.util.Map;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "final class TestClass {",
             "  interface A {}",

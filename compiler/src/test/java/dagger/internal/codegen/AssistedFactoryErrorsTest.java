@@ -351,7 +351,7 @@ public class AssistedFactoryErrorsTest {
             "package test;",
             "",
             "import javax.inject.Inject;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "class Bar {",
             "  @Inject",
@@ -365,7 +365,7 @@ public class AssistedFactoryErrorsTest {
             "",
             "import dagger.Module;",
             "import dagger.Provides;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Module",
             "class FooModule {",
@@ -381,7 +381,7 @@ public class AssistedFactoryErrorsTest {
             "package test;",
             "",
             "import dagger.Component;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Component",
             "interface FooComponent {",
@@ -403,7 +403,7 @@ public class AssistedFactoryErrorsTest {
     assertThat(compilation).hadErrorContaining(fooError).inFile(component).onLine(8);
 
     String fooProviderError =
-        "Dagger does not support injecting @AssistedInject type, javax.inject.Provider<test.Foo>. "
+        "Dagger does not support injecting @AssistedInject type, jakarta.inject.Provider<test.Foo>. "
             + "Did you mean to inject its assisted factory type instead?";
     assertThat(compilation).hadErrorContaining(fooProviderError).inFile(bar).onLine(8);
     assertThat(compilation).hadErrorContaining(fooProviderError).inFile(module).onLine(10);
@@ -437,7 +437,7 @@ public class AssistedFactoryErrorsTest {
             "",
             "import dagger.Module;",
             "import dagger.Provides;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Module",
             "class FooModule {",

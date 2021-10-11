@@ -371,7 +371,7 @@ public class MapMultibindingValidationTest {
                 "import dagger.Component;",
                 "import dagger.producers.Producer;",
                 "import java.util.Map;",
-                "import javax.inject.Provider;",
+                "import jakarta.inject.Provider;",
                 "",
                 "@Component(modules = {MapModule.class})",
                 "interface TestComponent {")

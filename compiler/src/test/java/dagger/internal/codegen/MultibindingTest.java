@@ -106,7 +106,7 @@ public class MultibindingTest {
             "import dagger.Provides;",
             "import java.util.Collections;",
             "import java.util.Map;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Module",
             "class TestModule {",
