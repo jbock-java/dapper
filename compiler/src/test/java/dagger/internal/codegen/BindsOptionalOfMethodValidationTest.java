@@ -26,18 +26,18 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.Module;
 import dagger.producers.ProducerModule;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-/** Tests {@link dagger.internal.codegen.validation.BindsOptionalOfMethodValidator}. */
+/** Tests {@code BindsOptionalOfMethodValidator}. */
 @RunWith(Parameterized.class)
 public class BindsOptionalOfMethodValidationTest {
   @Parameters(name = "{0}")

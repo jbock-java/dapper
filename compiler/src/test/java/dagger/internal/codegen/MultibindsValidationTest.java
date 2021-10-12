@@ -22,9 +22,9 @@ import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertTh
 import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.producers.ProducerModule;
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import javax.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

@@ -36,7 +36,7 @@ public final class DiagnosticFormatting {
               + "((?:" // Start a group with a non-capturing or part
               + "java[.]lang"
               + "|java[.]util"
-              + "|javax[.]inject"
+              + "|jakarta[.]inject"
               + "|dagger"
               + "|dagger[.]multibindings"
               + "|com[.]google[.]common[.]base"

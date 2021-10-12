@@ -32,8 +32,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
-import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.my.Reusable;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;
@@ -235,6 +235,7 @@ public final class DaggerElements implements Elements, ClearableCache {
 
   // Note: This is similar to auto-common's MoreElements except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreElements?
+
   /**
    * Returns an {@link AnnotationMirror} for the annotation of type {@code annotationClass} on
    * {@code element}, or {@link Optional#empty()} if no such annotation exists. This method is a

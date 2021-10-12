@@ -25,6 +25,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.regex.Pattern;
 import javax.tools.JavaFileObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -503,6 +504,7 @@ public final class FullBindingGraphValidationTest {
     assertThat(compilation).hadWarningCount(1);
   }
 
+  @Ignore
   @Test
   public void bothAliasesDifferentValues() {
     Compilation compilation =

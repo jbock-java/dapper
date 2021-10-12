@@ -365,7 +365,7 @@ public final class ModuleValidationTest {
             "package test;",
             "",
             "import dagger.Module;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Singleton",
             "@Module",

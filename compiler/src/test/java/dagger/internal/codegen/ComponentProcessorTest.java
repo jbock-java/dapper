@@ -36,7 +36,6 @@ import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -60,7 +59,8 @@ public class ComponentProcessorTest {
     this.compilerMode = compilerMode;
   }
 
-  @Test public void doubleBindingFromResolvedModules() {
+  @Test
+  public void doubleBindingFromResolvedModules() {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.ParentModule",
         "package test;",
         "",
@@ -116,11 +116,12 @@ public class ComponentProcessorTest {
         .hadErrorContaining("@Provides List<Integer> AnotherModule.provideListOfInteger()");
   }
 
-  @Test public void privateNestedClassWithWarningThatIsAnErrorInComponent() {
+  @Test
+  public void privateNestedClassWithWarningThatIsAnErrorInComponent() {
     JavaFileObject outerClass = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class OuterClass {",
         "  @Inject OuterClass(InnerClass innerClass) {}",
@@ -140,18 +141,19 @@ public class ComponentProcessorTest {
         "}");
     Compilation compilation =
         compilerWithOptions(
-                compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
+            compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
             .compile(outerClass, componentFile);
     assertThat(compilation).failed();
     assertThat(compilation)
         .hadErrorContaining("Dagger does not support injection into private classes");
   }
 
-  @Test public void simpleComponent() {
+  @Test
+  public void simpleComponent() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType() {}",
@@ -269,12 +271,13 @@ public class ComponentProcessorTest {
         .hasSourceEquivalentTo(generatedComponent);
   }
 
-  @Test public void componentWithScope() {
+  @Test
+  public void componentWithScope() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
-        "import javax.inject.Singleton;",
+        "import jakarta.inject.Inject;",
+        "import jakarta.inject.Singleton;",
         "",
         "@Singleton",
         "final class SomeInjectableType {",
@@ -286,7 +289,7 @@ public class ComponentProcessorTest {
         "import dagger.Component;",
         "import dagger.Lazy;",
         "import jakarta.inject.Provider;",
-        "import javax.inject.Singleton;",
+        "import jakarta.inject.Singleton;",
         "",
         "@Singleton",
         "@Component",
@@ -389,12 +392,13 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void simpleComponentWithNesting() {
+  @Test
+  public void simpleComponentWithNesting() {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",
         "import dagger.Component;",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class OuterType {",
         "  static class A {",
@@ -446,11 +450,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void componentWithModule() {
+  @Test
+  public void componentWithModule() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class A {",
         "  @Inject A(B b) {}",
@@ -462,7 +467,7 @@ public class ComponentProcessorTest {
     JavaFileObject cFile = JavaFileObjects.forSourceLines("test.C",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class C {",
         "  @Inject C() {}",
@@ -549,7 +554,7 @@ public class ComponentProcessorTest {
             "test.A",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "final class A {",
             "  @Inject A(B b) {}",
@@ -564,7 +569,7 @@ public class ComponentProcessorTest {
             "test.C",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "final class C {",
             "  @Inject C() {}",
@@ -623,7 +628,8 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void transitiveModuleDeps() {
+  @Test
+  public void transitiveModuleDeps() {
     JavaFileObject always = JavaFileObjects.forSourceLines("test.AlwaysIncluded",
         "package test;",
         "",
@@ -777,19 +783,19 @@ public class ComponentProcessorTest {
         "@Component(modules = RootModule.class)",
         "interface TestComponent {}");
     assertThat(
-            compilerWithOptions(compilerMode.javacopts()).compile(rootModule, component))
+        compilerWithOptions(compilerMode.javacopts()).compile(rootModule, component))
         .failed();
     assertThat(
-            daggerCompiler(
-                    new GeneratingProcessor(
-                        "test.GeneratedModule",
-                        "package test;",
-                        "",
-                        "import dagger.Module;",
-                        "",
-                        "@Module",
-                        "final class GeneratedModule {}"))
-                .compile(rootModule, component))
+        daggerCompiler(
+            new GeneratingProcessor(
+                "test.GeneratedModule",
+                "package test;",
+                "",
+                "import dagger.Module;",
+                "",
+                "@Module",
+                "final class GeneratedModule {}"))
+            .compile(rootModule, component))
         .succeeded();
   }
 
@@ -816,19 +822,19 @@ public class ComponentProcessorTest {
             "  ChildComponent childComponent();",
             "}");
     assertThat(
-            compilerWithOptions(compilerMode.javacopts()).compile(subcomponent, component))
+        compilerWithOptions(compilerMode.javacopts()).compile(subcomponent, component))
         .failed();
     assertThat(
-            daggerCompiler(
-                    new GeneratingProcessor(
-                        "test.GeneratedModule",
-                        "package test;",
-                        "",
-                        "import dagger.Module;",
-                        "",
-                        "@Module",
-                        "final class GeneratedModule {}"))
-                .compile(subcomponent, component))
+        daggerCompiler(
+            new GeneratingProcessor(
+                "test.GeneratedModule",
+                "package test;",
+                "",
+                "import dagger.Module;",
+                "",
+                "@Module",
+                "final class GeneratedModule {}"))
+            .compile(subcomponent, component))
         .succeeded();
   }
 
@@ -927,7 +933,7 @@ public class ComponentProcessorTest {
   public void testDefaultPackage() {
     JavaFileObject aClass = JavaFileObjects.forSourceLines("AClass", "class AClass {}");
     JavaFileObject bClass = JavaFileObjects.forSourceLines("BClass",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "class BClass {",
         "  @Inject BClass(AClass a) {}",
@@ -949,16 +955,17 @@ public class ComponentProcessorTest {
         "  BClass bClass();",
         "}");
     assertThat(
-            compilerWithOptions(compilerMode.javacopts())
-                .compile(aModule, aClass, bClass, component))
+        compilerWithOptions(compilerMode.javacopts())
+            .compile(aModule, aClass, bClass, component))
         .succeeded();
   }
 
-  @Test public void membersInjection() {
+  @Test
+  public void membersInjection() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType() {}",
@@ -966,7 +973,7 @@ public class ComponentProcessorTest {
     JavaFileObject injectedTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectedType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectedType {",
         "  @Inject SomeInjectableType injectedField;",
@@ -1023,11 +1030,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void componentInjection() {
+  @Test
+  public void componentInjection() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType(SimpleComponent component) {}",
@@ -1080,11 +1088,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void membersInjectionInsideProvision() {
+  @Test
+  public void membersInjectionInsideProvision() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType() {}",
@@ -1092,7 +1101,7 @@ public class ComponentProcessorTest {
     JavaFileObject injectedTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectedType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectedType {",
         "  @Inject SomeInjectableType injectedField;",
@@ -1142,11 +1151,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void componentDependency() {
+  @Test
+  public void componentDependency() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class A {",
         "  @Inject A() {}",
@@ -1154,7 +1164,7 @@ public class ComponentProcessorTest {
     JavaFileObject bFile = JavaFileObjects.forSourceLines("test.B",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "import jakarta.inject.Provider;",
         "",
         "final class B {",
@@ -1272,7 +1282,8 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void moduleNameCollision() {
+  @Test
+  public void moduleNameCollision() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1375,13 +1386,14 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void ignoresDependencyMethodsFromObject() {
+  @Test
+  public void ignoresDependencyMethodsFromObject() {
     JavaFileObject injectedTypeFile =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "import jakarta.inject.Provider;",
             "",
             "final class InjectedType {",
@@ -1472,11 +1484,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void resolutionOrder() {
+  @Test
+  public void resolutionOrder() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class A {",
         "  @Inject A(B b) {}",
@@ -1484,7 +1497,7 @@ public class ComponentProcessorTest {
     JavaFileObject bFile = JavaFileObjects.forSourceLines("test.B",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class B {",
         "  @Inject B(C c) {}",
@@ -1492,7 +1505,7 @@ public class ComponentProcessorTest {
     JavaFileObject cFile = JavaFileObjects.forSourceLines("test.C",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class C {",
         "  @Inject C() {}",
@@ -1500,7 +1513,7 @@ public class ComponentProcessorTest {
     JavaFileObject xFile = JavaFileObjects.forSourceLines("test.X",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class X {",
         "  @Inject X(C c) {}",
@@ -1557,11 +1570,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void simpleComponent_redundantComponentMethod() {
+  @Test
+  public void simpleComponent_redundantComponentMethod() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType() {}",
@@ -1645,11 +1659,12 @@ public class ComponentProcessorTest {
         .hasSourceEquivalentTo(generatedComponent);
   }
 
-  @Test public void simpleComponent_inheritedComponentMethodDep() {
+  @Test
+  public void simpleComponent_inheritedComponentMethodDep() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType() {}",
@@ -1692,11 +1707,12 @@ public class ComponentProcessorTest {
         .containsElementsIn(generatedComponent);
   }
 
-  @Test public void wildcardGenericsRequiresAtProvides() {
+  @Test
+  public void wildcardGenericsRequiresAtProvides() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class A {",
         "  @Inject A() {}",
@@ -1704,7 +1720,7 @@ public class ComponentProcessorTest {
     JavaFileObject bFile = JavaFileObjects.forSourceLines("test.B",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "import jakarta.inject.Provider;",
         "",
         "final class B<T> {",
@@ -1713,7 +1729,7 @@ public class ComponentProcessorTest {
     JavaFileObject cFile = JavaFileObjects.forSourceLines("test.C",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "import jakarta.inject.Provider;",
         "",
         "final class C {",
@@ -1765,7 +1781,7 @@ public class ComponentProcessorTest {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "final class SomeInjectableType {",
         "  @Inject SomeInjectableType(GeneratedType generatedType) {}",
@@ -1781,15 +1797,15 @@ public class ComponentProcessorTest {
         "}");
     Compilation compilation =
         daggerCompiler(
-                new GeneratingProcessor(
-                    "test.GeneratedType",
-                    "package test;",
-                    "",
-                    "import javax.inject.Inject;",
-                    "",
-                    "final class GeneratedType {",
-                    "  @Inject GeneratedType() {}",
-                    "}"))
+            new GeneratingProcessor(
+                "test.GeneratedType",
+                "package test;",
+                "",
+                "import jakarta.inject.Inject;",
+                "",
+                "final class GeneratedType {",
+                "  @Inject GeneratedType() {}",
+                "}"))
             .withOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
@@ -1817,15 +1833,15 @@ public class ComponentProcessorTest {
             "}");
     Compilation compilation =
         daggerCompiler(
-                new GeneratingProcessor(
-                    "test.GeneratedType",
-                    "package test;",
-                    "",
-                    "import javax.inject.Inject;",
-                    "",
-                    "final class GeneratedType {",
-                    "  @Inject GeneratedType() {}",
-                    "}"))
+            new GeneratingProcessor(
+                "test.GeneratedType",
+                "package test;",
+                "",
+                "import jakarta.inject.Inject;",
+                "",
+                "final class GeneratedType {",
+                "  @Inject GeneratedType() {}",
+                "}"))
             .withOptions(compilerMode.javacopts())
             .compile(componentFile, interfaceFile);
     assertThat(compilation).succeeded();
@@ -1835,8 +1851,8 @@ public class ComponentProcessorTest {
   /**
    * We warn when generating a {@link MembersInjector} for a type post-hoc (i.e., if Dagger wasn't
    * invoked when compiling the type). But Dagger only generates {@link MembersInjector}s for types
-   * with {@link Inject @Inject} constructors if they have any injection sites, and it only
-   * generates them for types without {@link Inject @Inject} constructors if they have local
+   * with {@code @Inject} constructors if they have any injection sites, and it only
+   * generates them for types without {@code @Inject} constructors if they have local
    * (non-inherited) injection sites. So make sure we warn in only those cases where running the
    * Dagger processor actually generates a {@link MembersInjector}.
    */
@@ -1896,7 +1912,7 @@ public class ComponentProcessorTest {
                     "test.inject.NoInjectMemberWithConstructor",
                     "package test.inject;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class NoInjectMemberWithConstructor {",
                     "  @Inject NoInjectMemberWithConstructor() {}",
@@ -1905,7 +1921,7 @@ public class ComponentProcessorTest {
                     "test.inject.LocalInjectMemberNoConstructor",
                     "package test.inject;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class LocalInjectMemberNoConstructor {",
                     "  @Inject Object object;",
@@ -1914,7 +1930,7 @@ public class ComponentProcessorTest {
                     "test.inject.LocalInjectMemberWithConstructor",
                     "package test.inject;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class LocalInjectMemberWithConstructor {",
                     "  @Inject LocalInjectMemberWithConstructor() {}",
@@ -1924,7 +1940,7 @@ public class ComponentProcessorTest {
                     "test.inject.ParentInjectMemberNoConstructor",
                     "package test.inject;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class ParentInjectMemberNoConstructor",
                     "    extends LocalInjectMemberNoConstructor {}"),
@@ -1932,7 +1948,7 @@ public class ComponentProcessorTest {
                     "test.inject.ParentInjectMemberWithConstructor",
                     "package test.inject;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class ParentInjectMemberWithConstructor",
                     "    extends LocalInjectMemberNoConstructor {",
@@ -1965,7 +1981,7 @@ public class ComponentProcessorTest {
             "test.AScope",
             "package test;",
             "",
-            "import javax.inject.Scope;",
+            "import jakarta.inject.Scope;",
             "",
             "@Scope",
             "@interface AScope {}");
@@ -1974,7 +1990,7 @@ public class ComponentProcessorTest {
             "test.AClass",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "final class AClass {",
             "  @Inject @AScope AClass() {}",
@@ -1995,8 +2011,8 @@ public class ComponentProcessorTest {
             "test.Foo",
             "package test;",
             "",
-            "import javax.inject.Inject;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Inject;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Singleton",
             "class Foo {",
@@ -2019,7 +2035,7 @@ public class ComponentProcessorTest {
             "package test;",
             "",
             "import dagger.Component;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Singleton",
             "@Component(modules = TestModule.class)",
@@ -2166,7 +2182,7 @@ public class ComponentProcessorTest {
                     "test.InjectsMember",
                     "package test;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class InjectsMember {",
                     "  @Inject String member;",
@@ -2256,7 +2272,7 @@ public class ComponentProcessorTest {
                     "test.InjectsMember",
                     "package test;",
                     "",
-                    "import javax.inject.Inject;",
+                    "import jakarta.inject.Inject;",
                     "",
                     "public class InjectsMember {",
                     "  @Inject Integer member;",
@@ -2334,7 +2350,7 @@ public class ComponentProcessorTest {
             "package test;",
             "",
             "import dagger.Component;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Singleton",
             "@Component(modules=TestModule.class)",
@@ -2348,7 +2364,7 @@ public class ComponentProcessorTest {
             "",
             "import dagger.Module;",
             "import dagger.Provides;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Module",
             "abstract class TestModule {",
@@ -2406,7 +2422,7 @@ public class ComponentProcessorTest {
             "package test;",
             "",
             "import dagger.Component;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Singleton",
             "@Component(modules=TestModule.class)",
@@ -2420,7 +2436,7 @@ public class ComponentProcessorTest {
             "",
             "import dagger.Module;",
             "import dagger.Provides;",
-            "import javax.inject.Singleton;",
+            "import jakarta.inject.Singleton;",
             "",
             "@Module",
             "abstract class TestModule {",
@@ -2471,7 +2487,7 @@ public class ComponentProcessorTest {
             "test.Injected",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class Injected {",
             "  @Inject Injected(@GeneratedQualifier String string) {}",
@@ -2528,18 +2544,18 @@ public class ComponentProcessorTest {
 
     Compilation compilation =
         daggerCompiler(
-                new GeneratingProcessor(
-                    "test.GeneratedQualifier",
-                    "package test;",
-                    "",
-                    "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
-                    "",
-                    "import java.lang.annotation.Retention;",
-                    "import javax.inject.Qualifier;",
-                    "",
-                    "@Retention(RUNTIME)",
-                    "@Qualifier",
-                    "@interface GeneratedQualifier {}"))
+            new GeneratingProcessor(
+                "test.GeneratedQualifier",
+                "package test;",
+                "",
+                "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
+                "",
+                "import java.lang.annotation.Retention;",
+                "import jakarta.inject.Qualifier;",
+                "",
+                "@Retention(RUNTIME)",
+                "@Qualifier",
+                "@interface GeneratedQualifier {}"))
             .compile(injected, module, component);
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
@@ -2608,7 +2624,7 @@ public class ComponentProcessorTest {
                 "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
                 "",
                 "import java.lang.annotation.Retention;",
-                "import javax.inject.Qualifier;",
+                "import jakarta.inject.Qualifier;",
                 "",
                 "@Retention(RUNTIME)",
                 "@Qualifier",

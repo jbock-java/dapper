@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Dagger Authors.
+ * Copyright (C) 2016 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.writing;
+package dagger.internal.codegen.my;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import dagger.internal.Beta;
+import jakarta.inject.Scope;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
-/** A {@code Scope} that encompasses a single component implementation. */
+/**
+ * A scope that indicates that the object returned by a binding may be (but might not be) reused.
+ *
+ * <p>{@code @Reusable} is useful when you want to limit the number of provisions of a type, but
+ * there is no specific lifetime over which there must be only one instance.
+ *
+ * @see <a href="https://dagger.dev/users-guide#reusable-scope">Reusable Scope</a>
+ */
+@Documented
+@Beta
 @Retention(RUNTIME)
-@javax.inject.Scope
-public @interface PerComponentImplementation {}
+@Scope
+public @interface Reusable {}

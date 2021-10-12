@@ -28,7 +28,7 @@ import dagger.producers.ProducerModule;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.Collection;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

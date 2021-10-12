@@ -44,7 +44,7 @@ public final class Scopes {
   }
 
   /**
-   * Creates a {@link Scope} object from the {@link javax.inject.Scope}-annotated annotation type.
+   * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
   private static Scope scope(
       DaggerElements elements, Class<? extends Annotation> scopeAnnotationClass) {
@@ -72,7 +72,7 @@ public final class Scopes {
 
   /** Returns all of the associated scopes for a source code element. */
   public static ImmutableSet<Scope> scopesOf(Element element) {
-    return AnnotationMirrors.getAnnotatedAnnotations(element, javax.inject.Scope.class)
+    return AnnotationMirrors.getAnnotatedAnnotations(element, jakarta.inject.Scope.class)
         .stream()
         .map(Scope::scope)
         .collect(toImmutableSet());

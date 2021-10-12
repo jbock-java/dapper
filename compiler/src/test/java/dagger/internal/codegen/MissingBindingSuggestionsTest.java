@@ -33,7 +33,7 @@ public class MissingBindingSuggestionsTest {
     return JavaFileObjects.forSourceLines("test." + className,
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "class " + className +" {",
         "  @Inject " + className + "(" + constructorParams + ") {}",
@@ -44,7 +44,7 @@ public class MissingBindingSuggestionsTest {
     return JavaFileObjects.forSourceLines("test." + interfaceName,
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "interface " + interfaceName +" {}");
   }
@@ -63,7 +63,7 @@ public class MissingBindingSuggestionsTest {
         "package test;",
         "",
         "import dagger.Provides;",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "@dagger.Module",
         "final class BarModule {",
@@ -123,7 +123,7 @@ public class MissingBindingSuggestionsTest {
         "package test;",
         "",
         "import dagger.Provides;",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "@dagger.Module",
         "final class BazModule {",
@@ -187,7 +187,7 @@ public class MissingBindingSuggestionsTest {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "Foo",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class Foo {",
             "  @Inject Foo(Bar bar) {}",
@@ -195,7 +195,7 @@ public class MissingBindingSuggestionsTest {
     JavaFileObject bar =
         JavaFileObjects.forSourceLines(
             "Bar",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class Bar {",
             "  @Inject Bar(Baz baz) {}",
@@ -205,7 +205,7 @@ public class MissingBindingSuggestionsTest {
         "BazModule",
         "import dagger.Module;",
         "import dagger.Provides;",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "@Module",
         "final class BazModule {",
@@ -269,7 +269,7 @@ public class MissingBindingSuggestionsTest {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "Foo",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class Foo {",
             "  @Inject Foo(Bar bar) {}",
@@ -277,7 +277,7 @@ public class MissingBindingSuggestionsTest {
     JavaFileObject bar =
         JavaFileObjects.forSourceLines(
             "Bar",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class Bar {",
             "  @Inject Bar(Baz baz) {}",
@@ -287,7 +287,7 @@ public class MissingBindingSuggestionsTest {
         "BazModule",
         "import dagger.Module;",
         "import dagger.Provides;",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "@Module",
         "final class BazModule {",

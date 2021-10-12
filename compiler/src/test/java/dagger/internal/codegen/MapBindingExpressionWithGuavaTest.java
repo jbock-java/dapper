@@ -345,7 +345,7 @@ public class MapBindingExpressionWithGuavaTest {
             "package other;",
             "",
             "import java.util.Map;",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "public class UsesInaccessible {",
             "  @Inject UsesInaccessible(Map<Integer, Inaccessible> map) {}",

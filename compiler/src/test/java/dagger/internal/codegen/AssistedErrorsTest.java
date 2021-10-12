@@ -83,7 +83,7 @@ public class AssistedErrorsTest {
             "",
             "import dagger.assisted.Assisted;",
             "import dagger.assisted.AssistedInject;",
-            "import javax.inject.Qualifier;",
+            "import jakarta.inject.Qualifier;",
             "",
             "class Foo {",
             "  @Qualifier @interface FooQualifier {}",

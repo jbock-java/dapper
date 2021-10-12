@@ -137,7 +137,7 @@ public class SetBindingRequestFulfillmentTest {
             "package other;",
             "",
             "import java.util.Set;",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "public class UsesInaccessible {",
             "  @Inject UsesInaccessible(Set<Inaccessible> set1, Set<Inaccessible2> set2) {}",

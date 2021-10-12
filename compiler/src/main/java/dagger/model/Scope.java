@@ -24,14 +24,14 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Equivalence;
-import dagger.Reusable;
+import dagger.internal.codegen.my.Reusable;
 import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 
-/** A representation of a {@link javax.inject.Scope}. */
+/** A representation of a {@link jakarta.inject.Scope}. */
 @AutoValue
 // TODO(ronshapiro): point to SimpleAnnotationMirror
 public abstract class Scope {
@@ -48,25 +48,25 @@ public abstract class Scope {
   }
 
   /**
-   * Creates a {@link Scope} object from the {@link javax.inject.Scope}-annotated annotation type.
+   * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
   public static Scope scope(AnnotationMirror scopeAnnotation) {
-    checkArgument(isScope(scopeAnnotation));
+//    checkArgument(isScope(scopeAnnotation));
     return new AutoValue_Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
   }
 
   /**
-   * Returns {@code true} if {@link #scopeAnnotation()} is a {@link javax.inject.Scope} annotation.
+   * Returns {@code true} if {@link #scopeAnnotation()} is a {@link jakarta.inject.Scope} annotation.
    */
   public static boolean isScope(AnnotationMirror scopeAnnotation) {
     return isScope(MoreElements.asType(scopeAnnotation.getAnnotationType().asElement()));
   }
 
   /**
-   * Returns {@code true} if {@code scopeAnnotationType} is a {@link javax.inject.Scope} annotation.
+   * Returns {@code true} if {@code scopeAnnotationType} is a {@link jakarta.inject.Scope} annotation.
    */
   public static boolean isScope(TypeElement scopeAnnotationType) {
-    return isAnnotationPresent(scopeAnnotationType, javax.inject.Scope.class);
+    return isAnnotationPresent(scopeAnnotationType, jakarta.inject.Scope.class);
   }
 
   /** Returns {@code true} if this scope is the {@link Singleton @Singleton} scope. */

@@ -44,7 +44,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimaps;
 import dagger.MembersInjector;
-import dagger.Reusable;
+import dagger.internal.codegen.my.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Keys;

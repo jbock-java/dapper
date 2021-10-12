@@ -74,7 +74,7 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
             "test.UsesSubcomponent",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "class UsesSubcomponent {",
             "  @Inject UsesSubcomponent(Sub.Builder subBuilder) {}",

@@ -350,7 +350,7 @@ public class ModuleFactoryGeneratorTest {
     JavaFileObject classXFile = JavaFileObjects.forSourceLines("test.X",
         "package test;",
         "",
-        "import javax.inject.Inject;",
+        "import jakarta.inject.Inject;",
         "",
         "class X {",
         "  @Inject public String s;",
@@ -1207,7 +1207,7 @@ public class ModuleFactoryGeneratorTest {
           "test.QualifierA",
           "package test;",
           "",
-          "import javax.inject.Qualifier;",
+          "import jakarta.inject.Qualifier;",
           "",
           "@Qualifier @interface QualifierA {}");
 
@@ -1216,7 +1216,7 @@ public class ModuleFactoryGeneratorTest {
           "test.QualifierB",
           "package test;",
           "",
-          "import javax.inject.Qualifier;",
+          "import jakarta.inject.Qualifier;",
           "",
           "@Qualifier @interface QualifierB {}");
 
@@ -1290,7 +1290,7 @@ public class ModuleFactoryGeneratorTest {
           "test.ScopeA",
           "package test;",
           "",
-          "import javax.inject.Scope;",
+          "import jakarta.inject.Scope;",
           "",
           "@Scope @interface ScopeA {}");
 
@@ -1299,7 +1299,7 @@ public class ModuleFactoryGeneratorTest {
           "test.ScopeB",
           "package test;",
           "",
-          "import javax.inject.Scope;",
+          "import jakarta.inject.Scope;",
           "",
           "@Scope @interface ScopeB {}");
 
@@ -1501,7 +1501,7 @@ public class ModuleFactoryGeneratorTest {
             "test.FooImpl",
             "package test;",
             "",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "final class FooImpl implements Foo {",
             "  @Inject FooImpl() {}",
