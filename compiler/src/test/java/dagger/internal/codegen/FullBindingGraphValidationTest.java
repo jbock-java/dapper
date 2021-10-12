@@ -504,7 +504,6 @@ public final class FullBindingGraphValidationTest {
     assertThat(compilation).hadWarningCount(1);
   }
 
-  @Ignore
   @Test
   public void bothAliasesDifferentValues() {
     Compilation compilation =
