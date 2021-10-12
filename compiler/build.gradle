@@ -58,7 +58,6 @@ dependencies {
     implementation('org.checkerframework:checker-qual:3.18.1')
     implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    implementation('com.google.dagger:dagger:2.36')
     annotationProcessor('io.github.jbock-java:dapper-compiler:0.92')
     implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
