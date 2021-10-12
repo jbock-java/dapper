@@ -103,14 +103,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     if (processedModuleElements.contains(module)) {
       return;
     }
-    // For backwards compatibility, we allow a companion object to be annotated with @Module even
-    // though it's no longer required. However, we skip processing the companion object itself
-    // because it will now be processed when processing the companion object's enclosing class.
-    if (metadataUtil.isCompanionObjectClass(module)) {
-      // TODO(danysantiago): Be strict about annotating companion objects with @Module,
-      //  i.e. tell user to annotate parent instead.
-      return;
-    }
     ValidationReport<TypeElement> report = moduleValidator.validate(module);
     report.printMessagesTo(messager);
     if (report.isClean()) {

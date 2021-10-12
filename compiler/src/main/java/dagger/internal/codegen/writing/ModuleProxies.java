@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -84,7 +85,7 @@ public final class ModuleProxies {
 
     @Override
     public ImmutableList<TypeSpec.Builder> topLevelTypes(TypeElement moduleElement) {
-      ModuleKind.checkIsModule(moduleElement, metadataUtil);
+      checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
       return moduleProxies.nonPublicNullaryConstructor(moduleElement).isPresent()
           ? ImmutableList.of(buildProxy(moduleElement))
           : ImmutableList.of();
@@ -105,7 +106,7 @@ public final class ModuleProxies {
 
   /** The name of the class that hosts the module constructor proxy method. */
   private ClassName constructorProxyTypeName(TypeElement moduleElement) {
-    ModuleKind.checkIsModule(moduleElement, metadataUtil);
+    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     ClassName moduleClassName = ClassName.get(moduleElement);
     return moduleClassName
         .topLevelClassName()
@@ -118,7 +119,7 @@ public final class ModuleProxies {
    * abstract, no proxy method can be generated.
    */
   private Optional<ExecutableElement> nonPublicNullaryConstructor(TypeElement moduleElement) {
-    ModuleKind.checkIsModule(moduleElement, metadataUtil);
+    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     if (moduleElement.getModifiers().contains(ABSTRACT)
         || (moduleElement.getNestingKind().isNested()
             && !moduleElement.getModifiers().contains(STATIC))) {
@@ -137,7 +138,7 @@ public final class ModuleProxies {
    * constructor's generated proxy method.
    */
   public CodeBlock newModuleInstance(TypeElement moduleElement, ClassName requestingClass) {
-    ModuleKind.checkIsModule(moduleElement, metadataUtil);
+    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     String packageName = requestingClass.packageName();
     return nonPublicNullaryConstructor(moduleElement)
         .filter(constructor -> !isElementAccessibleFrom(constructor, packageName))

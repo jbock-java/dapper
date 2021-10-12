@@ -209,7 +209,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     for (InjectionSite injectionSite : binding.injectionSites()) {
       if (injectionSite.element().getEnclosingElement().equals(binding.membersInjectedType())) {
-        injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite, metadataUtil));
+        injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite));
       }
     }
 

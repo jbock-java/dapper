@@ -441,12 +441,6 @@ public final class ModuleValidator {
                       && !validate(module, visitedModules).isClean()) {
                     reportError("%s has errors", module.getQualifiedName());
                   }
-                  if (metadataUtil.isCompanionObjectClass(module)) {
-                    reportError(
-                        "%s is listed as a module, but it is a companion object class. "
-                            + "Add @Module to the enclosing class and reference that instead.",
-                        module.getQualifiedName());
-                  }
                   return null;
                 }
 

@@ -117,8 +117,7 @@ final class InjectionMethods {
      */
     static MethodSpec create(
         ProvisionBinding binding,
-        CompilerOptions compilerOptions,
-        KotlinMetadataUtil metadataUtil) {
+        CompilerOptions compilerOptions) {
       ExecutableElement element = asExecutable(binding.bindingElement().get());
       switch (element.getKind()) {
         case CONSTRUCTOR:
@@ -128,8 +127,8 @@ final class InjectionMethods {
               element,
               methodName(element),
               InstanceCastPolicy.IGNORE,
-              CheckNotNullPolicy.get(binding, compilerOptions),
-              metadataUtil);
+              CheckNotNullPolicy.get(binding, compilerOptions)
+          );
         default:
           throw new AssertionError(element);
       }
@@ -151,7 +150,7 @@ final class InjectionMethods {
       invokeArguments(binding, dependencyUsage, requestingClass).forEach(arguments::add);
 
       ClassName enclosingClass = generatedClassNameForBinding(binding);
-      MethodSpec methodSpec = create(binding, compilerOptions, metadataUtil);
+      MethodSpec methodSpec = create(binding, compilerOptions);
       return invokeMethod(methodSpec, arguments.build(), enclosingClass, requestingClass);
     }
 
@@ -260,7 +259,7 @@ final class InjectionMethods {
      * receives its own method, as the subclass may need to inject them in a different order from
      * the parent class.
      */
-    static MethodSpec create(InjectionSite injectionSite, KotlinMetadataUtil metadataUtil) {
+    static MethodSpec create(InjectionSite injectionSite) {
       String methodName = methodName(injectionSite);
       switch (injectionSite.kind()) {
         case METHOD:
@@ -268,8 +267,8 @@ final class InjectionMethods {
               asExecutable(injectionSite.element()),
               methodName,
               InstanceCastPolicy.CAST_IF_NOT_PUBLIC,
-              CheckNotNullPolicy.IGNORE,
-              metadataUtil);
+              CheckNotNullPolicy.IGNORE
+          );
         case FIELD:
           Optional<AnnotationMirror> qualifier =
               injectionSite.dependencies().stream()
@@ -343,7 +342,7 @@ final class InjectionMethods {
 
       ClassName enclosingClass =
           membersInjectorNameForType(asType(injectionSite.element().getEnclosingElement()));
-      MethodSpec methodSpec = create(injectionSite, metadataUtil);
+      MethodSpec methodSpec = create(injectionSite);
       return invokeMethod(methodSpec, arguments.build(), enclosingClass, generatedTypeName);
     }
 
@@ -435,16 +434,14 @@ final class InjectionMethods {
       ExecutableElement method,
       String methodName,
       InstanceCastPolicy instanceCastPolicy,
-      CheckNotNullPolicy checkNotNullPolicy,
-      KotlinMetadataUtil metadataUtil) {
+      CheckNotNullPolicy checkNotNullPolicy) {
     MethodSpec.Builder builder =
         methodBuilder(methodName).addModifiers(PUBLIC, STATIC).varargs(method.isVarArgs());
 
     TypeElement enclosingType = asType(method.getEnclosingElement());
-    boolean isMethodInKotlinCompanionObject = metadataUtil.isCompanionObjectClass(enclosingType);
     UniqueNameSet parameterNameSet = new UniqueNameSet();
     CodeBlock instance;
-    if (isMethodInKotlinCompanionObject || method.getModifiers().contains(STATIC)) {
+    if (method.getModifiers().contains(STATIC)) {
       instance = CodeBlock.of("$T", rawTypeName(TypeName.get(enclosingType.asType())));
     } else {
       copyTypeParameters(builder, enclosingType);

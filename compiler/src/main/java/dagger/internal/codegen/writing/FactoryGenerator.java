@@ -125,7 +125,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(getMethod(binding));
     addCreateMethod(binding, factoryBuilder);
 
-    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, metadataUtil));
+    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions));
     gwtIncompatibleAnnotation(binding).ifPresent(factoryBuilder::addAnnotation);
 
     return factoryBuilder;

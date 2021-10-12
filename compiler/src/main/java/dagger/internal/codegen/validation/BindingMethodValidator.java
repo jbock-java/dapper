@@ -158,7 +158,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
     }
 
     /** Checks additional properties of the binding method. */
-    protected void checkAdditionalMethodProperties() {}
+    protected void checkAdditionalMethodProperties() {
+    }
 
     /**
      * Adds an error if the method is not declared in a class or interface annotated with one of the
@@ -166,10 +167,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
      */
     private void checkEnclosingElement() {
       TypeElement enclosingElement = asType(element.getEnclosingElement());
-      if (metadataUtil.isCompanionObjectClass(enclosingElement)) {
-        // Binding method is in companion object, use companion object's enclosing class instead.
-        enclosingElement = asType(enclosingElement.getEnclosingElement());
-      }
       if (!isAnyAnnotationPresent(enclosingElement, enclosingElementAnnotations)) {
         report.addError(
             bindingMethods(

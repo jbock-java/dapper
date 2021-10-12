@@ -16,22 +16,10 @@
 
 package dagger.internal.codegen.kotlin;
 
-import javax.lang.model.element.TypeElement;
-
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
 
   @jakarta.inject.Inject
   KotlinMetadataUtil() {
-  }
-
-  /** Returns {@code true} if this type element is a Kotlin data class. */
-  public boolean isDataClass(TypeElement typeElement) {
-    return false;
-  }
-
-  /* Returns {@code true} if this type element is a Kotlin Companion Object. */
-  public boolean isCompanionObjectClass(TypeElement typeElement) {
-    return false;
   }
 }
