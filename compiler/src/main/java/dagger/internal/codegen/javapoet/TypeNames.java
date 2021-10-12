@@ -46,29 +46,29 @@ public final class TypeNames {
   public static final ClassName MODULE = ClassName.get("dagger", "Module");
   public static final ClassName MULTIBINDS = ClassName.get("dagger.multibindings", "Multibinds");
   public static final ClassName PROVIDES = ClassName.get("dagger", "Provides");
-  public static final ClassName REUSABLE = ClassName.get("dagger.internal.codegen.my", "Reusable");
+  public static final ClassName REUSABLE = ClassName.get("dagger", "Reusable");
   public static final ClassName SUBCOMPONENT = ClassName.get("dagger", "Subcomponent");
   public static final ClassName SUBCOMPONENT_BUILDER = SUBCOMPONENT.nestedClass("Builder");
   public static final ClassName SUBCOMPONENT_FACTORY = SUBCOMPONENT.nestedClass("Factory");
 
   // Dagger Internal classnames
-  public static final ClassName DOUBLE_CHECK = ClassName.get("dagger.internal.codegen.my", "DoubleCheck");
-  public static final ClassName FACTORY = ClassName.get("dagger.internal.codegen.my", "Factory");
+  public static final ClassName DOUBLE_CHECK = ClassName.get("dagger.internal", "DoubleCheck");
+  public static final ClassName FACTORY = ClassName.get("dagger.internal", "Factory");
   public static final ClassName INJECTED_FIELD_SIGNATURE =
       ClassName.get("dagger.internal", "InjectedFieldSignature");
   public static final ClassName INSTANCE_FACTORY =
-      ClassName.get("dagger.internal.codegen.my", "InstanceFactory");
-  public static final ClassName MAP_FACTORY = ClassName.get("dagger.internal.codegen.my", "MapFactory");
+      ClassName.get("dagger.internal", "InstanceFactory");
+  public static final ClassName MAP_FACTORY = ClassName.get("dagger.internal", "MapFactory");
   public static final ClassName MAP_PROVIDER_FACTORY =
-      ClassName.get("dagger.internal.codegen.my", "MapProviderFactory");
+      ClassName.get("dagger.internal", "MapProviderFactory");
   public static final ClassName MEMBERS_INJECTOR = ClassName.get("dagger", "MembersInjector");
   public static final ClassName MEMBERS_INJECTORS =
-      ClassName.get("dagger.internal.codegen.my", "MembersInjectors");
+      ClassName.get("dagger.internal", "MembersInjectors");
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName PROVIDER_OF_LAZY =
-      ClassName.get("dagger.internal.codegen.my", "ProviderOfLazy");
-  public static final ClassName SET_FACTORY = ClassName.get("dagger.internal.codegen.my", "SetFactory");
-  public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal.codegen.my", "SingleCheck");
+      ClassName.get("dagger.internal", "ProviderOfLazy");
+  public static final ClassName SET_FACTORY = ClassName.get("dagger.internal", "SetFactory");
+  public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal", "SingleCheck");
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 
   // Dagger Producers classnames
