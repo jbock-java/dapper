@@ -16,19 +16,16 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.asExecutable;
 import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.getMethodDescriptor;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.NONE;
@@ -47,11 +44,12 @@ import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
 import dagger.multibindings.Multibinds;
 import dagger.producers.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -103,10 +101,9 @@ public abstract class ModuleDescriptor {
   }
 
   /** A {@link ModuleDescriptor} factory. */
-  @jakarta.inject.Singleton
+  @Singleton
   public static final class Factory implements ClearableCache {
     private final DaggerElements elements;
-    private final KotlinMetadataUtil metadataUtil;
     private final BindingFactory bindingFactory;
     private final MultibindingDeclaration.Factory multibindingDeclarationFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
@@ -114,17 +111,15 @@ public abstract class ModuleDescriptor {
     private final OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory;
     private final Map<TypeElement, ModuleDescriptor> cache = new HashMap<>();
 
-    @jakarta.inject.Inject
+    @Inject
     Factory(
         DaggerElements elements,
-        KotlinMetadataUtil metadataUtil,
         BindingFactory bindingFactory,
         MultibindingDeclaration.Factory multibindingDeclarationFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
         SubcomponentDeclaration.Factory subcomponentDeclarationFactory,
         OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory) {
       this.elements = elements;
-      this.metadataUtil = metadataUtil;
       this.bindingFactory = bindingFactory;
       this.multibindingDeclarationFactory = multibindingDeclarationFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;

@@ -63,7 +63,6 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerCollectors;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
@@ -143,8 +142,7 @@ final class InjectionMethods {
         Function<DependencyRequest, CodeBlock> dependencyUsage,
         ClassName requestingClass,
         Optional<CodeBlock> moduleReference,
-        CompilerOptions compilerOptions,
-        KotlinMetadataUtil metadataUtil) {
+        CompilerOptions compilerOptions) {
       ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
       moduleReference.ifPresent(arguments::add);
       invokeArguments(binding, dependencyUsage, requestingClass).forEach(arguments::add);
@@ -293,8 +291,7 @@ final class InjectionMethods {
         CodeBlock instanceCodeBlock,
         TypeMirror instanceType,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
-        DaggerTypes types,
-        KotlinMetadataUtil metadataUtil) {
+        DaggerTypes types) {
       return injectionSites.stream()
           .map(
               injectionSite -> {
@@ -317,8 +314,8 @@ final class InjectionMethods {
                         injectionSite,
                         generatedTypeName,
                         maybeCastedInstance,
-                        dependencyUsage,
-                        metadataUtil));
+                        dependencyUsage
+                    ));
               })
           .collect(toConcatenatedCodeBlock());
     }
@@ -331,8 +328,7 @@ final class InjectionMethods {
         InjectionSite injectionSite,
         ClassName generatedTypeName,
         CodeBlock instanceCodeBlock,
-        Function<DependencyRequest, CodeBlock> dependencyUsage,
-        KotlinMetadataUtil metadataUtil) {
+        Function<DependencyRequest, CodeBlock> dependencyUsage) {
       ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
       arguments.add(instanceCodeBlock);
       if (!injectionSite.dependencies().isEmpty()) {

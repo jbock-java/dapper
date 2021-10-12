@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.FormatMethod;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Optional;
@@ -40,7 +39,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
 
   private final DaggerElements elements;
   private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
   private final DependencyRequestValidator dependencyRequestValidator;
   private final ClassName methodAnnotation;
   private final ImmutableSet<ClassName> enclosingElementAnnotations;
@@ -57,7 +55,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   protected BindingMethodValidator(
       DaggerElements elements,
       DaggerTypes types,
-      KotlinMetadataUtil metadataUtil,
       DependencyRequestValidator dependencyRequestValidator,
       ClassName methodAnnotation,
       ClassName enclosingElementAnnotation,
@@ -69,7 +66,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
     this(
         elements,
         types,
-        metadataUtil,
         methodAnnotation,
         ImmutableSet.of(enclosingElementAnnotation),
         dependencyRequestValidator,
@@ -90,7 +86,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   protected BindingMethodValidator(
       DaggerElements elements,
       DaggerTypes types,
-      KotlinMetadataUtil metadataUtil,
       ClassName methodAnnotation,
       Iterable<ClassName> enclosingElementAnnotations,
       DependencyRequestValidator dependencyRequestValidator,
@@ -102,7 +97,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
     super(methodAnnotation, allowsMultibindings, allowsScoping, injectionAnnotations);
     this.elements = elements;
     this.types = types;
-    this.metadataUtil = metadataUtil;
     this.methodAnnotation = methodAnnotation;
     this.enclosingElementAnnotations = ImmutableSet.copyOf(enclosingElementAnnotations);
     this.dependencyRequestValidator = dependencyRequestValidator;

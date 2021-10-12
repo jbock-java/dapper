@@ -27,9 +27,9 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 
@@ -39,17 +39,15 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   BindsOptionalOfMethodValidator(
       DaggerElements elements,
       DaggerTypes types,
-      KotlinMetadataUtil kotlinMetadataUtil,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
         elements,
         types,
-        kotlinMetadataUtil,
         TypeNames.BINDS_OPTIONAL_OF,
         ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
@@ -77,7 +75,7 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
     protected void checkKeyType(TypeMirror keyType) {
       super.checkKeyType(keyType);
       if (isValidImplicitProvisionKey(
-              injectionAnnotations.getQualifiers(element).stream().findFirst(), keyType, types)
+          injectionAnnotations.getQualifiers(element).stream().findFirst(), keyType, types)
           && !injectedConstructors(asTypeElement(keyType)).isEmpty()) {
         report.addError(
             "@BindsOptionalOf methods cannot return unqualified types that have an @Inject-"

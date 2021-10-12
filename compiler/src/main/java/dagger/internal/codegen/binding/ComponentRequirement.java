@@ -30,10 +30,7 @@ import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableSet;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.model.Key;
@@ -114,15 +111,15 @@ public abstract class ComponentRequirement {
   abstract Optional<NullPolicy> overrideNullPolicy();
 
   /** The requirement's null policy. */
-  public NullPolicy nullPolicy(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
+  public NullPolicy nullPolicy(DaggerElements elements) {
     if (overrideNullPolicy().isPresent()) {
       return overrideNullPolicy().get();
     }
     switch (kind()) {
       case MODULE:
-        return componentCanMakeNewInstances(typeElement(), metadataUtil)
+        return componentCanMakeNewInstances(typeElement())
             ? NullPolicy.NEW
-            : requiresAPassedInstance(elements, metadataUtil) ? NullPolicy.THROW : NullPolicy.ALLOW;
+            : requiresAPassedInstance(elements) ? NullPolicy.THROW : NullPolicy.ALLOW;
       case DEPENDENCY:
       case BOUND_INSTANCE:
         return NullPolicy.THROW;
@@ -134,13 +131,13 @@ public abstract class ComponentRequirement {
    * Returns true if the passed {@link ComponentRequirement} requires a passed instance in order to
    * be used within a component.
    */
-  public boolean requiresAPassedInstance(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
+  public boolean requiresAPassedInstance(DaggerElements elements) {
     if (!kind().isModule()) {
       // Bound instances and dependencies always require the user to provide an instance.
       return true;
     }
-    return requiresModuleInstance(elements, metadataUtil)
-        && !componentCanMakeNewInstances(typeElement(), metadataUtil);
+    return requiresModuleInstance(elements)
+        && !componentCanMakeNewInstances(typeElement());
   }
 
   /**
@@ -153,7 +150,7 @@ public abstract class ComponentRequirement {
    * <p>Alternatively, if the module is a Kotlin Object then the binding methods are considered
    * {@code static}, requiring no module instance.
    */
-  private boolean requiresModuleInstance(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
+  private boolean requiresModuleInstance(DaggerElements elements) {
 
     ImmutableSet<ExecutableElement> methods = elements.getLocalAndInheritedMethods(typeElement());
     return methods.stream()
@@ -181,11 +178,6 @@ public abstract class ComponentRequirement {
 
   /** Returns the name for this requirement that could be used as a variable. */
   public abstract String variableName();
-
-  /** Returns a parameter spec for this requirement. */
-  public ParameterSpec toParameterSpec() {
-    return ParameterSpec.builder(TypeName.get(type()), variableName()).build();
-  }
 
   public static ComponentRequirement forDependency(TypeMirror type) {
     return new AutoValue_ComponentRequirement(
@@ -228,7 +220,7 @@ public abstract class ComponentRequirement {
    */
   // TODO(bcorso): Should this method throw if its called knowing that an instance is not needed?
   public static boolean componentCanMakeNewInstances(
-      TypeElement typeElement, KotlinMetadataUtil metadataUtil) {
+      TypeElement typeElement) {
     switch (typeElement.getKind()) {
       case CLASS:
         break;

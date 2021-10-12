@@ -53,19 +53,19 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dagger.internal.codegen.my.Factory;
+import dagger.internal.Factory;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
@@ -79,20 +79,17 @@ import javax.lang.model.element.Element;
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
   private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
-  private final KotlinMetadataUtil metadataUtil;
 
-  @jakarta.inject.Inject
+  @Inject
   FactoryGenerator(
       Filer filer,
       SourceVersion sourceVersion,
       DaggerTypes types,
       DaggerElements elements,
-      CompilerOptions compilerOptions,
-      KotlinMetadataUtil metadataUtil) {
+      CompilerOptions compilerOptions) {
     super(filer, elements, sourceVersion);
     this.types = types;
     this.compilerOptions = compilerOptions;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -246,8 +243,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
                     CodeBlock.of("$N", frameworkFields.get(request)), request.kind()),
             generatedClassNameForBinding(binding),
             moduleParameter(binding).map(module -> CodeBlock.of("$N", module)),
-            compilerOptions,
-            metadataUtil);
+            compilerOptions
+        );
 
     if (binding.kind().equals(PROVISION)) {
       binding
@@ -265,8 +262,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
                   instance,
                   binding.key().type(),
                   frameworkFieldUsages(binding.dependencies(), frameworkFields)::get,
-                  types,
-                  metadataUtil))
+                  types
+              ))
           .addStatement("return $L", instance);
     } else {
       getMethod.addStatement("return $L", invokeNewInstance);

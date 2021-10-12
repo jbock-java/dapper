@@ -76,7 +76,6 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.javapoet.TypeSpecs;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph.Node;
@@ -254,10 +253,8 @@ public final class ComponentImplementation {
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
   private final ComponentNames componentNames;
-  private final CompilerOptions compilerOptions;
   private final DaggerElements elements;
   private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
   private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
 
   @jakarta.inject.Inject
@@ -271,8 +268,7 @@ public final class ComponentImplementation {
       ComponentNames componentNames,
       CompilerOptions compilerOptions,
       DaggerElements elements,
-      DaggerTypes types,
-      KotlinMetadataUtil metadataUtil) {
+      DaggerTypes types) {
     this.parent = parent;
     this.childComponentImplementationFactory = childComponentImplementationFactory;
     this.bindingExpressionsProvider = bindingExpressionsProvider;
@@ -280,10 +276,8 @@ public final class ComponentImplementation {
         componentCreatorImplementationFactoryProvider;
     this.graph = graph;
     this.componentNames = componentNames;
-    this.compilerOptions = compilerOptions;
     this.elements = elements;
     this.types = types;
-    this.metadataUtil = metadataUtil;
 
     // The first group of keys belong to the component itself. We call this the componentShard.
     this.componentShard = new ShardImplementation(getComponentName(graph, parent, componentNames));
@@ -298,7 +292,7 @@ public final class ComponentImplementation {
 
     // Create and claim the fields for this and all ancestor components stored as fields.
     this.componentFieldsByImplementation =
-        createComponentFieldsByImplementation(this, compilerOptions);
+        createComponentFieldsByImplementation(this);
   }
 
   /**
@@ -324,11 +318,6 @@ public final class ComponentImplementation {
     return CodeBlock.of("$N", componentFieldsByImplementation.get(this));
   }
 
-  /** Returns the fields for all components in the component path. */
-  public ImmutableList<FieldSpec> componentFields() {
-    return ImmutableList.copyOf(componentFieldsByImplementation.values());
-  }
-
   /** Returns the fields for all components in the component path except the current component. */
   public ImmutableList<FieldSpec> creatorComponentFields() {
     return componentFieldsByImplementation.entrySet().stream()
@@ -339,7 +328,7 @@ public final class ComponentImplementation {
 
   private static ImmutableMap<ComponentImplementation, FieldSpec>
   createComponentFieldsByImplementation(
-      ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
+      ComponentImplementation componentImplementation) {
     checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
@@ -368,6 +357,7 @@ public final class ComponentImplementation {
                   return field.build();
                 }));
   }
+
   /** Returns the shard representing the {@link ComponentImplementation} itself. */
   public ShardImplementation getComponentShard() {
     return componentShard;
@@ -762,7 +752,7 @@ public final class ComponentImplementation {
     private boolean canInstantiateAllRequirements() {
       return !Iterables.any(
           graph.componentRequirements(),
-          dependency -> dependency.requiresAPassedInstance(elements, metadataUtil));
+          dependency -> dependency.requiresAPassedInstance(elements));
     }
 
     private void createSubcomponentFactoryMethod(ExecutableElement factoryMethod) {

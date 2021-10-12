@@ -17,12 +17,10 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.Visibility.PRIVATE;
 import static com.google.auto.common.Visibility.PUBLIC;
 import static com.google.auto.common.Visibility.effectiveVisibilityOfElement;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.componentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnotation;
@@ -62,7 +60,6 @@ import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
@@ -124,7 +121,6 @@ public final class ModuleValidator {
   private final ComponentDescriptorFactory componentDescriptorFactory;
   private final BindingGraphFactory bindingGraphFactory;
   private final BindingGraphValidator bindingGraphValidator;
-  private final KotlinMetadataUtil metadataUtil;
   private final Map<TypeElement, ValidationReport<TypeElement>> cache = new HashMap<>();
   private final Set<TypeElement> knownModules = new HashSet<>();
 
@@ -136,8 +132,7 @@ public final class ModuleValidator {
       MethodSignatureFormatter methodSignatureFormatter,
       ComponentDescriptorFactory componentDescriptorFactory,
       BindingGraphFactory bindingGraphFactory,
-      BindingGraphValidator bindingGraphValidator,
-      KotlinMetadataUtil metadataUtil) {
+      BindingGraphValidator bindingGraphValidator) {
     this.types = types;
     this.elements = elements;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
@@ -145,7 +140,6 @@ public final class ModuleValidator {
     this.componentDescriptorFactory = componentDescriptorFactory;
     this.bindingGraphFactory = bindingGraphFactory;
     this.bindingGraphValidator = bindingGraphValidator;
-    this.metadataUtil = metadataUtil;
   }
 
   /**
@@ -196,7 +190,7 @@ public final class ModuleValidator {
       for (AnnotationMirror annotation : moduleMethod.getAnnotationMirrors()) {
         if (!ANDROID_PROCESSOR.isPresent()
             && MoreTypes.equivalence()
-                .equivalent(contributesAndroidInjector, annotation.getAnnotationType())) {
+            .equivalent(contributesAndroidInjector, annotation.getAnnotationType())) {
           builder.addSubreport(
               ValidationReport.about(moduleMethod)
                   .addError(
@@ -435,8 +429,8 @@ public final class ModuleValidator {
                         module.getQualifiedName(),
                         (validModuleAnnotations.size() > 1 ? "one of " : "")
                             + validModuleAnnotations.stream()
-                                .map(otherClass -> "@" + otherClass.simpleName())
-                                .collect(joining(", ")));
+                            .map(otherClass -> "@" + otherClass.simpleName())
+                            .collect(joining(", ")));
                   } else if (knownModules.contains(module)
                       && !validate(module, visitedModules).isClean()) {
                     reportError("%s has errors", module.getQualifiedName());

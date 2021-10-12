@@ -35,9 +35,9 @@ import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
 import javax.lang.model.SourceVersion;
@@ -49,12 +49,10 @@ import javax.lang.model.element.TypeElement;
 public final class ModuleProxies {
 
   private final DaggerElements elements;
-  private final KotlinMetadataUtil metadataUtil;
 
-  @jakarta.inject.Inject
-  public ModuleProxies(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
+  @Inject
+  public ModuleProxies(DaggerElements elements) {
     this.elements = elements;
-    this.metadataUtil = metadataUtil;
   }
 
   /** Generates a {@code public static} proxy method for constructing module instances. */
@@ -64,18 +62,15 @@ public final class ModuleProxies {
       extends SourceFileGenerator<TypeElement> {
 
     private final ModuleProxies moduleProxies;
-    private final KotlinMetadataUtil metadataUtil;
 
-    @jakarta.inject.Inject
+    @Inject
     ModuleConstructorProxyGenerator(
         Filer filer,
         DaggerElements elements,
         SourceVersion sourceVersion,
-        ModuleProxies moduleProxies,
-        KotlinMetadataUtil metadataUtil) {
+        ModuleProxies moduleProxies) {
       super(filer, elements, sourceVersion);
       this.moduleProxies = moduleProxies;
-      this.metadataUtil = metadataUtil;
     }
 
     @Override
@@ -122,7 +117,7 @@ public final class ModuleProxies {
     checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     if (moduleElement.getModifiers().contains(ABSTRACT)
         || (moduleElement.getNestingKind().isNested()
-            && !moduleElement.getModifiers().contains(STATIC))) {
+        && !moduleElement.getModifiers().contains(STATIC))) {
       return Optional.empty();
     }
     return constructorsIn(elements.getAllMembers(moduleElement)).stream()

@@ -34,7 +34,6 @@ import dagger.internal.codegen.binding.DelegateDeclaration.Factory;
 import dagger.internal.codegen.binding.ProductionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.validation.ModuleValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
@@ -60,7 +59,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator;
   private final InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator;
   private final DelegateDeclaration.Factory delegateDeclarationFactory;
-  private final KotlinMetadataUtil metadataUtil;
   private final Set<TypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
   @jakarta.inject.Inject
@@ -72,8 +70,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
       SourceFileGenerator<ProductionBinding> producerFactoryGenerator,
       @ModuleGenerator SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator,
       InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator,
-      Factory delegateDeclarationFactory,
-      KotlinMetadataUtil metadataUtil) {
+      Factory delegateDeclarationFactory) {
     super(MoreElements::asType);
     this.messager = messager;
     this.moduleValidator = moduleValidator;
@@ -83,7 +80,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     this.moduleConstructorProxyGenerator = moduleConstructorProxyGenerator;
     this.inaccessibleMapKeyProxyGenerator = inaccessibleMapKeyProxyGenerator;
     this.delegateDeclarationFactory = delegateDeclarationFactory;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override

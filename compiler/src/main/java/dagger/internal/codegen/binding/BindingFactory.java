@@ -60,7 +60,6 @@ import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProductionBinding.ProductionKind;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
@@ -69,9 +68,9 @@ import dagger.model.RequestKind;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import jakarta.inject.Provider;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -88,7 +87,6 @@ public final class BindingFactory {
   private final InjectionSiteFactory injectionSiteFactory;
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
-  private final KotlinMetadataUtil metadataUtil;
 
   @jakarta.inject.Inject
   BindingFactory(
@@ -97,15 +95,13 @@ public final class BindingFactory {
       KeyFactory keyFactory,
       DependencyRequestFactory dependencyRequestFactory,
       InjectionSiteFactory injectionSiteFactory,
-      InjectionAnnotations injectionAnnotations,
-      KotlinMetadataUtil metadataUtil) {
+      InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.elements = elements;
     this.keyFactory = keyFactory;
     this.dependencyRequestFactory = dependencyRequestFactory;
     this.injectionSiteFactory = injectionSiteFactory;
     this.injectionAnnotations = injectionAnnotations;
-    this.metadataUtil = metadataUtil;
   }
 
   /**
@@ -217,11 +213,11 @@ public final class BindingFactory {
   public ProvisionBinding providesMethodBinding(
       ExecutableElement providesMethod, TypeElement contributedBy) {
     return setMethodBindingProperties(
-            ProvisionBinding.builder(),
-            providesMethod,
-            contributedBy,
-            keyFactory.forProvidesMethod(providesMethod, contributedBy),
-            this::providesMethodBinding)
+        ProvisionBinding.builder(),
+        providesMethod,
+        contributedBy,
+        keyFactory.forProvidesMethod(providesMethod, contributedBy),
+        this::providesMethodBinding)
         .kind(PROVISION)
         .scope(uniqueScopeOf(providesMethod))
         .nullableType(getNullableType(providesMethod))
@@ -239,11 +235,11 @@ public final class BindingFactory {
     // TODO(beder): Add nullability checking with Java 8.
     ProductionBinding.Builder builder =
         setMethodBindingProperties(
-                ProductionBinding.builder(),
-                producesMethod,
-                contributedBy,
-                keyFactory.forProducesMethod(producesMethod, contributedBy),
-                this::producesMethodBinding)
+            ProductionBinding.builder(),
+            producesMethod,
+            contributedBy,
+            keyFactory.forProducesMethod(producesMethod, contributedBy),
+            this::producesMethodBinding)
             .kind(PRODUCTION)
             .productionKind(ProductionKind.fromProducesMethod(producesMethod))
             .thrownTypes(producesMethod.getThrownTypes())
@@ -253,12 +249,12 @@ public final class BindingFactory {
   }
 
   private <C extends ContributionBinding, B extends ContributionBinding.Builder<C, B>>
-      B setMethodBindingProperties(
-          B builder,
-          ExecutableElement method,
-          TypeElement contributedBy,
-          Key key,
-          BiFunction<ExecutableElement, TypeElement, C> create) {
+  B setMethodBindingProperties(
+      B builder,
+      ExecutableElement method,
+      TypeElement contributedBy,
+      Key key,
+      BiFunction<ExecutableElement, TypeElement, C> create) {
     checkArgument(method.getKind().equals(METHOD));
     ExecutableType methodType =
         MoreTypes.asExecutable(
@@ -503,7 +499,7 @@ public final class BindingFactory {
 
     boolean requiresProduction =
         underlyingKeyBindings.stream()
-                .anyMatch(binding -> binding.bindingType() == BindingType.PRODUCTION)
+            .anyMatch(binding -> binding.bindingType() == BindingType.PRODUCTION)
             || requestKind.equals(RequestKind.PRODUCER) // handles producerFromProvider cases
             || requestKind.equals(RequestKind.PRODUCED); // handles producerFromProvider cases
 
@@ -563,7 +559,7 @@ public final class BindingFactory {
         typeElement,
         hasNonDefaultTypeParameters(typeElement, key.type(), types)
             ? Optional.of(
-                membersInjectionBinding(asDeclared(typeElement.asType()), Optional.empty()))
+            membersInjectionBinding(asDeclared(typeElement.asType()), Optional.empty()))
             : Optional.empty(),
         injectionSites);
   }

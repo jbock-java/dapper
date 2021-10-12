@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.auto.common.MoreElements.asType;
 import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
@@ -35,7 +34,6 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.DependencyRequest;
 import java.util.Optional;
@@ -56,7 +54,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private final MembersInjectionMethods membersInjectionMethods;
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final SourceVersion sourceVersion;
-  private final KotlinMetadataUtil metadataUtil;
 
   @AssistedInject
   SimpleMethodBindingExpression(
@@ -65,12 +62,10 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
       CompilerOptions compilerOptions,
       ComponentBindingExpressions componentBindingExpressions,
       ComponentRequirementExpressions componentRequirementExpressions,
-      SourceVersion sourceVersion,
-      KotlinMetadataUtil metadataUtil) {
+      SourceVersion sourceVersion) {
     super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
-    this.metadataUtil = metadataUtil;
     checkArgument(
         provisionBinding.implicitDependencies().isEmpty(),
         "framework deps are not currently supported");
@@ -136,8 +131,8 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
             request -> dependencyArgument(request, requestingClass).codeBlock(),
             requestingClass,
             moduleReference(requestingClass),
-            compilerOptions,
-            metadataUtil));
+            compilerOptions
+        ));
   }
 
   private Expression dependencyArgument(DependencyRequest dependency, ClassName requestingClass) {
@@ -163,10 +158,10 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private Optional<CodeBlock> moduleReference(ClassName requestingClass) {
     return provisionBinding.requiresModuleInstance()
         ? provisionBinding
-            .contributingModule()
-            .map(Element::asType)
-            .map(ComponentRequirement::forModule)
-            .map(module -> componentRequirementExpressions.getExpression(module, requestingClass))
+        .contributingModule()
+        .map(Element::asType)
+        .map(ComponentRequirement::forModule)
+        .map(module -> componentRequirementExpressions.getExpression(module, requestingClass))
         : Optional.empty();
   }
 

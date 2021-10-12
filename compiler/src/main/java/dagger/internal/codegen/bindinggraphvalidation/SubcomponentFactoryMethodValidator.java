@@ -31,13 +31,13 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentNodeImpl;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -50,13 +50,11 @@ import javax.lang.model.type.ExecutableType;
 final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
 
   private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
   private final Map<ComponentNode, Set<TypeElement>> inheritedModulesCache = new HashMap<>();
 
-  @jakarta.inject.Inject
-  SubcomponentFactoryMethodValidator(DaggerTypes types, KotlinMetadataUtil metadataUtil) {
+  @Inject
+  SubcomponentFactoryMethodValidator(DaggerTypes types) {
     this.types = types;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -102,7 +100,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         // module not in the method parameters
         .filter(module -> !factoryMethodParameters.contains(module))
         // module doesn't have an accessible no-arg constructor
-        .filter(moduleType -> !componentCanMakeNewInstances(moduleType, metadataUtil))
+        .filter(moduleType -> !componentCanMakeNewInstances(moduleType))
         .collect(toImmutableSet());
   }
 
@@ -131,9 +129,9 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         componentNode.componentPath().atRoot()
             ? ImmutableSet.of()
             : graph
-                .componentNode(componentNode.componentPath().parent())
-                .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
-                .get();
+            .componentNode(componentNode.componentPath().parent())
+            .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
+            .get();
   }
 
   private void reportMissingModuleParameters(

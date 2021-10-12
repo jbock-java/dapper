@@ -35,11 +35,12 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +61,7 @@ import javax.tools.Diagnostic.Kind;
  * A {@linkplain ValidationReport validator} for {@code Inject}-annotated elements and the types
  * that contain them.
  */
-@jakarta.inject.Singleton
+@Singleton
 public final class InjectValidator implements ClearableCache {
   private final DaggerTypes types;
   private final DaggerElements elements;
@@ -68,25 +69,22 @@ public final class InjectValidator implements ClearableCache {
   private final DependencyRequestValidator dependencyRequestValidator;
   private final Optional<Diagnostic.Kind> privateAndStaticInjectionDiagnosticKind;
   private final InjectionAnnotations injectionAnnotations;
-  private final KotlinMetadataUtil metadataUtil;
   private final Map<ExecutableElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @jakarta.inject.Inject
+  @Inject
   InjectValidator(
       DaggerTypes types,
       DaggerElements elements,
       DependencyRequestValidator dependencyRequestValidator,
       CompilerOptions compilerOptions,
-      InjectionAnnotations injectionAnnotations,
-      KotlinMetadataUtil metadataUtil) {
+      InjectionAnnotations injectionAnnotations) {
     this(
         types,
         elements,
         compilerOptions,
         dependencyRequestValidator,
         Optional.empty(),
-        injectionAnnotations,
-        metadataUtil);
+        injectionAnnotations);
   }
 
   private InjectValidator(
@@ -95,15 +93,13 @@ public final class InjectValidator implements ClearableCache {
       CompilerOptions compilerOptions,
       DependencyRequestValidator dependencyRequestValidator,
       Optional<Kind> privateAndStaticInjectionDiagnosticKind,
-      InjectionAnnotations injectionAnnotations,
-      KotlinMetadataUtil metadataUtil) {
+      InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.elements = elements;
     this.compilerOptions = compilerOptions;
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.privateAndStaticInjectionDiagnosticKind = privateAndStaticInjectionDiagnosticKind;
     this.injectionAnnotations = injectionAnnotations;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -120,13 +116,12 @@ public final class InjectValidator implements ClearableCache {
     return compilerOptions.ignorePrivateAndStaticInjectionForComponent()
         ? this
         : new InjectValidator(
-            types,
-            elements,
-            compilerOptions,
-            dependencyRequestValidator,
-            Optional.of(Diagnostic.Kind.ERROR),
-            injectionAnnotations,
-            metadataUtil);
+        types,
+        elements,
+        compilerOptions,
+        dependencyRequestValidator,
+        Optional.of(Diagnostic.Kind.ERROR),
+        injectionAnnotations);
   }
 
   public ValidationReport<TypeElement> validateConstructor(ExecutableElement constructorElement) {
@@ -138,13 +133,13 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder<TypeElement> builder =
         ValidationReport.about(asType(constructorElement.getEnclosingElement()));
 
-    if (isAnnotationPresent(constructorElement, jakarta.inject.Inject.class)
+    if (isAnnotationPresent(constructorElement, Inject.class)
         && isAnnotationPresent(constructorElement, AssistedInject.class)) {
       builder.addError("Constructors cannot be annotated with both @Inject and @AssistedInject");
     }
 
     Class<?> injectAnnotation =
-        isAnnotationPresent(constructorElement, jakarta.inject.Inject.class) ? jakarta.inject.Inject.class : AssistedInject.class;
+        isAnnotationPresent(constructorElement, Inject.class) ? Inject.class : AssistedInject.class;
 
     if (constructorElement.getModifiers().contains(PRIVATE)) {
       builder.addError(
@@ -165,7 +160,7 @@ public final class InjectValidator implements ClearableCache {
             "@Scope annotations are not allowed on @%s constructors",
             injectAnnotation.getSimpleName());
 
-    if (injectAnnotation == jakarta.inject.Inject.class) {
+    if (injectAnnotation == Inject.class) {
       scopeErrorMsg += "; annotate the class instead";
     }
 
@@ -316,7 +311,7 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(typeElement);
     boolean hasInjectedMembers = false;
     for (VariableElement element : ElementFilter.fieldsIn(typeElement.getEnclosedElements())) {
-      if (MoreElements.isAnnotationPresent(element, jakarta.inject.Inject.class)) {
+      if (MoreElements.isAnnotationPresent(element, Inject.class)) {
         hasInjectedMembers = true;
         ValidationReport<VariableElement> report = validateField(element);
         if (!report.isClean()) {
@@ -325,7 +320,7 @@ public final class InjectValidator implements ClearableCache {
       }
     }
     for (ExecutableElement element : ElementFilter.methodsIn(typeElement.getEnclosedElements())) {
-      if (MoreElements.isAnnotationPresent(element, jakarta.inject.Inject.class)) {
+      if (MoreElements.isAnnotationPresent(element, Inject.class)) {
         hasInjectedMembers = true;
         ValidationReport<ExecutableElement> report = validateMethod(element);
         if (!report.isClean()) {
@@ -356,7 +351,7 @@ public final class InjectValidator implements ClearableCache {
     }
     for (ExecutableElement element :
         ElementFilter.constructorsIn(typeElement.getEnclosedElements())) {
-      if (isAnnotationPresent(element, jakarta.inject.Inject.class)
+      if (isAnnotationPresent(element, Inject.class)
           || isAnnotationPresent(element, AssistedInject.class)) {
         ValidationReport<TypeElement> report = validateConstructor(element);
         if (!report.isClean()) {

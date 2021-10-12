@@ -55,11 +55,11 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.FrameworkField;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.model.DependencyRequest;
+import jakarta.inject.Inject;
 import java.util.Map.Entry;
 import javax.annotation.processing.Filer;
 import javax.lang.model.SourceVersion;
@@ -70,18 +70,15 @@ import javax.lang.model.element.Element;
  */
 public final class MembersInjectorGenerator extends SourceFileGenerator<MembersInjectionBinding> {
   private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
 
-  @jakarta.inject.Inject
+  @Inject
   MembersInjectorGenerator(
       Filer filer,
       DaggerElements elements,
       DaggerTypes types,
-      SourceVersion sourceVersion,
-      KotlinMetadataUtil metadataUtil) {
+      SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
     this.types = types;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -199,8 +196,8 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
             CodeBlock.of("instance"),
             binding.key().type(),
             frameworkFieldUsages(binding.dependencies(), dependencyFields)::get,
-            types,
-            metadataUtil));
+            types
+        ));
 
     if (usesRawFrameworkTypes) {
       injectMembersBuilder.addAnnotation(suppressWarnings(UNCHECKED));

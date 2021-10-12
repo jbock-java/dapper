@@ -46,10 +46,10 @@ import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.MethodSignature;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.producers.internal.CancellationListener;
+import jakarta.inject.Inject;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
@@ -75,19 +75,16 @@ import javax.lang.model.type.DeclaredType;
 final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescriptor> {
   private final DaggerElements elements;
   private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentHjarGenerator(
       Filer filer,
       DaggerElements elements,
       DaggerTypes types,
-      SourceVersion sourceVersion,
-      KotlinMetadataUtil metadataUtil) {
+      SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
     this.elements = elements;
     this.types = types;
-    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -142,8 +139,8 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
     if (noArgFactoryMethod
         && !hasBindsInstanceMethods(componentDescriptor)
         && componentRequirements(componentDescriptor)
-            .noneMatch(
-                requirement -> requirement.requiresAPassedInstance(elements, metadataUtil))) {
+        .noneMatch(
+            requirement -> requirement.requiresAPassedInstance(elements))) {
       generatedComponent.addMethod(createMethod(componentDescriptor));
     }
 
@@ -196,17 +193,17 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
                 module ->
                     !module.moduleElement().getModifiers().contains(ABSTRACT)
                         && isElementAccessibleFrom(
-                            module.moduleElement(),
-                            ClassName.get(component.typeElement()).packageName()))
+                        module.moduleElement(),
+                        ClassName.get(component.typeElement()).packageName()))
             .map(module -> ComponentRequirement.forModule(module.moduleElement().asType())));
   }
 
   private boolean hasBindsInstanceMethods(ComponentDescriptor componentDescriptor) {
     return componentDescriptor.creatorDescriptor().isPresent()
         && elements
-            .getUnimplementedMethods(componentDescriptor.creatorDescriptor().get().typeElement())
-            .stream()
-            .anyMatch(method -> isBindsInstance(method));
+        .getUnimplementedMethods(componentDescriptor.creatorDescriptor().get().typeElement())
+        .stream()
+        .anyMatch(method -> isBindsInstance(method));
   }
 
   private static boolean isBindsInstance(ExecutableElement method) {

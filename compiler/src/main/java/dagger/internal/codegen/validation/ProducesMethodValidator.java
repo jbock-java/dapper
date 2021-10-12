@@ -27,9 +27,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import dagger.internal.codegen.binding.ConfigurationAnnotations;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
@@ -39,17 +39,15 @@ import javax.lang.model.type.TypeMirror;
 /** A validator for {@link dagger.producers.Produces} methods. */
 final class ProducesMethodValidator extends BindingMethodValidator {
 
-  @jakarta.inject.Inject
+  @Inject
   ProducesMethodValidator(
       DaggerElements elements,
       DaggerTypes types,
-      KotlinMetadataUtil kotlinMetadataUtil,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
         elements,
         types,
-        kotlinMetadataUtil,
         dependencyRequestValidator,
         TypeNames.PRODUCES,
         TypeNames.PRODUCER_MODULE,
