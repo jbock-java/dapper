@@ -27,6 +27,7 @@ javadoc {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1073' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -57,7 +58,7 @@ dependencies {
     implementation('org.checkerframework:checker-qual:3.18.1')
     implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:0.95')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
