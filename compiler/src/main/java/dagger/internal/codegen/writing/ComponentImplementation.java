@@ -81,6 +81,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.model.RequestKind;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -257,7 +258,7 @@ public final class ComponentImplementation {
   private final DaggerTypes types;
   private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentImplementation(
       @ParentComponent Optional<ComponentImplementation> parent,
       ChildComponentImplementationFactory childComponentImplementationFactory,

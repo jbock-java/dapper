@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.validation;
 
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,5 +27,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@jakarta.inject.Qualifier
+@Qualifier
 public @interface Validation {}

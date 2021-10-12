@@ -36,6 +36,8 @@ import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,14 +52,14 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 /** Validates types annotated with component creator annotations. */
-@jakarta.inject.Singleton
+@Singleton
 public final class ComponentCreatorValidator implements ClearableCache {
 
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final Map<TypeElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentCreatorValidator(DaggerElements elements, DaggerTypes types) {
     this.elements = elements;
     this.types = types;

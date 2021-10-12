@@ -34,6 +34,7 @@ import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 import javax.tools.Diagnostic;
@@ -47,7 +48,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final CompilerOptions compilerOptions;
 
-  @jakarta.inject.Inject
+  @Inject
   IncompatiblyScopedBindingsValidator(
       MethodSignatureFormatter methodSignatureFormatter, CompilerOptions compilerOptions) {
     this.methodSignatureFormatter = methodSignatureFormatter;

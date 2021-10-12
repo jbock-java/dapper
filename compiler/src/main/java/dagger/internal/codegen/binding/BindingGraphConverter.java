@@ -43,6 +43,7 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ import javax.lang.model.type.TypeMirror;
 final class BindingGraphConverter {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
-  @jakarta.inject.Inject
+  @Inject
   BindingGraphConverter(BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }

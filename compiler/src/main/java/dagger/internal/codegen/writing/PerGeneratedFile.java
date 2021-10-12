@@ -18,6 +18,7 @@ package dagger.internal.codegen.writing;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import jakarta.inject.Scope;
 import java.lang.annotation.Retention;
 
 /**
@@ -25,5 +26,5 @@ import java.lang.annotation.Retention;
  * descendant component implementations in the same generated file.
  */
 @Retention(RUNTIME)
-@jakarta.inject.Scope
+@Scope
 public @interface PerGeneratedFile {}

@@ -48,7 +48,9 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -67,7 +69,7 @@ import javax.tools.Diagnostic.Kind;
  * Note that this registry <b>does not</b> handle any explicit bindings (those from {@link Provides}
  * methods, {@link Component} dependencies, etc.).
  */
-@jakarta.inject.Singleton
+@Singleton
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final DaggerElements elements;
   private final DaggerTypes types;
@@ -166,7 +168,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final BindingsCollection<MembersInjectionBinding> membersInjectionBindings =
       new BindingsCollection<>(MembersInjector.class);
 
-  @jakarta.inject.Inject
+  @Inject
   InjectBindingRegistryImpl(
       DaggerElements elements,
       DaggerTypes types,

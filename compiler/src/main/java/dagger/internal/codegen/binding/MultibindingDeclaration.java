@@ -29,6 +29,7 @@ import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
 import dagger.multibindings.Multibinds;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -73,7 +74,7 @@ public abstract class MultibindingDeclaration extends BindingDeclaration
     private final DaggerTypes types;
     private final KeyFactory keyFactory;
 
-    @jakarta.inject.Inject
+    @Inject
     Factory(DaggerTypes types, KeyFactory keyFactory) {
       this.types = types;
       this.keyFactory = keyFactory;

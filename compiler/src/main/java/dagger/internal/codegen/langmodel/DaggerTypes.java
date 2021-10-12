@@ -29,6 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -54,7 +55,7 @@ public final class DaggerTypes implements Types {
   private final Types types;
   private final DaggerElements elements;
 
-  @jakarta.inject.Inject
+  @Inject
   public DaggerTypes(Types types, DaggerElements elements) {
     this.types = checkNotNull(types);
     this.elements = checkNotNull(elements);

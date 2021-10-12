@@ -23,6 +23,7 @@ import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
+import jakarta.inject.Inject;
 import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -39,11 +40,11 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   private final ElementVisitor<Void, Void> visitor;
   private final Set<Element> processedElements = Sets.newLinkedHashSet();
 
-  @jakarta.inject.Inject
+  @Inject
   InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
     super(e -> e);
     this.visitor =
-        new ElementKindVisitor8<Void, Void>() {
+        new ElementKindVisitor8<>() {
           @Override
           public Void visitExecutableAsConstructor(
               ExecutableElement constructorElement, Void aVoid) {

@@ -45,6 +45,8 @@ import dagger.internal.codegen.validation.InjectBindingRegistryModule;
 import dagger.internal.codegen.validation.MonitoringModuleProcessingStep;
 import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.spi.BindingGraphPlugin;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -61,12 +63,12 @@ import javax.lang.model.SourceVersion;
 public class ComponentProcessor extends BasicAnnotationProcessor {
   private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
-  @jakarta.inject.Inject InjectBindingRegistry injectBindingRegistry;
-  @jakarta.inject.Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  @jakarta.inject.Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @jakarta.inject.Inject ImmutableList<Step> processingSteps;
-  @jakarta.inject.Inject BindingGraphPlugins bindingGraphPlugins;
-  @jakarta.inject.Inject Set<ClearableCache> clearableCaches;
+  @Inject InjectBindingRegistry injectBindingRegistry;
+  @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
+  @Inject ImmutableList<Step> processingSteps;
+  @Inject BindingGraphPlugins bindingGraphPlugins;
+  @Inject Set<ClearableCache> clearableCaches;
 
   public ComponentProcessor() {
     this.testingPlugins = Optional.empty();
@@ -116,7 +118,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     return processingSteps;
   }
 
-  @jakarta.inject.Singleton
+  @Singleton
   @Component(
       modules = {
         BindingGraphValidationModule.class,

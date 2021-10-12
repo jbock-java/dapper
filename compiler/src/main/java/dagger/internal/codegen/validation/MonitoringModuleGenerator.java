@@ -39,6 +39,7 @@ import dagger.multibindings.Multibinds;
 import dagger.producers.ProductionScope;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import dagger.producers.monitoring.internal.Monitors;
+import jakarta.inject.Inject;
 import javax.annotation.processing.Filer;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -47,7 +48,7 @@ import javax.lang.model.element.TypeElement;
 /** Generates a monitoring module for use with production components. */
 final class MonitoringModuleGenerator extends SourceFileGenerator<TypeElement> {
 
-  @jakarta.inject.Inject
+  @Inject
   MonitoringModuleGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

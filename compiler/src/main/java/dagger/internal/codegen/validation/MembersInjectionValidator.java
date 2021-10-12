@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import jakarta.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -37,7 +38,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 final class MembersInjectionValidator {
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   MembersInjectionValidator(InjectionAnnotations injectionAnnotations) {
     this.injectionAnnotations = injectionAnnotations;
   }

@@ -37,6 +37,7 @@ import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,7 +62,7 @@ public final class ComponentNames {
   private final ImmutableMap<ComponentDescriptor, String> namesByDescriptor;
   private final ImmutableMap<Key, ComponentDescriptor> descriptorsByCreatorKey;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentNames(@TopLevel BindingGraph graph, KeyFactory keyFactory) {
     this.namesByDescriptor = namesByDescriptor(graph);
     this.descriptorsByCreatorKey = descriptorsByCreatorKey(keyFactory, namesByDescriptor.keySet());

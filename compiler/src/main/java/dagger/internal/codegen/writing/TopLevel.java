@@ -18,11 +18,12 @@ package dagger.internal.codegen.writing;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 
 /**
- * A {@link jakarta.inject.Qualifier} for bindings that are associated with the top level component implementation.
+ * A {@link Qualifier} for bindings that are associated with the top level component implementation.
  */
 @Retention(RUNTIME)
-@jakarta.inject.Qualifier
+@Qualifier
 public @interface TopLevel {}

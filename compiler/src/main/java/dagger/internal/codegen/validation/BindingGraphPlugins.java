@@ -25,6 +25,7 @@ import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.BindingGraphPlugin;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Filer;
@@ -37,7 +38,7 @@ public final class BindingGraphPlugins {
   private final DaggerElements elements;
   private final Map<String, String> processingOptions;
 
-  @jakarta.inject.Inject
+  @Inject
   BindingGraphPlugins(
       @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,

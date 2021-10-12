@@ -50,6 +50,7 @@ import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,7 +63,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   private final DependencyRequestFormatter dependencyRequestFormatter;
 
-  @jakarta.inject.Inject
+  @Inject
   DependencyCycleValidator(DependencyRequestFormatter dependencyRequestFormatter) {
     this.dependencyRequestFormatter = dependencyRequestFormatter;
   }

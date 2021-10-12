@@ -27,6 +27,7 @@ import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.Node;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.stream.Stream;
 
 /**
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 // TODO(b/29509141): Clarify the error.
 final class ProvisionDependencyOnProducerBindingValidator implements BindingGraphPlugin {
 
-  @jakarta.inject.Inject
+  @Inject
   ProvisionDependencyOnProducerBindingValidator() {}
 
   @Override

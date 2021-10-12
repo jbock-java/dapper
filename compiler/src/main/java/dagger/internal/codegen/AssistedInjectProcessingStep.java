@@ -30,6 +30,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import jakarta.inject.Inject;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.Messager;
@@ -42,7 +43,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
   private final DaggerTypes types;
   private final Messager messager;
 
-  @jakarta.inject.Inject
+  @Inject
   AssistedInjectProcessingStep(DaggerTypes types, Messager messager) {
     super(MoreElements::asExecutable);
     this.types = types;

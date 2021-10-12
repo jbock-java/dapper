@@ -20,6 +20,7 @@ import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import jakarta.inject.Inject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 
@@ -31,7 +32,7 @@ public final class MonitoringModuleProcessingStep extends TypeCheckingProcessing
   private final Messager messager;
   private final MonitoringModuleGenerator monitoringModuleGenerator;
 
-  @jakarta.inject.Inject
+  @Inject
   MonitoringModuleProcessingStep(
       Messager messager, MonitoringModuleGenerator monitoringModuleGenerator) {
     super(MoreElements::asType);

@@ -26,6 +26,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
+import jakarta.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -35,7 +36,7 @@ import java.util.Optional;
 /** Utilities relating to annotations defined in the {@code javax.inject} package. */
 public final class InjectionAnnotations {
 
-  @jakarta.inject.Inject
+  @Inject
   InjectionAnnotations() {
   }
 
@@ -65,7 +66,7 @@ public final class InjectionAnnotations {
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
   public static ImmutableSet<ExecutableElement> injectedConstructors(TypeElement type) {
     return FluentIterable.from(constructorsIn(type.getEnclosedElements()))
-        .filter(constructor -> isAnnotationPresent(constructor, jakarta.inject.Inject.class))
+        .filter(constructor -> isAnnotationPresent(constructor, Inject.class))
         .toSet();
   }
 }

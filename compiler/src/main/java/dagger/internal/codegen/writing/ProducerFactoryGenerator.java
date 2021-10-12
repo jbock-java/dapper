@@ -76,6 +76,7 @@ import dagger.model.RequestKind;
 import dagger.producers.Producer;
 import dagger.producers.internal.AbstractProducesMethodProducer;
 import dagger.producers.internal.Producers;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -90,7 +91,7 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
   private final CompilerOptions compilerOptions;
   private final KeyFactory keyFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   ProducerFactoryGenerator(
       Filer filer,
       DaggerElements elements,

@@ -18,12 +18,13 @@ package dagger.internal.codegen.writing;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 
 /**
- * A {@link jakarta.inject.Qualifier} for bindings that are associated with a component implementation's parent
+ * A {@link Qualifier} for bindings that are associated with a component implementation's parent
  * component.
  */
 @Retention(RUNTIME)
-@jakarta.inject.Qualifier
+@Qualifier
 public @interface ParentComponent {}

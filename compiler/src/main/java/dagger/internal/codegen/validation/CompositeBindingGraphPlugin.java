@@ -33,6 +33,7 @@ import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.MaybeBinding;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -55,7 +56,7 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
   public static final class Factory {
     private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-    @jakarta.inject.Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
+    @Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
       this.messageGeneratorFactory = messageGeneratorFactory;
     }
 

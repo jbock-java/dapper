@@ -40,6 +40,7 @@ import dagger.internal.codegen.base.OptionalType;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -60,7 +61,7 @@ public final class DependencyRequestFactory {
   private final KeyFactory keyFactory;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   DependencyRequestFactory(KeyFactory keyFactory, InjectionAnnotations injectionAnnotations) {
     this.keyFactory = keyFactory;
     this.injectionAnnotations = injectionAnnotations;

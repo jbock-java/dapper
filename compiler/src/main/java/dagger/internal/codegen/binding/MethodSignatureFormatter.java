@@ -23,6 +23,7 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +40,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   public MethodSignatureFormatter(DaggerTypes types, InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.injectionAnnotations = injectionAnnotations;

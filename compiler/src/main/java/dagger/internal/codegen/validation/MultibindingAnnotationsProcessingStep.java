@@ -23,6 +23,7 @@ import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import jakarta.inject.Inject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 
@@ -36,7 +37,7 @@ public final class MultibindingAnnotationsProcessingStep
   private final AnyBindingMethodValidator anyBindingMethodValidator;
   private final Messager messager;
 
-  @jakarta.inject.Inject
+  @Inject
   MultibindingAnnotationsProcessingStep(
       AnyBindingMethodValidator anyBindingMethodValidator, Messager messager) {
     super(MoreElements::asExecutable);

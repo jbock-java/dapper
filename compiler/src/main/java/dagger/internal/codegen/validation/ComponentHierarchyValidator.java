@@ -43,6 +43,7 @@ import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Scope;
+import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Map;
@@ -54,7 +55,7 @@ final class ComponentHierarchyValidator {
   private static final Joiner COMMA_SEPARATED_JOINER = Joiner.on(", ");
   private final CompilerOptions compilerOptions;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentHierarchyValidator(CompilerOptions compilerOptions) {
     this.compilerOptions = compilerOptions;
   }

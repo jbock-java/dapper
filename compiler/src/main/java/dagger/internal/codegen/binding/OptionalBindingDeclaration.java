@@ -23,6 +23,7 @@ import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
 import dagger.BindsOptionalOf;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -51,7 +52,7 @@ abstract class OptionalBindingDeclaration extends BindingDeclaration {
   static class Factory {
     private final KeyFactory keyFactory;
 
-    @jakarta.inject.Inject
+    @Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

@@ -39,6 +39,7 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.Messager;
@@ -61,7 +62,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final DelegateDeclaration.Factory delegateDeclarationFactory;
   private final Set<TypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
-  @jakarta.inject.Inject
+  @Inject
   ModuleProcessingStep(
       Messager messager,
       ModuleValidator moduleValidator,

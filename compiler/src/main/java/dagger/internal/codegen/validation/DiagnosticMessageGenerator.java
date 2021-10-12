@@ -54,6 +54,7 @@ import dagger.model.BindingGraph.Edge;
 import dagger.model.BindingGraph.MaybeBinding;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
+import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Function;
@@ -69,7 +70,7 @@ public final class DiagnosticMessageGenerator {
     private final DependencyRequestFormatter dependencyRequestFormatter;
     private final ElementFormatter elementFormatter;
 
-    @jakarta.inject.Inject
+    @Inject
     Factory(
         DaggerTypes types,
         DependencyRequestFormatter dependencyRequestFormatter,

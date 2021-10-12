@@ -57,6 +57,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import jakarta.inject.Inject;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -81,7 +82,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   AssistedFactoryProcessingStep(
       Messager messager,
       Filer filer,

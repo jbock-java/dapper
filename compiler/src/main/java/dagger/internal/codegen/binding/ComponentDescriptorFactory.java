@@ -42,6 +42,7 @@ import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescri
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.lang.model.element.ExecutableElement;
@@ -58,7 +59,7 @@ public final class ComponentDescriptorFactory {
   private final ModuleDescriptor.Factory moduleDescriptorFactory;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentDescriptorFactory(
       DaggerElements elements,
       DaggerTypes types,

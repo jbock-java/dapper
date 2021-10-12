@@ -38,6 +38,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.processing.Filer;
@@ -80,7 +81,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
   private static final ClassName AUTO_ANNOTATION =
       ClassName.get("com.google.auto.value", "AutoAnnotation");
 
-  @jakarta.inject.Inject
+  @Inject
   AnnotationCreatorGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

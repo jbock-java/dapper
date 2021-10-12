@@ -24,6 +24,7 @@ import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -61,7 +62,7 @@ public abstract class SubcomponentDeclaration extends BindingDeclaration {
   public static class Factory {
     private final KeyFactory keyFactory;
 
-    @jakarta.inject.Inject
+    @Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

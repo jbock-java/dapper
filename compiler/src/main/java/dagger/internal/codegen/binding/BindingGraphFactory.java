@@ -57,7 +57,9 @@ import dagger.model.Scope;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
 import dagger.producers.internal.ProductionExecutorModule;
+import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -74,7 +76,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 /** A factory for {@link BindingGraph} objects. */
-@jakarta.inject.Singleton
+@Singleton
 public final class BindingGraphFactory implements ClearableCache {
 
   private final DaggerElements elements;
@@ -86,7 +88,7 @@ public final class BindingGraphFactory implements ClearableCache {
   private final Map<Key, ImmutableSet<Key>> keysMatchingRequestCache = new HashMap<>();
   private final CompilerOptions compilerOptions;
 
-  @jakarta.inject.Inject
+  @Inject
   BindingGraphFactory(
       DaggerElements elements,
       InjectBindingRegistry injectBindingRegistry,

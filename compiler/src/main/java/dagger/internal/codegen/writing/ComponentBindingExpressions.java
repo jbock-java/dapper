@@ -55,6 +55,7 @@ import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -92,7 +93,7 @@ public final class ComponentBindingExpressions {
   private final SwitchingProviders switchingProviders;
   private final Map<BindingRequest, BindingExpression> expressions = new HashMap<>();
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentBindingExpressions(
       @ParentComponent Optional<ComponentBindingExpressions> parent,
       BindingGraph graph,

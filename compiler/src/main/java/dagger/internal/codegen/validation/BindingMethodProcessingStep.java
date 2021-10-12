@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
+import jakarta.inject.Inject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 
@@ -31,7 +32,7 @@ public final class BindingMethodProcessingStep
   private final Messager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
 
-  @jakarta.inject.Inject
+  @Inject
   BindingMethodProcessingStep(
       Messager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
     super(MoreElements::asExecutable);

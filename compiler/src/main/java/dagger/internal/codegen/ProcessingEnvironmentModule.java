@@ -28,6 +28,7 @@ import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.multibindings.IntoSet;
 import dagger.spi.BindingGraphPlugin;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -75,7 +76,7 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  @jakarta.inject.Singleton
+  @Singleton
   static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
     return new DaggerElements(processingEnvironment);
   }

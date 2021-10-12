@@ -65,6 +65,7 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.model.RequestKind;
 import dagger.producers.Producer;
 import dagger.producers.internal.Producers;
+import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
@@ -103,14 +104,14 @@ final class OptionalFactories {
      */
     private final Map<OptionalKind, FieldSpec> absentOptionalProviderFields = new TreeMap<>();
 
-    @jakarta.inject.Inject
+    @Inject
     PerGeneratedFileCache() {}
   }
 
   private final PerGeneratedFileCache perGeneratedFileCache;
   private final ShardImplementation rootComponentShard;
 
-  @jakarta.inject.Inject
+  @Inject
   OptionalFactories(
       PerGeneratedFileCache perGeneratedFileCache,
       ComponentImplementation componentImplementation) {

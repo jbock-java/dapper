@@ -32,6 +32,7 @@ import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.model.RequestKind;
 
+import jakarta.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -45,7 +46,7 @@ final class DependencyRequestValidator {
   private final MembersInjectionValidator membersInjectionValidator;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   DependencyRequestValidator(
       MembersInjectionValidator membersInjectionValidator,
       InjectionAnnotations injectionAnnotations) {

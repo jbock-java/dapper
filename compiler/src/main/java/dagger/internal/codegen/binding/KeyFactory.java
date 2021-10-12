@@ -54,6 +54,7 @@ import dagger.producers.Producer;
 import dagger.producers.Production;
 import dagger.producers.internal.ProductionImplementation;
 import dagger.producers.monitoring.ProductionComponentMonitor;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -74,7 +75,7 @@ public final class KeyFactory {
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   KeyFactory(
       DaggerTypes types, DaggerElements elements, InjectionAnnotations injectionAnnotations) {
     this.types = checkNotNull(types);

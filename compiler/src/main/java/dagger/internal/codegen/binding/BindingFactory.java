@@ -88,7 +88,7 @@ public final class BindingFactory {
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
-  @jakarta.inject.Inject
+  @Inject
   BindingFactory(
       DaggerTypes types,
       DaggerElements elements,

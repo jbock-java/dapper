@@ -50,6 +50,7 @@ import dagger.model.ComponentPath;
 import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
@@ -68,7 +69,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
   private final CompilerOptions compilerOptions;
 
-  @jakarta.inject.Inject
+  @Inject
   DuplicateBindingsValidator(
       BindingDeclarationFormatter bindingDeclarationFormatter, CompilerOptions compilerOptions) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;

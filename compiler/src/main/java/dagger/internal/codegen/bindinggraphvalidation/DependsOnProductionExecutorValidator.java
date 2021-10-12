@@ -26,6 +26,7 @@ import dagger.model.BindingGraph.MaybeBinding;
 import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 
 /**
  * Reports an error on all bindings that depend explicitly on the {@code @Production Executor} key.
@@ -35,7 +36,7 @@ final class DependsOnProductionExecutorValidator implements BindingGraphPlugin {
   private final CompilerOptions compilerOptions;
   private final KeyFactory keyFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   DependsOnProductionExecutorValidator(CompilerOptions compilerOptions, KeyFactory keyFactory) {
     this.compilerOptions = compilerOptions;
     this.keyFactory = keyFactory;

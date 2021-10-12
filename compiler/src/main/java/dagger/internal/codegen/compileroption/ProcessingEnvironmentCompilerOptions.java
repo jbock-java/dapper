@@ -57,6 +57,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.producers.Produces;
+import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   private final Map<EnumOption<?>, ImmutableMap<String, ? extends Enum<?>>> allCommandLineOptions =
       new HashMap<>();
 
-  @jakarta.inject.Inject
+  @Inject
   ProcessingEnvironmentCompilerOptions(
       ProcessingEnvironment processingEnvironment, DaggerElements daggerElements) {
     this.processingEnvironment = processingEnvironment;

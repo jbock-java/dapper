@@ -26,6 +26,7 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
 import javax.lang.model.SourceVersion;
@@ -35,7 +36,7 @@ import javax.lang.model.element.Element;
 final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   private final TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentGenerator(
       Filer filer,
       DaggerElements elements,

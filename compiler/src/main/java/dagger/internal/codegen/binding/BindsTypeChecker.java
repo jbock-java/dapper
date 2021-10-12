@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
@@ -42,7 +43,7 @@ public final class BindsTypeChecker {
   private final DaggerElements elements;
 
   // TODO(bcorso): Make this pkg-private. Used by DelegateBindingExpression.
-  @jakarta.inject.Inject
+  @Inject
   public BindsTypeChecker(DaggerTypes types, DaggerElements elements) {
     this.types = types;
     this.elements = elements;

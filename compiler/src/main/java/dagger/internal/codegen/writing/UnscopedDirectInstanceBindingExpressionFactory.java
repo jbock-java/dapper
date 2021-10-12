@@ -20,6 +20,7 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.model.RequestKind;
+import jakarta.inject.Inject;
 import java.util.Optional;
 
 /**
@@ -47,7 +48,7 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   private final SubcomponentCreatorBindingExpression.Factory
       subcomponentCreatorBindingExpressionFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   UnscopedDirectInstanceBindingExpressionFactory(
       ComponentImplementation componentImplementation,
       AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory,

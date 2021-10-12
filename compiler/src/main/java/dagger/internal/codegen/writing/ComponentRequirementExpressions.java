@@ -32,6 +32,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public final class ComponentRequirementExpressions {
   private final ShardImplementation componentShard;
   private final ModuleProxies moduleProxies;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentRequirementExpressions(
       @ParentComponent Optional<ComponentRequirementExpressions> parent,
       BindingGraph graph,

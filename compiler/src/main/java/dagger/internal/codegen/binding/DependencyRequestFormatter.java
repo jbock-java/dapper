@@ -25,6 +25,7 @@ import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.producers.Produces;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -57,7 +58,7 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
 
   private final DaggerTypes types;
 
-  @jakarta.inject.Inject
+  @Inject
   DependencyRequestFormatter(DaggerTypes types) {
     this.types = types;
   }

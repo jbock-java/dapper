@@ -30,6 +30,7 @@ import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.MaybeBinding;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import jakarta.inject.Inject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -43,7 +44,7 @@ final class DiagnosticReporterFactory {
   private final Messager messager;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   DiagnosticReporterFactory(
       Messager messager, DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
     this.messager = messager;

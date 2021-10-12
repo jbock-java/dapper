@@ -18,6 +18,7 @@ package dagger.internal.codegen.compileroption;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 
 /**
@@ -25,5 +26,5 @@ import java.lang.annotation.Retention;
  * processing options} passed to the current invocation of {@code javac}.
  */
 @Retention(RUNTIME)
-@jakarta.inject.Qualifier
+@Qualifier
 public @interface ProcessingOptions {}

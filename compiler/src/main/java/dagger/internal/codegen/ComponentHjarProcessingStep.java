@@ -33,6 +33,7 @@ import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
@@ -57,7 +58,7 @@ final class ComponentHjarProcessingStep extends TypeCheckingProcessingStep<TypeE
   private final ComponentDescriptorFactory componentDescriptorFactory;
   private final SourceFileGenerator<ComponentDescriptor> componentGenerator;
 
-  @jakarta.inject.Inject
+  @Inject
   ComponentHjarProcessingStep(
       Messager messager,
       ComponentValidator componentValidator,

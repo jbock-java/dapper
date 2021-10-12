@@ -21,6 +21,7 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import jakarta.inject.Inject;
 
 /**
  * A factory for creating unscoped creation expressions for a provision or production binding.
@@ -51,7 +52,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   private final ProducerCreationExpression.Factory producerCreationExpressionFactory;
   private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
-  @jakarta.inject.Inject
+  @Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,

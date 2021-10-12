@@ -26,6 +26,8 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.spi.BindingGraphPlugin;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Optional;
@@ -37,7 +39,7 @@ abstract class SpiModule {
   private SpiModule() {}
 
   @Provides
-  @jakarta.inject.Singleton
+  @Singleton
   static ImmutableSet<BindingGraphPlugin> externalPlugins(
       @TestingPlugins Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins,
       @ProcessorClassLoader ClassLoader processorClassLoader) {
@@ -47,12 +49,12 @@ abstract class SpiModule {
                 ServiceLoader.load(BindingGraphPlugin.class, processorClassLoader)));
   }
 
-  @jakarta.inject.Qualifier
+  @Qualifier
   @Retention(RUNTIME)
   @Target({FIELD, PARAMETER, METHOD})
   @interface TestingPlugins {}
 
-  @jakarta.inject.Qualifier
+  @Qualifier
   @Retention(RUNTIME)
   @Target({PARAMETER, METHOD})
   @interface ProcessorClassLoader {}
