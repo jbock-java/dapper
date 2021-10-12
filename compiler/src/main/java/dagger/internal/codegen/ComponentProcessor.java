@@ -50,8 +50,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.SourceVersion;
 
 /**
@@ -63,12 +61,12 @@ import javax.lang.model.SourceVersion;
 public class ComponentProcessor extends BasicAnnotationProcessor {
   private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
-  @Inject InjectBindingRegistry injectBindingRegistry;
-  @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject ImmutableList<Step> processingSteps;
-  @Inject BindingGraphPlugins bindingGraphPlugins;
-  @Inject Set<ClearableCache> clearableCaches;
+  @javax.inject.Inject InjectBindingRegistry injectBindingRegistry;
+  @javax.inject.Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  @javax.inject.Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
+  @javax.inject.Inject ImmutableList<Step> processingSteps;
+  @javax.inject.Inject BindingGraphPlugins bindingGraphPlugins;
+  @javax.inject.Inject Set<ClearableCache> clearableCaches;
 
   public ComponentProcessor() {
     this.testingPlugins = Optional.empty();
@@ -118,7 +116,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     return processingSteps;
   }
 
-  @Singleton
+  @javax.inject.Singleton
   @Component(
       modules = {
         BindingGraphValidationModule.class,

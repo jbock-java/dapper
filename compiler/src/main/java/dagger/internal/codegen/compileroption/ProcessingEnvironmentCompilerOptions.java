@@ -65,7 +65,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
@@ -80,7 +79,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   private final Map<EnumOption<?>, ImmutableMap<String, ? extends Enum<?>>> allCommandLineOptions =
       new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   ProcessingEnvironmentCompilerOptions(
       ProcessingEnvironment processingEnvironment, DaggerElements daggerElements) {
     this.processingEnvironment = processingEnvironment;

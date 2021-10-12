@@ -18,8 +18,6 @@ package dagger.internal.codegen.kotlin;
 
 import dagger.internal.codegen.base.ClearableCache;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Factory creating Kotlin metadata data objects.
@@ -27,10 +25,10 @@ import javax.inject.Singleton;
  * <p>The metadata is cache since it can be expensive to parse the information stored in a proto
  * binary string format in the metadata annotation values.
  */
-@Singleton
+@javax.inject.Singleton
 public final class KotlinMetadataFactory implements ClearableCache {
 
-  @Inject
+  @javax.inject.Inject
   KotlinMetadataFactory() {
   }
 

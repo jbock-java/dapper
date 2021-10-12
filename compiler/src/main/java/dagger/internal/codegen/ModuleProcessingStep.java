@@ -43,7 +43,6 @@ import dagger.internal.codegen.writing.ModuleGenerator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -64,7 +63,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final KotlinMetadataUtil metadataUtil;
   private final Set<TypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
-  @Inject
+  @javax.inject.Inject
   ModuleProcessingStep(
       Messager messager,
       ModuleValidator moduleValidator,

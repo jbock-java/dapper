@@ -44,8 +44,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -59,10 +57,10 @@ import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 
 /**
- * A {@linkplain ValidationReport validator} for {@link Inject}-annotated elements and the types
+ * A {@linkplain ValidationReport validator} for {@code Inject}-annotated elements and the types
  * that contain them.
  */
-@Singleton
+@javax.inject.Singleton
 public final class InjectValidator implements ClearableCache {
   private final DaggerTypes types;
   private final DaggerElements elements;
@@ -73,7 +71,7 @@ public final class InjectValidator implements ClearableCache {
   private final KotlinMetadataUtil metadataUtil;
   private final Map<ExecutableElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   InjectValidator(
       DaggerTypes types,
       DaggerElements elements,
@@ -140,13 +138,13 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder<TypeElement> builder =
         ValidationReport.about(asType(constructorElement.getEnclosingElement()));
 
-    if (isAnnotationPresent(constructorElement, Inject.class)
+    if (isAnnotationPresent(constructorElement, jakarta.inject.Inject.class)
         && isAnnotationPresent(constructorElement, AssistedInject.class)) {
       builder.addError("Constructors cannot be annotated with both @Inject and @AssistedInject");
     }
 
     Class<?> injectAnnotation =
-        isAnnotationPresent(constructorElement, Inject.class) ? Inject.class : AssistedInject.class;
+        isAnnotationPresent(constructorElement, jakarta.inject.Inject.class) ? jakarta.inject.Inject.class : AssistedInject.class;
 
     if (constructorElement.getModifiers().contains(PRIVATE)) {
       builder.addError(
@@ -167,7 +165,7 @@ public final class InjectValidator implements ClearableCache {
             "@Scope annotations are not allowed on @%s constructors",
             injectAnnotation.getSimpleName());
 
-    if (injectAnnotation == Inject.class) {
+    if (injectAnnotation == jakarta.inject.Inject.class) {
       scopeErrorMsg += "; annotate the class instead";
     }
 
@@ -318,7 +316,7 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(typeElement);
     boolean hasInjectedMembers = false;
     for (VariableElement element : ElementFilter.fieldsIn(typeElement.getEnclosedElements())) {
-      if (MoreElements.isAnnotationPresent(element, Inject.class)) {
+      if (MoreElements.isAnnotationPresent(element, jakarta.inject.Inject.class)) {
         hasInjectedMembers = true;
         ValidationReport<VariableElement> report = validateField(element);
         if (!report.isClean()) {
@@ -327,7 +325,7 @@ public final class InjectValidator implements ClearableCache {
       }
     }
     for (ExecutableElement element : ElementFilter.methodsIn(typeElement.getEnclosedElements())) {
-      if (MoreElements.isAnnotationPresent(element, Inject.class)) {
+      if (MoreElements.isAnnotationPresent(element, jakarta.inject.Inject.class)) {
         hasInjectedMembers = true;
         ValidationReport<ExecutableElement> report = validateMethod(element);
         if (!report.isClean()) {
@@ -359,7 +357,7 @@ public final class InjectValidator implements ClearableCache {
     }
     for (ExecutableElement element :
         ElementFilter.constructorsIn(typeElement.getEnclosedElements())) {
-      if (isAnnotationPresent(element, Inject.class)
+      if (isAnnotationPresent(element, jakarta.inject.Inject.class)
           || isAnnotationPresent(element, AssistedInject.class)) {
         ValidationReport<TypeElement> report = validateConstructor(element);
         if (!report.isClean()) {

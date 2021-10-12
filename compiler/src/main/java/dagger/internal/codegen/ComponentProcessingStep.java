@@ -42,7 +42,6 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -60,7 +59,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
   private final SourceFileGenerator<BindingGraph> componentGenerator;
   private final BindingGraphValidator bindingGraphValidator;
 
-  @Inject
+  @javax.inject.Inject
   ComponentProcessingStep(
       Messager messager,
       ComponentValidator componentValidator,

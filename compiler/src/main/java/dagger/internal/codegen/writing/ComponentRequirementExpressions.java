@@ -35,7 +35,6 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -56,7 +55,7 @@ public final class ComponentRequirementExpressions {
   private final ShardImplementation componentShard;
   private final ModuleProxies moduleProxies;
 
-  @Inject
+  @javax.inject.Inject
   ComponentRequirementExpressions(
       @ParentComponent Optional<ComponentRequirementExpressions> parent,
       BindingGraph graph,

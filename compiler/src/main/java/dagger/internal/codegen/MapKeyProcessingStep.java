@@ -32,7 +32,6 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -49,7 +48,7 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final AnnotationCreatorGenerator annotationCreatorGenerator;
   private final UnwrappedMapKeyGenerator unwrappedMapKeyGenerator;
 
-  @Inject
+  @javax.inject.Inject
   MapKeyProcessingStep(
       Messager messager,
       DaggerTypes types,

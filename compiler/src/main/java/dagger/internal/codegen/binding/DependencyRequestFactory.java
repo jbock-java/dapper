@@ -42,7 +42,6 @@ import dagger.model.Key;
 import dagger.model.RequestKind;
 import java.util.List;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -61,7 +60,7 @@ public final class DependencyRequestFactory {
   private final KeyFactory keyFactory;
   private final InjectionAnnotations injectionAnnotations;
 
-  @Inject
+  @javax.inject.Inject
   DependencyRequestFactory(KeyFactory keyFactory, InjectionAnnotations injectionAnnotations) {
     this.keyFactory = keyFactory;
     this.injectionAnnotations = injectionAnnotations;

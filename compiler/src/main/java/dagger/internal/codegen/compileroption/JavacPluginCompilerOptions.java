@@ -19,14 +19,13 @@ package dagger.internal.codegen.compileroption;
 import static dagger.internal.codegen.compileroption.ValidationType.NONE;
 import static javax.tools.Diagnostic.Kind.NOTE;
 
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
 /** {@link CompilerOptions} for Javac plugins (e.g. for Dagger statistics or Kythe). */
 public final class JavacPluginCompilerOptions extends CompilerOptions {
 
-  @Inject
+  @javax.inject.Inject
   JavacPluginCompilerOptions() {}
 
   @Override

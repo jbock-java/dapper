@@ -20,7 +20,6 @@ import dagger.MapKey;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 
@@ -55,7 +54,7 @@ import javax.lang.model.element.TypeElement;
  */
 public final class UnwrappedMapKeyGenerator extends AnnotationCreatorGenerator {
 
-  @Inject
+  @javax.inject.Inject
   UnwrappedMapKeyGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

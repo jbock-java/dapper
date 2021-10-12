@@ -21,11 +21,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.Provides;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 
 /**
- * Represents a request for a {@link Key} at an injection point. For example, parameters to {@link
+ * Represents a request for a {@link Key} at an injection point. For example, parameters to {@code
  * Inject} constructors, {@link Provides} methods, and component methods are all dependency
  * requests.
  *

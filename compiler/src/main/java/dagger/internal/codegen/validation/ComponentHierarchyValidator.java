@@ -46,7 +46,6 @@ import dagger.model.Scope;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
@@ -55,7 +54,7 @@ final class ComponentHierarchyValidator {
   private static final Joiner COMMA_SEPARATED_JOINER = Joiner.on(", ");
   private final CompilerOptions compilerOptions;
 
-  @Inject
+  @javax.inject.Inject
   ComponentHierarchyValidator(CompilerOptions compilerOptions) {
     this.compilerOptions = compilerOptions;
   }

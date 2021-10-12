@@ -19,12 +19,11 @@ package dagger.internal.codegen.compileroption;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
-import javax.inject.Qualifier;
 
 /**
  * A qualifier for the {@link javax.annotation.processing.ProcessingEnvironment#getOptions()
  * processing options} passed to the current invocation of {@code javac}.
  */
 @Retention(RUNTIME)
-@Qualifier
+@javax.inject.Qualifier
 public @interface ProcessingOptions {}

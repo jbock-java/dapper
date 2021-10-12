@@ -56,8 +56,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -105,7 +103,7 @@ public abstract class ModuleDescriptor {
   }
 
   /** A {@link ModuleDescriptor} factory. */
-  @Singleton
+  @javax.inject.Singleton
   public static final class Factory implements ClearableCache {
     private final DaggerElements elements;
     private final KotlinMetadataUtil metadataUtil;
@@ -116,7 +114,7 @@ public abstract class ModuleDescriptor {
     private final OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory;
     private final Map<TypeElement, ModuleDescriptor> cache = new HashMap<>();
 
-    @Inject
+    @javax.inject.Inject
     Factory(
         DaggerElements elements,
         KotlinMetadataUtil metadataUtil,

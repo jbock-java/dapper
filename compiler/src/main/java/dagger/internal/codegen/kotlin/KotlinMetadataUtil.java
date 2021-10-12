@@ -16,14 +16,13 @@
 
 package dagger.internal.codegen.kotlin;
 
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
 
-  @Inject
+  @javax.inject.Inject
   KotlinMetadataUtil() {
   }
 

@@ -90,8 +90,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -251,8 +249,8 @@ public final class ComponentImplementation {
   private final List<CodeBlock> shardCancellations = new ArrayList<>();
   private final Optional<ComponentImplementation> parent;
   private final ChildComponentImplementationFactory childComponentImplementationFactory;
-  private final Provider<ComponentBindingExpressions> bindingExpressionsProvider;
-  private final Provider<ComponentCreatorImplementationFactory>
+  private final javax.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider;
+  private final javax.inject.Provider<ComponentCreatorImplementationFactory>
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
   private final ComponentNames componentNames;
@@ -262,13 +260,13 @@ public final class ComponentImplementation {
   private final KotlinMetadataUtil metadataUtil;
   private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
 
-  @Inject
+  @javax.inject.Inject
   ComponentImplementation(
       @ParentComponent Optional<ComponentImplementation> parent,
       ChildComponentImplementationFactory childComponentImplementationFactory,
       // Inject as Provider<> to prevent a cycle.
-      Provider<ComponentBindingExpressions> bindingExpressionsProvider,
-      Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
+      javax.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider,
+      javax.inject.Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
       BindingGraph graph,
       ComponentNames componentNames,
       CompilerOptions compilerOptions,

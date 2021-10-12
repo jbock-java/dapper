@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.util.Elements;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
 import javax.lang.model.util.Types;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
 import javax.tools.Diagnostic;
@@ -56,7 +55,7 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
   public static final class Factory {
     private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-    @Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
+    @javax.inject.Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
       this.messageGeneratorFactory = messageGeneratorFactory;
     }
 

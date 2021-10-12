@@ -53,7 +53,6 @@ import dagger.producers.internal.CancellationListener;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -78,7 +77,7 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   ComponentHjarGenerator(
       Filer filer,
       DaggerElements elements,

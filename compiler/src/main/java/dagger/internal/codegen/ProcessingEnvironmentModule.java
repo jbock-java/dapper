@@ -33,7 +33,6 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.inject.Singleton;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Types;
 
@@ -76,7 +75,7 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  @Singleton
+  @javax.inject.Singleton
   static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
     return new DaggerElements(processingEnvironment);
   }

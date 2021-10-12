@@ -39,7 +39,6 @@ import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -51,7 +50,7 @@ public final class ModuleProxies {
   private final DaggerElements elements;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   public ModuleProxies(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
     this.elements = elements;
     this.metadataUtil = metadataUtil;
@@ -66,7 +65,7 @@ public final class ModuleProxies {
     private final ModuleProxies moduleProxies;
     private final KotlinMetadataUtil metadataUtil;
 
-    @Inject
+    @javax.inject.Inject
     ModuleConstructorProxyGenerator(
         Filer filer,
         DaggerElements elements,

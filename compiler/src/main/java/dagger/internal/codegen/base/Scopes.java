@@ -25,9 +25,9 @@ import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
 import dagger.producers.ProductionScope;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 
 /** Common names and convenience methods for {@link Scope}s. */

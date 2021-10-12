@@ -22,7 +22,6 @@ import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
@@ -32,7 +31,7 @@ public final class BindingMethodProcessingStep
   private final Messager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
 
-  @Inject
+  @javax.inject.Inject
   BindingMethodProcessingStep(
       Messager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
     super(MoreElements::asExecutable);

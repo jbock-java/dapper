@@ -24,7 +24,6 @@ import com.google.auto.value.extension.memoized.Memoized;
 import dagger.BindsOptionalOf;
 import dagger.model.Key;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -52,7 +51,7 @@ abstract class OptionalBindingDeclaration extends BindingDeclaration {
   static class Factory {
     private final KeyFactory keyFactory;
 
-    @Inject
+    @javax.inject.Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

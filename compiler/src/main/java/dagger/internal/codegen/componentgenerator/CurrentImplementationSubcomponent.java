@@ -28,7 +28,6 @@ import dagger.internal.codegen.writing.ComponentRequirementExpressions;
 import dagger.internal.codegen.writing.ParentComponent;
 import dagger.internal.codegen.writing.PerComponentImplementation;
 import java.util.Optional;
-import javax.inject.Provider;
 
 /**
  * A subcomponent that injects all objects that are responsible for creating a single {@link
@@ -48,9 +47,9 @@ public interface CurrentImplementationSubcomponent {
     @Provides
     static ChildComponentImplementationFactory provideChildComponentImplementationFactory(
         CurrentImplementationSubcomponent.Builder currentImplementationSubcomponentBuilder,
-        Provider<ComponentImplementation> componentImplementatation,
-        Provider<ComponentBindingExpressions> componentBindingExpressions,
-        Provider<ComponentRequirementExpressions> componentRequirementExpressions) {
+        javax.inject.Provider<ComponentImplementation> componentImplementatation,
+        javax.inject.Provider<ComponentBindingExpressions> componentBindingExpressions,
+        javax.inject.Provider<ComponentRequirementExpressions> componentRequirementExpressions) {
       return childGraph ->
           currentImplementationSubcomponentBuilder
               .bindingGraph(childGraph)

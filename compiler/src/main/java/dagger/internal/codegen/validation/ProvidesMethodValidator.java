@@ -27,7 +27,6 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 
@@ -36,7 +35,7 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
 
   private final DependencyRequestValidator dependencyRequestValidator;
 
-  @Inject
+  @javax.inject.Inject
   ProvidesMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

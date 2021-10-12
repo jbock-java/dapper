@@ -55,7 +55,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
@@ -70,7 +69,7 @@ final class ComponentCreatorImplementationFactory {
   private final KotlinMetadataUtil metadataUtil;
   private final ModuleProxies moduleProxies;
 
-  @Inject
+  @javax.inject.Inject
   ComponentCreatorImplementationFactory(
       ComponentImplementation componentImplementation,
       DaggerElements elements,

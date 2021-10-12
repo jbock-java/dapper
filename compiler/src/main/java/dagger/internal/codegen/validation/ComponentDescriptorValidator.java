@@ -64,7 +64,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -95,7 +94,7 @@ public final class ComponentDescriptorValidator {
   private final ComponentHierarchyValidator componentHierarchyValidator;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   ComponentDescriptorValidator(
       DaggerElements elements,
       DaggerTypes types,

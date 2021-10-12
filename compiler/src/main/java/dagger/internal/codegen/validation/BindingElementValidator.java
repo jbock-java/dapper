@@ -45,7 +45,6 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.inject.Qualifier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -258,7 +257,7 @@ public abstract class BindingElementValidator<E extends Element> {
     }
 
     /**
-     * Adds an error if the element has more than one {@linkplain Qualifier qualifier} annotation.
+     * Adds an error if the element has more than one {@linkplain jakarta.inject.Qualifier qualifier} annotation.
      */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {

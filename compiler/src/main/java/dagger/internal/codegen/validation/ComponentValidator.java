@@ -77,8 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -94,7 +92,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  * Performs superficial validation of the contract of the {@link Component} and {@link
  * ProductionComponent} annotations.
  */
-@Singleton
+@javax.inject.Singleton
 public final class ComponentValidator implements ClearableCache {
   private final DaggerElements elements;
   private final DaggerTypes types;
@@ -106,7 +104,7 @@ public final class ComponentValidator implements ClearableCache {
   private final DependencyRequestFactory dependencyRequestFactory;
   private final Map<TypeElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   ComponentValidator(
       DaggerElements elements,
       DaggerTypes types,

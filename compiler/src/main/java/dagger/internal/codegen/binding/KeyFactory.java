@@ -59,7 +59,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
@@ -75,7 +74,7 @@ public final class KeyFactory {
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
-  @Inject
+  @javax.inject.Inject
   KeyFactory(
       DaggerTypes types, DaggerElements elements, InjectionAnnotations injectionAnnotations) {
     this.types = checkNotNull(types);

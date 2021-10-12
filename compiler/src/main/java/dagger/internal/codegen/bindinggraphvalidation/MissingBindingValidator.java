@@ -33,7 +33,6 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
-import javax.inject.Inject;
 import javax.lang.model.type.TypeKind;
 
 /** Reports errors for missing bindings. */
@@ -42,7 +41,7 @@ final class MissingBindingValidator implements BindingGraphPlugin {
   private final DaggerTypes types;
   private final InjectBindingRegistry injectBindingRegistry;
 
-  @Inject
+  @javax.inject.Inject
   MissingBindingValidator(
       DaggerTypes types, InjectBindingRegistry injectBindingRegistry) {
     this.types = types;

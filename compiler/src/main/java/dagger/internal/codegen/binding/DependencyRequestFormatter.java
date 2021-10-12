@@ -26,7 +26,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.producers.Produces;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -45,12 +44,12 @@ import javax.lang.model.util.ElementKindVisitor8;
  *   <dd>{@code @Qualifier SomeType is provided at\n ComponentType.method()}
  *   <dt>For component injection methods
  *   <dd>{@code SomeType is injected at\n ComponentType.method(foo)}
- *   <dt>For parameters to {@link Provides @Provides}, {@link Produces @Produces}, or {@link
- *       Inject @Inject} methods:
+ *   <dt>For parameters to {@link Provides @Provides}, {@link Produces @Produces}, or {@code
+ *       @Inject} methods:
  *   <dd>{@code @Qualified ResolvedType is injected at\n EnclosingType.method([…, ]param[, …])}
- *   <dt>For parameters to {@link Inject @Inject} constructors:
+ *   <dt>For parameters to {@code @Inject} constructors:
  *   <dd>{@code @Qualified ResolvedType is injected at\n EnclosingType([…, ]param[, …])}
- *   <dt>For {@link Inject @Inject} fields:
+ *   <dt>For {@code @Inject} fields:
  *   <dd>{@code @Qualified ResolvedType is injected at\n EnclosingType.field}
  * </dl>
  */
@@ -58,7 +57,7 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
 
   private final DaggerTypes types;
 
-  @Inject
+  @javax.inject.Inject
   DependencyRequestFormatter(DaggerTypes types) {
     this.types = types;
   }

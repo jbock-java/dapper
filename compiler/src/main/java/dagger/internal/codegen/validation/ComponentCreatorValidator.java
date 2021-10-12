@@ -40,8 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -52,14 +50,14 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 /** Validates types annotated with component creator annotations. */
-@Singleton
+@javax.inject.Singleton
 public final class ComponentCreatorValidator implements ClearableCache {
 
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final Map<TypeElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   ComponentCreatorValidator(DaggerElements elements, DaggerTypes types) {
     this.elements = elements;
     this.types = types;

@@ -19,7 +19,6 @@ package dagger.internal.codegen.validation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import javax.inject.Qualifier;
 
 /**
  * Qualifier annotation for the {@link dagger.spi.BindingGraphPlugin}s that are used to implement
@@ -27,5 +26,5 @@ import javax.inject.Qualifier;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Qualifier
+@javax.inject.Qualifier
 public @interface Validation {}

@@ -41,7 +41,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -81,7 +80,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
   private static final ClassName AUTO_ANNOTATION =
       ClassName.get("com.google.auto.value", "AutoAnnotation");
 
-  @Inject
+  @javax.inject.Inject
   AnnotationCreatorGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

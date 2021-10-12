@@ -33,7 +33,6 @@ import dagger.internal.codegen.validation.ValidationReport;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
@@ -43,7 +42,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
   private final DaggerTypes types;
   private final Messager messager;
 
-  @Inject
+  @javax.inject.Inject
   AssistedInjectProcessingStep(DaggerTypes types, Messager messager) {
     super(MoreElements::asExecutable);
     this.types = types;
@@ -76,8 +75,8 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
         if (!uniqueAssistedParameters.add(assistedParameter)) {
           report.addError(
               String.format("@AssistedInject constructor has duplicate @Assisted type: %s. "
-                  + "Consider setting an identifier on the parameter by using "
-                  + "@Assisted(\"identifier\") in both the factory and @AssistedInject constructor",
+                      + "Consider setting an identifier on the parameter by using "
+                      + "@Assisted(\"identifier\") in both the factory and @AssistedInject constructor",
                   assistedParameter),
               assistedParameter.variableElement());
         }

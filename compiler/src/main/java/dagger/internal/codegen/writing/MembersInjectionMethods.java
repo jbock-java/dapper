@@ -43,7 +43,6 @@ import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.model.Key;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -59,7 +58,7 @@ final class MembersInjectionMethods {
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   MembersInjectionMethods(
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions bindingExpressions,

@@ -24,7 +24,6 @@ import static javax.lang.model.type.TypeKind.TYPEVAR;
 import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -32,7 +31,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<VariableElement> {
-  @Inject
+  @javax.inject.Inject
   BindsInstanceParameterValidator(InjectionAnnotations injectionAnnotations) {
     super(injectionAnnotations);
   }

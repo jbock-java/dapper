@@ -29,18 +29,16 @@ import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 
 /** Validates any binding method. */
-@Singleton
+@javax.inject.Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
   private final ImmutableMap<ClassName, BindingMethodValidator> validators;
   private final Map<ExecutableElement, ValidationReport<ExecutableElement>> reports =
       new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   AnyBindingMethodValidator(ImmutableMap<ClassName, BindingMethodValidator> validators) {
     this.validators = validators;
   }

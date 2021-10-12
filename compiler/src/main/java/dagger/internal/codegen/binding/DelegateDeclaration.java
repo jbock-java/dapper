@@ -32,7 +32,6 @@ import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -60,7 +59,7 @@ public abstract class DelegateDeclaration extends BindingDeclaration
     private final KeyFactory keyFactory;
     private final DependencyRequestFactory dependencyRequestFactory;
 
-    @Inject
+    @javax.inject.Inject
     Factory(
         DaggerTypes types,
         KeyFactory keyFactory,

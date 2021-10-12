@@ -55,8 +55,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -64,12 +62,12 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 /**
- * Maintains the collection of provision bindings from {@link Inject} constructors and members
- * injection bindings from {@link Inject} fields and methods known to the annotation processor.
+ * Maintains the collection of provision bindings from {@code Inject} constructors and members
+ * injection bindings from {@code Inject} fields and methods known to the annotation processor.
  * Note that this registry <b>does not</b> handle any explicit bindings (those from {@link Provides}
  * methods, {@link Component} dependencies, etc.).
  */
-@Singleton
+@javax.inject.Singleton
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final DaggerElements elements;
   private final DaggerTypes types;
@@ -168,7 +166,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final BindingsCollection<MembersInjectionBinding> membersInjectionBindings =
       new BindingsCollection<>(MembersInjector.class);
 
-  @Inject
+  @javax.inject.Inject
   InjectBindingRegistryImpl(
       DaggerElements elements,
       DaggerTypes types,

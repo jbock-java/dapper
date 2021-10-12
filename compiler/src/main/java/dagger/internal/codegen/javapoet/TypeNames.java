@@ -114,7 +114,7 @@ public final class TypeNames {
       ClassName.get("dagger.producers.internal", "SetProducer");
 
   // Other classnames
-  public static final ClassName INJECT = ClassName.get("javax.inject", "Inject");
+  public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName LIST = ClassName.get("java.util", "List");
   public static final ClassName SET = ClassName.get("java.util", "Set");
   public static final ClassName FUTURES =

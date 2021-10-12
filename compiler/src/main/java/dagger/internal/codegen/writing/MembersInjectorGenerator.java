@@ -62,7 +62,6 @@ import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.model.DependencyRequest;
 import java.util.Map.Entry;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
@@ -73,7 +72,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   MembersInjectorGenerator(
       Filer filer,
       DaggerElements elements,

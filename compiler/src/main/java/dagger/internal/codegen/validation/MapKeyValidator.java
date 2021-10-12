@@ -21,7 +21,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import dagger.MapKey;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.List;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -34,7 +33,7 @@ import javax.lang.model.type.TypeKind;
 public final class MapKeyValidator {
   private final DaggerElements elements;
 
-  @Inject
+  @javax.inject.Inject
   MapKeyValidator(DaggerElements elements) {
     this.elements = elements;
   }

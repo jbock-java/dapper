@@ -81,7 +81,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
@@ -91,7 +90,7 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
   private final CompilerOptions compilerOptions;
   private final KeyFactory keyFactory;
 
-  @Inject
+  @javax.inject.Inject
   ProducerFactoryGenerator(
       Filer filer,
       DaggerElements elements,

@@ -28,7 +28,6 @@ import dagger.spi.BindingGraphPlugin;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 
 /** Initializes {@link BindingGraphPlugin}s. */
 public final class BindingGraphPlugins {
@@ -38,7 +37,7 @@ public final class BindingGraphPlugins {
   private final DaggerElements elements;
   private final Map<String, String> processingOptions;
 
-  @Inject
+  @javax.inject.Inject
   BindingGraphPlugins(
       @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,

@@ -32,7 +32,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -40,7 +39,7 @@ import javax.lang.model.type.TypeMirror;
 /** A validator for {@link dagger.producers.Produces} methods. */
 final class ProducesMethodValidator extends BindingMethodValidator {
 
-  @Inject
+  @javax.inject.Inject
   ProducesMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

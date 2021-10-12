@@ -57,7 +57,6 @@ import dagger.model.ComponentPath;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Function;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -70,7 +69,7 @@ public final class DiagnosticMessageGenerator {
     private final DependencyRequestFormatter dependencyRequestFormatter;
     private final ElementFormatter elementFormatter;
 
-    @Inject
+    @javax.inject.Inject
     Factory(
         DaggerTypes types,
         DependencyRequestFormatter dependencyRequestFormatter,

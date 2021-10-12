@@ -28,7 +28,6 @@ import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.DependencyEdge;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
-import javax.inject.Inject;
 
 /**
  * Reports errors or warnings (depending on the {@code -Adagger.nullableValidation} value) for each
@@ -38,7 +37,7 @@ final class NullableBindingValidator implements BindingGraphPlugin {
 
   private final CompilerOptions compilerOptions;
 
-  @Inject
+  @javax.inject.Inject
   NullableBindingValidator(CompilerOptions compilerOptions) {
     this.compilerOptions = compilerOptions;
   }

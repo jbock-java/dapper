@@ -24,7 +24,6 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
@@ -32,7 +31,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementKindVisitor8;
 
 /**
- * An annotation processor for generating Dagger implementation code based on the {@link Inject}
+ * An annotation processor for generating Dagger implementation code based on the {@code Inject}
  * annotation.
  */
 // TODO(gak): add some error handling for bad source files
@@ -40,7 +39,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   private final ElementVisitor<Void, Void> visitor;
   private final Set<Element> processedElements = Sets.newLinkedHashSet();
 
-  @Inject
+  @javax.inject.Inject
   InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
     super(e -> e);
     this.visitor =

@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
@@ -63,7 +62,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   private final DependencyRequestFormatter dependencyRequestFormatter;
 
-  @Inject
+  @javax.inject.Inject
   DependencyCycleValidator(DependencyRequestFormatter dependencyRequestFormatter) {
     this.dependencyRequestFormatter = dependencyRequestFormatter;
   }

@@ -17,18 +17,16 @@
 package dagger.internal.codegen.my;
 
 import dagger.Provides;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
-import javax.inject.Scope;
 
 /**
- * An {@linkplain Scope unscoped} {@link Provider}. While a {@link Provider} <i>may</i> apply
+ * An {@link jakarta.inject.Scope unscoped} {@link Provider}. While a {@link Provider} <i>may</i> apply
  * scoping semantics while providing an instance, a factory implementation is guaranteed to exercise
- * the binding logic ({@link Inject} constructors, {@link Provides} methods) upon each call to
+ * the binding logic ({@code Inject} constructors, {@link Provides} methods) upon each call to
  * {@link #get}.
  *
  * <p>Note that while subsequent calls to {@link #get} will create new instances for bindings such
- * as those created by {@link Inject} constructors, a new instance is not guaranteed by all
+ * as those created by {@code Inject} constructors, a new instance is not guaranteed by all
  * bindings. For example, {@link Provides} methods may be implemented in ways that return the same
  * instance for each call.
  */

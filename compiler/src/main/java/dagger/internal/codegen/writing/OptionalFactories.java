@@ -70,7 +70,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.Executor;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
 
 /** The nested class and static methods required by the component to implement optional bindings. */
@@ -104,14 +103,14 @@ final class OptionalFactories {
      */
     private final Map<OptionalKind, FieldSpec> absentOptionalProviderFields = new TreeMap<>();
 
-    @Inject
+    @javax.inject.Inject
     PerGeneratedFileCache() {}
   }
 
   private final PerGeneratedFileCache perGeneratedFileCache;
   private final ShardImplementation rootComponentShard;
 
-  @Inject
+  @javax.inject.Inject
   OptionalFactories(
       PerGeneratedFileCache perGeneratedFileCache,
       ComponentImplementation componentImplementation) {

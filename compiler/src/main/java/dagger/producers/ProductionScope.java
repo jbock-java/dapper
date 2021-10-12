@@ -20,7 +20,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import javax.inject.Scope;
 
 /**
  * A scope annotation for provision bindings that are tied to the lifetime of a
@@ -28,5 +27,5 @@ import javax.inject.Scope;
  */
 @Documented
 @Retention(RUNTIME)
-@Scope
+@javax.inject.Scope
 public @interface ProductionScope {}

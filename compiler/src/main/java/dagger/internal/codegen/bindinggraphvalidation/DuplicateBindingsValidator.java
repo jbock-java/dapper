@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
@@ -69,7 +68,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
   private final CompilerOptions compilerOptions;
 
-  @Inject
+  @javax.inject.Inject
   DuplicateBindingsValidator(
       BindingDeclarationFormatter bindingDeclarationFormatter, CompilerOptions compilerOptions) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;

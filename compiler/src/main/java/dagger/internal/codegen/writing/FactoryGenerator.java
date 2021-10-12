@@ -69,12 +69,11 @@ import dagger.model.DependencyRequest;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
 /**
- * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@link
+ * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@code
  * Inject} constructors.
  */
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
@@ -82,7 +81,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   private final CompilerOptions compilerOptions;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   FactoryGenerator(
       Filer filer,
       SourceVersion sourceVersion,

@@ -19,12 +19,11 @@ package dagger.internal.codegen.writing;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
-import javax.inject.Scope;
 
 /**
- * A {@link Scope} that encompasses a top-level component implementation and any of its inner
+ * A {@code Scope} that encompasses a top-level component implementation and any of its inner
  * descendant component implementations in the same generated file.
  */
 @Retention(RUNTIME)
-@Scope
+@javax.inject.Scope
 public @interface PerGeneratedFile {}

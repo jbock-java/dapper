@@ -30,12 +30,11 @@ import dagger.model.BindingGraph;
 import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
-import javax.inject.Inject;
 
 /** Validates that there are not multiple set binding contributions to the same binding. */
 final class SetMultibindingValidator implements BindingGraphPlugin {
 
-  @Inject
+  @javax.inject.Inject
   SetMultibindingValidator() {
   }
 

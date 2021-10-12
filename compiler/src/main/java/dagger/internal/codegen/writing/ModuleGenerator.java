@@ -20,9 +20,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
 import java.lang.annotation.Retention;
-import javax.inject.Qualifier;
 
 /** Qualifier for a {@link SourceFileGenerator} for modules. */
-@Qualifier
+@javax.inject.Qualifier
 @Retention(RUNTIME)
 public @interface ModuleGenerator {}

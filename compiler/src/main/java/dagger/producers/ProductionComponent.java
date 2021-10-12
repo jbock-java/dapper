@@ -27,8 +27,6 @@ import dagger.internal.Beta;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected
@@ -47,8 +45,8 @@ import javax.inject.Qualifier;
  * component method. Component methods must represent {@linkplain Producer production}.
  *
  * <p>Production methods have no arguments and return either a {@link ListenableFuture} or {@link
- * Producer} of a type that is {@link Inject injected}, {@link Provides provided}, or {@link
- * Produces produced}. Each may have a {@link Qualifier} annotation as well. The following are all
+ * Producer} of a type that is injected, {@link Provides provided}, or {@link
+ * Produces produced}. Each may have a {@code Qualifier} annotation as well. The following are all
  * valid production method declarations:
  *
  * <pre><code>

@@ -32,7 +32,6 @@ import dagger.multibindings.Multibinds;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -74,7 +73,7 @@ public abstract class MultibindingDeclaration extends BindingDeclaration
     private final DaggerTypes types;
     private final KeyFactory keyFactory;
 
-    @Inject
+    @javax.inject.Inject
     Factory(DaggerTypes types, KeyFactory keyFactory) {
       this.types = types;
       this.keyFactory = keyFactory;

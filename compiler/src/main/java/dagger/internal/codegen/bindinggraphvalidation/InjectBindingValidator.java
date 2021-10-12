@@ -25,7 +25,6 @@ import dagger.internal.codegen.validation.ValidationReport.Item;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 
 /** Validates bindings from {@code @Inject}-annotated constructors. */
@@ -33,7 +32,7 @@ final class InjectBindingValidator implements BindingGraphPlugin {
 
   private final InjectValidator injectValidator;
 
-  @Inject
+  @javax.inject.Inject
   InjectBindingValidator(InjectValidator injectValidator) {
     this.injectValidator = injectValidator.whenGeneratingCode();
   }

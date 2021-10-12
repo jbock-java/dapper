@@ -23,13 +23,12 @@ import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.model.Key;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Maintains the collection of provision bindings from {@link Inject} constructors and members
- * injection bindings from {@link Inject} fields and methods known to the annotation processor. Note
+ * Maintains the collection of provision bindings from {@code Inject} constructors and members
+ * injection bindings from {@code Inject} fields and methods known to the annotation processor. Note
  * that this registry <b>does not</b> handle any explicit bindings (those from {@link Provides}
  * methods, {@link Component} dependencies, etc.).
  */

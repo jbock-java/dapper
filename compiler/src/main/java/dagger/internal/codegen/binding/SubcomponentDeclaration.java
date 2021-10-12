@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.model.Key;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -62,7 +61,7 @@ public abstract class SubcomponentDeclaration extends BindingDeclaration {
   public static class Factory {
     private final KeyFactory keyFactory;
 
-    @Inject
+    @javax.inject.Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import dagger.internal.Beta;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import javax.inject.Qualifier;
 
 /**
  * Qualifies a type that will be used as an internal implementation detail in the framework.
@@ -31,6 +30,6 @@ import javax.inject.Qualifier;
  */
 @Documented
 @Retention(RUNTIME)
-@Qualifier
+@javax.inject.Qualifier
 @Beta
 public @interface ProductionImplementation {}

@@ -19,7 +19,6 @@ package dagger.internal.codegen.base;
 import static com.google.auto.common.MoreElements.asExecutable;
 import static java.util.stream.Collectors.joining;
 
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
@@ -35,7 +34,7 @@ import javax.lang.model.util.ElementKindVisitor8;
  * <p>Parameters are given with their enclosing executable, with other parameters elided.
  */
 public final class ElementFormatter extends Formatter<Element> {
-  @Inject
+  @javax.inject.Inject
   ElementFormatter() {}
 
   @Override

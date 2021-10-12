@@ -28,7 +28,6 @@ import dagger.model.BindingGraph.Node;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import java.util.stream.Stream;
-import javax.inject.Inject;
 
 /**
  * Reports an error for each provision-only dependency request that is satisfied by a production
@@ -37,7 +36,7 @@ import javax.inject.Inject;
 // TODO(b/29509141): Clarify the error.
 final class ProvisionDependencyOnProducerBindingValidator implements BindingGraphPlugin {
 
-  @Inject
+  @javax.inject.Inject
   ProvisionDependencyOnProducerBindingValidator() {}
 
   @Override

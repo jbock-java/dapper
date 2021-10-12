@@ -30,8 +30,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
 
 /** Contains the bindings for {@link BindingGraphValidator} from external SPI providers. */
 @Module
@@ -39,7 +37,7 @@ abstract class SpiModule {
   private SpiModule() {}
 
   @Provides
-  @Singleton
+  @javax.inject.Singleton
   static ImmutableSet<BindingGraphPlugin> externalPlugins(
       @TestingPlugins Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins,
       @ProcessorClassLoader ClassLoader processorClassLoader) {
@@ -49,12 +47,12 @@ abstract class SpiModule {
                 ServiceLoader.load(BindingGraphPlugin.class, processorClassLoader)));
   }
 
-  @Qualifier
+  @javax.inject.Qualifier
   @Retention(RUNTIME)
   @Target({FIELD, PARAMETER, METHOD})
   @interface TestingPlugins {}
 
-  @Qualifier
+  @javax.inject.Qualifier
   @Retention(RUNTIME)
   @Target({PARAMETER, METHOD})
   @interface ProcessorClassLoader {}

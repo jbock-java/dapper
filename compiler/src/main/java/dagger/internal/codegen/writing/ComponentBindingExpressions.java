@@ -58,7 +58,6 @@ import dagger.model.RequestKind;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
@@ -93,7 +92,7 @@ public final class ComponentBindingExpressions {
   private final SwitchingProviders switchingProviders;
   private final Map<BindingRequest, BindingExpression> expressions = new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   ComponentBindingExpressions(
       @ParentComponent Optional<ComponentBindingExpressions> parent,
       BindingGraph graph,

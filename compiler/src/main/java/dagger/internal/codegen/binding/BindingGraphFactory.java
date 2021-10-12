@@ -69,15 +69,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 /** A factory for {@link BindingGraph} objects. */
-@Singleton
+@javax.inject.Singleton
 public final class BindingGraphFactory implements ClearableCache {
 
   private final DaggerElements elements;
@@ -89,7 +87,7 @@ public final class BindingGraphFactory implements ClearableCache {
   private final Map<Key, ImmutableSet<Key>> keysMatchingRequestCache = new HashMap<>();
   private final CompilerOptions compilerOptions;
 
-  @Inject
+  @javax.inject.Inject
   BindingGraphFactory(
       DaggerElements elements,
       InjectBindingRegistry injectBindingRegistry,
@@ -360,7 +358,7 @@ public final class BindingGraphFactory implements ClearableCache {
      *         <li>{@code Map<K, Provider<V>>} if the requested key's type is {@code Map<K,
      *             Producer<V>>}.
      *       </ul>
-     *   <li>An implicit {@link Inject @Inject}-annotated constructor binding if there is one and
+     *   <li>An implicit {@code @Inject}-annotated constructor binding if there is one and
      *       there are no explicit bindings or synthetic bindings.
      * </ul>
      */

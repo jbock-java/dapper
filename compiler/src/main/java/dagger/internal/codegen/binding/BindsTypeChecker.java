@@ -25,7 +25,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -33,9 +32,9 @@ import javax.lang.model.type.TypeMirror;
 
 /**
  * Checks the assignability of one type to another, given a {@link ContributionType} context. This
- * is used by {@link dagger.internal.codegen.validation.BindsMethodValidator} to validate that the
- * right-hand- side of a {@link dagger.Binds} method is valid, as well as in {@link
- * dagger.internal.codegen.writing.DelegateBindingExpression} when the right-hand-side in generated
+ * is used by {@code BindsMethodValidator} to validate that the
+ * right-hand- side of a {@link dagger.Binds} method is valid, as well as in {@code
+ * DelegateBindingExpression} when the right-hand-side in generated
  * code might be an erased type due to accessibility.
  */
 public final class BindsTypeChecker {
@@ -43,7 +42,7 @@ public final class BindsTypeChecker {
   private final DaggerElements elements;
 
   // TODO(bcorso): Make this pkg-private. Used by DelegateBindingExpression.
-  @Inject
+  @javax.inject.Inject
   public BindsTypeChecker(DaggerTypes types, DaggerElements elements) {
     this.types = types;
     this.elements = elements;

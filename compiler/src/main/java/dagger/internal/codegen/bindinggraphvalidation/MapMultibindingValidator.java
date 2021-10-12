@@ -44,7 +44,6 @@ import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Provider;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.type.DeclaredType;
 
 /**
@@ -56,7 +55,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
   private final KeyFactory keyFactory;
 
-  @Inject
+  @javax.inject.Inject
   MapMultibindingValidator(
       BindingDeclarationFormatter bindingDeclarationFormatter, KeyFactory keyFactory) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;

@@ -32,7 +32,6 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -42,7 +41,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final BindsTypeChecker bindsTypeChecker;
 
-  @Inject
+  @javax.inject.Inject
   BindsMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

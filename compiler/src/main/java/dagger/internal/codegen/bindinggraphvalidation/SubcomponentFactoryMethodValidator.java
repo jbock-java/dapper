@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
@@ -54,7 +53,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private final KotlinMetadataUtil metadataUtil;
   private final Map<ComponentNode, Set<TypeElement>> inheritedModulesCache = new HashMap<>();
 
-  @Inject
+  @javax.inject.Inject
   SubcomponentFactoryMethodValidator(DaggerTypes types, KotlinMetadataUtil metadataUtil) {
     this.types = types;
     this.metadataUtil = metadataUtil;

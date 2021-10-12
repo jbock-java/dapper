@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -58,7 +57,7 @@ import javax.lang.model.type.TypeMirror;
 final class BindingGraphConverter {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
-  @Inject
+  @javax.inject.Inject
   BindingGraphConverter(BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }

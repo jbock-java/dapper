@@ -26,8 +26,8 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Equivalence;
 import dagger.Reusable;
 import dagger.producers.ProductionScope;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
-import javax.inject.Singleton;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 

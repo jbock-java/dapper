@@ -31,7 +31,6 @@ import dagger.model.BindingGraph.MaybeBinding;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
@@ -44,7 +43,7 @@ final class DiagnosticReporterFactory {
   private final Messager messager;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
-  @Inject
+  @javax.inject.Inject
   DiagnosticReporterFactory(
       Messager messager, DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
     this.messager = messager;

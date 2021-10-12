@@ -26,7 +26,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -40,7 +39,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @Inject
+  @javax.inject.Inject
   public MethodSignatureFormatter(DaggerTypes types, InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.injectionAnnotations = injectionAnnotations;

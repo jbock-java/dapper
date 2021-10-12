@@ -25,19 +25,17 @@ import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.TypeElement;
 
 /** Validates a {@link BindingGraph}. */
-@Singleton
+@javax.inject.Singleton
 public final class BindingGraphValidator {
   private final ImmutableSet<BindingGraphPlugin> validationPlugins;
   private final ImmutableSet<BindingGraphPlugin> externalPlugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final CompilerOptions compilerOptions;
 
-  @Inject
+  @javax.inject.Inject
   BindingGraphValidator(
       @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,

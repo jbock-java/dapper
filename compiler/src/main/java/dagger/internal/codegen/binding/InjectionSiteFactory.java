@@ -29,13 +29,13 @@ import com.google.common.collect.SetMultimap;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -52,7 +52,7 @@ final class InjectionSiteFactory {
   private final DaggerElements elements;
   private final DependencyRequestFactory dependencyRequestFactory;
 
-  @Inject
+  @javax.inject.Inject
   InjectionSiteFactory(
       DaggerTypes types,
       DaggerElements elements,
@@ -68,8 +68,8 @@ final class InjectionSiteFactory {
     List<TypeElement> ancestors = new ArrayList<>();
     InjectionSiteVisitor injectionSiteVisitor = new InjectionSiteVisitor();
     for (Optional<DeclaredType> currentType = Optional.of(declaredType);
-        currentType.isPresent();
-        currentType = types.nonObjectSuperclass(currentType.get())) {
+         currentType.isPresent();
+         currentType = types.nonObjectSuperclass(currentType.get())) {
       DeclaredType type = currentType.get();
       ancestors.add(MoreElements.asType(type.asElement()));
       for (Element enclosedElement : type.asElement().getEnclosedElements()) {

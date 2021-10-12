@@ -30,7 +30,6 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 
@@ -40,7 +39,7 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @Inject
+  @javax.inject.Inject
   BindsOptionalOfMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

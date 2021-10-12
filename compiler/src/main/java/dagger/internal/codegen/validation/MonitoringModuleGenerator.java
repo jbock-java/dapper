@@ -40,7 +40,6 @@ import dagger.producers.ProductionScope;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import dagger.producers.monitoring.internal.Monitors;
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -48,7 +47,7 @@ import javax.lang.model.element.TypeElement;
 /** Generates a monitoring module for use with production components. */
 final class MonitoringModuleGenerator extends SourceFileGenerator<TypeElement> {
 
-  @Inject
+  @javax.inject.Inject
   MonitoringModuleGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

@@ -31,7 +31,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -48,7 +47,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   private final DaggerElements elements;
   private final Messager messager;
 
-  @Inject
+  @javax.inject.Inject
   AssistedProcessingStep(
       KotlinMetadataUtil kotlinMetadataUtil,
       InjectionAnnotations injectionAnnotations,

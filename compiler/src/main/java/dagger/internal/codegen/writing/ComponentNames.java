@@ -41,7 +41,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 
@@ -62,7 +61,7 @@ public final class ComponentNames {
   private final ImmutableMap<ComponentDescriptor, String> namesByDescriptor;
   private final ImmutableMap<Key, ComponentDescriptor> descriptorsByCreatorKey;
 
-  @Inject
+  @javax.inject.Inject
   ComponentNames(@TopLevel BindingGraph graph, KeyFactory keyFactory) {
     this.namesByDescriptor = namesByDescriptor(graph);
     this.descriptorsByCreatorKey = descriptorsByCreatorKey(keyFactory, namesByDescriptor.keySet());

@@ -21,7 +21,6 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.model.RequestKind;
 import java.util.Optional;
-import javax.inject.Inject;
 
 /**
  * A factory for creating a binding expression for an unscoped instance.
@@ -48,7 +47,7 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   private final SubcomponentCreatorBindingExpression.Factory
       subcomponentCreatorBindingExpressionFactory;
 
-  @Inject
+  @javax.inject.Inject
   UnscopedDirectInstanceBindingExpressionFactory(
       ComponentImplementation componentImplementation,
       AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory,

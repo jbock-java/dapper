@@ -62,7 +62,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -82,7 +81,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
 
-  @Inject
+  @javax.inject.Inject
   AssistedFactoryProcessingStep(
       Messager messager,
       Filer filer,
@@ -344,11 +343,11 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
       return assistedInjectType.getTypeArguments().isEmpty()
           ? generatedFactoryClassName
           : ParameterizedTypeName.get(
-              generatedFactoryClassName,
-              assistedInjectType.getTypeArguments().stream()
-                  .map(TypeName::get)
-                  .collect(toImmutableList())
-                  .toArray(new TypeName[0]));
+          generatedFactoryClassName,
+          assistedInjectType.getTypeArguments().stream()
+              .map(TypeName::get)
+              .collect(toImmutableList())
+              .toArray(new TypeName[0]));
     }
   }
 }

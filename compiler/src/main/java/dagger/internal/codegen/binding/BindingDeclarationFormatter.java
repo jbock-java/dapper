@@ -28,7 +28,6 @@ import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.Formatter;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -42,7 +41,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
 
   private final MethodSignatureFormatter methodSignatureFormatter;
 
-  @Inject
+  @javax.inject.Inject
   BindingDeclarationFormatter(MethodSignatureFormatter methodSignatureFormatter) {
     this.methodSignatureFormatter = methodSignatureFormatter;
   }

@@ -68,9 +68,9 @@ import dagger.model.Key;
 import dagger.model.RequestKind;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import javax.inject.Inject;
 import jakarta.inject.Provider;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -90,7 +90,7 @@ public final class BindingFactory {
   private final InjectionAnnotations injectionAnnotations;
   private final KotlinMetadataUtil metadataUtil;
 
-  @Inject
+  @javax.inject.Inject
   BindingFactory(
       DaggerTypes types,
       DaggerElements elements,
