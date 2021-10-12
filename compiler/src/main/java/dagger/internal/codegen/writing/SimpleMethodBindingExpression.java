@@ -107,10 +107,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
         Optional<CodeBlock> requiredModuleInstance = moduleReference(requestingClass);
         if (requiredModuleInstance.isPresent()) {
           module = requiredModuleInstance.get();
-        } else if (metadataUtil.isObjectClass(asType(method.getEnclosingElement()))) {
-          // Call through the singleton instance.
-          // See: https://kotlinlang.org/docs/reference/java-to-kotlin-interop.html#static-methods
-          module = CodeBlock.of("$T.INSTANCE", provisionBinding.bindingTypeElement().get());
         } else {
           module = CodeBlock.of("$T", provisionBinding.bindingTypeElement().get());
         }

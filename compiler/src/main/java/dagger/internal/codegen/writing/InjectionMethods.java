@@ -441,16 +441,11 @@ final class InjectionMethods {
         methodBuilder(methodName).addModifiers(PUBLIC, STATIC).varargs(method.isVarArgs());
 
     TypeElement enclosingType = asType(method.getEnclosingElement());
-    boolean isMethodInKotlinObject = metadataUtil.isObjectClass(enclosingType);
     boolean isMethodInKotlinCompanionObject = metadataUtil.isCompanionObjectClass(enclosingType);
     UniqueNameSet parameterNameSet = new UniqueNameSet();
     CodeBlock instance;
     if (isMethodInKotlinCompanionObject || method.getModifiers().contains(STATIC)) {
       instance = CodeBlock.of("$T", rawTypeName(TypeName.get(enclosingType.asType())));
-    } else if (isMethodInKotlinObject) {
-      // Call through the singleton instance.
-      // See: https://kotlinlang.org/docs/reference/java-to-kotlin-interop.html#static-methods
-      instance = CodeBlock.of("$T.INSTANCE", rawTypeName(TypeName.get(enclosingType.asType())));
     } else {
       copyTypeParameters(builder, enclosingType);
       boolean useObject = instanceCastPolicy.useObjectType(enclosingType.asType());

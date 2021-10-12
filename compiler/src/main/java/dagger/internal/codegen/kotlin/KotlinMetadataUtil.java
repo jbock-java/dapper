@@ -25,11 +25,6 @@ public final class KotlinMetadataUtil {
   KotlinMetadataUtil() {
   }
 
-  /** Returns {@code true} if this type element is a Kotlin Object. */
-  public boolean isObjectClass(TypeElement typeElement) {
-    return false;
-  }
-
   /** Returns {@code true} if this type element is a Kotlin data class. */
   public boolean isDataClass(TypeElement typeElement) {
     return false;

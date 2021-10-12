@@ -471,9 +471,6 @@ public final class BindingFactory {
       ContributionBinding.Builder<?, ?> builder,
       DelegateDeclaration delegateDeclaration,
       Class<?> frameworkType) {
-    boolean isKotlinObject =
-        metadataUtil.isObjectClass(delegateDeclaration.contributingModule().get())
-            || metadataUtil.isCompanionObjectClass(delegateDeclaration.contributingModule().get());
     return builder
         .contributionType(delegateDeclaration.contributionType())
         .bindingElement(delegateDeclaration.bindingElement().get())

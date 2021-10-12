@@ -154,12 +154,6 @@ public abstract class ComponentRequirement {
    * {@code static}, requiring no module instance.
    */
   private boolean requiresModuleInstance(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
-    boolean isKotlinObject =
-        metadataUtil.isObjectClass(typeElement())
-            || metadataUtil.isCompanionObjectClass(typeElement());
-    if (isKotlinObject) {
-      return false;
-    }
 
     ImmutableSet<ExecutableElement> methods = elements.getLocalAndInheritedMethods(typeElement());
     return methods.stream()
@@ -251,11 +245,6 @@ public abstract class ComponentRequirement {
     }
 
     if (requiresEnclosingInstance(typeElement)) {
-      return false;
-    }
-
-    if (metadataUtil.isObjectClass(typeElement)
-        || metadataUtil.isCompanionObjectClass(typeElement)) {
       return false;
     }
 

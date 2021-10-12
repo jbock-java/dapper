@@ -591,11 +591,6 @@ public final class ModuleValidator {
     // done in this class, which assume that supertype binding methods will be validated in a
     // separate call to the validator since the supertype itself must be a @Module, we need to look
     // at all the binding methods in the module's type hierarchy here.
-    boolean isKotlinObject =
-        metadataUtil.isObjectClass(module) || metadataUtil.isCompanionObjectClass(module);
-    if (isKotlinObject) {
-      return false;
-    }
     return methodsIn(elements.getAllMembers(module)).stream()
         .filter(anyBindingMethodValidator::isBindingMethod)
         .map(ExecutableElement::getModifiers)

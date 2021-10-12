@@ -336,7 +336,6 @@ public final class InjectValidator implements ClearableCache {
 
     if (hasInjectedMembers) {
       checkInjectIntoPrivateClass(typeElement, builder);
-      checkInjectIntoKotlinObject(typeElement, builder);
     }
     TypeMirror superclass = typeElement.getSuperclass();
     if (!superclass.getKind().equals(TypeKind.NONE)) {
@@ -396,13 +395,6 @@ public final class InjectValidator implements ClearableCache {
           "Dagger does not support injection into private classes",
           privateMemberDiagnosticKind(),
           element);
-    }
-  }
-
-  private void checkInjectIntoKotlinObject(
-      TypeElement element, ValidationReport.Builder<TypeElement> builder) {
-    if (metadataUtil.isObjectClass(element) || metadataUtil.isCompanionObjectClass(element)) {
-      builder.addError("Dagger does not support injection into Kotlin objects", element);
     }
   }
 
