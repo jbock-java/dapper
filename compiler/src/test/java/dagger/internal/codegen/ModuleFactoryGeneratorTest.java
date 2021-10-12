@@ -223,7 +223,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -270,7 +270,7 @@ public class ModuleFactoryGeneratorTest {
             "TestModule_ProvideStringFactory",
             "package test;",
             "",
-            GeneratedLines.generatedImports("import dagger.internal.codegen.my.Factory;"),
+            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
             "",
             GeneratedLines.generatedAnnotations(),
             "public final class TestModule_ProvideStringFactory implements Factory<String> {",
@@ -315,7 +315,7 @@ public class ModuleFactoryGeneratorTest {
             "TestModule_ProvideStringFactory",
             "package test;",
             "",
-            GeneratedLines.generatedImports("import dagger.internal.codegen.my.Factory;"),
+            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
             "",
             GeneratedLines.generatedAnnotations(),
             "public final class TestModule_ProvideStringFactory implements Factory<String> {",
@@ -386,7 +386,7 @@ public class ModuleFactoryGeneratorTest {
             "",
             GeneratedLines.generatedImports(
                 "import dagger.MembersInjector;",
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import java.util.List;",
                 "import jakarta.inject.Provider;"),
@@ -458,7 +458,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -510,7 +510,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import java.util.List;"),
             "",
@@ -563,7 +563,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import java.util.Set;"),
             "",
@@ -874,7 +874,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import java.util.List;",
                 "import jakarta.inject.Provider;"),
@@ -913,7 +913,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import jakarta.inject.Provider;"),
             "",
@@ -952,7 +952,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import jakarta.inject.Provider;"),
             "",
@@ -991,7 +991,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1023,7 +1023,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1096,7 +1096,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import java.util.Map;"),
             "",
@@ -1129,7 +1129,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1161,7 +1161,7 @@ public class ModuleFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import dagger.internal.Preconditions;",
                 "import jakarta.inject.Provider;"),
             "",

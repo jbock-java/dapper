@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.my;
 
-import static dagger.internal.codegen.my.DaggerCollections.newLinkedHashMapWithExpectedSize;
+import static dagger.internal.DaggerCollections.newLinkedHashMapWithExpectedSize;
 import static java.util.Collections.unmodifiableMap;
 
 import jakarta.inject.Provider;

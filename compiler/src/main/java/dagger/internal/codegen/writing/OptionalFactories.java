@@ -60,7 +60,7 @@ import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
-import dagger.internal.codegen.my.InstanceFactory;
+import dagger.internal.InstanceFactory;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.RequestKind;
 import dagger.producers.Producer;

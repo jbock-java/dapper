@@ -133,7 +133,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -182,7 +182,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -234,7 +234,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "test.GenericClass_Factory",
             "package test;",
             "",
-            GeneratedLines.generatedImports("import dagger.internal.codegen.my.Factory;"),
+            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
             "",
             GeneratedLines.generatedAnnotations(),
             "public final class GenericClass_Factory<T> implements Factory<GenericClass<T>> {",
@@ -278,7 +278,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -330,7 +330,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import java.util.List;",
                 "import jakarta.inject.Provider;"),
             "",
@@ -398,8 +398,8 @@ public final class InjectConstructorFactoryGeneratorTest {
             "",
             GeneratedLines.generatedImports(
                 "import dagger.Lazy;",
-                "import dagger.internal.codegen.my.DoubleCheck;",
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.DoubleCheck;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1066,7 +1066,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1113,7 +1113,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1173,7 +1173,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import java.util.List;",
                 "import jakarta.inject.Provider;"),
             "",
@@ -1226,7 +1226,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1282,7 +1282,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;",
                 "import other.pkg.Outer;"),
             "",
@@ -1341,7 +1341,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1395,7 +1395,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "test.SimpleType_Factory",
             "package test;",
             "",
-            GeneratedLines.generatedImports("import dagger.internal.codegen.my.Factory;"),
+            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
             "",
             GeneratedLines.generatedAnnotations(),
             "public final class SimpleType_Factory implements Factory<SimpleType> {",
@@ -1442,7 +1442,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "test.OuterType_A_Factory",
             "package test;",
             "",
-            GeneratedLines.generatedImports("import dagger.internal.codegen.my.Factory;"),
+            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
             "",
             GeneratedLines.generatedAnnotations(),
             "public final class OuterType_A_Factory implements Factory<OuterType.A> {",

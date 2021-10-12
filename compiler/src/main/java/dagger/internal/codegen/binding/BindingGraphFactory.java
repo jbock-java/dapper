@@ -44,7 +44,6 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimaps;
 import dagger.MembersInjector;
-import dagger.internal.codegen.my.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Keys;
@@ -58,6 +57,7 @@ import dagger.model.Scope;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
 import dagger.producers.internal.ProductionExecutorModule;
+import jakarta.inject.Provider;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import jakarta.inject.Provider;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -259,10 +258,10 @@ public final class BindingGraphFactory implements ClearableCache {
       ComponentDescriptor componentDescriptor, Optional<Resolver> parentResolver) {
     return shouldIncludeImplicitProductionModules(componentDescriptor, parentResolver)
         ? new ImmutableSet.Builder<ModuleDescriptor>()
-            .addAll(componentDescriptor.modules())
-            .add(descriptorForMonitoringModule(componentDescriptor.typeElement()))
-            .add(descriptorForProductionExecutorModule())
-            .build()
+        .addAll(componentDescriptor.modules())
+        .add(descriptorForMonitoringModule(componentDescriptor.typeElement()))
+        .add(descriptorForProductionExecutorModule())
+        .build()
         : componentDescriptor.modules();
   }
 
@@ -270,8 +269,8 @@ public final class BindingGraphFactory implements ClearableCache {
       ComponentDescriptor component, Optional<Resolver> parentResolver) {
     return component.isProduction()
         && ((!component.isSubcomponent() && component.isRealComponent())
-            || (parentResolver.isPresent()
-                && !parentResolver.get().componentDescriptor.isProduction()));
+        || (parentResolver.isPresent()
+        && !parentResolver.get().componentDescriptor.isProduction()));
   }
 
   /**
@@ -295,7 +294,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */
   private static <T extends BindingDeclaration>
-      ImmutableSetMultimap<Key, T> indexBindingDeclarationsByKey(Iterable<T> declarations) {
+  ImmutableSetMultimap<Key, T> indexBindingDeclarationsByKey(Iterable<T> declarations) {
     return ImmutableSetMultimap.copyOf(Multimaps.index(declarations, BindingDeclaration::key));
   }
 
@@ -471,7 +470,7 @@ public final class BindingGraphFactory implements ClearableCache {
           injectBindingRegistry.getOrFindMembersInjectionBinding(requestKey);
       return binding.isPresent()
           ? ResolvedBindings.forMembersInjectionBinding(
-              requestKey, componentDescriptor, binding.get())
+          requestKey, componentDescriptor, binding.get())
           : ResolvedBindings.noBindings(requestKey);
     }
 
@@ -680,15 +679,15 @@ public final class BindingGraphFactory implements ClearableCache {
           .anyMatch(
               declaration ->
                   declaration.contributingModule().equals(binding.contributingModule())
-                  && declaration.bindingElement().equals(binding.bindingElement()));
+                      && declaration.bindingElement().equals(binding.bindingElement()));
     }
 
     /** Returns the resolver lineage from parent to child. */
     private ImmutableList<Resolver> getResolverLineage() {
       ImmutableList.Builder<Resolver> resolverList = ImmutableList.builder();
       for (Optional<Resolver> currentResolver = Optional.of(this);
-          currentResolver.isPresent();
-          currentResolver = currentResolver.get().parentResolver) {
+           currentResolver.isPresent();
+           currentResolver = currentResolver.get().parentResolver) {
         resolverList.add(currentResolver.get());
       }
       return resolverList.build().reverse();
@@ -874,9 +873,9 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       /**
-       * Returns {@code true} if {@code binding} is unscoped (or has {@link Reusable @Reusable}
+       * Returns {@code true} if {@code binding} is unscoped (or has {@code @Reusable}
        * scope) and depends on multibindings with contributions declared within this component's
-       * modules, or if any of its unscoped or {@link Reusable @Reusable} scoped dependencies depend
+       * modules, or if any of its unscoped or {@code @Reusable} scoped dependencies depend
        * on such local multibindings.
        *
        * <p>We don't care about non-reusable scoped dependencies because they will never depend on
@@ -960,8 +959,8 @@ public final class BindingGraphFactory implements ClearableCache {
    * indexed by the key of the set or map to which they contribute.
    */
   static <T extends BindingDeclaration>
-      ImmutableSetMultimap<Key, T> multibindingContributionsByMultibindingKey(
-          Iterable<T> declarations) {
+  ImmutableSetMultimap<Key, T> multibindingContributionsByMultibindingKey(
+      Iterable<T> declarations) {
     ImmutableSetMultimap.Builder<Key, T> builder = ImmutableSetMultimap.builder();
     for (T declaration : declarations) {
       if (declaration.key().multibindingContributionIdentifier().isPresent()) {

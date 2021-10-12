@@ -17,14 +17,12 @@
 package dagger.model;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Equivalence;
-import dagger.internal.codegen.my.Reusable;
 import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -51,7 +49,7 @@ public abstract class Scope {
    * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
   public static Scope scope(AnnotationMirror scopeAnnotation) {
-//    checkArgument(isScope(scopeAnnotation));
+//    checkArgument(isScope(scopeAnnotation)); TODO see dapper issue
     return new AutoValue_Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
   }
 
@@ -74,9 +72,9 @@ public abstract class Scope {
     return isScope(Singleton.class);
   }
 
-  /** Returns {@code true} if this scope is the {@link Reusable @Reusable} scope. */
+  /** Returns {@code true} if this scope is the {@code @Reusable} scope. */
   public final boolean isReusable() {
-    return isScope(Reusable.class);
+    return isScope(dagger.Reusable.class);
   }
 
   /** Returns {@code true} if this scope is the {@link ProductionScope @ProductionScope} scope. */

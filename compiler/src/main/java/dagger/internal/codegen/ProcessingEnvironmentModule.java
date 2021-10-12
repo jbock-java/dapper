@@ -26,7 +26,6 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.my.Reusable;
 import dagger.multibindings.IntoSet;
 import dagger.spi.BindingGraphPlugin;
 import java.util.Map;
@@ -40,7 +39,7 @@ import javax.lang.model.util.Types;
 @Module
 interface ProcessingEnvironmentModule {
   @Binds
-  @Reusable
+  @dagger.internal.codegen.my.Reusable
     // to avoid parsing options more than once
   CompilerOptions bindCompilerOptions(
       ProcessingEnvironmentCompilerOptions processingEnvironmentCompilerOptions);

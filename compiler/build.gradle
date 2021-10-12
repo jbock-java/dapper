@@ -23,7 +23,7 @@ compileJava {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1068' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1069' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -59,7 +59,7 @@ dependencies {
     implementation('org.checkerframework:checker-qual:3.18.1')
     implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:0.93')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:0.94')
     implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')

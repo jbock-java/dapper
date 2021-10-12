@@ -30,8 +30,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
-import dagger.internal.codegen.my.DoubleCheck;
-import dagger.internal.codegen.my.MemoizedSentinel;
+import dagger.internal.DoubleCheck;
+import dagger.internal.MemoizedSentinel;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -87,11 +87,11 @@ abstract class MethodBindingExpression extends BindingExpression {
     addMethod();
 
     CodeBlock methodCall =
-         binding.kind() == BindingKind.ASSISTED_INJECTION
-              // Private methods for assisted injection take assisted parameters as input.
-              ? CodeBlock.of(
-                  "$N($L)", methodName(), parameterNames(assistedParameterSpecs(binding, types)))
-              : CodeBlock.of("$N()", methodName());
+        binding.kind() == BindingKind.ASSISTED_INJECTION
+            // Private methods for assisted injection take assisted parameters as input.
+            ? CodeBlock.of(
+            "$N($L)", methodName(), parameterNames(assistedParameterSpecs(binding, types)))
+            : CodeBlock.of("$N()", methodName());
 
     return Expression.create(
         returnType(),
@@ -126,7 +126,7 @@ abstract class MethodBindingExpression extends BindingExpression {
       ComponentMethodDescriptor componentMethod) {
     return implementation(
         wrappedBindingExpression.getDependencyExpressionForComponentMethod(
-                componentMethod, shardImplementation.getComponentImplementation())
+            componentMethod, shardImplementation.getComponentImplementation())
             ::codeBlock);
   }
 

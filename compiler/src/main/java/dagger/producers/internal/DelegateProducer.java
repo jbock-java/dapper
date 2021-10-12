@@ -19,7 +19,7 @@ package dagger.producers.internal;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import dagger.internal.codegen.my.DoubleCheck;
+import dagger.internal.DoubleCheck;
 import dagger.producers.Producer;
 import jakarta.inject.Provider;
 

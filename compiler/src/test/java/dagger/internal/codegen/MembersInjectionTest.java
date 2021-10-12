@@ -362,7 +362,7 @@ public class MembersInjectionTest {
             GeneratedLines.generatedImports(
                 "import dagger.Lazy;",
                 "import dagger.MembersInjector;",
-                "import dagger.internal.codegen.my.DoubleCheck;",
+                "import dagger.internal.DoubleCheck;",
                 "import dagger.internal.InjectedFieldSignature;",
                 "import jakarta.inject.Provider;"),
             "",
@@ -513,7 +513,7 @@ public class MembersInjectionTest {
             GeneratedLines.generatedImports(
                 "import dagger.Lazy;",
                 "import dagger.MembersInjector;",
-                "import dagger.internal.codegen.my.DoubleCheck;",
+                "import dagger.internal.DoubleCheck;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),
@@ -1295,7 +1295,7 @@ public class MembersInjectionTest {
             "package test;",
             "",
             GeneratedLines.generatedImports(
-                "import dagger.internal.codegen.my.Factory;",
+                "import dagger.internal.Factory;",
                 "import jakarta.inject.Provider;"),
             "",
             GeneratedLines.generatedAnnotations(),

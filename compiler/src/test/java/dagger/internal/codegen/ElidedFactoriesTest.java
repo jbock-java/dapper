@@ -179,8 +179,8 @@ public class ElidedFactoriesTest {
                 "package test;",
                 "",
                 GeneratedLines.generatedImports(
-                    "import dagger.internal.codegen.my.DoubleCheck;",
-                    "import dagger.internal.codegen.my.MemoizedSentinel;",
+                    "import dagger.internal.DoubleCheck;",
+                    "import dagger.internal.MemoizedSentinel;",
                     "import jakarta.inject.Provider;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
@@ -269,7 +269,7 @@ public class ElidedFactoriesTest {
                 "package test;",
                 "",
                 GeneratedLines.generatedImports(
-                    "import dagger.internal.codegen.my.DoubleCheck;",
+                    "import dagger.internal.DoubleCheck;",
                     "import jakarta.inject.Provider;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
@@ -382,8 +382,8 @@ public class ElidedFactoriesTest {
                 "package test;",
                 "",
                 GeneratedLines.generatedImports(
-                    "import dagger.internal.codegen.my.DoubleCheck;",
-                    "import dagger.internal.codegen.my.MemoizedSentinel;"),
+                    "import dagger.internal.DoubleCheck;",
+                    "import dagger.internal.MemoizedSentinel;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
                 "final class DaggerSimpleComponent implements SimpleComponent {",
@@ -452,7 +452,7 @@ public class ElidedFactoriesTest {
                 "package test;",
                 "",
                 GeneratedLines.generatedImports(
-                    "import dagger.internal.codegen.my.DoubleCheck;",
+                    "import dagger.internal.DoubleCheck;",
                     "import jakarta.inject.Provider;"),
                 "",
                 GeneratedLines.generatedAnnotations(),

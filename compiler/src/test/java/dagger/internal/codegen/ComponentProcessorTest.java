@@ -180,7 +180,7 @@ public class ComponentProcessorTest {
                 "",
                 GeneratedLines.generatedImports(
                     "import dagger.Lazy;",
-                    "import dagger.internal.codegen.my.DoubleCheck;",
+                    "import dagger.internal.DoubleCheck;",
                     "import jakarta.inject.Provider;"),
                 "",
                 GeneratedLines.generatedAnnotations(),
