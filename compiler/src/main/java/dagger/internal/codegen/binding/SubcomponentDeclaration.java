@@ -61,7 +61,7 @@ public abstract class SubcomponentDeclaration extends BindingDeclaration {
   public static class Factory {
     private final KeyFactory keyFactory;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

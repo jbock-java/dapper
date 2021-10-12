@@ -90,7 +90,7 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
   private final CompilerOptions compilerOptions;
   private final KeyFactory keyFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ProducerFactoryGenerator(
       Filer filer,
       DaggerElements elements,

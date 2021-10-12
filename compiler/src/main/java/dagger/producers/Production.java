@@ -31,6 +31,6 @@ import java.lang.annotation.Retention;
  */
 @Documented
 @Retention(RUNTIME)
-@javax.inject.Qualifier
+@jakarta.inject.Qualifier
 @Beta
 public @interface Production {}

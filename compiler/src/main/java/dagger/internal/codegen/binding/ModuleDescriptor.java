@@ -103,7 +103,7 @@ public abstract class ModuleDescriptor {
   }
 
   /** A {@link ModuleDescriptor} factory. */
-  @javax.inject.Singleton
+  @jakarta.inject.Singleton
   public static final class Factory implements ClearableCache {
     private final DaggerElements elements;
     private final KotlinMetadataUtil metadataUtil;
@@ -114,7 +114,7 @@ public abstract class ModuleDescriptor {
     private final OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory;
     private final Map<TypeElement, ModuleDescriptor> cache = new HashMap<>();
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(
         DaggerElements elements,
         KotlinMetadataUtil metadataUtil,

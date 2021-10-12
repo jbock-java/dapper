@@ -41,7 +41,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
 
   private final MethodSignatureFormatter methodSignatureFormatter;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingDeclarationFormatter(MethodSignatureFormatter methodSignatureFormatter) {
     this.methodSignatureFormatter = methodSignatureFormatter;
   }

@@ -50,7 +50,7 @@ public final class ModuleProxies {
   private final DaggerElements elements;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   public ModuleProxies(DaggerElements elements, KotlinMetadataUtil metadataUtil) {
     this.elements = elements;
     this.metadataUtil = metadataUtil;
@@ -65,7 +65,7 @@ public final class ModuleProxies {
     private final ModuleProxies moduleProxies;
     private final KotlinMetadataUtil metadataUtil;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     ModuleConstructorProxyGenerator(
         Filer filer,
         DaggerElements elements,

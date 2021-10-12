@@ -35,7 +35,7 @@ import java.util.Optional;
 /** Utilities relating to annotations defined in the {@code javax.inject} package. */
 public final class InjectionAnnotations {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectionAnnotations() {
   }
 

@@ -59,7 +59,7 @@ public abstract class DelegateDeclaration extends BindingDeclaration
     private final KeyFactory keyFactory;
     private final DependencyRequestFactory dependencyRequestFactory;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(
         DaggerTypes types,
         KeyFactory keyFactory,

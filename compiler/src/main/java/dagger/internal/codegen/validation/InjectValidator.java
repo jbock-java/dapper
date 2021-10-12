@@ -60,7 +60,7 @@ import javax.tools.Diagnostic.Kind;
  * A {@linkplain ValidationReport validator} for {@code Inject}-annotated elements and the types
  * that contain them.
  */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class InjectValidator implements ClearableCache {
   private final DaggerTypes types;
   private final DaggerElements elements;
@@ -71,7 +71,7 @@ public final class InjectValidator implements ClearableCache {
   private final KotlinMetadataUtil metadataUtil;
   private final Map<ExecutableElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectValidator(
       DaggerTypes types,
       DaggerElements elements,

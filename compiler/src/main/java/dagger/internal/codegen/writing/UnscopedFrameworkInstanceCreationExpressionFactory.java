@@ -51,7 +51,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   private final ProducerCreationExpression.Factory producerCreationExpressionFactory;
   private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,

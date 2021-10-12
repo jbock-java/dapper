@@ -27,5 +27,5 @@ import java.lang.annotation.Retention;
  */
 @Documented
 @Retention(RUNTIME)
-@javax.inject.Scope
+@jakarta.inject.Scope
 public @interface ProductionScope {}

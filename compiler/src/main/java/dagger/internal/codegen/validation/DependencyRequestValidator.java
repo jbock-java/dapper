@@ -45,7 +45,7 @@ final class DependencyRequestValidator {
   private final MembersInjectionValidator membersInjectionValidator;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DependencyRequestValidator(
       MembersInjectionValidator membersInjectionValidator,
       InjectionAnnotations injectionAnnotations) {

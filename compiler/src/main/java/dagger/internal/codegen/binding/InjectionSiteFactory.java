@@ -52,7 +52,7 @@ final class InjectionSiteFactory {
   private final DaggerElements elements;
   private final DependencyRequestFactory dependencyRequestFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectionSiteFactory(
       DaggerTypes types,
       DaggerElements elements,

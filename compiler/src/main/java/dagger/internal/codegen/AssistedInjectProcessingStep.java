@@ -42,7 +42,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
   private final DaggerTypes types;
   private final Messager messager;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   AssistedInjectProcessingStep(DaggerTypes types, Messager messager) {
     super(MoreElements::asExecutable);
     this.types = types;

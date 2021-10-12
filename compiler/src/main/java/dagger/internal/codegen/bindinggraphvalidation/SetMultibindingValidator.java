@@ -34,7 +34,7 @@ import dagger.spi.DiagnosticReporter;
 /** Validates that there are not multiple set binding contributions to the same binding. */
 final class SetMultibindingValidator implements BindingGraphPlugin {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   SetMultibindingValidator() {
   }
 

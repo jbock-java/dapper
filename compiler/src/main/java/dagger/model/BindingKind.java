@@ -18,14 +18,14 @@ package dagger.model;
 
 /** Represents the different kinds of {@link Binding}s that can exist in a binding graph. */
 public enum BindingKind {
-  /** A binding for an {@link javax.inject.Inject}-annotated constructor. */
+  /** A binding for an {@link jakarta.inject.Inject}-annotated constructor. */
   INJECTION,
 
   /** A binding for a {@link dagger.Provides}-annotated method. */
   PROVISION,
 
   /**
-   * A binding for an {@link javax.inject.Inject}-annotated constructor that contains at least one
+   * A binding for an {@link jakarta.inject.Inject}-annotated constructor that contains at least one
    * {@link dagger.assisted.Assisted}-annotated parameter.
    */
   ASSISTED_INJECTION,

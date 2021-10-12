@@ -37,7 +37,7 @@ public final class BindingGraphPlugins {
   private final DaggerElements elements;
   private final Map<String, String> processingOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingGraphPlugins(
       @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,

@@ -25,10 +25,10 @@ import dagger.internal.codegen.base.ClearableCache;
  * <p>The metadata is cache since it can be expensive to parse the information stored in a proto
  * binary string format in the metadata annotation values.
  */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class KotlinMetadataFactory implements ClearableCache {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   KotlinMetadataFactory() {
   }
 

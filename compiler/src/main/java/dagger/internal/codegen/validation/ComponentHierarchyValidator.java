@@ -54,7 +54,7 @@ final class ComponentHierarchyValidator {
   private static final Joiner COMMA_SEPARATED_JOINER = Joiner.on(", ");
   private final CompilerOptions compilerOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentHierarchyValidator(CompilerOptions compilerOptions) {
     this.compilerOptions = compilerOptions;
   }

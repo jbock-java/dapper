@@ -55,7 +55,7 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
   public static final class Factory {
     private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-    @javax.inject.Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
+    @jakarta.inject.Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
       this.messageGeneratorFactory = messageGeneratorFactory;
     }
 

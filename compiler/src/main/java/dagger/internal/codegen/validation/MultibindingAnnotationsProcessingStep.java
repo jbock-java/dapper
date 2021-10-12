@@ -36,7 +36,7 @@ public final class MultibindingAnnotationsProcessingStep
   private final AnyBindingMethodValidator anyBindingMethodValidator;
   private final Messager messager;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MultibindingAnnotationsProcessingStep(
       AnyBindingMethodValidator anyBindingMethodValidator, Messager messager) {
     super(MoreElements::asExecutable);

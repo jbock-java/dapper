@@ -37,7 +37,7 @@ final class NullableBindingValidator implements BindingGraphPlugin {
 
   private final CompilerOptions compilerOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   NullableBindingValidator(CompilerOptions compilerOptions) {
     this.compilerOptions = compilerOptions;
   }

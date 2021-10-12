@@ -58,7 +58,7 @@ public final class ComponentDescriptorFactory {
   private final ModuleDescriptor.Factory moduleDescriptorFactory;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentDescriptorFactory(
       DaggerElements elements,
       DaggerTypes types,

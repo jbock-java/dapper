@@ -55,7 +55,7 @@ public final class ComponentRequirementExpressions {
   private final ShardImplementation componentShard;
   private final ModuleProxies moduleProxies;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentRequirementExpressions(
       @ParentComponent Optional<ComponentRequirementExpressions> parent,
       BindingGraph graph,

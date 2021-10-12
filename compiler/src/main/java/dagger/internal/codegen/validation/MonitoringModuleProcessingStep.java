@@ -31,7 +31,7 @@ public final class MonitoringModuleProcessingStep extends TypeCheckingProcessing
   private final Messager messager;
   private final MonitoringModuleGenerator monitoringModuleGenerator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MonitoringModuleProcessingStep(
       Messager messager, MonitoringModuleGenerator monitoringModuleGenerator) {
     super(MoreElements::asType);

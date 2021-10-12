@@ -47,7 +47,7 @@ import javax.lang.model.element.TypeElement;
 /** Generates a monitoring module for use with production components. */
 final class MonitoringModuleGenerator extends SourceFileGenerator<TypeElement> {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MonitoringModuleGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

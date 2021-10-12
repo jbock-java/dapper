@@ -28,14 +28,14 @@ import dagger.spi.BindingGraphPlugin;
 import javax.lang.model.element.TypeElement;
 
 /** Validates a {@link BindingGraph}. */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class BindingGraphValidator {
   private final ImmutableSet<BindingGraphPlugin> validationPlugins;
   private final ImmutableSet<BindingGraphPlugin> externalPlugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final CompilerOptions compilerOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingGraphValidator(
       @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,

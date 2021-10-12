@@ -25,5 +25,5 @@ import java.lang.annotation.Retention;
  * descendant component implementations in the same generated file.
  */
 @Retention(RUNTIME)
-@javax.inject.Scope
+@jakarta.inject.Scope
 public @interface PerGeneratedFile {}

@@ -50,14 +50,14 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 /** Validates types annotated with component creator annotations. */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class ComponentCreatorValidator implements ClearableCache {
 
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final Map<TypeElement, ValidationReport<TypeElement>> reports = new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentCreatorValidator(DaggerElements elements, DaggerTypes types) {
     this.elements = elements;
     this.types = types;

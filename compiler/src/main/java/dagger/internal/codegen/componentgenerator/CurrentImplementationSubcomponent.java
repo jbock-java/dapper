@@ -47,9 +47,9 @@ public interface CurrentImplementationSubcomponent {
     @Provides
     static ChildComponentImplementationFactory provideChildComponentImplementationFactory(
         CurrentImplementationSubcomponent.Builder currentImplementationSubcomponentBuilder,
-        javax.inject.Provider<ComponentImplementation> componentImplementatation,
-        javax.inject.Provider<ComponentBindingExpressions> componentBindingExpressions,
-        javax.inject.Provider<ComponentRequirementExpressions> componentRequirementExpressions) {
+        jakarta.inject.Provider<ComponentImplementation> componentImplementatation,
+        jakarta.inject.Provider<ComponentBindingExpressions> componentBindingExpressions,
+        jakarta.inject.Provider<ComponentRequirementExpressions> componentRequirementExpressions) {
       return childGraph ->
           currentImplementationSubcomponentBuilder
               .bindingGraph(childGraph)

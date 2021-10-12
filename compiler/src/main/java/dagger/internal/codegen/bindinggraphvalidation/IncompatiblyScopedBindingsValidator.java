@@ -47,7 +47,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final CompilerOptions compilerOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   IncompatiblyScopedBindingsValidator(
       MethodSignatureFormatter methodSignatureFormatter, CompilerOptions compilerOptions) {
     this.methodSignatureFormatter = methodSignatureFormatter;

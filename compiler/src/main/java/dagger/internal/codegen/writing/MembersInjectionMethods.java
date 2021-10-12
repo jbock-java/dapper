@@ -58,7 +58,7 @@ final class MembersInjectionMethods {
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MembersInjectionMethods(
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions bindingExpressions,

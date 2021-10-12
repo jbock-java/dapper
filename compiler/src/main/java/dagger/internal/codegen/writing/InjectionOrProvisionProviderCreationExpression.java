@@ -31,7 +31,7 @@ import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstan
 import jakarta.inject.Provider;
 
 /**
- * A {@code Provider} creation expression for an {@link javax.inject.Inject @Inject}-constructed
+ * A {@code Provider} creation expression for an {@link jakarta.inject.Inject @Inject}-constructed
  * class or a {@link dagger.Provides @Provides}-annotated module method.
  */
 // TODO(dpb): Resolve with ProducerCreationExpression.

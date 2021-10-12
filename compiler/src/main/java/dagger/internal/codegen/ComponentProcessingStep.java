@@ -59,7 +59,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
   private final SourceFileGenerator<BindingGraph> componentGenerator;
   private final BindingGraphValidator bindingGraphValidator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentProcessingStep(
       Messager messager,
       ComponentValidator componentValidator,

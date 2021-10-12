@@ -33,7 +33,7 @@ import javax.lang.model.type.TypeKind;
 public final class MapKeyValidator {
   private final DaggerElements elements;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MapKeyValidator(DaggerElements elements) {
     this.elements = elements;
   }

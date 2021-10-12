@@ -51,7 +51,7 @@ abstract class OptionalBindingDeclaration extends BindingDeclaration {
   static class Factory {
     private final KeyFactory keyFactory;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(KeyFactory keyFactory) {
       this.keyFactory = keyFactory;
     }

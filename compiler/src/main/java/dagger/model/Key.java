@@ -41,13 +41,13 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
 /**
- * A {@linkplain TypeMirror type} and an optional {@linkplain javax.inject.Qualifier qualifier} that
+ * A {@linkplain TypeMirror type} and an optional {@linkplain jakarta.inject.Qualifier qualifier} that
  * is the lookup key for a binding.
  */
 @AutoValue
 public abstract class Key {
   /**
-   * A {@link javax.inject.Qualifier} annotation that provides a unique namespace prefix
+   * A {@link jakarta.inject.Qualifier} annotation that provides a unique namespace prefix
    * for the type of this key.
    */
   public final Optional<AnnotationMirror> qualifier() {
@@ -62,7 +62,7 @@ public abstract class Key {
   }
 
   /**
-   * A {@link javax.inject.Qualifier} annotation that provides a unique namespace prefix
+   * A {@link jakarta.inject.Qualifier} annotation that provides a unique namespace prefix
    * for the type of this key.
    *
    * Despite documentation in {@link AnnotationMirror}, equals and hashCode aren't implemented

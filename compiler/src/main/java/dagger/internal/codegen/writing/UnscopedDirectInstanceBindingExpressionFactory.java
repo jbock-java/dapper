@@ -47,7 +47,7 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   private final SubcomponentCreatorBindingExpression.Factory
       subcomponentCreatorBindingExpressionFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   UnscopedDirectInstanceBindingExpressionFactory(
       ComponentImplementation componentImplementation,
       AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory,

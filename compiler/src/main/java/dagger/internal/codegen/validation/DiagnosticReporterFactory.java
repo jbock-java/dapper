@@ -43,7 +43,7 @@ final class DiagnosticReporterFactory {
   private final Messager messager;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DiagnosticReporterFactory(
       Messager messager, DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
     this.messager = messager;

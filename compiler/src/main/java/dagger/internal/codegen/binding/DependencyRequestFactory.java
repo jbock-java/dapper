@@ -60,7 +60,7 @@ public final class DependencyRequestFactory {
   private final KeyFactory keyFactory;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DependencyRequestFactory(KeyFactory keyFactory, InjectionAnnotations injectionAnnotations) {
     this.keyFactory = keyFactory;
     this.injectionAnnotations = injectionAnnotations;

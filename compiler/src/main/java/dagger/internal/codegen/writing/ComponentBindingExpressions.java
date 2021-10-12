@@ -92,7 +92,7 @@ public final class ComponentBindingExpressions {
   private final SwitchingProviders switchingProviders;
   private final Map<BindingRequest, BindingExpression> expressions = new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentBindingExpressions(
       @ParentComponent Optional<ComponentBindingExpressions> parent,
       BindingGraph graph,

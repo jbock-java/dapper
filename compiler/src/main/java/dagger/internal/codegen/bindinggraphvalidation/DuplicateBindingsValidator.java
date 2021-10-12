@@ -68,7 +68,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
   private final CompilerOptions compilerOptions;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DuplicateBindingsValidator(
       BindingDeclarationFormatter bindingDeclarationFormatter, CompilerOptions compilerOptions) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;

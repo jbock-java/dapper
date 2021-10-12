@@ -35,7 +35,7 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
 
   private final DependencyRequestValidator dependencyRequestValidator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ProvidesMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

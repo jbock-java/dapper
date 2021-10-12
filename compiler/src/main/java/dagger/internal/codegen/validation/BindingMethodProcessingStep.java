@@ -31,7 +31,7 @@ public final class BindingMethodProcessingStep
   private final Messager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingMethodProcessingStep(
       Messager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
     super(MoreElements::asExecutable);

@@ -22,7 +22,7 @@ import javax.lang.model.element.TypeElement;
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   KotlinMetadataUtil() {
   }
 

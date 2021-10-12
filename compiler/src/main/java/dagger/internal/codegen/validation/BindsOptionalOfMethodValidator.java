@@ -39,7 +39,7 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindsOptionalOfMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

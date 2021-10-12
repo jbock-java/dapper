@@ -90,7 +90,7 @@ public final class BindingFactory {
   private final InjectionAnnotations injectionAnnotations;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingFactory(
       DaggerTypes types,
       DaggerElements elements,

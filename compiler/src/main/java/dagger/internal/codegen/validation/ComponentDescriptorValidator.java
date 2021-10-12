@@ -94,7 +94,7 @@ public final class ComponentDescriptorValidator {
   private final ComponentHierarchyValidator componentHierarchyValidator;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentDescriptorValidator(
       DaggerElements elements,
       DaggerTypes types,

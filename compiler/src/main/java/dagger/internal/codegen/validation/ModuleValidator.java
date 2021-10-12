@@ -92,7 +92,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  * A {@linkplain ValidationReport validator} for {@link dagger.Module}s or {@link
  * dagger.producers.ProducerModule}s.
  */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class ModuleValidator {
   private static final ImmutableSet<ClassName> SUBCOMPONENT_TYPES =
       ImmutableSet.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
@@ -128,7 +128,7 @@ public final class ModuleValidator {
   private final Map<TypeElement, ValidationReport<TypeElement>> cache = new HashMap<>();
   private final Set<TypeElement> knownModules = new HashSet<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ModuleValidator(
       DaggerTypes types,
       DaggerElements elements,

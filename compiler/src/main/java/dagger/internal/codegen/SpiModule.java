@@ -37,7 +37,7 @@ abstract class SpiModule {
   private SpiModule() {}
 
   @Provides
-  @javax.inject.Singleton
+  @jakarta.inject.Singleton
   static ImmutableSet<BindingGraphPlugin> externalPlugins(
       @TestingPlugins Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins,
       @ProcessorClassLoader ClassLoader processorClassLoader) {
@@ -47,12 +47,12 @@ abstract class SpiModule {
                 ServiceLoader.load(BindingGraphPlugin.class, processorClassLoader)));
   }
 
-  @javax.inject.Qualifier
+  @jakarta.inject.Qualifier
   @Retention(RUNTIME)
   @Target({FIELD, PARAMETER, METHOD})
   @interface TestingPlugins {}
 
-  @javax.inject.Qualifier
+  @jakarta.inject.Qualifier
   @Retention(RUNTIME)
   @Target({PARAMETER, METHOD})
   @interface ProcessorClassLoader {}

@@ -39,7 +39,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   public MethodSignatureFormatter(DaggerTypes types, InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.injectionAnnotations = injectionAnnotations;

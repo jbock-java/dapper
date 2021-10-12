@@ -74,7 +74,7 @@ public final class KeyFactory {
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   KeyFactory(
       DaggerTypes types, DaggerElements elements, InjectionAnnotations injectionAnnotations) {
     this.types = checkNotNull(types);

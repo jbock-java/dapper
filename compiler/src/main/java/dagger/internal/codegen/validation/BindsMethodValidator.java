@@ -41,7 +41,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final BindsTypeChecker bindsTypeChecker;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindsMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

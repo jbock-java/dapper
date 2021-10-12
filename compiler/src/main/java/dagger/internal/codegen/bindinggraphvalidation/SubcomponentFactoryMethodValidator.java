@@ -53,7 +53,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private final KotlinMetadataUtil metadataUtil;
   private final Map<ComponentNode, Set<TypeElement>> inheritedModulesCache = new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   SubcomponentFactoryMethodValidator(DaggerTypes types, KotlinMetadataUtil metadataUtil) {
     this.types = types;
     this.metadataUtil = metadataUtil;

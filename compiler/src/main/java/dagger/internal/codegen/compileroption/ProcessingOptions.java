@@ -25,5 +25,5 @@ import java.lang.annotation.Retention;
  * processing options} passed to the current invocation of {@code javac}.
  */
 @Retention(RUNTIME)
-@javax.inject.Qualifier
+@jakarta.inject.Qualifier
 public @interface ProcessingOptions {}

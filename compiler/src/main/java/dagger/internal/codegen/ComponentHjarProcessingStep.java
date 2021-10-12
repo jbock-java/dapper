@@ -57,7 +57,7 @@ final class ComponentHjarProcessingStep extends TypeCheckingProcessingStep<TypeE
   private final ComponentDescriptorFactory componentDescriptorFactory;
   private final SourceFileGenerator<ComponentDescriptor> componentGenerator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentHjarProcessingStep(
       Messager messager,
       ComponentValidator componentValidator,

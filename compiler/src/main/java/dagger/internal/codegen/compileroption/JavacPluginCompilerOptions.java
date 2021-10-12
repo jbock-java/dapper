@@ -25,7 +25,7 @@ import javax.tools.Diagnostic;
 /** {@link CompilerOptions} for Javac plugins (e.g. for Dagger statistics or Kythe). */
 public final class JavacPluginCompilerOptions extends CompilerOptions {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   JavacPluginCompilerOptions() {}
 
   @Override

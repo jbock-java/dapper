@@ -79,7 +79,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   private final Map<EnumOption<?>, ImmutableMap<String, ? extends Enum<?>>> allCommandLineOptions =
       new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ProcessingEnvironmentCompilerOptions(
       ProcessingEnvironment processingEnvironment, DaggerElements daggerElements) {
     this.processingEnvironment = processingEnvironment;

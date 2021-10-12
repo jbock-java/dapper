@@ -54,7 +54,7 @@ import javax.lang.model.element.TypeElement;
  */
 public final class UnwrappedMapKeyGenerator extends AnnotationCreatorGenerator {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   UnwrappedMapKeyGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

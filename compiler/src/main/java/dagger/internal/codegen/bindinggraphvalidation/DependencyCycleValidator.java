@@ -62,7 +62,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   private final DependencyRequestFormatter dependencyRequestFormatter;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DependencyCycleValidator(DependencyRequestFormatter dependencyRequestFormatter) {
     this.dependencyRequestFormatter = dependencyRequestFormatter;
   }

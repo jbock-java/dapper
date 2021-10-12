@@ -69,7 +69,7 @@ public final class DiagnosticMessageGenerator {
     private final DependencyRequestFormatter dependencyRequestFormatter;
     private final ElementFormatter elementFormatter;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(
         DaggerTypes types,
         DependencyRequestFormatter dependencyRequestFormatter,

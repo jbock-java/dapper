@@ -39,7 +39,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   private final ElementVisitor<Void, Void> visitor;
   private final Set<Element> processedElements = Sets.newLinkedHashSet();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
     super(e -> e);
     this.visitor =

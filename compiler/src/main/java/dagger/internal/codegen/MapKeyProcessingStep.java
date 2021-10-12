@@ -48,7 +48,7 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final AnnotationCreatorGenerator annotationCreatorGenerator;
   private final UnwrappedMapKeyGenerator unwrappedMapKeyGenerator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MapKeyProcessingStep(
       Messager messager,
       DaggerTypes types,

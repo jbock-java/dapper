@@ -77,7 +77,7 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentHjarGenerator(
       Filer filer,
       DaggerElements elements,

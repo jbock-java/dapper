@@ -64,7 +64,7 @@ public final class Scopes {
    * Returns the readable source representation (name with @ prefix) of the scope's annotation type.
    *
    * <p>It's readable source because it has had common package prefixes removed, e.g.
-   * {@code @javax.inject.Singleton} is returned as {@code @Singleton}.
+   * {@code @jakarta.inject.Singleton} is returned as {@code @Singleton}.
    */
   public static String getReadableSource(Scope scope) {
     return stripCommonTypePrefixes(scope.toString());

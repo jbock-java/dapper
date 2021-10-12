@@ -41,7 +41,7 @@ final class MissingBindingValidator implements BindingGraphPlugin {
   private final DaggerTypes types;
   private final InjectBindingRegistry injectBindingRegistry;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MissingBindingValidator(
       DaggerTypes types, InjectBindingRegistry injectBindingRegistry) {
     this.types = types;

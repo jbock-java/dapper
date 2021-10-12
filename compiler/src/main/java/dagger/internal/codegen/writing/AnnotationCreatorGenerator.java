@@ -80,7 +80,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
   private static final ClassName AUTO_ANNOTATION =
       ClassName.get("com.google.auto.value", "AutoAnnotation");
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   AnnotationCreatorGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);
   }

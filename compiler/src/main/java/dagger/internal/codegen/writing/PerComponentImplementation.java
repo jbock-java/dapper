@@ -22,5 +22,5 @@ import java.lang.annotation.Retention;
 
 /** A {@code Scope} that encompasses a single component implementation. */
 @Retention(RUNTIME)
-@javax.inject.Scope
+@jakarta.inject.Scope
 public @interface PerComponentImplementation {}

@@ -38,7 +38,7 @@ import javax.lang.model.type.TypeMirror;
 class MultibindsMethodValidator extends BindingMethodValidator {
 
   /** Creates a validator for {@link dagger.multibindings.Multibinds @Multibinds} methods. */
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MultibindsMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

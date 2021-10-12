@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 // TODO(b/29509141): Clarify the error.
 final class ProvisionDependencyOnProducerBindingValidator implements BindingGraphPlugin {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ProvisionDependencyOnProducerBindingValidator() {}
 
   @Override

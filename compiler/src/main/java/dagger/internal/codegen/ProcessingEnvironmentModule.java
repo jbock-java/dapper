@@ -76,7 +76,7 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  @javax.inject.Singleton
+  @jakarta.inject.Singleton
   static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
     return new DaggerElements(processingEnvironment);
   }

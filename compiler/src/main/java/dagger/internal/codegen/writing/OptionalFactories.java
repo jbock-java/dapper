@@ -103,14 +103,14 @@ final class OptionalFactories {
      */
     private final Map<OptionalKind, FieldSpec> absentOptionalProviderFields = new TreeMap<>();
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     PerGeneratedFileCache() {}
   }
 
   private final PerGeneratedFileCache perGeneratedFileCache;
   private final ShardImplementation rootComponentShard;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   OptionalFactories(
       PerGeneratedFileCache perGeneratedFileCache,
       ComponentImplementation componentImplementation) {

@@ -31,7 +31,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<VariableElement> {
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindsInstanceParameterValidator(InjectionAnnotations injectionAnnotations) {
     super(injectionAnnotations);
   }

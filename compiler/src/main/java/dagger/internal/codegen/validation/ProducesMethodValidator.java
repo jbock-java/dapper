@@ -39,7 +39,7 @@ import javax.lang.model.type.TypeMirror;
 /** A validator for {@link dagger.producers.Produces} methods. */
 final class ProducesMethodValidator extends BindingMethodValidator {
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ProducesMethodValidator(
       DaggerElements elements,
       DaggerTypes types,

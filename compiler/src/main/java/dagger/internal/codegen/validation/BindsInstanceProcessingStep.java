@@ -32,7 +32,7 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   private final BindsInstanceParameterValidator parameterValidator;
   private final Messager messager;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindsInstanceProcessingStep(
       BindsInstanceMethodValidator methodValidator,
       BindsInstanceParameterValidator parameterValidator,

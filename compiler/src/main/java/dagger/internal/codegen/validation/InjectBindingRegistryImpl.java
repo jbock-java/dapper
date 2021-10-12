@@ -67,7 +67,7 @@ import javax.tools.Diagnostic.Kind;
  * Note that this registry <b>does not</b> handle any explicit bindings (those from {@link Provides}
  * methods, {@link Component} dependencies, etc.).
  */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final DaggerElements elements;
   private final DaggerTypes types;
@@ -166,7 +166,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final BindingsCollection<MembersInjectionBinding> membersInjectionBindings =
       new BindingsCollection<>(MembersInjector.class);
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectBindingRegistryImpl(
       DaggerElements elements,
       DaggerTypes types,

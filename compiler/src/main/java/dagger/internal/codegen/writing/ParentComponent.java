@@ -21,9 +21,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 
 /**
- * A {@link javax.inject.Qualifier} for bindings that are associated with a component implementation's parent
+ * A {@link jakarta.inject.Qualifier} for bindings that are associated with a component implementation's parent
  * component.
  */
 @Retention(RUNTIME)
-@javax.inject.Qualifier
+@jakarta.inject.Qualifier
 public @interface ParentComponent {}

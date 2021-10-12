@@ -249,8 +249,8 @@ public final class ComponentImplementation {
   private final List<CodeBlock> shardCancellations = new ArrayList<>();
   private final Optional<ComponentImplementation> parent;
   private final ChildComponentImplementationFactory childComponentImplementationFactory;
-  private final javax.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider;
-  private final javax.inject.Provider<ComponentCreatorImplementationFactory>
+  private final jakarta.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider;
+  private final jakarta.inject.Provider<ComponentCreatorImplementationFactory>
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
   private final ComponentNames componentNames;
@@ -260,13 +260,13 @@ public final class ComponentImplementation {
   private final KotlinMetadataUtil metadataUtil;
   private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentImplementation(
       @ParentComponent Optional<ComponentImplementation> parent,
       ChildComponentImplementationFactory childComponentImplementationFactory,
       // Inject as Provider<> to prevent a cycle.
-      javax.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider,
-      javax.inject.Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
+      jakarta.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider,
+      jakarta.inject.Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
       BindingGraph graph,
       ComponentNames componentNames,
       CompilerOptions compilerOptions,

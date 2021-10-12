@@ -35,7 +35,7 @@ import javax.lang.model.element.Element;
 final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   private final TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentGenerator(
       Filer filer,
       DaggerElements elements,

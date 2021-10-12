@@ -26,5 +26,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@javax.inject.Qualifier
+@jakarta.inject.Qualifier
 public @interface Validation {}

@@ -81,7 +81,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   private final CompilerOptions compilerOptions;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   FactoryGenerator(
       Filer filer,
       SourceVersion sourceVersion,

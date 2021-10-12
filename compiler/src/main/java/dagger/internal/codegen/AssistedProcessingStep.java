@@ -47,7 +47,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   private final DaggerElements elements;
   private final Messager messager;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   AssistedProcessingStep(
       KotlinMetadataUtil kotlinMetadataUtil,
       InjectionAnnotations injectionAnnotations,

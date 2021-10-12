@@ -73,7 +73,7 @@ public abstract class MultibindingDeclaration extends BindingDeclaration
     private final DaggerTypes types;
     private final KeyFactory keyFactory;
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     Factory(DaggerTypes types, KeyFactory keyFactory) {
       this.types = types;
       this.keyFactory = keyFactory;

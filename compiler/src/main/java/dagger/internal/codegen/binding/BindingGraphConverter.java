@@ -57,7 +57,7 @@ import javax.lang.model.type.TypeMirror;
 final class BindingGraphConverter {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindingGraphConverter(BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }

@@ -32,13 +32,13 @@ import java.util.Map;
 import javax.lang.model.element.ExecutableElement;
 
 /** Validates any binding method. */
-@javax.inject.Singleton
+@jakarta.inject.Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
   private final ImmutableMap<ClassName, BindingMethodValidator> validators;
   private final Map<ExecutableElement, ValidationReport<ExecutableElement>> reports =
       new HashMap<>();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   AnyBindingMethodValidator(ImmutableMap<ClassName, BindingMethodValidator> validators) {
     this.validators = validators;
   }

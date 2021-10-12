@@ -69,7 +69,7 @@ final class ComponentCreatorImplementationFactory {
   private final KotlinMetadataUtil metadataUtil;
   private final ModuleProxies moduleProxies;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentCreatorImplementationFactory(
       ComponentImplementation componentImplementation,
       DaggerElements elements,

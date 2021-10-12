@@ -35,7 +35,7 @@ final class DependsOnProductionExecutorValidator implements BindingGraphPlugin {
   private final CompilerOptions compilerOptions;
   private final KeyFactory keyFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DependsOnProductionExecutorValidator(CompilerOptions compilerOptions, KeyFactory keyFactory) {
     this.compilerOptions = compilerOptions;
     this.keyFactory = keyFactory;

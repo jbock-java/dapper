@@ -63,7 +63,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final KotlinMetadataUtil metadataUtil;
   private final Set<TypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ModuleProcessingStep(
       Messager messager,
       ModuleValidator moduleValidator,

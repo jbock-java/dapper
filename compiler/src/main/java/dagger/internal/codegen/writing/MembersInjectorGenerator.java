@@ -72,7 +72,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MembersInjectorGenerator(
       Filer filer,
       DaggerElements elements,

@@ -34,7 +34,7 @@ import javax.lang.model.util.ElementKindVisitor8;
  * <p>Parameters are given with their enclosing executable, with other parameters elided.
  */
 public final class ElementFormatter extends Formatter<Element> {
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ElementFormatter() {}
 
   @Override

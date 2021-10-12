@@ -42,7 +42,7 @@ public final class InaccessibleMapKeyProxyGenerator
   private final DaggerTypes types;
   private final DaggerElements elements;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InaccessibleMapKeyProxyGenerator(
       Filer filer, DaggerTypes types, DaggerElements elements, SourceVersion sourceVersion) {
     super(filer, elements, sourceVersion);

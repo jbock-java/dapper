@@ -81,7 +81,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   AssistedFactoryProcessingStep(
       Messager messager,
       Filer filer,

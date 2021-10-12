@@ -55,7 +55,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
   private final KeyFactory keyFactory;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MapMultibindingValidator(
       BindingDeclarationFormatter bindingDeclarationFormatter, KeyFactory keyFactory) {
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;

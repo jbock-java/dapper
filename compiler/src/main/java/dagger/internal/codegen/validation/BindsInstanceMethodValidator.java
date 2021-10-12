@@ -32,7 +32,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<ExecutableElement> {
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   BindsInstanceMethodValidator(InjectionAnnotations injectionAnnotations) {
     super(injectionAnnotations);
   }

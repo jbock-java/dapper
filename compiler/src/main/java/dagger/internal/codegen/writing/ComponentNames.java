@@ -61,7 +61,7 @@ public final class ComponentNames {
   private final ImmutableMap<ComponentDescriptor, String> namesByDescriptor;
   private final ImmutableMap<Key, ComponentDescriptor> descriptorsByCreatorKey;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   ComponentNames(@TopLevel BindingGraph graph, KeyFactory keyFactory) {
     this.namesByDescriptor = namesByDescriptor(graph);
     this.descriptorsByCreatorKey = descriptorsByCreatorKey(keyFactory, namesByDescriptor.keySet());

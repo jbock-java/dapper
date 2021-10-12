@@ -22,6 +22,6 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import java.lang.annotation.Retention;
 
 /** Qualifier for a {@link SourceFileGenerator} for modules. */
-@javax.inject.Qualifier
+@jakarta.inject.Qualifier
 @Retention(RUNTIME)
 public @interface ModuleGenerator {}

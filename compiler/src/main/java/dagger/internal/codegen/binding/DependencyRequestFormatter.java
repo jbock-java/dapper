@@ -57,7 +57,7 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
 
   private final DaggerTypes types;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   DependencyRequestFormatter(DaggerTypes types) {
     this.types = types;
   }

@@ -32,7 +32,7 @@ final class InjectBindingValidator implements BindingGraphPlugin {
 
   private final InjectValidator injectValidator;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   InjectBindingValidator(InjectValidator injectValidator) {
     this.injectValidator = injectValidator.whenGeneratingCode();
   }

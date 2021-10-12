@@ -37,7 +37,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 final class MembersInjectionValidator {
   private final InjectionAnnotations injectionAnnotations;
 
-  @javax.inject.Inject
+  @jakarta.inject.Inject
   MembersInjectionValidator(InjectionAnnotations injectionAnnotations) {
     this.injectionAnnotations = injectionAnnotations;
   }
