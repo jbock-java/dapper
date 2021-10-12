@@ -79,7 +79,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-/** Convenience methods for creating and invoking {@link InjectionMethod}s. */
+/** Convenience methods for creating and invoking {@code InjectionMethod}s. */
 final class InjectionMethods {
 
   /**
@@ -211,8 +211,8 @@ final class InjectionMethods {
           || !isElementAccessibleFrom(method, requestingClass.packageName())
           // This check should be removable once we drop support for -source 7
           || method.getParameters().stream()
-              .map(VariableElement::asType)
-              .anyMatch(type -> !isRawTypeAccessible(type, requestingClass.packageName()));
+          .map(VariableElement::asType)
+          .anyMatch(type -> !isRawTypeAccessible(type, requestingClass.packageName()));
     }
 
     /**
@@ -309,7 +309,7 @@ final class InjectionMethods {
                 // from within generatedTypeName
                 CodeBlock maybeCastedInstance =
                     !types.isSubtype(instanceType, injectSiteType)
-                            && isTypeAccessibleFrom(injectSiteType, generatedTypeName.packageName())
+                        && isTypeAccessibleFrom(injectSiteType, generatedTypeName.packageName())
                         ? CodeBlock.of("($T) $L", injectSiteType, instanceCodeBlock)
                         : instanceCodeBlock;
                 return CodeBlock.of(
@@ -394,9 +394,9 @@ final class InjectionMethods {
   private static TypeName accessibleType(DependencyRequest dependency) {
     TypeName typeName = requestTypeName(dependency.kind(), accessibleType(dependency.key().type()));
     return dependency
-            .requestElement()
-            .map(element -> element.asType().getKind().isPrimitive())
-            .orElse(false)
+        .requestElement()
+        .map(element -> element.asType().getKind().isPrimitive())
+        .orElse(false)
         ? typeName.unbox()
         : typeName;
   }
