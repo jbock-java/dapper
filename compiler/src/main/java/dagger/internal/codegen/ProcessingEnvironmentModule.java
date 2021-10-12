@@ -20,6 +20,7 @@ import com.google.googlejavaformat.java.filer.FormattingFiler;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.Reusable;
 import dagger.internal.codegen.SpiModule.ProcessorClassLoader;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -40,7 +41,7 @@ import javax.lang.model.util.Types;
 @Module
 interface ProcessingEnvironmentModule {
   @Binds
-  @dagger.internal.codegen.my.Reusable
+  @Reusable
     // to avoid parsing options more than once
   CompilerOptions bindCompilerOptions(
       ProcessingEnvironmentCompilerOptions processingEnvironmentCompilerOptions);

@@ -69,7 +69,6 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
 /**
@@ -83,11 +82,10 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   @Inject
   FactoryGenerator(
       Filer filer,
-      SourceVersion sourceVersion,
       DaggerTypes types,
       DaggerElements elements,
       CompilerOptions compilerOptions) {
-    super(filer, elements, sourceVersion);
+    super(filer, elements);
     this.types = types;
     this.compilerOptions = compilerOptions;
   }

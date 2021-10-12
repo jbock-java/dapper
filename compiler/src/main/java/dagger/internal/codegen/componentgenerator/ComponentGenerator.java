@@ -29,7 +29,6 @@ import dagger.internal.codegen.writing.ComponentImplementation;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
 /** Generates the implementation of the abstract types annotated with {@link Component}. */
@@ -40,9 +39,8 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   ComponentGenerator(
       Filer filer,
       DaggerElements elements,
-      SourceVersion sourceVersion,
       TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory) {
-    super(filer, elements, sourceVersion);
+    super(filer, elements);
     this.topLevelImplementationComponentFactory = topLevelImplementationComponentFactory;
   }
 

@@ -27,9 +27,9 @@ public final class GeneratedLines {
   private static final String DAGGER_GENERATED_ANNOTATION = "@DaggerGenerated";
 
   private static final String GENERATED_ANNOTATION =
-     "@Generated("
-        + "value = \"dagger.internal.codegen.ComponentProcessor\", "
-        + "comments = \"https://dagger.dev\")";
+      "@Generated("
+          + "value = \"dagger.internal.codegen.ComponentProcessor\", "
+          + "comments = \"https://github.com/jbock-java/dapper\")";
 
   private static final String SUPPRESS_WARNINGS_ANNOTATION =
       "@SuppressWarnings({\"unchecked\", \"rawtypes\"})";
@@ -37,9 +37,7 @@ public final class GeneratedLines {
   private static final String IMPORT_DAGGER_GENERATED = "import dagger.internal.DaggerGenerated;";
 
   private static final String IMPORT_GENERATED_ANNOTATION =
-      isBeforeJava9()
-          ? "import javax.annotation.Generated;"
-          : "import javax.annotation.processing.Generated;";
+      "import javax.annotation.processing.Generated;";
 
   /** Returns a {@code String} of sorted imports. Includes generated imports automatically. */
   public static String generatedImports(String... extraImports) {
@@ -62,16 +60,5 @@ public final class GeneratedLines {
   /** Returns the annotations for a generated class without {@code SuppressWarnings}. */
   public static String generatedAnnotationsWithoutSuppressWarnings() {
     return Joiner.on('\n').join(DAGGER_GENERATED_ANNOTATION, GENERATED_ANNOTATION);
-  }
-
-  static final String GENERATION_OPTIONS_ANNOTATION = "@GenerationOptions(fastInit = false)";
-
-  private static boolean isBeforeJava9() {
-    try {
-      Class.forName("java.lang.Module");
-      return false;
-    } catch (ClassNotFoundException e) {
-      return true;
-    }
   }
 }

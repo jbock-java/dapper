@@ -510,7 +510,7 @@ public class MapBindingExpressionWithGuavaTest {
             "  @Override",
             "  public ListenableFuture<Map<String, String>> stringMap() {",
             "    return Futures.immediateFuture(",
-            "        (Map<String, String>) ImmutableMap.<String, String>of());",
+            "        ImmutableMap.<String, String>of());",
             "  }",
             "",
             "  @Override",
@@ -518,9 +518,7 @@ public class MapBindingExpressionWithGuavaTest {
             "}");
     Compilation compilation =
         compilerWithOptions(
-                compilerMode
-                , CompilerMode.JAVA7
-                )
+            compilerMode)
             .compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)

@@ -53,7 +53,6 @@ import jakarta.inject.Inject;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -80,9 +79,8 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
   ComponentHjarGenerator(
       Filer filer,
       DaggerElements elements,
-      DaggerTypes types,
-      SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+      DaggerTypes types) {
+    super(filer, elements);
     this.elements = elements;
     this.types = types;
   }

@@ -37,7 +37,6 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.DependencyRequest;
 import java.util.Optional;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
@@ -53,7 +52,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private final ComponentBindingExpressions componentBindingExpressions;
   private final MembersInjectionMethods membersInjectionMethods;
   private final ComponentRequirementExpressions componentRequirementExpressions;
-  private final SourceVersion sourceVersion;
 
   @AssistedInject
   SimpleMethodBindingExpression(
@@ -61,8 +59,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
       MembersInjectionMethods membersInjectionMethods,
       CompilerOptions compilerOptions,
       ComponentBindingExpressions componentBindingExpressions,
-      ComponentRequirementExpressions componentRequirementExpressions,
-      SourceVersion sourceVersion) {
+      ComponentRequirementExpressions componentRequirementExpressions) {
     super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
@@ -73,7 +70,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
     this.componentBindingExpressions = componentBindingExpressions;
     this.membersInjectionMethods = membersInjectionMethods;
     this.componentRequirementExpressions = componentRequirementExpressions;
-    this.sourceVersion = sourceVersion;
   }
 
   @Override
@@ -142,15 +138,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private Expression injectMembers(CodeBlock instance) {
     if (provisionBinding.injectionSites().isEmpty()) {
       return Expression.create(simpleMethodReturnType(), instance);
-    }
-    if (sourceVersion.compareTo(SourceVersion.RELEASE_7) <= 0) {
-      // Java 7 type inference can't figure out that instance in
-      // injectParameterized(Parameterized_Factory.newParameterized()) is Parameterized<T> and not
-      // Parameterized<Object>
-      if (!MoreTypes.asDeclared(provisionBinding.key().type()).getTypeArguments().isEmpty()) {
-        TypeName keyType = TypeName.get(provisionBinding.key().type());
-        instance = CodeBlock.of("($T) ($T) $L", keyType, rawTypeName(keyType), instance);
-      }
     }
     return membersInjectionMethods.getInjectExpression(provisionBinding.key(), instance);
   }

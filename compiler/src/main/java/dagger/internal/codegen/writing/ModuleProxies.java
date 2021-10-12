@@ -40,7 +40,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -67,9 +66,8 @@ public final class ModuleProxies {
     ModuleConstructorProxyGenerator(
         Filer filer,
         DaggerElements elements,
-        SourceVersion sourceVersion,
         ModuleProxies moduleProxies) {
-      super(filer, elements, sourceVersion);
+      super(filer, elements);
       this.moduleProxies = moduleProxies;
     }
 

@@ -41,7 +41,6 @@ import dagger.producers.monitoring.ProductionComponentMonitor;
 import dagger.producers.monitoring.internal.Monitors;
 import jakarta.inject.Inject;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -49,8 +48,8 @@ import javax.lang.model.element.TypeElement;
 final class MonitoringModuleGenerator extends SourceFileGenerator<TypeElement> {
 
   @Inject
-  MonitoringModuleGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+  MonitoringModuleGenerator(Filer filer, DaggerElements elements) {
+    super(filer, elements);
   }
 
   @Override

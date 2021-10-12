@@ -22,18 +22,16 @@ import com.google.common.collect.ImmutableList;
 /** The configuration options for compiler modes. */
 enum CompilerMode {
   DEFAULT_MODE,
-  FAST_INIT_MODE("-Adagger.fastInit=enabled"),
-  JAVA7("-source", "7", "-target", "7"),
-  ;
+  FAST_INIT_MODE("-Adagger.fastInit=enabled");
 
   /** Returns the compiler modes as a list of parameters for parameterized tests */
   static final ImmutableList<Object[]> TEST_PARAMETERS =
       ImmutableList.copyOf(
-          new Object[][] {{CompilerMode.DEFAULT_MODE}, {CompilerMode.FAST_INIT_MODE}});
+          new Object[][]{{CompilerMode.DEFAULT_MODE}, {CompilerMode.FAST_INIT_MODE}});
 
   private final ImmutableList<String> javacopts;
 
-  private CompilerMode(String... javacopts) {
+  CompilerMode(String... javacopts) {
     this.javacopts = ImmutableList.copyOf(javacopts);
   }
 

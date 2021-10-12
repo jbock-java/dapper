@@ -63,7 +63,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -77,7 +76,6 @@ import javax.lang.model.type.TypeMirror;
 final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<TypeElement> {
   private final Messager messager;
   private final Filer filer;
-  private final SourceVersion sourceVersion;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
@@ -86,14 +84,12 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   AssistedFactoryProcessingStep(
       Messager messager,
       Filer filer,
-      SourceVersion sourceVersion,
       DaggerElements elements,
       DaggerTypes types,
       BindingFactory bindingFactory) {
     super(MoreElements::asType);
     this.messager = messager;
     this.filer = filer;
-    this.sourceVersion = sourceVersion;
     this.elements = elements;
     this.types = types;
     this.bindingFactory = bindingFactory;
@@ -221,7 +217,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   /** Generates an implementation of the {@link dagger.assisted.AssistedFactory}-annotated class. */
   private final class AssistedFactoryImplGenerator extends SourceFileGenerator<ProvisionBinding> {
     AssistedFactoryImplGenerator() {
-      super(filer, elements, sourceVersion);
+      super(filer, elements);
     }
 
     @Override
@@ -318,12 +314,8 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
                           .collect(toImmutableList()))
                   .returns(providerOf(TypeName.get(factory.asType())))
                   .addStatement(
-                      "return $T.$Lcreate(new $T($N))",
+                      "return $T.create(new $T($N))",
                       INSTANCE_FACTORY,
-                      // Java 7 type inference requires the method call provide the exact type here.
-                      sourceVersion.compareTo(SourceVersion.RELEASE_7) <= 0
-                          ? CodeBlock.of("<$T>", types.accessibleType(metadata.factoryType(), name))
-                          : CodeBlock.of(""),
                       name,
                       delegateFactoryParam)
                   .build());

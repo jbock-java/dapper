@@ -82,7 +82,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
@@ -95,10 +94,9 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
   ProducerFactoryGenerator(
       Filer filer,
       DaggerElements elements,
-      SourceVersion sourceVersion,
       CompilerOptions compilerOptions,
       KeyFactory keyFactory) {
-    super(filer, elements, sourceVersion);
+    super(filer, elements);
     this.compilerOptions = compilerOptions;
     this.keyFactory = keyFactory;
   }
@@ -133,11 +131,11 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
     Optional<FieldSpec> moduleField =
         binding.requiresModuleInstance()
             ? Optional.of(
-                addFieldAndConstructorParameter(
-                    factoryBuilder,
-                    constructorBuilder,
-                    uniqueFieldNames.getUniqueName("module"),
-                    TypeName.get(binding.bindingTypeElement().get().asType())))
+            addFieldAndConstructorParameter(
+                factoryBuilder,
+                constructorBuilder,
+                uniqueFieldNames.getUniqueName("module"),
+                TypeName.get(binding.bindingTypeElement().get().asType())))
             : Optional.empty();
 
     List<CodeBlock> frameworkFieldAssignments = new ArrayList<>();
@@ -292,11 +290,11 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
     CodeBlock producerTokenArgs =
         compilerOptions.writeProducerNameInToken()
             ? CodeBlock.of(
-                "$S",
-                String.format(
-                    "%s#%s",
-                    ClassName.get(binding.bindingTypeElement().get()),
-                    binding.bindingElement().get().getSimpleName()))
+            "$S",
+            String.format(
+                "%s#%s",
+                ClassName.get(binding.bindingTypeElement().get()),
+                binding.bindingElement().get().getSimpleName()))
             : CodeBlock.of("$T.class", generatedTypeName);
     return CodeBlock.of("$T.create($L)", PRODUCER_TOKEN, producerTokenArgs);
   }

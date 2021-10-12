@@ -36,8 +36,6 @@ public final class TypeNames {
   public static final ClassName COMPONENT = ClassName.get("dagger", "Component");
   public static final ClassName COMPONENT_BUILDER = COMPONENT.nestedClass("Builder");
   public static final ClassName COMPONENT_FACTORY = COMPONENT.nestedClass("Factory");
-  public static final ClassName DAGGER_PROCESSING_OPTIONS =
-      ClassName.get("dagger", "DaggerProcessingOptions");
   public static final ClassName ELEMENTS_INTO_SET =
       ClassName.get("dagger.multibindings", "ElementsIntoSet");
   public static final ClassName INTO_MAP = ClassName.get("dagger.multibindings", "IntoMap");
@@ -117,6 +115,7 @@ public final class TypeNames {
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName LIST = ClassName.get("java.util", "List");
   public static final ClassName SET = ClassName.get("java.util", "Set");
+  public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
   public static final ClassName FUTURES =
       ClassName.get("com.google.common.util.concurrent", "Futures");
   public static final ClassName LISTENABLE_FUTURE =

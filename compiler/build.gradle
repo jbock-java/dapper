@@ -21,8 +21,13 @@ compileJava {
     options.compilerArgs << '11'
 }
 
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1071' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -36,20 +41,16 @@ tasks.withType(GenerateModuleMetadata) {
 
 shadowJar {
     minimize()
-    dependencies {
-        exclude('javax.annotation:jsr250-api:.*')
-    }
     archiveClassifier.set('')
-    relocate('com.squareup.javapoet', 'dapper.javapoet')
-    relocate('com.google', 'dapper.google')
-    relocate('org.checkerframework', 'dapper.org.checkerframework')
+    relocate('com.squareup.javapoet', 'dagger.shaded.com.squareup.javapoet')
+    relocate('com.google', 'dagger.shaded.com.google')
+    relocate('org.checkerframework', 'dagger.shaded.org.checkerframework')
 }
 
 dependencies {
     def core = 'io.github.jbock-java:dapper:1.0'
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
-    implementation('com.google.guava:guava:30.1.1-jre')
     implementation('com.google.googlejavaformat:google-java-format:1.11.0')
     shadow(core)
     implementation('jakarta.inject:jakarta.inject-api:2.0.1.RC1')
@@ -58,8 +59,7 @@ dependencies {
     implementation('org.checkerframework:checker-qual:3.18.1')
     implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:0.94')
-    implementation('javax.annotation:jsr250-api:1.0')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:0.95')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')

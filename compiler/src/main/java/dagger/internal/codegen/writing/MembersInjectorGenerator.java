@@ -62,7 +62,6 @@ import dagger.model.DependencyRequest;
 import jakarta.inject.Inject;
 import java.util.Map.Entry;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
 /**
@@ -75,9 +74,8 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   MembersInjectorGenerator(
       Filer filer,
       DaggerElements elements,
-      DaggerTypes types,
-      SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+      DaggerTypes types) {
+    super(filer, elements);
     this.types = types;
   }
 

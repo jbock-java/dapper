@@ -144,13 +144,13 @@ public class OptionalBindingRequestFulfillmentTest {
                 "",
                 "  @Override",
                 "  public Optional<DefinitelyNot> definitelyNot() {",
-                "    return Optional.<DefinitelyNot>absent();",
+                "    return Optional.absent();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Optional<Provider<Lazy<DefinitelyNot>>>",
                 "      providerOfLazyOfDefinitelyNot() {",
-                "    return Optional.<Provider<Lazy<DefinitelyNot>>>absent();",
+                "    return Optional.absent();",
                 "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -170,9 +170,7 @@ public class OptionalBindingRequestFulfillmentTest {
             .build();
     Compilation compilation =
         compilerWithOptions(
-                compilerMode
-                , CompilerMode.JAVA7
-                )
+            compilerMode)
             .compile(module, maybe, definitelyNot, component);
     assertThat(compilation).succeeded();
     assertThat(compilation)
@@ -253,7 +251,7 @@ public class OptionalBindingRequestFulfillmentTest {
             "",
             "  @Override",
             "  public ListenableFuture<Optional<DefinitelyNot>> definitelyNot() {",
-            "    return Futures.immediateFuture(Optional.<DefinitelyNot>absent());",
+            "    return Futures.immediateFuture(Optional.absent());",
             "  }",
             "",
             "  @Override",
@@ -262,9 +260,7 @@ public class OptionalBindingRequestFulfillmentTest {
 
     Compilation compilation =
         compilerWithOptions(
-                compilerMode
-                , CompilerMode.JAVA7
-                )
+            compilerMode)
             .compile(module, maybe, definitelyNot, component);
     assertThat(compilation).succeeded();
     assertThat(compilation)

@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
+import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import java.io.Writer;
 import java.util.Collection;
@@ -73,7 +74,7 @@ import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.Types;
 
 /** Extension of {@link Elements} that adds Dagger-specific methods. */
-@dagger.internal.codegen.my.Reusable
+@Reusable
 public final class DaggerElements implements Elements, ClearableCache {
   private final Map<TypeElement, ImmutableSet<ExecutableElement>> getLocalAndInheritedMethodsCache =
       new HashMap<>();

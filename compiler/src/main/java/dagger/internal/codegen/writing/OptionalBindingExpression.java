@@ -31,26 +31,22 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import javax.lang.model.SourceVersion;
 
 /** A binding expression for optional bindings. */
 final class OptionalBindingExpression extends SimpleInvocationBindingExpression {
   private final ProvisionBinding binding;
   private final ComponentBindingExpressions componentBindingExpressions;
   private final DaggerTypes types;
-  private final SourceVersion sourceVersion;
 
   @AssistedInject
   OptionalBindingExpression(
       @Assisted ProvisionBinding binding,
       ComponentBindingExpressions componentBindingExpressions,
-      DaggerTypes types,
-      SourceVersion sourceVersion) {
+      DaggerTypes types) {
     super(binding);
     this.binding = binding;
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;
-    this.sourceVersion = sourceVersion;
   }
 
   @Override
@@ -58,17 +54,6 @@ final class OptionalBindingExpression extends SimpleInvocationBindingExpression 
     OptionalType optionalType = OptionalType.from(binding.key());
     OptionalKind optionalKind = optionalType.kind();
     if (binding.dependencies().isEmpty()) {
-      if (sourceVersion.compareTo(SourceVersion.RELEASE_7) <= 0) {
-        // When compiling with -source 7, javac's type inference isn't strong enough to detect
-        // Futures.immediateFuture(Optional.absent()) for keys that aren't Object. It also has
-        // issues
-        // when used as an argument to some members injection proxy methods (see
-        // https://github.com/google/dagger/issues/916)
-        if (isTypeAccessibleFrom(binding.key().type(), requestingClass.packageName())) {
-          return Expression.create(
-              binding.key().type(), optionalKind.parameterizedAbsentValueExpression(optionalType));
-        }
-      }
       return Expression.create(binding.key().type(), optionalKind.absentValueExpression());
     }
     DependencyRequest dependency = getOnlyElement(binding.dependencies());
@@ -82,10 +67,10 @@ final class OptionalBindingExpression extends SimpleInvocationBindingExpression 
     // we will get "incompatible types: inference variable has incompatible bounds.
     return isTypeAccessibleFrom(dependency.key().type(), requestingClass.packageName())
         ? Expression.create(
-            binding.key().type(), optionalKind.presentExpression(dependencyExpression))
+        binding.key().type(), optionalKind.presentExpression(dependencyExpression))
         : Expression.create(
-            types.erasure(binding.key().type()),
-            optionalKind.presentObjectExpression(dependencyExpression));
+        types.erasure(binding.key().type()),
+        optionalKind.presentObjectExpression(dependencyExpression));
   }
 
   @Override

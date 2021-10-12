@@ -42,7 +42,6 @@ import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -82,8 +81,8 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
       ClassName.get("com.google.auto.value", "AutoAnnotation");
 
   @Inject
-  AnnotationCreatorGenerator(Filer filer, DaggerElements elements, SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+  AnnotationCreatorGenerator(Filer filer, DaggerElements elements) {
+    super(filer, elements);
   }
 
   @Override

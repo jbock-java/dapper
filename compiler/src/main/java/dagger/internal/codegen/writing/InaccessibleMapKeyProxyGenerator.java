@@ -31,7 +31,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import javax.annotation.processing.Filer;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 
 /**
@@ -45,8 +44,8 @@ public final class InaccessibleMapKeyProxyGenerator
 
   @Inject
   InaccessibleMapKeyProxyGenerator(
-      Filer filer, DaggerTypes types, DaggerElements elements, SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+      Filer filer, DaggerTypes types, DaggerElements elements) {
+    super(filer, elements);
     this.types = types;
     this.elements = elements;
   }
