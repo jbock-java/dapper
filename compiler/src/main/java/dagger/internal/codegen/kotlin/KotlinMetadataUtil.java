@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.kotlin;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /** Utility class for interacting with Kotlin Metadata. */
@@ -24,14 +23,6 @@ public final class KotlinMetadataUtil {
 
   @jakarta.inject.Inject
   KotlinMetadataUtil() {
-  }
-
-  /**
-   * Returns {@code true} if this element has the Kotlin Metadata annotation or if it is enclosed in
-   * an element that does.
-   */
-  public boolean hasMetadata(Element element) {
-    return false;
   }
 
   /** Returns {@code true} if this type element is a Kotlin Object. */
