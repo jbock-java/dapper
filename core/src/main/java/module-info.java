@@ -1,7 +1,7 @@
 module dagger {
 
   requires transitive java.compiler;
-  requires jakarta.inject;
+  requires transitive jakarta.inject;
 
   exports dagger;
   exports dagger.multibindings;
