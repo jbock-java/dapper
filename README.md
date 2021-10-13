@@ -23,31 +23,5 @@ implementation('io.github.jbock-java:dapper:1.0')
 annotationProcessor('io.github.jbock-java:dapper-compiler:1.0')
 ````
 
-Maven users add this to `pom.xml`:
+For maven users, there is the [modular-thermosiphon](https://github.com/h908714124/modular-thermosiphon) sample project.
 
-````xml
-<dependency>
-  <groupId>io.github.jbock-java</groupId>
-  <artifactId>dapper</artifactId>
-  <version>1.0</version>
-</dependency>
-
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-compiler-plugin</artifactId>
-      <version>3.8.1</version>
-      <configuration>
-        <annotationProcessorPaths>
-          <dependency>
-            <groupId>io.github.jbock-java</groupId>
-            <artifactId>dapper-compiler</artifactId>
-            <version>1.0</version>
-          </dependency>
-        </annotationProcessorPaths>
-      </configuration>
-    </plugin>
-  </plugins>
-</build>
-````
