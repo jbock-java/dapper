@@ -1,4 +1,4 @@
-[![dapper-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/dapper-compiler/badge.svg?color=grey&subject=dapper-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
+[![dapper-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/dapper-compiler/badge.svg?color=grey&subject=dapper-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/dapper-compiler)
 [![dapper](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/dapper/badge.svg?subject=dapper)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/dapper)
 
 This is a fork of [dagger2](https://github.com/google/dagger) but with a `module-info.java`,
@@ -14,9 +14,6 @@ Add to `module-info.java`:
 ````java
 requires jakarta.inject;
 requires dagger;
-requires dagger.multibindings;
-requires dagger.internal;
-requires dagger.assisted;
 ````
 
 Gradle users add this to `build.gradle`:
