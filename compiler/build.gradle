@@ -1,5 +1,6 @@
 plugins {
     id('java')
+    id('net.ltgt.errorprone') version('2.0.2')
     id('com.github.johnrengelman.shadow') version('6.1.0')
     id('maven-publish')
     id('signing')
@@ -27,6 +28,14 @@ javadoc {
 
 repositories {
     mavenCentral()
+}
+
+tasks.named('compileTestJava').configure { it ->
+    it.options.errorprone.enabled = false
+}
+
+tasks.named('compileJava').configure { it ->
+    it.options.errorprone.excludedPaths = '.*[/\\]generated[/\\].*'
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -63,6 +72,7 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
     testImplementation('org.junit.vintage:junit-vintage-engine:5.8.1')
     testImplementation('org.mockito:mockito-core:3.12.4')
+    errorprone('com.google.errorprone:error_prone_core:2.9.0')
 }
 
 jar {
