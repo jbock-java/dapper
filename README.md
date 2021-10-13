@@ -23,5 +23,5 @@ implementation('io.github.jbock-java:dapper:1.0')
 annotationProcessor('io.github.jbock-java:dapper-compiler:1.0')
 ````
 
-For maven users, there is the [modular-thermosiphon](https://github.com/h908714124/modular-thermosiphon) sample project.
+For maven users, there is the [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) sample project.
 
