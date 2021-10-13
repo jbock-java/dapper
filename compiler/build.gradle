@@ -35,7 +35,7 @@ tasks.named('compileTestJava').configure { it ->
 }
 
 tasks.named('compileJava').configure { it ->
-    it.options.errorprone.excludedPaths = '.*[/\\]generated[/\\].*'
+    it.options.errorprone.excludedPaths = '.*[/\\\\]generated[/\\\\].*'
 }
 
 tasks.withType(AbstractArchiveTask) {
