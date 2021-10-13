@@ -9,7 +9,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(15))
+        languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
 
@@ -76,6 +76,7 @@ jar {
 
 test {
     useJUnitPlatform()
+    jvmArgs = ['--add-opens', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED']
     testLogging {
         events('failed')
     }
