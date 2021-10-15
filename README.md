@@ -7,7 +7,7 @@ It was forked from dagger version `2.37`, which is the last dagger
 version that did not depend on the "xprocessing" kotlin library.
 
 In order to be modular, dapper uses `jakarta.inject` annotations, instead of `javax.inject`.
-It also requires Java 9.
+It also requires Java Version 11 or higher.
 
 Add to `module-info.java`:
 
