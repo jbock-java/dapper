@@ -19,6 +19,11 @@ if [[ -z "$VERSION" ]]; then
   die "$usage"
 fi
 
+if [[ "compiler" == "$MODULE" ]]; then
+ local greppy=$(./gradlew compiler:dependencies --configuration compileClasspath | fgrep "dapper:$VERSION")
+ test -z "$greppy" && die "compiler should depend on dapper:$VERSION"
+fi
+
 git pull origin $(git rev-parse --abbrev-ref HEAD)
 ./gradlew clean -Pversion=${VERSION} ${MODULE}:publish
 
