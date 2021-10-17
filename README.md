@@ -12,7 +12,6 @@ It also requires Java Version 11 or higher.
 Add to `module-info.java`:
 
 ````java
-requires jakarta.inject;
 requires dagger;
 ````
 
