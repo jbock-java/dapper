@@ -37,6 +37,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
@@ -77,8 +78,6 @@ import javax.lang.model.util.SimpleTypeVisitor6;
  * </pre>
  */
 public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement> {
-  private static final ClassName AUTO_ANNOTATION =
-      ClassName.get("com.google.auto.value", "AutoAnnotation");
 
   @Inject
   AnnotationCreatorGenerator(Filer filer, DaggerElements elements) {
@@ -109,7 +108,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
     String createMethodName = createMethodName(annotationElement);
     MethodSpec.Builder createMethod =
         methodBuilder(createMethodName)
-            .addAnnotation(AUTO_ANNOTATION)
+            .addAnnotation(TypeNames.AUTO_ANNOTATION)
             .addModifiers(PUBLIC, STATIC)
             .returns(TypeName.get(annotationElement.asType()));
 
