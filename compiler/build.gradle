@@ -56,7 +56,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = 'io.github.jbock-java:dapper:1.0'
+    def core = 'io.github.jbock-java:dapper:1.1'
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.googlejavaformat:google-java-format:1.11.0')
