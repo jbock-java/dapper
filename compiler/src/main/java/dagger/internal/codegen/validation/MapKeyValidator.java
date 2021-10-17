@@ -19,6 +19,7 @@ package dagger.internal.codegen.validation;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.MapKey;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -60,6 +61,6 @@ public final class MapKeyValidator {
   }
 
   private boolean autoAnnotationIsMissing() {
-    return elements.getTypeElement("com.google.auto.value.AutoAnnotation") == null;
+    return elements.getTypeElement(TypeNames.AUTO_ANNOTATION) == null;
   }
 }

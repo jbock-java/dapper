@@ -120,6 +120,12 @@ public final class TypeNames {
       ClassName.get("com.google.common.util.concurrent", "Futures");
   public static final ClassName LISTENABLE_FUTURE =
       ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
+  public static final ClassName FLUENT_FUTURE =
+      ClassName.get("com.google.common.util.concurrent", "FluentFuture");
+  public static final ClassName AUTO_ANNOTATION =
+      ClassName.get("com.google.auto.value", "AutoAnnotation");
+  public static final ClassName CAN_IGNORE_RETURN_VALUE =
+      ClassName.get("com.google.errorprone.annotations", "CanIgnoreReturnValue");
 
   /**
    * {@link TypeName#VOID} is lowercase-v {@code void} whereas this represents the class, {@link

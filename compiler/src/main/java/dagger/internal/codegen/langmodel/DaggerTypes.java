@@ -29,6 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -294,11 +295,17 @@ public final class DaggerTypes implements Types {
         null);
   }
 
-  private static final ImmutableSet<Class<?>> FUTURE_TYPES =
-      ImmutableSet.of(ListenableFuture.class, FluentFuture.class);
+  private static final ImmutableSet<ClassName> FUTURE_TYPES =
+      ImmutableSet.of(TypeNames.LISTENABLE_FUTURE, TypeNames.FLUENT_FUTURE);
 
   public static boolean isFutureType(TypeMirror type) {
-    return FUTURE_TYPES.stream().anyMatch(t -> MoreTypes.isTypeOf(t, type));
+    if (type.getKind() != TypeKind.DECLARED) {
+      return false;
+    }
+    TypeElement typeElement = MoreElements.asType(MoreTypes.asDeclared(type).asElement());
+    return FUTURE_TYPES.stream()
+        .map(ClassName::canonicalName)
+        .anyMatch(canonicalName -> canonicalName.equals(typeElement.getQualifiedName().toString()));
   }
 
   public static boolean hasTypeVariable(TypeMirror type) {

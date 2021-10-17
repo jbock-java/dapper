@@ -35,6 +35,7 @@ import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
@@ -105,7 +106,7 @@ final class MembersInjectionMethods {
             .returns(membersInjectedTypeName)
             .addParameter(parameter);
     TypeElement canIgnoreReturnValue =
-        elements.getTypeElement("com.google.errorprone.annotations.CanIgnoreReturnValue");
+        elements.getTypeElement(TypeNames.CAN_IGNORE_RETURN_VALUE);
     if (canIgnoreReturnValue != null) {
       methodBuilder.addAnnotation(ClassName.get(canIgnoreReturnValue));
     }
