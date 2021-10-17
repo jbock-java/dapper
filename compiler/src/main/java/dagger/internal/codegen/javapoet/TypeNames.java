@@ -116,16 +116,18 @@ public final class TypeNames {
   public static final ClassName LIST = ClassName.get("java.util", "List");
   public static final ClassName SET = ClassName.get("java.util", "Set");
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
+
+  // protect against relocation in the com.google namespace
   public static final ClassName FUTURES =
-      ClassName.get("com.google.common.util.concurrent", "Futures");
+      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "Futures");
   public static final ClassName LISTENABLE_FUTURE =
-      ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
+      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "ListenableFuture");
   public static final ClassName FLUENT_FUTURE =
-      ClassName.get("com.google.common.util.concurrent", "FluentFuture");
+      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "FluentFuture");
   public static final ClassName AUTO_ANNOTATION =
-      ClassName.get("com.google.auto.value", "AutoAnnotation");
+      ClassName.get(String.join(".", "com", "google", "auto", "value"), "AutoAnnotation");
   public static final ClassName CAN_IGNORE_RETURN_VALUE =
-      ClassName.get("com.google.errorprone.annotations", "CanIgnoreReturnValue");
+      ClassName.get(String.join(".", "com", "google", "errorprone", "annotations"), "CanIgnoreReturnValue");
 
   /**
    * {@link TypeName#VOID} is lowercase-v {@code void} whereas this represents the class, {@link
@@ -187,5 +189,6 @@ public final class TypeNames {
         : typeName;
   }
 
-  private TypeNames() {}
+  private TypeNames() {
+  }
 }
