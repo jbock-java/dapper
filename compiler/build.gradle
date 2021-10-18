@@ -28,6 +28,7 @@ javadoc {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1088' }
 }
 
 tasks.named('compileTestJava').configure { it ->
@@ -56,7 +57,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = 'io.github.jbock-java:dapper:1.1'
+    def core = 'io.github.jbock-java:dapper:1.2'
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.2')
     implementation('com.google.googlejavaformat:google-java-format:1.11.0')
