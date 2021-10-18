@@ -18,8 +18,8 @@ requires dagger;
 Gradle users add this to `build.gradle`:
 
 ````groovy
-implementation('io.github.jbock-java:dapper:1.1')
-annotationProcessor('io.github.jbock-java:dapper-compiler:1.1')
+implementation('io.github.jbock-java:dapper:1.2')
+annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
 ````
 
 For maven users, there is the [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) sample project.

@@ -64,7 +64,7 @@ dependencies {
     shadow('com.google.auto.value:auto-value-annotations:1.8.2')
     annotationProcessor('com.google.auto.value:auto-value:1.8.2')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:1.1')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
