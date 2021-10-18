@@ -20,7 +20,7 @@ if [[ -z "$VERSION" ]]; then
 fi
 
 if [[ "compiler" == "$MODULE" ]]; then
- local greppy=$(./gradlew compiler:dependencies --configuration compileClasspath | fgrep "dapper:$VERSION")
+ greppy=$(./gradlew compiler:dependencies --configuration compileClasspath | fgrep "dapper:$VERSION")
  test -z "$greppy" && die "compiler should depend on dapper:$VERSION"
 fi
 
