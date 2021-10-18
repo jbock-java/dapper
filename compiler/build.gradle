@@ -28,7 +28,6 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1089' }
 }
 
 tasks.named('compileTestJava').configure { it ->
@@ -52,21 +51,20 @@ shadowJar {
     minimize()
     archiveClassifier.set('')
     relocate('com.squareup.javapoet', 'dagger.shaded.com.squareup.javapoet')
-    relocate('com.google', 'dagger.shaded.com.google')
     relocate('org.checkerframework', 'dagger.shaded.org.checkerframework')
 }
 
 dependencies {
     def core = 'io.github.jbock-java:dapper:1.2'
     implementation('com.squareup:javapoet:1.13.0')
-    implementation('com.google.auto:auto-common:1.2')
-    implementation('com.google.googlejavaformat:google-java-format:1.11.0')
+    implementation('org.checkerframework:checker-compat-qual:2.5.5')
+    shadow('com.google.auto:auto-common:1.2')
+    shadow('com.google.googlejavaformat:google-java-format:1.11.0')
     shadow(core)
     shadow('com.google.auto.value:auto-value-annotations:1.8.2')
     annotationProcessor('com.google.auto.value:auto-value:1.8.2')
-    implementation('org.checkerframework:checker-compat-qual:2.5.5')
     annotationProcessor('org.checkerframework:checker:3.18.1')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.1')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
