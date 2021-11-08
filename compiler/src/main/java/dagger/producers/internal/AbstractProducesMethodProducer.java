@@ -26,7 +26,6 @@ import dagger.producers.monitoring.ProducerToken;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import jakarta.inject.Provider;
 import java.util.concurrent.Executor;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * An {@link AbstractProducer} for all {@link dagger.producers.Produces} methods.
@@ -41,14 +40,13 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 public abstract class AbstractProducesMethodProducer<D, T> extends AbstractProducer<T>
     implements AsyncFunction<D, T>, Executor {
   private final Provider<ProductionComponentMonitor> monitorProvider;
-  @NullableDecl
   private final ProducerToken token;
   private final Provider<Executor> executorProvider;
   private volatile ProducerMonitor monitor = null;
 
   protected AbstractProducesMethodProducer(
       Provider<ProductionComponentMonitor> monitorProvider,
-      @NullableDecl ProducerToken token,
+      ProducerToken token,
       Provider<Executor> executorProvider) {
     this.monitorProvider = checkNotNull(monitorProvider);
     this.token = token;

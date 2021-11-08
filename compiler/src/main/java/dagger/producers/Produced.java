@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import dagger.internal.Beta;
 import java.util.concurrent.ExecutionException;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * An interface that represents the result of a {@linkplain Producer production} of type {@code T},
@@ -64,7 +63,7 @@ public abstract class Produced<T> {
   public abstract int hashCode();
 
   /** Returns a successful {@code Produced}, whose {@link #get} will return the given value. */
-  public static <T> Produced<T> successful(@NullableDecl T value) {
+  public static <T> Produced<T> successful(T value) {
     return new Successful<T>(value);
   }
 
@@ -77,15 +76,13 @@ public abstract class Produced<T> {
   }
 
   private static final class Successful<T> extends Produced<T> {
-    @NullableDecl
     private final T value;
 
-    private Successful(@NullableDecl T value) {
+    private Successful(T value) {
       this.value = value;
     }
 
     @Override
-    @NullableDecl
     public T get() {
       return value;
     }

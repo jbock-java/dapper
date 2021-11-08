@@ -26,7 +26,6 @@ import com.google.common.truth.Subject;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
 import javax.lang.model.type.TypeMirror;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /** A Truth subject for making assertions on a {@link BindingGraph}. */
 public final class BindingGraphSubject extends Subject {
@@ -38,7 +37,7 @@ public final class BindingGraphSubject extends Subject {
 
   private final BindingGraph actual;
 
-  private BindingGraphSubject(FailureMetadata metadata, @NullableDecl BindingGraph actual) {
+  private BindingGraphSubject(FailureMetadata metadata, BindingGraph actual) {
     super(metadata, actual);
     this.actual = actual;
   }
@@ -111,7 +110,7 @@ public final class BindingGraphSubject extends Subject {
 
     private final Binding actual;
 
-    BindingSubject(FailureMetadata metadata, @NullableDecl Binding actual) {
+    BindingSubject(FailureMetadata metadata, Binding actual) {
       super(metadata, actual);
       this.actual = actual;
     }

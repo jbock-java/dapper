@@ -34,7 +34,6 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /** A factory for {@link DiagnosticReporter}s. */
 // TODO(ronshapiro): If multiple plugins print errors on the same node/edge, should we condense the
@@ -164,7 +163,7 @@ final class DiagnosticReporterFactory {
     void printMessage(
         Diagnostic.Kind diagnosticKind,
         CharSequence message,
-        @NullableDecl Element elementToReport) {
+        Element elementToReport) {
       if (diagnosticKind.equals(ERROR) && reportErrorsAsWarnings) {
         diagnosticKind = Diagnostic.Kind.WARNING;
       }

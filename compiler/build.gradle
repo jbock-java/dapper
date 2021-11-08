@@ -48,7 +48,6 @@ shadowJar {
 dependencies {
     def core = 'io.github.jbock-java:dapper:1.2'
     implementation('io.github.jbock-java:javapoet:1.14')
-    implementation('org.checkerframework:checker-compat-qual:2.5.5')
     shadow('io.github.jbock-java:auto-common:1.2.0')
     shadow(core)
     shadow('io.github.jbock-java:auto-value-annotations:1.8.2.0')

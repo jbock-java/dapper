@@ -101,5 +101,5 @@ public interface Producer<T> {
    * <p>If the key is bound to a {@link Produces} method, then calling this method multiple times
    * will return the same future.
    */
-    ListenableFuture<T> get();
+  ListenableFuture<T> get();
 }
