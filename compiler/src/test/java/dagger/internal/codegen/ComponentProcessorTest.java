@@ -22,6 +22,7 @@ import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
+import static org.hamcrest.CoreMatchers.is;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Predicate;
@@ -30,6 +31,7 @@ import com.google.common.collect.Sets;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.MembersInjector;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
@@ -40,6 +42,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
+import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -149,7 +152,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void simpleComponent() {
+  public void simpleComponent() throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -172,25 +175,31 @@ public class ComponentProcessorTest {
         "  Provider<SomeInjectableType> someInjectableTypeProvider();",
         "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedImports(
-                    "import dagger.Lazy;",
-                    "import dagger.internal.DoubleCheck;",
-                    "import jakarta.inject.Provider;"),
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedImportsIndividual(
+                "import dagger.Lazy;",
+                "import dagger.internal.DoubleCheck;",
+                "import jakarta.inject.Provider;"))
+            .addLines("")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final DaggerSimpleComponent simpleComponent = this;")
             .addLinesIn(
                 FAST_INIT_MODE,
+                "",
                 "  private volatile Provider<SomeInjectableType> someInjectableTypeProvider;")
             .addLines(
-                "  private DaggerSimpleComponent() {}",
+                "",
+                "  private DaggerSimpleComponent() {",
+                "",
+                "",
+                "  }",
                 "",
                 "  public static Builder builder() {",
                 "    return new Builder();",
@@ -233,7 +242,8 @@ public class ComponentProcessorTest {
                 "  }",
                 "",
                 "  static final class Builder {",
-                "    private Builder() {}",
+                "    private Builder() {",
+                "    }",
                 "",
                 "    public SimpleComponent build() {",
                 "      return new DaggerSimpleComponent();",
@@ -241,6 +251,7 @@ public class ComponentProcessorTest {
                 "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
+                "",
                 "  private static final class SwitchingProvider<T> implements Provider<T> {",
                 "    private final DaggerSimpleComponent simpleComponent;",
                 "",
@@ -255,20 +266,24 @@ public class ComponentProcessorTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0: return (T) new SomeInjectableType();",
+                "        case 0: // test.SomeInjectableType ",
+                "        return (T) new SomeInjectableType();",
+                "",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }")
-            .build();
+            .addLines("}")
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerSimpleComponent")
-        .hasSourceEquivalentTo(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    MatcherAssert.assertThat(actualImpl.lines().toArray(), is(generatedComponent));
   }
 
   @Test

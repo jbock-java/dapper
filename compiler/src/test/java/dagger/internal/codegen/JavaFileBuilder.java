@@ -91,4 +91,8 @@ final class JavaFileBuilder {
   JavaFileObject build() {
     return JavaFileObjects.forSourceLines(qualifiedName, sourceLines.build());
   }
+
+  String[] lines() {
+    return sourceLines.build().toArray(new String[0]);
+  }
 }

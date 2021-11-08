@@ -59,6 +59,7 @@ dependencies {
 //    testImplementation('io.github.jbock-java:compile-testing:0.19.0')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
     testImplementation('org.junit.vintage:junit-vintage-engine:5.8.1')
+    testImplementation('org.hamcrest:hamcrest-core:2.2')
 }
 
 jar {
