@@ -33,8 +33,6 @@ public abstract class CompilerOptions {
    */
   public abstract boolean fastInit(TypeElement element);
 
-  public abstract boolean formatGeneratedSource();
-
   public abstract boolean writeProducerNameInToken();
 
   public abstract Diagnostic.Kind nullableValidationKind();

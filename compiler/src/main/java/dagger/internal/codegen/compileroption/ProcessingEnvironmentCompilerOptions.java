@@ -102,11 +102,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
-  public boolean formatGeneratedSource() {
-    return isEnabled(FORMAT_GENERATED_SOURCE);
-  }
-
-  @Override
   public boolean writeProducerNameInToken() {
     return isEnabled(WRITE_PRODUCER_NAME_IN_TOKEN);
   }

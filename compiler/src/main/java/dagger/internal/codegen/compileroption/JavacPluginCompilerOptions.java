@@ -41,11 +41,6 @@ public final class JavacPluginCompilerOptions extends CompilerOptions {
   }
 
   @Override
-  public boolean formatGeneratedSource() {
-    return false;
-  }
-
-  @Override
   public boolean writeProducerNameInToken() {
     return true;
   }
