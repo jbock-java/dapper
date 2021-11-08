@@ -44,8 +44,8 @@ public final class TimingRecorders {
    * component's execution to fail.
    */
   public static ProductionComponentTimingRecorder.Factory
-      delegatingProductionComponentTimingRecorderFactory(
-          Collection<ProductionComponentTimingRecorder.Factory> factories) {
+  delegatingProductionComponentTimingRecorderFactory(
+      Collection<ProductionComponentTimingRecorder.Factory> factories) {
     switch (factories.size()) {
       case 0:
         return noOpProductionComponentTimingRecorderFactory();
@@ -282,7 +282,7 @@ public final class TimingRecorders {
 
   /** Returns a recorder factory that returns no-op component recorders. */
   public static ProductionComponentTimingRecorder.Factory
-      noOpProductionComponentTimingRecorderFactory() {
+  noOpProductionComponentTimingRecorderFactory() {
     return NO_OP_PRODUCTION_COMPONENT_TIMING_RECORDER_FACTORY;
   }
 
@@ -293,21 +293,21 @@ public final class TimingRecorders {
 
   private static final ProductionComponentTimingRecorder.Factory
       NO_OP_PRODUCTION_COMPONENT_TIMING_RECORDER_FACTORY =
-          new ProductionComponentTimingRecorder.Factory() {
-            @Override
-            public ProductionComponentTimingRecorder create(Object component) {
-              return noOpProductionComponentTimingRecorder();
-            }
-          };
+      new ProductionComponentTimingRecorder.Factory() {
+        @Override
+        public ProductionComponentTimingRecorder create(Object component) {
+          return noOpProductionComponentTimingRecorder();
+        }
+      };
 
   private static final ProductionComponentTimingRecorder
       NO_OP_PRODUCTION_COMPONENT_TIMING_RECORDER =
-          new ProductionComponentTimingRecorder() {
-            @Override
-            public ProducerTimingRecorder producerTimingRecorderFor(ProducerToken token) {
-              return ProducerTimingRecorder.noOp();
-            }
-          };
+      new ProductionComponentTimingRecorder() {
+        @Override
+        public ProducerTimingRecorder producerTimingRecorderFor(ProducerToken token) {
+          return ProducerTimingRecorder.noOp();
+        }
+      };
 
   private static void logCreateException(
       RuntimeException e, ProductionComponentTimingRecorder.Factory factory, Object component) {
@@ -344,5 +344,6 @@ public final class TimingRecorders {
         e);
   }
 
-  private TimingRecorders() {}
+  private TimingRecorders() {
+  }
 }

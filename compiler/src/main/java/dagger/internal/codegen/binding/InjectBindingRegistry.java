@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dagger.Component;
 import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerationException;
@@ -51,10 +50,8 @@ public interface InjectBindingRegistry {
    */
   Optional<ProvisionBinding> getOrFindMembersInjectorProvisionBinding(Key key);
 
-  @CanIgnoreReturnValue
   Optional<ProvisionBinding> tryRegisterConstructor(ExecutableElement constructorElement);
 
-  @CanIgnoreReturnValue
   Optional<MembersInjectionBinding> tryRegisterMembersInjectedType(TypeElement typeElement);
 
   /**

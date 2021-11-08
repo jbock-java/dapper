@@ -154,5 +154,6 @@ public final class ConfigurationAnnotations {
     }
   }
 
-  private ConfigurationAnnotations() {}
+  private ConfigurationAnnotations() {
+  }
 }

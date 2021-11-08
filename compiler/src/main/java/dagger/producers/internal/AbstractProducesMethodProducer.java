@@ -24,8 +24,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import dagger.producers.monitoring.ProducerMonitor;
 import dagger.producers.monitoring.ProducerToken;
 import dagger.producers.monitoring.ProductionComponentMonitor;
-import java.util.concurrent.Executor;
 import jakarta.inject.Provider;
+import java.util.concurrent.Executor;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
@@ -41,7 +41,8 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 public abstract class AbstractProducesMethodProducer<D, T> extends AbstractProducer<T>
     implements AsyncFunction<D, T>, Executor {
   private final Provider<ProductionComponentMonitor> monitorProvider;
-  @NullableDecl private final ProducerToken token;
+  @NullableDecl
+  private final ProducerToken token;
   private final Provider<Executor> executorProvider;
   private volatile ProducerMonitor monitor = null;
 

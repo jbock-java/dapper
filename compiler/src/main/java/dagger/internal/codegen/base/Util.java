@@ -38,5 +38,6 @@ public final class Util {
     return value;
   }
 
-  private Util() {}
+  private Util() {
+  }
 }

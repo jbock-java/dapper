@@ -20,9 +20,7 @@
  *
  * <p>This package is experimental, and APIs may change at over time.
  */
-@CheckReturnValue
 @Beta
 package dagger.spi;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.Beta;

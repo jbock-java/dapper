@@ -33,8 +33,6 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.Component;
 import dagger.Module;
 import dagger.Subcomponent;
@@ -158,7 +156,7 @@ public abstract class ComponentDescriptor {
    * dependency.
    */
   public abstract ImmutableMap<ExecutableElement, ComponentRequirement>
-      dependenciesByDependencyMethod();
+  dependenciesByDependencyMethod();
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
   public final ComponentRequirement getDependencyThatDefinesMethod(Element method) {
@@ -196,7 +194,7 @@ public abstract class ComponentDescriptor {
    * factory method.
    */
   public abstract ImmutableBiMap<ComponentMethodDescriptor, ComponentDescriptor>
-      childComponentsDeclaredByFactoryMethods();
+  childComponentsDeclaredByFactoryMethods();
 
   /** Returns a map of {@link #childComponents()} indexed by {@link #typeElement()}. */
   @Memoized
@@ -216,18 +214,18 @@ public abstract class ComponentDescriptor {
    * builder method.
    */
   abstract ImmutableBiMap<ComponentMethodDescriptor, ComponentDescriptor>
-      childComponentsDeclaredByBuilderEntryPoints();
+  childComponentsDeclaredByBuilderEntryPoints();
 
   private final Supplier<ImmutableMap<TypeElement, ComponentDescriptor>>
       childComponentsByBuilderType =
-          Suppliers.memoize(
-              () ->
-                  childComponents().stream()
-                      .filter(child -> child.creatorDescriptor().isPresent())
-                      .collect(
-                          toImmutableMap(
-                              child -> child.creatorDescriptor().get().typeElement(),
-                              child -> child)));
+      Suppliers.memoize(
+          () ->
+              childComponents().stream()
+                  .filter(child -> child.creatorDescriptor().isPresent())
+                  .collect(
+                      toImmutableMap(
+                          child -> child.creatorDescriptor().get().typeElement(),
+                          child -> child)));
 
   /** Returns the child component with the given builder type. */
   final ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
@@ -246,7 +244,7 @@ public abstract class ComponentDescriptor {
 
   @Memoized
   ImmutableMap<BindingRequest, ComponentMethodDescriptor>
-      firstMatchingComponentMethods() {
+  firstMatchingComponentMethods() {
     Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
     for (ComponentMethodDescriptor method : entryPointMethods()) {
       methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
@@ -264,6 +262,7 @@ public abstract class ComponentDescriptor {
 
   // TODO(gak): Consider making this non-optional and revising the
   // interaction between the spec & generation
+
   /** Returns a descriptor for the creator type for this component type, if the user defined one. */
   public abstract Optional<ComponentCreatorDescriptor> creatorDescriptor();
 
@@ -336,7 +335,6 @@ public abstract class ComponentDescriptor {
 
     /** A builder of {@link ComponentMethodDescriptor}s. */
     @AutoValue.Builder
-    @CanIgnoreReturnValue
     public interface Builder {
       /** @see ComponentMethodDescriptor#methodElement() */
       Builder methodElement(ExecutableElement methodElement);
@@ -348,7 +346,6 @@ public abstract class ComponentDescriptor {
       Builder subcomponent(ComponentDescriptor subcomponent);
 
       /** Builds the descriptor. */
-      @CheckReturnValue
       ComponentMethodDescriptor build();
     }
   }

@@ -25,8 +25,8 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.producers.Producer;
-import java.util.Map;
 import jakarta.inject.Provider;
+import java.util.Map;
 
 /**
  * A {@link Producer} implementation used to implement {@link Map} bindings. This factory returns an

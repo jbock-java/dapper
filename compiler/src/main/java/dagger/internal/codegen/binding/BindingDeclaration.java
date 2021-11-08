@@ -44,11 +44,11 @@ public abstract class BindingDeclaration {
    */
   public static final Comparator<BindingDeclaration> COMPARATOR =
       comparing(
-              (BindingDeclaration declaration) ->
-                  declaration.contributingModule().isPresent()
-                      ? declaration.contributingModule()
-                      : declaration.bindingTypeElement(),
-              emptiesLast(comparing((TypeElement type) -> type.getQualifiedName().toString())))
+          (BindingDeclaration declaration) ->
+              declaration.contributingModule().isPresent()
+                  ? declaration.contributingModule()
+                  : declaration.bindingTypeElement(),
+          emptiesLast(comparing((TypeElement type) -> type.getQualifiedName().toString())))
           .thenComparing(
               (BindingDeclaration declaration) -> declaration.bindingElement(),
               emptiesLast(

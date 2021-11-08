@@ -296,5 +296,6 @@ public final class AssistedInjectionAnnotations {
     return builder.build();
   }
 
-  private AssistedInjectionAnnotations() {}
+  private AssistedInjectionAnnotations() {
+  }
 }

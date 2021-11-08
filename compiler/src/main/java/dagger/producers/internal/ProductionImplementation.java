@@ -33,4 +33,5 @@ import java.lang.annotation.Retention;
 @Retention(RUNTIME)
 @Qualifier
 @Beta
-public @interface ProductionImplementation {}
+public @interface ProductionImplementation {
+}

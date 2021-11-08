@@ -25,7 +25,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.FormatMethod;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -38,8 +37,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import javax.lang.model.util.Elements;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
-import javax.lang.model.util.Types;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 /**
@@ -56,7 +55,8 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
   public static final class Factory {
     private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-    @Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
+    @Inject
+    Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
       this.messageGeneratorFactory = messageGeneratorFactory;
     }
 
@@ -155,13 +155,12 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     @Override
     public void reportComponent(Diagnostic.Kind diagnosticKind, ComponentNode componentNode,
-        String message) {
+                                String message) {
       addMessage(diagnosticKind, message);
       messageGenerator.appendComponentPathUnlessAtRoot(messageBuilder, componentNode);
     }
 
     @Override
-    @FormatMethod
     public void reportComponent(
         Diagnostic.Kind diagnosticKind,
         ComponentNode componentNode,
@@ -174,13 +173,12 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     @Override
     public void reportBinding(Diagnostic.Kind diagnosticKind, MaybeBinding binding,
-        String message) {
+                              String message) {
       addMessage(diagnosticKind,
           String.format("%s%s", message, messageGenerator.getMessage(binding)));
     }
 
     @Override
-    @FormatMethod
     public void reportBinding(
         Diagnostic.Kind diagnosticKind,
         MaybeBinding binding,
@@ -198,7 +196,6 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     @Override
-    @FormatMethod
     public void reportDependency(
         Diagnostic.Kind diagnosticKind,
         DependencyEdge dependencyEdge,
@@ -230,7 +227,6 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     @Override
-    @FormatMethod
     public void reportSubcomponentFactoryMethod(
         Diagnostic.Kind diagnosticKind,
         ChildFactoryMethodEdge childFactoryMethodEdge,

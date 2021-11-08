@@ -29,4 +29,5 @@ import java.lang.annotation.Retention;
 @Documented
 @Retention(RUNTIME)
 @Scope
-public @interface ProductionScope {}
+public @interface ProductionScope {
+}

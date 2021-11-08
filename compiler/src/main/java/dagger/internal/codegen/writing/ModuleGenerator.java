@@ -25,4 +25,5 @@ import java.lang.annotation.Retention;
 /** Qualifier for a {@link SourceFileGenerator} for modules. */
 @Qualifier
 @Retention(RUNTIME)
-public @interface ModuleGenerator {}
+public @interface ModuleGenerator {
+}

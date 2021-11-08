@@ -23,7 +23,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.FormatMethod;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -114,7 +113,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
    * <i>rule</i> comes from calling {@link String#format(String, Object...)} on {@code ruleFormat}
    * and the other arguments.
    */
-  @FormatMethod
   protected final String bindingMethods(String ruleFormat, Object... args) {
     return bindingElements(ruleFormat, args);
   }

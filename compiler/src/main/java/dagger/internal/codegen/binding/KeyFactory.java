@@ -55,12 +55,12 @@ import dagger.producers.Production;
 import dagger.producers.internal.ProductionImplementation;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
-import jakarta.inject.Provider;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -181,9 +181,9 @@ public final class KeyFactory {
     return contributionType.equals(ContributionType.UNIQUE)
         ? key
         : key.toBuilder()
-            .multibindingContributionIdentifier(
-                new MultibindingContributionIdentifier(method, contributingModule))
-            .build();
+        .multibindingContributionIdentifier(
+            new MultibindingContributionIdentifier(method, contributingModule))
+        .build();
   }
 
   /**
@@ -198,9 +198,9 @@ public final class KeyFactory {
     TypeMirror keyType =
         MapType.isMap(returnType)
             ? mapOfFrameworkType(
-                MapType.from(returnType).keyType(),
-                elements.getTypeElement(Provider.class),
-                MapType.from(returnType).valueType())
+            MapType.from(returnType).keyType(),
+            elements.getTypeElement(Provider.class),
+            MapType.from(returnType).valueType())
             : returnType;
     return forMethod(method, keyType);
   }

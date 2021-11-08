@@ -148,7 +148,7 @@ public final class MapKeys {
       ContributionBinding binding, ClassName requestingClass, DaggerElements elements) {
     AnnotationMirror mapKeyAnnotation = binding.mapKeyAnnotation().get();
     return MapKeyAccessibility.isMapKeyAccessibleFrom(
-            mapKeyAnnotation, requestingClass.packageName())
+        mapKeyAnnotation, requestingClass.packageName())
         ? directMapKeyExpression(mapKeyAnnotation, elements)
         : CodeBlock.of("$T.create()", mapKeyProxyClassName(binding));
   }
@@ -218,5 +218,6 @@ public final class MapKeys {
                     .build());
   }
 
-  private MapKeys() {}
+  private MapKeys() {
+  }
 }

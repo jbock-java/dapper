@@ -16,7 +16,6 @@
 
 package dagger.spi;
 
-import com.google.errorprone.annotations.FormatMethod;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -41,7 +40,6 @@ public interface DiagnosticReporter {
    * Reports a diagnostic for a component. For non-root components, includes information about the
    * path from the root component.
    */
-  @FormatMethod
   void reportComponent(
       Diagnostic.Kind diagnosticKind,
       ComponentNode componentNode,
@@ -59,7 +57,6 @@ public interface DiagnosticReporter {
    * Reports a diagnostic for a binding or missing binding. Includes information about how the
    * binding is reachable from entry points.
    */
-  @FormatMethod
   void reportBinding(
       Diagnostic.Kind diagnosticKind,
       MaybeBinding binding,
@@ -78,7 +75,6 @@ public interface DiagnosticReporter {
    * Reports a diagnostic for a dependency. Includes information about how the dependency is
    * reachable from entry points.
    */
-  @FormatMethod
   void reportDependency(
       Diagnostic.Kind diagnosticKind,
       DependencyEdge dependencyEdge,
@@ -93,7 +89,6 @@ public interface DiagnosticReporter {
       String message);
 
   /** Reports a diagnostic for a subcomponent factory method. */
-  @FormatMethod
   void reportSubcomponentFactoryMethod(
       Diagnostic.Kind diagnosticKind,
       ChildFactoryMethodEdge childFactoryMethodEdge,

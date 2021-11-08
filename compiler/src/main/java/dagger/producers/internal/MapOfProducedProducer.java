@@ -27,9 +27,9 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
-import jakarta.inject.Provider;
 
 /**
  * A {@link Producer} implementation used to implement {@link Map} bindings. This producer returns a
@@ -57,31 +57,31 @@ public final class MapOfProducedProducer<K, V> extends AbstractMapProducer<K, V,
   }
 
   private static final Function<
-          Map.Entry<Object, Producer<Object>>,
-          ListenableFuture<Map.Entry<Object, Produced<Object>>>>
+      Map.Entry<Object, Producer<Object>>,
+      ListenableFuture<Map.Entry<Object, Produced<Object>>>>
       ENTRY_UNWRAPPER =
-          new Function<
-              Map.Entry<Object, Producer<Object>>,
-              ListenableFuture<Map.Entry<Object, Produced<Object>>>>() {
-            @Override
-            public ListenableFuture<Map.Entry<Object, Produced<Object>>> apply(
-                final Map.Entry<Object, Producer<Object>> entry) {
-              return transform(
-                  Producers.createFutureProduced(entry.getValue().get()),
-                  new Function<Produced<Object>, Map.Entry<Object, Produced<Object>>>() {
-                    @Override
-                    public Map.Entry<Object, Produced<Object>> apply(Produced<Object> value) {
-                      return Maps.immutableEntry(entry.getKey(), value);
-                    }
-                  },
-                  directExecutor());
-            }
-          };
+      new Function<
+          Map.Entry<Object, Producer<Object>>,
+          ListenableFuture<Map.Entry<Object, Produced<Object>>>>() {
+        @Override
+        public ListenableFuture<Map.Entry<Object, Produced<Object>>> apply(
+            final Map.Entry<Object, Producer<Object>> entry) {
+          return transform(
+              Producers.createFutureProduced(entry.getValue().get()),
+              new Function<Produced<Object>, Map.Entry<Object, Produced<Object>>>() {
+                @Override
+                public Map.Entry<Object, Produced<Object>> apply(Produced<Object> value) {
+                  return Maps.immutableEntry(entry.getKey(), value);
+                }
+              },
+              directExecutor());
+        }
+      };
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // bivariate implementation
   private static <K, V>
-      Function<Map.Entry<K, Producer<V>>, ListenableFuture<Map.Entry<K, Produced<V>>>>
-          entryUnwrapper() {
+  Function<Map.Entry<K, Producer<V>>, ListenableFuture<Map.Entry<K, Produced<V>>>>
+  entryUnwrapper() {
     return (Function) ENTRY_UNWRAPPER;
   }
 

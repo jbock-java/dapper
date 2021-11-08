@@ -34,7 +34,8 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class MoreAnnotationMirrors {
 
-  private MoreAnnotationMirrors() {}
+  private MoreAnnotationMirrors() {
+  }
 
   /**
    * Wraps an {@link Optional} of a type in an {@code Optional} of a {@link Equivalence.Wrapper} for

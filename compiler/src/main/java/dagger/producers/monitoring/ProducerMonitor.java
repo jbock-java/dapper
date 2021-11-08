@@ -100,7 +100,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void requested() {}
+  public void requested() {
+  }
 
   /**
    * Called when all of the producer's inputs are available. This is called regardless of whether
@@ -113,7 +114,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void ready() {}
+  public void ready() {
+  }
 
   /**
    * Called when the producer method is about to start executing. This will be called from the same
@@ -124,7 +126,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void methodStarting() {}
+  public void methodStarting() {
+  }
 
   /**
    * Called when the producer method has finished executing. This will be called from the same
@@ -135,7 +138,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void methodFinished() {}
+  public void methodFinished() {
+  }
 
   /**
    * Called when the producer’s future has completed successfully with a value.
@@ -145,7 +149,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void succeeded(@SuppressWarnings("unused") Object value) {}
+  public void succeeded(@SuppressWarnings("unused") Object value) {
+  }
 
   /**
    * Called when the producer's future has failed with an exception.
@@ -155,7 +160,8 @@ public abstract class ProducerMonitor {
    *
    * <p>This implementation is a no-op.
    */
-  public void failed(@SuppressWarnings("unused") Throwable t) {}
+  public void failed(@SuppressWarnings("unused") Throwable t) {
+  }
 
   /**
    * Adds this monitor's completion methods as a callback to the future. This is only intended to be

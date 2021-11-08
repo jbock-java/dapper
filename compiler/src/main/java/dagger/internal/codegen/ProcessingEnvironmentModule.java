@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen;
 
-import com.google.googlejavaformat.java.filer.FormattingFiler;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -58,12 +57,8 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  static Filer filer(CompilerOptions compilerOptions, ProcessingEnvironment processingEnvironment) {
-    if (compilerOptions.headerCompilation() || !compilerOptions.formatGeneratedSource()) {
-      return processingEnvironment.getFiler();
-    } else {
-      return new FormattingFiler(processingEnvironment.getFiler());
-    }
+  static Filer filer(ProcessingEnvironment processingEnvironment) {
+    return processingEnvironment.getFiler();
   }
 
   @Provides

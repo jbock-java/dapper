@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.lang.model.element.TypeElement;
 
 // TODO(bcorso): Remove the LegacyBindingGraph after we've migrated to the new BindingGraph.
+
 /** The canonical representation of a full-resolved graph. */
 final class LegacyBindingGraph {
   private final ComponentDescriptor componentDescriptor;

@@ -131,5 +131,6 @@ public final class DaggerStreams {
         : StreamSupport.stream(iterable.spliterator(), false);
   }
 
-  private DaggerStreams() {}
+  private DaggerStreams() {
+  }
 }

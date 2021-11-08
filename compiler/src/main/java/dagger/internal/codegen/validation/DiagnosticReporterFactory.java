@@ -22,7 +22,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.FormatMethod;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -91,7 +90,6 @@ final class DiagnosticReporterFactory {
     }
 
     @Override
-    @FormatMethod
     public void reportComponent(
         Diagnostic.Kind diagnosticKind,
         ComponentNode componentNode,

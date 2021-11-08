@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dagger.Component;
 import dagger.MembersInjector;
 import dagger.Provides;
@@ -238,7 +237,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     return tryRegisterConstructor(constructorElement, Optional.empty(), false);
   }
 
-  @CanIgnoreReturnValue
   private Optional<ProvisionBinding> tryRegisterConstructor(
       ExecutableElement constructorElement,
       Optional<TypeMirror> resolvedType,
@@ -270,7 +268,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     return tryRegisterMembersInjectedType(typeElement, Optional.empty(), false);
   }
 
-  @CanIgnoreReturnValue
   private Optional<MembersInjectionBinding> tryRegisterMembersInjectedType(
       TypeElement typeElement,
       Optional<TypeMirror> resolvedType,
@@ -299,7 +296,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     return Optional.of(binding);
   }
 
-  @CanIgnoreReturnValue
   @Override
   public Optional<ProvisionBinding> getOrFindProvisionBinding(Key key) {
     checkNotNull(key);
@@ -331,7 +327,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     }
   }
 
-  @CanIgnoreReturnValue
   @Override
   public Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key) {
     checkNotNull(key);

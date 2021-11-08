@@ -25,8 +25,6 @@ import static javax.tools.Diagnostic.Kind.WARNING;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import java.util.Optional;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
@@ -144,9 +142,13 @@ public final class ValidationReport<T extends Element> {
   @AutoValue
   public abstract static class Item {
     public abstract String message();
+
     public abstract Kind kind();
+
     public abstract Element element();
+
     public abstract Optional<AnnotationMirror> annotation();
+
     abstract Optional<AnnotationValue> annotationValue();
   }
 
@@ -155,7 +157,6 @@ public final class ValidationReport<T extends Element> {
   }
 
   /** A {@link ValidationReport} builder. */
-  @CanIgnoreReturnValue
   public static final class Builder<T extends Element> {
     private final T subject;
     private final ImmutableSet.Builder<Item> items = ImmutableSet.builder();
@@ -166,7 +167,6 @@ public final class ValidationReport<T extends Element> {
       this.subject = subject;
     }
 
-    @CheckReturnValue
     T getSubject() {
       return subject;
     }
@@ -277,7 +277,6 @@ public final class ValidationReport<T extends Element> {
       return this;
     }
 
-    @CheckReturnValue
     public ValidationReport<T> build() {
       return new ValidationReport<>(subject, items.build(), subreports.build(), markedDirty);
     }

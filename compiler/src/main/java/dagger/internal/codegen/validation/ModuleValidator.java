@@ -51,7 +51,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.FormatMethod;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.BindingGraphFactory;
@@ -440,7 +439,6 @@ public final class ModuleValidator {
                   return null;
                 }
 
-                @FormatMethod
                 private void reportError(String format, Object... args) {
                   subreport.addError(
                       String.format(format, args), annotatedType, annotation, includedModule);

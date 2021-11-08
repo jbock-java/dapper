@@ -26,4 +26,5 @@ import java.lang.annotation.Retention;
  */
 @Retention(RUNTIME)
 @Qualifier
-public @interface TopLevel {}
+public @interface TopLevel {
+}

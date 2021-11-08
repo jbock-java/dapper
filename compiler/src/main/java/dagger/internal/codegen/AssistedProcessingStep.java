@@ -102,7 +102,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
       return AssistedInjectionAnnotations.isAssistedFactoryType(enclosingElement)
           // This assumes we've already validated AssistedFactory and that a valid method exists.
           && AssistedInjectionAnnotations.assistedFactoryMethod(enclosingElement, elements)
-              .equals(element);
+          .equals(element);
     }
     return false;
   }

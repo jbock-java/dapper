@@ -37,4 +37,5 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 @Retention(RUNTIME)
 @Beta
-public @interface Produces {}
+public @interface Produces {
+}

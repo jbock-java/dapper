@@ -94,5 +94,6 @@ public final class DaggerGraphs {
     return ImmutableSet.copyOf(difference(graph.nodes(), reachableNodes(graph, node)));
   }
 
-  private DaggerGraphs() {}
+  private DaggerGraphs() {
+  }
 }

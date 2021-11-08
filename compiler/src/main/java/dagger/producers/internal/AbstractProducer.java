@@ -28,7 +28,8 @@ public abstract class AbstractProducer<T> implements CancellableProducer<T> {
   private final AtomicBoolean requested = new AtomicBoolean();
   private final NonExternallyCancellableFuture<T> future = new NonExternallyCancellableFuture<T>();
 
-  protected AbstractProducer() {}
+  protected AbstractProducer() {
+  }
 
   /** Computes this producer's future, which is then cached in {@link #get}. */
   protected abstract ListenableFuture<T> compute();

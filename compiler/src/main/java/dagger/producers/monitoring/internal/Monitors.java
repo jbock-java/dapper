@@ -21,11 +21,11 @@ import com.google.common.collect.Iterables;
 import dagger.producers.monitoring.ProducerMonitor;
 import dagger.producers.monitoring.ProducerToken;
 import dagger.producers.monitoring.ProductionComponentMonitor;
+import jakarta.inject.Provider;
 import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jakarta.inject.Provider;
 
 /**
  * Utility methods relating to monitoring, for use in generated producers code.
@@ -333,12 +333,12 @@ public final class Monitors {
 
   private static final Provider<ProductionComponentMonitor>
       NO_OP_PRODUCTION_COMPONENT_MONITOR_PROVIDER =
-          new Provider<ProductionComponentMonitor>() {
-            @Override
-            public ProductionComponentMonitor get() {
-              return ProductionComponentMonitor.noOp();
-            }
-          };
+      new Provider<ProductionComponentMonitor>() {
+        @Override
+        public ProductionComponentMonitor get() {
+          return ProductionComponentMonitor.noOp();
+        }
+      };
 
   private static void logCreateException(
       RuntimeException e, ProductionComponentMonitor.Factory factory, Object component) {
@@ -383,5 +383,6 @@ public final class Monitors {
         e);
   }
 
-  private Monitors() {}
+  private Monitors() {
+  }
 }

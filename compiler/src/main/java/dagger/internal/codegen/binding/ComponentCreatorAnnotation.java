@@ -142,7 +142,7 @@ public enum ComponentCreatorAnnotation {
   }
 
   private static Collector<ComponentCreatorAnnotation, ?, ImmutableSet<ClassName>>
-      toAnnotationClasses() {
+  toAnnotationClasses() {
     return mapping(ComponentCreatorAnnotation::annotation, toImmutableSet());
   }
 }

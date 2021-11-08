@@ -24,4 +24,5 @@ import java.lang.annotation.Retention;
 /** A {@code Scope} that encompasses a single component implementation. */
 @Retention(RUNTIME)
 @Scope
-public @interface PerComponentImplementation {}
+public @interface PerComponentImplementation {
+}

@@ -81,7 +81,7 @@ public abstract class ComponentCreatorDescriptor {
    * method should only be called when validating the descriptor.
    */
   abstract ImmutableSetMultimap<ComponentRequirement, VariableElement>
-      unvalidatedFactoryParameters();
+  unvalidatedFactoryParameters();
 
   /**
    * Multimap of component requirements to elements (methods or parameters) that set that
@@ -91,7 +91,7 @@ public abstract class ComponentCreatorDescriptor {
    * method should only be called when validating the descriptor.
    */
   public final ImmutableSetMultimap<ComponentRequirement, Element>
-      unvalidatedRequirementElements() {
+  unvalidatedRequirementElements() {
     // ComponentCreatorValidator ensures that there are either setter methods or factory method
     // parameters, but not both, so we can cheat a little here since we know that only one of
     // the two multimaps will be non-empty.

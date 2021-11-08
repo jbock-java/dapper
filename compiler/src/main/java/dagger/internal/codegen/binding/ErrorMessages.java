@@ -41,11 +41,11 @@ public final class ErrorMessages {
 
   private static final ImmutableMap<ComponentKind, Function<String, String>>
       COMPONENT_TRANSFORMATIONS =
-          ImmutableMap.of(
-              ComponentKind.COMPONENT, UnaryOperator.identity(),
-              ComponentKind.SUBCOMPONENT, SUBCOMPONENT,
-              ComponentKind.PRODUCTION_COMPONENT, PRODUCTION,
-              ComponentKind.PRODUCTION_SUBCOMPONENT, PRODUCTION.andThen(SUBCOMPONENT));
+      ImmutableMap.of(
+          ComponentKind.COMPONENT, UnaryOperator.identity(),
+          ComponentKind.SUBCOMPONENT, SUBCOMPONENT,
+          ComponentKind.PRODUCTION_COMPONENT, PRODUCTION,
+          ComponentKind.PRODUCTION_SUBCOMPONENT, PRODUCTION.andThen(SUBCOMPONENT));
 
   public static ComponentMessages componentMessagesFor(ComponentKind componentKind) {
     return new ComponentMessages(COMPONENT_TRANSFORMATIONS.get(componentKind));
@@ -354,5 +354,6 @@ public final class ErrorMessages {
     }
   }
 
-  private ErrorMessages() {}
+  private ErrorMessages() {
+  }
 }

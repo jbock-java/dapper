@@ -47,6 +47,6 @@ public final class MonitoringModuleProcessingStep extends TypeCheckingProcessing
 
   @Override
   protected void process(TypeElement element, ImmutableSet<ClassName> annotations) {
-      monitoringModuleGenerator.generate(MoreElements.asType(element), messager);
+    monitoringModuleGenerator.generate(MoreElements.asType(element), messager);
   }
 }

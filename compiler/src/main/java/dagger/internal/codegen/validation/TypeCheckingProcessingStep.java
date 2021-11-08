@@ -27,10 +27,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.ClassName;
-
-import javax.lang.model.element.Element;
 import java.util.Set;
 import java.util.function.Function;
+import javax.lang.model.element.Element;
 
 /**
  * A {@link Step} that processes one element at a time and defers any for which {@link

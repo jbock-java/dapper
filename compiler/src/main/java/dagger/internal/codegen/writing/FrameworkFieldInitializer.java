@@ -183,9 +183,9 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
   private boolean isProvider() {
     return binding.bindingType().equals(BindingType.PROVISION)
         && frameworkInstanceCreationExpression
-            .alternativeFrameworkClass()
-            .map(TypeNames.PROVIDER::equals)
-            .orElse(true);
+        .alternativeFrameworkClass()
+        .map(TypeNames.PROVIDER::equals)
+        .orElse(true);
   }
 
   /** Initialization state for a factory field. */

@@ -36,7 +36,8 @@ import javax.lang.model.util.ElementKindVisitor8;
  */
 public final class ElementFormatter extends Formatter<Element> {
   @Inject
-  ElementFormatter() {}
+  ElementFormatter() {
+  }
 
   @Override
   public String format(Element element) {

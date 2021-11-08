@@ -21,7 +21,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.validation.ValidationReport;
-
 import java.util.Optional;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;

@@ -24,8 +24,8 @@ import dagger.Lazy;
 import dagger.MembersInjector;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import java.util.Set;
 import jakarta.inject.Provider;
+import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -50,7 +50,7 @@ public final class FrameworkTypes {
   public static boolean isFrameworkType(TypeMirror type) {
     return isType(type)
         && (typeIsOneOf(PROVISION_TYPES, type)
-            || typeIsOneOf(PRODUCTION_TYPES, type));
+        || typeIsOneOf(PRODUCTION_TYPES, type));
   }
 
   private static boolean typeIsOneOf(Set<Class<?>> classes, TypeMirror type) {
@@ -62,5 +62,6 @@ public final class FrameworkTypes {
     return false;
   }
 
-  private FrameworkTypes() {}
+  private FrameworkTypes() {
+  }
 }

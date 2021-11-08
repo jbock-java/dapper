@@ -77,7 +77,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                   // properly scoped ancestor component, so ignore them here.
                   if (binding.kind().equals(INJECTION)
                       && (bindingGraph.rootComponentNode().isSubcomponent()
-                          || !bindingGraph.rootComponentNode().isRealComponent())) {
+                      || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
                   incompatibleBindings.put(componentNode, binding);

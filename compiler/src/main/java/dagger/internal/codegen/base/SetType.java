@@ -115,6 +115,6 @@ public abstract class SetType {
    * @throws IllegalArgumentException if {@code key.type()} is not a {@link Set} type
    */
   public static SetType from(Key key) {
-    return from (key.type());
+    return from(key.type());
   }
 }

@@ -318,7 +318,8 @@ public abstract class BindingGraph {
    * An edge in the binding graph. Either a {@link DependencyEdge}, a {@link
    * ChildFactoryMethodEdge}, or a {@link SubcomponentCreatorBindingEdge}.
    */
-  public interface Edge {}
+  public interface Edge {
+  }
 
   /**
    * An edge that represents a dependency on a binding.

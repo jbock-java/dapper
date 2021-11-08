@@ -31,7 +31,6 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.FormatMethod;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.FrameworkTypes;
@@ -90,7 +89,6 @@ public abstract class BindingElementValidator<E extends Element> {
    * <i>rule</i> comes from calling {@link String#format(String, Object...)} on {@code ruleFormat}
    * and the other arguments.
    */
-  @FormatMethod
   protected final String bindingElements(String ruleFormat, Object... args) {
     return new Formatter().format("%s ", bindingElements()).format(ruleFormat, args).toString();
   }
@@ -156,7 +154,8 @@ public abstract class BindingElementValidator<E extends Element> {
     }
 
     /** Check any additional properties of the element. Does nothing by default. */
-    protected void checkAdditionalProperties() {}
+    protected void checkAdditionalProperties() {
+    }
 
     /**
      * The type declared by this binding element. This may differ from a binding's {@link
@@ -220,8 +219,8 @@ public abstract class BindingElementValidator<E extends Element> {
     /** Adds errors for unqualified assisted types. */
     private void checkAssistedType() {
       if (qualifiers.isEmpty()
-              && bindingElementType().isPresent()
-              && bindingElementType().get().getKind() == DECLARED) {
+          && bindingElementType().isPresent()
+          && bindingElementType().get().getKind() == DECLARED) {
         TypeElement keyElement = asTypeElement(bindingElementType().get());
         if (isAssistedInjectionType(keyElement)) {
           report.addError("Dagger does not support providing @AssistedInject types.", keyElement);

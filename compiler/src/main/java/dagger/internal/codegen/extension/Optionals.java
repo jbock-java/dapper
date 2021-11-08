@@ -57,12 +57,13 @@ public final class Optionals {
   public static <T> T rootmostValue(T start, Function<T, Optional<T>> nextFunction) {
     T current = start;
     for (Optional<T> next = nextFunction.apply(start);
-        next.isPresent();
-        next = nextFunction.apply(current)) {
+         next.isPresent();
+         next = nextFunction.apply(current)) {
       current = next.get();
     }
     return current;
   }
 
-  private Optionals() {}
+  private Optionals() {
+  }
 }

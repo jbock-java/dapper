@@ -24,11 +24,11 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.producers.Producer;
+import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import jakarta.inject.Provider;
 
 /**
  * A {@link Producer} implementation used to implement {@link Map} bindings. This producer returns a

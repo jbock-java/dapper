@@ -107,6 +107,7 @@ final class BindingGraphConverter {
   @AutoValue
   abstract static class ResolvedBindingsWithPath {
     abstract ResolvedBindings resolvedBindings();
+
     abstract ComponentPath componentPath();
 
     static ResolvedBindingsWithPath create(

@@ -41,18 +41,18 @@ public final class MoreAnnotationValues {
 
   private static final AnnotationValueVisitor<ImmutableList<AnnotationValue>, String>
       AS_ANNOTATION_VALUES =
-          new SimpleAnnotationValueVisitor8<ImmutableList<AnnotationValue>, String>() {
-            @Override
-            public ImmutableList<AnnotationValue> visitArray(
-                List<? extends AnnotationValue> vals, String elementName) {
-              return ImmutableList.copyOf(vals);
-            }
+      new SimpleAnnotationValueVisitor8<ImmutableList<AnnotationValue>, String>() {
+        @Override
+        public ImmutableList<AnnotationValue> visitArray(
+            List<? extends AnnotationValue> vals, String elementName) {
+          return ImmutableList.copyOf(vals);
+        }
 
-            @Override
-            protected ImmutableList<AnnotationValue> defaultAction(Object o, String elementName) {
-              throw new IllegalArgumentException(elementName + " is not an array: " + o);
-            }
-          };
+        @Override
+        protected ImmutableList<AnnotationValue> defaultAction(Object o, String elementName) {
+          throw new IllegalArgumentException(elementName + " is not an array: " + o);
+        }
+      };
 
   /**
    * Returns the type represented by an annotation value.
@@ -121,5 +121,6 @@ public final class MoreAnnotationValues {
         .anyMatch(member -> member.getSimpleName().contentEquals(valueName));
   }
 
-  private MoreAnnotationValues() {}
+  private MoreAnnotationValues() {
+  }
 }

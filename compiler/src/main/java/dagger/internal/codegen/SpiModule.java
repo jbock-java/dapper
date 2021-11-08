@@ -36,7 +36,8 @@ import java.util.ServiceLoader;
 /** Contains the bindings for {@link BindingGraphValidator} from external SPI providers. */
 @Module
 abstract class SpiModule {
-  private SpiModule() {}
+  private SpiModule() {
+  }
 
   @Provides
   @Singleton
@@ -52,10 +53,12 @@ abstract class SpiModule {
   @Qualifier
   @Retention(RUNTIME)
   @Target({FIELD, PARAMETER, METHOD})
-  @interface TestingPlugins {}
+  @interface TestingPlugins {
+  }
 
   @Qualifier
   @Retention(RUNTIME)
   @Target({PARAMETER, METHOD})
-  @interface ProcessorClassLoader {}
+  @interface ProcessorClassLoader {
+  }
 }

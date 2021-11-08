@@ -28,4 +28,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface Validation {}
+public @interface Validation {
+}

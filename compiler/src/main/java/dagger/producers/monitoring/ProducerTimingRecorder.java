@@ -47,7 +47,8 @@ public abstract class ProducerTimingRecorder {
    *     execute.
    */
   @SuppressWarnings("GoodTime") // should accept a java.time.Duration x2 (?)
-  public void recordMethod(long startedNanos, long durationNanos) {}
+  public void recordMethod(long startedNanos, long durationNanos) {
+  }
 
   /**
    * Reports that the producer's future has succeeded with the given statistics.
@@ -58,7 +59,8 @@ public abstract class ProducerTimingRecorder {
    *     from when the producer method started to when the future finished.
    */
   @SuppressWarnings("GoodTime") // should accept a java.time.Duration
-  public void recordSuccess(long latencyNanos) {}
+  public void recordSuccess(long latencyNanos) {
+  }
 
   /**
    * Reports that the producer's future has failed with the given statistics.
@@ -68,7 +70,8 @@ public abstract class ProducerTimingRecorder {
    *     from when the producer method started to when the future finished.
    */
   @SuppressWarnings("GoodTime") // should accept a java.time.Duration
-  public void recordFailure(Throwable exception, long latencyNanos) {}
+  public void recordFailure(Throwable exception, long latencyNanos) {
+  }
 
   /**
    * Reports that the producer was skipped because one of its inputs failed.
@@ -76,12 +79,14 @@ public abstract class ProducerTimingRecorder {
    * @param exception the exception that its input failed with. If multiple inputs failed, this
    *    exception will be chosen arbitrarily from the input failures.
    */
-  public void recordSkip(Throwable exception) {}
+  public void recordSkip(Throwable exception) {
+  }
 
   /** Returns a producer recorder that does nothing. */
   public static ProducerTimingRecorder noOp() {
     return NO_OP;
   }
 
-  private static final ProducerTimingRecorder NO_OP = new ProducerTimingRecorder() {};
+  private static final ProducerTimingRecorder NO_OP = new ProducerTimingRecorder() {
+  };
 }

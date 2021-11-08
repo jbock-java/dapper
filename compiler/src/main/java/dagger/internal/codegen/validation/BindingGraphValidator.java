@@ -72,7 +72,7 @@ public final class BindingGraphValidator {
 
     boolean errorsAsWarnings =
         graph.isFullBindingGraph()
-        && compilerOptions.fullBindingGraphValidationType().equals(ValidationType.WARNING);
+            && compilerOptions.fullBindingGraphValidationType().equals(ValidationType.WARNING);
 
     return runPlugins(validationPlugins, graph, errorsAsWarnings);
   }

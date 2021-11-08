@@ -54,13 +54,13 @@ final class OptionalFactoryInstanceCreationExpression
     return binding.dependencies().isEmpty()
         ? optionalFactories.absentOptionalProvider(binding)
         : optionalFactories.presentOptionalFactory(
-            binding,
-            componentBindingExpressions
-                .getDependencyExpression(
-                    bindingRequest(
-                        getOnlyElement(binding.dependencies()).key(), binding.frameworkType()),
-                    componentImplementation.shardImplementation(binding).name())
-                .codeBlock());
+        binding,
+        componentBindingExpressions
+            .getDependencyExpression(
+                bindingRequest(
+                    getOnlyElement(binding.dependencies()).key(), binding.frameworkType()),
+                componentImplementation.shardImplementation(binding).name())
+            .codeBlock());
   }
 
   @Override

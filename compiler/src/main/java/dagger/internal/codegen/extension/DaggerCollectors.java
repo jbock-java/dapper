@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collector;
-import javax.annotation.Nullable;
 
 /**
  * A copy of {@link com.google.common.collect.MoreCollectors} to avoid issues with the '-android'
@@ -76,8 +75,8 @@ public final class DaggerCollectors {
   private static final class ToOptionalState {
     static final int MAX_EXTRAS = 4;
 
-    @Nullable Object element;
-    @Nullable List<Object> extras;
+    Object element;
+    List<Object> extras;
 
     ToOptionalState() {
       element = null;
@@ -151,5 +150,6 @@ public final class DaggerCollectors {
     }
   }
 
-  private DaggerCollectors() {}
+  private DaggerCollectors() {
+  }
 }

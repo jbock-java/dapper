@@ -33,5 +33,6 @@ public abstract class ProductionExecutorModule {
   @ProductionImplementation
   abstract Executor productionImplementationExecutor(@Production Executor executor);
 
-  private ProductionExecutorModule() {}
+  private ProductionExecutorModule() {
+  }
 }

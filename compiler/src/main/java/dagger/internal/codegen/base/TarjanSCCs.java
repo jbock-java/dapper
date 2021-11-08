@@ -106,5 +106,6 @@ public final class TarjanSCCs {
     }
   }
 
-  private TarjanSCCs() {}
+  private TarjanSCCs() {
+  }
 }

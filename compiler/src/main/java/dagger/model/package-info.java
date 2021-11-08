@@ -23,9 +23,7 @@
  * package (i.e. via {@code @AutoValue}) or by Dagger's processor. This applies to test code as
  * well, so if you need a fake, please file a feature request instead of implementing it yourself.
  */
-@CheckReturnValue
 @Beta
 package dagger.model;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.Beta;

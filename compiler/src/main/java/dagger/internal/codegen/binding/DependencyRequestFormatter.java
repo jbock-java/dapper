@@ -19,7 +19,6 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.base.RequestKinds.requestType;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dagger.Provides;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -75,7 +74,6 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
    * Appends a newline and the formatted dependency request unless {@link
    * #format(DependencyRequest)} returns the empty string.
    */
-  @CanIgnoreReturnValue
   public StringBuilder appendFormatLine(
       StringBuilder builder, DependencyRequest dependencyRequest) {
     String formatted = format(dependencyRequest);

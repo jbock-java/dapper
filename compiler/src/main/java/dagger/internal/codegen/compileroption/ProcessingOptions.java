@@ -27,4 +27,5 @@ import java.lang.annotation.Retention;
  */
 @Retention(RUNTIME)
 @Qualifier
-public @interface ProcessingOptions {}
+public @interface ProcessingOptions {
+}

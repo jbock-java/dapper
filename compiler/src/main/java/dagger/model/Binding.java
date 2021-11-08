@@ -40,6 +40,7 @@ public interface Binding extends MaybeBinding {
   default Optional<Binding> binding() {
     return Optional.of(this);
   }
+
   /**
    * The dependencies of this binding. The order of the dependencies corresponds to the order in
    * which they will be injected when the binding is requested.

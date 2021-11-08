@@ -41,8 +41,6 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.Edge;
-import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.Key;
 import java.util.Comparator;
@@ -96,7 +94,8 @@ public abstract class BindingGraph {
     private ImmutableMap<ComponentPath, ComponentNode> componentNodes;
     private ImmutableSetMultimap<ComponentNode, ComponentNode> subcomponentNodes;
 
-    TopLevelBindingGraph() {}
+    TopLevelBindingGraph() {
+    }
 
     // This overrides dagger.model.BindingGraph with a more efficient implementation.
     @Override
@@ -219,7 +218,8 @@ public abstract class BindingGraph {
   private ImmutableSet<ModuleDescriptor> ownedModules;
   private ImmutableSet<TypeElement> bindingModules;
 
-  BindingGraph() {}
+  BindingGraph() {
+  }
 
   /** Returns the {@link ComponentNode} for this graph. */
   public abstract ComponentNode componentNode();
@@ -244,8 +244,8 @@ public abstract class BindingGraph {
   public final Optional<Binding> localContributionBinding(Key key) {
     return contributionBindings.containsKey(key)
         ? Optional.of(contributionBindings.get(key))
-            .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
-            .map(BindingNode::delegate)
+        .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
+        .map(BindingNode::delegate)
         : Optional.empty();
   }
 
@@ -256,8 +256,8 @@ public abstract class BindingGraph {
   public final Optional<Binding> localMembersInjectionBinding(Key key) {
     return membersInjectionBindings.containsKey(key)
         ? Optional.of(membersInjectionBindings.get(key))
-            .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
-            .map(BindingNode::delegate)
+        .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
+        .map(BindingNode::delegate)
         : Optional.empty();
   }
 

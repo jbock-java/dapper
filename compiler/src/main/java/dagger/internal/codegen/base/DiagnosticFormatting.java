@@ -68,5 +68,6 @@ public final class DiagnosticFormatting {
     return result.toString();
   }
 
-  private DiagnosticFormatting() {}
+  private DiagnosticFormatting() {
+  }
 }

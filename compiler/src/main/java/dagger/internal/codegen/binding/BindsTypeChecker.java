@@ -79,10 +79,10 @@ public final class BindsTypeChecker {
   private ImmutableList<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
     ImmutableList.Builder<ExecutableElement> methodsForName = ImmutableList.builder();
     for (ExecutableElement method :
-        // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
-        // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
-        // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
-        // getLocalAndInheritedMethods ensures that the method will always be present.
+      // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
+      // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
+      // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
+      // getLocalAndInheritedMethods ensures that the method will always be present.
         elements.getLocalAndInheritedMethods(MoreTypes.asTypeElement(type))) {
       if (method.getSimpleName().contentEquals(methodName)) {
         methodsForName.add(method);

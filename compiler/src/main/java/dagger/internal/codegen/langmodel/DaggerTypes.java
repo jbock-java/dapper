@@ -24,8 +24,6 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
-import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -64,6 +62,7 @@ public final class DaggerTypes implements Types {
 
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreTypes?
+
   /**
    * Returns true if the raw type underlying the given {@link TypeMirror} represents the same raw
    * type as the given {@link Class} and throws an IllegalArgumentException if the {@link

@@ -27,7 +27,6 @@ import static java.util.Collections.disjoint;
 import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
@@ -141,7 +140,6 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
     return report.isClean();
   }
 
-  @CanIgnoreReturnValue
   private boolean validateFullBindingGraph(ComponentDescriptor componentDescriptor) {
     TypeElement component = componentDescriptor.typeElement();
     if (!bindingGraphValidator.shouldDoFullBindingGraphValidation(component)) {

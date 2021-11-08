@@ -272,5 +272,6 @@ public final class Accessibility {
     return type.accept(RAW_TYPE_ACCESSIBILITY_VISITOR, Optional.empty());
   }
 
-  private Accessibility() {}
+  private Accessibility() {
+  }
 }

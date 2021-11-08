@@ -29,10 +29,10 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import jakarta.inject.Provider;
 
 /**
  * Utility methods for use in generated producer code.
@@ -220,7 +220,8 @@ public final class Producers {
    */
   private abstract static class CompletedProducer<T> implements CancellableProducer<T> {
     @Override
-    public void cancel(boolean mayInterruptIfRunning) {}
+    public void cancel(boolean mayInterruptIfRunning) {
+    }
 
     @Override
     public Producer<T> newDependencyView() {
@@ -233,5 +234,6 @@ public final class Producers {
     }
   }
 
-  private Producers() {}
+  private Producers() {
+  }
 }

@@ -47,9 +47,9 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
   public String toString() {
     return "subcomponent declared by "
         + (subcomponentDeclarations.size() == 1
-            ? getOnlyElement(declaringModules()).getQualifiedName()
-            : declaringModules().stream()
-                .map(TypeElement::getQualifiedName)
-                .collect(joining(", ", "{", "}")));
+        ? getOnlyElement(declaringModules()).getQualifiedName()
+        : declaringModules().stream()
+        .map(TypeElement::getQualifiedName)
+        .collect(joining(", ", "{", "}")));
   }
 }

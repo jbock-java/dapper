@@ -190,8 +190,8 @@ public final class ComponentDescriptorFactory {
         enclosedCreators.isEmpty()
             ? Optional.empty()
             : Optional.of(
-                ComponentCreatorDescriptor.create(
-                    getOnlyElement(enclosedCreators), elements, types, dependencyRequestFactory));
+            ComponentCreatorDescriptor.create(
+                getOnlyElement(enclosedCreators), elements, types, dependencyRequestFactory));
 
     ImmutableSet<Scope> scopes = scopesOf(typeElement);
     if (componentAnnotation.isProduction()) {
@@ -246,16 +246,16 @@ public final class ComponentDescriptorFactory {
         descriptor.dependencyRequest(
             componentAnnotation.isProduction()
                 ? dependencyRequestFactory.forComponentProductionMethod(
-                    componentMethod, resolvedComponentMethod)
+                componentMethod, resolvedComponentMethod)
                 : dependencyRequestFactory.forComponentProvisionMethod(
-                    componentMethod, resolvedComponentMethod));
+                componentMethod, resolvedComponentMethod));
         break;
 
       case 1:
         checkArgument(
             returnType.getKind().equals(VOID)
                 || MoreTypes.equivalence()
-                    .equivalent(returnType, resolvedComponentMethod.getParameterTypes().get(0)),
+                .equivalent(returnType, resolvedComponentMethod.getParameterTypes().get(0)),
             "members injection method must return void or parameter type: %s",
             componentMethod);
         descriptor.dependencyRequest(

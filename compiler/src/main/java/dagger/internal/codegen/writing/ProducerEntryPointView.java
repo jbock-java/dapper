@@ -63,7 +63,7 @@ final class ProducerEntryPointView {
       ClassName requestingClass) {
     if (shardImplementation.componentDescriptor().isProduction()
         && (componentMethod.dependencyRequest().get().kind().equals(RequestKind.FUTURE)
-            || componentMethod.dependencyRequest().get().kind().equals(RequestKind.PRODUCER))) {
+        || componentMethod.dependencyRequest().get().kind().equals(RequestKind.PRODUCER))) {
       MemberSelect field = createField(producerExpression, componentMethod);
       return Optional.of(
           Expression.create(fieldType(componentMethod), field.getExpressionFor(requestingClass)));
@@ -102,9 +102,9 @@ final class ProducerEntryPointView {
             shardImplementation.isComponentShard()
                 ? "this"
                 : shardImplementation
-                    .getComponentImplementation()
-                    .getComponentShard()
-                    .shardFieldReference());
+                .getComponentImplementation()
+                .getComponentShard()
+                .shardFieldReference());
     shardImplementation.addInitialization(fieldInitialization);
 
     return MemberSelect.localField(shardImplementation, field.name);

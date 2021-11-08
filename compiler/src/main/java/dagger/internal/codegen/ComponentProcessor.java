@@ -21,7 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
@@ -63,12 +62,18 @@ import javax.lang.model.SourceVersion;
 public class ComponentProcessor extends BasicAnnotationProcessor {
   private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
-  @Inject InjectBindingRegistry injectBindingRegistry;
-  @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject ImmutableList<Step> processingSteps;
-  @Inject BindingGraphPlugins bindingGraphPlugins;
-  @Inject Set<ClearableCache> clearableCaches;
+  @Inject
+  InjectBindingRegistry injectBindingRegistry;
+  @Inject
+  SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  @Inject
+  SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
+  @Inject
+  ImmutableList<Step> processingSteps;
+  @Inject
+  BindingGraphPlugins bindingGraphPlugins;
+  @Inject
+  Set<ClearableCache> clearableCaches;
 
   public ComponentProcessor() {
     this.testingPlugins = Optional.empty();
@@ -121,15 +126,15 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   @Singleton
   @Component(
       modules = {
-        BindingGraphValidationModule.class,
-        BindingMethodValidatorsModule.class,
-        ComponentGeneratorModule.class,
-        InjectBindingRegistryModule.class,
-        ProcessingEnvironmentModule.class,
-        ProcessingRoundCacheModule.class,
-        ProcessingStepsModule.class,
-        SourceFileGeneratorsModule.class,
-        SpiModule.class
+          BindingGraphValidationModule.class,
+          BindingMethodValidatorsModule.class,
+          ComponentGeneratorModule.class,
+          InjectBindingRegistryModule.class,
+          ProcessingEnvironmentModule.class,
+          ProcessingRoundCacheModule.class,
+          ProcessingStepsModule.class,
+          SourceFileGeneratorsModule.class,
+          SpiModule.class
       })
   interface ProcessorComponent {
     void inject(ComponentProcessor processor);
@@ -140,7 +145,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
 
     @Component.Factory
     interface Factory {
-      @CheckReturnValue
       ProcessorComponent create(
           @BindsInstance ProcessingEnvironment processingEnv,
           @BindsInstance @TestingPlugins Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins);

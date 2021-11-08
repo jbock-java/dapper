@@ -49,7 +49,8 @@ public final class Producers {
     }
 
     @Override
-    public void cancel(boolean mayInterruptIfRunning) {}
+    public void cancel(boolean mayInterruptIfRunning) {
+    }
 
     @Override
     public Producer<T> newDependencyView() {
@@ -62,5 +63,6 @@ public final class Producers {
     }
   }
 
-  private Producers() {}
+  private Producers() {
+  }
 }

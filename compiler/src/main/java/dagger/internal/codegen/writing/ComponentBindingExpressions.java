@@ -291,12 +291,12 @@ public final class ComponentBindingExpressions {
         staticMethod.isPresent()
             ? staticMethod::get
             : new FrameworkFieldInitializer(
-                componentImplementation,
-                binding,
-                binding.scope().isPresent()
-                    ? scope(
-                        binding, unscopedFrameworkInstanceCreationExpressionFactory.create(binding))
-                    : unscopedFrameworkInstanceCreationExpressionFactory.create(binding));
+            componentImplementation,
+            binding,
+            binding.scope().isPresent()
+                ? scope(
+                binding, unscopedFrameworkInstanceCreationExpressionFactory.create(binding))
+                : unscopedFrameworkInstanceCreationExpressionFactory.create(binding));
 
     switch (binding.bindingType()) {
       case PROVISION:
@@ -354,7 +354,7 @@ public final class ComponentBindingExpressions {
     return request.frameworkType().isPresent()
         ? frameworkInstanceBindingExpression(binding)
         : derivedFromFrameworkInstanceBindingExpressionFactory.create(
-            request, FrameworkType.PRODUCER_NODE);
+        request, FrameworkType.PRODUCER_NODE);
   }
 
   /**
@@ -375,7 +375,7 @@ public final class ComponentBindingExpressions {
     } else if (isFastInit()
         && unscopedFrameworkInstanceCreationExpressionFactory.create(binding).useSwitchingProvider()
         && !(instanceBindingExpression(binding)
-            instanceof DerivedFromFrameworkInstanceBindingExpression)) {
+        instanceof DerivedFromFrameworkInstanceBindingExpression)) {
       return wrapInMethod(
           binding, RequestKind.PROVIDER, switchingProviders.newBindingExpression(binding));
     }

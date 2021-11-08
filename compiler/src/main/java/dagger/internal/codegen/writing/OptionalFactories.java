@@ -53,6 +53,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
+import dagger.internal.InstanceFactory;
 import dagger.internal.Preconditions;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.OptionalType.OptionalKind;
@@ -60,18 +61,17 @@ import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
-import dagger.internal.InstanceFactory;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.RequestKind;
 import dagger.producers.Producer;
 import dagger.producers.internal.Producers;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.Executor;
-import jakarta.inject.Provider;
 
 /** The nested class and static methods required by the component to implement optional bindings. */
 // TODO(dpb): Name members simply if a component uses only one of Guava or JDK Optional.
@@ -105,7 +105,8 @@ final class OptionalFactories {
     private final Map<OptionalKind, FieldSpec> absentOptionalProviderFields = new TreeMap<>();
 
     @Inject
-    PerGeneratedFileCache() {}
+    PerGeneratedFileCache() {
+    }
   }
 
   private final PerGeneratedFileCache perGeneratedFileCache;
@@ -148,8 +149,8 @@ final class OptionalFactories {
   private MethodSpec absentOptionalProviderMethod(OptionalKind optionalKind) {
     TypeVariableName typeVariable = TypeVariableName.get("T");
     return methodBuilder(
-            String.format(
-                "absent%sProvider", UPPER_UNDERSCORE.to(UPPER_CAMEL, optionalKind.name())))
+        String.format(
+            "absent%sProvider", UPPER_UNDERSCORE.to(UPPER_CAMEL, optionalKind.name())))
         .addModifiers(PRIVATE, STATIC)
         .addTypeVariable(typeVariable)
         .returns(providerOf(optionalKind.of(typeVariable)))

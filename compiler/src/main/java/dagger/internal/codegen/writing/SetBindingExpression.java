@@ -87,24 +87,23 @@ final class SetBindingExpression extends SimpleInvocationBindingExpression {
     switch (binding.dependencies().size()) {
       case 0:
         return collectionsStaticFactoryInvocation(requestingClass, CodeBlock.of("emptySet()"));
-      case 1:
-        {
-          DependencyRequest dependency = getOnlyElement(binding.dependencies());
-          CodeBlock contributionExpression = getContributionExpression(dependency, requestingClass);
-          if (isSingleValue(dependency)) {
-            return collectionsStaticFactoryInvocation(
-                requestingClass, CodeBlock.of("singleton($L)", contributionExpression));
-          } else if (isImmutableSetAvailable) {
-            return Expression.create(
-                immutableSetType(),
-                CodeBlock.builder()
-                    .add("$T.", ImmutableSet.class)
-                    .add(maybeTypeParameter(requestingClass))
-                    .add("copyOf($L)", contributionExpression)
-                    .build());
-          }
+      case 1: {
+        DependencyRequest dependency = getOnlyElement(binding.dependencies());
+        CodeBlock contributionExpression = getContributionExpression(dependency, requestingClass);
+        if (isSingleValue(dependency)) {
+          return collectionsStaticFactoryInvocation(
+              requestingClass, CodeBlock.of("singleton($L)", contributionExpression));
+        } else if (isImmutableSetAvailable) {
+          return Expression.create(
+              immutableSetType(),
+              CodeBlock.builder()
+                  .add("$T.", ImmutableSet.class)
+                  .add(maybeTypeParameter(requestingClass))
+                  .add("copyOf($L)", contributionExpression)
+                  .build());
         }
-        // fall through
+      }
+      // fall through
       default:
         CodeBlock.Builder instantiation = CodeBlock.builder();
         instantiation

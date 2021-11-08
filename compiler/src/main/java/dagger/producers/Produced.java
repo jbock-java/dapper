@@ -19,7 +19,6 @@ package dagger.producers;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.Beta;
 import java.util.concurrent.ExecutionException;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -45,7 +44,6 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
  * @since 2.0
  */
 @Beta
-@CheckReturnValue
 public abstract class Produced<T> {
   /**
    * Returns the result of a production.
@@ -79,7 +77,8 @@ public abstract class Produced<T> {
   }
 
   private static final class Successful<T> extends Produced<T> {
-    @NullableDecl private final T value;
+    @NullableDecl
+    private final T value;
 
     private Successful(@NullableDecl T value) {
       this.value = value;
@@ -149,5 +148,6 @@ public abstract class Produced<T> {
     }
   }
 
-  private Produced() {}
+  private Produced() {
+  }
 }

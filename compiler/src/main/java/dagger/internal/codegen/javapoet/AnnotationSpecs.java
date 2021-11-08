@@ -51,5 +51,6 @@ public final class AnnotationSpecs {
     return builder.build();
   }
 
-  private AnnotationSpecs() {}
+  private AnnotationSpecs() {
+  }
 }

@@ -28,7 +28,8 @@ import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for validating the type hierarchy of a given type. */
 final class TypeHierarchyValidator {
-  private TypeHierarchyValidator() {}
+  private TypeHierarchyValidator() {
+  }
 
   /**
    * Validate the type hierarchy of the given type including all super classes, interfaces, and

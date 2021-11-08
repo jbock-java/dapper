@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.javapoet;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.TypeElement;
@@ -30,7 +29,6 @@ public final class TypeSpecs {
    *
    * @return {@code typeBuilder}
    */
-  @CanIgnoreReturnValue
   public static TypeSpec.Builder addSupertype(TypeSpec.Builder typeBuilder, TypeElement supertype) {
     switch (supertype.getKind()) {
       case CLASS:
@@ -42,5 +40,6 @@ public final class TypeSpecs {
     }
   }
 
-  private TypeSpecs() {}
+  private TypeSpecs() {
+  }
 }

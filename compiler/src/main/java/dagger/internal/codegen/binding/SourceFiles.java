@@ -60,8 +60,8 @@ import dagger.producers.Produced;
 import dagger.producers.Producer;
 import dagger.producers.internal.SetOfProducedProducer;
 import dagger.producers.internal.SetProducer;
-import java.util.List;
 import jakarta.inject.Provider;
+import java.util.List;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -87,7 +87,7 @@ public class SourceFiles {
    * @param binding must be an unresolved binding (type parameters must match its type element's)
    */
   public static ImmutableMap<DependencyRequest, FrameworkField>
-      generateBindingFieldsForDependencies(Binding binding) {
+  generateBindingFieldsForDependencies(Binding binding) {
     checkArgument(!binding.unresolved().isPresent(), "binding must be unresolved: %s", binding);
 
     FrameworkTypeMapper frameworkTypeMapper =
@@ -189,7 +189,7 @@ public class SourceFiles {
   }
 
   public static ClassName membersInjectorNameForType(TypeElement typeElement) {
-    return siblingClassName(typeElement,  "_MembersInjector");
+    return siblingClassName(typeElement, "_MembersInjector");
   }
 
   public static String memberInjectedFieldSignatureForVariable(VariableElement variableElement) {
@@ -242,8 +242,8 @@ public class SourceFiles {
       case PRODUCTION:
         return mapType.valuesAreFrameworkType()
             ? mapType.valuesAreTypeOf(Producer.class)
-                ? MAP_OF_PRODUCER_PRODUCER
-                : MAP_OF_PRODUCED_PRODUCER
+            ? MAP_OF_PRODUCER_PRODUCER
+            : MAP_OF_PRODUCED_PRODUCER
             : MAP_PRODUCER;
       default:
         throw new IllegalArgumentException(binding.bindingType().toString());
@@ -255,7 +255,7 @@ public class SourceFiles {
     if (binding instanceof ContributionBinding) {
       ContributionBinding contributionBinding = (ContributionBinding) binding;
       if (!(contributionBinding.kind() == INJECTION
-              || contributionBinding.kind() == ASSISTED_INJECTION)
+          || contributionBinding.kind() == ASSISTED_INJECTION)
           && !contributionBinding.requiresModuleInstance()) {
         return ImmutableList.of();
       }
@@ -316,5 +316,6 @@ public class SourceFiles {
     }
   }
 
-  private SourceFiles() {}
+  private SourceFiles() {
+  }
 }

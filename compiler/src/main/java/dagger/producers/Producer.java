@@ -17,7 +17,6 @@
 package dagger.producers;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.Beta;
 
 /**
@@ -102,6 +101,5 @@ public interface Producer<T> {
    * <p>If the key is bound to a {@link Produces} method, then calling this method multiple times
    * will return the same future.
    */
-  @CheckReturnValue
-  ListenableFuture<T> get();
+    ListenableFuture<T> get();
 }

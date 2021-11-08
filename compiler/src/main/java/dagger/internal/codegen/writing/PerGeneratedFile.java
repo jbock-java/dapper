@@ -27,4 +27,5 @@ import java.lang.annotation.Retention;
  */
 @Retention(RUNTIME)
 @Scope
-public @interface PerGeneratedFile {}
+public @interface PerGeneratedFile {
+}

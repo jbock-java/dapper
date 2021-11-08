@@ -62,7 +62,8 @@ public @interface ProductionSubcomponent {
   @Retention(RUNTIME) // Allows runtimes to have specialized behavior interoperating with Dagger.
   @Target(TYPE)
   @Documented
-  @interface Builder {}
+  @interface Builder {
+  }
 
   /**
    * A factory for a production subcomponent.
@@ -79,5 +80,6 @@ public @interface ProductionSubcomponent {
   @Retention(RUNTIME) // Allows runtimes to have specialized behavior interoperating with Dagger.
   @Target(TYPE)
   @Documented
-  @interface Factory {}
+  @interface Factory {
+  }
 }

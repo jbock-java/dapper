@@ -30,7 +30,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -136,7 +135,6 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
     return nestedAnnotationElements(annotationElement, new LinkedHashSet<>());
   }
 
-  @CanIgnoreReturnValue
   private static Set<TypeElement> nestedAnnotationElements(
       TypeElement annotationElement, Set<TypeElement> annotationElements) {
     if (annotationElements.add(annotationElement)) {

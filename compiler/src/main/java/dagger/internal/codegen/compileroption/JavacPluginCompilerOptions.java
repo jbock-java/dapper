@@ -27,7 +27,8 @@ import javax.tools.Diagnostic;
 public final class JavacPluginCompilerOptions extends CompilerOptions {
 
   @Inject
-  JavacPluginCompilerOptions() {}
+  JavacPluginCompilerOptions() {
+  }
 
   @Override
   public boolean usesProducers() {

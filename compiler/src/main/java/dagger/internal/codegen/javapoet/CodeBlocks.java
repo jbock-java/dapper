@@ -154,5 +154,6 @@ public final class CodeBlocks {
     return builder.add(")}").build();
   }
 
-  private CodeBlocks() {}
+  private CodeBlocks() {
+  }
 }

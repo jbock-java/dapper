@@ -87,7 +87,8 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
   }
 
   @Override
-  protected void addMethod() {}
+  protected void addMethod() {
+  }
 
   @Override
   protected String methodName() {

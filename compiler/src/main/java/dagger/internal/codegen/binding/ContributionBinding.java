@@ -24,9 +24,6 @@ import static java.util.Arrays.asList;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Equivalence;
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.MapType;
@@ -147,7 +144,6 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    * Base builder for {@link com.google.auto.value.AutoValue @AutoValue} subclasses of {@link
    * ContributionBinding}.
    */
-  @CanIgnoreReturnValue
   public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {
     public abstract B dependencies(Iterable<DependencyRequest> dependencies);
 
@@ -165,7 +161,9 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public final B clearBindingElement() {
       return bindingElement(Optional.empty());
-    };
+    }
+
+    ;
 
     abstract B contributingModule(TypeElement contributingModule);
 
@@ -178,10 +176,8 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public abstract B kind(BindingKind kind);
 
-    @CheckReturnValue
     abstract C autoBuild();
 
-    @CheckReturnValue
     public C build() {
       return autoBuild();
     }

@@ -24,7 +24,6 @@ import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.BindingKind;
@@ -79,7 +78,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
   public abstract Optional<Scope> scope();
 
   public static Builder builder() {
-    return new AutoValue_ProvisionBinding.Builder()
+    return new $AutoValue_ProvisionBinding.Builder()
         .provisionDependencies(ImmutableSet.of())
         .injectionSites(ImmutableSortedSet.of());
   }
@@ -115,7 +114,6 @@ public abstract class ProvisionBinding extends ContributionBinding {
 
   /** A {@link ProvisionBinding} builder. */
   @AutoValue.Builder
-  @CanIgnoreReturnValue
   public abstract static class Builder
       extends ContributionBinding.Builder<ProvisionBinding, Builder> {
 

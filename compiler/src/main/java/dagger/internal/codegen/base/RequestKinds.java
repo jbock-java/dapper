@@ -105,8 +105,8 @@ public final class RequestKinds {
   public static RequestKind getRequestKind(TypeMirror type) {
     checkTypePresent(type);
     if (!isType(type) // TODO(b/147320669): isType check can be removed once this bug is fixed.
-            || !type.getKind().equals(DECLARED)
-            || asDeclared(type).getTypeArguments().isEmpty()) {
+        || !type.getKind().equals(DECLARED)
+        || asDeclared(type).getTypeArguments().isEmpty()) {
       // If the type is not a declared type (i.e. class or interface) with type arguments, then we
       // know it can't be a parameterized type of one of the framework classes, so return INSTANCE.
       return RequestKind.INSTANCE;
@@ -185,5 +185,6 @@ public final class RequestKinds {
     throw new AssertionError();
   }
 
-  private RequestKinds() {}
+  private RequestKinds() {
+  }
 }

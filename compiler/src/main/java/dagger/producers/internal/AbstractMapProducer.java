@@ -21,8 +21,8 @@ import static dagger.producers.internal.Producers.producerFromProvider;
 
 import com.google.common.collect.ImmutableMap;
 import dagger.producers.Producer;
-import java.util.Map;
 import jakarta.inject.Provider;
+import java.util.Map;
 
 /**
  * An {@code abstract} {@link Producer} implementation used to implement {@link Map} bindings.

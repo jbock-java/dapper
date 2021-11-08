@@ -55,7 +55,6 @@ import com.google.common.base.Ascii;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.producers.Produces;
 import jakarta.inject.Inject;
 import java.util.Arrays;
@@ -302,8 +301,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     STRICT_MULTIBINDING_VALIDATION,
 
-    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES(ENABLED)
-    ;
+    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES(ENABLED);
 
     final FeatureStatus defaultValue;
 
@@ -400,10 +398,10 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     return ImmutableSet.<String>builder()
         .addAll(
             Stream.<CommandLineOption[]>of(
-                KeyOnlyOption.values(), Feature.values(), Validation.values())
-            .flatMap(Arrays::stream)
-            .flatMap(CommandLineOption::allNames)
-            .collect(toImmutableSet()))
+                    KeyOnlyOption.values(), Feature.values(), Validation.values())
+                .flatMap(Arrays::stream)
+                .flatMap(CommandLineOption::allNames)
+                .collect(toImmutableSet()))
         .add(KEYS_PER_COMPONENT_SHARD)
         .build();
   }

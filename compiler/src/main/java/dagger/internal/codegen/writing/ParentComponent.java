@@ -27,4 +27,5 @@ import java.lang.annotation.Retention;
  */
 @Retention(RUNTIME)
 @Qualifier
-public @interface ParentComponent {}
+public @interface ParentComponent {
+}

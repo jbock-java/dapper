@@ -37,7 +37,6 @@ import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.squareup.javapoet.ClassName;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
@@ -178,7 +177,6 @@ public abstract class ModuleDescriptor {
               .depthFirstPreOrder(transform(modules, this::create)));
     }
 
-    @CanIgnoreReturnValue
     private Set<TypeElement> collectIncludedModules(
         Set<TypeElement> includedModules, TypeElement moduleElement) {
       TypeMirror superclass = moduleElement.getSuperclass();

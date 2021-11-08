@@ -51,11 +51,11 @@ import dagger.model.RequestKind;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** Reports errors for dependency cycles. */

@@ -44,7 +44,8 @@ public interface BindingGraphPlugin {
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getFiler()
    */
-  default void initFiler(Filer filer) {}
+  default void initFiler(Filer filer) {
+  }
 
   /**
    * Initializes this plugin with a {@link Types} instance. This will be called once per instance of
@@ -53,7 +54,8 @@ public interface BindingGraphPlugin {
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getTypeUtils()
    */
-  default void initTypes(Types types) {}
+  default void initTypes(Types types) {
+  }
 
   /**
    * Initializes this plugin with a {@link Elements} instance. This will be called once per instance
@@ -62,7 +64,8 @@ public interface BindingGraphPlugin {
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getElementUtils()
    */
-  default void initElements(Elements elements) {}
+  default void initElements(Elements elements) {
+  }
 
   /**
    * Initializes this plugin with a filtered view of the options passed on the {@code javac}
@@ -72,7 +75,8 @@ public interface BindingGraphPlugin {
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getOptions()
    */
-  default void initOptions(Map<String, String> options) {}
+  default void initOptions(Map<String, String> options) {
+  }
 
   /**
    * Returns the annotation-processing options that this plugin uses to configure behavior.

@@ -177,5 +177,6 @@ final class PackageNameCompressor {
     return replacementMap;
   }
 
-  private PackageNameCompressor() {}
+  private PackageNameCompressor() {
+  }
 }

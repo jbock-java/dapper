@@ -50,7 +50,7 @@ public abstract class MethodSignature {
   }
 
   private static ImmutableList<? extends Equivalence.Wrapper<? extends TypeMirror>>
-      wrapInEquivalence(List<? extends TypeMirror> types) {
+  wrapInEquivalence(List<? extends TypeMirror> types) {
     return types.stream().map(MoreTypes.equivalence()::wrap).collect(toImmutableList());
   }
 }

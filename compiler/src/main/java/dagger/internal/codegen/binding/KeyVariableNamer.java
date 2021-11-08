@@ -86,7 +86,8 @@ public final class KeyVariableNamer {
         }
       };
 
-  private KeyVariableNamer() {}
+  private KeyVariableNamer() {
+  }
 
   public static String name(Key key) {
     if (key.multibindingContributionIdentifier().isPresent()) {

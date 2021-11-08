@@ -23,7 +23,6 @@ import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.SetType;
 import dagger.model.DependencyRequest;
@@ -67,7 +66,7 @@ public abstract class ProductionBinding extends ContributionBinding {
       if (isFutureType(producesMethod.getReturnType())) {
         return FUTURE;
       } else if (ContributionType.fromBindingElement(producesMethod)
-              .equals(ContributionType.SET_VALUES)
+          .equals(ContributionType.SET_VALUES)
           && isFutureType(SetType.from(producesMethod.getReturnType()).elementType())) {
         return SET_OF_FUTURE;
       } else {
@@ -126,7 +125,6 @@ public abstract class ProductionBinding extends ContributionBinding {
 
   /** A {@link ProductionBinding} builder. */
   @AutoValue.Builder
-  @CanIgnoreReturnValue
   public abstract static class Builder
       extends ContributionBinding.Builder<ProductionBinding, Builder> {
 

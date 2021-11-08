@@ -38,7 +38,8 @@ import java.util.stream.Stream;
 final class ProvisionDependencyOnProducerBindingValidator implements BindingGraphPlugin {
 
   @Inject
-  ProvisionDependencyOnProducerBindingValidator() {}
+  ProvisionDependencyOnProducerBindingValidator() {
+  }
 
   @Override
   public String pluginName() {
