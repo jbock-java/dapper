@@ -34,7 +34,9 @@ import dagger.MembersInjector;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -42,6 +44,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
+import org.assertj.core.api.Assertions;
 import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -287,7 +290,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void componentWithScope() {
+  public void componentWithScope() throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -313,14 +316,14 @@ public class ComponentProcessorTest {
         "  Lazy<SomeInjectableType> lazySomeInjectableType();",
         "  Provider<SomeInjectableType> someInjectableTypeProvider();",
         "}");
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerSimpleComponent implements SimpleComponent {",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final DaggerSimpleComponent simpleComponent = this;")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -332,8 +335,7 @@ public class ComponentProcessorTest {
                 "",
                 "  @SuppressWarnings(\"unchecked\")",
                 "  private void initialize() {",
-                "    this.someInjectableTypeProvider =",
-                "        DoubleCheck.provider(SomeInjectableType_Factory.create());",
+                "    this.someInjectableTypeProvider = DoubleCheck.provider(SomeInjectableType_Factory.create());",
                 "  }",
                 "")
             .addLines(
@@ -347,8 +349,7 @@ public class ComponentProcessorTest {
                 "        local = someInjectableType;",
                 "        if (local instanceof MemoizedSentinel) {",
                 "          local = new SomeInjectableType();",
-                "          someInjectableType =",
-                "              DoubleCheck.reentrantCheck(someInjectableType, local);",
+                "          someInjectableType = DoubleCheck.reentrantCheck(someInjectableType, local);",
                 "        }",
                 "      }",
                 "    }",
@@ -387,24 +388,28 @@ public class ComponentProcessorTest {
                 "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "  private final static class SwitchingProvider<T> implements Provider<T> {",
+                "  private static final class SwitchingProvider<T> implements Provider<T> {",
                 "    @SuppressWarnings(\"unchecked\")",
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0: return (T) simpleComponent.someInjectableType();",
+                "        case 0: // test.SomeInjectableType ",
+                "        return (T) simpleComponent.someInjectableType();",
+                "",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }")
-            .build();
+            .addLines("}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
