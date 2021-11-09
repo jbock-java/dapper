@@ -573,7 +573,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void componentWithAbstractModule() {
+  public void componentWithAbstractModule() throws IOException {
     JavaFileObject aFile =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -625,13 +625,14 @@ public class ComponentProcessorTest {
             "  A a();",
             "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private B b() {",
                 "    return TestModule_BFactory.b(new C());",
@@ -642,15 +643,17 @@ public class ComponentProcessorTest {
                 "    return new A(b());",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(aFile, bFile, cFile, moduleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
