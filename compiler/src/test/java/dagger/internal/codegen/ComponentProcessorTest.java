@@ -1192,7 +1192,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void componentDependency() {
+  public void componentDependency() throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1228,14 +1228,14 @@ public class ComponentProcessorTest {
         "interface BComponent {",
         "  B b();",
         "}");
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerBComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerBComponent implements BComponent {")
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerBComponent implements BComponent {")
             .addLinesIn(DEFAULT_MODE, "  private Provider<A> aProvider;")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -1286,12 +1286,12 @@ public class ComponentProcessorTest {
                 DEFAULT_MODE,
                 "  private static final class test_AComponent_a implements Provider<A> {",
                 "    private final AComponent aComponent;",
-                "    ",
+                "",
                 "    test_AComponent_a(AComponent aComponent) {",
-                "        this.aComponent = aComponent;",
+                "      this.aComponent = aComponent;",
                 "    }",
-                "    ",
-                "    @Override()",
+                "",
+                "    @Override",
                 "    public A get() {",
                 "      return Preconditions.checkNotNullFromComponent(aComponent.a());",
                 "    }",
@@ -1304,22 +1304,23 @@ public class ComponentProcessorTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0:",
-                "          return (T)",
-                "              Preconditions.checkNotNullFromComponent(bComponent.aComponent.a());",
-                "        default:",
-                "          throw new AssertionError(id);",
+                "        case 0: // test.A ",
+                "        return (T) Preconditions.checkNotNullFromComponent(bComponent.aComponent.a());",
+                "",
+                "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }")
-            .build();
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(aFile, bFile, aComponentFile, bComponentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerBComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerBComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
