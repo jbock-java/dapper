@@ -1066,7 +1066,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void componentInjection() {
+  public void componentInjection() throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1087,40 +1087,45 @@ public class ComponentProcessorTest {
         "  SomeInjectableType someInjectableType();",
         "  Provider<SimpleComponent> selfProvider();",
         "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerSimpleComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerSimpleComponent implements SimpleComponent {",
-            "  private final DaggerSimpleComponent simpleComponent = this;",
-            "",
-            "  private Provider<SimpleComponent> simpleComponentProvider;",
-            "",
-            "  @SuppressWarnings(\"unchecked\")",
-            "  private void initialize() {",
-            "    this.simpleComponentProvider =",
-            "        InstanceFactory.create((SimpleComponent) simpleComponent);",
-            "  }",
-            "",
-            "  @Override",
-            "  public SomeInjectableType someInjectableType() {",
-            "    return new SomeInjectableType(this)",
-            "  }",
-            "",
-            "  @Override",
-            "  public Provider<SimpleComponent> selfProvider() {",
-            "    return simpleComponentProvider;",
-            "  }",
-            "}");
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder(
+                "test.DaggerSimpleComponent")
+            .addLines(
+                "package test;",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerSimpleComponent implements SimpleComponent {",
+                "  private final DaggerSimpleComponent simpleComponent = this;",
+                "",
+                "  private Provider<SimpleComponent> simpleComponentProvider;",
+                "",
+                "  @SuppressWarnings(\"unchecked\")",
+                "  private void initialize() {",
+                "    this.simpleComponentProvider = InstanceFactory.create((SimpleComponent) simpleComponent);",
+                "  }",
+                "",
+                "  @Override",
+                "  public SomeInjectableType someInjectableType() {",
+                "    return new SomeInjectableType(this);",
+                "  }",
+                "",
+                "  @Override",
+                "  public Provider<SimpleComponent> selfProvider() {",
+                "    return simpleComponentProvider;",
+                "  }",
+                "}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
