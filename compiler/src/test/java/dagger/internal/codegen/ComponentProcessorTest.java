@@ -413,7 +413,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void simpleComponentWithNesting() {
+  public void simpleComponentWithNesting() throws IOException {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",
@@ -433,16 +433,16 @@ public class ComponentProcessorTest {
         "  }",
         "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerOuterType_SimpleComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerOuterType_SimpleComponent",
-                "    implements OuterType.SimpleComponent {",
-                "  private DaggerOuterType_SimpleComponent() {}",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerOuterType_SimpleComponent implements OuterType.SimpleComponent {",
+                "  private DaggerOuterType_SimpleComponent() {",
+                "  }",
                 "",
                 "  @Override",
                 "  public OuterType.A a() {",
@@ -460,14 +460,15 @@ public class ComponentProcessorTest {
                 "    return instance;",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(nestedTypesFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerOuterType_SimpleComponent")
-        .containsElementsIn(generatedComponent);
+    String actualImpl = compilation.generatedSourceFile("test.DaggerOuterType_SimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
