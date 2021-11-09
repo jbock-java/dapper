@@ -657,7 +657,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void transitiveModuleDeps() {
+  public void transitiveModuleDeps() throws IOException {
     JavaFileObject always = JavaFileObjects.forSourceLines("test.AlwaysIncluded",
         "package test;",
         "",
@@ -725,57 +725,60 @@ public class ComponentProcessorTest {
         "}");
     // Generated code includes all includes, but excludes the parent modules.
     // The "always" module should only be listed once.
-    JavaFileObject generatedComponent = JavaFileObjects.forSourceLines(
-        "test.DaggerTestComponent",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports("import dagger.internal.Preconditions;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "final class DaggerTestComponent implements TestComponent {",
-        "  static final class Builder {",
-        "",
-        "    @Deprecated",
-        "    public Builder testModule(TestModule testModule) {",
-        "      Preconditions.checkNotNull(testModule)",
-        "      return this;",
-        "    }",
-        "",
-        "    @Deprecated",
-        "    public Builder parentTestIncluded(ParentTestIncluded parentTestIncluded) {",
-        "      Preconditions.checkNotNull(parentTestIncluded)",
-        "      return this;",
-        "    }",
-        "",
-        "    @Deprecated",
-        "    public Builder alwaysIncluded(AlwaysIncluded alwaysIncluded) {",
-        "      Preconditions.checkNotNull(alwaysIncluded)",
-        "      return this;",
-        "    }",
-        "",
-        "    @Deprecated",
-        "    public Builder depModule(DepModule depModule) {",
-        "      Preconditions.checkNotNull(depModule)",
-        "      return this;",
-        "    }",
-        "",
-        "    @Deprecated",
-        "    public Builder parentDepIncluded(ParentDepIncluded parentDepIncluded) {",
-        "      Preconditions.checkNotNull(parentDepIncluded)",
-        "      return this;",
-        "    }",
-        "",
-        "    @Deprecated",
-        "    public Builder refByDep(RefByDep refByDep) {",
-        "      Preconditions.checkNotNull(refByDep)",
-        "      return this;",
-        "    }",
-        "",
-        "    public TestComponent build() {",
-        "      return new DaggerTestComponent();",
-        "    }",
-        "  }",
-        "}");
+    String[] generatedComponent = compilerMode
+        .javaFileBuilder("test.DaggerTestComponent")
+        .addLines(
+            "package test;",
+            "")
+        .addLines(GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+        .addLines("")
+        .addLines(GeneratedLines.generatedAnnotationsIndividual())
+        .addLines(
+            "final class DaggerTestComponent implements TestComponent {",
+            "  static final class Builder {",
+            "",
+            "    @Deprecated",
+            "    public Builder testModule(TestModule testModule) {",
+            "      Preconditions.checkNotNull(testModule);",
+            "      return this;",
+            "    }",
+            "",
+            "    @Deprecated",
+            "    public Builder parentTestIncluded(ParentTestIncluded parentTestIncluded) {",
+            "      Preconditions.checkNotNull(parentTestIncluded);",
+            "      return this;",
+            "    }",
+            "",
+            "    @Deprecated",
+            "    public Builder alwaysIncluded(AlwaysIncluded alwaysIncluded) {",
+            "      Preconditions.checkNotNull(alwaysIncluded);",
+            "      return this;",
+            "    }",
+            "",
+            "    @Deprecated",
+            "    public Builder depModule(DepModule depModule) {",
+            "      Preconditions.checkNotNull(depModule);",
+            "      return this;",
+            "    }",
+            "",
+            "    @Deprecated",
+            "    public Builder parentDepIncluded(ParentDepIncluded parentDepIncluded) {",
+            "      Preconditions.checkNotNull(parentDepIncluded);",
+            "      return this;",
+            "    }",
+            "",
+            "    @Deprecated",
+            "    public Builder refByDep(RefByDep refByDep) {",
+            "      Preconditions.checkNotNull(refByDep);",
+            "      return this;",
+            "    }",
+            "",
+            "    public TestComponent build() {",
+            "      return new DaggerTestComponent();",
+            "    }",
+            "  }",
+            "}")
+        .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -789,9 +792,11 @@ public class ComponentProcessorTest {
                 parentDepIncluded,
                 componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
