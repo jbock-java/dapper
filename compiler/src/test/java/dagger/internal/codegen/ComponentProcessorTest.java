@@ -994,7 +994,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void membersInjection() {
+  public void membersInjection() throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1025,15 +1025,16 @@ public class ComponentProcessorTest {
         "  SomeInjectedType injectAndReturn(SomeInjectedType instance);",
         "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
                 "",
                 "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  @Override",
                 "  public void inject(SomeInjectedType instance) {",
@@ -1047,20 +1048,21 @@ public class ComponentProcessorTest {
                 "",
                 "  @CanIgnoreReturnValue",
                 "  private SomeInjectedType injectSomeInjectedType(SomeInjectedType instance) {",
-                "    SomeInjectedType_MembersInjector.injectInjectedField(",
-                "        instance, new SomeInjectableType());",
+                "    SomeInjectedType_MembersInjector.injectInjectedField(instance, new SomeInjectableType());",
                 "    return instance;",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, injectedTypeFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
