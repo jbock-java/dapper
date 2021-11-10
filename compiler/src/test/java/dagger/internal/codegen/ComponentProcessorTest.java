@@ -1324,7 +1324,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void moduleNameCollision() {
+  public void moduleNameCollision() throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1366,65 +1366,67 @@ public class ComponentProcessorTest {
         "  A a();",
         "  other.test.A otherA();",
         "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  private final TestModule testModule;",
-            "  private final other.test.TestModule testModule2;",
-            "",
-            "  private DaggerTestComponent(",
-            "      TestModule testModuleParam,",
-            "      other.test.TestModule testModuleParam2) {",
-            "    this.testModule = testModuleParam;",
-            "    this.testModule2 = testModuleParam2;",
-            "  }",
-            "",
-            "  @Override",
-            "  public A a() {",
-            "    return TestModule_AFactory.a(testModule);",
-            "  }",
-            "",
-            "  @Override",
-            "  public other.test.A otherA() {",
-            "    return other.test.TestModule_AFactory.a(testModule2);",
-            "  }",
-            "",
-            "  static final class Builder {",
-            "    private TestModule testModule;",
-            "    private other.test.TestModule testModule2;",
-            "",
-            "    public Builder testModule(TestModule testModule) {",
-            "      this.testModule = Preconditions.checkNotNull(testModule);",
-            "      return this;",
-            "    }",
-            "",
-            "    public Builder testModule(other.test.TestModule testModule) {",
-            "      this.testModule2 = Preconditions.checkNotNull(testModule);",
-            "      return this;",
-            "    }",
-            "",
-            "    public TestComponent build() {",
-            "      if (testModule == null) {",
-            "        this.testModule = new TestModule();",
-            "      }",
-            "      if (testModule2 == null) {",
-            "        this.testModule2 = new other.test.TestModule();",
-            "      }",
-            "      return new DaggerTestComponent(testModule, testModule2);",
-            "    }",
-            "  }",
-            "}");
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines("package test;",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerTestComponent implements TestComponent {",
+                "  private final TestModule testModule;",
+                "  private final other.test.TestModule testModule2;",
+                "",
+                "  private DaggerTestComponent(TestModule testModuleParam, other.test.TestModule testModuleParam2) {",
+                "    this.testModule = testModuleParam;",
+                "    this.testModule2 = testModuleParam2;",
+                "  }",
+                "",
+                "  @Override",
+                "  public A a() {",
+                "    return TestModule_AFactory.a(testModule);",
+                "  }",
+                "",
+                "  @Override",
+                "  public other.test.A otherA() {",
+                "    return other.test.TestModule_AFactory.a(testModule2);",
+                "  }",
+                "",
+                "  static final class Builder {",
+                "    private TestModule testModule;",
+                "    private other.test.TestModule testModule2;",
+                "",
+                "    public Builder testModule(TestModule testModule) {",
+                "      this.testModule = Preconditions.checkNotNull(testModule);",
+                "      return this;",
+                "    }",
+                "",
+                "    public Builder testModule(other.test.TestModule testModule) {",
+                "      this.testModule2 = Preconditions.checkNotNull(testModule);",
+                "      return this;",
+                "    }",
+                "",
+                "    public TestComponent build() {",
+                "      if (testModule == null) {",
+                "        this.testModule = new TestModule();",
+                "      }",
+                "      if (testModule2 == null) {",
+                "        this.testModule2 = new other.test.TestModule();",
+                "      }",
+                "      return new DaggerTestComponent(testModule, testModule2);",
+                "    }",
+                "  }",
+                "}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(aFile, otherAFile, moduleFile, otherModuleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
