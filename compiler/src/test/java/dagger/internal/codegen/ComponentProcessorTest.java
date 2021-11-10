@@ -1430,7 +1430,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void ignoresDependencyMethodsFromObject() {
+  public void ignoresDependencyMethodsFromObject() throws IOException {
     JavaFileObject injectedTypeFile =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
@@ -1491,40 +1491,37 @@ public class ComponentProcessorTest {
             "  InjectedType injectedType();",
             "}");
 
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerBComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports("import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerBComponent implements BComponent {",
-            "  private final AComponent aComponent;",
-            "",
-            "  private DaggerBComponent(AComponent aComponentParam) {",
-            "    this.aComponent = aComponentParam;",
-            "  }",
-            "",
-            "  @Override",
-            "  public InjectedType injectedType() {",
-            "    return new InjectedType(",
-            "        Preconditions.checkNotNullFromComponent(",
-            "            aComponent.someStringInjection()),",
-            "        aComponent.someIntInjection(),",
-            "        aComponent,",
-            "        Preconditions.checkNotNullFromComponent(",
-            "            aComponent.someClassInjection()));",
-            "  }",
-            "}");
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines("package test;",
+                "")
+            .addLines(GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+            .addLines("")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerBComponent implements BComponent {",
+                "  private final AComponent aComponent;",
+                "",
+                "  private DaggerBComponent(AComponent aComponentParam) {",
+                "    this.aComponent = aComponentParam;",
+                "  }",
+                "",
+                "  @Override",
+                "  public InjectedType injectedType() {",
+                "    return new InjectedType(Preconditions.checkNotNullFromComponent(aComponent.someStringInjection()), aComponent.someIntInjection(), aComponent, Preconditions.checkNotNullFromComponent(aComponent.someClassInjection()));",
+                "  }",
+                "}").lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectedTypeFile, aComponentFile, bComponentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerBComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerBComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
