@@ -1525,7 +1525,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void resolutionOrder() {
+  public void resolutionOrder() throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1572,14 +1572,14 @@ public class ComponentProcessorTest {
         "  X x();",
         "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerTestComponent implements TestComponent {",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerTestComponent implements TestComponent {",
                 "  private B b() {",
                 "    return new B(new C());",
                 "  }",
@@ -1599,15 +1599,17 @@ public class ComponentProcessorTest {
                 "    return new X(new C());",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(aFile, bFile, cFile, xFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
