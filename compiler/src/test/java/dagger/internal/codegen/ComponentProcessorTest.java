@@ -1702,7 +1702,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void simpleComponent_inheritedComponentMethodDep() {
+  public void simpleComponent_inheritedComponentMethodDep() throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1728,25 +1728,29 @@ public class ComponentProcessorTest {
         "@Component",
         "interface SimpleComponent extends Supertype {",
         "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerSimpleComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerSimpleComponent implements SimpleComponent {",
-            "  @Override",
-            "  public SomeInjectableType someInjectableType() {",
-            "    return new SomeInjectableType();",
-            "  }",
-            "}");
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder("test.DaggerSimpleComponent")
+            .addLines(
+                "package test;",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerSimpleComponent implements SimpleComponent {",
+                "  @Override",
+                "  public SomeInjectableType someInjectableType() {",
+                "    return new SomeInjectableType();",
+                "  }",
+                "}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentSupertype, depComponentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
