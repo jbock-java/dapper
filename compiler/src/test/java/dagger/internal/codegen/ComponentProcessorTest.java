@@ -2209,7 +2209,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void nullIncorrectlyReturnedFromNonNullableInlinedProvider() {
+  public void nullIncorrectlyReturnedFromNonNullableInlinedProvider() throws IOException {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2245,38 +2245,40 @@ public class ComponentProcessorTest {
                     "  void inject(InjectsMember member);",
                     "}"));
     assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.TestModule_NonNullableStringFactory")
-        .containsElementsIn(
-            JavaFileObjects.forSourceLines(
-                "test.TestModule_NonNullableStringFactory",
+
+    Assertions.assertThat(compilation.generatedSourceFile("test.TestModule_NonNullableStringFactory")
+            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(compilerMode
+            .javaFileBuilder("test.TestModule_NonNullableStringFactory")
+            .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "public final class TestModule_NonNullableStringFactory",
-                "    implements Factory<String> {",
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "public final class TestModule_NonNullableStringFactory implements Factory<String> {",
                 "  @Override",
                 "  public String get() {",
                 "    return nonNullableString();",
                 "  }",
                 "",
                 "  public static String nonNullableString() {",
-                "    return Preconditions.checkNotNullFromProvides(",
-                "        TestModule.nonNullableString());",
+                "    return Preconditions.checkNotNullFromProvides(TestModule.nonNullableString());",
                 "  }",
-                "}"));
+                "}")
+            .lines()));
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  @Override",
                 "  public String nonNullableString() {",
-                "    return TestModule_NonNullableStringFactory.nonNullableString());",
+                "    return TestModule_NonNullableStringFactory.nonNullableString();",
                 "  }",
                 "",
                 "  @Override",
@@ -2286,16 +2288,16 @@ public class ComponentProcessorTest {
                 "",
                 "  @CanIgnoreReturnValue",
                 "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
-                "    InjectsMember_MembersInjector.injectMember(instance,",
-                "        TestModule_NonNullableStringFactory.nonNullableString());",
+                "    InjectsMember_MembersInjector.injectMember(instance, TestModule_NonNullableStringFactory.nonNullableString());",
                 "    return instance;",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
