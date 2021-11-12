@@ -2302,7 +2302,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void nullCheckingIgnoredWhenProviderReturnsPrimitive() {
+  public void nullCheckingIgnoredWhenProviderReturnsPrimitive() throws IOException {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2359,13 +2359,14 @@ public class ComponentProcessorTest {
                 "  }",
                 "}"));
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  @Override",
                 "  public Integer nonNullableInteger() {",
@@ -2379,16 +2380,16 @@ public class ComponentProcessorTest {
                 "",
                 "  @CanIgnoreReturnValue",
                 "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
-                "    InjectsMember_MembersInjector.injectMember(",
-                "        instance, TestModule.primitiveInteger());",
+                "    InjectsMember_MembersInjector.injectMember(instance, TestModule.primitiveInteger());",
                 "    return instance;",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
