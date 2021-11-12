@@ -2393,7 +2393,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis() {
+  public void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis() throws IOException {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -2438,22 +2438,26 @@ public class ComponentProcessorTest {
             "  String string();",
             "}");
 
-    JavaFileObject expectedPattern =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParent",
-            "package test;",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParent implements Parent {",
-            "  private String string() {",
-            "    return TestModule_StringFactory.string(numberProvider.get());",
-            "  }",
-            "}");
+    String[] expectedPattern =
+        compilerMode.javaFileBuilder("test.DaggerParent")
+            .addLines(
+                "package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerParent implements Parent {",
+                "  private String string() {",
+                "    return TestModule_StringFactory.string(numberProvider.get());",
+                "  }",
+                "}")
+            .lines();
 
     Compilation compilation = daggerCompiler().compile(parent, testModule, child);
     assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerParent")
-        .containsElementsIn(expectedPattern);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(expectedPattern));
   }
 
   @Test
