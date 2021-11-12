@@ -2461,7 +2461,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void componentMethodInChildCallsComponentMethodInParent() {
+  public void componentMethodInChildCallsComponentMethodInParent() throws IOException {
     JavaFileObject supertype =
         JavaFileObjects.forSourceLines(
             "test.Supertype",
@@ -2512,25 +2512,29 @@ public class ComponentProcessorTest {
             "@Subcomponent",
             "interface Child extends Supertype {}");
 
-    JavaFileObject expectedPattern =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParent",
-            "package test;",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParent implements Parent {",
-            "  private static final class ChildImpl implements Child {",
-            "    @Override",
-            "    public String string() {",
-            "      return parent.string();",
-            "    }",
-            "  }",
-            "}");
+    String[] expectedPattern =
+        compilerMode.javaFileBuilder("test.DaggerParent")
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerParent implements Parent {",
+                "  private static final class ChildImpl implements Child {",
+                "    @Override",
+                "    public String string() {",
+                "      return parent.string();",
+                "    }",
+                "  }",
+                "}")
+            .lines();
 
     Compilation compilation = daggerCompiler().compile(supertype, parent, testModule, child);
     assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerParent")
-        .containsElementsIn(expectedPattern);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(expectedPattern));
+
   }
 
   @Ignore("issue #3")
