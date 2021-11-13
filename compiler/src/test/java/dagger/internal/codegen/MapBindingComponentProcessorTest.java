@@ -754,7 +754,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void mapBindingsWithNonProviderValue() {
+  public void mapBindingsWithNonProviderValue() throws IOException {
     JavaFileObject mapModuleOneFile = JavaFileObjects.forSourceLines("test.MapModuleOne",
         "package test;",
         "",
@@ -826,29 +826,20 @@ public class MapBindingComponentProcessorTest {
         "interface TestComponent {",
         "  Provider<Map<PathEnum, Handler>> dispatcher();",
         "}");
-    JavaFileObject generatedComponent;
-    switch (compilerMode) {
-      case FAST_INIT_MODE:
+    String[]
         generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+        compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLinesIn(FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private final MapModuleOne mapModuleOne;",
                 "  private final MapModuleTwo mapModuleTwo;",
-                "  private volatile Provider<Map<PathEnum, Handler>>",
-                "      mapOfPathEnumAndHandlerProvider;",
+                "  private volatile Provider<Map<PathEnum, Handler>> mapOfPathEnumAndHandlerProvider;",
                 "",
                 "  private Map<PathEnum, Handler> mapOfPathEnumAndHandler() {",
-                "    return ImmutableMap.<PathEnum, Handler>of(",
-                "        PathEnum.ADMIN,",
-                "        MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(",
-                "            mapModuleOne),",
-                "        PathEnum.LOGIN,",
-                "        MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(",
-                "            mapModuleTwo));",
+                "    return ImmutableMap.<PathEnum, Handler>of(PathEnum.ADMIN, MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(mapModuleOne), PathEnum.LOGIN, MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(mapModuleTwo));",
                 "  }",
                 "",
                 "  @Override",
@@ -866,46 +857,34 @@ public class MapBindingComponentProcessorTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0: return (T) testComponent.mapOfPathEnumAndHandler();",
+                "        case 0: // java.util.Map<test.PathEnum,test.Handler> ",
+                "        return (T) testComponent.mapOfPathEnumAndHandler();",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }",
-                "}");
-        break;
-      default:
-        generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "}")
+            .addLinesIn(DEFAULT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private Provider<Handler> provideAdminHandlerProvider;",
                 "  private Provider<Handler> provideLoginHandlerProvider;",
                 "  private Provider<Map<PathEnum, Handler>> mapOfPathEnumAndHandlerProvider;",
                 "",
                 "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize(",
-                "        final MapModuleOne mapModuleOneParam,",
-                "        final MapModuleTwo mapModuleTwoParam) {",
-                "    this.provideAdminHandlerProvider =",
-                "        MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
-                "    this.provideLoginHandlerProvider =",
-                "        MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
-                "    this.mapOfPathEnumAndHandlerProvider =",
-                "        MapFactory.<PathEnum, Handler>builder(2)",
-                "            .put(PathEnum.ADMIN, provideAdminHandlerProvider)",
-                "            .put(PathEnum.LOGIN, provideLoginHandlerProvider)",
-                "            .build();",
+                "  private void initialize(final MapModuleOne mapModuleOneParam,",
+                "      final MapModuleTwo mapModuleTwoParam) {",
+                "    this.provideAdminHandlerProvider = MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
+                "    this.provideLoginHandlerProvider = MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
+                "    this.mapOfPathEnumAndHandlerProvider = MapFactory.<PathEnum, Handler>builder(2).put(PathEnum.ADMIN, provideAdminHandlerProvider).put(PathEnum.LOGIN, provideLoginHandlerProvider).build();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Provider<Map<PathEnum, Handler>> dispatcher() {",
                 "    return mapOfPathEnumAndHandlerProvider;",
                 "  }",
-                "}");
-    }
+                "}")
+            .lines();
+
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -917,10 +896,13 @@ public class MapBindingComponentProcessorTest {
                 LoginHandlerFile,
                 AdminHandlerFile,
                 componentFile);
+
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
