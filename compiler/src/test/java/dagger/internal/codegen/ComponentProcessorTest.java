@@ -2338,17 +2338,15 @@ public class ComponentProcessorTest {
                     "  void inject(InjectsMember member);",
                     "}"));
     assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.TestModule_PrimitiveIntegerFactory")
-        .containsElementsIn(
-            JavaFileObjects.forSourceLines(
-                "test.TestModule_PrimitiveIntegerFactory",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "public final class TestModule_PrimitiveIntegerFactory",
-                "    implements Factory<Integer> {",
-                "",
+
+    Assertions.assertThat(compilation.generatedSourceFile("test.TestModule_PrimitiveIntegerFactory")
+            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(compilerMode
+            .javaFileBuilder("test.TestModule_PrimitiveIntegerFactory")
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedImportsIndividual())
+            .addLines(
+                "public final class TestModule_PrimitiveIntegerFactory implements Factory<Integer> {",
                 "  @Override",
                 "  public Integer get() {",
                 "    return primitiveInteger();",
@@ -2357,7 +2355,8 @@ public class ComponentProcessorTest {
                 "  public static int primitiveInteger() {",
                 "    return TestModule.primitiveInteger();",
                 "  }",
-                "}"));
+                "}")
+            .lines()));
 
     String[] generatedComponent =
         compilerMode
@@ -2535,163 +2534,6 @@ public class ComponentProcessorTest {
     Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
         .containsSubsequence(List.of(expectedPattern));
 
-  }
-
-  @Ignore("issue #3")
-  @Test
-  public void justInTimeAtInjectConstructor_hasGeneratedQualifier() {
-    JavaFileObject injected =
-        JavaFileObjects.forSourceLines(
-            "test.Injected",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "",
-            "class Injected {",
-            "  @Inject Injected(@GeneratedQualifier String string) {}",
-            "}");
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "",
-            "@Module",
-            "interface TestModule {",
-            "  @Provides",
-            "  static String unqualified() {",
-            "    return new String();",
-            "  }",
-            "",
-            "  @Provides",
-            "  @GeneratedQualifier",
-            "  static String qualified() {",
-            "    return new String();",
-            "  }",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component(modules = TestModule.class)",
-            "interface TestComponent {",
-            "  Injected injected();",
-            "}");
-
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  @Override",
-            "  public Injected injected() {",
-            // Ensure that the qualified @Provides method is used. It's also probably more likely
-            // that if the qualifier type hasn't been generated, a duplicate binding error will be
-            // reported, since the annotation won't be recognized as a qualifier and instead as an
-            // ordinary annotation.
-            "    return new Injected(TestModule_QualifiedFactory.qualified());",
-            "  }",
-            "}");
-
-    Compilation compilation =
-        daggerCompiler(
-            new GeneratingProcessor(
-                "test.GeneratedQualifier",
-                "package test;",
-                "",
-                "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
-                "",
-                "import java.lang.annotation.Retention;",
-                "import jakarta.inject.Qualifier;",
-                "",
-                "@Retention(RUNTIME)",
-                "@Qualifier",
-                "@interface GeneratedQualifier {}"))
-            .compile(injected, module, component);
-    assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
-  }
-
-  @Ignore("issue #3")
-  @Test
-  public void moduleHasGeneratedQualifier() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "",
-            "@Module",
-            "interface TestModule {",
-            "  @Provides",
-            "  static String unqualified() {",
-            "    return new String();",
-            "  }",
-            "",
-            "  @Provides",
-            "  @GeneratedQualifier",
-            "  static String qualified() {",
-            "    return new String();",
-            "  }",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component(modules = TestModule.class)",
-            "interface TestComponent {",
-            "  String unqualified();",
-            "}");
-
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  @Override",
-            "  public String unqualified() {",
-            // Ensure that the unqualified @Provides method is used. It's also probably more likely
-            // if the qualifier hasn't been generated, a duplicate binding exception will be thrown
-            // since the annotation won't be considered a qualifier
-            "    return TestModule_UnqualifiedFactory.unqualified();",
-            "  }",
-            "}");
-
-    Compilation compilation =
-        daggerCompiler(
-            new GeneratingProcessor(
-                "test.GeneratedQualifier",
-                "package test;",
-                "",
-                "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
-                "",
-                "import java.lang.annotation.Retention;",
-                "import jakarta.inject.Qualifier;",
-                "",
-                "@Retention(RUNTIME)",
-                "@Qualifier",
-                "@interface GeneratedQualifier {}"))
-            .compile(module, component);
-    assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
   }
 
   @Test
