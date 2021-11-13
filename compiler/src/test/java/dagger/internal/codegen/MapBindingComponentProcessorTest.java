@@ -227,7 +227,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void mapBindingsWithInaccessibleKeys() {
+  public void mapBindingsWithInaccessibleKeys() throws IOException {
     JavaFileObject mapKeys =
         JavaFileObjects.forSourceLines(
             "mapkeys.MapKeys",
@@ -325,58 +325,35 @@ public class MapBindingComponentProcessorTest {
             "}");
     Compilation compilation = daggerCompiler().compile(mapKeys, moduleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+
+    Assertions.assertThat(compilation.generatedSourceFile("test.DaggerTestComponent")
+            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private Provider<Map<Class<?>, Integer>> mapOfClassOfAndIntegerProvider;",
                 "",
                 "  @SuppressWarnings(\"rawtypes\")",
                 "  private Provider mapOfPackagePrivateEnumAndIntegerProvider;",
                 "",
-                "  private Provider<Map<MapKeys.ComplexKey, Integer>>",
-                "      mapOfComplexKeyAndIntegerProvider;",
+                "  private Provider<Map<MapKeys.ComplexKey, Integer>> mapOfComplexKeyAndIntegerProvider;",
                 "",
                 "  private Map mapOfPackagePrivateEnumAndInteger() {",
-                "    return ImmutableMap.of(",
-                "        MapModule_EnumKeyMapKey.create(), MapModule.enumKey());",
+                "    return ImmutableMap.of(MapModule_EnumKeyMapKey.create(), MapModule.enumKey());",
                 "  }",
                 "",
                 "  @SuppressWarnings(\"unchecked\")",
                 "  private void initialize() {",
-                "    this.mapOfClassOfAndIntegerProvider =",
-                "        MapFactory.<Class<?>, Integer>builder(1)",
-                "            .put(MapModule_ClassKeyMapKey.create(),",
-                "                 MapModule_ClassKeyFactory.create())",
-                "            .build();",
-                "    this.mapOfPackagePrivateEnumAndIntegerProvider =",
-                "        MapFactory.builder(1)",
-                "            .put(MapModule_EnumKeyMapKey.create(), ",
-                "                 (Provider) MapModule_EnumKeyFactory.create())",
-                "            .build();",
-                "    this.mapOfComplexKeyAndIntegerProvider =",
-                "       MapFactory.<MapKeys.ComplexKey, Integer>builder(3)",
-                "          .put(",
-                "             MapModule_ComplexKeyWithInaccessibleValueMapKey.create(),",
-                "             MapModule_ComplexKeyWithInaccessibleValueFactory.create())",
-                "          .put(",
-                "             MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(),",
-                "             MapModule_ComplexKeyWithInaccessibleArrayValueFactory.create())",
-                "          .put(",
-                "             MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(),",
-                "             MapModule_ComplexKeyWithInaccessibleAnnotationValueFactory.create())",
-                "          .build();",
+                "    this.mapOfClassOfAndIntegerProvider = MapFactory.<Class<?>, Integer>builder(1).put(MapModule_ClassKeyMapKey.create(), MapModule_ClassKeyFactory.create()).build();",
+                "    this.mapOfPackagePrivateEnumAndIntegerProvider = MapFactory.builder(1).put(MapModule_EnumKeyMapKey.create(), (Provider) MapModule_EnumKeyFactory.create()).build();",
+                "    this.mapOfComplexKeyAndIntegerProvider = MapFactory.<MapKeys.ComplexKey, Integer>builder(3).put(MapModule_ComplexKeyWithInaccessibleValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleValueFactory.create()).put(MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleArrayValueFactory.create()).put(MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleAnnotationValueFactory.create()).build();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Class<?>, Integer> classKey() {",
-                "    return ImmutableMap.<Class<?>, Integer>of(",
-                "        MapModule_ClassKeyMapKey.create(), MapModule.classKey());",
+                "    return ImmutableMap.<Class<?>, Integer>of(MapModule_ClassKeyMapKey.create(), MapModule.classKey());",
                 "  }",
                 "",
                 "  @Override",
@@ -396,50 +373,42 @@ public class MapBindingComponentProcessorTest {
                 "",
                 "  @Override",
                 "  public Map<MapKeys.ComplexKey, Integer> complexKey() {",
-                "    return ImmutableMap.<MapKeys.ComplexKey, Integer>of(",
-                "        MapModule_ComplexKeyWithInaccessibleValueMapKey.create(),",
-                "        MapModule.complexKeyWithInaccessibleValue(),",
-                "        MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(),",
-                "        MapModule.complexKeyWithInaccessibleArrayValue(),",
-                "        MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(),",
-                "        MapModule.complexKeyWithInaccessibleAnnotationValue());",
+                "    return ImmutableMap.<MapKeys.ComplexKey, Integer>of(MapModule_ComplexKeyWithInaccessibleValueMapKey.create(), MapModule.complexKeyWithInaccessibleValue(), MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(), MapModule.complexKeyWithInaccessibleArrayValue(), MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(), MapModule.complexKeyWithInaccessibleAnnotationValue());",
                 "  }",
                 "",
                 "  @Override",
                 "  public Provider<Map<MapKeys.ComplexKey, Integer>> complexKeyProvider() {",
                 "    return mapOfComplexKeyAndIntegerProvider;",
                 "  }",
-                "}"));
-    assertThat(compilation)
-        .generatedSourceFile(
-            "mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
-        .containsElementsIn(
-            JavaFileObjects.forSourceLines(
-                "mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey",
-                "package mapkeys;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "}")
+            .lines()));
+    ;
+
+    Assertions.assertThat(compilation.generatedSourceFile("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
+            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(compilerMode
+            .javaFileBuilder("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "public final class MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey {",
                 "  public static MapKeys.ComplexKey create() {",
-                "    return MapKeys_ComplexKeyCreator.createComplexKey(",
-                "        new Class[] {String.class},",
-                "        String.class,",
-                "        MapKeys_ComplexKeyCreator.createClassKey(MapKeys.Inaccessible.class));",
+                "    return MapKeys_ComplexKeyCreator.createComplexKey(new Class[] {String.class}, String.class, MapKeys_ComplexKeyCreator.createClassKey(MapKeys.Inaccessible.class));",
                 "  }",
-                "}"));
-    assertThat(compilation)
-        .generatedSourceFile("mapkeys.MapModule_ClassKeyMapKey")
-        .containsElementsIn(
-            JavaFileObjects.forSourceLines(
-                "mapkeys.MapModule_ClassKeyMapKey",
-                "package mapkeys;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "}")
+            .lines()));
+
+    Assertions.assertThat(compilation.generatedSourceFile("mapkeys.MapModule_ClassKeyMapKey")
+            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(compilerMode
+            .javaFileBuilder("mapkeys.MapModule_ClassKeyMapKey")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "public final class MapModule_ClassKeyMapKey {",
                 "  public static Class<?> create() {",
                 "    return MapKeys.Inaccessible.class;",
                 "  }",
-                "}"));
+                "}")
+            .lines()));
   }
 
   @Test
