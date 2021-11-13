@@ -17,13 +17,19 @@
 package dagger.internal.codegen;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
+import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
+import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,7 +49,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void mapBindingsWithEnumKey() {
+  public void mapBindingsWithEnumKey() throws IOException {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -120,22 +126,18 @@ public class MapBindingComponentProcessorTest {
         "interface TestComponent {",
         "  Provider<Map<PathEnum, Provider<Handler>>> dispatcher();",
         "}");
-    JavaFileObject generatedComponent;
-    switch (compilerMode) {
-      case FAST_INIT_MODE:
-        generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLinesIn(FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private final MapModuleOne mapModuleOne;",
                 "  private final MapModuleTwo mapModuleTwo;",
                 "  private volatile Provider<Handler> provideAdminHandlerProvider;",
                 "  private volatile Provider<Handler> provideLoginHandlerProvider;",
-                "  private volatile Provider<Map<PathEnum, Provider<Handler>>>",
-                "      mapOfPathEnumAndProviderOfHandlerProvider;",
+                "  private volatile Provider<Map<PathEnum, Provider<Handler>>> mapOfPathEnumAndProviderOfHandlerProvider;",
                 "",
                 "  private Provider<Handler> provideAdminHandlerProvider() {",
                 "    Object local = provideAdminHandlerProvider;",
@@ -155,11 +157,8 @@ public class MapBindingComponentProcessorTest {
                 "    return (Provider<Handler>) local;",
                 "  }",
                 "",
-                "  private Map<PathEnum, Provider<Handler>>",
-                "        mapOfPathEnumAndProviderOfHandler() {",
-                "    return ImmutableMap.<PathEnum, Provider<Handler>>of(",
-                "        PathEnum.ADMIN, provideAdminHandlerProvider(),",
-                "        PathEnum.LOGIN, provideLoginHandlerProvider());",
+                "  private Map<PathEnum, Provider<Handler>> mapOfPathEnumAndProviderOfHandler() {",
+                "    return ImmutableMap.<PathEnum, Provider<Handler>>of(PathEnum.ADMIN, provideAdminHandlerProvider(), PathEnum.LOGIN, provideLoginHandlerProvider());",
                 "  }",
                 "",
                 "  @Override",
@@ -167,8 +166,7 @@ public class MapBindingComponentProcessorTest {
                 "    Object local = mapOfPathEnumAndProviderOfHandlerProvider;",
                 "    if (local == null) {",
                 "      local = new SwitchingProvider<>(testComponent, 0);",
-                "      mapOfPathEnumAndProviderOfHandlerProvider =",
-                "          (Provider<Map<PathEnum, Provider<Handler>>>) local;",
+                "      mapOfPathEnumAndProviderOfHandlerProvider = (Provider<Map<PathEnum, Provider<Handler>>>) local;",
                 "    }",
                 "    return (Provider<Map<PathEnum, Provider<Handler>>>) local;",
                 "  }",
@@ -178,54 +176,37 @@ public class MapBindingComponentProcessorTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0:",
-                "            return (T) testComponent.mapOfPathEnumAndProviderOfHandler();",
-                "        case 1:",
-                "            return (T) MapModuleOne_ProvideAdminHandlerFactory",
-                "                .provideAdminHandler(testComponent.mapModuleOne);",
-                "        case 2:",
-                "            return (T) MapModuleTwo_ProvideLoginHandlerFactory",
-                "                .provideLoginHandler(testComponent.mapModuleTwo);",
+                "        case 0: // java.util.Map<test.PathEnum,jakarta.inject.Provider<test.Handler>> ",
+                "        return (T) testComponent.mapOfPathEnumAndProviderOfHandler();",
+                "        case 1: // java.util.Map<test.PathEnum,jakarta.inject.Provider<test.Handler>> test.MapModuleOne#provideAdminHandler ",
+                "        return (T) MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(testComponent.mapModuleOne);",
+                "        case 2: // java.util.Map<test.PathEnum,jakarta.inject.Provider<test.Handler>> test.MapModuleTwo#provideLoginHandler ",
+                "        return (T) MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(testComponent.mapModuleTwo);",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }",
-                "}");
-        break;
-      default:
-        generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "}")
+            .addLinesIn(DEFAULT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private Provider<Handler> provideAdminHandlerProvider;",
                 "  private Provider<Handler> provideLoginHandlerProvider;",
-                "  private Provider<Map<PathEnum, Provider<Handler>>>",
-                "      mapOfPathEnumAndProviderOfHandlerProvider;",
+                "  private Provider<Map<PathEnum, Provider<Handler>>> mapOfPathEnumAndProviderOfHandlerProvider;",
                 "",
                 "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize(",
-                "      final MapModuleOne mapModuleOneParam,",
+                "  private void initialize(final MapModuleOne mapModuleOneParam,",
                 "      final MapModuleTwo mapModuleTwoParam) {",
-                "    this.provideAdminHandlerProvider =",
-                "        MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
-                "    this.provideLoginHandlerProvider =",
-                "        MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
-                "    this.mapOfPathEnumAndProviderOfHandlerProvider =",
-                "        MapProviderFactory.<PathEnum, Handler>builder(2)",
-                "            .put(PathEnum.ADMIN, provideAdminHandlerProvider)",
-                "            .put(PathEnum.LOGIN, provideLoginHandlerProvider)",
-                "            .build();",
+                "    this.provideAdminHandlerProvider = MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
+                "    this.provideLoginHandlerProvider = MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
+                "    this.mapOfPathEnumAndProviderOfHandlerProvider = MapProviderFactory.<PathEnum, Handler>builder(2).put(PathEnum.ADMIN, provideAdminHandlerProvider).put(PathEnum.LOGIN, provideLoginHandlerProvider).build();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Provider<Map<PathEnum, Provider<Handler>>> dispatcher() {",
                 "    return mapOfPathEnumAndProviderOfHandlerProvider;",
                 "  }",
-                "}");
-    }
+                "}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -238,9 +219,11 @@ public class MapBindingComponentProcessorTest {
                 AdminHandlerFile,
                 componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
