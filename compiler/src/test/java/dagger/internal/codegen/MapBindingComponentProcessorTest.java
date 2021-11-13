@@ -906,7 +906,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void injectMapWithoutMapBinding() {
+  public void injectMapWithoutMapBinding() throws IOException {
     JavaFileObject mapModuleFile = JavaFileObjects.forSourceLines("test.MapModule",
         "package test;",
         "",
@@ -933,26 +933,30 @@ public class MapBindingComponentProcessorTest {
         "interface TestComponent {",
         "  Map<String, String> dispatcher();",
         "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  private final MapModule mapModule;",
-            "",
-            "  @Override",
-            "  public Map<String, String> dispatcher() {",
-            "    return MapModule_ProvideAMapFactory.provideAMap(mapModule);",
-            "  }",
-            "}");
+    String[] generatedComponent =
+        compilerMode
+            .javaFileBuilder("test.DaggerTestComponent")
+            .addLines(
+                "package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
+                "final class DaggerTestComponent implements TestComponent {",
+                "  private final MapModule mapModule;",
+                "",
+                "  @Override",
+                "  public Map<String, String> dispatcher() {",
+                "    return MapModule_ProvideAMapFactory.provideAMap(mapModule);",
+                "  }",
+                "}")
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 }
