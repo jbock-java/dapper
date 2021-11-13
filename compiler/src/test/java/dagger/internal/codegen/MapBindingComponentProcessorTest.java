@@ -579,7 +579,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void mapBindingsWithWrappedKey() {
+  public void mapBindingsWithWrappedKey() throws IOException {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -650,123 +650,91 @@ public class MapBindingComponentProcessorTest {
         "interface TestComponent {",
         "  Provider<Map<WrappedClassKey, Provider<Handler>>> dispatcher();",
         "}");
-    JavaFileObject generatedComponent;
-    switch (compilerMode) {
-      case FAST_INIT_MODE:
-        generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerTestComponent implements TestComponent {",
-                "  private final MapModuleOne mapModuleOne;",
-                "  private final MapModuleTwo mapModuleTwo;",
-                "  private volatile Provider<Handler> provideAdminHandlerProvider;",
-                "  private volatile Provider<Handler> provideLoginHandlerProvider;",
-                "  private volatile Provider<Map<WrappedClassKey, Provider<Handler>>>",
-                "      mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
-                "",
-                "  private DaggerTestComponent(",
-                "      MapModuleOne mapModuleOneParam,",
-                "      MapModuleTwo mapModuleTwoParam) {",
-                "    this.mapModuleOne = mapModuleOneParam;",
-                "    this.mapModuleTwo = mapModuleTwoParam;",
-                "  }",
-                "",
-                "  private Provider<Handler> provideAdminHandlerProvider() {",
-                "    Object local = provideAdminHandlerProvider;",
-                "    if (local == null) {",
-                "      local = new SwitchingProvider<>(testComponent, 1);",
-                "      provideAdminHandlerProvider = (Provider<Handler>) local;",
-                "    }",
-                "    return (Provider<Handler>) local;",
-                "  }",
-                "",
-                "  private Provider<Handler> provideLoginHandlerProvider() {",
-                "    Object local = provideLoginHandlerProvider;",
-                "    if (local == null) {",
-                "      local = new SwitchingProvider<>(testComponent, 2);",
-                "      provideLoginHandlerProvider = (Provider<Handler>) local;",
-                "    }",
-                "    return (Provider<Handler>) local;",
-                "  }",
-                "",
-                "  private Map<WrappedClassKey, Provider<Handler>>",
-                "      mapOfWrappedClassKeyAndProviderOfHandler() {",
-                "    return ImmutableMap.<WrappedClassKey, Provider<Handler>>of(",
-                "        WrappedClassKeyCreator.createWrappedClassKey(Integer.class),",
-                "        provideAdminHandlerProvider(),",
-                "        WrappedClassKeyCreator.createWrappedClassKey(Long.class),",
-                "        provideLoginHandlerProvider());",
-                "  }",
-                "",
-                "  @Override",
-                "  public Provider<Map<WrappedClassKey, Provider<Handler>>> dispatcher() {",
-                "    Object local = mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
-                "    if (local == null) {",
-                "      local = new SwitchingProvider<>(testComponent, 0);",
-                "      mapOfWrappedClassKeyAndProviderOfHandlerProvider =",
-                "          (Provider<Map<WrappedClassKey, Provider<Handler>>>) local;",
-                "    }",
-                "    return (Provider<Map<WrappedClassKey, Provider<Handler>>>) local;",
-                "  }",
-                "",
-                "  private static final class SwitchingProvider<T> implements Provider<T> {",
-                "    @SuppressWarnings(\"unchecked\")",
-                "    @Override",
-                "    public T get() {",
-                "      switch (id) {",
-                "        case 0:",
-                "            return (T) testComponent.mapOfWrappedClassKeyAndProviderOfHandler();",
-                "        case 1:",
-                "            return (T) MapModuleOne_ProvideAdminHandlerFactory",
-                "                .provideAdminHandler(testComponent.mapModuleOne);",
-                "        case 2:",
-                "            return (T) MapModuleTwo_ProvideLoginHandlerFactory",
-                "                .provideLoginHandler(testComponent.mapModuleTwo);",
-                "        default: throw new AssertionError(id);",
-                "      }",
-                "    }",
-                "  }",
-                "}");
-        break;
-      default:
-        generatedComponent =
-            JavaFileObjects.forSourceLines(
-                "test.DaggerTestComponent",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerTestComponent implements TestComponent {",
-                "  private Provider<Handler> provideAdminHandlerProvider;",
-                "  private Provider<Handler> provideLoginHandlerProvider;",
-                "  private Provider<Map<WrappedClassKey, Provider<Handler>>>",
-                "      mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
-                "",
-                "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize(",
-                "      final MapModuleOne mapModuleOneParam,",
-                "      final MapModuleTwo mapModuleTwoParam) {",
-                "    this.provideAdminHandlerProvider =",
-                "        MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
-                "    this.provideLoginHandlerProvider =",
-                "        MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
-                "    this.mapOfWrappedClassKeyAndProviderOfHandlerProvider =",
-                "        MapProviderFactory.<WrappedClassKey, Handler>builder(2)",
-                "            .put(WrappedClassKeyCreator.createWrappedClassKey(Integer.class),",
-                "                provideAdminHandlerProvider)",
-                "            .put(WrappedClassKeyCreator.createWrappedClassKey(Long.class),",
-                "                provideLoginHandlerProvider)",
-                "            .build();",
-                "  }",
-                "",
-                "  @Override",
-                "  public Provider<Map<WrappedClassKey, Provider<Handler>>> dispatcher() {",
-                "    return mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
-                "  }",
-                "}");
-    }
+    String[] generatedComponent = compilerMode
+        .javaFileBuilder("test.DaggerTestComponent")
+        .addLines("package test;")
+        .addLines(GeneratedLines.generatedAnnotationsIndividual())
+        .addLinesIn(FAST_INIT_MODE,
+            "final class DaggerTestComponent implements TestComponent {",
+            "  private final MapModuleOne mapModuleOne;",
+            "  private final MapModuleTwo mapModuleTwo;",
+            "  private volatile Provider<Handler> provideAdminHandlerProvider;",
+            "  private volatile Provider<Handler> provideLoginHandlerProvider;",
+            "  private volatile Provider<Map<WrappedClassKey, Provider<Handler>>> mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
+            "",
+            "  private DaggerTestComponent(MapModuleOne mapModuleOneParam, MapModuleTwo mapModuleTwoParam) {",
+            "    this.mapModuleOne = mapModuleOneParam;",
+            "    this.mapModuleTwo = mapModuleTwoParam;",
+            "  }",
+            "",
+            "  private Provider<Handler> provideAdminHandlerProvider() {",
+            "    Object local = provideAdminHandlerProvider;",
+            "    if (local == null) {",
+            "      local = new SwitchingProvider<>(testComponent, 1);",
+            "      provideAdminHandlerProvider = (Provider<Handler>) local;",
+            "    }",
+            "    return (Provider<Handler>) local;",
+            "  }",
+            "",
+            "  private Provider<Handler> provideLoginHandlerProvider() {",
+            "    Object local = provideLoginHandlerProvider;",
+            "    if (local == null) {",
+            "      local = new SwitchingProvider<>(testComponent, 2);",
+            "      provideLoginHandlerProvider = (Provider<Handler>) local;",
+            "    }",
+            "    return (Provider<Handler>) local;",
+            "  }",
+            "",
+            "  private Map<WrappedClassKey, Provider<Handler>> mapOfWrappedClassKeyAndProviderOfHandler() {",
+            "    return ImmutableMap.<WrappedClassKey, Provider<Handler>>of(WrappedClassKeyCreator.createWrappedClassKey(Integer.class), provideAdminHandlerProvider(), WrappedClassKeyCreator.createWrappedClassKey(Long.class), provideLoginHandlerProvider());",
+            "  }",
+            "",
+            "  @Override",
+            "  public Provider<Map<WrappedClassKey, Provider<Handler>>> dispatcher() {",
+            "    Object local = mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
+            "    if (local == null) {",
+            "      local = new SwitchingProvider<>(testComponent, 0);",
+            "      mapOfWrappedClassKeyAndProviderOfHandlerProvider = (Provider<Map<WrappedClassKey, Provider<Handler>>>) local;",
+            "    }",
+            "    return (Provider<Map<WrappedClassKey, Provider<Handler>>>) local;",
+            "  }",
+            "",
+            "  private static final class SwitchingProvider<T> implements Provider<T> {",
+            "    @SuppressWarnings(\"unchecked\")",
+            "    @Override",
+            "    public T get() {",
+            "      switch (id) {",
+            "        case 0: // java.util.Map<test.WrappedClassKey,jakarta.inject.Provider<test.Handler>> ",
+            "        return (T) testComponent.mapOfWrappedClassKeyAndProviderOfHandler();",
+            "        case 1: // java.util.Map<test.WrappedClassKey,jakarta.inject.Provider<test.Handler>> test.MapModuleOne#provideAdminHandler ",
+            "        return (T) MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(testComponent.mapModuleOne);",
+            "        case 2: // java.util.Map<test.WrappedClassKey,jakarta.inject.Provider<test.Handler>> test.MapModuleTwo#provideLoginHandler ",
+            "        return (T) MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(testComponent.mapModuleTwo);",
+            "        default: throw new AssertionError(id);",
+            "      }",
+            "    }",
+            "  }",
+            "}")
+        .addLinesIn(DEFAULT_MODE,
+            "final class DaggerTestComponent implements TestComponent {",
+            "  private Provider<Handler> provideAdminHandlerProvider;",
+            "  private Provider<Handler> provideLoginHandlerProvider;",
+            "  private Provider<Map<WrappedClassKey, Provider<Handler>>> mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
+            "",
+            "  @SuppressWarnings(\"unchecked\")",
+            "  private void initialize(final MapModuleOne mapModuleOneParam,",
+            "      final MapModuleTwo mapModuleTwoParam) {",
+            "    this.provideAdminHandlerProvider = MapModuleOne_ProvideAdminHandlerFactory.create(mapModuleOneParam);",
+            "    this.provideLoginHandlerProvider = MapModuleTwo_ProvideLoginHandlerFactory.create(mapModuleTwoParam);",
+            "    this.mapOfWrappedClassKeyAndProviderOfHandlerProvider = MapProviderFactory.<WrappedClassKey, Handler>builder(2).put(WrappedClassKeyCreator.createWrappedClassKey(Integer.class), provideAdminHandlerProvider).put(WrappedClassKeyCreator.createWrappedClassKey(Long.class), provideLoginHandlerProvider).build();",
+            "  }",
+            "",
+            "  @Override",
+            "  public Provider<Map<WrappedClassKey, Provider<Handler>>> dispatcher() {",
+            "    return mapOfWrappedClassKeyAndProviderOfHandlerProvider;",
+            "  }",
+            "}")
+        .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -778,9 +746,11 @@ public class MapBindingComponentProcessorTest {
                 AdminHandlerFile,
                 componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
