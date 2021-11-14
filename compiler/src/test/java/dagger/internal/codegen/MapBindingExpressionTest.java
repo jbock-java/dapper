@@ -30,9 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -204,11 +202,9 @@ public class MapBindingExpressionTest {
             .lines();
     Compilation compilation = daggerCompilerWithoutGuava().compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -345,11 +341,9 @@ public class MapBindingExpressionTest {
 
     Compilation compilation = daggerCompilerWithoutGuava().compile(parent, parentModule, child);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(generatedComponent);
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerParent")
+        .containsLinesIn(generatedComponent);
   }
 
   private Compiler daggerCompilerWithoutGuava() {
