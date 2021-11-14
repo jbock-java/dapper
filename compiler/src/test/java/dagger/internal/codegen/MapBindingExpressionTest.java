@@ -212,7 +212,7 @@ public class MapBindingExpressionTest {
   }
 
   @Test
-  public void inaccessible() throws IOException {
+  public void inaccessible() {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible",
@@ -278,11 +278,9 @@ public class MapBindingExpressionTest {
     Compilation compilation =
         daggerCompilerWithoutGuava().compile(module, inaccessible, usesInaccessible, componentFile);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(generatedComponent);
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
