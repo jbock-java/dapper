@@ -25,8 +25,12 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,7 +50,7 @@ public class MapBindingExpressionTest {
   }
 
   @Test
-  public void mapBindings() {
+  public void mapBindings() throws IOException {
     JavaFileObject mapModuleFile = JavaFileObjects.forSourceLines("test.MapModule",
         "package test;",
         "",
@@ -83,16 +87,14 @@ public class MapBindingExpressionTest {
         "  Map<Long, Long> longs();",
         "  Map<Long, Provider<Long>> providerLongs();",
         "}");
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                "import dagger.internal.MapBuilder;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerTestComponent implements TestComponent {")
+                "import dagger.internal.MapBuilder;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerTestComponent implements TestComponent {")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "  private volatile Provider<Integer> provideIntProvider;",
@@ -152,41 +154,31 @@ public class MapBindingExpressionTest {
                 "  }",
                 "",
                 "  @Override",
-                "  public Map<Integer, Provider<Integer>> providerInts() {",
-                "    return Collections.<Integer, Provider<Integer>>singletonMap(")
+                "  public Map<Integer, Provider<Integer>> providerInts() {")
             .addLinesIn(
-                DEFAULT_MODE, //
-                "        0, MapModule_ProvideIntFactory.create());")
+                DEFAULT_MODE,
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, MapModule_ProvideIntFactory.create());")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "        0, provideIntProvider());")
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, provideIntProvider());")
             .addLines(
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Long, Long> longs() {",
-                "    return MapBuilder.<Long, Long>newMapBuilder(3)",
-                "        .put(0L, MapModule.provideLong0())",
-                "        .put(1L, MapModule.provideLong1())",
-                "        .put(2L, MapModule.provideLong2())",
-                "        .build();",
+                "    return MapBuilder.<Long, Long>newMapBuilder(3).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).build();",
                 "  }",
                 "",
                 "  @Override",
-                "  public Map<Long, Provider<Long>> providerLongs() {",
-                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3)")
+                "  public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "        .put(0L, MapModule_ProvideLong0Factory.create())",
-                "        .put(1L, MapModule_ProvideLong1Factory.create())",
-                "        .put(2L, MapModule_ProvideLong2Factory.create())")
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).build();")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "        .put(0L, provideLong0Provider())",
-                "        .put(1L, provideLong1Provider())",
-                "        .put(2L, provideLong2Provider())")
-            .addLines( //
-                "        .build();", "  }")
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3).put(0L, provideLong0Provider()).put(1L, provideLong1Provider()).put(2L, provideLong2Provider()).build();")
+            .addLines(
+                "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "  private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -194,21 +186,27 @@ public class MapBindingExpressionTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0: return (T) (Integer) MapModule.provideInt();",
-                "        case 1: return (T) (Long) MapModule.provideLong0();",
-                "        case 2: return (T) (Long) MapModule.provideLong1();",
-                "        case 3: return (T) (Long) MapModule.provideLong2();",
+                "        case 0: // java.util.Map<java.lang.Integer,jakarta.inject.Provider<java.lang.Integer>> test.MapModule#provideInt ",
+                "        return (T) (Integer) MapModule.provideInt();",
+                "        case 1: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong0 ",
+                "        return (T) (Long) MapModule.provideLong0();",
+                "        case 2: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong1 ",
+                "        return (T) (Long) MapModule.provideLong1();",
+                "        case 3: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong2 ",
+                "        return (T) (Long) MapModule.provideLong2();",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }",
                 "}")
-            .build();
+            .lines();
     Compilation compilation = daggerCompilerWithoutGuava().compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
