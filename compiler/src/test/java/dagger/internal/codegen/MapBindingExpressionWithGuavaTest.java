@@ -396,7 +396,7 @@ public class MapBindingExpressionWithGuavaTest {
   }
 
   @Test
-  public void subcomponentOmitsInheritedBindings() {
+  public void subcomponentOmitsInheritedBindings() throws IOException {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -436,31 +436,31 @@ public class MapBindingExpressionWithGuavaTest {
             "interface Child {",
             "  Map<String, Object> objectMap();",
             "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParent implements Parent {",
-            "  private final ParentModule parentModule;",
-            "",
-            "  private static final class ChildImpl implements Child {",
-            "    @Override",
-            "    public Map<String, Object> objectMap() {",
-            "      return ImmutableMap.<String, Object>of(",
-            "          \"parent key\",",
-            "          ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerParent implements Parent {",
+        "  private final ParentModule parentModule;",
+        "",
+        "  private static final class ChildImpl implements Child {",
+        "    @Override",
+        "    public Map<String, Object> objectMap() {",
+        "      return ImmutableMap.<String, Object>of(\"parent key\", ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
+        "    }",
+        "  }",
+        "}");
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent, parentModule, child);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerParent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(generatedComponent);
   }
 
   @Test
