@@ -464,7 +464,7 @@ public class MapBindingExpressionWithGuavaTest {
   }
 
   @Test
-  public void productionComponents() {
+  public void productionComponents() throws IOException {
     JavaFileObject mapModuleFile =
         JavaFileObjects.forSourceLines(
             "test.MapModule",
@@ -489,32 +489,32 @@ public class MapBindingExpressionWithGuavaTest {
         "interface TestComponent {",
         "  ListenableFuture<Map<String, String>> stringMap();",
         "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            "import dagger.producers.internal.CancellationListener;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent, "
-                + "CancellationListener {",
-            "  @Override",
-            "  public ListenableFuture<Map<String, String>> stringMap() {",
-            "    return Futures.immediateFuture(",
-            "        ImmutableMap.<String, String>of());",
-            "  }",
-            "",
-            "  @Override",
-            "  public void onProducerFutureCancelled(boolean mayInterruptIfRunning) {}",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;",
+        "",
+        "import dagger.producers.internal.CancellationListener;");
+    Collections.addAll(generatedComponent, GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent, CancellationListener {",
+        "  @Override",
+        "  public ListenableFuture<Map<String, String>> stringMap() {",
+        "    return Futures.immediateFuture(ImmutableMap.<String, String>of());",
+        "  }",
+        "",
+        "  @Override",
+        "  public void onProducerFutureCancelled(boolean mayInterruptIfRunning) {",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(
             compilerMode)
             .compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(generatedComponent);
   }
 }
