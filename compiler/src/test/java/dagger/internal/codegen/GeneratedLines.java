@@ -106,4 +106,13 @@ public final class GeneratedLines {
   public static String generatedAnnotationsWithoutSuppressWarnings() {
     return Joiner.on('\n').join(DAGGER_GENERATED_ANNOTATION, GENERATED_ANNOTATION);
   }
+
+  public static String[] generatedAnnotationsWithoutSuppressWarningsIndividual() {
+    return new String[]{
+        DAGGER_GENERATED_ANNOTATION,
+        GENERATED_ANNOTATION_0,
+        GENERATED_ANNOTATION_1,
+        GENERATED_ANNOTATION_2,
+        GENERATED_ANNOTATION_3};
+  }
 }

@@ -30,6 +30,9 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -371,59 +374,61 @@ public class ProducerModuleFactoryGeneratorTest {
         "    return null;",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "TestModule_ProduceStringFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import com.google.common.util.concurrent.Futures;",
-                "import com.google.common.util.concurrent.ListenableFuture;",
-                "import dagger.producers.internal.AbstractProducesMethodProducer;",
-                "import dagger.producers.monitoring.ProducerToken;",
-                "import dagger.producers.monitoring.ProductionComponentMonitor;",
-                "import java.util.concurrent.Executor;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotationsWithoutSuppressWarnings(),
-            "@SuppressWarnings({\"FutureReturnValueIgnored\", \"unchecked\", \"rawtypes\"})",
-            "public final class TestModule_ProduceStringFactory",
-            "    extends AbstractProducesMethodProducer<Void, String> {",
-            "  private final TestModule module;",
-            "",
-            "  private TestModule_ProduceStringFactory(",
-            "      TestModule module,",
-            "      Provider<Executor> executorProvider,",
-            "      Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {",
-            "    super(",
-            "        productionComponentMonitorProvider,",
-            "        ProducerToken.create(TestModule_ProduceStringFactory.class),",
-            "        executorProvider);",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  public static TestModule_ProduceStringFactory create(",
-            "      TestModule module,",
-            "      Provider<Executor> executorProvider,",
-            "      Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {",
-            "    return new TestModule_ProduceStringFactory(",
-            "        module, executorProvider, productionComponentMonitorProvider);",
-            "  }",
-            "",
-            "  @Override protected ListenableFuture<Void> collectDependencies() {",
-            "    return Futures.<Void>immediateFuture(null);",
-            "  }",
-            "",
-            "  @Override public ListenableFuture<String> callProducesMethod(Void ignoredVoidArg) {",
-            "    return module.produceString();",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;",
+        "");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import com.google.common.util.concurrent.Futures;",
+            "import com.google.common.util.concurrent.ListenableFuture;",
+            "import dagger.producers.internal.AbstractProducesMethodProducer;",
+            "import dagger.producers.monitoring.ProducerToken;",
+            "import dagger.producers.monitoring.ProductionComponentMonitor;",
+            "import java.util.concurrent.Executor;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(factoryFile, "");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsWithoutSuppressWarningsIndividual());
+    Collections.addAll(factoryFile,
+        "@SuppressWarnings({",
+        "    \"FutureReturnValueIgnored\",",
+        "    \"unchecked\",",
+        "    \"rawtypes\"",
+        "})",
+        "public final class TestModule_ProduceStringFactory extends AbstractProducesMethodProducer<Void, String> {",
+        "  private final TestModule module;",
+        "",
+        "  private TestModule_ProduceStringFactory(TestModule module, Provider<Executor> executorProvider,",
+        "      Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {",
+        "    super(productionComponentMonitorProvider, ProducerToken.create(TestModule_ProduceStringFactory.class), executorProvider);",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  public static TestModule_ProduceStringFactory create(TestModule module,",
+        "      Provider<Executor> executorProvider,",
+        "      Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {",
+        "    return new TestModule_ProduceStringFactory(module, executorProvider, productionComponentMonitorProvider);",
+        "  }",
+        "",
+        "  @Override",
+        "  protected ListenableFuture<Void> collectDependencies() {",
+        "    return Futures.<Void>immediateFuture(null);",
+        "  }",
+        "",
+        "  @Override",
+        "  public ListenableFuture<String> callProducesMethod(Void ignoredVoidArg) {",
+        "    return module.produceString();",
+        "  }",
+        "}",
+        "");
     assertAbout(javaSource())
         .that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProduceStringFactory", factoryFile);
+        .generatesSources("test.TestModule_ProduceStringFactory",
+            factoryFile);
   }
 
   @Test
