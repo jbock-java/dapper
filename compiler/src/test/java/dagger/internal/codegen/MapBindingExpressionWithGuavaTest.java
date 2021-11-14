@@ -23,14 +23,11 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -50,7 +47,7 @@ public class MapBindingExpressionWithGuavaTest {
   }
 
   @Test
-  public void mapBindings() throws IOException {
+  public void mapBindings() {
     JavaFileObject mapModuleFile =
         JavaFileObjects.forSourceLines(
             "test.MapModule",
@@ -316,15 +313,13 @@ public class MapBindingExpressionWithGuavaTest {
         compilerWithOptions(compilerMode.javacopts())
             .compile(mapModuleFile, componentFile, subcomponentModuleFile, subcomponent);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
-  public void inaccessible() throws IOException {
+  public void inaccessible() {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible", "package other;", "", "class Inaccessible {}");
@@ -388,15 +383,13 @@ public class MapBindingExpressionWithGuavaTest {
         compilerWithOptions(compilerMode.javacopts())
             .compile(module, inaccessible, usesInaccessible, componentFile);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(generatedComponent);
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
-  public void subcomponentOmitsInheritedBindings() throws IOException {
+  public void subcomponentOmitsInheritedBindings() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -456,15 +449,13 @@ public class MapBindingExpressionWithGuavaTest {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent, parentModule, child);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(generatedComponent);
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerParent")
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
-  public void productionComponents() throws IOException {
+  public void productionComponents() {
     JavaFileObject mapModuleFile =
         JavaFileObjects.forSourceLines(
             "test.MapModule",
@@ -511,10 +502,8 @@ public class MapBindingExpressionWithGuavaTest {
             compilerMode)
             .compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(generatedComponent);
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLinesIn(generatedComponent);
   }
 }

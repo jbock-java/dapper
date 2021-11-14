@@ -25,7 +25,6 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +49,7 @@ public class MapBindingExpressionTest {
   }
 
   @Test
-  public void mapBindings() throws IOException {
+  public void mapBindings() {
     JavaFileObject mapModuleFile = JavaFileObjects.forSourceLines("test.MapModule",
         "package test;",
         "",
@@ -280,7 +279,7 @@ public class MapBindingExpressionTest {
   }
 
   @Test
-  public void subcomponentOmitsInheritedBindings() throws IOException {
+  public void subcomponentOmitsInheritedBindings() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
