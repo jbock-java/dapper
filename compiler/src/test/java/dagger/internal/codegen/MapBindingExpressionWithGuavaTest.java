@@ -23,8 +23,12 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +48,7 @@ public class MapBindingExpressionWithGuavaTest {
   }
 
   @Test
-  public void mapBindings() {
+  public void mapBindings() throws IOException {
     JavaFileObject mapModuleFile =
         JavaFileObjects.forSourceLines(
             "test.MapModule",
@@ -120,13 +124,14 @@ public class MapBindingExpressionWithGuavaTest {
             "  Map<Long, Long> longs();",
             "  Map<Long, Provider<Long>> providerLongs();",
             "}");
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerTestComponent implements TestComponent {")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -187,38 +192,29 @@ public class MapBindingExpressionWithGuavaTest {
                 "  }",
                 "",
                 "  @Override",
-                "  public Map<Integer, Provider<Integer>> providerInts() {",
-                "    return ImmutableMap.<Integer, Provider<Integer>>of(")
+                "  public Map<Integer, Provider<Integer>> providerInts() {")
             .addLinesIn(
-                DEFAULT_MODE, //
-                "        0, MapModule_ProvideIntFactory.create());")
+                DEFAULT_MODE,
+                "    return ImmutableMap.<Integer, Provider<Integer>>of(0, MapModule_ProvideIntFactory.create());")
             .addLinesIn(
-                FAST_INIT_MODE, //
-                "        0, provideIntProvider());")
+                FAST_INIT_MODE,
+                "    return ImmutableMap.<Integer, Provider<Integer>>of(0, provideIntProvider());")
             .addLines(
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Long, Long> longs() {",
-                "    return ImmutableMap.<Long, Long>of(",
-                "      0L, MapModule.provideLong0(),",
-                "      1L, MapModule.provideLong1(),",
-                "      2L, MapModule.provideLong2());",
+                "    return ImmutableMap.<Long, Long>of(0L, MapModule.provideLong0(), 1L, MapModule.provideLong1(), 2L, MapModule.provideLong2());",
                 "  }",
                 "",
                 "  @Override",
-                "  public Map<Long, Provider<Long>> providerLongs() {",
-                "    return ImmutableMap.<Long, Provider<Long>>of(")
+                "  public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "      0L, MapModule_ProvideLong0Factory.create(),",
-                "      1L, MapModule_ProvideLong1Factory.create(),",
-                "      2L, MapModule_ProvideLong2Factory.create());")
+                "    return ImmutableMap.<Long, Provider<Long>>of(0L, MapModule_ProvideLong0Factory.create(), 1L, MapModule_ProvideLong1Factory.create(), 2L, MapModule_ProvideLong2Factory.create());")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "      0L, provideLong0Provider(),",
-                "      1L, provideLong1Provider(),",
-                "      2L, provideLong2Provider());")
+                "    return ImmutableMap.<Long, Provider<Long>>of(0L, provideLong0Provider(), 1L, provideLong1Provider(), 2L, provideLong2Provider());")
             .addLines(
                 "  }",
                 "",
@@ -263,37 +259,19 @@ public class MapBindingExpressionWithGuavaTest {
             .addLines(
                 "    @Override",
                 "    public Map<Long, Long> longs() {",
-                "      return ImmutableMap.<Long, Long>builderWithExpectedSize(6)",
-                "          .put(0L, MapModule.provideLong0())",
-                "          .put(1L, MapModule.provideLong1())",
-                "          .put(2L, MapModule.provideLong2())",
-                "          .put(3L, SubcomponentMapModule.provideLong3())",
-                "          .put(4L, SubcomponentMapModule.provideLong4())",
-                "          .put(5L, SubcomponentMapModule.provideLong5())",
-                "          .build();",
+                "      return ImmutableMap.<Long, Long>builderWithExpectedSize(6).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).put(3L, SubcomponentMapModule.provideLong3()).put(4L, SubcomponentMapModule.provideLong4()).put(5L, SubcomponentMapModule.provideLong5()).build();",
                 "    }",
                 "",
                 "    @Override",
-                "    public Map<Long, Provider<Long>> providerLongs() {",
-                "      return ImmutableMap.<Long, Provider<Long>>builderWithExpectedSize(6)")
+                "    public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "          .put(0L, MapModule_ProvideLong0Factory.create())",
-                "          .put(1L, MapModule_ProvideLong1Factory.create())",
-                "          .put(2L, MapModule_ProvideLong2Factory.create())",
-                "          .put(3L, SubcomponentMapModule_ProvideLong3Factory.create())",
-                "          .put(4L, SubcomponentMapModule_ProvideLong4Factory.create())",
-                "          .put(5L, SubcomponentMapModule_ProvideLong5Factory.create())")
+                "      return ImmutableMap.<Long, Provider<Long>>builderWithExpectedSize(6).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).put(3L, SubcomponentMapModule_ProvideLong3Factory.create()).put(4L, SubcomponentMapModule_ProvideLong4Factory.create()).put(5L, SubcomponentMapModule_ProvideLong5Factory.create()).build();")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "          .put(0L, testComponent.provideLong0Provider())",
-                "          .put(1L, testComponent.provideLong1Provider())",
-                "          .put(2L, testComponent.provideLong2Provider())",
-                "          .put(3L, provideLong3Provider())",
-                "          .put(4L, provideLong4Provider())",
-                "          .put(5L, provideLong5Provider())")
-            .addLines( //
-                "          .build();", "    }")
+                "      return ImmutableMap.<Long, Provider<Long>>builderWithExpectedSize(6).put(0L, testComponent.provideLong0Provider()).put(1L, testComponent.provideLong1Provider()).put(2L, testComponent.provideLong2Provider()).put(3L, provideLong3Provider()).put(4L, provideLong4Provider()).put(5L, provideLong5Provider()).build();")
+            .addLines(
+                "    }")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "    private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -301,9 +279,12 @@ public class MapBindingExpressionWithGuavaTest {
                 "      @Override",
                 "      public T get() {",
                 "        switch (id) {",
-                "          case 0: return (T) (Long) SubcomponentMapModule.provideLong3();",
-                "          case 1: return (T) (Long) SubcomponentMapModule.provideLong4();",
-                "          case 2: return (T) (Long) SubcomponentMapModule.provideLong5();",
+                "          case 0: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong3 ",
+                "          return (T) (Long) SubcomponentMapModule.provideLong3();",
+                "          case 1: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong4 ",
+                "          return (T) (Long) SubcomponentMapModule.provideLong4();",
+                "          case 2: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong5 ",
+                "          return (T) (Long) SubcomponentMapModule.provideLong5();",
                 "          default: throw new AssertionError(id);",
                 "        }",
                 "      }",
@@ -315,23 +296,29 @@ public class MapBindingExpressionWithGuavaTest {
                 "    @Override",
                 "    public T get() {",
                 "      switch (id) {",
-                "        case 0: return (T) (Integer) MapModule.provideInt();",
-                "        case 1: return (T) (Long) MapModule.provideLong0();",
-                "        case 2: return (T) (Long) MapModule.provideLong1();",
-                "        case 3: return (T) (Long) MapModule.provideLong2();",
+                "        case 0: // java.util.Map<java.lang.Integer,jakarta.inject.Provider<java.lang.Integer>> test.MapModule#provideInt ",
+                "        return (T) (Integer) MapModule.provideInt();",
+                "        case 1: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong0 ",
+                "        return (T) (Long) MapModule.provideLong0();",
+                "        case 2: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong1 ",
+                "        return (T) (Long) MapModule.provideLong1();",
+                "        case 3: // java.util.Map<java.lang.Long,jakarta.inject.Provider<java.lang.Long>> test.MapModule#provideLong2 ",
+                "        return (T) (Long) MapModule.provideLong2();",
                 "        default: throw new AssertionError(id);",
                 "      }",
                 "    }",
                 "  }",
                 "}")
-            .build();
+            .lines();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(mapModuleFile, componentFile, subcomponentModuleFile, subcomponent);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(List.of(generatedComponent));
   }
 
   @Test
