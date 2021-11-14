@@ -137,7 +137,7 @@ public class DelegateBindingExpressionTest {
 
     assertThatCompilationWithModule(module)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -216,7 +216,7 @@ public class DelegateBindingExpressionTest {
 
     assertThatCompilationWithModule(module)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -292,7 +292,7 @@ public class DelegateBindingExpressionTest {
 
     assertThatCompilationWithModule(module)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -394,7 +394,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -502,7 +502,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -592,7 +592,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -693,7 +693,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
@@ -798,7 +798,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerRequestsSubtypeAsProvider")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerRequestsSubtypeAsProvider")
                 .addLines(
@@ -890,7 +890,7 @@ public class DelegateBindingExpressionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(

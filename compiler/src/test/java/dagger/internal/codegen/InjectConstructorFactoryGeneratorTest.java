@@ -63,7 +63,8 @@ public final class InjectConstructorFactoryGeneratorTest {
           "",
           "@Scope @interface ScopeB {}");
 
-  @Test public void injectOnPrivateConstructor() {
+  @Test
+  public void injectOnPrivateConstructor() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateConstructor",
         "package test;",
         "",
@@ -80,7 +81,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void injectConstructorOnInnerClass() {
+  @Test
+  public void injectConstructorOnInnerClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -101,7 +103,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(7);
   }
 
-  @Test public void injectConstructorOnAbstractClass() {
+  @Test
+  public void injectConstructorOnAbstractClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AbstractClass",
         "package test;",
         "",
@@ -118,7 +121,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void injectConstructorOnGenericClass() {
+  @Test
+  public void injectConstructorOnGenericClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -160,10 +164,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void fieldAndMethodGenerics() {
+  @Test
+  public void fieldAndMethodGenerics() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -217,10 +222,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void genericClassWithNoDependencies() {
+  @Test
+  public void genericClassWithNoDependencies() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -260,10 +266,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void twoGenericTypes() {
+  @Test
+  public void twoGenericTypes() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -309,10 +316,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void boundedGenerics() {
+  @Test
+  public void boundedGenerics() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -374,10 +382,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void multipleSameTypesWithGenericsAndQualifiersAndLazies() {
+  @Test
+  public void multipleSameTypesWithGenericsAndQualifiersAndLazies() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -531,10 +540,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(file, QUALIFIER_A))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.GenericClass_Factory", expected);
   }
 
-  @Test public void multipleInjectConstructors() {
+  @Test
+  public void multipleInjectConstructors() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.TooManyInjectConstructors",
         "package test;",
         "",
@@ -557,7 +567,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(8);
   }
 
-  @Test public void multipleQualifiersOnInjectConstructorParameter() {
+  @Test
+  public void multipleQualifiersOnInjectConstructorParameter() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierConstructorParam",
         "package test;",
         "",
@@ -575,7 +586,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void injectConstructorOnClassWithMultipleScopes() {
+  @Test
+  public void injectConstructorOnClassWithMultipleScopes() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleScopeClass",
         "package test;",
         "",
@@ -598,7 +610,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .atColumn(9);
   }
 
-  @Test public void injectConstructorWithQualifier() {
+  @Test
+  public void injectConstructorWithQualifier() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleScopeClass",
         "package test;",
         "",
@@ -622,7 +635,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(8);
   }
 
-  @Test public void injectConstructorWithCheckedExceptionsError() {
+  @Test
+  public void injectConstructorWithCheckedExceptionsError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.CheckedExceptionClass",
         "package test;",
         "",
@@ -639,7 +653,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void injectConstructorWithCheckedExceptionsWarning() {
+  @Test
+  public void injectConstructorWithCheckedExceptionsWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.CheckedExceptionClass",
         "package test;",
         "",
@@ -657,7 +672,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void privateInjectClassError() {
+  @Test
+  public void privateInjectClassError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -676,7 +692,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(7);
   }
 
-  @Test public void privateInjectClassWarning() {
+  @Test
+  public void privateInjectClassWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -696,7 +713,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(7);
   }
 
-  @Test public void nestedInPrivateInjectClassError() {
+  @Test
+  public void nestedInPrivateInjectClassError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -717,7 +735,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(8);
   }
 
-  @Test public void nestedInPrivateInjectClassWarning() {
+  @Test
+  public void nestedInPrivateInjectClassWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -739,7 +758,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(8);
   }
 
-  @Test public void finalInjectField() {
+  @Test
+  public void finalInjectField() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.FinalInjectField",
         "package test;",
         "",
@@ -756,7 +776,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void privateInjectFieldError() {
+  @Test
+  public void privateInjectFieldError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectField",
         "package test;",
         "",
@@ -773,7 +794,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void privateInjectFieldWarning() {
+  @Test
+  public void privateInjectFieldWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectField",
         "package test;",
         "",
@@ -787,7 +809,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
   }
 
-  @Test public void staticInjectFieldError() {
+  @Test
+  public void staticInjectFieldError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectField",
         "package test;",
         "",
@@ -804,7 +827,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void staticInjectFieldWarning() {
+  @Test
+  public void staticInjectFieldWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectField",
         "package test;",
         "",
@@ -818,7 +842,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
   }
 
-  @Test public void multipleQualifiersOnField() {
+  @Test
+  public void multipleQualifiersOnField() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierInjectField",
         "package test;",
         "",
@@ -841,7 +866,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .atColumn(23);
   }
 
-  @Test public void abstractInjectMethod() {
+  @Test
+  public void abstractInjectMethod() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AbstractInjectMethod",
         "package test;",
         "",
@@ -858,7 +884,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void privateInjectMethodError() {
+  @Test
+  public void privateInjectMethodError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectMethod",
         "package test;",
         "",
@@ -875,7 +902,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void privateInjectMethodWarning() {
+  @Test
+  public void privateInjectMethodWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectMethod",
         "package test;",
         "",
@@ -889,7 +917,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
   }
 
-  @Test public void staticInjectMethodError() {
+  @Test
+  public void staticInjectMethodError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectMethod",
         "package test;",
         "",
@@ -906,7 +935,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void staticInjectMethodWarning() {
+  @Test
+  public void staticInjectMethodWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectMethod",
         "package test;",
         "",
@@ -920,7 +950,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
   }
 
-  @Test public void genericInjectMethod() {
+  @Test
+  public void genericInjectMethod() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericInjectMethod",
         "package test;",
         "",
@@ -937,7 +968,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void multipleQualifiersOnInjectMethodParameter() {
+  @Test
+  public void multipleQualifiersOnInjectMethodParameter() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierMethodParam",
         "package test;",
         "",
@@ -954,7 +986,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void injectConstructorDependsOnProduced() {
+  @Test
+  public void injectConstructorDependsOnProduced() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -970,7 +1003,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .hadErrorContaining("Produced may only be injected in @Produces methods");
   }
 
-  @Test public void injectConstructorDependsOnProducer() {
+  @Test
+  public void injectConstructorDependsOnProducer() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -986,7 +1020,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .hadErrorContaining("Producer may only be injected in @Produces methods");
   }
 
-  @Test public void injectFieldDependsOnProduced() {
+  @Test
+  public void injectFieldDependsOnProduced() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1002,7 +1037,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .hadErrorContaining("Produced may only be injected in @Produces methods");
   }
 
-  @Test public void injectFieldDependsOnProducer() {
+  @Test
+  public void injectFieldDependsOnProducer() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1018,7 +1054,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .hadErrorContaining("Producer may only be injected in @Produces methods");
   }
 
-  @Test public void injectMethodDependsOnProduced() {
+  @Test
+  public void injectMethodDependsOnProduced() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1034,7 +1071,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .hadErrorContaining("Produced may only be injected in @Produces methods");
   }
 
-  @Test public void injectMethodDependsOnProducer() {
+  @Test
+  public void injectMethodDependsOnProducer() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1051,7 +1089,8 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
 
-  @Test public void injectConstructor() {
+  @Test
+  public void injectConstructor() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.InjectConstructor",
         "package test;",
         "",
@@ -1093,10 +1132,11 @@ public final class InjectConstructorFactoryGeneratorTest {
             "}");
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.InjectConstructor_Factory", expected);
   }
 
-  @Test public void injectConstructorAndMembersInjection() {
+  @Test
+  public void injectConstructorAndMembersInjection() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AllInjections",
         "package test;",
         "",
@@ -1153,7 +1193,7 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expectedFactory);
+        .generatesSources("test.AllInjections_Factory", expectedFactory);
   }
 
   @Test
@@ -1202,7 +1242,7 @@ public final class InjectConstructorFactoryGeneratorTest {
             "}");
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1256,7 +1296,7 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1313,7 +1353,7 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1377,7 +1417,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         .that(ImmutableList.of(samePackageInterface, differentPackageInterface, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expected);
+        .and().generatesSources("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1419,10 +1459,12 @@ public final class InjectConstructorFactoryGeneratorTest {
         .that(simpleType)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factory);
+        .and()
+        .generatesSources("test.SimpleType_Factory", factory);
   }
 
-  @Test public void simpleComponentWithNesting() {
+  @Test
+  public void simpleComponentWithNesting() {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",
@@ -1465,6 +1507,7 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(nestedTypesFile))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(aFactory);
+        .and()
+        .generatesSources("test.OuterType_A_Factory", aFactory);
   }
 }

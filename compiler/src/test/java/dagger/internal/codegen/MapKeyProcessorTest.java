@@ -85,7 +85,7 @@ public class MapKeyProcessorTest {
         .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(generatedKeyCreator);
+        .generatesSources("test.PathKeyCreator", generatedKeyCreator);
   }
 
   @Test
@@ -135,6 +135,6 @@ public class MapKeyProcessorTest {
         .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(generatedKeyCreator);
+        .generatesSources("test.Container_PathKeyCreator", generatedKeyCreator);
   }
 }

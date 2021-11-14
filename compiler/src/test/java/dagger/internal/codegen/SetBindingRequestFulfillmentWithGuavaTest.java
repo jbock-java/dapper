@@ -125,7 +125,7 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -219,7 +219,7 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -285,7 +285,7 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -372,6 +372,6 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .hasSourceEquivalentTo(generatedComponent);
+        .containsExactLines(generatedComponent);
   }
 }

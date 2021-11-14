@@ -43,22 +43,26 @@ public class ModuleFactoryGeneratorTest {
   // TODO(gak): add tests for invalid combinations of scope and qualifier annotations like we have
   // for @Inject
 
-  @Test public void providesMethodNotInModule() {
+  @Test
+  public void providesMethodNotInModule() {
     assertThatMethodInUnannotatedClass("@Provides String provideString() { return null; }")
         .hasError("@Provides methods can only be present within a @Module or @ProducerModule");
   }
 
-  @Test public void providesMethodAbstract() {
+  @Test
+  public void providesMethodAbstract() {
     assertThatModuleMethod("@Provides abstract String abstractMethod();")
         .hasError("@Provides methods cannot be abstract");
   }
 
-  @Test public void providesMethodPrivate() {
+  @Test
+  public void providesMethodPrivate() {
     assertThatModuleMethod("@Provides private String privateMethod() { return null; }")
         .hasError("@Provides methods cannot be private");
   }
 
-  @Test public void providesMethodReturnVoid() {
+  @Test
+  public void providesMethodReturnVoid() {
     assertThatModuleMethod("@Provides void voidMethod() {}")
         .hasError("@Provides methods must return a value (not void)");
   }
@@ -93,30 +97,35 @@ public class ModuleFactoryGeneratorTest {
         .hasError("@Provides methods must not return framework types");
   }
 
-  @Test public void providesMethodWithTypeParameter() {
+  @Test
+  public void providesMethodWithTypeParameter() {
     assertThatModuleMethod("@Provides <T> String typeParameter() { return null; }")
         .hasError("@Provides methods may not have type parameters");
   }
 
-  @Test public void providesMethodSetValuesWildcard() {
+  @Test
+  public void providesMethodSetValuesWildcard() {
     assertThatModuleMethod("@Provides @ElementsIntoSet Set<?> provideWildcard() { return null; }")
         .hasError(
             "@Provides methods must return a primitive, an array, a type variable, "
                 + "or a declared type");
   }
 
-  @Test public void providesMethodSetValuesRawSet() {
+  @Test
+  public void providesMethodSetValuesRawSet() {
     assertThatModuleMethod("@Provides @ElementsIntoSet Set provideSomething() { return null; }")
         .hasError("@Provides methods annotated with @ElementsIntoSet cannot return a raw Set");
   }
 
-  @Test public void providesMethodSetValuesNotASet() {
+  @Test
+  public void providesMethodSetValuesNotASet() {
     assertThatModuleMethod(
-            "@Provides @ElementsIntoSet List<String> provideStrings() { return null; }")
+        "@Provides @ElementsIntoSet List<String> provideStrings() { return null; }")
         .hasError("@Provides methods annotated with @ElementsIntoSet must return a Set");
   }
 
-  @Test public void modulesWithTypeParamsMustBeAbstract() {
+  @Test
+  public void modulesWithTypeParamsMustBeAbstract() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -132,7 +141,8 @@ public class ModuleFactoryGeneratorTest {
         .onLine(6);
   }
 
-  @Test public void provideOverriddenByNoProvide() {
+  @Test
+  public void provideOverriddenByNoProvide() {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.Parent",
         "package test;",
         "",
@@ -151,7 +161,8 @@ public class ModuleFactoryGeneratorTest {
                 + "@Provides String test.Parent.foo()");
   }
 
-  @Test public void provideOverriddenByProvide() {
+  @Test
+  public void provideOverriddenByProvide() {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.Parent",
         "package test;",
         "",
@@ -170,7 +181,8 @@ public class ModuleFactoryGeneratorTest {
                 + "@Provides String test.Parent.foo()");
   }
 
-  @Test public void providesOverridesNonProvides() {
+  @Test
+  public void providesOverridesNonProvides() {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.Parent",
         "package test;",
         "",
@@ -188,7 +200,8 @@ public class ModuleFactoryGeneratorTest {
                 + "String test.Parent.foo()");
   }
 
-  @Test public void validatesIncludedModules() {
+  @Test
+  public void validatesIncludedModules() {
     JavaFileObject module = JavaFileObjects.forSourceLines("test.Parent",
         "package test;",
         "",
@@ -204,7 +217,8 @@ public class ModuleFactoryGeneratorTest {
             "java.lang.Void is listed as a module, but is not annotated with @Module");
   }
 
-  @Test public void singleProvidesMethodNoArgs() {
+  @Test
+  public void singleProvidesMethodNoArgs() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -219,7 +233,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideStringFactory",
+            "test.TestModule_ProvideStringFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -249,10 +263,12 @@ public class ModuleFactoryGeneratorTest {
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
-  @Test public void singleProvidesMethodNoArgs_disableNullable() {
+  @Test
+  public void singleProvidesMethodNoArgs_disableNullable() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -267,7 +283,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideStringFactory",
+            "test.TestModule_ProvideStringFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports("import dagger.internal.Factory;"),
@@ -296,10 +312,12 @@ public class ModuleFactoryGeneratorTest {
         .withCompilerOptions("-Adagger.nullableValidation=WARNING")
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
-  @Test public void nullableProvides() {
+  @Test
+  public void nullableProvides() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -312,7 +330,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideStringFactory",
+            "test.TestModule_ProvideStringFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports("import dagger.internal.Factory;"),
@@ -343,10 +361,12 @@ public class ModuleFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(moduleFile, NULLABLE))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
-  @Test public void multipleProvidesMethods() {
+  @Test
+  public void multipleProvidesMethods() {
     JavaFileObject classXFile = JavaFileObjects.forSourceLines("test.X",
         "package test;",
         "",
@@ -381,7 +401,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject listFactoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideObjectsFactory",
+            "test.TestModule_ProvideObjectsFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -434,10 +454,12 @@ public class ModuleFactoryGeneratorTest {
             ImmutableList.of(classXFile, moduleFile, QUALIFIER_A, QUALIFIER_B))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(listFactoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideObjectsFactory", listFactoryFile);
   }
 
-  @Test public void providesSetElement() {
+  @Test
+  public void providesSetElement() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -454,7 +476,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideStringFactory",
+            "test.TestModule_ProvideStringFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -484,10 +506,12 @@ public class ModuleFactoryGeneratorTest {
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
-  @Test public void providesSetElementWildcard() {
+  @Test
+  public void providesSetElementWildcard() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -506,7 +530,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideWildcardListFactory",
+            "test.TestModule_ProvideWildcardListFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -539,10 +563,12 @@ public class ModuleFactoryGeneratorTest {
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideWildcardListFactory", factoryFile);
   }
 
-  @Test public void providesSetValues() {
+  @Test
+  public void providesSetValues() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -559,7 +585,7 @@ public class ModuleFactoryGeneratorTest {
         "}");
     JavaFileObject factoryFile =
         JavaFileObjects.forSourceLines(
-            "TestModule_ProvideStringsFactory",
+            "test.TestModule_ProvideStringsFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -591,10 +617,12 @@ public class ModuleFactoryGeneratorTest {
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources(factoryFile);
+        .and()
+        .generatesSources("test.TestModule_ProvideStringsFactory", factoryFile);
   }
 
-  @Test public void multipleProvidesMethodsWithSameName() {
+  @Test
+  public void multipleProvidesMethodsWithSameName() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -1055,11 +1083,19 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(
-            listBFactory, bElementFactory, bEntryFactory, numberFactory, integerFactory);
+        .generatesSources("test.ParentModule_ProvideListBFactory", listBFactory)
+        .and()
+        .generatesSources("test.ParentModule_ProvideBElementFactory", bElementFactory)
+        .and()
+        .generatesSources("test.ParentModule_ProvideBEntryFactory", bEntryFactory)
+        .and()
+        .generatesSources("test.ChildNumberModule_ProvideNumberFactory", numberFactory)
+        .and()
+        .generatesSources("test.ChildIntegerModule_ProvideIntegerFactory", integerFactory);
   }
 
-  @Test public void parameterizedModuleWithStaticProvidesMethodOfGenericType() {
+  @Test
+  public void parameterizedModuleWithStaticProvidesMethodOfGenericType() {
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.ParameterizedModule",
@@ -1092,7 +1128,7 @@ public class ModuleFactoryGeneratorTest {
 
     JavaFileObject provideMapStringNumberFactory =
         JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideMapStringNumberFactory;",
+            "test.ParameterizedModule_ProvideMapStringNumberFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -1125,7 +1161,7 @@ public class ModuleFactoryGeneratorTest {
 
     JavaFileObject provideNonGenericTypeFactory =
         JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideNonGenericTypeFactory;",
+            "test.ParameterizedModule_ProvideNonGenericTypeFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -1157,7 +1193,7 @@ public class ModuleFactoryGeneratorTest {
 
     JavaFileObject provideNonGenericTypeWithDepsFactory =
         JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory;",
+            "test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory",
             "package test;",
             "",
             GeneratedLines.generatedImports(
@@ -1196,10 +1232,11 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(
-            provideMapStringNumberFactory,
-            provideNonGenericTypeFactory,
-            provideNonGenericTypeWithDepsFactory);
+        .generatesSources("test.ParameterizedModule_ProvideMapStringNumberFactory", provideMapStringNumberFactory)
+        .and()
+        .generatesSources("test.ParameterizedModule_ProvideNonGenericTypeFactory", provideNonGenericTypeFactory)
+        .and()
+        .generatesSources("test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory", provideNonGenericTypeWithDepsFactory);
   }
 
   private static final JavaFileObject QUALIFIER_A =
@@ -1334,7 +1371,8 @@ public class ModuleFactoryGeneratorTest {
         .onLineContaining("@ScopeB");
   }
 
-  @Test public void providerDependsOnProduced() {
+  @Test
+  public void providerDependsOnProduced() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -1354,7 +1392,8 @@ public class ModuleFactoryGeneratorTest {
         .hadErrorContaining("Producer may only be injected in @Produces methods");
   }
 
-  @Test public void providerDependsOnProducer() {
+  @Test
+  public void providerDependsOnProducer() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -1397,7 +1436,7 @@ public class ModuleFactoryGeneratorTest {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_GetFactory")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.TestModule_GetFactory",
                 "package test;",
@@ -1420,7 +1459,7 @@ public class ModuleFactoryGeneratorTest {
 
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_CreateFactory")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.TestModule_CreateFactory",
                 "package test;",

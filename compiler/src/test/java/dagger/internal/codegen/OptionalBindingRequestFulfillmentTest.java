@@ -175,7 +175,7 @@ public class OptionalBindingRequestFulfillmentTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -265,6 +265,6 @@ public class OptionalBindingRequestFulfillmentTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 }

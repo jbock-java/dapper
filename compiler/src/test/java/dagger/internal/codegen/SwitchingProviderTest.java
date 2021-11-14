@@ -200,7 +200,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -242,7 +242,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -325,7 +325,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -414,7 +414,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -459,7 +459,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -530,7 +530,7 @@ public class SwitchingProviderTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",

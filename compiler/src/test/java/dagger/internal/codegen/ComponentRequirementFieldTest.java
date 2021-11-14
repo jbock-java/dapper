@@ -69,7 +69,7 @@ public class ComponentRequirementFieldTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -188,7 +188,7 @@ public class ComponentRequirementFieldTest {
             "}");
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -238,7 +238,7 @@ public class ComponentRequirementFieldTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             JavaFileObjects.forSourceLines(
                 "test.DaggerTestComponent",
                 "package test;",
@@ -425,6 +425,6 @@ public class ComponentRequirementFieldTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 }

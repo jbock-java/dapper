@@ -117,7 +117,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -193,7 +193,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .hasSourceEquivalentTo(generatedComponent);
+        .containsExactLines(generatedComponent);
   }
 
   @Test
@@ -419,7 +419,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .hasSourceEquivalentTo(generatedComponent);
+        .containsExactLines(generatedComponent);
   }
 
   @Test
@@ -509,7 +509,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test

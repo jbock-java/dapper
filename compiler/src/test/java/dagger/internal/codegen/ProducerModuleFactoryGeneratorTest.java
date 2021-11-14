@@ -28,8 +28,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import java.lang.annotation.Retention;
 import jakarta.inject.Qualifier;
+import java.lang.annotation.Retention;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,22 +38,26 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ProducerModuleFactoryGeneratorTest {
 
-  @Test public void producesMethodNotInModule() {
+  @Test
+  public void producesMethodNotInModule() {
     assertThatMethodInUnannotatedClass("@Produces String produceString() { return null; }")
         .hasError("@Produces methods can only be present within a @ProducerModule");
   }
 
-  @Test public void producesMethodAbstract() {
+  @Test
+  public void producesMethodAbstract() {
     assertThatProductionModuleMethod("@Produces abstract String produceString();")
         .hasError("@Produces methods cannot be abstract");
   }
 
-  @Test public void producesMethodPrivate() {
+  @Test
+  public void producesMethodPrivate() {
     assertThatProductionModuleMethod("@Produces private String produceString() { return null; }")
         .hasError("@Produces methods cannot be private");
   }
 
-  @Test public void producesMethodReturnVoid() {
+  @Test
+  public void producesMethodReturnVoid() {
     assertThatProductionModuleMethod("@Produces void produceNothing() {}")
         .hasError("@Produces methods must return a value (not void)");
   }
@@ -73,7 +77,7 @@ public class ProducerModuleFactoryGeneratorTest {
   @Test
   public void producesMembersInjector() {
     assertThatProductionModuleMethod(
-            "@Produces MembersInjector<String> produceMembersInjector() {}")
+        "@Produces MembersInjector<String> produceMembersInjector() {}")
         .hasError("@Produces methods must not return framework types");
   }
 
@@ -89,13 +93,15 @@ public class ProducerModuleFactoryGeneratorTest {
         .hasError("@Produces methods must not return framework types");
   }
 
-  @Test public void producesMethodReturnRawFuture() {
+  @Test
+  public void producesMethodReturnRawFuture() {
     assertThatProductionModuleMethod("@Produces ListenableFuture produceRaw() {}")
         .importing(ListenableFuture.class)
         .hasError("@Produces methods cannot return a raw ListenableFuture");
   }
 
-  @Test public void producesMethodReturnWildcardFuture() {
+  @Test
+  public void producesMethodReturnWildcardFuture() {
     assertThatProductionModuleMethod("@Produces ListenableFuture<?> produceRaw() {}")
         .importing(ListenableFuture.class)
         .hasError(
@@ -103,59 +109,67 @@ public class ProducerModuleFactoryGeneratorTest {
                 + "a declared type, or a ListenableFuture of one of those types");
   }
 
-  @Test public void producesMethodWithTypeParameter() {
+  @Test
+  public void producesMethodWithTypeParameter() {
     assertThatProductionModuleMethod("@Produces <T> String produceString() { return null; }")
         .hasError("@Produces methods may not have type parameters");
   }
 
-  @Test public void producesMethodSetValuesWildcard() {
+  @Test
+  public void producesMethodSetValuesWildcard() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet Set<?> produceWildcard() { return null; }")
+        "@Produces @ElementsIntoSet Set<?> produceWildcard() { return null; }")
         .hasError(
             "@Produces methods can return only a primitive, an array, a type variable, "
                 + "a declared type, or a ListenableFuture of one of those types");
   }
 
-  @Test public void producesMethodSetValuesRawSet() {
+  @Test
+  public void producesMethodSetValuesRawSet() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet Set produceSomething() { return null; }")
+        "@Produces @ElementsIntoSet Set produceSomething() { return null; }")
         .hasError("@Produces methods annotated with @ElementsIntoSet cannot return a raw Set");
   }
 
-  @Test public void producesMethodSetValuesNotASet() {
+  @Test
+  public void producesMethodSetValuesNotASet() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet List<String> produceStrings() { return null; }")
+        "@Produces @ElementsIntoSet List<String> produceStrings() { return null; }")
         .hasError(
             "@Produces methods of type set values must return a Set or ListenableFuture of Set");
   }
 
-  @Test public void producesMethodSetValuesWildcardInFuture() {
+  @Test
+  public void producesMethodSetValuesWildcardInFuture() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet "
-                + "ListenableFuture<Set<?>> produceWildcard() { return null; }")
+        "@Produces @ElementsIntoSet "
+            + "ListenableFuture<Set<?>> produceWildcard() { return null; }")
         .importing(ListenableFuture.class)
         .hasError(
             "@Produces methods can return only a primitive, an array, a type variable, "
                 + "a declared type, or a ListenableFuture of one of those types");
   }
 
-  @Test public void producesMethodSetValuesFutureRawSet() {
+  @Test
+  public void producesMethodSetValuesFutureRawSet() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet ListenableFuture<Set> produceSomething() { return null; }")
+        "@Produces @ElementsIntoSet ListenableFuture<Set> produceSomething() { return null; }")
         .importing(ListenableFuture.class)
         .hasError("@Produces methods annotated with @ElementsIntoSet cannot return a raw Set");
   }
 
-  @Test public void producesMethodSetValuesFutureNotASet() {
+  @Test
+  public void producesMethodSetValuesFutureNotASet() {
     assertThatProductionModuleMethod(
-            "@Produces @ElementsIntoSet "
-                + "ListenableFuture<List<String>> produceStrings() { return null; }")
+        "@Produces @ElementsIntoSet "
+            + "ListenableFuture<List<String>> produceStrings() { return null; }")
         .importing(ListenableFuture.class)
         .hasError(
             "@Produces methods of type set values must return a Set or ListenableFuture of Set");
   }
 
-  @Test public void multipleProducesMethodsWithSameName() {
+  @Test
+  public void multipleProducesMethodsWithSameName() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -188,7 +202,8 @@ public class ProducerModuleFactoryGeneratorTest {
                 + "Exception");
   }
 
-  @Test public void producesMethodWithScope() {
+  @Test
+  public void producesMethodWithScope() {
     assertThatProductionModuleMethod("@Produces @Singleton String str() { return \"\"; }")
         .hasError("@Produces methods cannot be scoped");
   }
@@ -323,7 +338,8 @@ public class ProducerModuleFactoryGeneratorTest {
         .onLine(8);
   }
 
-  @Test public void argumentNamedModuleCompiles() {
+  @Test
+  public void argumentNamedModuleCompiles() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -340,7 +356,8 @@ public class ProducerModuleFactoryGeneratorTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test public void singleProducesMethodNoArgsFuture() {
+  @Test
+  public void singleProducesMethodNoArgsFuture() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -406,7 +423,7 @@ public class ProducerModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(factoryFile);
+        .generatesSources("test.TestModule_ProduceStringFactory", factoryFile);
   }
 
   @Test
@@ -480,13 +497,13 @@ public class ProducerModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(factoryFile);
+        .generatesSources("test.TestModule_ProduceStringFactory", factoryFile);
   }
 
   @Test
   public void producesMethodMultipleQualifiersOnMethod() {
     assertThatProductionModuleMethod(
-            "@Produces @QualifierA @QualifierB static String produceString() { return null; }")
+        "@Produces @QualifierA @QualifierB static String produceString() { return null; }")
         .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
         .hasError("may not use more than one @Qualifier");
   }
@@ -494,8 +511,8 @@ public class ProducerModuleFactoryGeneratorTest {
   @Test
   public void producesMethodMultipleQualifiersOnParameter() {
     assertThatProductionModuleMethod(
-            "@Produces static String produceString(@QualifierA @QualifierB Object input) "
-                + "{ return null; }")
+        "@Produces static String produceString(@QualifierA @QualifierB Object input) "
+            + "{ return null; }")
         .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
         .hasError("may not use more than one @Qualifier");
   }
@@ -503,8 +520,8 @@ public class ProducerModuleFactoryGeneratorTest {
   @Test
   public void producesMethodWildcardDependency() {
     assertThatProductionModuleMethod(
-            "@Produces static String produceString(Provider<? extends Number> numberProvider) "
-                + "{ return null; }")
+        "@Produces static String produceString(Provider<? extends Number> numberProvider) "
+            + "{ return null; }")
         .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
         .hasError(
             "Dagger does not support injecting Provider<T>, Lazy<T>, Producer<T>, or Produced<T> "
@@ -513,9 +530,11 @@ public class ProducerModuleFactoryGeneratorTest {
 
   @Qualifier
   @Retention(RUNTIME)
-  public @interface QualifierA {}
+  public @interface QualifierA {
+  }
 
   @Qualifier
   @Retention(RUNTIME)
-  public @interface QualifierB {}
+  public @interface QualifierB {
+  }
 }

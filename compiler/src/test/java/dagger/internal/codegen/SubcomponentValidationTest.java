@@ -594,7 +594,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParentComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -701,7 +701,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParentComponent")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test
@@ -776,7 +776,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParentComponent")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test
@@ -846,7 +846,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("DaggerParentComponent")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test
@@ -924,7 +924,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParentComponent")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test
@@ -972,7 +972,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerC")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test
@@ -1062,7 +1062,7 @@ public class SubcomponentValidationTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerC")
-        .containsElementsIn(componentGeneratedFile);
+        .containsLinesIn(componentGeneratedFile);
   }
 
   @Test

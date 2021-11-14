@@ -103,7 +103,7 @@ public class ComponentShardTest {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("dagger.internal.codegen.DaggerTestComponent")
-        .containsElementsIn(
+        .containsLinesIn(
             compilerMode
                 .javaFileBuilder("dagger.internal.codegen.DaggerTestComponent")
                 .addLines(

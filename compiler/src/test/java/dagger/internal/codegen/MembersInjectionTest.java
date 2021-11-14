@@ -99,7 +99,7 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -165,10 +165,11 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
-  @Test public void fieldAndMethodGenerics() {
+  @Test
+  public void fieldAndMethodGenerics() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -228,10 +229,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.GenericClass_MembersInjector", expected);
   }
 
-  @Test public void subclassedGenericMembersInjectors() {
+  @Test
+  public void subclassedGenericMembersInjectors() {
     JavaFileObject a = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -338,10 +340,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.Child_MembersInjector", expected);
   }
 
-  @Test public void fieldInjection() {
+  @Test
+  public void fieldInjection() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.FieldInjection",
         "package test;",
         "",
@@ -417,7 +420,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.FieldInjection_MembersInjector", expected);
   }
 
   @Test
@@ -488,10 +491,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.FieldInjectionWithQualifier_MembersInjector", expected);
   }
 
-  @Test public void methodInjection() {
+  @Test
+  public void methodInjection() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MethodInjection",
         "package test;",
         "",
@@ -576,7 +580,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.MethodInjection_MembersInjector", expected);
   }
 
   @Test
@@ -664,10 +668,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expected);
+        .generatesSources("test.MixedMemberInjection_MembersInjector", expected);
   }
 
-  @Test public void injectConstructorAndMembersInjection() {
+  @Test
+  public void injectConstructorAndMembersInjection() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AllInjections",
         "package test;",
         "",
@@ -729,10 +734,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expectedMembersInjector);
+        .generatesSources("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
-  @Test public void supertypeMembersInjection() {
+  @Test
+  public void supertypeMembersInjection() {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -783,30 +789,30 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expectedMembersInjector);
+        .generatesSources("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
   @Test
   public void simpleComponentWithNesting() {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines(
-          "test.OuterType",
-          "package test;",
-          "",
-          "import dagger.Component;",
-          "import jakarta.inject.Inject;",
-          "",
-          "final class OuterType {",
-          "  static class A {",
-          "    @Inject A() {}",
-          "  }",
-          "  static class B {",
-          "    @Inject A a;",
-          "  }",
-          "  @Component interface SimpleComponent {",
-          "    A a();",
-          "    void inject(B b);",
-          "  }",
-          "}");
+        "test.OuterType",
+        "package test;",
+        "",
+        "import dagger.Component;",
+        "import jakarta.inject.Inject;",
+        "",
+        "final class OuterType {",
+        "  static class A {",
+        "    @Inject A() {}",
+        "  }",
+        "  static class B {",
+        "    @Inject A a;",
+        "  }",
+        "  @Component interface SimpleComponent {",
+        "    A a();",
+        "    void inject(B b);",
+        "  }",
+        "}");
     JavaFileObject bMembersInjector =
         JavaFileObjects.forSourceLines(
             "test.OuterType_B_MembersInjector",
@@ -847,7 +853,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(bMembersInjector);
+        .generatesSources("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
   @Test
@@ -926,10 +932,10 @@ public class MembersInjectionTest {
                 if (!done) {
                   done = true;
                   try (Writer writer =
-                      processingEnv
-                          .getFiler()
-                          .createSourceFile("test.GeneratedType")
-                          .openWriter()) {
+                           processingEnv
+                               .getFiler()
+                               .createSourceFile("test.GeneratedType")
+                               .openWriter()) {
                     writer.write(
                         Joiner.on('\n')
                             .join(
@@ -949,7 +955,7 @@ public class MembersInjectionTest {
             })
         .compilesWithoutError()
         .and()
-        .generatesSources(bMembersInjector);
+        .generatesSources("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
   @Test
@@ -1093,10 +1099,11 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expectedMembersInjector);
+        .generatesSources("test.Child_MembersInjector", expectedMembersInjector);
   }
 
-  @Test public void privateNestedClassError() {
+  @Test
+  public void privateNestedClassError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1115,7 +1122,8 @@ public class MembersInjectionTest {
         .onLine(6);
   }
 
-  @Test public void privateNestedClassWarning() {
+  @Test
+  public void privateNestedClassWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1128,7 +1136,7 @@ public class MembersInjectionTest {
         "}");
     Compilation compilation =
         compilerWithOptions(
-                compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
+            compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
             .compile(file);
     assertThat(compilation).succeeded();
     assertThat(compilation)
@@ -1137,7 +1145,8 @@ public class MembersInjectionTest {
         .onLine(6);
   }
 
-  @Test public void privateSuperclassIsOkIfNotInjectedInto() {
+  @Test
+  public void privateSuperclassIsOkIfNotInjectedInto() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1199,7 +1208,7 @@ public class MembersInjectionTest {
     assertThat(compilation).failed();
     assertThat(compilation)
         .hadErrorContaining("Methods with @Inject may not throw checked exceptions. "
-          + "Please wrap your exceptions in a RuntimeException instead.")
+            + "Please wrap your exceptions in a RuntimeException instead.")
         .inFile(file)
         .onLineContaining("throws Exception");
   }
@@ -1333,10 +1342,10 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.InjectedType_MembersInjector")
-        .hasSourceEquivalentTo(membersInjector);
+        .containsExactLines(membersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.InjectedType_Factory")
-        .hasSourceEquivalentTo(factory);
+        .containsExactLines(factory);
   }
 
   @Test
@@ -1392,7 +1401,7 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("other.Inaccessible_MembersInjector")
-        .hasSourceEquivalentTo(
+        .containsExactLines(
             JavaFileObjects.forSourceLines(
                 "other.Inaccessible_MembersInjector",
                 "package other;",
@@ -1470,7 +1479,7 @@ public class MembersInjectionTest {
             "}");
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -1600,7 +1609,7 @@ public class MembersInjectionTest {
             .build();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   @Test
@@ -1696,7 +1705,7 @@ public class MembersInjectionTest {
 
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+        .containsLinesIn(generatedComponent);
   }
 
   // Shows that we shouldn't create a members injector for a type that doesn't have
@@ -1809,10 +1818,10 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.A_MembersInjector")
-        .hasSourceEquivalentTo(expectedAMembersInjector);
+        .containsExactLines(expectedAMembersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.C_MembersInjector")
-        .hasSourceEquivalentTo(expectedCMembersInjector);
+        .containsExactLines(expectedCMembersInjector);
 
     try {
       assertThat(compilation).generatedSourceFile("test.B_MembersInjector");
@@ -1916,9 +1925,9 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.A_MembersInjector")
-        .hasSourceEquivalentTo(expectedAMembersInjector);
+        .containsExactLines(expectedAMembersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.B_MembersInjector")
-        .hasSourceEquivalentTo(expectedBMembersInjector);
+        .containsExactLines(expectedBMembersInjector);
   }
 }
