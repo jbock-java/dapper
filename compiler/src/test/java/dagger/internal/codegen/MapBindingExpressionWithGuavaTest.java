@@ -24,7 +24,9 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
@@ -322,7 +324,7 @@ public class MapBindingExpressionWithGuavaTest {
   }
 
   @Test
-  public void inaccessible() {
+  public void inaccessible() throws IOException {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible", "package other;", "", "class Inaccessible {}");
@@ -366,28 +368,31 @@ public class MapBindingExpressionWithGuavaTest {
             "interface TestComponent {",
             "  UsesInaccessible usesInaccessible();",
             "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            "import other.UsesInaccessible;",
-            "import other.UsesInaccessible_Factory;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  @Override",
-            "  public UsesInaccessible usesInaccessible() {",
-            "    return UsesInaccessible_Factory.newInstance((Map) ImmutableMap.of());",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;",
+        "",
+        "import other.UsesInaccessible;",
+        "import other.UsesInaccessible_Factory;",
+        "");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {",
+        "  @Override",
+        "  public UsesInaccessible usesInaccessible() {",
+        "    return UsesInaccessible_Factory.newInstance((Map) ImmutableMap.of());",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(module, inaccessible, usesInaccessible, componentFile);
     assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsElementsIn(generatedComponent);
+
+    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
+        .orElseThrow().getCharContent(false).toString();
+    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
+        .containsSubsequence(generatedComponent);
   }
 
   @Test
