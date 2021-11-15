@@ -28,7 +28,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.testing.compile.Compilation;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.tools.JavaFileObject;
@@ -92,38 +94,38 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
             "  UsesSubcomponent usesSubcomponent();",
             "}");
 
-    JavaFileObject generatedComponent =
-        preprocessedJavaFile(
-            "test.DaggerC",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerC implements C {",
-            "  @Override",
-            "  public Sub.Builder sBuilder() {",
-            "    return new SubBuilder(c);",
-            "  }",
-            "",
-            "  @Override",
-            "  public UsesSubcomponent usesSubcomponent() {",
-            "    return new UsesSubcomponent(new SubBuilder(c));",
-            "  }",
-            "",
-            "  private static final class SubBuilder implements Sub.Builder {",
-            "    @Override",
-            "    public Sub build() {",
-            "      return new SubImpl(c);",
-            "    }",
-            "  }",
-            "",
-            "  private static final class SubImpl implements Sub {",
-            "    private SubImpl(DaggerC c) {",
-            "      this.c = c;",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedImportsIndividual());
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerC implements C {",
+        "  @Override",
+        "  public Sub.Builder sBuilder() {",
+        "    return new SubBuilder(c);",
+        "  }",
+        "",
+        "  @Override",
+        "  public UsesSubcomponent usesSubcomponent() {",
+        "    return new UsesSubcomponent(new SubBuilder(c));",
+        "  }",
+        "",
+        "  private static final class SubBuilder implements Sub.Builder {",
+        "    @Override",
+        "    public Sub build() {",
+        "      return new SubImpl(c);",
+        "    }",
+        "  }",
+        "",
+        "  private static final class SubImpl implements Sub {",
+        "    private SubImpl(DaggerC c) {",
+        "      this.c = c;",
+        "    }",
+        "  }",
+        "}");
 
     Compilation compilation = compile(subcomponent, usesSubcomponent, component);
     assertThat(compilation).succeeded();
