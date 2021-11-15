@@ -101,7 +101,7 @@ public class ComponentFactoryTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test

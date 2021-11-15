@@ -315,7 +315,7 @@ public class MapBindingExpressionWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -385,7 +385,7 @@ public class MapBindingExpressionWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -451,7 +451,7 @@ public class MapBindingExpressionWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -504,6 +504,6 @@ public class MapBindingExpressionWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 }

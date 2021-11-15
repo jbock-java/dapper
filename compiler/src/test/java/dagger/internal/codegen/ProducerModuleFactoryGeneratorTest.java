@@ -427,8 +427,7 @@ public class ProducerModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProduceStringFactory",
-            factoryFile);
+        .hasExactContents("test.TestModule_ProduceStringFactory", factoryFile);
   }
 
   @Test
@@ -502,7 +501,7 @@ public class ProducerModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProduceStringFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProduceStringFactory", factoryFile);
   }
 
   @Test

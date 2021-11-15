@@ -116,7 +116,7 @@ public class ElidedFactoriesTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsExactLines(generatedComponent);
+        .hasExactContents(generatedComponent);
   }
 
   @Test
@@ -319,7 +319,7 @@ public class ElidedFactoriesTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsExactLines(generatedComponent);
+        .hasExactContents(generatedComponent);
   }
 
   @Test
@@ -514,6 +514,6 @@ public class ElidedFactoriesTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsExactLines(generatedComponent);
+        .hasExactContents(generatedComponent);
   }
 }

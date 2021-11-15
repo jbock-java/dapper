@@ -164,7 +164,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -222,7 +223,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -266,7 +268,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -316,7 +319,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -382,7 +386,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -540,7 +545,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(file, QUALIFIER_A))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.GenericClass_Factory", expected);
+        .and()
+        .hasExactContents("test.GenericClass_Factory", expected);
   }
 
   @Test
@@ -1132,7 +1138,8 @@ public final class InjectConstructorFactoryGeneratorTest {
             "}");
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.InjectConstructor_Factory", expected);
+        .and()
+        .hasExactContents("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1193,7 +1200,7 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.AllInjections_Factory", expectedFactory);
+        .hasExactContents("test.AllInjections_Factory", expectedFactory);
   }
 
   @Test
@@ -1242,7 +1249,8 @@ public final class InjectConstructorFactoryGeneratorTest {
             "}");
     assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.InjectConstructor_Factory", expected);
+        .and()
+        .hasExactContents("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1296,7 +1304,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.InjectConstructor_Factory", expected);
+        .and()
+        .hasExactContents("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1353,7 +1362,8 @@ public final class InjectConstructorFactoryGeneratorTest {
     assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.InjectConstructor_Factory", expected);
+        .and()
+        .hasExactContents("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1417,7 +1427,8 @@ public final class InjectConstructorFactoryGeneratorTest {
         .that(ImmutableList.of(samePackageInterface, differentPackageInterface, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
-        .and().generatesSources("test.InjectConstructor_Factory", expected);
+        .and()
+        .hasExactContents("test.InjectConstructor_Factory", expected);
   }
 
   @Test
@@ -1460,7 +1471,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.SimpleType_Factory", factory);
+        .hasExactContents("test.SimpleType_Factory", factory);
   }
 
   @Test
@@ -1508,6 +1519,6 @@ public final class InjectConstructorFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.OuterType_A_Factory", aFactory);
+        .hasExactContents("test.OuterType_A_Factory", aFactory);
   }
 }

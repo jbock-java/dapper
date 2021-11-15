@@ -99,7 +99,7 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -165,7 +165,7 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -229,7 +229,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.GenericClass_MembersInjector", expected);
+        .hasExactContents("test.GenericClass_MembersInjector", expected);
   }
 
   @Test
@@ -340,7 +340,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.Child_MembersInjector", expected);
+        .hasExactContents("test.Child_MembersInjector", expected);
   }
 
   @Test
@@ -420,7 +420,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.FieldInjection_MembersInjector", expected);
+        .hasExactContents("test.FieldInjection_MembersInjector", expected);
   }
 
   @Test
@@ -491,7 +491,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.FieldInjectionWithQualifier_MembersInjector", expected);
+        .hasExactContents("test.FieldInjectionWithQualifier_MembersInjector", expected);
   }
 
   @Test
@@ -580,7 +580,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.MethodInjection_MembersInjector", expected);
+        .hasExactContents("test.MethodInjection_MembersInjector", expected);
   }
 
   @Test
@@ -668,7 +668,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.MixedMemberInjection_MembersInjector", expected);
+        .hasExactContents("test.MixedMemberInjection_MembersInjector", expected);
   }
 
   @Test
@@ -734,7 +734,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.AllInjections_MembersInjector", expectedMembersInjector);
+        .hasExactContents("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
   @Test
@@ -789,7 +789,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.AllInjections_MembersInjector", expectedMembersInjector);
+        .hasExactContents("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
   @Test
@@ -853,7 +853,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.OuterType_B_MembersInjector", bMembersInjector);
+        .hasExactContents("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
   @Test
@@ -955,7 +955,7 @@ public class MembersInjectionTest {
             })
         .compilesWithoutError()
         .and()
-        .generatesSources("test.OuterType_B_MembersInjector", bMembersInjector);
+        .hasExactContents("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
   @Test
@@ -1099,7 +1099,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.Child_MembersInjector", expectedMembersInjector);
+        .hasExactContents("test.Child_MembersInjector", expectedMembersInjector);
   }
 
   @Test
@@ -1342,10 +1342,10 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.InjectedType_MembersInjector")
-        .containsExactLines(membersInjector);
+        .hasExactContents(membersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.InjectedType_Factory")
-        .containsExactLines(factory);
+        .hasExactContents(factory);
   }
 
   @Test
@@ -1401,7 +1401,7 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("other.Inaccessible_MembersInjector")
-        .containsExactLines(
+        .hasExactContents(
             JavaFileObjects.forSourceLines(
                 "other.Inaccessible_MembersInjector",
                 "package other;",
@@ -1479,7 +1479,7 @@ public class MembersInjectionTest {
             "}");
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -1609,7 +1609,7 @@ public class MembersInjectionTest {
             .build();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -1705,7 +1705,7 @@ public class MembersInjectionTest {
 
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   // Shows that we shouldn't create a members injector for a type that doesn't have
@@ -1818,10 +1818,10 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.A_MembersInjector")
-        .containsExactLines(expectedAMembersInjector);
+        .hasExactContents(expectedAMembersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.C_MembersInjector")
-        .containsExactLines(expectedCMembersInjector);
+        .hasExactContents(expectedCMembersInjector);
 
     try {
       assertThat(compilation).generatedSourceFile("test.B_MembersInjector");
@@ -1925,9 +1925,9 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.A_MembersInjector")
-        .containsExactLines(expectedAMembersInjector);
+        .hasExactContents(expectedAMembersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.B_MembersInjector")
-        .containsExactLines(expectedBMembersInjector);
+        .hasExactContents(expectedBMembersInjector);
   }
 }

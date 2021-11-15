@@ -137,7 +137,7 @@ public class AssistedFactoryTest {
             .build();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -243,6 +243,6 @@ public class AssistedFactoryTest {
             .build();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 }

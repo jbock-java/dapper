@@ -264,7 +264,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
   @Test
@@ -313,7 +313,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
   @Test
@@ -362,7 +362,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
   @Test
@@ -455,7 +455,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideObjectsFactory", listFactoryFile);
+        .hasExactContents("test.TestModule_ProvideObjectsFactory", listFactoryFile);
   }
 
   @Test
@@ -507,7 +507,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideStringFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideStringFactory", factoryFile);
   }
 
   @Test
@@ -564,7 +564,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideWildcardListFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideWildcardListFactory", factoryFile);
   }
 
   @Test
@@ -618,7 +618,7 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.TestModule_ProvideStringsFactory", factoryFile);
+        .hasExactContents("test.TestModule_ProvideStringsFactory", factoryFile);
   }
 
   @Test
@@ -1083,15 +1083,15 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.ParentModule_ProvideListBFactory", listBFactory)
+        .hasExactContents("test.ParentModule_ProvideListBFactory", listBFactory)
         .and()
-        .generatesSources("test.ParentModule_ProvideBElementFactory", bElementFactory)
+        .hasExactContents("test.ParentModule_ProvideBElementFactory", bElementFactory)
         .and()
-        .generatesSources("test.ParentModule_ProvideBEntryFactory", bEntryFactory)
+        .hasExactContents("test.ParentModule_ProvideBEntryFactory", bEntryFactory)
         .and()
-        .generatesSources("test.ChildNumberModule_ProvideNumberFactory", numberFactory)
+        .hasExactContents("test.ChildNumberModule_ProvideNumberFactory", numberFactory)
         .and()
-        .generatesSources("test.ChildIntegerModule_ProvideIntegerFactory", integerFactory);
+        .hasExactContents("test.ChildIntegerModule_ProvideIntegerFactory", integerFactory);
   }
 
   @Test
@@ -1232,11 +1232,11 @@ public class ModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources("test.ParameterizedModule_ProvideMapStringNumberFactory", provideMapStringNumberFactory)
+        .hasExactContents("test.ParameterizedModule_ProvideMapStringNumberFactory", provideMapStringNumberFactory)
         .and()
-        .generatesSources("test.ParameterizedModule_ProvideNonGenericTypeFactory", provideNonGenericTypeFactory)
+        .hasExactContents("test.ParameterizedModule_ProvideNonGenericTypeFactory", provideNonGenericTypeFactory)
         .and()
-        .generatesSources("test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory", provideNonGenericTypeWithDepsFactory);
+        .hasExactContents("test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory", provideNonGenericTypeWithDepsFactory);
   }
 
   private static final JavaFileObject QUALIFIER_A =
@@ -1436,7 +1436,7 @@ public class ModuleFactoryGeneratorTest {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_GetFactory")
-        .containsLinesIn(
+        .containsLines(
             JavaFileObjects.forSourceLines(
                 "test.TestModule_GetFactory",
                 "package test;",
@@ -1459,7 +1459,7 @@ public class ModuleFactoryGeneratorTest {
 
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_CreateFactory")
-        .containsLinesIn(
+        .containsLines(
             JavaFileObjects.forSourceLines(
                 "test.TestModule_CreateFactory",
                 "package test;",

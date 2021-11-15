@@ -114,7 +114,7 @@ public class SetBindingRequestFulfillmentTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -210,7 +210,7 @@ public class SetBindingRequestFulfillmentTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLinesIn(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -318,7 +318,7 @@ public class SetBindingRequestFulfillmentTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .containsExactLines(generatedComponent);
+        .hasExactContents(generatedComponent);
   }
 
   private Compiler daggerCompilerWithoutGuava() {

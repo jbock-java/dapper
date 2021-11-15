@@ -541,7 +541,7 @@ public class ProductionComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestClass_SimpleComponent")
-        .containsExactLines(generatedComponent);
+        .hasExactContents(generatedComponent);
   }
 
   @Test
@@ -648,7 +648,7 @@ public class ProductionComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .containsLinesIn(
+        .containsLines(
             new JavaFileBuilder(compilerMode, "test.DaggerRoot")
                 .addLines(
                     "package test;",
