@@ -24,7 +24,10 @@ import static dagger.internal.codegen.binding.ErrorMessages.creatorMessagesFor;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ErrorMessages;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,23 +82,23 @@ public class ComponentFactoryTest {
             "    TestComponent newTestComponent(TestModule mod);",
             "  }",
             "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            "import dagger.internal.Preconditions;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  private static final class Factory implements TestComponent.Factory {",
-            "    @Override",
-            "    public TestComponent newTestComponent(TestModule mod) {",
-            "      Preconditions.checkNotNull(mod);",
-            "      return new DaggerTestComponent(mod);",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;",
+        "",
+        "import dagger.internal.Preconditions;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {",
+        "  private static final class Factory implements TestComponent.Factory {",
+        "    @Override",
+        "    public TestComponent newTestComponent(TestModule mod) {",
+        "      Preconditions.checkNotNull(mod);",
+        "      return new DaggerTestComponent(mod);",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(moduleFile, componentFile);
     assertThat(compilation).succeeded();
