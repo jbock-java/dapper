@@ -24,7 +24,10 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +47,8 @@ public class SubcomponentValidationTest {
     this.compilerMode = compilerMode;
   }
 
-  @Test public void factoryMethod_missingModulesWithParameters() {
+  @Test
+  public void factoryMethod_missingModulesWithParameters() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
         "package test;",
         "",
@@ -163,7 +167,8 @@ public class SubcomponentValidationTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test public void factoryMethod_nonModuleParameter() {
+  @Test
+  public void factoryMethod_nonModuleParameter() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
         "package test;",
         "",
@@ -192,7 +197,8 @@ public class SubcomponentValidationTest {
         .atColumn(43);
   }
 
-  @Test public void factoryMethod_duplicateParameter() {
+  @Test
+  public void factoryMethod_duplicateParameter() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -229,7 +235,8 @@ public class SubcomponentValidationTest {
         .atColumn(71);
   }
 
-  @Test public void factoryMethod_superflouousModule() {
+  @Test
+  public void factoryMethod_superflouousModule() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -265,7 +272,8 @@ public class SubcomponentValidationTest {
         .onLine(7);
   }
 
-  @Test public void missingBinding() {
+  @Test
+  public void missingBinding() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -308,7 +316,8 @@ public class SubcomponentValidationTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test public void subcomponentOnConcreteType() {
+  @Test
+  public void subcomponentOnConcreteType() {
     JavaFileObject subcomponentFile = JavaFileObjects.forSourceLines("test.NotASubcomponent",
         "package test;",
         "",
@@ -322,7 +331,8 @@ public class SubcomponentValidationTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void scopeMismatch() {
+  @Test
+  public void scopeMismatch() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.ParentComponent",
         "package test;",
         "",
@@ -449,14 +459,14 @@ public class SubcomponentValidationTest {
             "  @Inject public void dep2Method() { }",
             "}");
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerParentComponent")
             .addLines(
                 "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerParentComponent implements ParentComponent {")
+                "")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines("final class DaggerParentComponent implements ParentComponent {")
             .addLinesIn(
                 DEFAULT_MODE,
                 "  @SuppressWarnings(\"unchecked\")",
@@ -470,7 +480,7 @@ public class SubcomponentValidationTest {
                 "  public Dep1 dep1() {")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "   Object local = dep1;",
+                "    Object local = dep1;",
                 "    if (local instanceof MemoizedSentinel) {",
                 "      synchronized (local) {",
                 "        local = dep1;",
@@ -491,7 +501,7 @@ public class SubcomponentValidationTest {
                 "  public Dep2 dep2() {")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "   Object local = dep2;",
+                "    Object local = dep2;",
                 "    if (local instanceof MemoizedSentinel) {",
                 "      synchronized (local) {",
                 "        local = dep2;",
@@ -550,26 +560,20 @@ public class SubcomponentValidationTest {
                 "    private NeedsDep1 needsDep1() {",
                 "      return new NeedsDep1(parentComponent.dep1());",
                 "    }")
-            .addLines(
-                "    private A a() {",
-                "      return injectA(",
-                "          A_Factory.newInstance(",
-                "              needsDep1(),")
             .addLinesIn(
                 DEFAULT_MODE,
-                "              parentComponent.dep1Provider.get(),",
-                "              parentComponent.dep2Provider.get()));")
+                "    private A a() {",
+                "      return injectA(A_Factory.newInstance(needsDep1(), parentComponent.dep1Provider.get(), parentComponent.dep2Provider.get()));",
+                "    }")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "              parentComponent.dep1(),",
-                "              parentComponent.dep2()));")
+                "    private A a() {",
+                "      return injectA(A_Factory.newInstance(needsDep1(), parentComponent.dep1(), parentComponent.dep2()));", "    }")
             .addLines(
-                "    }",
                 "",
                 "    @Override",
                 "    public Object object() {",
-                "      return ChildModule_ProvideObjectFactory.provideObject(",
-                "          childModule, a());",
+                "      return ChildModule_ProvideObjectFactory.provideObject(childModule, a());",
                 "    }",
                 "",
                 "    @CanIgnoreReturnValue",
@@ -579,7 +583,7 @@ public class SubcomponentValidationTest {
                 "    }",
                 "  }",
                 "}")
-            .build();
+            .lines();
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
@@ -652,49 +656,51 @@ public class SubcomponentValidationTest {
             "",
             "@Subcomponent interface NoConflict {}");
 
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParentComponent",
-            "package test;",
-            "",
-            "import test.subpackage.Sub;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParentComponent implements ParentComponent {",
-            "  @Override",
-            "  public Foo.Sub newInstanceSubcomponent() {",
-            "    return new F_SubImpl(parentComponent);",
-            "  }",
-            "",
-            "  @Override",
-            "  public NoConflict newNoConflictSubcomponent() {",
-            "    return new NoConflictImpl(parentComponent);",
-            "  }",
-            "",
-            "  static final class Builder {",
-            "    public ParentComponent build() {",
-            "      return new DaggerParentComponent();",
-            "    }",
-            "  }",
-            "",
-            "  private static final class F_SubImpl implements Foo.Sub {",
-            "    @Override",
-            "    public Bar.Sub newBarSubcomponent() {",
-            "      return new B_SubImpl(parentComponent, f_SubImpl);",
-            "    }",
-            "",
-            "    private static final class B_SubImpl implements Bar.Sub {",
-            "      @Override",
-            "      public Sub newSubcomponentInSubpackage() {",
-            "        return new ts_SubI(parentComponent, f_SubImpl, b_SubImpl);",
-            "      }",
-            "",
-            "      private static final class ts_SubI implements Sub {}",
-            "    }",
-            "  }",
-            "",
-            "  private static final class NoConflictImpl implements NoConflict {}",
-            "}");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        "package test;",
+        "",
+        "import test.subpackage.Sub;");
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerParentComponent implements ParentComponent {",
+        "  @Override",
+        "  public Foo.Sub newInstanceSubcomponent() {",
+        "    return new F_SubImpl(parentComponent);",
+        "  }",
+        "",
+        "  @Override",
+        "  public NoConflict newNoConflictSubcomponent() {",
+        "    return new NoConflictImpl(parentComponent);",
+        "  }",
+        "",
+        "  static final class Builder {",
+        "    public ParentComponent build() {",
+        "      return new DaggerParentComponent();",
+        "    }",
+        "  }",
+        "",
+        "  private static final class F_SubImpl implements Foo.Sub {",
+        "    @Override",
+        "    public Bar.Sub newBarSubcomponent() {",
+        "      return new B_SubImpl(parentComponent, f_SubImpl);",
+        "    }",
+        "",
+        "    private static final class B_SubImpl implements Bar.Sub {",
+        "      @Override",
+        "      public Sub newSubcomponentInSubpackage() {",
+        "        return new ts_SubI(parentComponent, f_SubImpl, b_SubImpl);",
+        "      }",
+        "",
+        "      private static final class ts_SubI implements Sub {",
+        "      }",
+        "    }",
+        "  }",
+        "",
+        "  private static final class NoConflictImpl implements NoConflict {",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(parent, foo, bar, baz, noConflict);
@@ -736,41 +742,38 @@ public class SubcomponentValidationTest {
             "",
             "@Subcomponent public interface Sub {}");
 
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParentComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParentComponent implements ParentComponent {",
-            "  @Override",
-            "  public Sub newSubcomponent() {",
-            "    return new t_SubImpl(parentComponent);",
-            "  }",
-            "",
-            "  static final class Builder {",
-            "    public ParentComponent build() {",
-            "      return new DaggerParentComponent();",
-            "    }",
-            "  }",
-            "",
-            "  private static final class t_SubImpl implements Sub {",
-            "    @Override",
-            "    public test.deep.many.levels.that.match.test.Sub newDeepSubcomponent() {",
-            "      return new tdmltmt_SubImpl(parentComponent, t_SubImpl);",
-            "    }",
-            "",
-            "    private static final class tdmltmt_SubImpl implements ",
-            "        test.deep.many.levels.that.match.test.Sub {",
-            "      private tdmltmt_SubImpl(",
-            "          DaggerParentComponent parentComponent,",
-            "          t_SubImpl t_SubImpl) {",
-            "        this.parentComponent = parentComponent;",
-            "        this.t_SubImpl = t_SubImpl;",
-            "      }",
-            "    }",
-            "  }",
-            "}");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        "package test;");
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerParentComponent implements ParentComponent {",
+        "  @Override",
+        "  public Sub newSubcomponent() {",
+        "    return new t_SubImpl(parentComponent);",
+        "  }",
+        "",
+        "  static final class Builder {",
+        "    public ParentComponent build() {",
+        "      return new DaggerParentComponent();",
+        "    }",
+        "  }",
+        "",
+        "  private static final class t_SubImpl implements Sub {",
+        "    @Override",
+        "    public test.deep.many.levels.that.match.test.Sub newDeepSubcomponent() {",
+        "      return new tdmltmt_SubImpl(parentComponent, t_SubImpl);",
+        "    }",
+        "",
+        "    private static final class tdmltmt_SubImpl implements test.deep.many.levels.that.match.test.Sub {",
+        "      private tdmltmt_SubImpl(DaggerParentComponent parentComponent, t_SubImpl t_SubImpl) {",
+        "        this.parentComponent = parentComponent;",
+        "        this.t_SubImpl = t_SubImpl;",
+        "      }",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent, sub, deepSub);
     assertThat(compilation).succeeded();
@@ -807,39 +810,35 @@ public class SubcomponentValidationTest {
             "",
             "@Subcomponent public interface Sub {}");
 
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "DaggerParentComponent",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParentComponent implements ParentComponent {",
-            "  @Override",
-            "  public Sub newSubcomponent() {",
-            "    return new $_SubImpl(parentComponent);",
-            "  }",
-            "",
-            "  private static final class $_SubImpl implements Sub {",
-            "    private $_SubImpl(DaggerParentComponent parentComponent) {",
-            "      this.parentComponent = parentComponent;",
-            "    }",
-            "",
-            "    @Override",
-            "    public test.deep.many.levels.that.match.test.Sub newDeepSubcomponent() {",
-            "      return new tdmltmt_SubImpl(parentComponent, $_SubImpl);",
-            "    }",
-            "",
-            "    private static final class tdmltmt_SubImpl implements ",
-            "        test.deep.many.levels.that.match.test.Sub {",
-            "      private tdmltmt_SubImpl(",
-            "          DaggerParentComponent parentComponent,",
-            "          $_SubImpl $_SubImpl) {",
-            "        this.parentComponent = parentComponent;",
-            "        this.$_SubImpl = $_SubImpl;",
-            "      }",
-            "    }",
-            "  }",
-            "}",
-            "");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerParentComponent implements ParentComponent {",
+        "  @Override",
+        "  public Sub newSubcomponent() {",
+        "    return new $_SubImpl(parentComponent);",
+        "  }",
+        "",
+        "  private static final class $_SubImpl implements Sub {",
+        "    private $_SubImpl(DaggerParentComponent parentComponent) {",
+        "      this.parentComponent = parentComponent;",
+        "    }",
+        "",
+        "    @Override",
+        "    public test.deep.many.levels.that.match.test.Sub newDeepSubcomponent() {",
+        "      return new tdmltmt_SubImpl(parentComponent, $_SubImpl);",
+        "    }",
+        "",
+        "    private static final class tdmltmt_SubImpl implements test.deep.many.levels.that.match.test.Sub {",
+        "      private tdmltmt_SubImpl(DaggerParentComponent parentComponent, $_SubImpl $_SubImpl) {",
+        "        this.parentComponent = parentComponent;",
+        "        this.$_SubImpl = $_SubImpl;",
+        "      }",
+        "    }",
+        "  }",
+        "}",
+        "");
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent, sub, deepSub);
@@ -888,36 +887,36 @@ public class SubcomponentValidationTest {
             "  }",
             "}");
 
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerParentComponent",
-            "package test;",
-            "",
-            "import top1.a.b.c.d.E;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerParentComponent implements ParentComponent {",
-            "  @Override",
-            "  public E.F.Sub top1() {",
-            "    return new F_SubImpl(parentComponent);",
-            "  }",
-            "",
-            "  @Override",
-            "  public top2.a.b.c.d.E.F.Sub top2() {",
-            "    return new F2_SubImpl(parentComponent);",
-            "  }",
-            "",
-            "  private static final class F_SubImpl implements E.F.Sub {",
-            "    private F_SubImpl(DaggerParentComponent parentComponent) {",
-            "      this.parentComponent = parentComponent;",
-            "    }",
-            "  }",
-            "  private static final class F2_SubImpl implements top2.a.b.c.d.E.F.Sub {",
-            "    private F2_SubImpl(DaggerParentComponent parentComponent) {",
-            "      this.parentComponent = parentComponent;",
-            "    }",
-            "  }",
-            "}");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        "package test;",
+        "",
+        "import top1.a.b.c.d.E;");
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerParentComponent implements ParentComponent {",
+        "  @Override",
+        "  public E.F.Sub top1() {",
+        "    return new F_SubImpl(parentComponent);",
+        "  }",
+        "",
+        "  @Override",
+        "  public top2.a.b.c.d.E.F.Sub top2() {",
+        "    return new F2_SubImpl(parentComponent);",
+        "  }",
+        "",
+        "  private static final class F_SubImpl implements E.F.Sub {",
+        "    private F_SubImpl(DaggerParentComponent parentComponent) {",
+        "      this.parentComponent = parentComponent;",
+        "    }",
+        "  }",
+        "  private static final class F2_SubImpl implements top2.a.b.c.d.E.F.Sub {",
+        "    private F2_SubImpl(DaggerParentComponent parentComponent) {",
+        "      this.parentComponent = parentComponent;",
+        "    }",
+        "  }",
+        "}");
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent, top1, top2);
@@ -951,20 +950,22 @@ public class SubcomponentValidationTest {
             "  @Subcomponent interface C {}",
             "}");
 
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerC",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerC implements C {",
-            "  @Override",
-            "  public Foo.C newInstanceC() {",
-            "    return new F_CImpl(c);",
-            "  }",
-            "",
-            "  private static final class F_CImpl implements Foo.C {}",
-            "}");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        "package test;",
+        "");
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerC implements C {",
+        "  @Override",
+        "  public Foo.C newInstanceC() {",
+        "    return new F_CImpl(c);",
+        "  }",
+        "",
+        "  private static final class F_CImpl implements Foo.C {",
+        "  }",
+        "}");
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
@@ -1010,53 +1011,53 @@ public class SubcomponentValidationTest {
             "    }",
             "  }",
             "}");
-    JavaFileObject componentGeneratedFile =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerC",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerC implements C {",
-            "  @Override",
-            "  public C.Foo.Sub.Builder fooBuilder() {",
-            "    return new F_SubBuilder(c);",
-            "  }",
-            "",
-            "  @Override",
-            "  public C.Bar.Sub.Builder barBuilder() {",
-            "    return new B_SubBuilder(c);",
-            "  }",
-            "",
-            // TODO(bcorso): Reverse the order of subcomponent and builder so that subcomponent
-            // comes first.
-            "  private static final class F_SubBuilder implements C.Foo.Sub.Builder {",
-            "    @Override",
-            "    public C.Foo.Sub build() {",
-            "      return new F_SubImpl(c);",
-            "    }",
-            "  }",
-            "",
-            "  private static final class F_SubImpl implements C.Foo.Sub {",
-            "    private F_SubImpl(DaggerC c) {",
-            "      this.c = c;",
-            "    }",
-            "  }",
-            "",
-            "  private static final class B_SubBuilder implements C.Bar.Sub.Builder {",
-            "    @Override",
-            "    public C.Bar.Sub build() {",
-            "      return new B_SubImpl(c);",
-            "    }",
-            "  }",
-            "",
-            "  private static final class B_SubImpl implements C.Bar.Sub {",
-            "    private B_SubImpl(DaggerC c) {",
-            "      this.c = c;",
-            "    }",
-            "  }",
-            "}");
+    List<String> componentGeneratedFile = new ArrayList<>();
+    Collections.addAll(componentGeneratedFile,
+        "package test;");
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedImportsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(componentGeneratedFile,
+        "final class DaggerC implements C {",
+        "  @Override",
+        "  public C.Foo.Sub.Builder fooBuilder() {",
+        "    return new F_SubBuilder(c);",
+        "  }",
+        "",
+        "  @Override",
+        "  public C.Bar.Sub.Builder barBuilder() {",
+        "    return new B_SubBuilder(c);",
+        "  }",
+        "",
+        // TODO(bcorso): Reverse the order of subcomponent and builder so that subcomponent
+        // comes first.
+        "  private static final class F_SubBuilder implements C.Foo.Sub.Builder {",
+        "    @Override",
+        "    public C.Foo.Sub build() {",
+        "      return new F_SubImpl(c);",
+        "    }",
+        "  }",
+        "",
+        "  private static final class F_SubImpl implements C.Foo.Sub {",
+        "    private F_SubImpl(DaggerC c) {",
+        "      this.c = c;",
+        "    }",
+        "  }",
+        "",
+        "  private static final class B_SubBuilder implements C.Bar.Sub.Builder {",
+        "    @Override",
+        "    public C.Bar.Sub build() {",
+        "      return new B_SubImpl(c);",
+        "    }",
+        "  }",
+        "",
+        "  private static final class B_SubImpl implements C.Bar.Sub {",
+        "    private B_SubImpl(DaggerC c) {",
+        "      this.c = c;",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(parent);
     assertThat(compilation).succeeded();
@@ -1163,15 +1164,15 @@ public class SubcomponentValidationTest {
 
     Compilation compilation =
         daggerCompiler(
-                new GeneratingProcessor(
-                    "test.GeneratedType",
-                    "package test;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "final class GeneratedType {",
-                    "  @Inject GeneratedType() {}",
-                    "}"))
+            new GeneratingProcessor(
+                "test.GeneratedType",
+                "package test;",
+                "",
+                "import jakarta.inject.Inject;",
+                "",
+                "final class GeneratedType {",
+                "  @Inject GeneratedType() {}",
+                "}"))
             .compile(parent, child, childSupertype);
     assertThat(compilation).succeededWithoutWarnings();
   }
