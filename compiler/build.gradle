@@ -63,6 +63,8 @@ dependencies {
     testImplementation('org.assertj:assertj-core:3.21.0')
     // why is this necessary?
     testImplementation('com.google.errorprone:error_prone_annotations:2.4.0')
+    // why is this necessary?
+    testImplementation('com.google.code.findbugs:jsr305:3.0.2')
 }
 
 jar {
