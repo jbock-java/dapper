@@ -20,7 +20,6 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
-import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -28,7 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import java.util.Arrays;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,9 +106,9 @@ public class ComponentShardTest {
                 .javaFileBuilder("dagger.internal.codegen.DaggerTestComponent")
                 .addLines(
                     "package dagger.internal.codegen;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
-                    "final class DaggerTestComponent implements TestComponent {")
+                    "")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,
                     "  private Shard1 shard1;",
@@ -236,7 +234,8 @@ public class ComponentShardTest {
                     "    private volatile Provider<Binding4> binding4Provider;",
                     "    private volatile Provider<Binding5> binding5Provider;",
                     "",
-                    "    private Shard1() {}",
+                    "    private Shard1() {",
+                    "    }",
                     "",
                     "    private Binding5 binding5() {",
                     "      Object local = binding5;",
@@ -335,7 +334,8 @@ public class ComponentShardTest {
                     "    private volatile Object binding1 = new MemoizedSentinel();",
                     "    private volatile Provider<Binding1> binding1Provider;",
                     "",
-                    "    private Shard2() {}",
+                    "    private Shard2() {",
+                    "    }",
                     "",
                     "    private Binding1 binding1() {",
                     "      Object local = binding1;",
@@ -407,10 +407,8 @@ public class ComponentShardTest {
                     "",
                     "  @SuppressWarnings(\"unchecked\")",
                     "  private void initialize() {",
-                    "    this.binding7Provider =",
-                    "        DoubleCheck.provider(Binding7_Factory.create());",
-                    "    this.binding6Provider =",
-                    "        DoubleCheck.provider(Binding6_Factory.create(binding7Provider));",
+                    "    this.binding7Provider = DoubleCheck.provider(Binding7_Factory.create());",
+                    "    this.binding6Provider = DoubleCheck.provider(Binding6_Factory.create(binding7Provider));",
                     "  }",
                     "",
                     "  @Override",
@@ -495,18 +493,11 @@ public class ComponentShardTest {
                     "",
                     "    @SuppressWarnings(\"unchecked\")",
                     "    private void initialize() {",
-                    "      this.binding5Provider =",
-                    "          DoubleCheck.provider(",
-                    "              Binding5_Factory.create(testComponent.binding6Provider));",
+                    "      this.binding5Provider = DoubleCheck.provider(Binding5_Factory.create(testComponent.binding6Provider));",
                     "      this.binding2Provider = new DelegateFactory<>();",
-                    "      this.binding4Provider =",
-                    "          DoubleCheck.provider(",
-                    "              Binding4_Factory.create(binding5Provider, binding2Provider));",
-                    "      this.binding3Provider =",
-                    "          DoubleCheck.provider(Binding3_Factory.create(binding4Provider));",
-                    "      DelegateFactory.setDelegate(",
-                    "          binding2Provider,",
-                    "          DoubleCheck.provider(Binding2_Factory.create(binding3Provider)));",
+                    "      this.binding4Provider = DoubleCheck.provider(Binding4_Factory.create(binding5Provider, binding2Provider));",
+                    "      this.binding3Provider = DoubleCheck.provider(Binding3_Factory.create(binding4Provider));",
+                    "      DelegateFactory.setDelegate(binding2Provider, DoubleCheck.provider(Binding2_Factory.create(binding3Provider)));",
                     "    }",
                     "  }",
                     "",
@@ -519,13 +510,10 @@ public class ComponentShardTest {
                     "",
                     "    @SuppressWarnings(\"unchecked\")",
                     "    private void initialize() {",
-                    "      this.binding1Provider =",
-                    "          DoubleCheck.provider(",
-                    "              Binding1_Factory.create(",
-                    "                  testComponent.shard1.binding2Provider));",
+                    "      this.binding1Provider = DoubleCheck.provider(Binding1_Factory.create(testComponent.shard1.binding2Provider));",
                     "    }",
                     "  }")
-                .build());
+                .lines());
   }
 
   private static JavaFileObject createBinding(String bindingName, String... deps) {
@@ -540,7 +528,7 @@ public class ComponentShardTest {
         "@Singleton",
         "final class " + bindingName + " {",
         "  @Inject",
-        "  " + bindingName + "(" + Arrays.stream(deps).collect(joining(", ")) + ") {}",
+        "  " + bindingName + "(" + String.join(", ", deps) + ") {}",
         "}");
   }
 
