@@ -95,7 +95,8 @@ public class AssistedFactoryTest {
     JavaFileObject generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
-            .addLines("package test;", "", GeneratedLines.generatedAnnotations())
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLinesIn(
                 FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
@@ -192,7 +193,8 @@ public class AssistedFactoryTest {
     JavaFileObject generatedComponent =
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
-            .addLines("package test;", "", GeneratedLines.generatedAnnotations())
+            .addLines("package test;")
+            .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLinesIn(
                 FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
@@ -231,8 +233,7 @@ public class AssistedFactoryTest {
                 "    this.fooFactoryProvider = new DelegateFactory<>();",
                 "    this.barProvider = Bar_Factory.create(fooFactoryProvider);",
                 "    this.fooProvider = Foo_Factory.create(barProvider);",
-                "    DelegateFactory.setDelegate(",
-                "        fooFactoryProvider, FooFactory_Impl.create(fooProvider));",
+                "    DelegateFactory.setDelegate(fooFactoryProvider, FooFactory_Impl.create(fooProvider));",
                 "  }",
                 "",
                 "  @Override",
