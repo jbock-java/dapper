@@ -141,9 +141,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,
@@ -177,14 +177,10 @@ public class DelegateBindingExpressionTest {
                     DEFAULT_MODE,
                     "  @SuppressWarnings(\"unchecked\")",
                     "  private void initialize() {",
-                    "    this.regularScopedProvider = ",
-                    "        DoubleCheck.provider(RegularScoped_Factory.create());",
-                    "    this.reusableScopedProvider = ",
-                    "        SingleCheck.provider(ReusableScoped_Factory.create());",
-                    "    this.reusableProvider = DoubleCheck.provider(",
-                    "        (Provider) reusableScopedProvider);",
-                    "    this.unscopedProvider = DoubleCheck.provider(",
-                    "        (Provider) Unscoped_Factory.create());",
+                    "    this.regularScopedProvider = DoubleCheck.provider(RegularScoped_Factory.create());",
+                    "    this.reusableScopedProvider = SingleCheck.provider(ReusableScoped_Factory.create());",
+                    "    this.reusableProvider = DoubleCheck.provider((Provider) reusableScopedProvider);",
+                    "    this.unscopedProvider = DoubleCheck.provider((Provider) Unscoped_Factory.create());",
                     "  }")
                 .addLines( //
                     "}")
@@ -220,9 +216,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,
@@ -256,12 +252,9 @@ public class DelegateBindingExpressionTest {
                     DEFAULT_MODE,
                     "  @SuppressWarnings(\"unchecked\")",
                     "  private void initialize() {",
-                    "    this.regularScopedProvider = ",
-                    "        DoubleCheck.provider(RegularScoped_Factory.create());",
-                    "    this.reusableScopedProvider = ",
-                    "        SingleCheck.provider(ReusableScoped_Factory.create());",
-                    "    this.unscopedProvider = SingleCheck.provider(",
-                    "        (Provider) Unscoped_Factory.create());",
+                    "    this.regularScopedProvider = DoubleCheck.provider(RegularScoped_Factory.create());",
+                    "    this.reusableScopedProvider = SingleCheck.provider(ReusableScoped_Factory.create());",
+                    "    this.unscopedProvider = SingleCheck.provider((Provider) Unscoped_Factory.create());",
                     "  }")
                 .addLines( //
                     "}")
@@ -296,10 +289,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
-                    "final class DaggerTestComponent implements TestComponent {")
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,
                     "  private volatile Object regularScoped = new MemoizedSentinel();",
@@ -332,12 +324,10 @@ public class DelegateBindingExpressionTest {
                     DEFAULT_MODE,
                     "  @SuppressWarnings(\"unchecked\")",
                     "  private void initialize() {",
-                    "    this.regularScopedProvider = ",
-                    "        DoubleCheck.provider(RegularScoped_Factory.create());",
-                    "    this.reusableScopedProvider = ",
-                    "        SingleCheck.provider(ReusableScoped_Factory.create());",
+                    "    this.regularScopedProvider = DoubleCheck.provider(RegularScoped_Factory.create());",
+                    "    this.reusableScopedProvider = SingleCheck.provider(ReusableScoped_Factory.create());",
                     "  }")
-                .addLines( //
+                .addLines(
                     "}")
                 .build());
   }
@@ -398,9 +388,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
@@ -506,9 +496,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
@@ -596,9 +586,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
@@ -640,10 +630,9 @@ public class DelegateBindingExpressionTest {
                     "    @Override",
                     "    public T get() {",
                     "      switch (id) {",
-                    "        case 0:",
-                    "            return (T) TestModule_ProvideStringFactory.provideString();",
-                    "        default:",
-                    "            throw new AssertionError(id);",
+                    "        case 0: // java.lang.String ",
+                    "        return (T) TestModule_ProvideStringFactory.provideString();",
+                    "        default: throw new AssertionError(id);",
                     "      }",
                     "    }",
                     "  }")
@@ -698,9 +687,9 @@ public class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
-                    "final class DaggerTestComponent implements TestComponent {")
+                    "")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
                     "  @Override",
@@ -740,10 +729,9 @@ public class DelegateBindingExpressionTest {
                     "    @Override",
                     "    public T get() {",
                     "      switch (id) {",
-                    "        case 0:",
-                    "            return (T) TestModule_ProvideStringFactory.provideString();",
-                    "        default:",
-                    "            throw new AssertionError(id);",
+                    "        case 0: // java.lang.String ",
+                    "        return (T) TestModule_ProvideStringFactory.provideString();",
+                    "        default: throw new AssertionError(id);",
                     "      }",
                     "    }",
                     "  }")
@@ -802,11 +790,10 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerRequestsSubtypeAsProvider")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
-                    "final class DaggerRequestsSubtypeAsProvider",
-                    "    implements RequestsSubtypeAsProvider {")
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
+                    "final class DaggerRequestsSubtypeAsProvider implements RequestsSubtypeAsProvider {")
                 .addLinesIn(
                     DEFAULT_MODE,
                     "  @Override",
@@ -837,7 +824,8 @@ public class DelegateBindingExpressionTest {
                     "    @Override",
                     "    public T get() {",
                     "      switch (id) {",
-                    "        case 0: return (T) Subtype_Factory.newInstance();",
+                    "        case 0: // other.Subtype ",
+                    "        return (T) Subtype_Factory.newInstance();",
                     "        default: throw new AssertionError(id);",
                     "      }",
                     "    }",
@@ -894,9 +882,9 @@ public class DelegateBindingExpressionTest {
             compilerMode
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
-                    "package test;",
-                    "",
-                    GeneratedLines.generatedAnnotations(),
+                    "package test;")
+                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
@@ -905,10 +893,8 @@ public class DelegateBindingExpressionTest {
                     "",
                     "  @SuppressWarnings(\"unchecked\")",
                     "  private void initialize() {",
-                    "    this.provideStringProvider =",
-                    "        SingleCheck.provider(TestModule_ProvideStringFactory.create());",
-                    "    this.bindStringProvider =",
-                    "        DoubleCheck.provider((Provider) provideStringProvider);",
+                    "    this.provideStringProvider = SingleCheck.provider(TestModule_ProvideStringFactory.create());",
+                    "    this.bindStringProvider = DoubleCheck.provider((Provider) provideStringProvider);",
                     "  }",
                     "",
                     "  @Override",
@@ -960,7 +946,8 @@ public class DelegateBindingExpressionTest {
                     "    @Override",
                     "    public T get() {",
                     "      switch (id) {",
-                    "        case 0: return (T) testComponent.object2();",
+                    "        case 0: // java.lang.Object ",
+                    "        return (T) testComponent.object2();",
                     "        default: throw new AssertionError(id);",
                     "      }",
                     "    }",
