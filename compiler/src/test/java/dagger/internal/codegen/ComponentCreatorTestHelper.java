@@ -27,6 +27,8 @@ import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ErrorMessages;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.tools.JavaFileObject;
 
@@ -70,6 +72,19 @@ abstract class ComponentCreatorTestHelper {
                       .replace("build", "create"));
     }
     return stream.collect(joining("\n"));
+  }
+
+  List<String> processLines(List<String> lines) {
+    Stream<String> stream = lines.stream();
+    if (creatorKind.equals(FACTORY)) {
+      stream =
+          stream.map(
+              line ->
+                  line.replace("Builder", "Factory")
+                      .replace("builder", "factory")
+                      .replace("build", "create"));
+    }
+    return stream.collect(Collectors.toList());
   }
 
   /**

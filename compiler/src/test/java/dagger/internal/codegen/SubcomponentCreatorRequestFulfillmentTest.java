@@ -131,6 +131,6 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerC")
-        .containsLines(generatedComponent);
+        .containsLines(processLines(generatedComponent));
   }
 }
