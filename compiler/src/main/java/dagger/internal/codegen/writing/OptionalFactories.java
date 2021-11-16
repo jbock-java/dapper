@@ -160,7 +160,7 @@ final class OptionalFactories {
             optionalKind.absentValueExpression())
         .addCode("$L // safe covariant cast\n", AnnotationSpecs.suppressWarnings(UNCHECKED))
         .addCode(
-            "$1T provider = ($1T) $2N;",
+            "$1T provider = ($1T) $2N;\n",
             providerOf(optionalKind.of(typeVariable)),
             perGeneratedFileCache.absentOptionalProviderFields.computeIfAbsent(
                 optionalKind,
