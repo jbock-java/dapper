@@ -34,7 +34,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import dagger.internal.codegen.binding.ComponentCreatorKind;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,14 +54,15 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   private final CompilerType compilerType;
   private final CompilerMode compilerMode;
+  private final ComponentCreatorKind componentCreatorKind;
 
   @Parameters(name = "compilerMode={0}, creatorKind={1}")
   public static Collection<Object[]> parameters() {
     return ImmutableList.of(
-      new Object[]{DEFAULT_MODE, COMPONENT_BUILDER, JAVAC},
-      new Object[]{DEFAULT_MODE, COMPONENT_FACTORY, JAVAC},
-      new Object[]{FAST_INIT_MODE, COMPONENT_BUILDER, JAVAC},
-      new Object[]{FAST_INIT_MODE, COMPONENT_FACTORY, JAVAC});
+        new Object[]{DEFAULT_MODE, COMPONENT_BUILDER, JAVAC},
+        new Object[]{DEFAULT_MODE, COMPONENT_FACTORY, JAVAC},
+        new Object[]{FAST_INIT_MODE, COMPONENT_BUILDER, JAVAC},
+        new Object[]{FAST_INIT_MODE, COMPONENT_FACTORY, JAVAC});
   }
 
   public ComponentCreatorTest(
@@ -65,6 +70,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
       ComponentCreatorAnnotation componentCreatorAnnotation,
       CompilerType compilerType) {
     super(compilerMode, componentCreatorAnnotation);
+    this.componentCreatorKind = componentCreatorAnnotation.creatorKind();
     this.compilerMode = compilerMode;
     this.compilerType = compilerType;
   }
@@ -455,55 +461,56 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
                 "}")
             .build();
 
-    JavaFileObject generatedComponent =
-        javaFileBuilder("test.DaggerSimpleComponent")
-            .addLines(
-                "package test;",
-                "",
-                GeneratedLines.generatedImports("import dagger.internal.Preconditions;"),
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerSimpleComponent implements SimpleComponent {",
-                "  private final Integer i;",
-                "",
-                "  private DaggerSimpleComponent(Integer iParam) {",
-                "    this.i = iParam;",
-                "  }",
-                "",
-                "  @Override",
-                "  public int anInt() {",
-                "    return i;",
-                "  }",
-                "")
-            .addLinesIf(
-                BUILDER,
-                "  private static final class Builder implements SimpleComponent.Builder {",
-                "    private Integer i;",
-                "",
-                "    @Override",
-                "    public Builder i(int i) {",
-                "      this.i = Preconditions.checkNotNull(i);",
-                "      return this;",
-                "    }",
-                "",
-                "    @Override",
-                "    public SimpleComponent build() {",
-                "      Preconditions.checkBuilderRequirement(i, Integer.class);",
-                "      return new DaggerSimpleComponent(i);",
-                "    }",
-                "  }")
-            .addLinesIf(
-                FACTORY,
-                "  private static final class Factory implements SimpleComponent.Factory {",
-                "    @Override",
-                "    public SimpleComponent create(int i) {",
-                "      Preconditions.checkNotNull(i);",
-                "      return new DaggerSimpleComponent(i);",
-                "    }",
-                "  }")
-            .addLines(
-                "}")
-            .build();
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"));
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerSimpleComponent implements SimpleComponent {",
+        "  private final Integer i;",
+        "",
+        "  private DaggerSimpleComponent(Integer iParam) {",
+        "    this.i = iParam;",
+        "  }",
+        "",
+        "  @Override",
+        "  public int anInt() {",
+        "    return i;",
+        "  }",
+        "");
+    if (componentCreatorKind == BUILDER) {
+      Collections.addAll(generatedComponent,
+          "  private static final class Builder implements SimpleComponent.Builder {",
+          "    private Integer i;",
+          "",
+          "    @Override",
+          "    public Builder i(int i) {",
+          "      this.i = Preconditions.checkNotNull(i);",
+          "      return this;",
+          "    }",
+          "",
+          "    @Override",
+          "    public SimpleComponent build() {",
+          "      Preconditions.checkBuilderRequirement(i, Integer.class);",
+          "      return new DaggerSimpleComponent(i);",
+          "    }",
+          "  }");
+    }
+    if (componentCreatorKind == FACTORY) {
+      Collections.addAll(generatedComponent,
+          "  private static final class Factory implements SimpleComponent.Factory {",
+          "    @Override",
+          "    public SimpleComponent create(int i) {",
+          "      Preconditions.checkNotNull(i);",
+          "      return new DaggerSimpleComponent(i);",
+          "    }",
+          "  }");
+    }
+    Collections.addAll(generatedComponent,
+        "}");
 
     Compilation compilation = compile(componentFile);
     assertThat(compilation).succeededWithoutWarnings();
@@ -840,7 +847,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     String elements =
         creatorKind.equals(BUILDER)
             ? "[void test.SimpleComponent.Builder.set1(test.TestModule), "
-                + "void test.SimpleComponent.Builder.set2(test.TestModule)]"
+            + "void test.SimpleComponent.Builder.set2(test.TestModule)]"
             : "[test.TestModule m1, test.TestModule m2]";
     assertThat(compilation)
         .hadErrorContaining(
@@ -904,7 +911,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     String elements =
         creatorKind.equals(BUILDER)
             ? "[void test.SimpleComponent.Builder.set1(test.TestModule), "
-                + "void test.SimpleComponent.Builder.set2(test.TestModule)]"
+            + "void test.SimpleComponent.Builder.set2(test.TestModule)]"
             : "[test.TestModule m1, test.TestModule t]";
     assertThat(compilation)
         .hadErrorContaining(
@@ -957,7 +964,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     String elements =
         creatorKind.equals(BUILDER)
             ? "[void test.SimpleComponent.Builder.abstractModule(test.AbstractModule), "
-                + "void test.SimpleComponent.Builder.other(String)]"
+            + "void test.SimpleComponent.Builder.other(String)]"
             : "[test.AbstractModule abstractModule, String s]";
     assertThat(compilation)
         .hadErrorContaining(String.format(messages.extraSetters(), elements))
