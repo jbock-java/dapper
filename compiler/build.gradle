@@ -27,7 +27,6 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1116' }
 }
 
 tasks.withType(AbstractArchiveTask) {
