@@ -427,7 +427,7 @@ public class ProducerModuleFactoryGeneratorTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .hasExactContents("test.TestModule_ProduceStringFactory", factoryFile);
+        .containsLines("test.TestModule_ProduceStringFactory", factoryFile);
   }
 
   @Test

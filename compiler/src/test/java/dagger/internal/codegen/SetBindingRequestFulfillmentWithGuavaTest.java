@@ -372,6 +372,6 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 }

@@ -286,7 +286,7 @@ public class ComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -969,7 +969,7 @@ public class ComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -1717,7 +1717,7 @@ public class ComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -2174,7 +2174,7 @@ public class ComponentProcessorTest {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
-        .hasExactContents(generated);
+        .containsLines(generated);
   }
 
   @Test
@@ -2616,7 +2616,7 @@ public class ComponentProcessorTest {
         "");
     assertThat(compilation)
         .generatedSourceFile("test.DaggerPublicComponent")
-        .hasExactContents(
+        .containsLines(
             daggerPublicComponent);
   }
 

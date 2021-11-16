@@ -85,7 +85,7 @@ public class MapKeyProcessorTest {
         .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
         .compilesWithoutError()
         .and()
-        .hasExactContents("test.PathKeyCreator", generatedKeyCreator);
+        .containsLines("test.PathKeyCreator", generatedKeyCreator);
   }
 
   @Test
@@ -135,6 +135,6 @@ public class MapKeyProcessorTest {
         .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
         .compilesWithoutError()
         .and()
-        .hasExactContents("test.Container_PathKeyCreator", generatedKeyCreator);
+        .containsLines("test.Container_PathKeyCreator", generatedKeyCreator);
   }
 }

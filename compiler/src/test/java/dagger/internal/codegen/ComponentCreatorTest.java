@@ -199,7 +199,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
@@ -425,7 +425,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .hasExactContents(generatedComponent);
+        .containsLines(generatedComponent);
   }
 
   @Test
