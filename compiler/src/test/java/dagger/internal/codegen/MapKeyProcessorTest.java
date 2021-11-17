@@ -22,7 +22,10 @@ import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import com.google.auto.value.processor.AutoAnnotationProcessor;
 import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,22 +66,23 @@ public class MapKeyProcessorTest {
         "    ADMIN,",
         "    LOGIN;",
         "}");
-    JavaFileObject generatedKeyCreator =
-        JavaFileObjects.forSourceLines(
-            "test.PathKeyCreator",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports("import com.google.auto.value.AutoAnnotation;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class PathKeyCreator {",
-            "  private PathKeyCreator() {}",
-            "",
-            "  @AutoAnnotation",
-            "  public static PathKey createPathKey(PathEnum value, String relativePath) {",
-            "    return new AutoAnnotation_PathKeyCreator_createPathKey(value, relativePath);",
-            "  }",
-            "}");
+    List<String> generatedKeyCreator = new ArrayList<>();
+    Collections.addAll(generatedKeyCreator,
+        "package test;");
+    Collections.addAll(generatedKeyCreator,
+        GeneratedLines.generatedImportsIndividual("import com.google.auto.value.AutoAnnotation;"));
+    Collections.addAll(generatedKeyCreator,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedKeyCreator,
+        "public final class PathKeyCreator {",
+        "  private PathKeyCreator() {",
+        "  }",
+        "",
+        "  @AutoAnnotation",
+        "  public static PathKey createPathKey(PathEnum value, String relativePath) {",
+        "    return new AutoAnnotation_PathKeyCreator_createPathKey(value, relativePath);",
+        "  }",
+        "}");
     assertAbout(javaSources())
         .that(ImmutableList.of(enumKeyFile, pathEnumFile))
         .withCompilerOptions(compilerMode.javacopts())
@@ -111,24 +115,23 @@ public class MapKeyProcessorTest {
         "    ADMIN,",
         "    LOGIN;",
         "}");
-    JavaFileObject generatedKeyCreator =
-        JavaFileObjects.forSourceLines(
-            "test.Container_PathKeyCreator",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports("import com.google.auto.value.AutoAnnotation;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class Container_PathKeyCreator {",
-            "  private Container_PathKeyCreator() {}",
-            "",
-            "  @AutoAnnotation",
-            "  public static Container.PathKey createPathKey("
-                + "PathEnum value, String relativePath) {",
-            "    return new AutoAnnotation_Container_PathKeyCreator_createPathKey(",
-            "        value, relativePath);",
-            "  }",
-            "}");
+    List<String> generatedKeyCreator = new ArrayList<>();
+    Collections.addAll(generatedKeyCreator,
+        "package test;");
+    Collections.addAll(generatedKeyCreator,
+        GeneratedLines.generatedImportsIndividual("import com.google.auto.value.AutoAnnotation;"));
+    Collections.addAll(generatedKeyCreator,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedKeyCreator,
+        "public final class Container_PathKeyCreator {",
+        "  private Container_PathKeyCreator() {",
+        "  }",
+        "",
+        "  @AutoAnnotation",
+        "  public static Container.PathKey createPathKey(PathEnum value, String relativePath) {",
+        "    return new AutoAnnotation_Container_PathKeyCreator_createPathKey(value, relativePath);",
+        "  }",
+        "}");
     assertAbout(javaSources())
         .that(ImmutableList.of(enumKeyFile, pathEnumFile))
         .withCompilerOptions(compilerMode.javacopts())
