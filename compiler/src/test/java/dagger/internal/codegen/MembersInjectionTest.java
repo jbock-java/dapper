@@ -86,14 +86,10 @@ public class MembersInjectionTest {
 
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(generatedComponent,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.DaggerTestComponent",
-        "package test;",
-        "",
-        GeneratedLines.generatedAnnotations(),
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  @Override",
         "  public Child child() {",
@@ -378,23 +374,18 @@ public class MembersInjectionTest {
 
     List<String> expected = new ArrayList<>();
     Collections.addAll(expected,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(expected,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.FieldInjection_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.Lazy;",
             "import dagger.MembersInjector;",
             "import dagger.internal.DoubleCheck;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "public final class FieldInjection_MembersInjector",
-        "    implements MembersInjector<FieldInjection> {",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(expected,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(expected,
+        "public final class FieldInjection_MembersInjector implements MembersInjector<FieldInjection> {",
         "  private final Provider<String> stringProvider;",
         "  private final Provider<String> stringProvider2;",
         "  private final Provider<String> stringProvider3;",
@@ -406,12 +397,9 @@ public class MembersInjectionTest {
         "    this.stringProvider3 = stringProvider3;",
         "  }",
         "",
-        "  public static MembersInjector<FieldInjection> create(",
-        "      Provider<String> stringProvider,",
-        "      Provider<String> stringProvider2,",
-        "      Provider<String> stringProvider3) {",
-        "    return new FieldInjection_MembersInjector(",
-        "        stringProvider, stringProvider2, stringProvider3);",
+        "  public static MembersInjector<FieldInjection> create(Provider<String> stringProvider,",
+        "      Provider<String> stringProvider2, Provider<String> stringProvider3) {",
+        "    return new FieldInjection_MembersInjector(stringProvider, stringProvider2, stringProvider3);",
         "  }",
         "",
         "  @Override",
@@ -432,8 +420,7 @@ public class MembersInjectionTest {
         "  }",
         "",
         "  @InjectedFieldSignature(\"test.FieldInjection.stringProvider\")",
-        "  public static void injectStringProvider(",
-        "      Object instance, Provider<String> stringProvider) {",
+        "  public static void injectStringProvider(Object instance, Provider<String> stringProvider) {",
         "    ((FieldInjection) instance).stringProvider = stringProvider;",
         "  }",
         "}");
@@ -635,7 +622,11 @@ public class MembersInjectionTest {
 
     List<String> expected = new ArrayList<>();
     Collections.addAll(expected,
-        "AAAAAAA");
+        "");
+    Collections.addAll(expected,
+        "");
+    Collections.addAll(expected,
+        "");
     Collections.addAll(expected,
         "");
     JavaFileObjects.forSourceLines(
@@ -648,31 +639,24 @@ public class MembersInjectionTest {
             "import jakarta.inject.Provider;"),
         "",
         GeneratedLines.generatedAnnotations(),
-        "public final class MixedMemberInjection_MembersInjector",
-        "    implements MembersInjector<MixedMemberInjection> {",
+        "public final class MixedMemberInjection_MembersInjector implements MembersInjector<MixedMemberInjection> {",
         "  private final Provider<String> stringProvider;",
         "  private final Provider<Object> objectProvider;",
         "  private final Provider<String> sProvider;",
         "  private final Provider<Object> oProvider;",
         "",
-        "  public MixedMemberInjection_MembersInjector(",
-        "      Provider<String> stringProvider,",
-        "      Provider<Object> objectProvider,",
-        "      Provider<String> sProvider,",
-        "      Provider<Object> oProvider) {",
+        "  public MixedMemberInjection_MembersInjector(Provider<String> stringProvider,",
+        "      Provider<Object> objectProvider, Provider<String> sProvider, Provider<Object> oProvider) {",
         "    this.stringProvider = stringProvider;",
         "    this.objectProvider = objectProvider;",
         "    this.sProvider = sProvider;",
         "    this.oProvider = oProvider;",
         "  }",
         "",
-        "  public static MembersInjector<MixedMemberInjection> create(",
-        "      Provider<String> stringProvider,",
-        "      Provider<Object> objectProvider,",
-        "      Provider<String> sProvider,",
-        "      Provider<Object> oProvider) {",
-        "    return new MixedMemberInjection_MembersInjector(",
-        "        stringProvider, objectProvider, sProvider, oProvider);}",
+        "  public static MembersInjector<MixedMemberInjection> create(Provider<String> stringProvider,",
+        "      Provider<Object> objectProvider, Provider<String> sProvider, Provider<Object> oProvider) {",
+        "    return new MixedMemberInjection_MembersInjector(stringProvider, objectProvider, sProvider, oProvider);",
+        "  }",
         "",
         "  @Override",
         "  public void injectMembers(MixedMemberInjection instance) {",
@@ -832,7 +816,7 @@ public class MembersInjectionTest {
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
-        .containsLines("test.B_MembersInjector", expectedMembersInjector);
+        .containsLines("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
   @Test
@@ -859,29 +843,23 @@ public class MembersInjectionTest {
 
     List<String> bMembersInjector = new ArrayList<>();
     Collections.addAll(bMembersInjector,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(bMembersInjector,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.OuterType_B_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "public final class OuterType_B_MembersInjector",
-        "    implements MembersInjector<OuterType.B> {",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(bMembersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(bMembersInjector,
+        "public final class OuterType_B_MembersInjector implements MembersInjector<OuterType.B> {",
         "  private final Provider<OuterType.A> aProvider;",
         "",
         "  public OuterType_B_MembersInjector(Provider<OuterType.A> aProvider) {",
         "    this.aProvider = aProvider;",
         "  }",
         "",
-        "  public static MembersInjector<OuterType.B> create(",
-        "    Provider<OuterType.A> aProvider) {",
+        "  public static MembersInjector<OuterType.B> create(Provider<OuterType.A> aProvider) {",
         "    return new OuterType_B_MembersInjector(aProvider);",
         "  }",
         "",
@@ -930,29 +908,23 @@ public class MembersInjectionTest {
 
     List<String> bMembersInjector = new ArrayList<>();
     Collections.addAll(bMembersInjector,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(bMembersInjector,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.OuterType_B_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "public final class OuterType_B_MembersInjector",
-        "    implements MembersInjector<OuterType.B> {",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(bMembersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(bMembersInjector,
+        "public final class OuterType_B_MembersInjector implements MembersInjector<OuterType.B> {",
         "  private final Provider<OuterType.A> aProvider;",
         "",
         "  public OuterType_B_MembersInjector(Provider<OuterType.A> aProvider) {",
         "    this.aProvider = aProvider;",
         "  }",
         "",
-        "  public static MembersInjector<OuterType.B> create(",
-        "      Provider<OuterType.A> aProvider) {",
+        "  public static MembersInjector<OuterType.B> create(Provider<OuterType.A> aProvider) {",
         "    return new OuterType_B_MembersInjector(aProvider);",
         "  }",
         "",
@@ -1469,34 +1441,28 @@ public class MembersInjectionTest {
 
     List<String> inaccessibleMembersInjector = new ArrayList<>();
     Collections.addAll(inaccessibleMembersInjector,
-        "AAAAAAA");
+        "package other;");
     Collections.addAll(inaccessibleMembersInjector,
-        "");
-
-    JavaFileObjects.forSourceLines(
-        "other.Inaccessible_MembersInjector",
-        "package other;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "public final class Inaccessible_MembersInjector",
-        "    implements MembersInjector<Inaccessible> {",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(inaccessibleMembersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(inaccessibleMembersInjector,
+        "public final class Inaccessible_MembersInjector implements MembersInjector<Inaccessible> {",
         "  private final Provider<Foo> fooProvider;",
         "  private final Provider<Foo> fooProvider2;",
         "",
-        "  public Inaccessible_MembersInjector(",
-        "      Provider<Foo> fooProvider, Provider<Foo> fooProvider2) {",
+        "  public Inaccessible_MembersInjector(Provider<Foo> fooProvider, Provider<Foo> fooProvider2) {",
         "    this.fooProvider = fooProvider;",
         "    this.fooProvider2 = fooProvider2;",
         "  }",
         "",
-        "  public static MembersInjector<Inaccessible> create(",
-        "      Provider<Foo> fooProvider, Provider<Foo> fooProvider2) {",
-        "    return new Inaccessible_MembersInjector(fooProvider, fooProvider2);}",
+        "  public static MembersInjector<Inaccessible> create(Provider<Foo> fooProvider,",
+        "      Provider<Foo> fooProvider2) {",
+        "    return new Inaccessible_MembersInjector(fooProvider, fooProvider2);",
+        "  }",
         "",
         "  @Override",
         "  public void injectMembers(Inaccessible instance) {",
@@ -1934,20 +1900,16 @@ public class MembersInjectionTest {
             "  @Inject String valueB;",
             "}");
 
-    List<String> expectedAMembersInjector = new ArrayList<>();
-    Collections.addAll(expectedAMembersInjector,
-        "AAAAAAA");
-    Collections.addAll(expectedAMembersInjector,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.A_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+    List<String> aMembersInjector = new ArrayList<>();
+    Collections.addAll(aMembersInjector,
+        "package test;");
+    Collections.addAll(aMembersInjector,
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(aMembersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(aMembersInjector,
         "public final class A_MembersInjector implements MembersInjector<A> {",
         "  private final Provider<String> valueBProvider;",
         "",
@@ -1965,21 +1927,17 @@ public class MembersInjectionTest {
         "  }",
         "}");
 
-    List<String> expectedBMembersInjector = new ArrayList<>();
-    Collections.addAll(expectedBMembersInjector,
-        "AAAAAAA");
-    Collections.addAll(expectedBMembersInjector,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.B_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+    List<String> bMembersInjector = new ArrayList<>();
+    Collections.addAll(bMembersInjector,
+        "package test;");
+    Collections.addAll(bMembersInjector,
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(bMembersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(bMembersInjector,
         "public final class B_MembersInjector implements MembersInjector<B> {",
         "  private final Provider<String> valueBProvider;",
         "",
@@ -1987,8 +1945,7 @@ public class MembersInjectionTest {
         "    this.valueBProvider = valueBProvider;",
         "  }",
         "",
-        "  public static MembersInjector<B> create(",
-        "      Provider<String> valueBProvider) {",
+        "  public static MembersInjector<B> create(Provider<String> valueBProvider) {",
         "    return new B_MembersInjector(valueBProvider);",
         "  }",
         "",
@@ -2002,17 +1959,15 @@ public class MembersInjectionTest {
         "    ((B) instance).valueB = valueB;",
         "  }",
         "}");
-
-
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(classA, classB);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.A_MembersInjector")
-        .containsLines(expectedAMembersInjector);
+        .containsLines(aMembersInjector);
     assertThat(compilation)
         .generatedSourceFile("test.B_MembersInjector")
-        .containsLines(expectedBMembersInjector);
+        .containsLines(bMembersInjector);
   }
 }
