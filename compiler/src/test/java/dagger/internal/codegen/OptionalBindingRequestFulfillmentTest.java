@@ -17,13 +17,15 @@
 package dagger.internal.codegen;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,73 +103,69 @@ public class OptionalBindingRequestFulfillmentTest {
             "  Optional<Provider<Lazy<DefinitelyNot>>> providerOfLazyOfDefinitelyNot();",
             "}");
 
-    JavaFileObject generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerTestComponent")
-            .addLines(
-                "package test;",
-                "",
-                "import com.google.common.base.Optional;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "final class DaggerTestComponent implements TestComponent {")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "  private volatile Provider<Maybe> provideMaybeProvider;",
-                "",
-                "  private Provider<Maybe> maybeProvider() {",
-                "    Object local = provideMaybeProvider;",
-                "    if (local == null) {",
-                "      local = new SwitchingProvider<>(testComponent, 0);",
-                "      provideMaybeProvider = (Provider<Maybe>) local;",
-                "    }",
-                "    return (Provider<Maybe>) local;",
-                "  }")
-            .addLines(
-                "  @Override",
-                "  public Optional<Maybe> maybe() {",
-                "    return Optional.of(",
-                "        Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe());",
-                "  }",
-                "",
-                "  @Override",
-                "  public Optional<Provider<Lazy<Maybe>>> providerOfLazyOfMaybe() {",
-                "    return Optional.of(ProviderOfLazy.create(")
-            .addLinesIn(
-                DEFAULT_MODE, //
-                "        Maybe_MaybeModule_ProvideMaybeFactory.create()));")
-            .addLinesIn(
-                FAST_INIT_MODE, //
-                "        maybeProvider()));")
-            .addLines(
-                "  }",
-                "",
-                "  @Override",
-                "  public Optional<DefinitelyNot> definitelyNot() {",
-                "    return Optional.absent();",
-                "  }",
-                "",
-                "  @Override",
-                "  public Optional<Provider<Lazy<DefinitelyNot>>>",
-                "      providerOfLazyOfDefinitelyNot() {",
-                "    return Optional.absent();",
-                "  }")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "  private static final class SwitchingProvider<T> implements Provider<T> {",
-                "    @SuppressWarnings(\"unchecked\")",
-                "    @Override",
-                "    public T get() {",
-                "      switch (id) {",
-                "        case 0:",
-                "          return (T) Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe();",
-                "        default:",
-                "          throw new AssertionError(id);",
-                "      }",
-                "    }",
-                "  }",
-                "}")
-            .build();
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;",
+        "import com.google.common.base.Optional;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {");
+    if (compilerMode == FAST_INIT_MODE) {
+      Collections.addAll(generatedComponent,
+          "  private volatile Provider<Maybe> provideMaybeProvider;",
+          "",
+          "  private Provider<Maybe> maybeProvider() {",
+          "    Object local = provideMaybeProvider;",
+          "    if (local == null) {",
+          "      local = new SwitchingProvider<>(testComponent, 0);",
+          "      provideMaybeProvider = (Provider<Maybe>) local;",
+          "    }",
+          "    return (Provider<Maybe>) local;",
+          "  }");
+    }
+    Collections.addAll(generatedComponent,
+        "  @Override",
+        "  public Optional<Maybe> maybe() {",
+        "    return Optional.of(Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe());",
+        "  }",
+        "",
+        "  @Override",
+        "  public Optional<Provider<Lazy<Maybe>>> providerOfLazyOfMaybe() {");
+    if (compilerMode == FAST_INIT_MODE) {
+      Collections.addAll(generatedComponent,
+          "    return Optional.of(ProviderOfLazy.create(maybeProvider()));");
+    } else {
+      Collections.addAll(generatedComponent,
+          "    return Optional.of(ProviderOfLazy.create(Maybe_MaybeModule_ProvideMaybeFactory.create()));");
+    }
+    Collections.addAll(generatedComponent,
+        "  }",
+        "",
+        "  @Override",
+        "  public Optional<DefinitelyNot> definitelyNot() {",
+        "    return Optional.absent();",
+        "  }",
+        "",
+        "  @Override",
+        "  public Optional<Provider<Lazy<DefinitelyNot>>> providerOfLazyOfDefinitelyNot() {",
+        "    return Optional.absent();",
+        "  }");
+    if (compilerMode == FAST_INIT_MODE) {
+      Collections.addAll(generatedComponent,
+          "  private static final class SwitchingProvider<T> implements Provider<T> {",
+          "    @SuppressWarnings(\"unchecked\")",
+          "    @Override",
+          "    public T get() {",
+          "      switch (id) {",
+          "        case 0: // other.Maybe ",
+          "        return (T) Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe();",
+          "        default: throw new AssertionError(id);",
+          "      }",
+          "    }",
+          "  }",
+          "}");
+    }
     Compilation compilation =
         compilerWithOptions(
             compilerMode)
@@ -233,30 +231,30 @@ public class OptionalBindingRequestFulfillmentTest {
             "  ListenableFuture<Optional<Maybe>> maybe();",
             "  ListenableFuture<Optional<DefinitelyNot>> definitelyNot();",
             "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            "import com.google.common.base.Optional;",
-            "import dagger.producers.internal.CancellationListener;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent, CancellationListener {",
-            "  @Override",
-            "  public ListenableFuture<Optional<Maybe>> maybe() {",
-            "    return Futures.immediateFuture(",
-            "        Optional.of(Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe()));",
-            "  }",
-            "",
-            "  @Override",
-            "  public ListenableFuture<Optional<DefinitelyNot>> definitelyNot() {",
-            "    return Futures.immediateFuture(Optional.absent());",
-            "  }",
-            "",
-            "  @Override",
-            "  public void onProducerFutureCancelled(boolean mayInterruptIfRunning) {}",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        "import com.google.common.base.Optional;",
+        "import dagger.producers.internal.CancellationListener;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent, CancellationListener {",
+        "  @Override",
+        "  public ListenableFuture<Optional<Maybe>> maybe() {",
+        "    return Futures.immediateFuture(Optional.of(Maybe_MaybeModule_ProvideMaybeFactory.provideMaybe()));",
+        "  }",
+        "",
+        "  @Override",
+        "  public ListenableFuture<Optional<DefinitelyNot>> definitelyNot() {",
+        "    return Futures.immediateFuture(Optional.absent());",
+        "  }",
+        "",
+        "  @Override",
+        "  public void onProducerFutureCancelled(boolean mayInterruptIfRunning) {",
+        "  }",
+        "}");
 
     Compilation compilation =
         compilerWithOptions(
