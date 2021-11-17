@@ -1288,33 +1288,29 @@ public class MembersInjectionTest {
 
     List<String> membersInjector = new ArrayList<>();
     Collections.addAll(membersInjector,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(membersInjector,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.InjectedType_MembersInjector",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.MembersInjector;",
             "import dagger.internal.InjectedFieldSignature;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
-        "public final class InjectedType_MembersInjector ",
-        "    implements MembersInjector<InjectedType> {",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(membersInjector,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(membersInjector,
+        "public final class InjectedType_MembersInjector implements MembersInjector<InjectedType> {",
         "  private final Provider<Integer> primitiveIntProvider;",
         "  private final Provider<Integer> boxedIntProvider;",
         "",
-        "  public InjectedType_MembersInjector(",
-        "      Provider<Integer> primitiveIntProvider, Provider<Integer> boxedIntProvider) {",
+        "  public InjectedType_MembersInjector(Provider<Integer> primitiveIntProvider,",
+        "      Provider<Integer> boxedIntProvider) {",
         "    this.primitiveIntProvider = primitiveIntProvider;",
         "    this.boxedIntProvider = boxedIntProvider;",
         "  }",
         "",
-        "  public static MembersInjector<InjectedType> create(",
-        "      Provider<Integer> primitiveIntProvider, Provider<Integer> boxedIntProvider) {",
-        "    return new InjectedType_MembersInjector(primitiveIntProvider, boxedIntProvider);}",
+        "  public static MembersInjector<InjectedType> create(Provider<Integer> primitiveIntProvider,",
+        "      Provider<Integer> boxedIntProvider) {",
+        "    return new InjectedType_MembersInjector(primitiveIntProvider, boxedIntProvider);",
+        "  }",
         "",
         "  @Override",
         "  public void injectMembers(InjectedType instance) {",
@@ -1335,25 +1331,21 @@ public class MembersInjectionTest {
 
     List<String> factory = new ArrayList<>();
     Collections.addAll(factory,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(factory,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.InjectedType_Factory",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import dagger.internal.Factory;",
-            "import jakarta.inject.Provider;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(factory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factory,
         "public final class InjectedType_Factory implements Factory<InjectedType> {",
         "  private final Provider<Integer> primitiveIntProvider;",
         "",
         "  private final Provider<Integer> boxedIntProvider;",
         "",
-        "  public InjectedType_Factory(",
-        "      Provider<Integer> primitiveIntProvider, Provider<Integer> boxedIntProvider) {",
+        "  public InjectedType_Factory(Provider<Integer> primitiveIntProvider,",
+        "      Provider<Integer> boxedIntProvider) {",
         "    this.primitiveIntProvider = primitiveIntProvider;",
         "    this.boxedIntProvider = boxedIntProvider;",
         "  }",
@@ -1361,14 +1353,13 @@ public class MembersInjectionTest {
         "  @Override",
         "  public InjectedType get() {",
         "    InjectedType instance = newInstance();",
-        "    InjectedType_MembersInjector.injectPrimitiveInt(",
-        "        instance, primitiveIntProvider.get());",
+        "    InjectedType_MembersInjector.injectPrimitiveInt(instance, primitiveIntProvider.get());",
         "    InjectedType_MembersInjector.injectBoxedInt(instance, boxedIntProvider.get());",
         "    return instance;",
         "  }",
         "",
-        "  public static InjectedType_Factory create(",
-        "      Provider<Integer> primitiveIntProvider, Provider<Integer> boxedIntProvider) {",
+        "  public static InjectedType_Factory create(Provider<Integer> primitiveIntProvider,",
+        "      Provider<Integer> boxedIntProvider) {",
         "    return new InjectedType_Factory(primitiveIntProvider, boxedIntProvider);",
         "  }",
         "",
@@ -1710,23 +1701,19 @@ public class MembersInjectionTest {
 
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
-        "AAAAAAA");
+        "package test;");
     Collections.addAll(generatedComponent,
-        "");
-    JavaFileObjects.forSourceLines(
-        "test.DaggerTestComponent",
-        "package test;",
-        "",
-        GeneratedLines.generatedImports(
+        GeneratedLines.generatedImportsIndividual(
             "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
             "import other.Foo_Factory;",
             "import other.InjectsSubtype;",
             "import other.InjectsSubtype_Factory;",
             "import other.Subtype_Factory;",
             "import other.Supertype;",
-            "import other.Supertype_MembersInjector;"),
-        "",
-        GeneratedLines.generatedAnnotations(),
+            "import other.Supertype_MembersInjector;"));
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private Object subtype() {",
         "    return injectSubtype(Subtype_Factory.newInstance());",
@@ -1739,8 +1726,7 @@ public class MembersInjectionTest {
         "",
         "  @CanIgnoreReturnValue",
         "  private Object injectSubtype(Object instance) {",
-        "    Supertype_MembersInjector.injectT(",
-        "        (Supertype) instance, Foo_Factory.newInstance());",
+        "    Supertype_MembersInjector.injectT((Supertype) instance, Foo_Factory.newInstance());",
         "    return instance;",
         "  }",
         "}");
