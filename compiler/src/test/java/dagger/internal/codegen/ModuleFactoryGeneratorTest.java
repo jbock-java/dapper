@@ -28,6 +28,9 @@ import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertTh
 import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -231,35 +234,36 @@ public class ModuleFactoryGeneratorTest {
         "    return \"\";",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideStringFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideStringFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override public String get() {",
-            "    return provideString(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-            "    return new TestModule_ProvideStringFactory(module);",
-            "  }",
-            "",
-            "  public static String provideString(TestModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideString());",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideStringFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public String get() {",
+        "    return provideString(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
+        "    return new TestModule_ProvideStringFactory(module);",
+        "  }",
+        "",
+        "  public static String provideString(TestModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideString());",
+        "  }",
+        "}");
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -281,33 +285,34 @@ public class ModuleFactoryGeneratorTest {
         "    return \"\";",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideStringFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideStringFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override public String get() {",
-            "    return provideString(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-            "    return new TestModule_ProvideStringFactory(module);",
-            "  }",
-            "",
-            "  public static String provideString(TestModule instance) {",
-            "    return instance.provideString();",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideStringFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public String get() {",
+        "    return provideString(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
+        "    return new TestModule_ProvideStringFactory(module);",
+        "  }",
+        "",
+        "  public static String provideString(TestModule instance) {",
+        "    return instance.provideString();",
+        "  }",
+        "}");
     assertAbout(javaSource()).that(moduleFile)
         .withCompilerOptions("-Adagger.nullableValidation=WARNING")
         .processedWith(new ComponentProcessor())
@@ -328,36 +333,36 @@ public class ModuleFactoryGeneratorTest {
         "final class TestModule {",
         "  @Provides @Nullable String provideString() { return null; }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideStringFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports("import dagger.internal.Factory;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideStringFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override",
-            "  @Nullable",
-            "  public String get() {",
-            "    return provideString(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-            "    return new TestModule_ProvideStringFactory(module);",
-            "  }",
-            "",
-            "  @Nullable",
-            "  public static String provideString(TestModule instance) {",
-            "    return instance.provideString();",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideStringFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  @Nullable",
+        "  public String get() {",
+        "    return provideString(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
+        "    return new TestModule_ProvideStringFactory(module);",
+        "  }",
+        "",
+        "  @Nullable",
+        "  public static String provideString(TestModule instance) {",
+        "    return instance.provideString();",
+        "  }",
+        "}");
     assertAbout(javaSources()).that(ImmutableList.of(moduleFile, NULLABLE))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -399,57 +404,49 @@ public class ModuleFactoryGeneratorTest {
         "    return new Object();",
         "  }",
         "}");
-    JavaFileObject listFactoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideObjectsFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.MembersInjector;",
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import java.util.List;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideObjectsFactory",
-            "    implements Factory<List<Object>> {",
-            "  private final TestModule module;",
-            "  private final Provider<Object> aProvider;",
-            "  private final Provider<Object> bProvider;",
-            "  private final Provider<MembersInjector<X>> xInjectorProvider;",
-            "",
-            "  public TestModule_ProvideObjectsFactory(",
-            "      TestModule module,",
-            "      Provider<Object> aProvider,",
-            "      Provider<Object> bProvider,",
-            "      Provider<MembersInjector<X>> xInjectorProvider) {",
-            "    this.module = module;",
-            "    this.aProvider = aProvider;",
-            "    this.bProvider = bProvider;",
-            "    this.xInjectorProvider = xInjectorProvider;",
-            "  }",
-            "",
-            "  @Override public List<Object> get() {",
-            "    return provideObjects(",
-            "        module, aProvider.get(), bProvider.get(), xInjectorProvider.get());",
-            "  }",
-            "",
-            "  public static TestModule_ProvideObjectsFactory create(",
-            "      TestModule module,",
-            "      Provider<Object> aProvider,",
-            "      Provider<Object> bProvider,",
-            "      Provider<MembersInjector<X>> xInjectorProvider) {",
-            "    return new TestModule_ProvideObjectsFactory(",
-            "        module, aProvider, bProvider, xInjectorProvider);",
-            "  }",
-            "",
-            "  public static List<Object> provideObjects(",
-            "      TestModule instance, Object a, Object b, MembersInjector<X> xInjector) {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        instance.provideObjects(a, b, xInjector));",
-            "  }",
-            "}");
+    List<String> listFactoryFile = new ArrayList<>();
+    Collections.addAll(listFactoryFile,
+        "package test;");
+    Collections.addAll(listFactoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.MembersInjector;",
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import java.util.List;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(listFactoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(listFactoryFile,
+        "public final class TestModule_ProvideObjectsFactory implements Factory<List<Object>> {",
+        "  private final TestModule module;",
+        "  private final Provider<Object> aProvider;",
+        "  private final Provider<Object> bProvider;",
+        "  private final Provider<MembersInjector<X>> xInjectorProvider;",
+        "",
+        "  public TestModule_ProvideObjectsFactory(TestModule module, Provider<Object> aProvider,",
+        "      Provider<Object> bProvider, Provider<MembersInjector<X>> xInjectorProvider) {",
+        "    this.module = module;",
+        "    this.aProvider = aProvider;",
+        "    this.bProvider = bProvider;",
+        "    this.xInjectorProvider = xInjectorProvider;",
+        "  }",
+        "",
+        "  @Override",
+        "  public List<Object> get() {",
+        "    return provideObjects(module, aProvider.get(), bProvider.get(), xInjectorProvider.get());",
+        "  }",
+        "",
+        "  public static TestModule_ProvideObjectsFactory create(TestModule module,",
+        "      Provider<Object> aProvider, Provider<Object> bProvider,",
+        "      Provider<MembersInjector<X>> xInjectorProvider) {",
+        "    return new TestModule_ProvideObjectsFactory(module, aProvider, bProvider, xInjectorProvider);",
+        "  }",
+        "",
+        "  public static List<Object> provideObjects(TestModule instance, Object a, Object b,",
+        "      MembersInjector<X> xInjector) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideObjects(a, b, xInjector));",
+        "  }",
+        "}");
     assertAbout(javaSources()).that(
             ImmutableList.of(classXFile, moduleFile, QUALIFIER_A, QUALIFIER_B))
         .processedWith(new ComponentProcessor())
@@ -474,35 +471,36 @@ public class ModuleFactoryGeneratorTest {
         "    return \"\";",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideStringFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideStringFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override public String get() {",
-            "    return provideString(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-            "    return new TestModule_ProvideStringFactory(module);",
-            "  }",
-            "",
-            "  public static String provideString(TestModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideString());",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideStringFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public String get() {",
+        "    return provideString(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
+        "    return new TestModule_ProvideStringFactory(module);",
+        "  }",
+        "",
+        "  public static String provideString(TestModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideString());",
+        "  }",
+        "}");
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -528,38 +526,37 @@ public class ModuleFactoryGeneratorTest {
         "    return new ArrayList<>();",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideWildcardListFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import java.util.List;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideWildcardListFactory implements "
-                + "Factory<List<List<?>>> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideWildcardListFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override public List<List<?>> get() {",
-            "    return provideWildcardList(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideWildcardListFactory create(TestModule module) {",
-            "    return new TestModule_ProvideWildcardListFactory(module);",
-            "  }",
-            "",
-            "  public static List<List<?>> provideWildcardList(TestModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        instance.provideWildcardList());",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import java.util.List;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideWildcardListFactory implements Factory<List<List<?>>> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideWildcardListFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public List<List<?>> get() {",
+        "    return provideWildcardList(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideWildcardListFactory create(TestModule module) {",
+        "    return new TestModule_ProvideWildcardListFactory(module);",
+        "  }",
+        "",
+        "  public static List<List<?>> provideWildcardList(TestModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideWildcardList());",
+        "  }",
+        "}");
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -583,37 +580,37 @@ public class ModuleFactoryGeneratorTest {
         "    return null;",
         "  }",
         "}");
-    JavaFileObject factoryFile =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule_ProvideStringsFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import java.util.Set;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class TestModule_ProvideStringsFactory implements Factory<Set<String>> {",
-            "  private final TestModule module;",
-            "",
-            "  public TestModule_ProvideStringsFactory(TestModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override public Set<String> get() {",
-            "    return provideStrings(module);",
-            "  }",
-            "",
-            "  public static TestModule_ProvideStringsFactory create(TestModule module) {",
-            "    return new TestModule_ProvideStringsFactory(module);",
-            "  }",
-            "",
-            "  public static Set<String> provideStrings(TestModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        instance.provideStrings());",
-            "  }",
-            "}");
+    List<String> factoryFile = new ArrayList<>();
+    Collections.addAll(factoryFile,
+        "package test;");
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import java.util.Set;"));
+    Collections.addAll(factoryFile,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(factoryFile,
+        "public final class TestModule_ProvideStringsFactory implements Factory<Set<String>> {",
+        "  private final TestModule module;",
+        "",
+        "  public TestModule_ProvideStringsFactory(TestModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public Set<String> get() {",
+        "    return provideStrings(module);",
+        "  }",
+        "",
+        "  public static TestModule_ProvideStringsFactory create(TestModule module) {",
+        "    return new TestModule_ProvideStringsFactory(module);",
+        "  }",
+        "",
+        "  public static Set<String> provideStrings(TestModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideStrings());",
+        "  }",
+        "}");
     assertAbout(javaSource()).that(moduleFile)
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -896,188 +893,172 @@ public class ModuleFactoryGeneratorTest {
         "  List<Number> numberList();",
         "  List<Integer> integerList();",
         "}");
-    JavaFileObject listBFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParentModule_ProvideListBFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import java.util.List;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParentModule_ProvideListBFactory<A extends CharSequence,",
-            "    B, C extends Number & Comparable<C>> implements Factory<List<B>> {",
-            "  private final ParentModule<A, B, C> module;",
-            "  private final Provider<B> bProvider;",
-            "",
-            "  public ParentModule_ProvideListBFactory(",
-            "        ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    this.module = module;",
-            "    this.bProvider = bProvider;",
-            "  }",
-            "",
-            "  @Override",
-            "  public List<B> get() {  ",
-            "    return provideListB(module, bProvider.get());",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>>",
-            "      ParentModule_ProvideListBFactory<A, B, C>  create(",
-            "          ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    return new ParentModule_ProvideListBFactory<A, B, C>(module, bProvider);",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> List<B>",
-            "      provideListB(ParentModule<A, B, C> instance, B b) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideListB(b));",
-            "  }",
-            "}");
-    JavaFileObject bElementFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParentModule_ProvideBElementFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParentModule_ProvideBElementFactory<A extends CharSequence,",
-            "    B, C extends Number & Comparable<C>> implements Factory<B> {",
-            "  private final ParentModule<A, B, C> module;",
-            "  private final Provider<B> bProvider;",
-            "",
-            "  public ParentModule_ProvideBElementFactory(",
-            "        ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    this.module = module;",
-            "    this.bProvider = bProvider;",
-            "  }",
-            "",
-            "  @Override",
-            "  public B get() {  ",
-            "    return provideBElement(module, bProvider.get());",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>>",
-            "      ParentModule_ProvideBElementFactory<A, B, C> create(",
-            "          ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    return new ParentModule_ProvideBElementFactory<A, B, C>(module, bProvider);",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>>",
-            "      B provideBElement(",
-            "          ParentModule<A, B, C> instance, B b) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideBElement(b));",
-            "  }",
-            "}");
-    JavaFileObject bEntryFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParentModule_ProvideBEntryFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParentModule_ProvideBEntryFactory<A extends CharSequence,",
-            "    B, C extends Number & Comparable<C>> implements Factory<B>> {",
-            "  private final ParentModule<A, B, C> module;",
-            "  private final Provider<B> bProvider;",
-            "",
-            "  public ParentModule_ProvideBEntryFactory(",
-            "        ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    this.module = module;",
-            "    this.bProvider = bProvider;",
-            "  }",
-            "",
-            "  @Override",
-            "  public B get() {  ",
-            "    return provideBEntry(module, bProvider.get());",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>>",
-            "      ParentModule_ProvideBEntryFactory<A, B, C> create(",
-            "          ParentModule<A, B, C> module, Provider<B> bProvider) {",
-            "    return new ParentModule_ProvideBEntryFactory<A, B, C>(module, bProvider);",
-            "  }",
-            "",
-            "  public static <A extends CharSequence, B, C extends Number & Comparable<C>>",
-            "      B provideBEntry(",
-            "          ParentModule<A, B, C> instance, B b) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideBEntry(b));",
-            "  }",
-            "}");
-    JavaFileObject numberFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ChildNumberModule_ProvideNumberFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ChildNumberModule_ProvideNumberFactory",
-            "    implements Factory<Number> {",
-            "  private final ChildNumberModule module;",
-            "",
-            "  public ChildNumberModule_ProvideNumberFactory(ChildNumberModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override",
-            "  public Number get() {  ",
-            "    return provideNumber(module);",
-            "  }",
-            "",
-            "  public static ChildNumberModule_ProvideNumberFactory create(",
-            "      ChildNumberModule module) {",
-            "    return new ChildNumberModule_ProvideNumberFactory(module);",
-            "  }",
-            "",
-            "  public static Number provideNumber(ChildNumberModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(instance.provideNumber());",
-            "  }",
-            "}");
-    JavaFileObject integerFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ChildIntegerModule_ProvideIntegerFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ChildIntegerModule_ProvideIntegerFactory",
-            "    implements Factory<Integer> {",
-            "  private final ChildIntegerModule module;",
-            "",
-            "  public ChildIntegerModule_ProvideIntegerFactory(ChildIntegerModule module) {",
-            "    this.module = module;",
-            "  }",
-            "",
-            "  @Override",
-            "  public Integer get() {  ",
-            "    return provideInteger(module);",
-            "  }",
-            "",
-            "  public static ChildIntegerModule_ProvideIntegerFactory create(",
-            "      ChildIntegerModule module) {",
-            "    return new ChildIntegerModule_ProvideIntegerFactory(module);",
-            "  }",
-            "",
-            "  public static Integer provideInteger(ChildIntegerModule instance) {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        instance.provideInteger());",
-            "  }",
-            "}");
+    List<String> listBFactory = new ArrayList<>();
+    Collections.addAll(listBFactory,
+        "package test;");
+    Collections.addAll(listBFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import java.util.List;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(listBFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(listBFactory,
+        "public final class ParentModule_ProvideListBFactory<A extends CharSequence, B, C extends Number & Comparable<C>> implements Factory<List<B>> {",
+        "  private final ParentModule<A, B, C> module;",
+        "  private final Provider<B> bProvider;",
+        "",
+        "  public ParentModule_ProvideListBFactory(ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    this.module = module;",
+        "    this.bProvider = bProvider;",
+        "  }",
+        "",
+        "  @Override",
+        "  public List<B> get() {",
+        "    return provideListB(module, bProvider.get());",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> ParentModule_ProvideListBFactory<A, B, C> create(",
+        "      ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    return new ParentModule_ProvideListBFactory<A, B, C>(module, bProvider);",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> List<B> provideListB(",
+        "      ParentModule<A, B, C> instance, B b) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideListB(b));",
+        "  }",
+        "}");
+    List<String> bElementFactory = new ArrayList<>();
+    Collections.addAll(bElementFactory,
+        "package test;");
+    Collections.addAll(bElementFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(bElementFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(bElementFactory,
+        "public final class ParentModule_ProvideBElementFactory<A extends CharSequence, B, C extends Number & Comparable<C>> implements Factory<B> {",
+        "  private final ParentModule<A, B, C> module;",
+        "  private final Provider<B> bProvider;",
+        "",
+        "  public ParentModule_ProvideBElementFactory(ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    this.module = module;",
+        "    this.bProvider = bProvider;",
+        "  }",
+        "",
+        "  @Override",
+        "  public B get() {",
+        "    return provideBElement(module, bProvider.get());",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> ParentModule_ProvideBElementFactory<A, B, C> create(",
+        "      ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    return new ParentModule_ProvideBElementFactory<A, B, C>(module, bProvider);",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> B provideBElement(",
+        "      ParentModule<A, B, C> instance, B b) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideBElement(b));",
+        "  }",
+        "}");
+    List<String> bEntryFactory = new ArrayList<>();
+    Collections.addAll(bEntryFactory,
+        "package test;");
+    Collections.addAll(bEntryFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(bEntryFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(bEntryFactory,
+        "public final class ParentModule_ProvideBEntryFactory<A extends CharSequence, B, C extends Number & Comparable<C>> implements Factory<B> {",
+        "  private final ParentModule<A, B, C> module;",
+        "  private final Provider<B> bProvider;",
+        "",
+        "  public ParentModule_ProvideBEntryFactory(ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    this.module = module;",
+        "    this.bProvider = bProvider;",
+        "  }",
+        "",
+        "  @Override",
+        "  public B get() {",
+        "    return provideBEntry(module, bProvider.get());",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> ParentModule_ProvideBEntryFactory<A, B, C> create(",
+        "      ParentModule<A, B, C> module, Provider<B> bProvider) {",
+        "    return new ParentModule_ProvideBEntryFactory<A, B, C>(module, bProvider);",
+        "  }",
+        "",
+        "  public static <A extends CharSequence, B, C extends Number & Comparable<C>> B provideBEntry(",
+        "      ParentModule<A, B, C> instance, B b) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideBEntry(b));",
+        "  }",
+        "}");
+    List<String> numberFactory = new ArrayList<>();
+    Collections.addAll(numberFactory,
+        "package test;");
+    Collections.addAll(numberFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;"));
+    Collections.addAll(numberFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(numberFactory,
+        "public final class ChildNumberModule_ProvideNumberFactory implements Factory<Number> {",
+        "  private final ChildNumberModule module;",
+        "",
+        "  public ChildNumberModule_ProvideNumberFactory(ChildNumberModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public Number get() {",
+        "    return provideNumber(module);",
+        "  }",
+        "",
+        "  public static ChildNumberModule_ProvideNumberFactory create(ChildNumberModule module) {",
+        "    return new ChildNumberModule_ProvideNumberFactory(module);",
+        "  }",
+        "",
+        "  public static Number provideNumber(ChildNumberModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideNumber());",
+        "  }",
+        "}");
+    List<String> integerFactory = new ArrayList<>();
+    Collections.addAll(integerFactory,
+        "package test;");
+    Collections.addAll(integerFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;"));
+    Collections.addAll(integerFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(integerFactory,
+        "public final class ChildIntegerModule_ProvideIntegerFactory implements Factory<Integer> {",
+        "  private final ChildIntegerModule module;",
+        "",
+        "  public ChildIntegerModule_ProvideIntegerFactory(ChildIntegerModule module) {",
+        "    this.module = module;",
+        "  }",
+        "",
+        "  @Override",
+        "  public Integer get() {",
+        "    return provideInteger(module);",
+        "  }",
+        "",
+        "  public static ChildIntegerModule_ProvideIntegerFactory create(ChildIntegerModule module) {",
+        "    return new ChildIntegerModule_ProvideIntegerFactory(module);",
+        "  }",
+        "",
+        "  public static Integer provideInteger(ChildIntegerModule instance) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideInteger());",
+        "  }",
+        "}");
     assertAbout(javaSources())
         .that(ImmutableList.of(parent, numberChild, integerChild, component))
         .processedWith(new ComponentProcessor())
@@ -1126,106 +1107,97 @@ public class ModuleFactoryGeneratorTest {
             "  }",
             "}");
 
-    JavaFileObject provideMapStringNumberFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideMapStringNumberFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import java.util.Map;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParameterizedModule_ProvideMapStringNumberFactory",
-            "    implements Factory<Map<String, Number>> {",
-            "  @Override",
-            "  public Map<String, Number> get() {",
-            "    return provideMapStringNumber();",
-            "  }",
-            "",
-            "  public static ParameterizedModule_ProvideMapStringNumberFactory create() {",
-            "    return InstanceHolder.INSTANCE;",
-            "  }",
-            "",
-            "  public static Map<String, Number> provideMapStringNumber() {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        ParameterizedModule.provideMapStringNumber());",
-            "  }",
-            "",
-            "  private static final class InstanceHolder {",
-            "    private static final ParameterizedModule_ProvideMapStringNumberFactory INSTANCE =",
-            "        new ParameterizedModule_ProvideMapStringNumberFactory();",
-            "  }",
-            "}");
+    List<String> provideMapStringNumberFactory = new ArrayList<>();
+    Collections.addAll(provideMapStringNumberFactory,
+        "package test;");
+    Collections.addAll(provideMapStringNumberFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import java.util.Map;"));
+    Collections.addAll(provideMapStringNumberFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(provideMapStringNumberFactory,
+        "public final class ParameterizedModule_ProvideMapStringNumberFactory implements Factory<Map<String, Number>> {",
+        "  @Override",
+        "  public Map<String, Number> get() {",
+        "    return provideMapStringNumber();",
+        "  }",
+        "",
+        "  public static ParameterizedModule_ProvideMapStringNumberFactory create() {",
+        "    return InstanceHolder.INSTANCE;",
+        "  }",
+        "",
+        "  public static Map<String, Number> provideMapStringNumber() {",
+        "    return Preconditions.checkNotNullFromProvides(ParameterizedModule.provideMapStringNumber());",
+        "  }",
+        "",
+        "  private static final class InstanceHolder {",
+        "    private static final ParameterizedModule_ProvideMapStringNumberFactory INSTANCE = new ParameterizedModule_ProvideMapStringNumberFactory();",
+        "  }",
+        "}");
 
-    JavaFileObject provideNonGenericTypeFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideNonGenericTypeFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParameterizedModule_ProvideNonGenericTypeFactory",
-            "    implements Factory<Object> {",
-            "  @Override",
-            "  public Object get() {",
-            "    return provideNonGenericType();",
-            "  }",
-            "",
-            "  public static ParameterizedModule_ProvideNonGenericTypeFactory create() {",
-            "    return InstanceHolder.INSTANCE;",
-            "  }",
-            "",
-            "  public static Object provideNonGenericType() {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        ParameterizedModule.provideNonGenericType());",
-            "  }",
-            "",
-            "  private static final class InstanceHolder {",
-            "    private static final ParameterizedModule_ProvideNonGenericTypeFactory INSTANCE =",
-            "        new ParameterizedModule_ProvideNonGenericTypeFactory();",
-            "  }",
-            "}");
+    List<String> provideNonGenericTypeFactory = new ArrayList<>();
+    Collections.addAll(provideNonGenericTypeFactory,
+        "package test;");
+    Collections.addAll(provideNonGenericTypeFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;"));
+    Collections.addAll(provideNonGenericTypeFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(provideNonGenericTypeFactory,
+        "public final class ParameterizedModule_ProvideNonGenericTypeFactory implements Factory<Object> {",
+        "  @Override",
+        "  public Object get() {",
+        "    return provideNonGenericType();",
+        "  }",
+        "",
+        "  public static ParameterizedModule_ProvideNonGenericTypeFactory create() {",
+        "    return InstanceHolder.INSTANCE;",
+        "  }",
+        "",
+        "  public static Object provideNonGenericType() {",
+        "    return Preconditions.checkNotNullFromProvides(ParameterizedModule.provideNonGenericType());",
+        "  }",
+        "",
+        "  private static final class InstanceHolder {",
+        "    private static final ParameterizedModule_ProvideNonGenericTypeFactory INSTANCE = new ParameterizedModule_ProvideNonGenericTypeFactory();",
+        "  }",
+        "}");
 
-    JavaFileObject provideNonGenericTypeWithDepsFactory =
-        JavaFileObjects.forSourceLines(
-            "test.ParameterizedModule_ProvideNonGenericTypeWithDepsFactory",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(
-                "import dagger.internal.Factory;",
-                "import dagger.internal.Preconditions;",
-                "import jakarta.inject.Provider;"),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "public final class ParameterizedModule_ProvideNonGenericTypeWithDepsFactory",
-            "    implements Factory<String> {",
-            "  private final Provider<Object> oProvider;",
-            "",
-            "  public ParameterizedModule_ProvideNonGenericTypeWithDepsFactory(",
-            "      Provider<Object> oProvider) {",
-            "    this.oProvider = oProvider;",
-            "  }",
-            "",
-            "  @Override",
-            "  public String get() {",
-            "    return provideNonGenericTypeWithDeps(oProvider.get());",
-            "  }",
-            "",
-            "  public static ParameterizedModule_ProvideNonGenericTypeWithDepsFactory create(",
-            "      Provider<Object> oProvider) {",
-            "    return new ParameterizedModule_ProvideNonGenericTypeWithDepsFactory(oProvider);",
-            "  }",
-            "",
-            "  public static String provideNonGenericTypeWithDeps(Object o) {",
-            "    return Preconditions.checkNotNullFromProvides(",
-            "        ParameterizedModule.provideNonGenericTypeWithDeps(o));",
-            "  }",
-            "}");
+    List<String> provideNonGenericTypeWithDepsFactory = new ArrayList<>();
+    Collections.addAll(provideNonGenericTypeWithDepsFactory,
+        "package test;");
+    Collections.addAll(provideNonGenericTypeWithDepsFactory,
+        GeneratedLines.generatedImportsIndividual(
+            "import dagger.internal.Factory;",
+            "import dagger.internal.Preconditions;",
+            "import jakarta.inject.Provider;"));
+    Collections.addAll(provideNonGenericTypeWithDepsFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(provideNonGenericTypeWithDepsFactory,
+        "public final class ParameterizedModule_ProvideNonGenericTypeWithDepsFactory implements Factory<String> {",
+        "  private final Provider<Object> oProvider;",
+        "",
+        "  public ParameterizedModule_ProvideNonGenericTypeWithDepsFactory(Provider<Object> oProvider) {",
+        "    this.oProvider = oProvider;",
+        "  }",
+        "",
+        "  @Override",
+        "  public String get() {",
+        "    return provideNonGenericTypeWithDeps(oProvider.get());",
+        "  }",
+        "",
+        "  public static ParameterizedModule_ProvideNonGenericTypeWithDepsFactory create(",
+        "      Provider<Object> oProvider) {",
+        "    return new ParameterizedModule_ProvideNonGenericTypeWithDepsFactory(oProvider);",
+        "  }",
+        "",
+        "  public static String provideNonGenericTypeWithDeps(Object o) {",
+        "    return Preconditions.checkNotNullFromProvides(ParameterizedModule.provideNonGenericTypeWithDeps(o));",
+        "  }",
+        "}");
 
     assertAbout(javaSource())
         .that(moduleFile)
@@ -1434,51 +1406,53 @@ public class ModuleFactoryGeneratorTest {
 
     Compilation compilation = daggerCompiler().compile(module);
     assertThat(compilation).succeededWithoutWarnings();
+    List<String> generatedGetFactory = new ArrayList<>();
+    Collections.addAll(generatedGetFactory,
+        "package test;");
+    Collections.addAll(generatedGetFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedGetFactory,
+        "public final class TestModule_GetFactory implements Factory<Integer> {",
+        "  @Override",
+        "  public Integer get() {",
+        "    return proxyGet();",
+        "  }",
+        "",
+        "  public static TestModule_GetFactory create() {",
+        "    return InstanceHolder.INSTANCE;",
+        "  }",
+        "",
+        "  public static int proxyGet() {",
+        "    return TestModule.get();",
+        "  }",
+        "}");
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_GetFactory")
-        .containsLines(
-            JavaFileObjects.forSourceLines(
-                "test.TestModule_GetFactory",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "public final class TestModule_GetFactory implements Factory<Integer> {",
-                "  @Override",
-                "  public Integer get() {",
-                "    return proxyGet();",
-                "  }",
-                "",
-                "  public static TestModule_GetFactory create() {",
-                "    return InstanceHolder.INSTANCE;",
-                "  }",
-                "",
-                "  public static int proxyGet() {",
-                "    return TestModule.get();",
-                "  }",
-                "}"));
+        .containsLines(generatedGetFactory);
 
+    List<String> generatedCreateFactory = new ArrayList<>();
+    Collections.addAll(generatedCreateFactory,
+        "package test;");
+    Collections.addAll(generatedCreateFactory,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedCreateFactory,
+        "public final class TestModule_CreateFactory implements Factory<Boolean> {",
+        "  @Override",
+        "  public Boolean get() {",
+        "    return proxyCreate();",
+        "  }",
+        "",
+        "  public static TestModule_CreateFactory create() {",
+        "    return InstanceHolder.INSTANCE;",
+        "  }",
+        "",
+        "  public static boolean proxyCreate() {",
+        "    return TestModule.create();",
+        "  }",
+        "}");
     assertThat(compilation)
         .generatedSourceFile("test.TestModule_CreateFactory")
-        .containsLines(
-            JavaFileObjects.forSourceLines(
-                "test.TestModule_CreateFactory",
-                "package test;",
-                "",
-                GeneratedLines.generatedAnnotations(),
-                "public final class TestModule_CreateFactory implements Factory<Boolean> {",
-                "  @Override",
-                "  public Boolean get() {",
-                "    return proxyCreate();",
-                "  }",
-                "",
-                "  public static TestModule_CreateFactory create() {",
-                "    return InstanceHolder.INSTANCE;",
-                "  }",
-                "",
-                "  public static boolean proxyCreate() {",
-                "    return TestModule.create();",
-                "  }",
-                "}"));
+        .containsLines(generatedCreateFactory);
   }
 
   private static final String BINDS_METHOD = "@Binds abstract Foo bindFoo(FooImpl impl);";
