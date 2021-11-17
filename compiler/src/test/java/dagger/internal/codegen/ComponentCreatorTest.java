@@ -105,25 +105,25 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
             "     SimpleComponent build();",
             "  }",
             "}");
-    JavaFileObject generatedComponent =
-        preprocessedJavaFile(
-            "test.DaggerSimpleComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerSimpleComponent implements SimpleComponent {",
-            "  private static final class Builder implements SimpleComponent.Builder {",
-            "    @Override",
-            "    public SimpleComponent build() {",
-            "      return new DaggerSimpleComponent();",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerSimpleComponent implements SimpleComponent {",
+        "  private static final class Builder implements SimpleComponent.Builder {",
+        "    @Override",
+        "    public SimpleComponent build() {",
+        "      return new DaggerSimpleComponent();",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation = compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(generatedComponent);
+        .containsLines(processLines(generatedComponent));
   }
 
   @Test
@@ -158,48 +158,48 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
             "    TestComponent build();",
             "  }",
             "}");
-    JavaFileObject generatedComponent =
-        preprocessedJavaFile(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            GeneratedLines.generatedImports(),
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  private final TestModule testModule;",
-            "",
-            "  private final DaggerTestComponent testComponent = this;",
-            "",
-            "  private DaggerTestComponent(TestModule testModuleParam) {",
-            "    this.testModule = testModuleParam;",
-            "  }",
-            "",
-            "  public static TestComponent.Builder builder() {",
-            "    return new Builder();",
-            "  }",
-            "",
-            "  public static TestComponent create() {",
-            "    return new Builder().build();",
-            "  }",
-            "",
-            "  @Override",
-            "  public String string() {",
-            "    return TestModule_StringFactory.string(testModule);",
-            "  }",
-            "",
-            "  private static final class Builder implements TestComponent.Builder {",
-            "    @Override",
-            "    public TestComponent build() {",
-            "      return new DaggerTestComponent(new TestModule());",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedImportsIndividual());
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {",
+        "  private final TestModule testModule;",
+        "",
+        "  private final DaggerTestComponent testComponent = this;",
+        "",
+        "  private DaggerTestComponent(TestModule testModuleParam) {",
+        "    this.testModule = testModuleParam;",
+        "  }",
+        "",
+        "  public static TestComponent.Builder builder() {",
+        "    return new Builder();",
+        "  }",
+        "",
+        "  public static TestComponent create() {",
+        "    return new Builder().build();",
+        "  }",
+        "",
+        "  @Override",
+        "  public String string() {",
+        "    return TestModule_StringFactory.string(testModule);",
+        "  }",
+        "",
+        "  private static final class Builder implements TestComponent.Builder {",
+        "    @Override",
+        "    public TestComponent build() {",
+        "      return new DaggerTestComponent(new TestModule());",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation = compile(module, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
+        .containsLines(processLines(generatedComponent));
   }
 
   @Test
@@ -358,14 +358,15 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
             .addLines("}")
             .build();
 
-    JavaFileObject generatedComponent =
+    String[] generatedComponent =
         javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
-                "package test;",
-                "",
-                GeneratedLines.generatedImports("import dagger.internal.Preconditions;"),
-                "",
-                GeneratedLines.generatedAnnotations(),
+                "package test;")
+            .addLines(
+                GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+            .addLines(
+                GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final Object object;",
                 "",
@@ -386,7 +387,7 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
                 "    return new Factory();",
                 "  }")
             .addLines(
-                "", //
+                "",
                 "  @Override",
                 "  public Object object() {",
                 "    return object;",
@@ -419,13 +420,13 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
                 "    }",
                 "  }")
             .addLines("}")
-            .build();
+            .lines();
 
     Compilation compilation = compile(componentFile);
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(generatedComponent);
+        .containsLines(processLines(List.of(generatedComponent)));
   }
 
   @Test
