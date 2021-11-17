@@ -24,7 +24,10 @@ import static dagger.internal.codegen.binding.ErrorMessages.creatorMessagesFor;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ErrorMessages;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,33 +83,33 @@ public class ComponentBuilderTest {
             "    TestComponent create();",
             "  }",
             "}");
-    JavaFileObject generatedComponent =
-        JavaFileObjects.forSourceLines(
-            "test.DaggerTestComponent",
-            "package test;",
-            "",
-            "import dagger.internal.Preconditions;",
-            "",
-            GeneratedLines.generatedAnnotations(),
-            "final class DaggerTestComponent implements TestComponent {",
-            "  private static final class Builder implements TestComponent.Builder {",
-            "    private TestModule testModule;",
-            "",
-            "    @Override",
-            "    public Builder setTestModule(TestModule testModule) {",
-            "      this.testModule = Preconditions.checkNotNull(testModule);",
-            "      return this;",
-            "    }",
-            "",
-            "    @Override",
-            "    public TestComponent create() {",
-            "      if (testModule == null) {",
-            "        this.testModule = new TestModule();",
-            "      }",
-            "      return new DaggerTestComponent(testModule);",
-            "    }",
-            "  }",
-            "}");
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        "import dagger.internal.Preconditions;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {",
+        "  private static final class Builder implements TestComponent.Builder {",
+        "    private TestModule testModule;",
+        "",
+        "    @Override",
+        "    public Builder setTestModule(TestModule testModule) {",
+        "      this.testModule = Preconditions.checkNotNull(testModule);",
+        "      return this;",
+        "    }",
+        "",
+        "    @Override",
+        "    public TestComponent create() {",
+        "      if (testModule == null) {",
+        "        this.testModule = new TestModule();",
+        "      }",
+        "      return new DaggerTestComponent(testModule);",
+        "    }",
+        "  }",
+        "}");
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(moduleFile, componentFile);
     assertThat(compilation).succeeded();
