@@ -9,7 +9,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -69,7 +69,6 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'dagger.compiler',
                 'Implementation-Version': project.properties['version']
         )
     }
