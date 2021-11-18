@@ -54,7 +54,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  * ensures that using this class will never result in generating code that will not compile.
  *
  * <p>Whenever compiler independence is not a requirement, the compiler-specific implementation of
- * this functionality should be preferred. For example, {@link
+ * this functionality should be preferred. For example, {@code
  * com.sun.source.util.Trees#isAccessible(com.sun.source.tree.Scope, TypeElement)} would be
  * preferable for {@code javac}.
  */
