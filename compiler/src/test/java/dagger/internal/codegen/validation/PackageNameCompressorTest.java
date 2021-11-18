@@ -20,12 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_FOOTER;
 import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_HEADER;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
+
 
 /** Tests for {@link PackageNameCompressor}. */
-@RunWith(JUnit4.class)
 public class PackageNameCompressorTest {
   @Test
   public void testSimple() {
