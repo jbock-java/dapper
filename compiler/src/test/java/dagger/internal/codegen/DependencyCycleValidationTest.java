@@ -26,11 +26,8 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.regex.Pattern;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class DependencyCycleValidationTest {
   private static final JavaFileObject SIMPLE_CYCLIC_DEPENDENCY =
       JavaFileObjects.forSourceLines(

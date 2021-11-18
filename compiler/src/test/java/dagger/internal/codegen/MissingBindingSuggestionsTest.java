@@ -23,11 +23,8 @@ import static dagger.internal.codegen.TestUtils.message;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class MissingBindingSuggestionsTest {
   private static JavaFileObject injectable(String className, String constructorParams) {
     return JavaFileObjects.forSourceLines("test." + className,
@@ -35,7 +32,7 @@ public class MissingBindingSuggestionsTest {
         "",
         "import jakarta.inject.Inject;",
         "",
-        "class " + className +" {",
+        "class " + className + " {",
         "  @Inject " + className + "(" + constructorParams + ") {}",
         "}");
   }
@@ -46,10 +43,11 @@ public class MissingBindingSuggestionsTest {
         "",
         "import jakarta.inject.Inject;",
         "",
-        "interface " + interfaceName +" {}");
+        "interface " + interfaceName + " {}");
   }
 
-  @Test public void suggestsBindingInSeparateComponent() {
+  @Test
+  public void suggestsBindingInSeparateComponent() {
     JavaFileObject fooComponent = JavaFileObjects.forSourceLines("test.FooComponent",
         "package test;",
         "",
@@ -100,7 +98,8 @@ public class MissingBindingSuggestionsTest {
         .hadErrorContaining("A binding with matching key exists in component: BarComponent");
   }
 
-  @Test public void suggestsBindingInNestedSubcomponent() {
+  @Test
+  public void suggestsBindingInNestedSubcomponent() {
     JavaFileObject fooComponent = JavaFileObjects.forSourceLines("test.FooComponent",
         "package test;",
         "",

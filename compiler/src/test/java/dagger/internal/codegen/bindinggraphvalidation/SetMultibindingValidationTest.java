@@ -22,11 +22,8 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class SetMultibindingValidationTest {
   private static final JavaFileObject FOO =
       JavaFileObjects.forSourceLines(
@@ -46,7 +43,8 @@ public class SetMultibindingValidationTest {
           "  @Inject FooImpl() {}",
           "}");
 
-  @Test public void testMultipleSetBindingsToSameFoo() {
+  @Test
+  public void testMultipleSetBindingsToSameFoo() {
     JavaFileObject module = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -77,7 +75,8 @@ public class SetMultibindingValidationTest {
             "Multiple set contributions into Set<Foo> for the same contribution key: FooImpl");
   }
 
-  @Test public void testMultipleSetBindingsToSameFooThroughMultipleBinds() {
+  @Test
+  public void testMultipleSetBindingsToSameFooThroughMultipleBinds() {
     JavaFileObject module = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -110,7 +109,8 @@ public class SetMultibindingValidationTest {
             "Multiple set contributions into Set<Object> for the same contribution key: FooImpl");
   }
 
-  @Test public void testMultipleSetBindingsViaElementsIntoSet() {
+  @Test
+  public void testMultipleSetBindingsViaElementsIntoSet() {
     JavaFileObject module = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -149,10 +149,11 @@ public class SetMultibindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             "Multiple set contributions into Set<Foo> for the same contribution key: "
-            + "@TestModule.Internal Set<Foo>");
+                + "@TestModule.Internal Set<Foo>");
   }
 
-  @Test public void testMultipleSetBindingsToSameFooSubcomponents() {
+  @Test
+  public void testMultipleSetBindingsToSameFooSubcomponents() {
     JavaFileObject parentModule = JavaFileObjects.forSourceLines("test.ParentModule",
         "package test;",
         "",
@@ -207,7 +208,8 @@ public class SetMultibindingValidationTest {
             "ParentComponent → ChildComponent");
   }
 
-  @Test public void testMultipleSetBindingsToSameKeyButDifferentBindings() {
+  @Test
+  public void testMultipleSetBindingsToSameKeyButDifferentBindings() {
     // Use an impl with local multibindings to create different bindings. We still want this to fail
     // even though there are separate bindings because it is likely an unintentional error anyway.
     JavaFileObject fooImplWithMult = JavaFileObjects.forSourceLines("test.FooImplWithMult",
@@ -283,7 +285,7 @@ public class SetMultibindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             "Multiple set contributions into Set<Foo> for the same contribution key: "
-            + "FooImplWithMult");
+                + "FooImplWithMult");
     assertThat(compilation)
         .hadErrorContaining(
             "ParentComponent → ChildComponent");

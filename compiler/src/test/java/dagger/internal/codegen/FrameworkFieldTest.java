@@ -37,23 +37,27 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class FrameworkFieldTest {
-  @Rule public CompilationRule compilationRule = new CompilationRule();
+  @Rule
+  public CompilationRule compilationRule = new CompilationRule();
 
   private ClassName xTypeName;
 
-  @Before public void setUp() {
+  @Before
+  public void setUp() {
     xTypeName =
         ClassName.get(compilationRule.getElements().getTypeElement(X.class.getCanonicalName()));
   }
 
-  @Test public void frameworkType() {
+  @Test
+  public void frameworkType() {
     assertThat(FrameworkField.create(PROVIDER, xTypeName, "test").type())
         .isEqualTo(providerOf(xTypeName));
     assertThat(FrameworkField.create(MEMBERS_INJECTOR, xTypeName, "test").type())
         .isEqualTo(membersInjectorOf(xTypeName));
   }
 
-  @Test public void nameSuffix() {
+  @Test
+  public void nameSuffix() {
     assertThat(FrameworkField.create(PROVIDER, xTypeName, "foo").name())
         .isEqualTo("fooProvider");
     assertThat(FrameworkField.create(PROVIDER, xTypeName, "fooProvider").name())
@@ -61,6 +65,8 @@ public class FrameworkFieldTest {
   }
 
   static final class X {
-    @Inject X() {}
+    @Inject
+    X() {
+    }
   }
 }

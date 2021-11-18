@@ -39,7 +39,8 @@ public final class CodeBlocksTest {
   private static final CodeBlock stringS = CodeBlock.of("$T s", String.class);
   private static final CodeBlock intI = CodeBlock.of("$T i", int.class);
 
-  @Rule public CompilationRule compilationRule = new CompilationRule();
+  @Rule
+  public CompilationRule compilationRule = new CompilationRule();
   private Elements elements;
 
   @Before

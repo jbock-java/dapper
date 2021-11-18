@@ -19,13 +19,11 @@ package dagger.internal.codegen;
 import static com.google.common.truth.Truth.assertThat;
 
 import dagger.internal.codegen.base.DiagnosticFormatting;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class DiagnosticFormattingTest {
-  @Test public void stripCommonTypePrefixes() {
+  @Test
+  public void stripCommonTypePrefixes() {
     String typeName = "com.google.common.collect.ImmutableList<java.lang.Boolean>";
     assertThat(DiagnosticFormatting.stripCommonTypePrefixes(typeName))
         .isEqualTo("ImmutableList<Boolean>");

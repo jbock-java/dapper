@@ -22,11 +22,8 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class MultipleRequestTest {
   private static final JavaFileObject DEP_FILE = JavaFileObjects.forSourceLines("test.Dep",
       "package test;",
@@ -37,7 +34,8 @@ public class MultipleRequestTest {
       "  @Inject Dep() {}",
       "}");
 
-  @Test public void multipleRequests_constructor() {
+  @Test
+  public void multipleRequests_constructor() {
     Compilation compilation =
         daggerCompiler()
             .compile(
@@ -64,7 +62,8 @@ public class MultipleRequestTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test public void multipleRequests_field() {
+  @Test
+  public void multipleRequests_field() {
     Compilation compilation =
         daggerCompiler()
             .compile(
@@ -93,7 +92,8 @@ public class MultipleRequestTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test public void multipleRequests_providesMethod() {
+  @Test
+  public void multipleRequests_providesMethod() {
     Compilation compilation =
         daggerCompiler()
             .compile(

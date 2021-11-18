@@ -30,11 +30,8 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class ValidationReportTest {
   private static final JavaFileObject TEST_CLASS_FILE =
       JavaFileObjects.forSourceLines("test.TestClass",

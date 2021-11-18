@@ -22,12 +22,10 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class ComponentDependenciesTest {
+
   @Test
   public void dependenciesWithTwoOfSameMethodOnDifferentInterfaces_fail() {
     JavaFileObject interfaceOne = JavaFileObjects.forSourceLines("test.One",

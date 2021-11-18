@@ -24,12 +24,9 @@ import static dagger.internal.codegen.TestUtils.message;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {ComponentHierarchyValidator}. */
-@RunWith(JUnit4.class)
 public class ComponentHierarchyValidationTest {
   @Test
   public void singletonSubcomponent() {

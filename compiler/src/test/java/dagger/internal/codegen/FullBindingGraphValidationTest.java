@@ -25,12 +25,8 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.regex.Pattern;
 import javax.tools.JavaFileObject;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class FullBindingGraphValidationTest {
   private static final JavaFileObject MODULE_WITH_ERRORS =
       JavaFileObjects.forSourceLines(

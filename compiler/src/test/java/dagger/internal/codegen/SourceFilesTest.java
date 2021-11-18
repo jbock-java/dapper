@@ -31,13 +31,15 @@ import org.junit.runners.JUnit4;
 /** Tests for {@link SourceFiles}. */
 @RunWith(JUnit4.class)
 public final class SourceFilesTest {
-  @Rule public CompilationRule compilation = new CompilationRule();
+  @Rule
+  public CompilationRule compilation = new CompilationRule();
 
   private TypeElement typeElementFor(Class<?> clazz) {
     return compilation.getElements().getTypeElement(clazz.getCanonicalName());
   }
 
-  private static final class Int {}
+  private static final class Int {
+  }
 
   @Test
   public void testSimpleVariableName_typeCollisions() {
@@ -53,9 +55,11 @@ public final class SourceFilesTest {
     assertThat(simpleVariableName(typeElementFor(Package.class))).isEqualTo("pkg");
   }
 
-  private static final class For {}
+  private static final class For {
+  }
 
-  private static final class Goto {}
+  private static final class Goto {
+  }
 
   @Test
   public void testSimpleVariableName_randomKeywords() {

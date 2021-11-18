@@ -23,15 +23,12 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests to make sure that delegate bindings where the impl depends on a binding in a subcomponent
  * properly fail. These are regression tests for b/147020838.
  */
-@RunWith(JUnit4.class)
 public class BindsDependsOnSubcomponentValidationTest {
   @Test
   public void testBinds() {

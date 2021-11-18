@@ -29,12 +29,9 @@ import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import java.util.regex.Pattern;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Tests for -Adagger.pluginsVisitFullBindingGraph. */
-@RunWith(JUnit4.class)
 public final class PluginsVisitFullBindingGraphTest {
   private static final JavaFileObject MODULE_WITHOUT_ERRORS =
       JavaFileObjects.forSourceLines(
@@ -129,7 +126,7 @@ public final class PluginsVisitFullBindingGraphTest {
         .onLineContaining("interface ModuleWithoutErrors");
   }
 
-  /** A test plugin that just reports each component with the given {@link Diagnostic.Kind}. */
+  /** A test plugin that just reports each component with the given {@code Diagnostic.Kind}. */
   private static final class ErrorPlugin implements BindingGraphPlugin {
     @Override
     public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {

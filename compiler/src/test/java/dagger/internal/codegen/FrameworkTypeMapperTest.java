@@ -25,14 +25,12 @@ import static dagger.model.RequestKind.PROVIDER;
 
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Test case for {@link FrameworkTypeMapper}. */
-@RunWith(JUnit4.class)
 public class FrameworkTypeMapperTest {
-  @Test public void forProvider() {
+  @Test
+  public void forProvider() {
     FrameworkTypeMapper mapper = FrameworkTypeMapper.FOR_PROVIDER;
     assertThat(mapper.getFrameworkType(INSTANCE)).isEqualTo(FrameworkType.PROVIDER);
     assertThat(mapper.getFrameworkType(LAZY)).isEqualTo(FrameworkType.PROVIDER);

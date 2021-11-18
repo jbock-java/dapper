@@ -23,12 +23,9 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Producer-specific validation tests. */
-@RunWith(JUnit4.class)
 public class ProductionGraphValidationTest {
   private static final JavaFileObject EXECUTOR_MODULE =
       JavaFileObjects.forSourceLines(
@@ -48,7 +45,8 @@ public class ProductionGraphValidationTest {
           "  }",
           "}");
 
-  @Test public void componentWithUnprovidedInput() {
+  @Test
+  public void componentWithUnprovidedInput() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.MyComponent",
         "package test;",
         "",
@@ -84,7 +82,8 @@ public class ProductionGraphValidationTest {
         .onLineContaining("interface MyComponent");
   }
 
-  @Test public void componentProductionWithNoDependencyChain() {
+  @Test
+  public void componentProductionWithNoDependencyChain() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",
@@ -110,7 +109,8 @@ public class ProductionGraphValidationTest {
         .onLineContaining("interface AComponent");
   }
 
-  @Test public void provisionDependsOnProduction() {
+  @Test
+  public void provisionDependsOnProduction() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestClass",
@@ -163,7 +163,8 @@ public class ProductionGraphValidationTest {
         .onLineContaining("class AModule");
   }
 
-  @Test public void provisionEntryPointDependsOnProduction() {
+  @Test
+  public void provisionEntryPointDependsOnProduction() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestClass",
@@ -452,7 +453,7 @@ public class ProductionGraphValidationTest {
         .inFile(component)
         .onLineContaining("interface TestComponent");
   }
-  
+
   @Test
   public void componentWithBadModule() {
     JavaFileObject badModule =

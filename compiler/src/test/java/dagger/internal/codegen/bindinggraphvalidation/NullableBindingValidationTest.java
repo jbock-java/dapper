@@ -24,11 +24,8 @@ import static dagger.internal.codegen.bindinggraphvalidation.NullableBindingVali
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class NullableBindingValidationTest {
   private static final JavaFileObject NULLABLE =
       JavaFileObjects.forSourceLines(
@@ -37,7 +34,8 @@ public class NullableBindingValidationTest {
           "",
           "public @interface Nullable {}");
 
-  @Test public void nullCheckForConstructorParameters() {
+  @Test
+  public void nullCheckForConstructorParameters() {
     JavaFileObject a = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -80,7 +78,8 @@ public class NullableBindingValidationTest {
     assertThat(compilation2).succeeded();
   }
 
-  @Test public void nullCheckForMembersInjectParam() {
+  @Test
+  public void nullCheckForMembersInjectParam() {
     JavaFileObject a = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -124,7 +123,8 @@ public class NullableBindingValidationTest {
     assertThat(compilation2).succeeded();
   }
 
-  @Test public void nullCheckForVariable() {
+  @Test
+  public void nullCheckForVariable() {
     JavaFileObject a = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -168,7 +168,8 @@ public class NullableBindingValidationTest {
     assertThat(compilation2).succeeded();
   }
 
-  @Test public void nullCheckForComponentReturn() {
+  @Test
+  public void nullCheckForComponentReturn() {
     JavaFileObject module = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",

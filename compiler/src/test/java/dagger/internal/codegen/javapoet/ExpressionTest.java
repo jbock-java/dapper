@@ -33,13 +33,16 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ExpressionTest {
-  @Rule public CompilationRule compilationRule = new CompilationRule();
+  @Rule
+  public CompilationRule compilationRule = new CompilationRule();
   private DaggerElements elements;
   private DaggerTypes types;
 
-  interface Supertype {}
+  interface Supertype {
+  }
 
-  interface Subtype extends Supertype {}
+  interface Subtype extends Supertype {
+  }
 
   @Before
   public void setUp() {

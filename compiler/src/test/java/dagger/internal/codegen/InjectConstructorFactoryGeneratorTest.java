@@ -30,11 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 // TODO(gak): add tests for generation in the default package.
 public final class InjectConstructorFactoryGeneratorTest {
   private static final JavaFileObject QUALIFIER_A =
