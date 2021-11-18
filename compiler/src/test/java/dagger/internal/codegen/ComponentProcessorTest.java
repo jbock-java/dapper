@@ -2565,6 +2565,78 @@ public class ComponentProcessorTest {
   }
 
   @Test
+  public void moduleHasGeneratedQualifier() {
+    JavaFileObject module =
+        JavaFileObjects.forSourceLines(
+            "test.TestModule",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "interface TestModule {",
+            "  @Provides",
+            "  static String unqualified() {",
+            "    return new String();",
+            "  }",
+            "",
+            "  @Provides",
+            "  @GeneratedQualifier",
+            "  static String qualified() {",
+            "    return new String();",
+            "  }",
+            "}");
+    JavaFileObject component =
+        JavaFileObjects.forSourceLines(
+            "test.TestComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "",
+            "@Component(modules = TestModule.class)",
+            "interface TestComponent {",
+            "  String unqualified();",
+            "}");
+    // Generating the qualifier leads to duplicate binding exception.
+    JavaFileObject qualifier =
+        JavaFileObjects.forSourceLines(
+            "test.GeneratedQualifier",
+            "package test;",
+            "",
+            "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
+            "",
+            "import java.lang.annotation.Retention;",
+            "import jakarta.inject.Qualifier;",
+            "",
+            "@Retention(RUNTIME)",
+            "@Qualifier",
+            "@interface GeneratedQualifier {}");
+
+    List<String> generatedComponent = new ArrayList<>();
+    Collections.addAll(generatedComponent,
+        "package test;");
+    Collections.addAll(generatedComponent,
+        GeneratedLines.generatedAnnotationsIndividual());
+    Collections.addAll(generatedComponent,
+        "final class DaggerTestComponent implements TestComponent {",
+        "  @Override",
+        "  public String unqualified() {",
+        // Ensure that the unqualified @Provides method is used.
+        "    return TestModule_UnqualifiedFactory.unqualified();",
+        "  }",
+        "}");
+
+    Compilation compilation =
+        daggerCompiler()
+            .compile(module, component, qualifier);
+    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(compilation)
+        .generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(generatedComponent);
+  }
+
+  @Test
   public void publicComponentType() {
     JavaFileObject publicComponent =
         JavaFileObjects.forSourceLines(
