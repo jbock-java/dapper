@@ -22,7 +22,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
 import java.util.Optional;
@@ -139,17 +138,12 @@ public final class ValidationReport<T extends Element> {
   }
 
   /** Metadata about a {@link ValidationReport} item. */
-  @AutoValue
-  public abstract static class Item {
-    public abstract String message();
-
-    public abstract Kind kind();
-
-    public abstract Element element();
-
-    public abstract Optional<AnnotationMirror> annotation();
-
-    abstract Optional<AnnotationValue> annotationValue();
+  public record Item(
+      String message,
+      Kind kind,
+      Element element,
+      Optional<AnnotationMirror> annotation,
+      Optional<AnnotationValue> annotationValue) {
   }
 
   public static <T extends Element> Builder<T> about(T subject) {
@@ -260,7 +254,7 @@ public final class ValidationReport<T extends Element> {
         Optional<AnnotationMirror> annotation,
         Optional<AnnotationValue> annotationValue) {
       items.add(
-          new AutoValue_ValidationReport_Item(message, kind, element, annotation, annotationValue));
+          new Item(message, kind, element, annotation, annotationValue));
       return this;
     }
 
