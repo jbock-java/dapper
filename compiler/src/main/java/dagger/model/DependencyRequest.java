@@ -16,8 +16,10 @@
 
 package dagger.model;
 
-import com.google.auto.value.AutoValue;
+import static java.util.Objects.requireNonNull;
+
 import dagger.Provides;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 
@@ -31,42 +33,103 @@ import javax.lang.model.element.Element;
  * java.util.concurrent.Executor} is required for all {@code @Produces} methods to run
  * asynchronously even though it is not directly specified as a parameter to the binding method.
  */
-@AutoValue
-public abstract class DependencyRequest {
+public final class DependencyRequest {
+
+  private final RequestKind kind;
+  private final Key key;
+  private final Optional<Element> requestElement;
+  private final boolean isNullable;
+
+  private DependencyRequest(
+      RequestKind kind,
+      Key key,
+      Optional<Element> requestElement,
+      boolean isNullable) {
+    this.kind = requireNonNull(kind);
+    this.key = requireNonNull(key);
+    this.requestElement = requireNonNull(requestElement);
+    this.isNullable = isNullable;
+  }
+
   /** The kind of this request. */
-  public abstract RequestKind kind();
+  public RequestKind kind() {
+    return kind;
+  }
 
   /** The key of this request. */
-  public abstract Key key();
+  public Key key() {
+    return key;
+  }
 
   /**
    * The element that declares this dependency request. Absent for <a href="#synthetic">synthetic
    * </a> requests.
    */
-  public abstract Optional<Element> requestElement();
+  public Optional<Element> requestElement() {
+    return requestElement;
+  }
 
   /**
    * Returns {@code true} if this request allows null objects. A request is nullable if it is
    * has an annotation with "Nullable" as its simple name.
    */
-  public abstract boolean isNullable();
+  public boolean isNullable() {
+    return isNullable;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DependencyRequest that = (DependencyRequest) o;
+    return isNullable == that.isNullable && kind == that.kind && key.equals(that.key) && requestElement.equals(that.requestElement);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(kind, key, requestElement, isNullable);
+  }
 
   /** Returns a new builder of dependency requests. */
   public static DependencyRequest.Builder builder() {
-    return new AutoValue_DependencyRequest.Builder().isNullable(false);
+    return new Builder();
   }
 
   /** A builder of {@link DependencyRequest}s. */
-  @AutoValue.Builder
-  public abstract static class Builder {
-    public abstract Builder kind(RequestKind kind);
+  public static final class Builder {
+    private RequestKind kind;
+    private Key key;
+    private Optional<Element> requestElement = Optional.empty();
+    private boolean isNullable;
+    private Builder() {
+    }
 
-    public abstract Builder key(Key key);
+    public Builder kind(RequestKind kind) {
+      this.kind = kind;
+      return this;
+    }
 
-    public abstract Builder requestElement(Element element);
+    public Builder key(Key key) {
+      this.key = key;
+      return this;
+    }
 
-    public abstract Builder isNullable(boolean isNullable);
+    public Builder requestElement(Element requestElement) {
+      this.requestElement = Optional.of(requestElement);
+      return this;
+    }
 
-    public abstract DependencyRequest build();
+    public Builder isNullable(boolean isNullable) {
+      this.isNullable = isNullable;
+      return this;
+    }
+
+    public DependencyRequest build() {
+      return new DependencyRequest(
+          this.kind,
+          this.key,
+          this.requestElement,
+          this.isNullable);
+    }
   }
 }
