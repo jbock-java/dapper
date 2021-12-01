@@ -24,6 +24,7 @@ import static javax.tools.Diagnostic.Kind.WARNING;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
@@ -138,12 +139,72 @@ public final class ValidationReport<T extends Element> {
   }
 
   /** Metadata about a {@link ValidationReport} item. */
-  public record Item(
-      String message,
-      Kind kind,
-      Element element,
-      Optional<AnnotationMirror> annotation,
-      Optional<AnnotationValue> annotationValue) {
+  public static final class Item {
+    private final String message;
+    private final Kind kind;
+    private final Element element;
+    private final Optional<AnnotationMirror> annotation;
+    private final Optional<AnnotationValue> annotationValue;
+
+    public Item(
+        String message,
+        Kind kind,
+        Element element,
+        Optional<AnnotationMirror> annotation,
+        Optional<AnnotationValue> annotationValue) {
+      this.message = message;
+      this.kind = kind;
+      this.element = element;
+      this.annotation = annotation;
+      this.annotationValue = annotationValue;
+    }
+
+    public String message() {
+      return message;
+    }
+
+    public Kind kind() {
+      return kind;
+    }
+
+    public Element element() {
+      return element;
+    }
+
+    public Optional<AnnotationMirror> annotation() {
+      return annotation;
+    }
+
+    public Optional<AnnotationValue> annotationValue() {
+      return annotationValue;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) return true;
+      if (obj == null || obj.getClass() != this.getClass()) return false;
+      var that = (Item) obj;
+      return Objects.equals(this.message, that.message) &&
+          Objects.equals(this.kind, that.kind) &&
+          Objects.equals(this.element, that.element) &&
+          Objects.equals(this.annotation, that.annotation) &&
+          Objects.equals(this.annotationValue, that.annotationValue);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(message, kind, element, annotation, annotationValue);
+    }
+
+    @Override
+    public String toString() {
+      return "Item[" +
+          "message=" + message + ", " +
+          "kind=" + kind + ", " +
+          "element=" + element + ", " +
+          "annotation=" + annotation + ", " +
+          "annotationValue=" + annotationValue + ']';
+    }
   }
 
   public static <T extends Element> Builder<T> about(T subject) {

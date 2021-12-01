@@ -15,10 +15,10 @@ java {
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
     options.compilerArgs << '--release'
-    options.compilerArgs << '17'
+    options.compilerArgs << '11'
 }
 
 javadoc {

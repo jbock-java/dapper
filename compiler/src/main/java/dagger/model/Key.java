@@ -16,21 +16,21 @@
 
 package dagger.model;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.base.Equivalence;
 import com.google.common.base.Equivalence.Wrapper;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.CodeBlock;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -42,20 +42,35 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
  * A {@linkplain TypeMirror type} and an optional {@linkplain jakarta.inject.Qualifier qualifier} that
  * is the lookup key for a binding.
  */
-@AutoValue
-public abstract class Key {
+public final class Key {
+  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier;
+  private final Equivalence.Wrapper<TypeMirror> wrappedType;
+  private final Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier;
+
+  private transient volatile int hashCode;
+  private transient volatile boolean hashCode$Memoized;
+
+  private Key(
+      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier,
+      Equivalence.Wrapper<TypeMirror> wrappedType,
+      Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier) {
+    this.wrappedQualifier = requireNonNull(wrappedQualifier);
+    this.wrappedType = requireNonNull(wrappedType);
+    this.multibindingContributionIdentifier = requireNonNull(multibindingContributionIdentifier);
+  }
+
   /**
    * A {@link jakarta.inject.Qualifier} annotation that provides a unique namespace prefix
    * for the type of this key.
    */
-  public final Optional<AnnotationMirror> qualifier() {
+  public Optional<AnnotationMirror> qualifier() {
     return wrappedQualifier().map(Wrapper::get);
   }
 
   /**
    * The type represented by this key.
    */
-  public final TypeMirror type() {
+  public TypeMirror type() {
     return wrappedType().get();
   }
 
@@ -67,7 +82,9 @@ public abstract class Key {
    * to represent logical equality, so {@link AnnotationMirrors#equivalence()}
    * provides this facility.
    */
-  abstract Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier();
+  Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier() {
+    return wrappedQualifier;
+  }
 
   /**
    * The type represented by this key.
@@ -75,7 +92,9 @@ public abstract class Key {
    * As documented in {@link TypeMirror}, equals and hashCode aren't implemented to represent
    * logical equality, so {@link MoreTypes#equivalence()} wraps this type.
    */
-  abstract Equivalence.Wrapper<TypeMirror> wrappedType();
+  Equivalence.Wrapper<TypeMirror> wrappedType() {
+    return wrappedType;
+  }
 
   /**
    * Distinguishes keys for multibinding contributions that share a {@link #type()} and {@link
@@ -86,20 +105,45 @@ public abstract class Key {
    *
    * <p>Absent except for multibinding contributions.
    */
-  public abstract Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier();
+  public Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier() {
+    return multibindingContributionIdentifier;
+  }
 
   /** Returns a {@link Builder} that inherits the properties of this key. */
-  public abstract Builder toBuilder();
+  public Builder toBuilder() {
+    return new Builder(this);
+  }
 
   // The main hashCode/equality bottleneck is in MoreTypes.equivalence(). It's possible that we can
   // avoid this by tuning that method. Perhaps we can also avoid the issue entirely by interning all
   // Keys
-  @Memoized
   @Override
-  public abstract int hashCode();
+  public int hashCode() {
+    if (!hashCode$Memoized) {
+      synchronized (this) {
+        if (!hashCode$Memoized) {
+          hashCode = Objects.hash(wrappedQualifier, wrappedType, multibindingContributionIdentifier);
+          hashCode$Memoized = true;
+        }
+      }
+    }
+    return hashCode;
+  }
 
   @Override
-  public abstract boolean equals(Object o);
+  public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    }
+    if (!(o instanceof Key)) {
+      return false;
+    }
+    Key that = (Key) o;
+    return Objects.equals(this.wrappedQualifier, that.wrappedQualifier())
+        && Objects.equals(this.wrappedType, that.wrappedType())
+        && Objects.equals(this.multibindingContributionIdentifier,
+        that.multibindingContributionIdentifier());
+  }
 
   /**
    * Returns a String rendering of an {@link AnnotationMirror} that includes attributes in the order
@@ -111,21 +155,22 @@ public abstract class Key {
   // TODO(ronshapiro): move this to auto-common
   static String stableAnnotationMirrorToString(AnnotationMirror qualifier) {
     StringBuilder builder = new StringBuilder("@").append(qualifier.getAnnotationType());
-    ImmutableMap<ExecutableElement, AnnotationValue> elementValues =
+    Map<ExecutableElement, AnnotationValue> elementValues =
         AnnotationMirrors.getAnnotationValuesWithDefaults(qualifier);
     if (!elementValues.isEmpty()) {
-      ImmutableMap.Builder<String, String> namedValuesBuilder = ImmutableMap.builder();
+      Map<String, String> namedValues = new LinkedHashMap<>();
       elementValues.forEach(
           (key, value) ->
-              namedValuesBuilder.put(
+              namedValues.put(
                   key.getSimpleName().toString(), stableAnnotationValueToString(value)));
-      ImmutableMap<String, String> namedValues = namedValuesBuilder.build();
       builder.append('(');
       if (namedValues.size() == 1 && namedValues.containsKey("value")) {
         // Omit "value ="
         builder.append(namedValues.get("value"));
       } else {
-        builder.append(Joiner.on(", ").withKeyValueSeparator("=").join(namedValues));
+        builder.append(namedValues.entrySet().stream()
+            .map(e -> e.getKey() + "=" + e.getValue())
+            .collect(joining(", ")));
       }
       builder.append(')');
     }
@@ -161,49 +206,68 @@ public abstract class Key {
   }
 
   @Override
-  public final String toString() {
-    return Joiner.on(' ')
-        .skipNulls()
-        .join(
+  public String toString() {
+    return Stream.of(
             qualifier().map(Key::stableAnnotationMirrorToString).orElse(null),
             type(),
-            multibindingContributionIdentifier().orElse(null));
+            multibindingContributionIdentifier().orElse(null))
+        .filter(Objects::nonNull)
+        .map(Objects::toString)
+        .collect(Collectors.joining(" "));
   }
 
   /** Returns a builder for {@link Key}s. */
   public static Builder builder(TypeMirror type) {
-    return new AutoValue_Key.Builder().type(type);
+    return new Builder().type(type);
   }
 
   /** A builder for {@link Key}s. */
-  @AutoValue.Builder
-  public abstract static class Builder {
-    abstract Builder wrappedType(Equivalence.Wrapper<TypeMirror> wrappedType);
+  public static final class Builder {
 
-    public final Builder type(TypeMirror type) {
-      return wrappedType(MoreTypes.equivalence().wrap(checkNotNull(type)));
+    private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier = Optional.empty();
+    private Equivalence.Wrapper<TypeMirror> wrappedType;
+    private Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier = Optional.empty();
+
+    private Builder() {
     }
 
-    abstract Builder wrappedQualifier(
-        Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier);
-
-    abstract Builder wrappedQualifier(Equivalence.Wrapper<AnnotationMirror> wrappedQualifier);
-
-    public final Builder qualifier(AnnotationMirror qualifier) {
-      return wrappedQualifier(AnnotationMirrors.equivalence().wrap(checkNotNull(qualifier)));
+    private Builder(Key source) {
+      this.wrappedQualifier = source.wrappedQualifier();
+      this.wrappedType = source.wrappedType();
+      this.multibindingContributionIdentifier = source.multibindingContributionIdentifier();
     }
 
-    public final Builder qualifier(Optional<AnnotationMirror> qualifier) {
-      return wrappedQualifier(checkNotNull(qualifier).map(AnnotationMirrors.equivalence()::wrap));
+    public Builder type(TypeMirror type) {
+      this.wrappedType = MoreTypes.equivalence().wrap(requireNonNull(type));
+      return this;
     }
 
-    public abstract Builder multibindingContributionIdentifier(
-        Optional<MultibindingContributionIdentifier> identifier);
+    public Builder qualifier(AnnotationMirror qualifier) {
+      this.wrappedQualifier = Optional.of(AnnotationMirrors.equivalence().wrap(requireNonNull(qualifier)));
+      return this;
+    }
 
-    public abstract Builder multibindingContributionIdentifier(
-        MultibindingContributionIdentifier identifier);
+    public Builder qualifier(Optional<AnnotationMirror> qualifier) {
+      this.wrappedQualifier = qualifier.map(AnnotationMirrors.equivalence()::wrap);
+      return this;
+    }
 
-    public abstract Key build();
+    public Builder multibindingContributionIdentifier(Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier) {
+      this.multibindingContributionIdentifier = multibindingContributionIdentifier;
+      return this;
+    }
+
+    public Builder multibindingContributionIdentifier(MultibindingContributionIdentifier multibindingContributionIdentifier) {
+      this.multibindingContributionIdentifier = Optional.of(multibindingContributionIdentifier);
+      return this;
+    }
+
+    public Key build() {
+      return new Key(
+          this.wrappedQualifier,
+          this.wrappedType,
+          this.multibindingContributionIdentifier);
+    }
   }
 
   /**
