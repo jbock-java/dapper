@@ -21,11 +21,9 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.base.Functions;
-import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
@@ -36,8 +34,8 @@ import javax.lang.model.type.DeclaredType;
 /** A representation of an annotation. */
 public final class SimpleAnnotationMirror implements AnnotationMirror {
   private final TypeElement annotationType;
-  private final ImmutableMap<String, ? extends AnnotationValue> namedValues;
-  private final ImmutableMap<ExecutableElement, ? extends AnnotationValue> elementValues;
+  private final Map<String, ? extends AnnotationValue> namedValues;
+  private final Map<ExecutableElement, ? extends AnnotationValue> elementValues;
 
   private SimpleAnnotationMirror(
       TypeElement annotationType, Map<String, ? extends AnnotationValue> namedValues) {
@@ -46,15 +44,15 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
         "annotationType must be an annotation: %s",
         annotationType);
     checkArgument(
-        FluentIterable.from(methodsIn(annotationType.getEnclosedElements()))
-            .transform(element -> element.getSimpleName().toString())
-            .toSet()
+        methodsIn(annotationType.getEnclosedElements()).stream()
+            .map(element -> element.getSimpleName().toString())
+            .collect(Collectors.toSet())
             .equals(namedValues.keySet()),
         "namedValues must have values for exactly the members in %s: %s",
         annotationType,
         namedValues);
     this.annotationType = annotationType;
-    this.namedValues = ImmutableMap.copyOf(namedValues);
+    this.namedValues = namedValues;
     this.elementValues =
         Maps.toMap(
             methodsIn(annotationType.getEnclosedElements()),
@@ -78,7 +76,9 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
     if (!namedValues.isEmpty()) {
       builder
           .append('(')
-          .append(Joiner.on(", ").withKeyValueSeparator(" = ").join(namedValues))
+          .append(namedValues.entrySet().stream()
+              .map(e -> e.getKey() + " = " + e.getValue())
+              .collect(Collectors.joining(", ")))
           .append(')');
     }
     return builder.toString();
@@ -90,7 +90,7 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
    * @param annotationType must be an annotation type with no members
    */
   public static AnnotationMirror of(TypeElement annotationType) {
-    return of(annotationType, ImmutableMap.<String, AnnotationValue>of());
+    return of(annotationType, Map.of());
   }
 
   /**

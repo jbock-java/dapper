@@ -22,27 +22,31 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Equivalence;
 import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 
 /** A representation of a {@link jakarta.inject.Scope}. */
-@AutoValue
 // TODO(ronshapiro): point to SimpleAnnotationMirror
-public abstract class Scope {
-  abstract Equivalence.Wrapper<AnnotationMirror> wrappedScopeAnnotation();
+public final class Scope {
+
+  private final Equivalence.Wrapper<AnnotationMirror> wrappedScopeAnnotation;
+
+  private Scope(Equivalence.Wrapper<AnnotationMirror> wrappedScopeAnnotation) {
+    this.wrappedScopeAnnotation = Objects.requireNonNull(wrappedScopeAnnotation);
+  }
 
   /** The {@link AnnotationMirror} that represents the scope annotation. */
-  public final AnnotationMirror scopeAnnotation() {
-    return wrappedScopeAnnotation().get();
+  public AnnotationMirror scopeAnnotation() {
+    return wrappedScopeAnnotation.get();
   }
 
   /** The scope annotation element. */
-  public final TypeElement scopeAnnotationElement() {
+  public TypeElement scopeAnnotationElement() {
     return MoreTypes.asTypeElement(scopeAnnotation().getAnnotationType());
   }
 
@@ -51,7 +55,7 @@ public abstract class Scope {
    */
   public static Scope scope(AnnotationMirror scopeAnnotation) {
     checkArgument(isScope(scopeAnnotation));
-    return new AutoValue_Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
+    return new Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
   }
 
   /**
@@ -69,17 +73,17 @@ public abstract class Scope {
   }
 
   /** Returns {@code true} if this scope is the {@link Singleton @Singleton} scope. */
-  public final boolean isSingleton() {
+  public boolean isSingleton() {
     return isScope(Singleton.class);
   }
 
   /** Returns {@code true} if this scope is the {@code @Reusable} scope. */
-  public final boolean isReusable() {
+  public boolean isReusable() {
     return isScope(dagger.Reusable.class);
   }
 
   /** Returns {@code true} if this scope is the {@link ProductionScope @ProductionScope} scope. */
-  public final boolean isProductionScope() {
+  public boolean isProductionScope() {
     return isScope(ProductionScope.class);
   }
 
@@ -87,9 +91,22 @@ public abstract class Scope {
     return scopeAnnotationElement().getQualifiedName().contentEquals(annotation.getCanonicalName());
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Scope scope = (Scope) o;
+    return wrappedScopeAnnotation.equals(scope.wrappedScopeAnnotation);
+  }
+
+  @Override
+  public int hashCode() {
+    return wrappedScopeAnnotation.hashCode();
+  }
+
   /** Returns a debug representation of the scope. */
   @Override
-  public final String toString() {
+  public String toString() {
     return scopeAnnotation().toString();
   }
 }
