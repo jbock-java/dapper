@@ -24,8 +24,8 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMult
 import static dagger.model.BindingKind.MULTIBOUND_MAP;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;

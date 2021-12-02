@@ -74,7 +74,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         .flatMap(instancesOf(ChildFactoryMethodEdge.class))
         .forEach(
             edge -> {
-              ImmutableSet<TypeElement> missingModules = findMissingModules(edge, bindingGraph);
+              Set<TypeElement> missingModules = findMissingModules(edge, bindingGraph);
               if (!missingModules.isEmpty()) {
                 reportMissingModuleParameters(
                     edge, missingModules, bindingGraph, diagnosticReporter);
@@ -82,9 +82,9 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
             });
   }
 
-  private ImmutableSet<TypeElement> findMissingModules(
+  private Set<TypeElement> findMissingModules(
       ChildFactoryMethodEdge edge, BindingGraph graph) {
-    ImmutableSet<TypeElement> factoryMethodParameters =
+    Set<TypeElement> factoryMethodParameters =
         subgraphFactoryMethodParameters(edge, graph);
     ComponentNode child = (ComponentNode) graph.network().incidentNodes(edge).target();
     SetView<TypeElement> modulesOwnedByChild = ownedModules(child, graph);
@@ -104,7 +104,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         .collect(toImmutableSet());
   }
 
-  private ImmutableSet<TypeElement> subgraphFactoryMethodParameters(
+  private Set<TypeElement> subgraphFactoryMethodParameters(
       ChildFactoryMethodEdge edge, BindingGraph bindingGraph) {
     ComponentNode parent = (ComponentNode) bindingGraph.network().incidentNodes(edge).source();
     DeclaredType parentType = asDeclared(parent.componentPath().currentComponent().asType());
@@ -136,7 +136,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
 
   private void reportMissingModuleParameters(
       ChildFactoryMethodEdge edge,
-      ImmutableSet<TypeElement> missingModules,
+      Set<TypeElement> missingModules,
       BindingGraph graph,
       DiagnosticReporter diagnosticReporter) {
     diagnosticReporter.reportSubcomponentFactoryMethod(

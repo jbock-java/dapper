@@ -26,7 +26,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ObjectArrays;
 import dagger.internal.codegen.base.ClearableCache;
@@ -38,6 +37,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -277,8 +277,8 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     private void validateFactory() {
-      ImmutableList<ExecutableElement> abstractMethods =
-          elements.getUnimplementedMethods(type).asList();
+      List<ExecutableElement> abstractMethods =
+          new ArrayList<>(elements.getUnimplementedMethods(type));
       switch (abstractMethods.size()) {
         case 0:
           report.addError(messages.missingFactoryMethod());

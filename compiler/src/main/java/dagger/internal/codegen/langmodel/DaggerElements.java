@@ -76,7 +76,7 @@ import javax.lang.model.util.Types;
 /** Extension of {@link Elements} that adds Dagger-specific methods. */
 @Reusable
 public final class DaggerElements implements Elements, ClearableCache {
-  private final Map<TypeElement, ImmutableSet<ExecutableElement>> getLocalAndInheritedMethodsCache =
+  private final Map<TypeElement, Set<ExecutableElement>> getLocalAndInheritedMethodsCache =
       new HashMap<>();
   private final Elements elements;
   private final Types types;
@@ -101,14 +101,14 @@ public final class DaggerElements implements Elements, ClearableCache {
   private static final Traverser<Element> GET_ENCLOSED_ELEMENTS =
       Traverser.forTree(Element::getEnclosedElements);
 
-  public ImmutableSet<ExecutableElement> getLocalAndInheritedMethods(TypeElement type) {
+  public Set<ExecutableElement> getLocalAndInheritedMethods(TypeElement type) {
     return getLocalAndInheritedMethodsCache.computeIfAbsent(
         type, k -> MoreElements.getLocalAndInheritedMethods(type, types, elements));
   }
 
-  public ImmutableSet<ExecutableElement> getUnimplementedMethods(TypeElement type) {
+  public Set<ExecutableElement> getUnimplementedMethods(TypeElement type) {
     return FluentIterable.from(getLocalAndInheritedMethods(type))
-        .filter(hasModifiers(ABSTRACT))
+        .filter(hasModifiers(ABSTRACT)::test)
         .toSet();
   }
 

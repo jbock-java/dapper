@@ -43,7 +43,9 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -135,15 +137,15 @@ public final class ComponentDescriptorFactory {
 
     // Start with the component's modules. For fictional components built from a module, start with
     // that module.
-    ImmutableSet<TypeElement> modules =
+    Set<TypeElement> modules =
         componentAnnotation.isRealComponent()
             ? componentAnnotation.modules()
             : ImmutableSet.of(typeElement);
 
-    ImmutableSet<ModuleDescriptor> transitiveModules =
+    Set<ModuleDescriptor> transitiveModules =
         moduleDescriptorFactory.transitiveModules(modules);
 
-    ImmutableSet.Builder<ComponentDescriptor> subcomponentsFromModules = ImmutableSet.builder();
+    Set<ComponentDescriptor> subcomponentsFromModules = new LinkedHashSet<>();
     for (ModuleDescriptor module : transitiveModules) {
       for (SubcomponentDeclaration subcomponentDeclaration : module.subcomponentDeclarations()) {
         TypeElement subcomponent = subcomponentDeclaration.subcomponentType();
@@ -158,7 +160,7 @@ public final class ComponentDescriptorFactory {
     ImmutableBiMap.Builder<ComponentMethodDescriptor, ComponentDescriptor>
         subcomponentsByBuilderMethod = ImmutableBiMap.builder();
     if (componentAnnotation.isRealComponent()) {
-      ImmutableSet<ExecutableElement> unimplementedMethods =
+      Set<ExecutableElement> unimplementedMethods =
           elements.getUnimplementedMethods(typeElement);
       for (ExecutableElement componentMethod : unimplementedMethods) {
         ComponentMethodDescriptor componentMethodDescriptor =
@@ -205,7 +207,7 @@ public final class ComponentDescriptorFactory {
         transitiveModules,
         dependenciesByDependencyMethod.build(),
         scopes,
-        subcomponentsFromModules.build(),
+        subcomponentsFromModules,
         subcomponentsByFactoryMethod.build(),
         subcomponentsByBuilderMethod.build(),
         componentMethodsBuilder.build(),

@@ -33,9 +33,10 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import com.google.auto.common.Equivalence;
+import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Equivalence.Wrapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimaps;
@@ -199,8 +200,8 @@ public final class ComponentDescriptorValidator {
      * singleton components have no scoped dependencies.
      */
     private void validateDependencyScopes(ComponentDescriptor component) {
-      ImmutableSet<Scope> scopes = component.scopes();
-      ImmutableSet<TypeElement> scopedDependencies =
+      Set<Scope> scopes = component.scopes();
+      Set<TypeElement> scopedDependencies =
           scopedTypesIn(
               component
                   .dependencies()

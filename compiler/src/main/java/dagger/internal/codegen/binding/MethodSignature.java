@@ -18,10 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Equivalence;
-import com.google.common.collect.ImmutableList;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.List;
@@ -35,9 +34,9 @@ public abstract class MethodSignature {
 
   abstract String name();
 
-  abstract ImmutableList<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes();
+  abstract List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes();
 
-  abstract ImmutableList<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes();
+  abstract List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes();
 
   public static MethodSignature forComponentMethod(
       ComponentMethodDescriptor componentMethod, DeclaredType componentType, DaggerTypes types) {
@@ -49,7 +48,7 @@ public abstract class MethodSignature {
         wrapInEquivalence(methodType.getThrownTypes()));
   }
 
-  private static ImmutableList<? extends Equivalence.Wrapper<? extends TypeMirror>>
+  private static List<? extends Equivalence.Wrapper<? extends TypeMirror>>
   wrapInEquivalence(List<? extends TypeMirror> types) {
     return types.stream().map(MoreTypes.equivalence()::wrap).collect(toImmutableList());
   }

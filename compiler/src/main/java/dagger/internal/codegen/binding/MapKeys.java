@@ -29,7 +29,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -40,6 +39,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -62,14 +62,14 @@ public final class MapKeys {
    *     annotation
    */
   static Optional<AnnotationMirror> getMapKey(Element bindingElement) {
-    ImmutableSet<? extends AnnotationMirror> mapKeys = getMapKeys(bindingElement);
+    Set<? extends AnnotationMirror> mapKeys = getMapKeys(bindingElement);
     return mapKeys.isEmpty()
         ? Optional.empty()
         : Optional.<AnnotationMirror>of(getOnlyElement(mapKeys));
   }
 
   /** Returns all of the {@link MapKey} annotations that annotate {@code bindingElement}. */
-  public static ImmutableSet<? extends AnnotationMirror> getMapKeys(Element bindingElement) {
+  public static Set<? extends AnnotationMirror> getMapKeys(Element bindingElement) {
     return getAnnotatedAnnotations(bindingElement, MapKey.class);
   }
 

@@ -315,7 +315,7 @@ public final class ComponentValidator implements ClearableCache {
 
         ComponentKind subcomponentKind =
             ComponentKind.forAnnotatedElement(MoreTypes.asTypeElement(returnType)).get();
-        ImmutableSet<TypeElement> moduleTypes =
+        Set<TypeElement> moduleTypes =
             ComponentAnnotation.componentAnnotation(subcomponentAnnotation).modules();
 
         // TODO(gak): This logic maybe/probably shouldn't live here as it requires us to traverse

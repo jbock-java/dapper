@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -98,10 +99,10 @@ public abstract class ComponentDescriptor {
    * The set of component dependencies listed in {@link Component#dependencies} or {@link
    * dagger.producers.ProductionComponent#dependencies()}.
    */
-  public abstract ImmutableSet<ComponentRequirement> dependencies();
+  public abstract Set<ComponentRequirement> dependencies();
 
   /** The non-abstract {@link #modules()} and the {@link #dependencies()}. */
-  public final ImmutableSet<ComponentRequirement> dependenciesAndConcreteModules() {
+  public final Set<ComponentRequirement> dependenciesAndConcreteModules() {
     return Stream.concat(
             moduleTypes().stream()
                 .filter(dep -> !dep.getModifiers().contains(ABSTRACT))
@@ -114,10 +115,10 @@ public abstract class ComponentDescriptor {
    * The {@link ModuleDescriptor modules} declared in {@link Component#modules()} and reachable by
    * traversing {@link Module#includes()}.
    */
-  public abstract ImmutableSet<ModuleDescriptor> modules();
+  public abstract Set<ModuleDescriptor> modules();
 
   /** The types of the {@link #modules()}. */
-  public final ImmutableSet<TypeElement> moduleTypes() {
+  public final Set<TypeElement> moduleTypes() {
     return modules().stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
   }
 
@@ -133,7 +134,7 @@ public abstract class ComponentDescriptor {
    * </ul>
    */
   @Memoized
-  ImmutableSet<ComponentRequirement> requirements() {
+  Set<ComponentRequirement> requirements() {
     ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
     modules().stream()
         .filter(
@@ -155,7 +156,7 @@ public abstract class ComponentDescriptor {
    * the enclosing type of the method; a method may be declared by a supertype of the actual
    * dependency.
    */
-  public abstract ImmutableMap<ExecutableElement, ComponentRequirement>
+  public abstract Map<ExecutableElement, ComponentRequirement>
   dependenciesByDependencyMethod();
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
@@ -167,7 +168,7 @@ public abstract class ComponentDescriptor {
   }
 
   /** The scopes of the component. */
-  public abstract ImmutableSet<Scope> scopes();
+  public abstract Set<Scope> scopes();
 
   /**
    * All {@link Subcomponent}s which are direct children of this component. This includes
@@ -175,7 +176,7 @@ public abstract class ComponentDescriptor {
    * #childComponentsDeclaredByFactoryMethods() factory methods} and {@linkplain
    * #childComponentsDeclaredByBuilderEntryPoints() builder methods}.
    */
-  public final ImmutableSet<ComponentDescriptor> childComponents() {
+  public final Set<ComponentDescriptor> childComponents() {
     return ImmutableSet.<ComponentDescriptor>builder()
         .addAll(childComponentsDeclaredByFactoryMethods().values())
         .addAll(childComponentsDeclaredByBuilderEntryPoints().values())
@@ -187,7 +188,7 @@ public abstract class ComponentDescriptor {
    * All {@linkplain Subcomponent direct child} components that are declared by a {@linkplain
    * Module#subcomponents() module's subcomponents}.
    */
-  abstract ImmutableSet<ComponentDescriptor> childComponentsDeclaredByModules();
+  abstract Set<ComponentDescriptor> childComponentsDeclaredByModules();
 
   /**
    * All {@linkplain Subcomponent direct child} components that are declared by a subcomponent
@@ -198,7 +199,7 @@ public abstract class ComponentDescriptor {
 
   /** Returns a map of {@link #childComponents()} indexed by {@link #typeElement()}. */
   @Memoized
-  public ImmutableMap<TypeElement, ComponentDescriptor> childComponentsByElement() {
+  public Map<TypeElement, ComponentDescriptor> childComponentsByElement() {
     return Maps.uniqueIndex(childComponents(), ComponentDescriptor::typeElement);
   }
 
@@ -235,7 +236,7 @@ public abstract class ComponentDescriptor {
         builderType.getQualifiedName());
   }
 
-  public abstract ImmutableSet<ComponentMethodDescriptor> componentMethods();
+  public abstract Set<ComponentMethodDescriptor> componentMethods();
 
   /** Returns the first component method associated with this binding request, if one exists. */
   public Optional<ComponentMethodDescriptor> firstMatchingComponentMethod(BindingRequest request) {
@@ -243,7 +244,7 @@ public abstract class ComponentDescriptor {
   }
 
   @Memoized
-  ImmutableMap<BindingRequest, ComponentMethodDescriptor>
+  Map<BindingRequest, ComponentMethodDescriptor>
   firstMatchingComponentMethods() {
     Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
     for (ComponentMethodDescriptor method : entryPointMethods()) {
@@ -253,7 +254,7 @@ public abstract class ComponentDescriptor {
   }
 
   /** The entry point methods on the component type. Each has a {@link DependencyRequest}. */
-  public final ImmutableSet<ComponentMethodDescriptor> entryPointMethods() {
+  public final Set<ComponentMethodDescriptor> entryPointMethods() {
     return componentMethods()
         .stream()
         .filter(method -> method.dependencyRequest().isPresent())
@@ -351,8 +352,8 @@ public abstract class ComponentDescriptor {
   }
 
   /** No-argument methods defined on {@link Object} that are ignored for contribution. */
-  private static final ImmutableSet<String> NON_CONTRIBUTING_OBJECT_METHOD_NAMES =
-      ImmutableSet.of("toString", "hashCode", "clone", "getClass");
+  private static final Set<String> NON_CONTRIBUTING_OBJECT_METHOD_NAMES =
+      Set.of("toString", "hashCode", "clone", "getClass");
 
   /**
    * Returns {@code true} if a method could be a component entry point but not a members-injection

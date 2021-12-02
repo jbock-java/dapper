@@ -20,9 +20,9 @@ import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.common.AnnotationMirrors;
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Equivalence;
 import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;

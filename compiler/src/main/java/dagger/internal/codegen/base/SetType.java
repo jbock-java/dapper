@@ -18,9 +18,9 @@ package dagger.internal.codegen.base;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Equivalence;
 import dagger.model.Key;
 import java.util.Set;
 import javax.lang.model.type.DeclaredType;

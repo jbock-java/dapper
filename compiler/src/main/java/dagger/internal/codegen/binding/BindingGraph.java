@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -189,7 +190,7 @@ public abstract class BindingGraph {
 
     BindingGraph bindingGraph = new AutoValue_BindingGraph(componentNode, topLevelBindingGraph);
 
-    ImmutableSet<ModuleDescriptor> modules =
+    Set<ModuleDescriptor> modules =
         ((ComponentNodeImpl) componentNode).componentDescriptor().modules();
 
     ImmutableSet<ModuleDescriptor> inheritedModules =

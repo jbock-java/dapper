@@ -22,8 +22,8 @@ import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreatio
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 import static java.util.Arrays.asList;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
-import com.google.common.base.Equivalence;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.MapType;

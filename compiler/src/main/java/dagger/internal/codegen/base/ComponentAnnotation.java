@@ -31,8 +31,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
@@ -107,10 +110,10 @@ public abstract class ComponentAnnotation {
   public abstract boolean isRealComponent();
 
   /** The values listed as {@code dependencies}. */
-  public abstract ImmutableList<AnnotationValue> dependencyValues();
+  public abstract List<AnnotationValue> dependencyValues();
 
   /** The types listed as {@code dependencies}. */
-  public ImmutableList<TypeMirror> dependencyTypes() {
+  public List<TypeMirror> dependencyTypes() {
     return dependencyValues().stream().map(MoreAnnotationValues::asType).collect(toImmutableList());
   }
 
@@ -119,15 +122,15 @@ public abstract class ComponentAnnotation {
    *
    * @throws IllegalArgumentException if any of {@link #dependencyTypes()} are error types
    */
-  public ImmutableList<TypeElement> dependencies() {
-    return asTypeElements(dependencyTypes()).asList();
+  public List<TypeElement> dependencies() {
+    return new ArrayList<>(asTypeElements(dependencyTypes()));
   }
 
   /** The values listed as {@code modules}. */
-  public abstract ImmutableList<AnnotationValue> moduleValues();
+  public abstract List<AnnotationValue> moduleValues();
 
   /** The types listed as {@code modules}. */
-  public ImmutableList<TypeMirror> moduleTypes() {
+  public List<TypeMirror> moduleTypes() {
     return moduleValues().stream().map(MoreAnnotationValues::asType).collect(toImmutableList());
   }
 
@@ -136,11 +139,11 @@ public abstract class ComponentAnnotation {
    *
    * @throws IllegalArgumentException if any of {@link #moduleTypes()} are error types
    */
-  public ImmutableSet<TypeElement> modules() {
+  public Set<TypeElement> modules() {
     return asTypeElements(moduleTypes());
   }
 
-  protected final ImmutableList<AnnotationValue> getAnnotationValues(String parameterName) {
+  protected final List<AnnotationValue> getAnnotationValues(String parameterName) {
     return asAnnotationValues(getAnnotationValue(annotation(), parameterName));
   }
 
@@ -237,19 +240,19 @@ public abstract class ComponentAnnotation {
 
     @Override
     @Memoized
-    public ImmutableList<AnnotationValue> dependencyValues() {
+    public List<AnnotationValue> dependencyValues() {
       return isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies");
     }
 
     @Override
     @Memoized
-    public ImmutableList<TypeMirror> dependencyTypes() {
+    public List<TypeMirror> dependencyTypes() {
       return super.dependencyTypes();
     }
 
     @Override
     @Memoized
-    public ImmutableList<TypeElement> dependencies() {
+    public List<TypeElement> dependencies() {
       return super.dependencies();
     }
 
@@ -260,19 +263,19 @@ public abstract class ComponentAnnotation {
 
     @Override
     @Memoized
-    public ImmutableList<AnnotationValue> moduleValues() {
+    public List<AnnotationValue> moduleValues() {
       return getAnnotationValues("modules");
     }
 
     @Override
     @Memoized
-    public ImmutableList<TypeMirror> moduleTypes() {
+    public List<TypeMirror> moduleTypes() {
       return super.moduleTypes();
     }
 
     @Override
     @Memoized
-    public ImmutableSet<TypeElement> modules() {
+    public Set<TypeElement> modules() {
       return super.modules();
     }
 
@@ -321,24 +324,24 @@ public abstract class ComponentAnnotation {
     }
 
     @Override
-    public ImmutableList<AnnotationValue> dependencyValues() {
+    public List<AnnotationValue> dependencyValues() {
       return ImmutableList.of();
     }
 
     @Override
-    public ImmutableList<AnnotationValue> moduleValues() {
+    public List<AnnotationValue> moduleValues() {
       return moduleAnnotation().includesAsAnnotationValues();
     }
 
     @Override
     @Memoized
-    public ImmutableList<TypeMirror> moduleTypes() {
+    public List<TypeMirror> moduleTypes() {
       return super.moduleTypes();
     }
 
     @Override
     @Memoized
-    public ImmutableSet<TypeElement> modules() {
+    public Set<TypeElement> modules() {
       return super.modules();
     }
 

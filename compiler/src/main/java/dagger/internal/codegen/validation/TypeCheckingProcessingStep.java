@@ -21,12 +21,17 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 import com.google.auto.common.BasicAnnotationProcessor.Step;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.ClassName;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.Element;
@@ -49,7 +54,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
   }
 
   @Override
-  public ImmutableSet<Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+  public ImmutableSet<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
     ImmutableMap<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
@@ -60,9 +65,9 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
         difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
     ImmutableSet.Builder<Element> deferredElements = ImmutableSet.builder();
-    ImmutableSetMultimap.copyOf(elementsByAnnotation)
-        .inverse()
-        .asMap()
+    elementsByAnnotation.entrySet().stream()
+        .flatMap(e -> e.getValue().stream().map(v -> new SimpleImmutableEntry<>(e.getKey(), v)))
+        .collect(groupingBy(Entry::getValue, mapping(Entry::getKey, toList())))
         .forEach(
             (element, annotations) -> {
               try {

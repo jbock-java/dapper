@@ -256,7 +256,7 @@ public final class BindingGraphFactory implements ClearableCache {
    * subcomponent, also includes the production monitoring module for the component and the
    * production executor module.
    */
-  private ImmutableSet<ModuleDescriptor> modules(
+  private Set<ModuleDescriptor> modules(
       ComponentDescriptor componentDescriptor, Optional<Resolver> parentResolver) {
     return shouldIncludeImplicitProductionModules(componentDescriptor, parentResolver)
         ? new ImmutableSet.Builder<ModuleDescriptor>()

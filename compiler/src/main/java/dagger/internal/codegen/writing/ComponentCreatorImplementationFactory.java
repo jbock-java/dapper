@@ -52,6 +52,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -124,25 +125,25 @@ final class ComponentCreatorImplementationFactory {
      * The set of requirements that must be passed to the component's constructor in the order
      * they must be passed.
      */
-    final ImmutableSet<ComponentRequirement> componentConstructorRequirements() {
+    final Set<ComponentRequirement> componentConstructorRequirements() {
       return componentImplementation.graph().componentRequirements();
     }
 
     /** Returns the requirements that have setter methods on the creator type. */
-    abstract ImmutableSet<ComponentRequirement> setterMethods();
+    abstract Set<ComponentRequirement> setterMethods();
 
     /**
      * Returns the component requirements that have factory method parameters, mapped to the name
      * for that parameter.
      */
-    abstract ImmutableMap<ComponentRequirement, String> factoryMethodParameters();
+    abstract Map<ComponentRequirement, String> factoryMethodParameters();
 
     /**
      * The {@link ComponentRequirement}s that this creator allows users to set. Values are a status
      * for each requirement indicating what's needed for that requirement in the implementation
      * class currently being generated.
      */
-    abstract ImmutableMap<ComponentRequirement, RequirementStatus> userSettableRequirements();
+    abstract Map<ComponentRequirement, RequirementStatus> userSettableRequirements();
 
     /**
      * Component requirements that are both settable by the creator and needed to construct the
@@ -283,7 +284,7 @@ final class ComponentCreatorImplementationFactory {
           .returns(ClassName.get(componentDescriptor().typeElement()))
           .addModifiers(PUBLIC);
 
-      ImmutableMap<ComponentRequirement, String> factoryMethodParameters =
+      Map<ComponentRequirement, String> factoryMethodParameters =
           factoryMethodParameters();
       userSettableRequirements()
           .keySet()
@@ -341,7 +342,7 @@ final class ComponentCreatorImplementationFactory {
     protected abstract MethodSpec.Builder factoryMethodBuilder();
 
     private CodeBlock componentConstructorArgs(
-        ImmutableMap<ComponentRequirement, String> factoryMethodParameters) {
+        Map<ComponentRequirement, String> factoryMethodParameters) {
       return Stream.concat(
               componentImplementation.creatorComponentFields().stream()
                   .map(field -> CodeBlock.of("$N", field)),
@@ -487,7 +488,7 @@ final class ComponentCreatorImplementationFactory {
     }
 
     @Override
-    protected ImmutableSet<ComponentRequirement> setterMethods() {
+    protected Set<ComponentRequirement> setterMethods() {
       return componentDescriptor().dependenciesAndConcreteModules();
     }
 

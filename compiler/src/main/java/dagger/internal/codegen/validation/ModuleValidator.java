@@ -449,7 +449,7 @@ public final class ModuleValidator {
     return subreport.build();
   }
 
-  private static ImmutableList<AnnotationValue> getModules(AnnotationMirror annotation) {
+  private static List<AnnotationValue> getModules(AnnotationMirror annotation) {
     if (isModuleAnnotation(annotation)) {
       return moduleAnnotation(annotation).includesAsAnnotationValues();
     }

@@ -141,7 +141,7 @@ public final class DaggerTypes implements Types {
    * {@link Optional} is returned if there is no non-{@link Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
-    return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orNull());
+    return MoreTypes.nonObjectSuperclass(types, elements, type);
   }
 
   /**

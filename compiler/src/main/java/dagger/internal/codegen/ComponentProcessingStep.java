@@ -24,7 +24,7 @@ import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnot
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.allCreatorAnnotations;
 import static java.util.Collections.disjoint;
 
-import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
+import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
@@ -46,7 +46,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /**
- * A {@link ProcessingStep} that is responsible for dealing with a component or production component
+ * A {@link BasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
  * as part of the {@link ComponentProcessor}.
  */
 final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeElement> {

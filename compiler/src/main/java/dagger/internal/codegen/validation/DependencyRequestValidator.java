@@ -32,6 +32,7 @@ import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
+import java.util.Collection;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -73,7 +74,7 @@ final class DependencyRequestValidator {
     private final TypeMirror requestType;
     private final TypeMirror keyType;
     private final RequestKind requestKind;
-    private final ImmutableCollection<? extends AnnotationMirror> qualifiers;
+    private final Collection<? extends AnnotationMirror> qualifiers;
 
 
     Validator(ValidationReport.Builder<?> report, Element requestElement, TypeMirror requestType) {

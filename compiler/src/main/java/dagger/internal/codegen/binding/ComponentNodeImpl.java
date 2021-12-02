@@ -24,6 +24,7 @@ import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
+import java.util.Set;
 
 /** An implementation of {@link ComponentNode} that also exposes the {@link ComponentDescriptor}. */
 @AutoValue
@@ -51,7 +52,7 @@ public abstract class ComponentNodeImpl implements ComponentNode {
   }
 
   @Override
-  public ImmutableSet<Scope> scopes() {
+  public Set<Scope> scopes() {
     return componentDescriptor().scopes();
   }
 

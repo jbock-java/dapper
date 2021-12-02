@@ -25,16 +25,17 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.model.Key;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -152,7 +153,7 @@ public abstract class ComponentRequirement {
    */
   private boolean requiresModuleInstance(DaggerElements elements) {
 
-    ImmutableSet<ExecutableElement> methods = elements.getLocalAndInheritedMethods(typeElement());
+    Set<ExecutableElement> methods = elements.getLocalAndInheritedMethods(typeElement());
     return methods.stream()
         .filter(this::isBindingMethod)
         .map(ExecutableElement::getModifiers)

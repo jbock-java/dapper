@@ -16,14 +16,14 @@
 
 package dagger.internal.codegen;
 
+import static com.google.auto.common.BasicAnnotationProcessor.Step;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.lang.model.util.ElementFilter.typesIn;
 
-import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -41,6 +41,7 @@ import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -48,7 +49,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 /**
- * A {@link ProcessingStep} that validates module classes and generates factories for binding
+ * A {@link Step} that validates module classes and generates factories for binding
  * methods.
  */
 final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement> {
@@ -89,8 +90,10 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  public ImmutableSet<Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-    List<TypeElement> modules = typesIn(elementsByAnnotation.values());
+  public ImmutableSet<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
+    List<TypeElement> modules = typesIn(elementsByAnnotation.values().stream()
+        .flatMap(Set::stream)
+        .collect(toList()));
     moduleValidator.addKnownModules(modules);
     return super.process(elementsByAnnotation);
   }

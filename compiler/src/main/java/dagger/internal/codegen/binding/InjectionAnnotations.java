@@ -23,10 +23,12 @@ import static javax.lang.model.util.ElementFilter.constructorsIn;
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.SuperficialValidation;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -44,7 +46,7 @@ public final class InjectionAnnotations {
       throw new TypeNotPresentException(e.toString(), null);
     }
     checkNotNull(e);
-    ImmutableCollection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
+    Collection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
     switch (qualifierAnnotations.size()) {
       case 0:
         return Optional.empty();
@@ -56,10 +58,10 @@ public final class InjectionAnnotations {
     }
   }
 
-  public ImmutableCollection<? extends AnnotationMirror> getQualifiers(Element element) {
-    ImmutableSet<? extends AnnotationMirror> qualifiers =
+  public Collection<? extends AnnotationMirror> getQualifiers(Element element) {
+    Set<? extends AnnotationMirror> qualifiers =
         AnnotationMirrors.getAnnotatedAnnotations(element, jakarta.inject.Qualifier.class);
-    return qualifiers.asList();
+    return new ArrayList<>(qualifiers);
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */

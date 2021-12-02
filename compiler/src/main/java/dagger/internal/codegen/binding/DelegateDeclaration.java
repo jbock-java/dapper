@@ -20,11 +20,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 
+import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
-import com.google.common.base.Equivalence;
 import com.google.common.collect.Iterables;
 import dagger.Binds;
 import dagger.internal.codegen.base.ContributionType;

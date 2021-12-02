@@ -20,9 +20,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.auto.common.AnnotationMirrors;
+import com.google.auto.common.Equivalence;
+import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Equivalence;
-import com.google.common.base.Equivalence.Wrapper;
 import com.squareup.javapoet.CodeBlock;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,16 +43,16 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
  * is the lookup key for a binding.
  */
 public final class Key {
-  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier;
-  private final Equivalence.Wrapper<TypeMirror> wrappedType;
+  private final Optional<Wrapper<AnnotationMirror>> wrappedQualifier;
+  private final Wrapper<TypeMirror> wrappedType;
   private final Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier;
 
   private transient volatile int hashCode;
   private transient volatile boolean hashCode$Memoized;
 
   private Key(
-      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier,
-      Equivalence.Wrapper<TypeMirror> wrappedType,
+      Optional<Wrapper<AnnotationMirror>> wrappedQualifier,
+      Wrapper<TypeMirror> wrappedType,
       Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier) {
     this.wrappedQualifier = requireNonNull(wrappedQualifier);
     this.wrappedType = requireNonNull(wrappedType);
@@ -82,7 +82,7 @@ public final class Key {
    * to represent logical equality, so {@link AnnotationMirrors#equivalence()}
    * provides this facility.
    */
-  Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier() {
+  Optional<Wrapper<AnnotationMirror>> wrappedQualifier() {
     return wrappedQualifier;
   }
 
@@ -92,7 +92,7 @@ public final class Key {
    * As documented in {@link TypeMirror}, equals and hashCode aren't implemented to represent
    * logical equality, so {@link MoreTypes#equivalence()} wraps this type.
    */
-  Equivalence.Wrapper<TypeMirror> wrappedType() {
+  Wrapper<TypeMirror> wrappedType() {
     return wrappedType;
   }
 
@@ -224,8 +224,8 @@ public final class Key {
   /** A builder for {@link Key}s. */
   public static final class Builder {
 
-    private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedQualifier = Optional.empty();
-    private Equivalence.Wrapper<TypeMirror> wrappedType;
+    private Optional<Wrapper<AnnotationMirror>> wrappedQualifier = Optional.empty();
+    private Wrapper<TypeMirror> wrappedType;
     private Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier = Optional.empty();
 
     private Builder() {

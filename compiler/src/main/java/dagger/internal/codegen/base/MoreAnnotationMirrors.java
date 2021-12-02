@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValu
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 
 import com.google.auto.common.AnnotationMirrors;
-import com.google.common.base.Equivalence;
+import com.google.auto.common.Equivalence;
 import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;

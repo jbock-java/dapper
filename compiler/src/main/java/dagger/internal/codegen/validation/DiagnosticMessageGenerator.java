@@ -56,6 +56,7 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import jakarta.inject.Inject;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.Element;
@@ -132,18 +133,18 @@ public final class DiagnosticMessageGenerator {
   }
 
   public String getMessage(MaybeBinding binding) {
-    ImmutableSet<DependencyEdge> entryPoints = graph.entryPointEdgesDependingOnBinding(binding);
-    ImmutableSet<DependencyEdge> requests = requests(binding);
-    ImmutableList<DependencyEdge> dependencyTrace = dependencyTrace(binding, entryPoints);
+    Set<DependencyEdge> entryPoints = graph.entryPointEdgesDependingOnBinding(binding);
+    Set<DependencyEdge> requests = requests(binding);
+    List<DependencyEdge> dependencyTrace = dependencyTrace(binding, entryPoints);
 
     return getMessageInternal(dependencyTrace, requests, entryPoints);
   }
 
   public String getMessage(DependencyEdge dependencyEdge) {
-    ImmutableSet<DependencyEdge> requests = ImmutableSet.of(dependencyEdge);
+    Set<DependencyEdge> requests = ImmutableSet.of(dependencyEdge);
 
-    ImmutableSet<DependencyEdge> entryPoints;
-    ImmutableList<DependencyEdge> dependencyTrace;
+    Set<DependencyEdge> entryPoints;
+    List<DependencyEdge> dependencyTrace;
     if (dependencyEdge.isEntryPoint()) {
       entryPoints = ImmutableSet.of(dependencyEdge);
       dependencyTrace = ImmutableList.of(dependencyEdge);
@@ -162,9 +163,9 @@ public final class DiagnosticMessageGenerator {
   }
 
   private String getMessageInternal(
-      ImmutableList<DependencyEdge> dependencyTrace,
-      ImmutableSet<DependencyEdge> requests,
-      ImmutableSet<DependencyEdge> entryPoints) {
+      List<DependencyEdge> dependencyTrace,
+      Set<DependencyEdge> requests,
+      Set<DependencyEdge> entryPoints) {
     StringBuilder message =
         graph.isFullBindingGraph()
             ? new StringBuilder()
@@ -244,7 +245,7 @@ public final class DiagnosticMessageGenerator {
       };
 
   private static boolean isTracedRequest(
-      ImmutableList<DependencyEdge> dependencyTrace, DependencyEdge request) {
+      List<DependencyEdge> dependencyTrace, DependencyEdge request) {
     return !dependencyTrace.isEmpty() && request.equals(dependencyTrace.get(0));
   }
 
@@ -254,12 +255,12 @@ public final class DiagnosticMessageGenerator {
    */
   // TODO(ronshapiro): Adding a DependencyPath type to dagger.model could be useful, i.e.
   // bindingGraph.shortestPathFromEntryPoint(DependencyEdge, MaybeBindingNode)
-  ImmutableList<DependencyEdge> dependencyTrace(
-      MaybeBinding binding, ImmutableSet<DependencyEdge> entryPoints) {
+  List<DependencyEdge> dependencyTrace(
+      MaybeBinding binding, Set<DependencyEdge> entryPoints) {
     // Module binding graphs may have bindings unreachable from any entry points. If there are
     // no entry points for this DiagnosticInfo, don't try to print a dependency trace.
     if (entryPoints.isEmpty()) {
-      return ImmutableList.of();
+      return List.of();
     }
     // Show the full dependency trace for one entry point.
     DependencyEdge entryPointForTrace =

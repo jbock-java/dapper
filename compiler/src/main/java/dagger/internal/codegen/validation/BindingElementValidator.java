@@ -40,10 +40,12 @@ import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.model.Key;
 import dagger.model.Scope;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -134,7 +136,7 @@ public abstract class BindingElementValidator<E extends Element> {
   protected abstract class ElementValidator {
     protected final E element;
     protected final ValidationReport.Builder<E> report;
-    private final ImmutableCollection<? extends AnnotationMirror> qualifiers;
+    private final Collection<? extends AnnotationMirror> qualifiers;
 
     protected ElementValidator(E element) {
       this.element = element;
@@ -278,7 +280,7 @@ public abstract class BindingElementValidator<E extends Element> {
       if (!allowsMultibindings.allowsMultibindings()) {
         return;
       }
-      ImmutableSet<? extends AnnotationMirror> mapKeys = getMapKeys(element);
+      Set<? extends AnnotationMirror> mapKeys = getMapKeys(element);
       if (ContributionType.fromBindingElement(element).equals(ContributionType.MAP)) {
         switch (mapKeys.size()) {
           case 0:
