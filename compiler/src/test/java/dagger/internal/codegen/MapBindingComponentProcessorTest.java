@@ -30,11 +30,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+@Ignore // AutoAnnotationProcessor
 @RunWith(Parameterized.class)
 public class MapBindingComponentProcessorTest {
   @Parameters(name = "{0}")
