@@ -36,7 +36,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-@Ignore // AutoAnnotationProcessor
 @RunWith(Parameterized.class)
 public class MapBindingComponentProcessorTest {
   @Parameters(name = "{0}")
@@ -228,6 +227,7 @@ public class MapBindingComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
+  @Ignore // AutoAnnotationProcessor
   @Test
   public void mapBindingsWithInaccessibleKeys() throws IOException {
     JavaFileObject mapKeys =
@@ -580,6 +580,7 @@ public class MapBindingComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
+  @Ignore // AutoAnnotationProcessor
   @Test
   public void mapBindingsWithWrappedKey() throws IOException {
     JavaFileObject mapModuleOneFile =

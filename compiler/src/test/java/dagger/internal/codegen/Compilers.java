@@ -53,7 +53,7 @@ public final class Compilers {
    */
   public static Compiler daggerCompiler(Processor... extraProcessors) {
     ImmutableList.Builder<Processor> processors = ImmutableList.builder();
-    processors.add(new ComponentProcessor(), new AutoAnnotationProcessor());
+    processors.add(new ComponentProcessor());
     processors.add(extraProcessors);
     return javac().withProcessors(processors.build()).withOptions(DEFAULT_JAVACOPTS);
   }

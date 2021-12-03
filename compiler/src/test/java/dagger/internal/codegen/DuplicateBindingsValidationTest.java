@@ -36,7 +36,7 @@ public class DuplicateBindingsValidationTest {
 
   @Parameters(name = "fullBindingGraphValidation={0}")
   public static ImmutableList<Object[]> parameters() {
-    return ImmutableList.copyOf(new Object[][] {{false}, {true}});
+    return ImmutableList.copyOf(new Object[][]{{false}, {true}});
   }
 
   private final boolean fullBindingGraphValidation;
@@ -45,7 +45,8 @@ public class DuplicateBindingsValidationTest {
     this.fullBindingGraphValidation = fullBindingGraphValidation;
   }
 
-  @Test public void duplicateExplicitBindings_ProvidesAndComponentProvision() {
+  @Test
+  public void duplicateExplicitBindings_ProvidesAndComponentProvision() {
     assumeFalse(fullBindingGraphValidation);
 
     JavaFileObject component = JavaFileObjects.forSourceLines("test.Outer",
@@ -84,7 +85,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -97,7 +98,8 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining("interface Child");
   }
 
-  @Test public void duplicateExplicitBindings_TwoProvidesMethods() {
+  @Test
+  public void duplicateExplicitBindings_TwoProvidesMethods() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -138,7 +140,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -206,7 +208,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -276,7 +278,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -347,7 +349,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -404,7 +406,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -459,7 +461,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -477,7 +479,8 @@ public class DuplicateBindingsValidationTest {
             fullBindingGraphValidation ? "class TestModule3" : "interface TestComponent");
   }
 
-  @Test public void duplicateBindings_TruncateAfterLimit() {
+  @Test
+  public void duplicateBindings_TruncateAfterLimit() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -588,7 +591,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -662,7 +665,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(aComponent, bComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -743,7 +746,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(aComponent, bComponent, cComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -819,7 +822,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption())
             .compile(aComponent, bComponent, cComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -1007,8 +1010,8 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-                "-Adagger.nullableValidation=WARNING",
-                fullBindingGraphValidationOption())
+            "-Adagger.nullableValidation=WARNING",
+            fullBindingGraphValidationOption())
             .compile(parentConflictsWithChild, child);
     assertThat(compilation).failed();
     assertThat(compilation)
