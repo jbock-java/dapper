@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.model.BindingKind.MEMBERS_INJECTOR;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -43,8 +42,15 @@ import javax.lang.model.util.ElementKindVisitor8;
  *   <li>{@code Provider<Map<SomeMapKey, MapValue>>}.
  * </ul>
  */
-@AutoValue
-public abstract class FrameworkField {
+public final class FrameworkField {
+
+  private final ParameterizedTypeName type;
+  private final String name;
+
+  private FrameworkField(ParameterizedTypeName type, String name) {
+    this.type = type;
+    this.name = name;
+  }
 
   /**
    * Creates a framework field.
@@ -57,7 +63,7 @@ public abstract class FrameworkField {
   public static FrameworkField create(
       ClassName frameworkClassName, TypeName valueTypeName, String fieldName) {
     String suffix = frameworkClassName.simpleName();
-    return new AutoValue_FrameworkField(
+    return new FrameworkField(
         ParameterizedTypeName.get(frameworkClassName, valueTypeName),
         fieldName.endsWith(suffix) ? fieldName : fieldName + suffix);
   }
@@ -93,7 +99,7 @@ public abstract class FrameworkField {
   }
 
   private static final ElementVisitor<String, Binding> BINDING_ELEMENT_NAME =
-      new ElementKindVisitor8<String, Binding>() {
+      new ElementKindVisitor8<>() {
 
         @Override
         protected String defaultAction(Element e, Binding p) {
@@ -121,7 +127,11 @@ public abstract class FrameworkField {
         }
       };
 
-  public abstract ParameterizedTypeName type();
+  public ParameterizedTypeName type() {
+    return type;
+  }
 
-  public abstract String name();
+  public String name() {
+    return name;
+  }
 }
