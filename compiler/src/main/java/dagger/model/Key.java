@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.auto.common.AnnotationMirrors;
-import com.google.auto.common.Equivalence;
 import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.CodeBlock;
@@ -47,8 +46,7 @@ public final class Key {
   private final Wrapper<TypeMirror> wrappedType;
   private final Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier;
 
-  private transient volatile int hashCode;
-  private transient volatile boolean hashCode$Memoized;
+  private final int hashCode;
 
   private Key(
       Optional<Wrapper<AnnotationMirror>> wrappedQualifier,
@@ -57,6 +55,7 @@ public final class Key {
     this.wrappedQualifier = requireNonNull(wrappedQualifier);
     this.wrappedType = requireNonNull(wrappedType);
     this.multibindingContributionIdentifier = requireNonNull(multibindingContributionIdentifier);
+    this.hashCode = Objects.hash(wrappedQualifier, wrappedType, multibindingContributionIdentifier);
   }
 
   /**
@@ -119,14 +118,6 @@ public final class Key {
   // Keys
   @Override
   public int hashCode() {
-    if (!hashCode$Memoized) {
-      synchronized (this) {
-        if (!hashCode$Memoized) {
-          hashCode = Objects.hash(wrappedQualifier, wrappedType, multibindingContributionIdentifier);
-          hashCode$Memoized = true;
-        }
-      }
-    }
     return hashCode;
   }
 
@@ -139,6 +130,9 @@ public final class Key {
       return false;
     }
     Key that = (Key) o;
+    if (this.hashCode != that.hashCode) {
+      return false;
+    }
     return Objects.equals(this.wrappedQualifier, that.wrappedQualifier())
         && Objects.equals(this.wrappedType, that.wrappedType())
         && Objects.equals(this.multibindingContributionIdentifier,

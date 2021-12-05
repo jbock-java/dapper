@@ -20,35 +20,45 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getLast;
 import static java.util.stream.Collectors.joining;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
+import java.util.Objects;
 import javax.lang.model.element.TypeElement;
 
 /** A path containing a component and all of its ancestor components. */
-@AutoValue
-public abstract class ComponentPath {
+public final class ComponentPath {
+
+  private final ImmutableList<TypeElement> components;
+
+  private final int hashCode;
+
+  private ComponentPath(ImmutableList<TypeElement> components) {
+    this.components = Objects.requireNonNull(components);
+    this.hashCode = components.hashCode();
+  }
+
   /** Returns a new {@link ComponentPath} from {@code components}. */
   public static ComponentPath create(Iterable<TypeElement> components) {
-    return new AutoValue_ComponentPath(ImmutableList.copyOf(components));
+    return new ComponentPath(ImmutableList.copyOf(components));
   }
 
   /**
    * Returns the component types, starting from the {@linkplain #rootComponent() root
    * component} and ending with the {@linkplain #currentComponent() current component}.
    */
-  public abstract ImmutableList<TypeElement> components();
+  public ImmutableList<TypeElement> components() {
+    return components;
+  }
+
 
   /**
    * Returns the root {@link dagger.Component}- or {@link
    * dagger.producers.ProductionComponent}-annotated type
    */
-  public final TypeElement rootComponent() {
+  public TypeElement rootComponent() {
     return components().get(0);
   }
 
   /** Returns the component at the end of the path. */
-  @Memoized
   public TypeElement currentComponent() {
     return getLast(components());
   }
@@ -58,7 +68,7 @@ public abstract class ComponentPath {
    *
    * @throws IllegalStateException if the current graph is the {@linkplain #atRoot() root component}
    */
-  public final TypeElement parentComponent() {
+  public TypeElement parentComponent() {
     checkState(!atRoot());
     return components().reverse().get(1);
   }
@@ -69,13 +79,13 @@ public abstract class ComponentPath {
    * @throws IllegalStateException if the current graph is the {@linkplain #atRoot() root component}
    */
   // TODO(ronshapiro): consider memoizing this
-  public final ComponentPath parent() {
+  public ComponentPath parent() {
     checkState(!atRoot());
     return create(components().subList(0, components().size() - 1));
   }
 
   /** Returns the path from the root component to the {@code child} of the current component. */
-  public final ComponentPath childPath(TypeElement child) {
+  public ComponentPath childPath(TypeElement child) {
     return create(ImmutableList.<TypeElement>builder().addAll(components()).add(child).build());
   }
 
@@ -83,19 +93,28 @@ public abstract class ComponentPath {
    * Returns {@code true} if the {@linkplain #currentComponent()} current component} is the
    * {@linkplain #rootComponent()} root component}.
    */
-  public final boolean atRoot() {
+  public boolean atRoot() {
     return components().size() == 1;
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return components().stream().map(TypeElement::getQualifiedName).collect(joining(" → "));
   }
 
-  @Memoized
   @Override
-  public abstract int hashCode();
+  public int hashCode() {
+    return hashCode;
+  }
 
   @Override
-  public abstract boolean equals(Object obj);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ComponentPath that = (ComponentPath) o;
+    if (this.hashCode != that.hashCode) {
+      return false;
+    }
+    return components.equals(that.components);
+  }
 }
