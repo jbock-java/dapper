@@ -2,8 +2,9 @@ package dagger.internal.codegen.base;
 
 import java.util.function.Supplier;
 
-final class Cache<T> {
+public final class Cache<T> {
 
+  private boolean hit;
   private T instance;
 
   private final Supplier<T> supplier;
@@ -12,12 +13,13 @@ final class Cache<T> {
     this.supplier = supplier;
   }
 
-  static <T> Cache<T> of(Supplier<T> supplier) {
+  public static <T> Cache<T> of(Supplier<T> supplier) {
     return new Cache<>(supplier);
   }
 
-  T get() {
-    if (instance == null) {
+  public T get() {
+    if (!hit) {
+      hit = true;
       instance = supplier.get();
     }
     return instance;

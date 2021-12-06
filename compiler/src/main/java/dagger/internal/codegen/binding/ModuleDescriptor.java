@@ -27,14 +27,13 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
@@ -42,6 +41,7 @@ import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
+import dagger.internal.codegen.base.Cache;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
@@ -52,51 +52,124 @@ import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** Contains metadata that describes a module. */
-@AutoValue
-public abstract class ModuleDescriptor {
+public final class ModuleDescriptor {
 
-  public abstract TypeElement moduleElement();
+  private final TypeElement moduleElement;
+  private final ImmutableSet<TypeElement> includedModules;
+  private final ImmutableSet<ContributionBinding> bindings;
+  private final ImmutableSet<MultibindingDeclaration> multibindingDeclarations;
+  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
+  private final ImmutableSet<DelegateDeclaration> delegateDeclarations;
+  private final ImmutableSet<OptionalBindingDeclaration> optionalDeclarations;
+  private final ModuleKind kind;
 
-  abstract ImmutableSet<TypeElement> includedModules();
+  ModuleDescriptor(
+      TypeElement moduleElement,
+      ImmutableSet<TypeElement> includedModules,
+      ImmutableSet<ContributionBinding> bindings,
+      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
+      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
+      ImmutableSet<DelegateDeclaration> delegateDeclarations,
+      ImmutableSet<OptionalBindingDeclaration> optionalDeclarations,
+      ModuleKind kind) {
+    this.moduleElement = requireNonNull(moduleElement);
+    this.includedModules = requireNonNull(includedModules);
+    this.bindings = requireNonNull(bindings);
+    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
+    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
+    this.delegateDeclarations = requireNonNull(delegateDeclarations);
+    this.optionalDeclarations = requireNonNull(optionalDeclarations);
+    this.kind = requireNonNull(kind);
+  }
 
-  public abstract ImmutableSet<ContributionBinding> bindings();
+  public TypeElement moduleElement() {
+    return moduleElement;
+  }
+
+  ImmutableSet<TypeElement> includedModules() {
+    return includedModules;
+  }
+
+  public ImmutableSet<ContributionBinding> bindings() {
+    return bindings;
+  }
 
   /** The multibinding declarations contained in this module. */
-  abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
+  ImmutableSet<MultibindingDeclaration> multibindingDeclarations() {
+    return multibindingDeclarations;
+  }
 
   /** The {@link Module#subcomponents() subcomponent declarations} contained in this module. */
-  abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
+  ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations() {
+    return subcomponentDeclarations;
+  }
 
   /** The {@link Binds} method declarations that define delegate bindings. */
-  abstract ImmutableSet<DelegateDeclaration> delegateDeclarations();
+  ImmutableSet<DelegateDeclaration> delegateDeclarations() {
+    return delegateDeclarations;
+  }
 
   /** The {@link BindsOptionalOf} method declarations that define optional bindings. */
-  abstract ImmutableSet<OptionalBindingDeclaration> optionalDeclarations();
+  ImmutableSet<OptionalBindingDeclaration> optionalDeclarations() {
+    return optionalDeclarations;
+  }
 
   /** The kind of the module. */
-  public abstract ModuleKind kind();
+  public ModuleKind kind() {
+    return kind;
+  }
+
+  private final Cache<ImmutableSet<BindingDeclaration>> allBindingDeclarations = Cache.of(() ->
+      ImmutableSet.<BindingDeclaration>builder()
+          .addAll(bindings())
+          .addAll(delegateDeclarations())
+          .addAll(multibindingDeclarations())
+          .addAll(optionalDeclarations())
+          .addAll(subcomponentDeclarations())
+          .build());
 
   /** Returns all of the bindings declared in this module. */
-  @Memoized
   public ImmutableSet<BindingDeclaration> allBindingDeclarations() {
-    return ImmutableSet.<BindingDeclaration>builder()
-        .addAll(bindings())
-        .addAll(delegateDeclarations())
-        .addAll(multibindingDeclarations())
-        .addAll(optionalDeclarations())
-        .addAll(subcomponentDeclarations())
-        .build();
+    return allBindingDeclarations.get();
   }
 
   /** Returns the keys of all bindings declared by this module. */
   ImmutableSet<Key> allBindingKeys() {
     return allBindingDeclarations().stream().map(BindingDeclaration::key).collect(toImmutableSet());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ModuleDescriptor that = (ModuleDescriptor) o;
+    return moduleElement.equals(that.moduleElement)
+        && includedModules.equals(that.includedModules)
+        && bindings.equals(that.bindings)
+        && multibindingDeclarations.equals(that.multibindingDeclarations)
+        && subcomponentDeclarations.equals(that.subcomponentDeclarations)
+        && delegateDeclarations.equals(that.delegateDeclarations)
+        && optionalDeclarations.equals(that.optionalDeclarations)
+        && kind == that.kind;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(moduleElement,
+        includedModules,
+        bindings,
+        multibindingDeclarations,
+        subcomponentDeclarations,
+        delegateDeclarations,
+        optionalDeclarations,
+        kind);
   }
 
   /** A {@link ModuleDescriptor} factory. */
@@ -158,7 +231,7 @@ public abstract class ModuleDescriptor {
         }
       }
 
-      return new AutoValue_ModuleDescriptor(
+      return new ModuleDescriptor(
           moduleElement,
           ImmutableSet.copyOf(collectIncludedModules(new LinkedHashSet<>(), moduleElement)),
           bindings.build(),
