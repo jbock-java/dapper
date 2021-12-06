@@ -27,14 +27,13 @@ import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -48,6 +47,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
 import java.util.List;
+import java.util.Objects;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -165,8 +165,32 @@ public final class AssistedInjectionAnnotations {
   }
 
   /** Metadata about an {@link dagger.assisted.AssistedFactory} annotated type. */
-  @AutoValue
-  public abstract static class AssistedFactoryMetadata {
+  public static final class AssistedFactoryMetadata {
+    private final TypeElement factory;
+    private final DeclaredType factoryType;
+    private final ExecutableElement factoryMethod;
+    private final TypeElement assistedInjectElement;
+    private final DeclaredType assistedInjectType;
+    private final ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters;
+    private final ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters;
+
+    private AssistedFactoryMetadata(
+        TypeElement factory,
+        DeclaredType factoryType,
+        ExecutableElement factoryMethod,
+        TypeElement assistedInjectElement,
+        DeclaredType assistedInjectType,
+        ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters,
+        ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters) {
+      this.factory = requireNonNull(factory);
+      this.factoryType = requireNonNull(factoryType);
+      this.factoryMethod = requireNonNull(factoryMethod);
+      this.assistedInjectElement = requireNonNull(assistedInjectElement);
+      this.assistedInjectType = requireNonNull(assistedInjectType);
+      this.assistedInjectAssistedParameters = requireNonNull(assistedInjectAssistedParameters);
+      this.assistedFactoryAssistedParameters = requireNonNull(assistedFactoryAssistedParameters);
+    }
+
     public static AssistedFactoryMetadata create(
         TypeMirror factory, DaggerElements elements, DaggerTypes types) {
       DeclaredType factoryType = asDeclared(factory);
@@ -174,11 +198,10 @@ public final class AssistedInjectionAnnotations {
       ExecutableElement factoryMethod = assistedFactoryMethod(factoryElement, elements);
       ExecutableType factoryMethodType = asExecutable(types.asMemberOf(factoryType, factoryMethod));
       DeclaredType assistedInjectType = asDeclared(factoryMethodType.getReturnType());
-      return new AutoValue_AssistedInjectionAnnotations_AssistedFactoryMetadata(
+      return new AssistedFactoryMetadata(
           factoryElement,
           factoryType,
           factoryMethod,
-          factoryMethodType,
           asTypeElement(assistedInjectType),
           assistedInjectType,
           AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType, types),
@@ -186,23 +209,34 @@ public final class AssistedInjectionAnnotations {
               factoryMethod, factoryMethodType));
     }
 
-    public abstract TypeElement factory();
+    public TypeElement factory() {
+      return factory;
+    }
 
-    public abstract DeclaredType factoryType();
+    public DeclaredType factoryType() {
+      return factoryType;
+    }
 
-    public abstract ExecutableElement factoryMethod();
+    public ExecutableElement factoryMethod() {
+      return factoryMethod;
+    }
 
-    public abstract ExecutableType factoryMethodType();
+    public TypeElement assistedInjectElement() {
+      return assistedInjectElement;
+    }
 
-    public abstract TypeElement assistedInjectElement();
+    public DeclaredType assistedInjectType() {
+      return assistedInjectType;
+    }
 
-    public abstract DeclaredType assistedInjectType();
+    public ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters() {
+      return assistedInjectAssistedParameters;
+    }
 
-    public abstract ImmutableList<AssistedParameter> assistedInjectAssistedParameters();
+    public ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters() {
+      return assistedFactoryAssistedParameters;
+    }
 
-    public abstract ImmutableList<AssistedParameter> assistedFactoryAssistedParameters();
-
-    @Memoized
     public ImmutableMap<AssistedParameter, VariableElement> assistedInjectAssistedParametersMap() {
       ImmutableMap.Builder<AssistedParameter, VariableElement> builder = ImmutableMap.builder();
       for (AssistedParameter assistedParameter : assistedInjectAssistedParameters()) {
@@ -211,7 +245,6 @@ public final class AssistedInjectionAnnotations {
       return builder.build();
     }
 
-    @Memoized
     public ImmutableMap<AssistedParameter, VariableElement> assistedFactoryAssistedParametersMap() {
       ImmutableMap.Builder<AssistedParameter, VariableElement> builder = ImmutableMap.builder();
       for (AssistedParameter assistedParameter : assistedFactoryAssistedParameters()) {
@@ -227,38 +260,64 @@ public final class AssistedInjectionAnnotations {
    * <p>This parameter can represent an {@link Assisted} annotated parameter from an {@link
    * AssistedInject} constructor or an {@link AssistedFactory} method.
    */
-  @AutoValue
-  public abstract static class AssistedParameter {
-    public static AssistedParameter create(VariableElement parameter, TypeMirror parameterType) {
-      AssistedParameter assistedParameter =
-          new AutoValue_AssistedInjectionAnnotations_AssistedParameter(
-              getAnnotationMirror(parameter, TypeNames.ASSISTED)
-                  .map(assisted -> getStringValue(assisted, "value"))
-                  .orElse(""),
-              MoreTypes.equivalence().wrap(parameterType));
-      assistedParameter.variableElement = parameter;
-      return assistedParameter;
+  public static final class AssistedParameter {
+
+    private final String qualifier;
+    private final Equivalence.Wrapper<TypeMirror> wrappedType;
+    private final VariableElement variableElement;
+
+    private AssistedParameter(
+        String qualifier,
+        Equivalence.Wrapper<TypeMirror> wrappedType,
+        VariableElement variableElement) {
+      this.qualifier = requireNonNull(qualifier);
+      this.wrappedType = requireNonNull(wrappedType);
+      this.variableElement = variableElement;
     }
 
-    private VariableElement variableElement;
+    public static AssistedParameter create(VariableElement parameter, TypeMirror parameterType) {
+      return new AssistedParameter(
+          getAnnotationMirror(parameter, TypeNames.ASSISTED)
+              .map(assisted -> getStringValue(assisted, "value"))
+              .orElse(""),
+          MoreTypes.equivalence().wrap(parameterType),
+          parameter);
+    }
 
     /** Returns the string qualifier from the {@link Assisted#value()}. */
-    public abstract String qualifier();
+    public String qualifier() {
+      return qualifier;
+    }
 
     /** Returns the wrapper for the type annotated with {@link Assisted}. */
-    public abstract Equivalence.Wrapper<TypeMirror> wrappedType();
+    public Equivalence.Wrapper<TypeMirror> wrappedType() {
+      return wrappedType;
+    }
 
     /** Returns the type annotated with {@link Assisted}. */
-    public final TypeMirror type() {
+    public TypeMirror type() {
       return wrappedType().get();
     }
 
-    public final VariableElement variableElement() {
+    public VariableElement variableElement() {
       return variableElement;
     }
 
     @Override
-    public final String toString() {
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      AssistedParameter that = (AssistedParameter) o;
+      return qualifier.equals(that.qualifier) && wrappedType.equals(that.wrappedType);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(qualifier, wrappedType);
+    }
+
+    @Override
+    public String toString() {
       return qualifier().isEmpty()
           ? String.format("@Assisted %s", type())
           : String.format("@Assisted(\"%s\") %s", qualifier(), type());
