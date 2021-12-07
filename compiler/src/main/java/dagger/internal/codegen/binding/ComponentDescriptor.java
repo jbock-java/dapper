@@ -27,7 +27,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableBiMap;
@@ -372,19 +371,37 @@ public final class ComponentDescriptor {
   }
 
   /** A component method. */
-  @AutoValue
-  public abstract static class ComponentMethodDescriptor {
+  public static final class ComponentMethodDescriptor {
+
+    private final ExecutableElement methodElement;
+    private final Optional<DependencyRequest> dependencyRequest;
+    private final Optional<ComponentDescriptor> subcomponent;
+
+    private ComponentMethodDescriptor(
+        ExecutableElement methodElement,
+        Optional<DependencyRequest> dependencyRequest,
+        Optional<ComponentDescriptor> subcomponent) {
+      this.methodElement = methodElement;
+      this.dependencyRequest = dependencyRequest;
+      this.subcomponent = subcomponent;
+    }
     /** The method itself. Note that this may be declared on a supertype of the component. */
-    public abstract ExecutableElement methodElement();
+    public ExecutableElement methodElement() {
+      return methodElement;
+    }
 
     /**
      * The dependency request for production, provision, and subcomponent creator methods. Absent
      * for subcomponent factory methods.
      */
-    public abstract Optional<DependencyRequest> dependencyRequest();
+    public Optional<DependencyRequest> dependencyRequest() {
+      return dependencyRequest;
+    }
 
     /** The subcomponent for subcomponent factory methods and subcomponent creator methods. */
-    public abstract Optional<ComponentDescriptor> subcomponent();
+    public Optional<ComponentDescriptor> subcomponent() {
+      return subcomponent;
+    }
 
     /**
      * Returns the return type of {@link #methodElement()} as resolved in the {@link
@@ -402,26 +419,61 @@ public final class ComponentDescriptor {
           .requestedType(dependencyRequest().get().key().type(), types);
     }
 
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ComponentMethodDescriptor that = (ComponentMethodDescriptor) o;
+      return methodElement.equals(that.methodElement)
+          && dependencyRequest.equals(that.dependencyRequest)
+          && subcomponent.equals(that.subcomponent);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(methodElement,
+          dependencyRequest,
+          subcomponent);
+    }
+
     /** A {@link ComponentMethodDescriptor}builder for a method. */
     public static Builder builder(ExecutableElement method) {
-      return new AutoValue_ComponentDescriptor_ComponentMethodDescriptor.Builder()
-          .methodElement(method);
+      return new Builder(method);
     }
 
     /** A builder of {@link ComponentMethodDescriptor}s. */
-    @AutoValue.Builder
-    public interface Builder {
-      /** @see ComponentMethodDescriptor#methodElement() */
-      Builder methodElement(ExecutableElement methodElement);
+    public static final class Builder {
+      private final ExecutableElement methodElement;
+      private Optional<DependencyRequest> dependencyRequest = Optional.empty();
+      private Optional<ComponentDescriptor> subcomponent = Optional.empty();
+
+      private Builder(ExecutableElement methodElement) {
+        this.methodElement = methodElement;
+      }
 
       /** @see ComponentMethodDescriptor#dependencyRequest() */
-      Builder dependencyRequest(DependencyRequest dependencyRequest);
+      public Builder dependencyRequest(DependencyRequest dependencyRequest) {
+        this.dependencyRequest = Optional.of(dependencyRequest);
+        return this;
+      }
 
       /** @see ComponentMethodDescriptor#subcomponent() */
-      Builder subcomponent(ComponentDescriptor subcomponent);
+      public Builder subcomponent(ComponentDescriptor subcomponent) {
+        this.subcomponent = Optional.of(subcomponent);
+        return this;
+      }
 
       /** Builds the descriptor. */
-      ComponentMethodDescriptor build();
+      public ComponentDescriptor.ComponentMethodDescriptor build() {
+        if (this.methodElement == null) {
+          String missing = " methodElement";
+          throw new IllegalStateException("Missing required properties:" + missing);
+        }
+        return new ComponentMethodDescriptor(
+            this.methodElement,
+            this.dependencyRequest,
+            this.subcomponent);
+      }
     }
   }
 
