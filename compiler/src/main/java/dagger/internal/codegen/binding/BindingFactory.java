@@ -553,7 +553,7 @@ public final class BindingFactory {
 
     Key key = keyFactory.forMembersInjectedType(declaredType);
     TypeElement typeElement = MoreElements.asType(declaredType.asElement());
-    return new AutoValue_MembersInjectionBinding(
+    return new MembersInjectionBinding(
         key,
         dependencies,
         typeElement,

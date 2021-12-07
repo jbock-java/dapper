@@ -17,16 +17,19 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
+import dagger.model.Key;
 import jakarta.inject.Inject;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -34,17 +37,51 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 /** Represents the full members injection of a particular type. */
-@AutoValue
-public abstract class MembersInjectionBinding extends Binding {
+public final class MembersInjectionBinding extends Binding {
+  private final Key key;
+  private final ImmutableSet<DependencyRequest> explicitDependencies;
+  private final TypeElement membersInjectedType;
+  private final Optional<MembersInjectionBinding> unresolved;
+  private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+
+  private final IntSupplier hash = Suppliers.memoizeInt(() ->
+      Objects.hash(key(),
+          explicitDependencies(),
+          membersInjectedType(),
+          unresolved(),
+          injectionSites()));
+
+  MembersInjectionBinding(
+      Key key,
+      ImmutableSet<DependencyRequest> explicitDependencies,
+      TypeElement membersInjectedType,
+      Optional<MembersInjectionBinding> unresolved,
+      ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites) {
+    this.key = requireNonNull(key);
+    this.explicitDependencies = requireNonNull(explicitDependencies);
+    this.membersInjectedType = requireNonNull(membersInjectedType);
+    this.unresolved = requireNonNull(unresolved);
+    this.injectionSites = requireNonNull(injectionSites);
+  }
+
   @Override
-  public final Optional<Element> bindingElement() {
+  public Key key() {
+    return key;
+  }
+
+  @Override
+  public Optional<Element> bindingElement() {
     return Optional.of(membersInjectedType());
   }
 
-  public abstract TypeElement membersInjectedType();
+  public TypeElement membersInjectedType() {
+    return membersInjectedType;
+  }
 
   @Override
-  public abstract Optional<MembersInjectionBinding> unresolved();
+  public Optional<MembersInjectionBinding> unresolved() {
+    return unresolved;
+  }
 
   @Override
   public Optional<TypeElement> contributingModule() {
@@ -52,11 +89,18 @@ public abstract class MembersInjectionBinding extends Binding {
   }
 
   /** The set of individual sites where {@code Inject} is applied. */
-  public abstract ImmutableSortedSet<InjectionSite> injectionSites();
+  public ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
+    return injectionSites;
+  }
 
   @Override
   public BindingType bindingType() {
     return BindingType.MEMBERS_INJECTION;
+  }
+
+  @Override
+  public ImmutableSet<DependencyRequest> explicitDependencies() {
+    return explicitDependencies;
   }
 
   @Override
@@ -85,55 +129,84 @@ public abstract class MembersInjectionBinding extends Binding {
     return false;
   }
 
-  @Memoized
   @Override
-  public abstract int hashCode();
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MembersInjectionBinding that = (MembersInjectionBinding) o;
+    return key.equals(that.key)
+        && explicitDependencies.equals(that.explicitDependencies)
+        && membersInjectedType.equals(that.membersInjectedType)
+        && unresolved.equals(that.unresolved)
+        && injectionSites.equals(that.injectionSites);
+  }
 
   // TODO(ronshapiro,dpb): simplify the equality semantics
   @Override
-  public abstract boolean equals(Object obj);
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
   /** Metadata about a field or method injection site. */
-  @AutoValue
-  public abstract static class InjectionSite {
+  public static final class InjectionSite {
+    private final MembersInjectionBinding.InjectionSite.Kind kind;
+    private final Element element;
+    private final ImmutableSet<DependencyRequest> dependencies;
+
+    InjectionSite(
+        MembersInjectionBinding.InjectionSite.Kind kind,
+        Element element,
+        ImmutableSet<DependencyRequest> dependencies) {
+      this.kind = kind;
+      this.element = element;
+      this.dependencies = dependencies;
+    }
+
+    private final IntSupplier indexAmongAtInjectMembersWithSameSimpleName = Suppliers.memoizeInt(() -> element()
+        .getEnclosingElement()
+        .getEnclosedElements()
+        .stream()
+        .filter(element -> isAnnotationPresent(element, Inject.class))
+        .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE))
+        .filter(element -> element.getSimpleName().equals(this.element().getSimpleName()))
+        .collect(toList())
+        .indexOf(element()));
+
     /** The type of injection site. */
     public enum Kind {
       FIELD,
       METHOD,
     }
 
-    public abstract Kind kind();
+    public MembersInjectionBinding.InjectionSite.Kind kind() {
+      return kind;
+    }
 
-    public abstract Element element();
+    public Element element() {
+      return element;
+    }
 
-    public abstract ImmutableSet<DependencyRequest> dependencies();
+    public ImmutableSet<DependencyRequest> dependencies() {
+      return dependencies;
+    }
 
     /**
      * Returns the index of {@link #element()} in its parents {@code @Inject} members that have the
      * same simple name. This method filters out private elements so that the results will be
      * consistent independent of whether the build system uses header jars or not.
      */
-    @Memoized
     public int indexAmongAtInjectMembersWithSameSimpleName() {
-      return element()
-          .getEnclosingElement()
-          .getEnclosedElements()
-          .stream()
-          .filter(element -> isAnnotationPresent(element, Inject.class))
-          .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE))
-          .filter(element -> element.getSimpleName().equals(this.element().getSimpleName()))
-          .collect(toList())
-          .indexOf(element());
+      return indexAmongAtInjectMembersWithSameSimpleName.getAsInt();
     }
 
     public static InjectionSite field(VariableElement element, DependencyRequest dependency) {
-      return new AutoValue_MembersInjectionBinding_InjectionSite(
+      return new InjectionSite(
           Kind.FIELD, element, ImmutableSet.of(dependency));
     }
 
     public static InjectionSite method(
         ExecutableElement element, Iterable<DependencyRequest> dependencies) {
-      return new AutoValue_MembersInjectionBinding_InjectionSite(
+      return new InjectionSite(
           Kind.METHOD, element, ImmutableSet.copyOf(dependencies));
     }
   }
