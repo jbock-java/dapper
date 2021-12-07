@@ -152,6 +152,11 @@ public final class MembersInjectionBinding extends Binding {
     private final MembersInjectionBinding.InjectionSite.Kind kind;
     private final Element element;
     private final ImmutableSet<DependencyRequest> dependencies;
+    private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(
+        kind(),
+        element(),
+        dependencies(),
+        indexAmongAtInjectMembersWithSameSimpleName()));
 
     InjectionSite(
         MembersInjectionBinding.InjectionSite.Kind kind,
@@ -197,6 +202,23 @@ public final class MembersInjectionBinding extends Binding {
      */
     public int indexAmongAtInjectMembersWithSameSimpleName() {
       return indexAmongAtInjectMembersWithSameSimpleName.getAsInt();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      InjectionSite that = (InjectionSite) o;
+      return hashCode() == that.hashCode()
+          && indexAmongAtInjectMembersWithSameSimpleName() == that.indexAmongAtInjectMembersWithSameSimpleName()
+          && kind == that.kind
+          && element.equals(that.element)
+          && dependencies.equals(that.dependencies);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash.getAsInt();
     }
 
     public static InjectionSite field(VariableElement element, DependencyRequest dependency) {
