@@ -23,6 +23,7 @@ import static dagger.internal.codegen.base.Suppliers.memoizeInt;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
@@ -64,8 +65,44 @@ import javax.lang.model.type.TypeMirror;
  * represent a synthetic component for the module, where there is an entry point for each binding in
  * the module.
  */
-@AutoValue
-public abstract class ComponentDescriptor {
+public final class ComponentDescriptor {
+
+  private final ComponentAnnotation annotation;
+  private final TypeElement typeElement;
+  private final Set<ComponentRequirement> dependencies;
+  private final Set<ModuleDescriptor> modules;
+  private final Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod;
+  private final Set<Scope> scopes;
+  private final Set<ComponentDescriptor> childComponentsDeclaredByModules;
+  private final ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods;
+  private final ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints;
+  private final Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods;
+  private final Optional<ComponentCreatorDescriptor> creatorDescriptor;
+
+  private ComponentDescriptor(
+      ComponentAnnotation annotation,
+      TypeElement typeElement,
+      Set<ComponentRequirement> dependencies,
+      Set<ModuleDescriptor> modules,
+      Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod,
+      Set<Scope> scopes,
+      Set<ComponentDescriptor> childComponentsDeclaredByModules,
+      ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods,
+      ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
+      Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods,
+      Optional<ComponentCreatorDescriptor> creatorDescriptor) {
+    this.annotation = requireNonNull(annotation);
+    this.typeElement = requireNonNull(typeElement);
+    this.dependencies = requireNonNull(dependencies);
+    this.modules = requireNonNull(modules);
+    this.dependenciesByDependencyMethod = requireNonNull(dependenciesByDependencyMethod);
+    this.scopes = requireNonNull(scopes);
+    this.childComponentsDeclaredByModules = requireNonNull(childComponentsDeclaredByModules);
+    this.childComponentsDeclaredByFactoryMethods = requireNonNull(childComponentsDeclaredByFactoryMethods);
+    this.childComponentsDeclaredByBuilderEntryPoints = requireNonNull(childComponentsDeclaredByBuilderEntryPoints);
+    this.componentMethods = requireNonNull(componentMethods);
+    this.creatorDescriptor = requireNonNull(creatorDescriptor);
+  }
 
   private final Supplier<Set<ComponentRequirement>> requirements = Suppliers.memoize(() -> {
     ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
@@ -100,10 +137,12 @@ public abstract class ComponentDescriptor {
       });
 
   /** The annotation that specifies that {@link #typeElement()} is a component. */
-  public abstract ComponentAnnotation annotation();
+  public ComponentAnnotation annotation() {
+    return annotation;
+  }
 
   /** Returns {@code true} if this is a subcomponent. */
-  public final boolean isSubcomponent() {
+  public boolean isSubcomponent() {
     return annotation().isSubcomponent();
   }
 
@@ -111,7 +150,7 @@ public abstract class ComponentDescriptor {
    * Returns {@code true} if this is a production component or subcomponent, or a
    * {@code @ProducerModule} when doing module binding validation.
    */
-  public final boolean isProduction() {
+  public boolean isProduction() {
     return annotation().isProduction();
   }
 
@@ -119,7 +158,7 @@ public abstract class ComponentDescriptor {
    * Returns {@code true} if this is a real component, and not a fictional one used to validate
    * module bindings.
    */
-  public final boolean isRealComponent() {
+  public boolean isRealComponent() {
     return annotation().isRealComponent();
   }
 
@@ -127,16 +166,20 @@ public abstract class ComponentDescriptor {
    * The element that defines the component. This is the element to which the {@link #annotation()}
    * was applied.
    */
-  public abstract TypeElement typeElement();
+  public TypeElement typeElement() {
+    return typeElement;
+  }
 
   /**
    * The set of component dependencies listed in {@link Component#dependencies} or {@link
    * dagger.producers.ProductionComponent#dependencies()}.
    */
-  public abstract Set<ComponentRequirement> dependencies();
+  public Set<ComponentRequirement> dependencies() {
+    return dependencies;
+  }
 
   /** The non-abstract {@link #modules()} and the {@link #dependencies()}. */
-  public final Set<ComponentRequirement> dependenciesAndConcreteModules() {
+  public Set<ComponentRequirement> dependenciesAndConcreteModules() {
     return Stream.concat(
             moduleTypes().stream()
                 .filter(dep -> !dep.getModifiers().contains(ABSTRACT))
@@ -149,10 +192,12 @@ public abstract class ComponentDescriptor {
    * The {@link ModuleDescriptor modules} declared in {@link Component#modules()} and reachable by
    * traversing {@link Module#includes()}.
    */
-  public abstract Set<ModuleDescriptor> modules();
+  public Set<ModuleDescriptor> modules() {
+    return modules;
+  }
 
   /** The types of the {@link #modules()}. */
-  public final Set<TypeElement> moduleTypes() {
+  public Set<TypeElement> moduleTypes() {
     return modules().stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
   }
 
@@ -177,11 +222,12 @@ public abstract class ComponentDescriptor {
    * the enclosing type of the method; a method may be declared by a supertype of the actual
    * dependency.
    */
-  public abstract Map<ExecutableElement, ComponentRequirement>
-  dependenciesByDependencyMethod();
+  public Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod() {
+    return dependenciesByDependencyMethod;
+  }
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
-  public final ComponentRequirement getDependencyThatDefinesMethod(Element method) {
+  public ComponentRequirement getDependencyThatDefinesMethod(Element method) {
     checkArgument(
         method instanceof ExecutableElement, "method must be an executable element: %s", method);
     return checkNotNull(
@@ -189,7 +235,9 @@ public abstract class ComponentDescriptor {
   }
 
   /** The scopes of the component. */
-  public abstract Set<Scope> scopes();
+  public Set<Scope> scopes() {
+    return scopes;
+  }
 
   /**
    * All {@link Subcomponent}s which are direct children of this component. This includes
@@ -197,7 +245,7 @@ public abstract class ComponentDescriptor {
    * #childComponentsDeclaredByFactoryMethods() factory methods} and {@linkplain
    * #childComponentsDeclaredByBuilderEntryPoints() builder methods}.
    */
-  public final Set<ComponentDescriptor> childComponents() {
+  public Set<ComponentDescriptor> childComponents() {
     return ImmutableSet.<ComponentDescriptor>builder()
         .addAll(childComponentsDeclaredByFactoryMethods().values())
         .addAll(childComponentsDeclaredByBuilderEntryPoints().values())
@@ -209,14 +257,18 @@ public abstract class ComponentDescriptor {
    * All {@linkplain Subcomponent direct child} components that are declared by a {@linkplain
    * Module#subcomponents() module's subcomponents}.
    */
-  abstract Set<ComponentDescriptor> childComponentsDeclaredByModules();
+  Set<ComponentDescriptor> childComponentsDeclaredByModules() {
+    return childComponentsDeclaredByModules;
+  }
 
   /**
    * All {@linkplain Subcomponent direct child} components that are declared by a subcomponent
    * factory method.
    */
-  public abstract ImmutableBiMap<ComponentMethodDescriptor, ComponentDescriptor>
-  childComponentsDeclaredByFactoryMethods();
+  public ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
+  childComponentsDeclaredByFactoryMethods() {
+    return childComponentsDeclaredByFactoryMethods;
+  }
 
   /** Returns a map of {@link #childComponents()} indexed by {@link #typeElement()}. */
   public Map<TypeElement, ComponentDescriptor> childComponentsByElement() {
@@ -224,7 +276,7 @@ public abstract class ComponentDescriptor {
   }
 
   /** Returns the factory method that declares a child component. */
-  final Optional<ComponentMethodDescriptor> getFactoryMethodForChildComponent(
+  Optional<ComponentMethodDescriptor> getFactoryMethodForChildComponent(
       ComponentDescriptor childComponent) {
     return Optional.ofNullable(
         childComponentsDeclaredByFactoryMethods().inverse().get(childComponent));
@@ -234,8 +286,10 @@ public abstract class ComponentDescriptor {
    * All {@linkplain Subcomponent direct child} components that are declared by a subcomponent
    * builder method.
    */
-  abstract ImmutableBiMap<ComponentMethodDescriptor, ComponentDescriptor>
-  childComponentsDeclaredByBuilderEntryPoints();
+  ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
+  childComponentsDeclaredByBuilderEntryPoints() {
+    return childComponentsDeclaredByBuilderEntryPoints;
+  }
 
   private final Supplier<ImmutableMap<TypeElement, ComponentDescriptor>>
       childComponentsByBuilderType =
@@ -249,14 +303,16 @@ public abstract class ComponentDescriptor {
                           child -> child)));
 
   /** Returns the child component with the given builder type. */
-  final ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
+  ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
     return checkNotNull(
         childComponentsByBuilderType.get().get(builderType),
         "no child component found for builder type %s",
         builderType.getQualifiedName());
   }
 
-  public abstract Set<ComponentMethodDescriptor> componentMethods();
+  public Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods() {
+    return componentMethods;
+  }
 
   /** Returns the first component method associated with this binding request, if one exists. */
   public Optional<ComponentMethodDescriptor> firstMatchingComponentMethod(BindingRequest request) {
@@ -268,7 +324,7 @@ public abstract class ComponentDescriptor {
   }
 
   /** The entry point methods on the component type. Each has a {@link DependencyRequest}. */
-  public final Set<ComponentMethodDescriptor> entryPointMethods() {
+  public Set<ComponentMethodDescriptor> entryPointMethods() {
     return componentMethods()
         .stream()
         .filter(method -> method.dependencyRequest().isPresent())
@@ -279,14 +335,16 @@ public abstract class ComponentDescriptor {
   // interaction between the spec & generation
 
   /** Returns a descriptor for the creator type for this component type, if the user defined one. */
-  public abstract Optional<ComponentCreatorDescriptor> creatorDescriptor();
+  public Optional<ComponentCreatorDescriptor> creatorDescriptor() {
+    return creatorDescriptor;
+  }
 
   /**
    * Returns {@code true} for components that have a creator, either because the user {@linkplain
    * #creatorDescriptor() specified one} or because it's a top-level component with an implicit
    * builder.
    */
-  public final boolean hasCreator() {
+  public boolean hasCreator() {
     return !isSubcomponent() || creatorDescriptor().isPresent();
   }
 
@@ -294,20 +352,24 @@ public abstract class ComponentDescriptor {
    * Returns the {@link CancellationPolicy} for this component, or an empty optional if either the
    * component is not a production component or no {@code CancellationPolicy} annotation is present.
    */
-  public final Optional<CancellationPolicy> cancellationPolicy() {
+  public Optional<CancellationPolicy> cancellationPolicy() {
     return isProduction()
         ? Optional.ofNullable(typeElement().getAnnotation(CancellationPolicy.class))
         : Optional.empty();
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ComponentDescriptor that = (ComponentDescriptor) o;
+    return annotation.equals(that.annotation) && typeElement.equals(that.typeElement);
+  }
+
+  @Override
   public int hashCode() {
     return hashCode.getAsInt();
   }
-
-  // TODO(ronshapiro): simplify the equality semantics
-  @Override
-  public abstract boolean equals(Object obj);
 
   /** A component method. */
   @AutoValue
