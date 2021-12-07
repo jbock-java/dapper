@@ -200,7 +200,7 @@ public final class ComponentDescriptorFactory {
       scopes = ImmutableSet.<Scope>builder().addAll(scopes).add(productionScope(elements)).build();
     }
 
-    return new AutoValue_ComponentDescriptor(
+    return new ComponentDescriptor(
         componentAnnotation,
         typeElement,
         componentDependencies,

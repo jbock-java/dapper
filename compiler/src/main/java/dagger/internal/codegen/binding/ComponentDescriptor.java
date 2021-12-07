@@ -79,7 +79,7 @@ public final class ComponentDescriptor {
   private final Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods;
   private final Optional<ComponentCreatorDescriptor> creatorDescriptor;
 
-  private ComponentDescriptor(
+  ComponentDescriptor(
       ComponentAnnotation annotation,
       TypeElement typeElement,
       Set<ComponentRequirement> dependencies,
