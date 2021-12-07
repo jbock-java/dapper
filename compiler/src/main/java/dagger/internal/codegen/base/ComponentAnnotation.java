@@ -26,7 +26,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
@@ -36,6 +35,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
@@ -238,22 +238,27 @@ public abstract class ComponentAnnotation {
   @AutoValue
   abstract static class RealComponentAnnotation extends ComponentAnnotation {
 
+    private final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
+        isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies"));
+    private final Supplier<List<TypeMirror>> dependencyTypes = Suppliers.memoize(super::dependencyTypes);
+    private final Supplier<List<TypeElement>> dependencies = Suppliers.memoize(super::dependencies);
+    private final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
+    private final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
+    private final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
+
     @Override
-    @Memoized
     public List<AnnotationValue> dependencyValues() {
-      return isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies");
+      return dependencyValues.get();
     }
 
     @Override
-    @Memoized
     public List<TypeMirror> dependencyTypes() {
-      return super.dependencyTypes();
+      return dependencyTypes.get();
     }
 
     @Override
-    @Memoized
     public List<TypeElement> dependencies() {
-      return super.dependencies();
+      return dependencies.get();
     }
 
     @Override
@@ -262,21 +267,18 @@ public abstract class ComponentAnnotation {
     }
 
     @Override
-    @Memoized
     public List<AnnotationValue> moduleValues() {
-      return getAnnotationValues("modules");
+      return moduleValues.get();
     }
 
     @Override
-    @Memoized
     public List<TypeMirror> moduleTypes() {
-      return super.moduleTypes();
+      return moduleTypes.get();
     }
 
     @Override
-    @Memoized
     public Set<TypeElement> modules() {
-      return super.modules();
+      return modules.get();
     }
 
     static Builder builder() {
@@ -301,6 +303,9 @@ public abstract class ComponentAnnotation {
    */
   @AutoValue
   abstract static class FictionalComponentAnnotation extends ComponentAnnotation {
+
+    private final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
+    private final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
 
     @Override
     public AnnotationMirror annotation() {
@@ -334,15 +339,13 @@ public abstract class ComponentAnnotation {
     }
 
     @Override
-    @Memoized
     public List<TypeMirror> moduleTypes() {
-      return super.moduleTypes();
+      return moduleTypes.get();
     }
 
     @Override
-    @Memoized
     public Set<TypeElement> modules() {
-      return super.modules();
+      return modules.get();
     }
 
     public abstract ModuleAnnotation moduleAnnotation();

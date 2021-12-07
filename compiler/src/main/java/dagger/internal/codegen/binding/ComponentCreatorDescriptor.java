@@ -26,17 +26,18 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import com.google.auto.common.MoreTypes;
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import dagger.BindsInstance;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -51,6 +52,15 @@ import javax.lang.model.type.TypeMirror;
  */
 @AutoValue
 public abstract class ComponentCreatorDescriptor {
+
+  private final Supplier<ImmutableMap<ComponentRequirement, Element>> requirementElements = Suppliers.memoize(() ->
+      flatten(unvalidatedRequirementElements()));
+
+  private final Supplier<ImmutableMap<ComponentRequirement, ExecutableElement>> setterMethods = Suppliers.memoize(() ->
+      flatten(unvalidatedSetterMethods()));
+
+  private final Supplier<ImmutableMap<ComponentRequirement, VariableElement>> factoryParameters = Suppliers.memoize(() ->
+      flatten(unvalidatedFactoryParameters()));
 
   /** Returns the annotation marking this creator. */
   public abstract ComponentCreatorAnnotation annotation();
@@ -105,21 +115,18 @@ public abstract class ComponentCreatorDescriptor {
    * Map of component requirements to elements (setter methods or factory method parameters) that
    * set them.
    */
-  @Memoized
   ImmutableMap<ComponentRequirement, Element> requirementElements() {
-    return flatten(unvalidatedRequirementElements());
+    return requirementElements.get();
   }
 
   /** Map of component requirements to setter methods for those requirements. */
-  @Memoized
   public ImmutableMap<ComponentRequirement, ExecutableElement> setterMethods() {
-    return flatten(unvalidatedSetterMethods());
+    return setterMethods.get();
   }
 
   /** Map of component requirements to factory method parameters for those requirements. */
-  @Memoized
   public ImmutableMap<ComponentRequirement, VariableElement> factoryParameters() {
-    return flatten(unvalidatedFactoryParameters());
+    return factoryParameters.get();
   }
 
   private static <K, V> ImmutableMap<K, V> flatten(Multimap<K, V> multimap) {

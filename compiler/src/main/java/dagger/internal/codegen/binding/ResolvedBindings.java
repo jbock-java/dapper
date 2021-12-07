@@ -21,11 +21,13 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 
 import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import javax.lang.model.element.TypeElement;
 
@@ -40,6 +42,10 @@ import javax.lang.model.element.TypeElement;
  */
 @AutoValue
 abstract class ResolvedBindings {
+
+ private final Supplier<ImmutableSet<ContributionBinding>> contributionBindings = Suppliers.memoize(() ->
+     ImmutableSet.copyOf(allContributionBindings().values()));
+
   /** The binding key for which the {@link #bindings()} have been resolved. */
   abstract Key key();
 
@@ -106,13 +112,12 @@ abstract class ResolvedBindings {
    * All contribution bindings, regardless of owning component. Empty if this is a members-injection
    * binding.
    */
-  @Memoized
   ImmutableSet<ContributionBinding> contributionBindings() {
     // TODO(ronshapiro): consider optimizing ImmutableSet.copyOf(Collection) for small immutable
     // collections so that it doesn't need to call toArray(). Even though this method is memoized,
     // toArray() can take ~150ms for large components, and there are surely other places in the
     // processor that can benefit from this.
-    return ImmutableSet.copyOf(allContributionBindings().values());
+    return contributionBindings.get();
   }
 
   /** The component that owns {@code binding}. */

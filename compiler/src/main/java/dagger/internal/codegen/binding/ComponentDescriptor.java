@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.Suppliers.memoizeInt;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
@@ -26,7 +27,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableBiMap;
@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -65,6 +66,39 @@ import javax.lang.model.type.TypeMirror;
  */
 @AutoValue
 public abstract class ComponentDescriptor {
+
+  private final Supplier<Set<ComponentRequirement>> requirements = Suppliers.memoize(() -> {
+    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
+    modules().stream()
+        .filter(
+            module ->
+                module.bindings().stream().anyMatch(ContributionBinding::requiresModuleInstance))
+        .map(module -> ComponentRequirement.forModule(module.moduleElement().asType()))
+        .forEach(requirements::add);
+    requirements.addAll(dependencies());
+    requirements.addAll(
+        creatorDescriptor()
+            .map(ComponentCreatorDescriptor::boundInstanceRequirements)
+            .orElse(ImmutableSet.of()));
+    return requirements.build();
+  });
+
+  private final IntSupplier hashCode = memoizeInt(() -> {
+    // TODO(b/122962745): Only use typeElement().hashCode()
+    return Objects.hash(typeElement(), annotation());
+  });
+
+  private final Supplier<Map<TypeElement, ComponentDescriptor>> childComponentsByElement = Suppliers.memoize(() ->
+      Maps.uniqueIndex(childComponents(), ComponentDescriptor::typeElement));
+
+  private final Supplier<Map<BindingRequest, ComponentMethodDescriptor>> firstMatchingComponentMethods = Suppliers.memoize(() -> {
+        Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
+        for (ComponentMethodDescriptor method : entryPointMethods()) {
+          methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
+        }
+        return ImmutableMap.copyOf(methods);
+      });
+
   /** The annotation that specifies that {@link #typeElement()} is a component. */
   public abstract ComponentAnnotation annotation();
 
@@ -133,21 +167,8 @@ public abstract class ComponentDescriptor {
    *   <li>{@linkplain #dependencies() dependencies}
    * </ul>
    */
-  @Memoized
   Set<ComponentRequirement> requirements() {
-    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
-    modules().stream()
-        .filter(
-            module ->
-                module.bindings().stream().anyMatch(ContributionBinding::requiresModuleInstance))
-        .map(module -> ComponentRequirement.forModule(module.moduleElement().asType()))
-        .forEach(requirements::add);
-    requirements.addAll(dependencies());
-    requirements.addAll(
-        creatorDescriptor()
-            .map(ComponentCreatorDescriptor::boundInstanceRequirements)
-            .orElse(ImmutableSet.of()));
-    return requirements.build();
+    return requirements.get();
   }
 
   /**
@@ -198,9 +219,8 @@ public abstract class ComponentDescriptor {
   childComponentsDeclaredByFactoryMethods();
 
   /** Returns a map of {@link #childComponents()} indexed by {@link #typeElement()}. */
-  @Memoized
   public Map<TypeElement, ComponentDescriptor> childComponentsByElement() {
-    return Maps.uniqueIndex(childComponents(), ComponentDescriptor::typeElement);
+    return childComponentsByElement.get();
   }
 
   /** Returns the factory method that declares a child component. */
@@ -243,14 +263,8 @@ public abstract class ComponentDescriptor {
     return Optional.ofNullable(firstMatchingComponentMethods().get(request));
   }
 
-  @Memoized
-  Map<BindingRequest, ComponentMethodDescriptor>
-  firstMatchingComponentMethods() {
-    Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
-    for (ComponentMethodDescriptor method : entryPointMethods()) {
-      methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
-    }
-    return ImmutableMap.copyOf(methods);
+  Map<BindingRequest, ComponentMethodDescriptor> firstMatchingComponentMethods() {
+    return firstMatchingComponentMethods.get();
   }
 
   /** The entry point methods on the component type. Each has a {@link DependencyRequest}. */
@@ -286,11 +300,9 @@ public abstract class ComponentDescriptor {
         : Optional.empty();
   }
 
-  @Memoized
   @Override
   public int hashCode() {
-    // TODO(b/122962745): Only use typeElement().hashCode()
-    return Objects.hash(typeElement(), annotation());
+    return hashCode.getAsInt();
   }
 
   // TODO(ronshapiro): simplify the equality semantics

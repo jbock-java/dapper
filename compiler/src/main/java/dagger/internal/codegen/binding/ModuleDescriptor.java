@@ -41,8 +41,8 @@ import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.base.Cache;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
 import dagger.multibindings.Multibinds;
@@ -54,6 +54,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -126,7 +127,7 @@ public final class ModuleDescriptor {
     return kind;
   }
 
-  private final Cache<ImmutableSet<BindingDeclaration>> allBindingDeclarations = Cache.of(() ->
+  private final Supplier<ImmutableSet<BindingDeclaration>> allBindingDeclarations = Suppliers.memoize(() ->
       ImmutableSet.<BindingDeclaration>builder()
           .addAll(bindings())
           .addAll(delegateDeclarations())

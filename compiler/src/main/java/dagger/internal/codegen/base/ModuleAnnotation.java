@@ -24,6 +24,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 
 import com.google.auto.common.MoreTypes;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
@@ -38,17 +39,23 @@ public final class ModuleAnnotation {
   private static final ImmutableSet<ClassName> MODULE_ANNOTATIONS =
       ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE);
 
-  private final Cache<ImmutableList<TypeElement>> includes = Cache.of(() -> includesAsAnnotationValues().stream()
-      .map(MoreAnnotationValues::asType)
-      .map(MoreTypes::asTypeElement)
-      .collect(toImmutableList()));
-  private final Cache<ImmutableList<AnnotationValue>> includesAsAnnotationValues = Cache.of(() -> asAnnotationValues(getAnnotationValue(annotation(), "includes")));
-  private final Cache<ImmutableList<TypeElement>> subcomponents = Cache.of(() -> subcomponentsAsAnnotationValues().stream()
-      .map(MoreAnnotationValues::asType)
-      .map(MoreTypes::asTypeElement)
-      .collect(toImmutableList()));
-  private final Cache<ImmutableList<AnnotationValue>> subcomponentsAsAnnotationValues = Cache.of(() -> asAnnotationValues(getAnnotationValue(annotation(), "subcomponents")));
+  private final Supplier<ImmutableList<TypeElement>> includes = Suppliers.memoize(() ->
+      includesAsAnnotationValues().stream()
+          .map(MoreAnnotationValues::asType)
+          .map(MoreTypes::asTypeElement)
+          .collect(toImmutableList()));
 
+  private final Supplier<ImmutableList<AnnotationValue>> includesAsAnnotationValues = Suppliers.memoize(() ->
+      asAnnotationValues(getAnnotationValue(annotation(), "includes")));
+
+  private final Supplier<ImmutableList<TypeElement>> subcomponents = Suppliers.memoize(() ->
+      subcomponentsAsAnnotationValues().stream()
+          .map(MoreAnnotationValues::asType)
+          .map(MoreTypes::asTypeElement)
+          .collect(toImmutableList()));
+
+  private final Supplier<ImmutableList<AnnotationValue>> subcomponentsAsAnnotationValues = Suppliers.memoize(() ->
+      asAnnotationValues(getAnnotationValue(annotation(), "subcomponents")));
 
   public ModuleAnnotation(AnnotationMirror annotation) {
     this.annotation = annotation;
