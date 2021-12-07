@@ -24,12 +24,12 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;

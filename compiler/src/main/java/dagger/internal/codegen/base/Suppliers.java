@@ -8,7 +8,7 @@ public final class Suppliers {
   private Suppliers() {
   }
 
-  public static <T> com.google.common.base.Supplier<T> memoize(Supplier<T> delegate) {
+  public static <T> Supplier<T> memoize(Supplier<T> delegate) {
     return Cache.of(delegate);
   }
 
@@ -16,15 +16,15 @@ public final class Suppliers {
     return new IntCache(delegate);
   }
 
-  private static final class Cache<T> implements com.google.common.base.Supplier<T> {
+  private static final class Cache<T> implements Supplier<T> {
 
-    private boolean hit;
-    private T instance;
+    private boolean initialized;
+    private T value;
 
-    private final Supplier<T> supplier;
+    private final Supplier<T> delegate;
 
-    Cache(Supplier<T> supplier) {
-      this.supplier = supplier;
+    Cache(Supplier<T> delegate) {
+      this.delegate = delegate;
     }
 
     static <T> Cache<T> of(Supplier<T> supplier) {
@@ -33,32 +33,32 @@ public final class Suppliers {
 
     @Override
     public T get() {
-      if (!hit) {
-        hit = true;
-        instance = supplier.get();
+      if (!initialized) {
+        initialized = true;
+        value = delegate.get();
       }
-      return instance;
+      return value;
     }
   }
 
   private static final class IntCache implements IntSupplier {
 
-    private boolean hit;
-    private int cached;
+    private boolean initialized;
+    private int value;
 
-    private final IntSupplier supplier;
+    private final IntSupplier delegate;
 
-    IntCache(IntSupplier supplier) {
-      this.supplier = supplier;
+    IntCache(IntSupplier delegate) {
+      this.delegate = delegate;
     }
 
     @Override
     public int getAsInt() {
-      if (!hit) {
-        hit = true;
-        cached = supplier.getAsInt();
+      if (!initialized) {
+        initialized = true;
+        value = delegate.getAsInt();
       }
-      return cached;
+      return value;
     }
   }
 }
