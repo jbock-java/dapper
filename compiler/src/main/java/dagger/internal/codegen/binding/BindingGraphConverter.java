@@ -22,9 +22,9 @@ import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -33,6 +33,7 @@ import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.model.BindingGraph.ComponentNode;
@@ -49,7 +50,9 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntSupplier;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -311,7 +314,7 @@ final class BindingGraphConverter {
         Node source, Node dependency, DependencyRequest dependencyRequest) {
       // An iterative approach is used instead of a Stream because this method is called in a hot
       // loop, and the Stream calculates the size of network.edgesConnecting(), which is slow. This
-      // seems to be because caculating the edges connecting two nodes in a Network that supports
+      // seems to be because calculating the edges connecting two nodes in a Network that supports
       // parallel edges is must check the equality of many nodes, and BindingNode's equality
       // semantics drag in the equality of many other expensive objects
       for (Edge edge : network.edgesConnecting(source, dependency)) {
@@ -382,17 +385,44 @@ final class BindingGraphConverter {
     }
   }
 
-  @AutoValue
-  abstract static class MissingBindingImpl extends MissingBinding {
-    static MissingBinding create(ComponentPath component, Key key) {
-      return new AutoValue_BindingGraphConverter_MissingBindingImpl(component, key);
+  static final class MissingBindingImpl extends MissingBinding {
+    private final ComponentPath componentPath;
+    private final Key key;
+    private final IntSupplier hash = Suppliers.memoizeInt(() ->
+        Objects.hash(componentPath(), key()));
+
+    MissingBindingImpl(ComponentPath componentPath, Key key) {
+      this.componentPath = requireNonNull(componentPath);
+      this.key = requireNonNull(key);
     }
 
-    @Memoized
-    @Override
-    public abstract int hashCode();
+    static MissingBinding create(ComponentPath component, Key key) {
+      return new MissingBindingImpl(component, key);
+    }
 
     @Override
-    public abstract boolean equals(Object o);
+    public ComponentPath componentPath() {
+      return componentPath;
+    }
+
+    @Override
+    public Key key() {
+      return key;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      MissingBindingImpl that = (MissingBindingImpl) o;
+      return this.hashCode() == that.hashCode()
+          && componentPath.equals(that.componentPath)
+          && key.equals(that.key);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash.getAsInt();
+    }
   }
 }
