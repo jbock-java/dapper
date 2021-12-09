@@ -18,14 +18,16 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationElementAndValue;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import jakarta.inject.Inject;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -33,30 +35,77 @@ import javax.lang.model.element.TypeElement;
  * A declaration for a subcomponent that is included in a module via {@link
  * dagger.Module#subcomponents()}.
  */
-@AutoValue
-public abstract class SubcomponentDeclaration extends BindingDeclaration {
+public final class SubcomponentDeclaration extends BindingDeclaration {
+  private final Optional<Element> bindingElement;
+  private final Optional<TypeElement> contributingModule;
+  private final Key key;
+  private final TypeElement subcomponentType;
+  private final ModuleAnnotation moduleAnnotation;
+  private final IntSupplier hash = Suppliers.memoizeInt(() ->
+      Objects.hash(bindingElement(), contributingModule(), key(), subcomponentType(), moduleAnnotation()));
+
+  SubcomponentDeclaration(
+      Optional<Element> bindingElement,
+      Optional<TypeElement> contributingModule,
+      Key key,
+      TypeElement subcomponentType,
+      ModuleAnnotation moduleAnnotation) {
+    this.bindingElement = requireNonNull(bindingElement);
+    this.contributingModule = requireNonNull(contributingModule);
+    this.key = requireNonNull(key);
+    this.subcomponentType = requireNonNull(subcomponentType);
+    this.moduleAnnotation = requireNonNull(moduleAnnotation);
+  }
+
+  @Override
+  public Optional<Element> bindingElement() {
+    return bindingElement;
+  }
+
+  @Override
+  public Optional<TypeElement> contributingModule() {
+    return contributingModule;
+  }
+
   /**
    * Key for the {@link dagger.Subcomponent.Builder} or {@link
    * dagger.producers.ProductionSubcomponent.Builder} of {@link #subcomponentType()}.
    */
   @Override
-  public abstract Key key();
+  public Key key() {
+    return key;
+  }
 
   /**
    * The type element that defines the {@link dagger.Subcomponent} or {@link
    * dagger.producers.ProductionSubcomponent} for this declaration.
    */
-  abstract TypeElement subcomponentType();
+  TypeElement subcomponentType() {
+    return subcomponentType;
+  }
 
   /** The module annotation. */
-  public abstract ModuleAnnotation moduleAnnotation();
-
-  @Memoized
-  @Override
-  public abstract int hashCode();
+  public ModuleAnnotation moduleAnnotation() {
+    return moduleAnnotation;
+  }
 
   @Override
-  public abstract boolean equals(Object obj);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    SubcomponentDeclaration that = (SubcomponentDeclaration) o;
+    return hashCode() == that.hashCode()
+        && bindingElement.equals(that.bindingElement)
+        && contributingModule.equals(that.contributingModule)
+        && key.equals(that.key)
+        && subcomponentType.equals(that.subcomponentType)
+        && moduleAnnotation.equals(that.moduleAnnotation);
+  }
+
+  @Override
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
   /** A {@link SubcomponentDeclaration} factory. */
   public static class Factory {
@@ -74,7 +123,7 @@ public abstract class SubcomponentDeclaration extends BindingDeclaration {
           getAnnotationElementAndValue(moduleAnnotation.annotation(), "subcomponents").getKey();
       for (TypeElement subcomponent : moduleAnnotation.subcomponents()) {
         declarations.add(
-            new AutoValue_SubcomponentDeclaration(
+            new SubcomponentDeclaration(
                 Optional.of(subcomponentAttribute),
                 Optional.of(module),
                 keyFactory.forSubcomponentCreator(
