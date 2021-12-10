@@ -18,20 +18,46 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import dagger.BindsOptionalOf;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import jakarta.inject.Inject;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 /** A {@link BindsOptionalOf} declaration. */
-@AutoValue
-abstract class OptionalBindingDeclaration extends BindingDeclaration {
+final class OptionalBindingDeclaration extends BindingDeclaration {
+
+  private final Optional<Element> bindingElement;
+  private final Optional<TypeElement> contributingModule;
+  private final Key key;
+  private final IntSupplier hash = Suppliers.memoizeInt(() ->
+      Objects.hash(bindingElement(), contributingModule(), key()));
+
+  OptionalBindingDeclaration(
+      Optional<Element> bindingElement,
+      Optional<TypeElement> contributingModule,
+      Key key) {
+    this.bindingElement = requireNonNull(bindingElement);
+    this.contributingModule = requireNonNull(contributingModule);
+    this.key = requireNonNull(key);
+  }
+
+  @Override
+  public Optional<Element> bindingElement() {
+    return bindingElement;
+  }
+
+  @Override
+  public Optional<TypeElement> contributingModule() {
+    return contributingModule;
+  }
 
   /**
    * {@inheritDoc}
@@ -40,14 +66,25 @@ abstract class OptionalBindingDeclaration extends BindingDeclaration {
    * {@code Optional} of derived types.
    */
   @Override
-  public abstract Key key();
-
-  @Memoized
-  @Override
-  public abstract int hashCode();
+  public Key key() {
+    return key;
+  }
 
   @Override
-  public abstract boolean equals(Object obj);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    OptionalBindingDeclaration that = (OptionalBindingDeclaration) o;
+    return hashCode() == that.hashCode()
+        && bindingElement.equals(that.bindingElement)
+        && contributingModule.equals(that.contributingModule)
+        && key.equals(that.key);
+  }
+
+  @Override
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
   static class Factory {
     private final KeyFactory keyFactory;
@@ -59,8 +96,8 @@ abstract class OptionalBindingDeclaration extends BindingDeclaration {
 
     OptionalBindingDeclaration forMethod(ExecutableElement method, TypeElement contributingModule) {
       checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
-      return new AutoValue_OptionalBindingDeclaration(
-          Optional.<Element>of(method),
+      return new OptionalBindingDeclaration(
+          Optional.of(method),
           Optional.of(contributingModule),
           keyFactory.forBindsOptionalOfMethod(method, contributingModule));
     }
