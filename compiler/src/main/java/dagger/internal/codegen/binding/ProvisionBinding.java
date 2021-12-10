@@ -19,50 +19,143 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.PROVISION;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
+import com.google.auto.common.Equivalence;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
-@AutoValue
-public abstract class ProvisionBinding extends ContributionBinding {
+public final class ProvisionBinding extends ContributionBinding {
+
+  private final ContributionType contributionType;
+  private final Key key;
+  private final Optional<Element> bindingElement;
+  private final Optional<TypeElement> contributingModule;
+  private final BindingKind kind;
+  private final Optional<DeclaredType> nullableType;
+  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation;
+  private final ImmutableSet<DependencyRequest> provisionDependencies;
+  private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+  private final Optional<ProvisionBinding> unresolved;
+  private final Optional<Scope> scope;
+
+  private final IntSupplier hash = Suppliers.memoizeInt(() ->
+      Objects.hash(contributionType(), key(), bindingElement(),
+          contributingModule(), kind(), nullableType(),
+          wrappedMapKeyAnnotation(), provisionDependencies(),
+          injectionSites(), unresolved(), scope()));
+
+  private final Supplier<ImmutableSet<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
+      ImmutableSet.<DependencyRequest>builder()
+          .addAll(provisionDependencies())
+          .addAll(membersInjectionDependencies())
+          .build());
+  private final Supplier<ImmutableSet<DependencyRequest>> membersInjectionDependencies = Suppliers.memoize(() -> injectionSites()
+      .stream()
+      .flatMap(i -> i.dependencies().stream())
+      .collect(toImmutableSet()));
+  private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
+
+  ProvisionBinding(
+      ContributionType contributionType,
+      Key key,
+      Optional<Element> bindingElement,
+      Optional<TypeElement> contributingModule,
+      BindingKind kind,
+      Optional<DeclaredType> nullableType,
+      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation,
+      ImmutableSet<DependencyRequest> provisionDependencies,
+      ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
+      Optional<ProvisionBinding> unresolved,
+      Optional<Scope> scope) {
+    this.contributionType = requireNonNull(contributionType);
+    this.key = requireNonNull(key);
+    this.bindingElement = requireNonNull(bindingElement);
+    this.contributingModule = requireNonNull(contributingModule);
+    this.kind = requireNonNull(kind);
+    this.nullableType = requireNonNull(nullableType);
+    this.wrappedMapKeyAnnotation = requireNonNull(wrappedMapKeyAnnotation);
+    this.provisionDependencies = requireNonNull(provisionDependencies);
+    this.injectionSites = requireNonNull(injectionSites);
+    this.unresolved = requireNonNull(unresolved);
+    this.scope = requireNonNull(scope);
+  }
 
   @Override
-  @Memoized
   public ImmutableSet<DependencyRequest> explicitDependencies() {
-    return ImmutableSet.<DependencyRequest>builder()
-        .addAll(provisionDependencies())
-        .addAll(membersInjectionDependencies())
-        .build();
+    return explicitDependencies.get();
+  }
+
+  @Override
+  public ContributionType contributionType() {
+    return contributionType;
+  }
+
+  @Override
+  public Key key() {
+    return key;
+  }
+
+  @Override
+  public Optional<Element> bindingElement() {
+    return bindingElement;
+  }
+
+  @Override
+  public Optional<TypeElement> contributingModule() {
+    return contributingModule;
+  }
+
+  @Override
+  public BindingKind kind() {
+    return kind;
+  }
+
+  @Override
+  public Optional<DeclaredType> nullableType() {
+    return nullableType;
+  }
+
+  @Override
+  public Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation() {
+    return wrappedMapKeyAnnotation;
   }
 
   /**
    * Dependencies necessary to invoke an {@code @Inject} constructor or {@code @Provides} method.
    */
-  public abstract ImmutableSet<DependencyRequest> provisionDependencies();
+  public ImmutableSet<DependencyRequest> provisionDependencies() {
+    return provisionDependencies;
+  }
 
-  @Memoized
   ImmutableSet<DependencyRequest> membersInjectionDependencies() {
-    return injectionSites()
-        .stream()
-        .flatMap(i -> i.dependencies().stream())
-        .collect(toImmutableSet());
+    return membersInjectionDependencies.get();
   }
 
   /**
    * {@link InjectionSite}s for all {@code @Inject} members if {@link #kind()} is {@link
    * BindingKind#INJECTION}, otherwise empty.
    */
-  public abstract ImmutableSortedSet<InjectionSite> injectionSites();
+  public ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
+    return injectionSites;
+  }
 
   @Override
   public BindingType bindingType() {
@@ -70,21 +163,27 @@ public abstract class ProvisionBinding extends ContributionBinding {
   }
 
   @Override
-  public abstract Optional<ProvisionBinding> unresolved();
+  public Optional<ProvisionBinding> unresolved() {
+    return unresolved;
+  }
 
   // TODO(ronshapiro): we should be able to remove this, but AutoValue barks on the Builder's scope
   // method, saying that the method doesn't correspond to a property of ProvisionBinding
   @Override
-  public abstract Optional<Scope> scope();
+  public Optional<Scope> scope() {
+    return scope;
+  }
 
   public static Builder builder() {
-    return new $AutoValue_ProvisionBinding.Builder()
+    return new Builder()
         .provisionDependencies(ImmutableSet.of())
         .injectionSites(ImmutableSortedSet.of());
   }
 
   @Override
-  public abstract Builder toBuilder();
+  public ProvisionBinding.Builder toBuilder() {
+    return new Builder(this);
+  }
 
   private static final ImmutableSet<BindingKind> KINDS_TO_CHECK_FOR_NULL =
       ImmutableSet.of(PROVISION, COMPONENT_PROVISION);
@@ -98,38 +197,155 @@ public abstract class ProvisionBinding extends ContributionBinding {
 
   // Profiling determined that this method is called enough times that memoizing it had a measurable
   // performance improvement for large components.
-  @Memoized
   @Override
   public boolean requiresModuleInstance() {
-    return super.requiresModuleInstance();
+    return requiresModuleInstance.get();
   }
 
-  @Memoized
-  @Override
-  public abstract int hashCode();
 
-  // TODO(ronshapiro,dpb): simplify the equality semantics
   @Override
-  public abstract boolean equals(Object obj);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ProvisionBinding that = (ProvisionBinding) o;
+    return hashCode() == that.hashCode()
+        && contributionType == that.contributionType
+        && key.equals(that.key)
+        && bindingElement.equals(that.bindingElement)
+        && contributingModule.equals(that.contributingModule)
+        && kind == that.kind
+        && nullableType.equals(that.nullableType)
+        && wrappedMapKeyAnnotation.equals(that.wrappedMapKeyAnnotation)
+        && provisionDependencies.equals(that.provisionDependencies)
+        && injectionSites.equals(that.injectionSites)
+        && unresolved.equals(that.unresolved)
+        && scope.equals(that.scope);
+  }
+
+  @Override
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
   /** A {@link ProvisionBinding} builder. */
-  @AutoValue.Builder
-  public abstract static class Builder
-      extends ContributionBinding.Builder<ProvisionBinding, Builder> {
+  static class Builder extends ContributionBinding.Builder<ProvisionBinding, Builder> {
+    private ContributionType contributionType;
+    private Key key;
+    private Optional<Element> bindingElement = Optional.empty();
+    private Optional<TypeElement> contributingModule = Optional.empty();
+    private BindingKind kind;
+    private Optional<DeclaredType> nullableType = Optional.empty();
+    private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation = Optional.empty();
+    private ImmutableSet<DependencyRequest> provisionDependencies;
+    private ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+    private Optional<ProvisionBinding> unresolved = Optional.empty();
+    private Optional<Scope> scope = Optional.empty();
+
+    Builder() {
+    }
+
+    private Builder(ProvisionBinding source) {
+      this.contributionType = source.contributionType();
+      this.key = source.key();
+      this.bindingElement = source.bindingElement();
+      this.contributingModule = source.contributingModule();
+      this.kind = source.kind();
+      this.nullableType = source.nullableType();
+      this.wrappedMapKeyAnnotation = source.wrappedMapKeyAnnotation();
+      this.provisionDependencies = source.provisionDependencies();
+      this.injectionSites = source.injectionSites();
+      this.unresolved = source.unresolved();
+      this.scope = source.scope();
+    }
 
     @Override
     public Builder dependencies(Iterable<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
     }
 
-    abstract Builder provisionDependencies(Iterable<DependencyRequest> provisionDependencies);
-
-    public abstract Builder injectionSites(ImmutableSortedSet<InjectionSite> injectionSites);
+    @Override
+    public Builder contributionType(ContributionType contributionType) {
+      this.contributionType = contributionType;
+      return this;
+    }
 
     @Override
-    public abstract Builder unresolved(ProvisionBinding unresolved);
+    public Builder key(Key key) {
+      this.key = key;
+      return this;
+    }
 
-    public abstract Builder scope(Optional<Scope> scope);
+    @Override
+    public Builder bindingElement(Element bindingElement) {
+      this.bindingElement = Optional.of(bindingElement);
+      return this;
+    }
+
+    @Override
+    Builder bindingElement(Optional<Element> bindingElement) {
+      this.bindingElement = bindingElement;
+      return this;
+    }
+
+    @Override
+    Builder contributingModule(TypeElement contributingModule) {
+      this.contributingModule = Optional.of(contributingModule);
+      return this;
+    }
+
+    @Override
+    public Builder kind(BindingKind kind) {
+      this.kind = kind;
+      return this;
+    }
+
+    @Override
+    public Builder nullableType(Optional<DeclaredType> nullableType) {
+      this.nullableType = nullableType;
+      return this;
+    }
+
+    @Override
+    Builder wrappedMapKeyAnnotation(Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation) {
+      this.wrappedMapKeyAnnotation = wrappedMapKeyAnnotation;
+      return this;
+    }
+
+    Builder provisionDependencies(Iterable<DependencyRequest> provisionDependencies) {
+      this.provisionDependencies = ImmutableSet.copyOf(provisionDependencies);
+      return this;
+    }
+
+    public Builder injectionSites(ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites) {
+      this.injectionSites = injectionSites;
+      return this;
+    }
+
+    @Override
+    public Builder unresolved(ProvisionBinding unresolved) {
+      this.unresolved = Optional.of(unresolved);
+      return this;
+    }
+
+    public Builder scope(Optional<Scope> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    @Override
+    ProvisionBinding autoBuild() {
+      return new ProvisionBinding(
+          this.contributionType,
+          this.key,
+          this.bindingElement,
+          this.contributingModule,
+          this.kind,
+          this.nullableType,
+          this.wrappedMapKeyAnnotation,
+          this.provisionDependencies,
+          this.injectionSites,
+          this.unresolved,
+          this.scope);
+    }
   }
-
 }
