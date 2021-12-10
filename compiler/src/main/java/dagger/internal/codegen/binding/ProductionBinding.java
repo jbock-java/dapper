@@ -18,23 +18,121 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
+import com.google.auto.common.Equivalence;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.base.Suppliers;
+import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /** A value object representing the mechanism by which a {@link Key} can be produced. */
-@AutoValue
-public abstract class ProductionBinding extends ContributionBinding {
+public final class ProductionBinding extends ContributionBinding {
+
+  private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
+
+  private final ContributionType contributionType;
+  private final Key key;
+  private final Optional<Element> bindingElement;
+  private final Optional<TypeElement> contributingModule;
+  private final BindingKind kind;
+  private final ImmutableSet<DependencyRequest> explicitDependencies;
+  private final Optional<DeclaredType> nullableType;
+  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation;
+  private final Optional<ProductionBinding> unresolved;
+  private final Optional<ProductionBinding.ProductionKind> productionKind;
+  private final ImmutableList<? extends TypeMirror> thrownTypes;
+  private final Optional<DependencyRequest> executorRequest;
+  private final Optional<DependencyRequest> monitorRequest;
+
+  private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(contributionType(),
+      key(), bindingElement(), contributingModule(), kind(), explicitDependencies(),
+      nullableType(), wrappedMapKeyAnnotation(), unresolved(), productionKind(),
+      thrownTypes(), executorRequest(), monitorRequest()));
+
+  ProductionBinding(
+      ContributionType contributionType,
+      Key key,
+      Optional<Element> bindingElement,
+      Optional<TypeElement> contributingModule,
+      BindingKind kind,
+      ImmutableSet<DependencyRequest> explicitDependencies,
+      Optional<DeclaredType> nullableType,
+      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation,
+      Optional<ProductionBinding> unresolved,
+      Optional<ProductionBinding.ProductionKind> productionKind,
+      ImmutableList<? extends TypeMirror> thrownTypes,
+      Optional<DependencyRequest> executorRequest,
+      Optional<DependencyRequest> monitorRequest) {
+    this.contributionType = requireNonNull(contributionType);
+    this.key = requireNonNull(key);
+    this.bindingElement = requireNonNull(bindingElement);
+    this.contributingModule = requireNonNull(contributingModule);
+    this.kind = requireNonNull(kind);
+    this.explicitDependencies = requireNonNull(explicitDependencies);
+    this.nullableType = requireNonNull(nullableType);
+    this.wrappedMapKeyAnnotation = requireNonNull(wrappedMapKeyAnnotation);
+    this.unresolved = requireNonNull(unresolved);
+    this.productionKind = requireNonNull(productionKind);
+    this.thrownTypes = requireNonNull(thrownTypes);
+    this.executorRequest = requireNonNull(executorRequest);
+    this.monitorRequest = requireNonNull(monitorRequest);
+  }
+
+  @Override
+  public ContributionType contributionType() {
+    return contributionType;
+  }
+
+  @Override
+  public Key key() {
+    return key;
+  }
+
+  @Override
+  public Optional<Element> bindingElement() {
+    return bindingElement;
+  }
+
+  @Override
+  public Optional<TypeElement> contributingModule() {
+    return contributingModule;
+  }
+
+  @Override
+  public BindingKind kind() {
+    return kind;
+  }
+
+  @Override
+  public ImmutableSet<DependencyRequest> explicitDependencies() {
+    return explicitDependencies;
+  }
+
+  @Override
+  public Optional<DeclaredType> nullableType() {
+    return nullableType;
+  }
+
+  @Override
+  public Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation() {
+    return wrappedMapKeyAnnotation;
+  }
 
   @Override
   public BindingType bindingType() {
@@ -42,7 +140,9 @@ public abstract class ProductionBinding extends ContributionBinding {
   }
 
   @Override
-  public abstract Optional<ProductionBinding> unresolved();
+  public Optional<ProductionBinding> unresolved() {
+    return unresolved;
+  }
 
   @Override
   public ImmutableSet<DependencyRequest> implicitDependencies() {
@@ -80,70 +180,211 @@ public abstract class ProductionBinding extends ContributionBinding {
    * {@code @Produces} methods will have a production kind, but synthetic production bindings may
    * not.
    */
-  public abstract Optional<ProductionKind> productionKind();
+  public Optional<ProductionBinding.ProductionKind> productionKind() {
+    return productionKind;
+  }
 
   /** Returns the list of types in the throws clause of the method. */
-  public abstract ImmutableList<? extends TypeMirror> thrownTypes();
+  public ImmutableList<? extends TypeMirror> thrownTypes() {
+    return thrownTypes;
+  }
 
   /**
    * If this production requires an executor, this will be the corresponding request.  All
    * production bindings from {@code @Produces} methods will have an executor request, but
    * synthetic production bindings may not.
    */
-  abstract Optional<DependencyRequest> executorRequest();
+  Optional<DependencyRequest> executorRequest() {
+    return executorRequest;
+  }
 
   /** If this production requires a monitor, this will be the corresponding request.  All
    * production bindings from {@code @Produces} methods will have a monitor request, but synthetic
    * production bindings may not.
    */
-  abstract Optional<DependencyRequest> monitorRequest();
+  Optional<DependencyRequest> monitorRequest() {
+    return monitorRequest;
+  }
 
   // Profiling determined that this method is called enough times that memoizing it had a measurable
   // performance improvement for large components.
-  @Memoized
   @Override
   public boolean requiresModuleInstance() {
-    return super.requiresModuleInstance();
+    return requiresModuleInstance.get();
   }
 
   public static Builder builder() {
-    return new AutoValue_ProductionBinding.Builder()
-        .explicitDependencies(ImmutableList.<DependencyRequest>of())
-        .thrownTypes(ImmutableList.<TypeMirror>of());
+    return new Builder()
+        .explicitDependencies(ImmutableList.of())
+        .thrownTypes(ImmutableList.of());
   }
 
   @Override
-  public abstract Builder toBuilder();
+  public Builder toBuilder() {
+    return new Builder(this);
+  }
 
-  @Memoized
   @Override
-  public abstract int hashCode();
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ProductionBinding that = (ProductionBinding) o;
+    return hashCode() == that.hashCode()
+        && contributionType == that.contributionType
+        && key.equals(that.key)
+        && bindingElement.equals(that.bindingElement)
+        && contributingModule.equals(that.contributingModule)
+        && kind == that.kind
+        && explicitDependencies.equals(that.explicitDependencies)
+        && nullableType.equals(that.nullableType)
+        && wrappedMapKeyAnnotation.equals(that.wrappedMapKeyAnnotation)
+        && unresolved.equals(that.unresolved)
+        && productionKind.equals(that.productionKind)
+        && thrownTypes.equals(that.thrownTypes)
+        && executorRequest.equals(that.executorRequest)
+        && monitorRequest.equals(that.monitorRequest);
+  }
 
-  // TODO(ronshapiro,dpb): simplify the equality semantics
   @Override
-  public abstract boolean equals(Object obj);
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
   /** A {@link ProductionBinding} builder. */
-  @AutoValue.Builder
-  public abstract static class Builder
-      extends ContributionBinding.Builder<ProductionBinding, Builder> {
+  static class Builder extends ContributionBinding.Builder<ProductionBinding, Builder> {
+    private ContributionType contributionType;
+    private Key key;
+    private Optional<Element> bindingElement = Optional.empty();
+    private Optional<TypeElement> contributingModule = Optional.empty();
+    private BindingKind kind;
+    private ImmutableSet<DependencyRequest> explicitDependencies;
+    private Optional<DeclaredType> nullableType = Optional.empty();
+    private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation = Optional.empty();
+    private Optional<ProductionBinding> unresolved = Optional.empty();
+    private Optional<ProductionBinding.ProductionKind> productionKind = Optional.empty();
+    private ImmutableList<? extends TypeMirror> thrownTypes;
+    private Optional<DependencyRequest> executorRequest = Optional.empty();
+    private Optional<DependencyRequest> monitorRequest = Optional.empty();
+
+    Builder() {
+    }
+
+    private Builder(ProductionBinding source) {
+      this.contributionType = source.contributionType();
+      this.key = source.key();
+      this.bindingElement = source.bindingElement();
+      this.contributingModule = source.contributingModule();
+      this.kind = source.kind();
+      this.explicitDependencies = source.explicitDependencies();
+      this.nullableType = source.nullableType();
+      this.wrappedMapKeyAnnotation = source.wrappedMapKeyAnnotation();
+      this.unresolved = source.unresolved();
+      this.productionKind = source.productionKind();
+      this.thrownTypes = source.thrownTypes();
+      this.executorRequest = source.executorRequest();
+      this.monitorRequest = source.monitorRequest();
+    }
 
     @Override
     public Builder dependencies(Iterable<DependencyRequest> dependencies) {
       return explicitDependencies(dependencies);
     }
 
-    abstract Builder explicitDependencies(Iterable<DependencyRequest> dependencies);
-
-    abstract Builder productionKind(ProductionKind productionKind);
+    @Override
+    public Builder contributionType(ContributionType contributionType) {
+      this.contributionType = contributionType;
+      return this;
+    }
 
     @Override
-    public abstract Builder unresolved(ProductionBinding unresolved);
+    public Builder key(Key key) {
+      this.key = key;
+      return this;
+    }
 
-    abstract Builder thrownTypes(Iterable<? extends TypeMirror> thrownTypes);
+    @Override
+    public Builder bindingElement(Element bindingElement) {
+      this.bindingElement = Optional.of(bindingElement);
+      return this;
+    }
 
-    abstract Builder executorRequest(DependencyRequest executorRequest);
+    @Override
+    Builder bindingElement(Optional<Element> bindingElement) {
+      this.bindingElement = bindingElement;
+      return this;
+    }
 
-    abstract Builder monitorRequest(DependencyRequest monitorRequest);
+    @Override
+    Builder contributingModule(TypeElement contributingModule) {
+      this.contributingModule = Optional.of(contributingModule);
+      return this;
+    }
+
+    @Override
+    public Builder kind(BindingKind kind) {
+      this.kind = kind;
+      return this;
+    }
+
+    Builder explicitDependencies(Iterable<DependencyRequest> explicitDependencies) {
+      this.explicitDependencies = ImmutableSet.copyOf(explicitDependencies);
+      return this;
+    }
+
+    @Override
+    public Builder nullableType(Optional<DeclaredType> nullableType) {
+      this.nullableType = nullableType;
+      return this;
+    }
+
+    @Override
+    Builder wrappedMapKeyAnnotation(Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation) {
+      this.wrappedMapKeyAnnotation = wrappedMapKeyAnnotation;
+      return this;
+    }
+
+    @Override
+    public Builder unresolved(ProductionBinding unresolved) {
+      this.unresolved = Optional.of(unresolved);
+      return this;
+    }
+
+    Builder productionKind(ProductionBinding.ProductionKind productionKind) {
+      this.productionKind = Optional.of(productionKind);
+      return this;
+    }
+
+    Builder thrownTypes(Iterable<? extends TypeMirror> thrownTypes) {
+      this.thrownTypes = ImmutableList.copyOf(thrownTypes);
+      return this;
+    }
+
+    Builder executorRequest(DependencyRequest executorRequest) {
+      this.executorRequest = Optional.of(executorRequest);
+      return this;
+    }
+
+    Builder monitorRequest(DependencyRequest monitorRequest) {
+      this.monitorRequest = Optional.of(monitorRequest);
+      return this;
+    }
+
+    @Override
+    ProductionBinding autoBuild() {
+      return new ProductionBinding(
+          this.contributionType,
+          this.key,
+          this.bindingElement,
+          this.contributingModule,
+          this.kind,
+          this.explicitDependencies,
+          this.nullableType,
+          this.wrappedMapKeyAnnotation,
+          this.unresolved,
+          this.productionKind,
+          this.thrownTypes,
+          this.executorRequest,
+          this.monitorRequest);
+    }
   }
 }
