@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -28,12 +29,11 @@ import static javax.lang.model.element.Modifier.STATIC;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.model.Key;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;
@@ -42,8 +42,28 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** A type that a component needs an instance of. */
-@AutoValue
-public abstract class ComponentRequirement {
+public final class ComponentRequirement {
+
+  private final ComponentRequirement.Kind kind;
+  private final Equivalence.Wrapper<TypeMirror> wrappedType;
+  private final Optional<ComponentRequirement.NullPolicy> overrideNullPolicy;
+  private final Optional<Key> key;
+  private final String variableName;
+
+  ComponentRequirement(
+      ComponentRequirement.Kind kind,
+      Equivalence.Wrapper<TypeMirror> wrappedType,
+      Optional<ComponentRequirement.NullPolicy> overrideNullPolicy,
+      Optional<Key> key,
+      String variableName) {
+    this.kind = requireNonNull(kind);
+    this.wrappedType = requireNonNull(wrappedType);
+    this.overrideNullPolicy = requireNonNull(overrideNullPolicy);
+    this.key = requireNonNull(key);
+    this.variableName = requireNonNull(variableName);
+  }
+
+
   /** The kind of the {@link ComponentRequirement}. */
   public enum Kind {
     /** A type listed in the component's {@code dependencies} attribute. */
@@ -68,11 +88,13 @@ public abstract class ComponentRequirement {
   }
 
   /** The kind of requirement. */
-  public abstract Kind kind();
+  public ComponentRequirement.Kind kind() {
+    return kind;
+  }
 
   /** Returns true if this is a {@link Kind#BOUND_INSTANCE} requirement. */
   // TODO(ronshapiro): consider removing this and inlining the usages
-  final boolean isBoundInstance() {
+  boolean isBoundInstance() {
     return kind().isBoundInstance();
   }
 
@@ -80,7 +102,9 @@ public abstract class ComponentRequirement {
    * The type of the instance the component must have, wrapped so that requirements can be used as
    * value types.
    */
-  public abstract Equivalence.Wrapper<TypeMirror> wrappedType();
+  public Equivalence.Wrapper<TypeMirror> wrappedType() {
+    return wrappedType;
+  }
 
   /** The type of the instance the component must have. */
   public TypeMirror type() {
@@ -109,7 +133,9 @@ public abstract class ComponentRequirement {
    * <p>Some implementations' null policy can be determined upon construction (e.g., for binding
    * instances), but others' require Elements which must wait until {@link #nullPolicy} is called.
    */
-  abstract Optional<NullPolicy> overrideNullPolicy();
+  Optional<ComponentRequirement.NullPolicy> overrideNullPolicy() {
+    return overrideNullPolicy;
+  }
 
   /** The requirement's null policy. */
   public NullPolicy nullPolicy(DaggerElements elements) {
@@ -175,13 +201,34 @@ public abstract class ComponentRequirement {
   }
 
   /** The key for this requirement, if one is available. */
-  public abstract Optional<Key> key();
+  public Optional<Key> key() {
+    return key;
+  }
 
   /** Returns the name for this requirement that could be used as a variable. */
-  public abstract String variableName();
+  public String variableName() {
+    return variableName;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ComponentRequirement that = (ComponentRequirement) o;
+    return kind == that.kind
+        && wrappedType.equals(that.wrappedType)
+        && overrideNullPolicy.equals(that.overrideNullPolicy)
+        && key.equals(that.key)
+        && variableName.equals(that.variableName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(kind, wrappedType, overrideNullPolicy, key, variableName);
+  }
 
   public static ComponentRequirement forDependency(TypeMirror type) {
-    return new AutoValue_ComponentRequirement(
+    return new ComponentRequirement(
         Kind.DEPENDENCY,
         MoreTypes.equivalence().wrap(checkNotNull(type)),
         Optional.empty(),
@@ -190,7 +237,7 @@ public abstract class ComponentRequirement {
   }
 
   public static ComponentRequirement forModule(TypeMirror type) {
-    return new AutoValue_ComponentRequirement(
+    return new ComponentRequirement(
         Kind.MODULE,
         MoreTypes.equivalence().wrap(checkNotNull(type)),
         Optional.empty(),
@@ -199,7 +246,7 @@ public abstract class ComponentRequirement {
   }
 
   static ComponentRequirement forBoundInstance(Key key, boolean nullable, String variableName) {
-    return new AutoValue_ComponentRequirement(
+    return new ComponentRequirement(
         Kind.BOUND_INSTANCE,
         MoreTypes.equivalence().wrap(key.type()),
         nullable ? Optional.of(NullPolicy.ALLOW) : Optional.empty(),
