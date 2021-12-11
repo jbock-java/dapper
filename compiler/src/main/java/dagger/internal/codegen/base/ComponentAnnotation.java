@@ -33,6 +33,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -235,21 +236,21 @@ public abstract class ComponentAnnotation {
    *
    * @see FictionalComponentAnnotation
    */
-  static final class RealComponentAnnotation extends ComponentAnnotation {
+  private static final class RealComponentAnnotation extends ComponentAnnotation {
 
-    private final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
+    final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
         isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies"));
-    private final Supplier<List<TypeMirror>> dependencyTypes = Suppliers.memoize(super::dependencyTypes);
-    private final Supplier<List<TypeElement>> dependencies = Suppliers.memoize(super::dependencies);
-    private final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
-    private final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
-    private final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
+    final Supplier<List<TypeMirror>> dependencyTypes = Suppliers.memoize(super::dependencyTypes);
+    final Supplier<List<TypeElement>> dependencies = Suppliers.memoize(super::dependencies);
+    final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
+    final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
+    final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
 
-    private final AnnotationMirror annotation;
-    private final boolean isSubcomponent;
-    private final boolean isProduction;
+    final AnnotationMirror annotation;
+    final boolean isSubcomponent;
+    final boolean isProduction;
 
-    private RealComponentAnnotation(
+    RealComponentAnnotation(
         AnnotationMirror annotation,
         boolean isSubcomponent,
         boolean isProduction) {
@@ -308,11 +309,26 @@ public abstract class ComponentAnnotation {
       return modules.get();
     }
 
-    private static Builder builder() {
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      RealComponentAnnotation that = (RealComponentAnnotation) o;
+      return isSubcomponent == that.isSubcomponent
+          && isProduction == that.isProduction
+          && annotation.equals(that.annotation);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(annotation, isSubcomponent, isProduction);
+    }
+
+    static Builder builder() {
       return new Builder();
     }
 
-    private static final class Builder {
+    static final class Builder {
       AnnotationMirror annotation;
       Boolean isSubcomponent;
       Boolean isProduction;
@@ -394,7 +410,20 @@ public abstract class ComponentAnnotation {
       return modules.get();
     }
 
-    private ModuleAnnotation moduleAnnotation() {
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      FictionalComponentAnnotation that = (FictionalComponentAnnotation) o;
+      return moduleAnnotation.equals(that.moduleAnnotation);
+    }
+
+    @Override
+    public int hashCode() {
+      return moduleAnnotation.hashCode();
+    }
+
+    ModuleAnnotation moduleAnnotation() {
       return moduleAnnotation;
     }
   }
