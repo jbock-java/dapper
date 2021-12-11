@@ -17,16 +17,17 @@
 package dagger.internal.codegen.base;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import dagger.model.Key;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
@@ -39,8 +40,13 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  *
  * <p>{@link com.google.common.base.Optional} and {@link java.util.Optional} are supported.
  */
-@AutoValue
-public abstract class OptionalType {
+public final class OptionalType {
+
+  private final Equivalence.Wrapper<DeclaredType> wrappedDeclaredOptionalType;
+
+  private OptionalType(Equivalence.Wrapper<DeclaredType> wrappedDeclaredOptionalType) {
+    this.wrappedDeclaredOptionalType = requireNonNull(wrappedDeclaredOptionalType);
+  }
 
   /** A variant of {@code Optional}. */
   public enum OptionalKind {
@@ -69,13 +75,6 @@ public abstract class OptionalType {
       return CodeBlock.of("$T.$L()", clazz, absentFactoryMethodName);
     }
 
-    /**
-     * Returns an expression for the absent/empty value, parameterized with {@link #valueType()}.
-     */
-    public CodeBlock parameterizedAbsentValueExpression(OptionalType optionalType) {
-      return CodeBlock.of("$T.<$T>$L()", clazz, optionalType.valueType(), absentFactoryMethodName);
-    }
-
     /** Returns an expression for the present {@code value}. */
     public CodeBlock presentExpression(CodeBlock value) {
       return CodeBlock.of("$T.of($L)", clazz, value);
@@ -91,7 +90,7 @@ public abstract class OptionalType {
   }
 
   private static final TypeVisitor<Optional<OptionalKind>, Void> OPTIONAL_KIND =
-      new SimpleTypeVisitor8<Optional<OptionalKind>, Void>(Optional.empty()) {
+      new SimpleTypeVisitor8<>(Optional.empty()) {
         @Override
         public Optional<OptionalKind> visitDeclared(DeclaredType t, Void p) {
           for (OptionalKind optionalKind : OptionalKind.values()) {
@@ -104,18 +103,9 @@ public abstract class OptionalType {
         }
       };
 
-  /**
-   * The optional type itself, wrapped using {@link MoreTypes#equivalence()}.
-   *
-   * @deprecated Use {@link #declaredOptionalType()} instead.
-   */
-  @Deprecated
-  protected abstract Equivalence.Wrapper<DeclaredType> wrappedDeclaredOptionalType();
-
   /** The optional type itself. */
-  @SuppressWarnings("deprecation")
   private DeclaredType declaredOptionalType() {
-    return wrappedDeclaredOptionalType().get();
+    return wrappedDeclaredOptionalType.get();
   }
 
   /** Which {@code Optional} type is used. */
@@ -136,6 +126,19 @@ public abstract class OptionalType {
   /** Returns {@code true} if {@code key.type()} is an {@code Optional} type. */
   public static boolean isOptional(Key key) {
     return isOptional(key.type());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    OptionalType that = (OptionalType) o;
+    return wrappedDeclaredOptionalType.equals(that.wrappedDeclaredOptionalType);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(wrappedDeclaredOptionalType);
   }
 
   /**
