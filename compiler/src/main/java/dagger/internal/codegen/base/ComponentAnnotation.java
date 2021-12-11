@@ -24,8 +24,8 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.PRODUCER_MODULE;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
@@ -207,7 +207,7 @@ public abstract class ComponentAnnotation {
 
   /** Creates a fictional component annotation representing a module. */
   public static ComponentAnnotation fromModuleAnnotation(ModuleAnnotation moduleAnnotation) {
-    return new AutoValue_ComponentAnnotation_FictionalComponentAnnotation(moduleAnnotation);
+    return new FictionalComponentAnnotation(moduleAnnotation);
   }
 
   /** The root component annotation types. */
@@ -235,8 +235,7 @@ public abstract class ComponentAnnotation {
    *
    * @see FictionalComponentAnnotation
    */
-  @AutoValue
-  abstract static class RealComponentAnnotation extends ComponentAnnotation {
+  static final class RealComponentAnnotation extends ComponentAnnotation {
 
     private final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
         isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies"));
@@ -245,6 +244,34 @@ public abstract class ComponentAnnotation {
     private final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
     private final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
     private final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
+
+    private final AnnotationMirror annotation;
+    private final boolean isSubcomponent;
+    private final boolean isProduction;
+
+    private RealComponentAnnotation(
+        AnnotationMirror annotation,
+        boolean isSubcomponent,
+        boolean isProduction) {
+      this.annotation = requireNonNull(annotation);
+      this.isSubcomponent = isSubcomponent;
+      this.isProduction = isProduction;
+    }
+
+    @Override
+    public AnnotationMirror annotation() {
+      return annotation;
+    }
+
+    @Override
+    public boolean isSubcomponent() {
+      return isSubcomponent;
+    }
+
+    @Override
+    public boolean isProduction() {
+      return isProduction;
+    }
 
     @Override
     public List<AnnotationValue> dependencyValues() {
@@ -281,19 +308,33 @@ public abstract class ComponentAnnotation {
       return modules.get();
     }
 
-    static Builder builder() {
-      return new AutoValue_ComponentAnnotation_RealComponentAnnotation.Builder();
+    private static Builder builder() {
+      return new Builder();
     }
 
-    @AutoValue.Builder
-    interface Builder {
-      Builder annotation(AnnotationMirror annotation);
+    private static final class Builder {
+      AnnotationMirror annotation;
+      Boolean isSubcomponent;
+      Boolean isProduction;
 
-      Builder isSubcomponent(boolean isSubcomponent);
+      ComponentAnnotation.RealComponentAnnotation.Builder annotation(AnnotationMirror annotation) {
+        this.annotation = annotation;
+        return this;
+      }
 
-      Builder isProduction(boolean isProduction);
+      ComponentAnnotation.RealComponentAnnotation.Builder isSubcomponent(boolean isSubcomponent) {
+        this.isSubcomponent = isSubcomponent;
+        return this;
+      }
 
-      RealComponentAnnotation build();
+      ComponentAnnotation.RealComponentAnnotation.Builder isProduction(boolean isProduction) {
+        this.isProduction = isProduction;
+        return this;
+      }
+
+      RealComponentAnnotation build() {
+        return new RealComponentAnnotation(annotation, isSubcomponent, isProduction);
+      }
     }
   }
 
@@ -301,11 +342,16 @@ public abstract class ComponentAnnotation {
    * A fictional component annotation used to represent modules or other collections of bindings as
    * a component.
    */
-  @AutoValue
-  abstract static class FictionalComponentAnnotation extends ComponentAnnotation {
+  private static final class FictionalComponentAnnotation extends ComponentAnnotation {
 
-    private final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
-    private final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
+    final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
+    final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
+
+    final ModuleAnnotation moduleAnnotation;
+
+    FictionalComponentAnnotation(ModuleAnnotation moduleAnnotation) {
+      this.moduleAnnotation = requireNonNull(moduleAnnotation);
+    }
 
     @Override
     public AnnotationMirror annotation() {
@@ -348,6 +394,8 @@ public abstract class ComponentAnnotation {
       return modules.get();
     }
 
-    public abstract ModuleAnnotation moduleAnnotation();
+    private ModuleAnnotation moduleAnnotation() {
+      return moduleAnnotation;
+    }
   }
 }
