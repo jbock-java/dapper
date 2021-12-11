@@ -24,9 +24,9 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMult
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.MEMBERS_INJECTION;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -53,6 +53,7 @@ import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -324,21 +325,53 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   /** The identifying information about a binding, excluding its {@link Binding#componentPath()}. */
-  @AutoValue
-  abstract static class BindingElement {
+  static final class BindingElement {
+    private final BindingKind bindingKind;
+    private final Optional<Element> bindingElement;
+    private final Optional<TypeElement> contributingModule;
 
-    abstract BindingKind bindingKind();
+    BindingElement(
+        BindingKind bindingKind,
+        Optional<Element> bindingElement,
+        Optional<TypeElement> contributingModule) {
+      this.bindingKind = requireNonNull(bindingKind);
+      this.bindingElement = requireNonNull(bindingElement);
+      this.contributingModule = requireNonNull(contributingModule);
+    }
 
-    abstract Optional<Element> bindingElement();
+    BindingKind bindingKind() {
+      return bindingKind;
+    }
 
-    abstract Optional<TypeElement> contributingModule();
+    Optional<Element> bindingElement() {
+      return bindingElement;
+    }
+
+    Optional<TypeElement> contributingModule() {
+      return contributingModule;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      BindingElement that = (BindingElement) o;
+      return bindingKind == that.bindingKind
+          && bindingElement.equals(that.bindingElement)
+          && contributingModule.equals(that.contributingModule);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(bindingKind, bindingElement, contributingModule);
+    }
 
     static ImmutableSetMultimap<BindingElement, Binding> index(Set<Binding> bindings) {
       return bindings.stream().collect(toImmutableSetMultimap(BindingElement::forBinding, b -> b));
     }
 
     private static BindingElement forBinding(Binding binding) {
-      return new AutoValue_DuplicateBindingsValidator_BindingElement(
+      return new BindingElement(
           binding.kind(), binding.bindingElement(), binding.contributingModule());
     }
   }
