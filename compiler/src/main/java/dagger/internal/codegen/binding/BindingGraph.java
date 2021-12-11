@@ -17,6 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.common.collect.Iterables.transform;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
@@ -38,6 +39,7 @@ import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.Traverser;
 import dagger.Subcomponent;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -48,6 +50,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -60,12 +63,55 @@ import javax.lang.model.element.VariableElement;
 @AutoValue
 public abstract class BindingGraph {
 
+  private final Supplier<ImmutableSet<ComponentRequirement>> componentRequirements = Suppliers.memoize(() -> {
+    ImmutableSet<TypeElement> requiredModules =
+        stream(Traverser.forTree(BindingGraph::subgraphs).depthFirstPostOrder(this))
+            .flatMap(graph -> graph.bindingModules.stream())
+            .filter(ownedModuleTypes()::contains)
+            .collect(toImmutableSet());
+    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
+    componentDescriptor().requirements().stream()
+        .filter(
+            requirement ->
+                !requirement.kind().isModule()
+                    || requiredModules.contains(requirement.typeElement()))
+        .forEach(requirements::add);
+    if (factoryMethod().isPresent()) {
+      requirements.addAll(factoryMethodParameters().keySet());
+    }
+    return requirements.build();
+  });
+  private final Supplier<ImmutableList<BindingGraph>> subgraphs = Suppliers.memoize(() -> topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
+      .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
+      .collect(toImmutableList()));
+
   /**
    * A graph that represents the entire network of nodes from all components, subcomponents and
    * their bindings.
    */
   @AutoValue
   public abstract static class TopLevelBindingGraph extends dagger.model.BindingGraph {
+
+    private final Supplier<? extends ImmutableSetMultimap<Class<? extends Node>, ? extends Node>> nodesByClass
+        = memoize(super::nodesByClass);
+    private final Supplier<ImmutableListMultimap<ComponentPath, BindingNode>> bindingsByComponent = memoize(() ->
+        Multimaps.index(transform(bindings(), BindingNode.class::cast), Node::componentPath));
+    private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
+      Map<Node, Integer> nodeOrderMap = Maps.newHashMapWithExpectedSize(network().nodes().size());
+      int i = 0;
+      for (Node node : network().nodes()) {
+        nodeOrderMap.put(node, i++);
+      }
+      return Comparator.comparing(nodeOrderMap::get);
+    });
+    private final Supplier<ImmutableSet<ImmutableSet<Node>>> stronglyConnectedNodes = Suppliers.memoize(() -> TarjanSCCs.compute(
+        ImmutableSet.copyOf(network().nodes()),
+        // NetworkBuilder does not have a stable successor order, so we have to roll our own
+        // based on the node order, which is stable.
+        // TODO(bcorso): Fix once https://github.com/google/guava/issues/2650 is fixed.
+        node ->
+            network().successors(node).stream().sorted(nodeOrder()).collect(toImmutableList())));
+
     static TopLevelBindingGraph create(
         ImmutableNetwork<Node, Edge> network, boolean isFullBindingGraph) {
       TopLevelBindingGraph topLevelBindingGraph =
@@ -112,41 +158,26 @@ public abstract class BindingGraph {
     }
 
     @Override
-    @Memoized
     public ImmutableSetMultimap<Class<? extends Node>, ? extends Node> nodesByClass() {
-      return super.nodesByClass();
+      return nodesByClass.get();
     }
 
     /**
      * Returns an index of each {@link BindingNode} by its {@link ComponentPath}. Accessing this for
      * a component and its parent components is faster than doing a graph traversal.
      */
-    @Memoized
     ImmutableListMultimap<ComponentPath, BindingNode> bindingsByComponent() {
-      return Multimaps.index(transform(bindings(), BindingNode.class::cast), Node::componentPath);
+      return bindingsByComponent.get();
     }
 
     /** Returns a {@link Comparator} in the same order as {@link Network#nodes()}. */
-    @Memoized
     Comparator<Node> nodeOrder() {
-      Map<Node, Integer> nodeOrderMap = Maps.newHashMapWithExpectedSize(network().nodes().size());
-      int i = 0;
-      for (Node node : network().nodes()) {
-        nodeOrderMap.put(node, i++);
-      }
-      return (n1, n2) -> nodeOrderMap.get(n1).compareTo(nodeOrderMap.get(n2));
+      return nodeOrder.get();
     }
 
     /** Returns the set of strongly connected nodes in this graph in reverse topological order. */
-    @Memoized
     public ImmutableSet<ImmutableSet<Node>> stronglyConnectedNodes() {
-      return TarjanSCCs.<Node>compute(
-          ImmutableSet.copyOf(network().nodes()),
-          // NetworkBuilder does not have a stable successor order, so we have to roll our own
-          // based on the node order, which is stable.
-          // TODO(bcorso): Fix once https://github.com/google/guava/issues/2650 is fixed.
-          node ->
-              network().successors(node).stream().sorted(nodeOrder()).collect(toImmutableList()));
+      return stronglyConnectedNodes.get();
     }
   }
 
@@ -340,24 +371,8 @@ public abstract class BindingGraph {
    *   <li>bound instances
    * </ul>
    */
-  @Memoized
   public ImmutableSet<ComponentRequirement> componentRequirements() {
-    ImmutableSet<TypeElement> requiredModules =
-        stream(Traverser.forTree(BindingGraph::subgraphs).depthFirstPostOrder(this))
-            .flatMap(graph -> graph.bindingModules.stream())
-            .filter(ownedModuleTypes()::contains)
-            .collect(toImmutableSet());
-    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
-    componentDescriptor().requirements().stream()
-        .filter(
-            requirement ->
-                !requirement.kind().isModule()
-                    || requiredModules.contains(requirement.typeElement()))
-        .forEach(requirements::add);
-    if (factoryMethod().isPresent()) {
-      requirements.addAll(factoryMethodParameters().keySet());
-    }
-    return requirements.build();
+    return componentRequirements.get();
   }
 
   /** Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph}. */
@@ -367,11 +382,8 @@ public abstract class BindingGraph {
         .collect(toImmutableSet());
   }
 
-  @Memoized
   public ImmutableList<BindingGraph> subgraphs() {
-    return topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
-        .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
-        .collect(toImmutableList());
+    return subgraphs.get();
   }
 
   /** Returns the list of all {@link BindingNode}s local to this component. */
