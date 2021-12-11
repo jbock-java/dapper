@@ -34,12 +34,12 @@ import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.ABSENT_OPTIONAL_FIELD;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.ABSENT_OPTIONAL_METHOD;
 import static dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind.PRESENT_FACTORY;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -194,16 +194,34 @@ final class OptionalFactories {
   }
 
   /** Information about the type of a factory for present bindings. */
-  @AutoValue
-  abstract static class PresentFactorySpec {
+  private static final class PresentFactorySpec {
+    final FrameworkType frameworkType;
+    final OptionalType.OptionalKind optionalKind;
+    final RequestKind valueKind;
+
+    PresentFactorySpec(
+        FrameworkType frameworkType,
+        OptionalType.OptionalKind optionalKind,
+        RequestKind valueKind) {
+      this.frameworkType = requireNonNull(frameworkType);
+      this.optionalKind = requireNonNull(optionalKind);
+      this.valueKind = requireNonNull(valueKind);
+    }
+
     /** Whether the factory is a {@link Provider} or a {@link Producer}. */
-    abstract FrameworkType frameworkType();
+    FrameworkType frameworkType() {
+      return frameworkType;
+    }
 
     /** What kind of {@code Optional} is returned. */
-    abstract OptionalKind optionalKind();
+    OptionalType.OptionalKind optionalKind() {
+      return optionalKind;
+    }
 
     /** The kind of request satisfied by the value of the {@code Optional}. */
-    abstract RequestKind valueKind();
+    RequestKind valueKind() {
+      return valueKind;
+    }
 
     /** The type variable for the factory class. */
     TypeVariableName typeVariable() {
@@ -278,7 +296,7 @@ final class OptionalFactories {
     }
 
     private static PresentFactorySpec of(ContributionBinding binding) {
-      return new AutoValue_OptionalFactories_PresentFactorySpec(
+      return new PresentFactorySpec(
           FrameworkType.forBindingType(binding.bindingType()),
           OptionalType.from(binding.key()).kind(),
           getOnlyElement(binding.dependencies()).kind());
