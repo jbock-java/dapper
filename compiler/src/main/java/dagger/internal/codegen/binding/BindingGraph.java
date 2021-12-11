@@ -24,9 +24,9 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -60,8 +60,21 @@ import javax.lang.model.element.VariableElement;
  * A graph that represents a single component or subcomponent within a fully validated top-level
  * binding graph.
  */
-@AutoValue
-public abstract class BindingGraph {
+public final class BindingGraph {
+
+  private final Supplier<ImmutableList<BindingGraph>> subgraphs = Suppliers.memoize(() -> topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
+      .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
+      .collect(toImmutableList()));
+
+  private final dagger.model.BindingGraph.ComponentNode componentNode;
+  private final dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph;
+
+  private BindingGraph(
+       dagger.model.BindingGraph.ComponentNode componentNode,
+       dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph) {
+    this.componentNode = requireNonNull(componentNode);
+    this.topLevelBindingGraph = requireNonNull(topLevelBindingGraph);
+  }
 
   private final Supplier<ImmutableSet<ComponentRequirement>> componentRequirements = Suppliers.memoize(() -> {
     ImmutableSet<TypeElement> requiredModules =
@@ -81,9 +94,6 @@ public abstract class BindingGraph {
     }
     return requirements.build();
   });
-  private final Supplier<ImmutableList<BindingGraph>> subgraphs = Suppliers.memoize(() -> topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
-      .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
-      .collect(toImmutableList()));
 
   /**
    * A graph that represents the entire network of nodes from all components, subcomponents and
@@ -140,9 +150,6 @@ public abstract class BindingGraph {
 
     private ImmutableMap<ComponentPath, ComponentNode> componentNodes;
     private ImmutableSetMultimap<ComponentNode, ComponentNode> subcomponentNodes;
-
-    TopLevelBindingGraph() {
-    }
 
     // This overrides dagger.model.BindingGraph with a more efficient implementation.
     @Override
@@ -219,7 +226,7 @@ public abstract class BindingGraph {
               }
             });
 
-    BindingGraph bindingGraph = new AutoValue_BindingGraph(componentNode, topLevelBindingGraph);
+    BindingGraph bindingGraph = new BindingGraph(componentNode, topLevelBindingGraph);
 
     Set<ModuleDescriptor> modules =
         ((ComponentNodeImpl) componentNode).componentDescriptor().modules();
@@ -250,22 +257,23 @@ public abstract class BindingGraph {
   private ImmutableSet<ModuleDescriptor> ownedModules;
   private ImmutableSet<TypeElement> bindingModules;
 
-  BindingGraph() {
+  /** Returns the {@link ComponentNode} for this graph. */
+  public dagger.model.BindingGraph.ComponentNode componentNode() {
+    return componentNode;
   }
 
-  /** Returns the {@link ComponentNode} for this graph. */
-  public abstract ComponentNode componentNode();
-
   /** Returns the {@link ComponentPath} for this graph. */
-  public final ComponentPath componentPath() {
+  public ComponentPath componentPath() {
     return componentNode().componentPath();
   }
 
   /** Returns the {@link TopLevelBindingGraph} from which this graph is contained. */
-  public abstract TopLevelBindingGraph topLevelBindingGraph();
+  public dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph() {
+    return topLevelBindingGraph;
+  }
 
   /** Returns the {@link ComponentDescriptor} for this graph */
-  public final ComponentDescriptor componentDescriptor() {
+  public ComponentDescriptor componentDescriptor() {
     return ((ComponentNodeImpl) componentNode()).componentDescriptor();
   }
 
@@ -273,7 +281,7 @@ public abstract class BindingGraph {
    * Returns the {@link ContributionBinding} for the given {@link Key} in this component or {@link
    * Optional#empty()} if one doesn't exist.
    */
-  public final Optional<Binding> localContributionBinding(Key key) {
+  public Optional<Binding> localContributionBinding(Key key) {
     return contributionBindings.containsKey(key)
         ? Optional.of(contributionBindings.get(key))
         .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
@@ -285,7 +293,7 @@ public abstract class BindingGraph {
    * Returns the {@link MembersInjectionBinding} for the given {@link Key} in this component or
    * {@link Optional#empty()} if one doesn't exist.
    */
-  public final Optional<Binding> localMembersInjectionBinding(Key key) {
+  public Optional<Binding> localMembersInjectionBinding(Key key) {
     return membersInjectionBindings.containsKey(key)
         ? Optional.of(membersInjectionBindings.get(key))
         .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
@@ -294,7 +302,7 @@ public abstract class BindingGraph {
   }
 
   /** Returns the {@link ContributionBinding} for the given {@link Key}. */
-  public final ContributionBinding contributionBinding(Key key) {
+  public ContributionBinding contributionBinding(Key key) {
     return (ContributionBinding) contributionBindings.get(key).delegate();
   }
 
@@ -302,14 +310,14 @@ public abstract class BindingGraph {
    * Returns the {@link MembersInjectionBinding} for the given {@link Key} or {@link
    * Optional#empty()} if one does not exist.
    */
-  public final Optional<MembersInjectionBinding> membersInjectionBinding(Key key) {
+  public Optional<MembersInjectionBinding> membersInjectionBinding(Key key) {
     return membersInjectionBindings.containsKey(key)
         ? Optional.of((MembersInjectionBinding) membersInjectionBindings.get(key).delegate())
         : Optional.empty();
   }
 
   /** Returns the {@link TypeElement} for the component this graph represents. */
-  public final TypeElement componentTypeElement() {
+  public TypeElement componentTypeElement() {
     return componentPath().currentComponent();
   }
 
@@ -321,7 +329,7 @@ public abstract class BindingGraph {
    * subcomponents}, this set will be the transitive modules that are not owned by any of their
    * ancestors.
    */
-  public final ImmutableSet<TypeElement> ownedModuleTypes() {
+  public ImmutableSet<TypeElement> ownedModuleTypes() {
     return ownedModules.stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
   }
 
@@ -341,7 +349,7 @@ public abstract class BindingGraph {
    * </code></pre>
    */
   // TODO(b/73294201): Consider returning the resolved ExecutableType for the factory method.
-  public final Optional<ExecutableElement> factoryMethod() {
+  public Optional<ExecutableElement> factoryMethod() {
     return topLevelBindingGraph().network().inEdges(componentNode()).stream()
         .filter(edge -> edge instanceof ChildFactoryMethodEdge)
         .map(edge -> ((ChildFactoryMethodEdge) edge).factoryMethod())
@@ -354,7 +362,7 @@ public abstract class BindingGraph {
    * BindingGraph#factoryMethod factory method}.
    */
   // TODO(dpb): Consider disallowing modules if none of their bindings are used.
-  public final ImmutableMap<ComponentRequirement, VariableElement> factoryMethodParameters() {
+  public ImmutableMap<ComponentRequirement, VariableElement> factoryMethodParameters() {
     return factoryMethod().get().getParameters().stream()
         .collect(
             toImmutableMap(
@@ -376,7 +384,7 @@ public abstract class BindingGraph {
   }
 
   /** Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph}. */
-  public final ImmutableSet<ComponentDescriptor> componentDescriptors() {
+  public ImmutableSet<ComponentDescriptor> componentDescriptors() {
     return topLevelBindingGraph().componentNodes().stream()
         .map(componentNode -> ((ComponentNodeImpl) componentNode).componentDescriptor())
         .collect(toImmutableSet());
@@ -389,13 +397,5 @@ public abstract class BindingGraph {
   /** Returns the list of all {@link BindingNode}s local to this component. */
   public ImmutableList<BindingNode> localBindingNodes() {
     return topLevelBindingGraph().bindingsByComponent().get(componentPath());
-  }
-
-  @Memoized
-  public ImmutableSet<BindingNode> bindingNodes() {
-    return ImmutableSet.<BindingNode>builder()
-        .addAll(contributionBindings.values())
-        .addAll(membersInjectionBindings.values())
-        .build();
   }
 }
