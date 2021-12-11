@@ -26,7 +26,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -99,8 +98,7 @@ public final class BindingGraph {
    * A graph that represents the entire network of nodes from all components, subcomponents and
    * their bindings.
    */
-  @AutoValue
-  public abstract static class TopLevelBindingGraph extends dagger.model.BindingGraph {
+  public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
 
     private final Supplier<? extends ImmutableSetMultimap<Class<? extends Node>, ? extends Node>> nodesByClass
         = memoize(super::nodesByClass);
@@ -122,10 +120,30 @@ public final class BindingGraph {
         node ->
             network().successors(node).stream().sorted(nodeOrder()).collect(toImmutableList())));
 
+    private final ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network;
+    private final boolean isFullBindingGraph;
+
+    TopLevelBindingGraph(
+        ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network,
+        boolean isFullBindingGraph) {
+      this.network = requireNonNull(network);
+      this.isFullBindingGraph = isFullBindingGraph;
+    }
+
+    @Override
+    public ImmutableNetwork<Node, Edge> network() {
+      return network;
+    }
+
+    @Override
+    public boolean isFullBindingGraph() {
+      return isFullBindingGraph;
+    }
+
     static TopLevelBindingGraph create(
         ImmutableNetwork<Node, Edge> network, boolean isFullBindingGraph) {
       TopLevelBindingGraph topLevelBindingGraph =
-          new AutoValue_BindingGraph_TopLevelBindingGraph(network, isFullBindingGraph);
+          new TopLevelBindingGraph(network, isFullBindingGraph);
 
       ImmutableMap<ComponentPath, ComponentNode> componentNodes =
           topLevelBindingGraph.componentNodes().stream()
