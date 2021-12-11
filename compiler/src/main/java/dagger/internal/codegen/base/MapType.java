@@ -18,25 +18,34 @@ package dagger.internal.codegen.base;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import dagger.model.Key;
 import java.util.Map;
+import java.util.Objects;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
  * Information about a {@link Map} {@link TypeMirror}.
  */
-@AutoValue
-public abstract class MapType {
+public final class MapType {
+
+  private final Equivalence.Wrapper<DeclaredType> wrappedDeclaredMapType;
+
+  MapType(Equivalence.Wrapper<DeclaredType> wrappedDeclaredMapType) {
+    this.wrappedDeclaredMapType = requireNonNull(wrappedDeclaredMapType);
+  }
+
   /**
    * The map type itself, wrapped using {@link MoreTypes#equivalence()}. Use
    * {@link #declaredMapType()} instead.
    */
-  protected abstract Equivalence.Wrapper<DeclaredType> wrappedDeclaredMapType();
+  Equivalence.Wrapper<DeclaredType> wrappedDeclaredMapType() {
+    return wrappedDeclaredMapType;
+  }
 
   /**
    * The map type itself.
@@ -123,6 +132,19 @@ public abstract class MapType {
     return MoreTypes.asDeclared(valueType()).getTypeArguments().get(0);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MapType mapType = (MapType) o;
+    return wrappedDeclaredMapType.equals(mapType.wrappedDeclaredMapType);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(wrappedDeclaredMapType);
+  }
+
   /**
    * {@code true} if {@code type} is a {@link Map} type.
    */
@@ -144,7 +166,7 @@ public abstract class MapType {
    */
   public static MapType from(TypeMirror type) {
     checkArgument(isMap(type), "%s is not a Map", type);
-    return new AutoValue_MapType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
+    return new MapType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
   }
 
   /**

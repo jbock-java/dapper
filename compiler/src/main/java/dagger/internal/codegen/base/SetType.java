@@ -17,11 +17,12 @@
 package dagger.internal.codegen.base;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import dagger.model.Key;
+import java.util.Objects;
 import java.util.Set;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -29,13 +30,21 @@ import javax.lang.model.type.TypeMirror;
 /**
  * Information about a {@link Set} {@link TypeMirror}.
  */
-@AutoValue
-public abstract class SetType {
+public final class SetType {
+
+  private final Equivalence.Wrapper<DeclaredType> wrappedDeclaredSetType;
+
+  private SetType(Equivalence.Wrapper<DeclaredType> wrappedDeclaredSetType) {
+    this.wrappedDeclaredSetType = requireNonNull(wrappedDeclaredSetType);
+  }
+
   /**
    * The set type itself, wrapped using {@link MoreTypes#equivalence()}. Use
    * {@link #declaredSetType()} instead.
    */
-  protected abstract Equivalence.Wrapper<DeclaredType> wrappedDeclaredSetType();
+  Equivalence.Wrapper<DeclaredType> wrappedDeclaredSetType() {
+    return wrappedDeclaredSetType;
+  }
 
   /**
    * The set type itself.
@@ -85,6 +94,19 @@ public abstract class SetType {
     return MoreTypes.asDeclared(elementType()).getTypeArguments().get(0);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    SetType setType = (SetType) o;
+    return wrappedDeclaredSetType.equals(setType.wrappedDeclaredSetType);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(wrappedDeclaredSetType);
+  }
+
   /**
    * {@code true} if {@code type} is a {@link Set} type.
    */
@@ -106,7 +128,7 @@ public abstract class SetType {
    */
   public static SetType from(TypeMirror type) {
     checkArgument(isSet(type), "%s must be a Set", type);
-    return new AutoValue_SetType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
+    return new SetType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
   }
 
   /**
