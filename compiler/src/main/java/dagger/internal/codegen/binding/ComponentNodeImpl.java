@@ -17,8 +17,8 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.ComponentPath;
@@ -27,15 +27,25 @@ import dagger.model.Scope;
 import java.util.Set;
 
 /** An implementation of {@link ComponentNode} that also exposes the {@link ComponentDescriptor}. */
-@AutoValue
-public abstract class ComponentNodeImpl implements ComponentNode {
-  public static ComponentNode create(
-      ComponentPath componentPath, ComponentDescriptor componentDescriptor) {
-    return new AutoValue_ComponentNodeImpl(componentPath, componentDescriptor);
+public final class ComponentNodeImpl implements ComponentNode {
+
+  private final ComponentPath componentPath;
+  private final ComponentDescriptor componentDescriptor;
+
+  ComponentNodeImpl(
+      ComponentPath componentPath,
+      ComponentDescriptor componentDescriptor) {
+    this.componentPath = requireNonNull(componentPath);
+    this.componentDescriptor = requireNonNull(componentDescriptor);
   }
 
   @Override
-  public final boolean isSubcomponent() {
+  public ComponentPath componentPath() {
+    return componentPath;
+  }
+
+  @Override
+  public boolean isSubcomponent() {
     return componentDescriptor().isSubcomponent();
   }
 
@@ -45,7 +55,7 @@ public abstract class ComponentNodeImpl implements ComponentNode {
   }
 
   @Override
-  public final ImmutableSet<DependencyRequest> entryPoints() {
+  public ImmutableSet<DependencyRequest> entryPoints() {
     return componentDescriptor().entryPointMethods().stream()
         .map(method -> method.dependencyRequest().get())
         .collect(toImmutableSet());
@@ -56,10 +66,17 @@ public abstract class ComponentNodeImpl implements ComponentNode {
     return componentDescriptor().scopes();
   }
 
-  public abstract ComponentDescriptor componentDescriptor();
+  public ComponentDescriptor componentDescriptor() {
+    return componentDescriptor;
+  }
+
+  public static ComponentNode create(
+      ComponentPath componentPath, ComponentDescriptor componentDescriptor) {
+    return new ComponentNodeImpl(componentPath, componentDescriptor);
+  }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return componentPath().toString();
   }
 }
