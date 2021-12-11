@@ -24,6 +24,7 @@ import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
+import java.util.Objects;
 import java.util.Set;
 
 /** An implementation of {@link ComponentNode} that also exposes the {@link ComponentDescriptor}. */
@@ -73,6 +74,20 @@ public final class ComponentNodeImpl implements ComponentNode {
   public static ComponentNode create(
       ComponentPath componentPath, ComponentDescriptor componentDescriptor) {
     return new ComponentNodeImpl(componentPath, componentDescriptor);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ComponentNodeImpl that = (ComponentNodeImpl) o;
+    return componentPath.equals(that.componentPath)
+        && componentDescriptor.equals(that.componentDescriptor);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(componentPath, componentDescriptor);
   }
 
   @Override
