@@ -268,14 +268,21 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
    * An ordered set of endpoint pairs representing the edges in the cycle. The target of each pair
    * is the source of the next pair. The target of the last pair is the source of the first pair.
    */
-  @AutoValue
-  abstract static class Cycle<N> {
+  static final class Cycle<N> {
+    private final ImmutableSet<EndpointPair<N>> endpointPairs;
+
+    Cycle(ImmutableSet<EndpointPair<N>> endpointPairs) {
+      this.endpointPairs = endpointPairs;
+    }
+
     /**
      * The ordered set of endpoint pairs representing the edges in the cycle. The target of each
      * pair is the source of the next pair. The target of the last pair is the source of the first
      * pair.
      */
-    abstract ImmutableSet<EndpointPair<N>> endpointPairs();
+    ImmutableSet<EndpointPair<N>> endpointPairs() {
+      return endpointPairs;
+    }
 
     /** Returns the nodes that participate in the cycle. */
     ImmutableSet<N> nodes() {
@@ -304,11 +311,11 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
       ImmutableSet.Builder<EndpointPair<N>> shifted = ImmutableSet.builder();
       shifted.addAll(skip(endpointPairs(), startIndex));
       shifted.addAll(limit(endpointPairs(), size() - startIndex));
-      return new AutoValue_DependencyCycleValidator_Cycle<>(shifted.build());
+      return new Cycle<>(shifted.build());
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
       return endpointPairs().toString();
     }
 
@@ -323,7 +330,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
       for (int i = 0; i < nodes.size() - 1; i++) {
         cycle.add(EndpointPair.ordered(nodes.get(i), nodes.get(i + 1)));
       }
-      return new AutoValue_DependencyCycleValidator_Cycle<>(cycle.build());
+      return new Cycle<>(cycle.build());
     }
   }
 }
