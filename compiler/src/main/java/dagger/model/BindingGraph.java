@@ -23,6 +23,7 @@ import static com.google.common.graph.Graphs.transpose;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static java.util.stream.Collectors.toCollection;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -32,8 +33,10 @@ import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
 import dagger.Module;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -134,24 +137,24 @@ public abstract class BindingGraph {
 
   /** Returns the bindings. */
   public Set<Binding> bindings() {
-    return nodes(Binding.class);
+    return nodesByClass().bindings;
   }
 
   /** Returns the bindings for a key. */
   public Set<Binding> bindings(Key key) {
-    return nodes(Binding.class).stream()
+    return nodesByClass().bindings.stream()
         .filter(binding -> binding.key().equals(key))
         .collect(toImmutableSet());
   }
 
   /** Returns the nodes that represent missing bindings. */
   public Set<MissingBinding> missingBindings() {
-    return nodes(MissingBinding.class);
+    return nodesByClass().missingBindings;
   }
 
   /** Returns the component nodes. */
   public Set<ComponentNode> componentNodes() {
-    return nodes(ComponentNode.class);
+    return nodesByClass().componentNodes;
   }
 
   /** Returns the component node for a component. */
@@ -290,21 +293,32 @@ public abstract class BindingGraph {
     return ImmutableNetwork.copyOf(dependencyGraph);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private <N extends Node> Set<N> nodes(Class<N> clazz) {
-    return (Set) nodesByClass().get(clazz);
+  public static final class NodesByClass {
+    private final Set<Binding> bindings;
+    private final Set<MissingBinding> missingBindings;
+    private final Set<ComponentNode> componentNodes;
+
+    NodesByClass(Set<Binding> bindings, Set<MissingBinding> missingBindings, Set<ComponentNode> componentNodes) {
+      this.bindings = bindings;
+      this.missingBindings = missingBindings;
+      this.componentNodes = componentNodes;
+    }
   }
 
-  private static final Set<Class<? extends Node>> NODE_TYPES =
-      Set.of(Binding.class, MissingBinding.class, ComponentNode.class);
-
-  protected ImmutableSetMultimap<Class<? extends Node>, ? extends Node> nodesByClass() {
-    return network().nodes().stream()
-        .collect(
-            toImmutableSetMultimap(
-                node ->
-                    NODE_TYPES.stream().filter(clazz -> clazz.isInstance(node)).findFirst().get(),
-                node -> node));
+  protected NodesByClass nodesByClass() {
+    Set<Binding> bindings = network().nodes().stream()
+        .filter(node -> node instanceof Binding)
+        .map(Binding.class::cast)
+        .collect(toCollection(LinkedHashSet::new));
+    Set<MissingBinding> missingBindings = network().nodes().stream()
+        .filter(node -> node instanceof MissingBinding)
+        .map(MissingBinding.class::cast)
+        .collect(toCollection(LinkedHashSet::new));
+    Set<ComponentNode> componentNodes = network().nodes().stream()
+        .filter(node -> node instanceof ComponentNode)
+        .map(ComponentNode.class::cast)
+        .collect(toCollection(LinkedHashSet::new));
+    return new NodesByClass(bindings, missingBindings, componentNodes);
   }
 
   private Stream<DependencyEdge> dependencyEdgeStream() {

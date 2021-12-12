@@ -38,7 +38,6 @@ import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.Traverser;
 import dagger.Subcomponent;
-import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -61,21 +60,22 @@ import javax.lang.model.element.VariableElement;
  */
 public final class BindingGraph {
 
-  private final Supplier<ImmutableList<BindingGraph>> subgraphs = Suppliers.memoize(() -> topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
-      .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
-      .collect(toImmutableList()));
+  private final Supplier<ImmutableList<BindingGraph>> subgraphs = memoize(() ->
+      topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
+          .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
+          .collect(toImmutableList()));
 
   private final dagger.model.BindingGraph.ComponentNode componentNode;
   private final dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph;
 
   private BindingGraph(
-       dagger.model.BindingGraph.ComponentNode componentNode,
-       dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph) {
+      dagger.model.BindingGraph.ComponentNode componentNode,
+      dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph) {
     this.componentNode = requireNonNull(componentNode);
     this.topLevelBindingGraph = requireNonNull(topLevelBindingGraph);
   }
 
-  private final Supplier<ImmutableSet<ComponentRequirement>> componentRequirements = Suppliers.memoize(() -> {
+  private final Supplier<ImmutableSet<ComponentRequirement>> componentRequirements = memoize(() -> {
     ImmutableSet<TypeElement> requiredModules =
         stream(Traverser.forTree(BindingGraph::subgraphs).depthFirstPostOrder(this))
             .flatMap(graph -> graph.bindingModules.stream())
@@ -100,8 +100,7 @@ public final class BindingGraph {
    */
   public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
 
-    private final Supplier<? extends ImmutableSetMultimap<Class<? extends Node>, ? extends Node>> nodesByClass
-        = memoize(super::nodesByClass);
+    private final Supplier<NodesByClass> nodesByClass = memoize(super::nodesByClass);
     private final Supplier<ImmutableListMultimap<ComponentPath, BindingNode>> bindingsByComponent = memoize(() ->
         Multimaps.index(transform(bindings(), BindingNode.class::cast), Node::componentPath));
     private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
@@ -112,7 +111,7 @@ public final class BindingGraph {
       }
       return Comparator.comparing(nodeOrderMap::get);
     });
-    private final Supplier<ImmutableSet<ImmutableSet<Node>>> stronglyConnectedNodes = Suppliers.memoize(() -> TarjanSCCs.compute(
+    private final Supplier<ImmutableSet<ImmutableSet<Node>>> stronglyConnectedNodes = memoize(() -> TarjanSCCs.compute(
         ImmutableSet.copyOf(network().nodes()),
         // NetworkBuilder does not have a stable successor order, so we have to roll our own
         // based on the node order, which is stable.
@@ -183,7 +182,7 @@ public final class BindingGraph {
     }
 
     @Override
-    public ImmutableSetMultimap<Class<? extends Node>, ? extends Node> nodesByClass() {
+    public NodesByClass nodesByClass() {
       return nodesByClass.get();
     }
 
