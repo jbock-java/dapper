@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.auto.common.Equivalence;
 import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;

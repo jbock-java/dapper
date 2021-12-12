@@ -24,7 +24,6 @@ import static javax.lang.model.type.TypeKind.WILDCARD;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableCollection;
 import dagger.MembersInjector;
 import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.FrameworkTypes;

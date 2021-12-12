@@ -18,7 +18,6 @@ package dagger.internal.codegen.writing;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
