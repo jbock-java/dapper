@@ -20,7 +20,7 @@
  * Dagger SPI.
  *
  * <p>Unless otherwise specified, the types/interfaces are only intended to be implemented in this
- * package (i.e. via {@code @AutoValue}) or by Dagger's processor. This applies to test code as
+ * package or by Dagger's processor. This applies to test code as
  * well, so if you need a fake, please file a feature request instead of implementing it yourself.
  */
 @Beta

@@ -141,7 +141,7 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   public abstract Builder<?, ?> toBuilder();
 
   /**
-   * Base builder for {@link com.google.auto.value.AutoValue @AutoValue} subclasses of {@link
+   * Base builder for subclasses of {@link
    * ContributionBinding}.
    */
   public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {
