@@ -20,29 +20,49 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.List;
+import java.util.Objects;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 /** A class that defines proper {@code equals} and {@code hashcode} for a method signature. */
-@AutoValue
-public abstract class MethodSignature {
+public final class MethodSignature {
+  private final String name;
+  private final List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes;
+  private final List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes;
 
-  abstract String name();
+  MethodSignature(
+      String name,
+      List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes,
+      List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes) {
+    this.name = name;
+    this.parameterTypes = parameterTypes;
+    this.thrownTypes = thrownTypes;
+  }
 
-  abstract List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes();
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MethodSignature that = (MethodSignature) o;
+    return name.equals(that.name)
+        && parameterTypes.equals(that.parameterTypes)
+        && thrownTypes.equals(that.thrownTypes);
+  }
 
-  abstract List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes();
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, parameterTypes, thrownTypes);
+  }
 
   public static MethodSignature forComponentMethod(
       ComponentMethodDescriptor componentMethod, DeclaredType componentType, DaggerTypes types) {
     ExecutableType methodType =
         MoreTypes.asExecutable(types.asMemberOf(componentType, componentMethod.methodElement()));
-    return new AutoValue_MethodSignature(
+    return new MethodSignature(
         componentMethod.methodElement().getSimpleName().toString(),
         wrapInEquivalence(methodType.getParameterTypes()),
         wrapInEquivalence(methodType.getThrownTypes()));
