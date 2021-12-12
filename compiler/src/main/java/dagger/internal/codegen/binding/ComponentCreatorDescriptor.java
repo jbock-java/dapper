@@ -23,9 +23,9 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -50,31 +50,53 @@ import javax.lang.model.type.TypeMirror;
  * A descriptor for a component <i>creator</i> type: that is, a type annotated with
  * {@code @Component.Builder} (or one of the corresponding production or subcomponent versions).
  */
-@AutoValue
-public abstract class ComponentCreatorDescriptor {
+public final class ComponentCreatorDescriptor {
 
   private final Supplier<ImmutableMap<ComponentRequirement, Element>> requirementElements = Suppliers.memoize(() ->
       flatten(unvalidatedRequirementElements()));
-
   private final Supplier<ImmutableMap<ComponentRequirement, ExecutableElement>> setterMethods = Suppliers.memoize(() ->
       flatten(unvalidatedSetterMethods()));
-
   private final Supplier<ImmutableMap<ComponentRequirement, VariableElement>> factoryParameters = Suppliers.memoize(() ->
       flatten(unvalidatedFactoryParameters()));
 
+  private final ComponentCreatorAnnotation annotation;
+  private final TypeElement typeElement;
+  private final ExecutableElement factoryMethod;
+  private final ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods;
+  private final ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters;
+
+  private ComponentCreatorDescriptor(
+      ComponentCreatorAnnotation annotation,
+      TypeElement typeElement,
+      ExecutableElement factoryMethod,
+      ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods,
+      ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters) {
+    this.annotation = requireNonNull(annotation);
+    this.typeElement = requireNonNull(typeElement);
+    this.factoryMethod = requireNonNull(factoryMethod);
+    this.unvalidatedSetterMethods = requireNonNull(unvalidatedSetterMethods);
+    this.unvalidatedFactoryParameters = requireNonNull(unvalidatedFactoryParameters);
+  }
+
   /** Returns the annotation marking this creator. */
-  public abstract ComponentCreatorAnnotation annotation();
+  public ComponentCreatorAnnotation annotation() {
+    return annotation;
+  }
 
   /** The kind of this creator. */
-  public final ComponentCreatorKind kind() {
+  public ComponentCreatorKind kind() {
     return annotation().creatorKind();
   }
 
   /** The annotated creator type. */
-  public abstract TypeElement typeElement();
+  public TypeElement typeElement() {
+    return typeElement;
+  }
 
   /** The method that creates and returns a component instance. */
-  public abstract ExecutableElement factoryMethod();
+  public ExecutableElement factoryMethod() {
+    return factoryMethod;
+  }
 
   /**
    * Multimap of component requirements to setter methods that set that requirement.
@@ -82,7 +104,9 @@ public abstract class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  abstract ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods();
+  ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods() {
+    return unvalidatedSetterMethods;
+  }
 
   /**
    * Multimap of component requirements to factory method parameters that set that requirement.
@@ -90,8 +114,9 @@ public abstract class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  abstract ImmutableSetMultimap<ComponentRequirement, VariableElement>
-  unvalidatedFactoryParameters();
+  ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters() {
+    return unvalidatedFactoryParameters;
+  }
 
   /**
    * Multimap of component requirements to elements (methods or parameters) that set that
@@ -100,7 +125,7 @@ public abstract class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  public final ImmutableSetMultimap<ComponentRequirement, Element>
+  public ImmutableSetMultimap<ComponentRequirement, Element>
   unvalidatedRequirementElements() {
     // ComponentCreatorValidator ensures that there are either setter methods or factory method
     // parameters, but not both, so we can cheat a little here since we know that only one of
@@ -135,27 +160,27 @@ public abstract class ComponentCreatorDescriptor {
   }
 
   /** Returns the set of component requirements this creator allows the user to set. */
-  public final ImmutableSet<ComponentRequirement> userSettableRequirements() {
+  public ImmutableSet<ComponentRequirement> userSettableRequirements() {
     // Note: they should have been validated at the point this is used, so this set is valid.
     return unvalidatedRequirementElements().keySet();
   }
 
   /** Returns the set of requirements for modules and component dependencies for this creator. */
-  public final ImmutableSet<ComponentRequirement> moduleAndDependencyRequirements() {
+  public ImmutableSet<ComponentRequirement> moduleAndDependencyRequirements() {
     return userSettableRequirements().stream()
         .filter(requirement -> !requirement.isBoundInstance())
         .collect(toImmutableSet());
   }
 
   /** Returns the set of bound instance requirements for this creator. */
-  final ImmutableSet<ComponentRequirement> boundInstanceRequirements() {
+  ImmutableSet<ComponentRequirement> boundInstanceRequirements() {
     return userSettableRequirements().stream()
         .filter(ComponentRequirement::isBoundInstance)
         .collect(toImmutableSet());
   }
 
   /** Returns the element in this creator that sets the given {@code requirement}. */
-  final Element elementForRequirement(ComponentRequirement requirement) {
+  Element elementForRequirement(ComponentRequirement requirement) {
     return requirementElements().get(requirement);
   }
 
@@ -204,7 +229,7 @@ public abstract class ComponentCreatorDescriptor {
 
     // Validation should have ensured exactly one creator annotation is present on the type.
     ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(typeElement));
-    return new AutoValue_ComponentCreatorDescriptor(
+    return new ComponentCreatorDescriptor(
         annotation, typeElement, factoryMethod, setterMethods.build(), factoryParameters.build());
   }
 
