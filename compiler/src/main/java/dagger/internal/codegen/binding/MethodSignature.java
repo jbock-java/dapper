@@ -17,6 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
@@ -38,9 +39,9 @@ public final class MethodSignature {
       String name,
       List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes,
       List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes) {
-    this.name = name;
-    this.parameterTypes = parameterTypes;
-    this.thrownTypes = thrownTypes;
+    this.name = requireNonNull(name);
+    this.parameterTypes = requireNonNull(parameterTypes);
+    this.thrownTypes = requireNonNull(thrownTypes);
   }
 
   @Override

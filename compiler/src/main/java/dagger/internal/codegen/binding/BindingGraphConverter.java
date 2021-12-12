@@ -24,7 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -107,16 +106,38 @@ final class BindingGraphConverter {
    * This is required so that binding nodes are not reused across different branches of the
    * graph since the ResolvedBindings class only contains the component and not the path.
    */
-  @AutoValue
-  abstract static class ResolvedBindingsWithPath {
-    abstract ResolvedBindings resolvedBindings();
+  static final class ResolvedBindingsWithPath {
+    private final ResolvedBindings resolvedBindings;
+    private final ComponentPath componentPath;
 
-    abstract ComponentPath componentPath();
+    private ResolvedBindingsWithPath(
+        ResolvedBindings resolvedBindings,
+        ComponentPath componentPath) {
+      this.resolvedBindings = requireNonNull(resolvedBindings);
+      this.componentPath = requireNonNull(componentPath);
+    }
+
+    ResolvedBindings resolvedBindings() {
+      return resolvedBindings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ResolvedBindingsWithPath that = (ResolvedBindingsWithPath) o;
+      return resolvedBindings.equals(that.resolvedBindings)
+          && componentPath.equals(that.componentPath);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(resolvedBindings, componentPath);
+    }
 
     static ResolvedBindingsWithPath create(
         ResolvedBindings resolvedBindings, ComponentPath componentPath) {
-      return new AutoValue_BindingGraphConverter_ResolvedBindingsWithPath(
-          resolvedBindings, componentPath);
+      return new ResolvedBindingsWithPath(resolvedBindings, componentPath);
     }
   }
 
