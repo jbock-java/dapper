@@ -16,10 +16,9 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingType.PRODUCTION;
+import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import dagger.BindsOptionalOf;
@@ -30,6 +29,7 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
 import dagger.multibindings.Multibinds;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -41,8 +41,7 @@ import javax.lang.model.element.TypeElement;
 // TODO(dpb): Consider a supertype of dagger.model.Binding that
 // dagger.internal.codegen.binding.Binding
 // could also implement.
-@AutoValue
-public abstract class BindingNode implements dagger.model.Binding {
+public final class BindingNode implements dagger.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
@@ -50,26 +49,75 @@ public abstract class BindingNode implements dagger.model.Binding {
       ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
       ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
-    BindingNode node =
-        new AutoValue_BindingNode(
-            component,
-            delegate,
-            multibindingDeclarations,
-            optionalBindingDeclarations,
-            subcomponentDeclarations);
-    node.bindingDeclarationFormatter = checkNotNull(bindingDeclarationFormatter);
-    return node;
+    return new BindingNode(
+        component,
+        delegate,
+        multibindingDeclarations,
+        optionalBindingDeclarations,
+        subcomponentDeclarations,
+        bindingDeclarationFormatter);
   }
 
-  private BindingDeclarationFormatter bindingDeclarationFormatter;
+  private final ComponentPath componentPath;
+  private final dagger.internal.codegen.binding.Binding delegate;
+  private final ImmutableSet<MultibindingDeclaration> multibindingDeclarations;
+  private final ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations;
+  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
+  private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
-  public abstract Binding delegate();
+  private BindingNode(
+      ComponentPath componentPath,
+      dagger.internal.codegen.binding.Binding delegate,
+      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
+      ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
+      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
+      BindingDeclarationFormatter bindingDeclarationFormatter) {
+    this.componentPath = requireNonNull(componentPath);
+    this.delegate = requireNonNull(delegate);
+    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
+    this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
+    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
+    this.bindingDeclarationFormatter = requireNonNull(bindingDeclarationFormatter);
+  }
 
-  public abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
+  @Override
+  public ComponentPath componentPath() {
+    return componentPath;
+  }
 
-  public abstract ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations();
+  public dagger.internal.codegen.binding.Binding delegate() {
+    return delegate;
+  }
 
-  public abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
+  public ImmutableSet<MultibindingDeclaration> multibindingDeclarations() {
+    return multibindingDeclarations;
+  }
+
+  public ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations() {
+    return optionalBindingDeclarations;
+  }
+
+  public ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations() {
+    return subcomponentDeclarations;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    BindingNode that = (BindingNode) o;
+    return componentPath.equals(that.componentPath)
+        && delegate.equals(that.delegate)
+        && multibindingDeclarations.equals(that.multibindingDeclarations)
+        && optionalBindingDeclarations.equals(that.optionalBindingDeclarations)
+        && subcomponentDeclarations.equals(that.subcomponentDeclarations);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(componentPath, delegate, multibindingDeclarations,
+        optionalBindingDeclarations, subcomponentDeclarations);
+  }
 
   /**
    * The {@link Element}s (other than the binding's {@link #bindingElement()}) that are associated
@@ -81,7 +129,7 @@ public abstract class BindingNode implements dagger.model.Binding {
    *   <li>{@linkplain Multibinds multibinding} declarations
    * </ul>
    */
-  public final Iterable<BindingDeclaration> associatedDeclarations() {
+  public Iterable<BindingDeclaration> associatedDeclarations() {
     return Iterables.concat(
         multibindingDeclarations(), optionalBindingDeclarations(), subcomponentDeclarations());
   }
@@ -132,7 +180,7 @@ public abstract class BindingNode implements dagger.model.Binding {
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return bindingDeclarationFormatter.format(delegate());
   }
 }
