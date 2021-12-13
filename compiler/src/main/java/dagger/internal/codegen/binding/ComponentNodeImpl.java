@@ -16,13 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.ComponentPath;
-import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import java.util.Objects;
 import java.util.Set;
@@ -53,13 +50,6 @@ public final class ComponentNodeImpl implements ComponentNode {
   @Override
   public boolean isRealComponent() {
     return componentDescriptor().isRealComponent();
-  }
-
-  @Override
-  public ImmutableSet<DependencyRequest> entryPoints() {
-    return componentDescriptor().entryPointMethods().stream()
-        .map(method -> method.dependencyRequest().get())
-        .collect(toImmutableSet());
   }
 
   @Override

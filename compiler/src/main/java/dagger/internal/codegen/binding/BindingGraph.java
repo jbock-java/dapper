@@ -25,6 +25,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toCollection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -45,6 +46,7 @@ import dagger.model.ComponentPath;
 import dagger.model.Key;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -100,7 +102,6 @@ public final class BindingGraph {
    */
   public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
 
-    private final Supplier<NodesByClass> nodesByClass = memoize(super::nodesByClass);
     private final Supplier<ImmutableListMultimap<ComponentPath, BindingNode>> bindingsByComponent = memoize(() ->
         Multimaps.index(transform(bindings(), BindingNode.class::cast), Node::componentPath));
     private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
@@ -119,19 +120,22 @@ public final class BindingGraph {
         node ->
             network().successors(node).stream().sorted(nodeOrder()).collect(toImmutableList())));
 
-    private final ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network;
     private final boolean isFullBindingGraph;
+    private final ImmutableMap<ComponentPath, ComponentNode> mComponentNodes;
+    private final ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes;
 
     TopLevelBindingGraph(
-        ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network,
-        boolean isFullBindingGraph) {
-      this.network = requireNonNull(network);
+        ImmutableNetwork<Node, Edge> network,
+        Set<dagger.model.Binding> bindings,
+        Set<MissingBinding> missingBindings,
+        Set<ComponentNode> componentNodes,
+        boolean isFullBindingGraph,
+        ImmutableMap<ComponentPath, ComponentNode> mComponentNodes,
+        ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes) {
+      super(network, bindings, missingBindings, componentNodes);
       this.isFullBindingGraph = isFullBindingGraph;
-    }
-
-    @Override
-    public ImmutableNetwork<Node, Edge> network() {
-      return network;
+      this.mComponentNodes = mComponentNodes;
+      this.mSubcomponentNodes = mSubcomponentNodes;
     }
 
     @Override
@@ -141,49 +145,37 @@ public final class BindingGraph {
 
     static TopLevelBindingGraph create(
         ImmutableNetwork<Node, Edge> network, boolean isFullBindingGraph) {
-      TopLevelBindingGraph topLevelBindingGraph =
-          new TopLevelBindingGraph(network, isFullBindingGraph);
+      NodesByClass nodesByClass = NodesByClass.create(network);
 
-      ImmutableMap<ComponentPath, ComponentNode> componentNodes =
-          topLevelBindingGraph.componentNodes().stream()
+      ImmutableMap<ComponentPath, ComponentNode> mComponentNodes =
+          nodesByClass.componentNodes.stream()
               .collect(
                   toImmutableMap(ComponentNode::componentPath, componentNode -> componentNode));
 
       ImmutableSetMultimap.Builder<ComponentNode, ComponentNode> subcomponentNodesBuilder =
           ImmutableSetMultimap.builder();
-      topLevelBindingGraph.componentNodes().stream()
+      nodesByClass.componentNodes.stream()
           .filter(componentNode -> !componentNode.componentPath().atRoot())
           .forEach(
               componentNode ->
                   subcomponentNodesBuilder.put(
-                      componentNodes.get(componentNode.componentPath().parent()), componentNode));
-
-      // Set these fields directly on the instance rather than passing these in as input to the
-      // AutoValue to prevent exposing this data outside of the class.
-      topLevelBindingGraph.componentNodes = componentNodes;
-      topLevelBindingGraph.subcomponentNodes = subcomponentNodesBuilder.build();
-      return topLevelBindingGraph;
+                      mComponentNodes.get(componentNode.componentPath().parent()), componentNode));
+      return new TopLevelBindingGraph(network,
+          nodesByClass.bindings, nodesByClass.missingBindings, nodesByClass.componentNodes,
+          isFullBindingGraph, mComponentNodes, subcomponentNodesBuilder.build());
     }
-
-    private ImmutableMap<ComponentPath, ComponentNode> componentNodes;
-    private ImmutableSetMultimap<ComponentNode, ComponentNode> subcomponentNodes;
 
     // This overrides dagger.model.BindingGraph with a more efficient implementation.
     @Override
     public Optional<ComponentNode> componentNode(ComponentPath componentPath) {
-      return componentNodes.containsKey(componentPath)
-          ? Optional.of(componentNodes.get(componentPath))
+      return mComponentNodes.containsKey(componentPath)
+          ? Optional.of(mComponentNodes.get(componentPath))
           : Optional.empty();
     }
 
     /** Returns the set of subcomponent nodes of the given component node. */
     ImmutableSet<ComponentNode> subcomponentNodes(ComponentNode componentNode) {
-      return subcomponentNodes.get(componentNode);
-    }
-
-    @Override
-    public NodesByClass nodesByClass() {
-      return nodesByClass.get();
+      return mSubcomponentNodes.get(componentNode);
     }
 
     /**
@@ -202,6 +194,37 @@ public final class BindingGraph {
     /** Returns the set of strongly connected nodes in this graph in reverse topological order. */
     public ImmutableSet<ImmutableSet<Node>> stronglyConnectedNodes() {
       return stronglyConnectedNodes.get();
+    }
+  }
+
+  private static final class NodesByClass {
+    final Set<dagger.model.Binding> bindings;
+    final Set<dagger.model.BindingGraph.MissingBinding> missingBindings;
+    final Set<ComponentNode> componentNodes;
+
+    NodesByClass(
+        Set<dagger.model.Binding> bindings,
+        Set<dagger.model.BindingGraph.MissingBinding> missingBindings,
+        Set<ComponentNode> componentNodes) {
+      this.bindings = bindings;
+      this.missingBindings = missingBindings;
+      this.componentNodes = componentNodes;
+    }
+
+    static NodesByClass create(ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network) {
+      Set<dagger.model.Binding> bindings = network.nodes().stream()
+          .filter(node -> node instanceof dagger.model.Binding)
+          .map(dagger.model.Binding.class::cast)
+          .collect(toCollection(LinkedHashSet::new));
+      Set<dagger.model.BindingGraph.MissingBinding> missingBindings = network.nodes().stream()
+          .filter(node -> node instanceof dagger.model.BindingGraph.MissingBinding)
+          .map(dagger.model.BindingGraph.MissingBinding.class::cast)
+          .collect(toCollection(LinkedHashSet::new));
+      Set<ComponentNode> componentNodes = network.nodes().stream()
+          .filter(node -> node instanceof ComponentNode)
+          .map(ComponentNode.class::cast)
+          .collect(toCollection(LinkedHashSet::new));
+      return new NodesByClass(bindings, missingBindings, componentNodes);
     }
   }
 

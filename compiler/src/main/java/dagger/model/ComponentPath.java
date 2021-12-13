@@ -112,9 +112,6 @@ public final class ComponentPath {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ComponentPath that = (ComponentPath) o;
-    if (this.hashCode != that.hashCode) {
-      return false;
-    }
-    return components.equals(that.components);
+    return hashCode == that.hashCode && components.equals(that.components);
   }
 }

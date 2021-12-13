@@ -22,21 +22,19 @@ import static com.google.common.graph.Graphs.reachableNodes;
 import static com.google.common.graph.Graphs.transpose;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
 import dagger.Module;
-import java.util.LinkedHashSet;
+import dagger.internal.codegen.base.Suppliers;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -91,8 +89,42 @@ import javax.lang.model.element.TypeElement;
  * <p><b>Note that this API is experimental and will change.</b>
  */
 public abstract class BindingGraph {
+  private final ImmutableNetwork<Node, Edge> network;
+  private final Set<Binding> bindings;
+  private final Set<MissingBinding> missingBindings;
+  private final Set<ComponentNode> componentNodes;
+
+  private final Supplier<ImmutableNetwork<Node, DependencyEdge>> dependencyGraph = Suppliers.memoize(() -> {
+    MutableNetwork<Node, DependencyEdge> dependencyGraph =
+        NetworkBuilder.from(network())
+            .expectedNodeCount(network().nodes().size())
+            .expectedEdgeCount((int) dependencyEdgeStream().count())
+            .build();
+    network().nodes().forEach(dependencyGraph::addNode); // include disconnected nodes
+    dependencyEdgeStream()
+        .forEach(
+            edge -> {
+              EndpointPair<Node> endpoints = network().incidentNodes(edge);
+              dependencyGraph.addEdge(endpoints.source(), endpoints.target(), edge);
+            });
+    return ImmutableNetwork.copyOf(dependencyGraph);
+  });
+
+  protected BindingGraph(
+      ImmutableNetwork<Node, Edge> network,
+      Set<Binding> bindings,
+      Set<MissingBinding> missingBindings,
+      Set<ComponentNode> componentNodes) {
+    this.network = requireNonNull(network);
+    this.bindings = requireNonNull(bindings);
+    this.missingBindings = requireNonNull(missingBindings);
+    this.componentNodes = requireNonNull(componentNodes);
+  }
+
   /** Returns the graph in its {@link Network} representation. */
-  public abstract ImmutableNetwork<Node, Edge> network();
+  public final ImmutableNetwork<Node, Edge> network() {
+    return network;
+  }
 
   @Override
   public String toString() {
@@ -137,24 +169,24 @@ public abstract class BindingGraph {
 
   /** Returns the bindings. */
   public Set<Binding> bindings() {
-    return nodesByClass().bindings;
+    return bindings;
   }
 
   /** Returns the bindings for a key. */
   public Set<Binding> bindings(Key key) {
-    return nodesByClass().bindings.stream()
+    return bindings.stream()
         .filter(binding -> binding.key().equals(key))
         .collect(toImmutableSet());
   }
 
   /** Returns the nodes that represent missing bindings. */
   public Set<MissingBinding> missingBindings() {
-    return nodesByClass().missingBindings;
+    return missingBindings;
   }
 
   /** Returns the component nodes. */
   public Set<ComponentNode> componentNodes() {
-    return nodesByClass().componentNodes;
+    return componentNodes;
   }
 
   /** Returns the component node for a component. */
@@ -162,13 +194,6 @@ public abstract class BindingGraph {
     return componentNodes().stream()
         .filter(node -> node.componentPath().equals(component))
         .findFirst();
-  }
-
-  /** Returns the component nodes for a component. */
-  public Set<ComponentNode> componentNodes(TypeElement component) {
-    return componentNodes().stream()
-        .filter(node -> node.componentPath().currentComponent().equals(component))
-        .collect(toImmutableSet());
   }
 
   /** Returns the component node for the root component. */
@@ -185,50 +210,11 @@ public abstract class BindingGraph {
   }
 
   /**
-   * Returns the dependency edges for the dependencies of a binding. For valid graphs, each {@link
-   * DependencyRequest} will map to a single {@link DependencyEdge}. When conflicting bindings exist
-   * for a key, the multimap will have several edges for that {@link DependencyRequest}. Graphs that
-   * have no binding for a key will have an edge whose {@linkplain EndpointPair#target() target
-   * node} is a {@link MissingBinding}.
-   */
-  public ImmutableSetMultimap<DependencyRequest, DependencyEdge> dependencyEdges(
-      Binding binding) {
-    return dependencyEdgeStream(binding)
-        .collect(toImmutableSetMultimap(DependencyEdge::dependencyRequest, edge -> edge));
-  }
-
-  /** Returns the dependency edges for a dependency request. */
-  public Set<DependencyEdge> dependencyEdges(DependencyRequest dependencyRequest) {
-    return dependencyEdgeStream()
-        .filter(edge -> edge.dependencyRequest().equals(dependencyRequest))
-        .collect(toImmutableSet());
-  }
-
-  /**
-   * Returns the dependency edges for the entry points of a given {@code component}. Each edge's
-   * source node is that component's component node.
-   */
-  public Set<DependencyEdge> entryPointEdges(ComponentPath component) {
-    return dependencyEdgeStream(componentNode(component).get()).collect(toImmutableSet());
-  }
-
-  private Stream<DependencyEdge> dependencyEdgeStream(Node node) {
-    return network().outEdges(node).stream().flatMap(instancesOf(DependencyEdge.class));
-  }
-
-  /**
    * Returns the dependency edges for all entry points for all components and subcomponents. Each
    * edge's source node is a component node.
    */
   public Set<DependencyEdge> entryPointEdges() {
     return entryPointEdgeStream().collect(toImmutableSet());
-  }
-
-  /** Returns the binding or missing binding nodes that directly satisfy entry points. */
-  public Set<MaybeBinding> entryPointBindings() {
-    return entryPointEdgeStream()
-        .map(edge -> (MaybeBinding) network().incidentNodes(edge).target())
-        .collect(toImmutableSet());
   }
 
   /**
@@ -254,8 +240,6 @@ public abstract class BindingGraph {
   /**
    * Returns the bindings that a given binding directly requests as a dependency. Does not include
    * any {@link MissingBinding}s.
-   *
-   * @see #requestedMaybeMissingBindings(Binding)
    */
   public ImmutableSet<Binding> requestedBindings(Binding binding) {
     return network().successors(binding).stream()
@@ -263,62 +247,9 @@ public abstract class BindingGraph {
         .collect(toImmutableSet());
   }
 
-  /**
-   * Returns the bindings or missing bindings that a given binding directly requests as a
-   * dependency.
-   *
-   * @see #requestedBindings(Binding)
-   */
-  public ImmutableSet<MaybeBinding> requestedMaybeMissingBindings(Binding binding) {
-    return network().successors(binding).stream()
-        .flatMap(instancesOf(MaybeBinding.class))
-        .collect(toImmutableSet());
-  }
-
   /** Returns a subnetwork that contains all nodes but only {@link DependencyEdge}s. */
-  // TODO(dpb): Make public. Cache.
   private ImmutableNetwork<Node, DependencyEdge> dependencyGraph() {
-    MutableNetwork<Node, DependencyEdge> dependencyGraph =
-        NetworkBuilder.from(network())
-            .expectedNodeCount(network().nodes().size())
-            .expectedEdgeCount((int) dependencyEdgeStream().count())
-            .build();
-    network().nodes().forEach(dependencyGraph::addNode); // include disconnected nodes
-    dependencyEdgeStream()
-        .forEach(
-            edge -> {
-              EndpointPair<Node> endpoints = network().incidentNodes(edge);
-              dependencyGraph.addEdge(endpoints.source(), endpoints.target(), edge);
-            });
-    return ImmutableNetwork.copyOf(dependencyGraph);
-  }
-
-  public static final class NodesByClass {
-    private final Set<Binding> bindings;
-    private final Set<MissingBinding> missingBindings;
-    private final Set<ComponentNode> componentNodes;
-
-    NodesByClass(Set<Binding> bindings, Set<MissingBinding> missingBindings, Set<ComponentNode> componentNodes) {
-      this.bindings = bindings;
-      this.missingBindings = missingBindings;
-      this.componentNodes = componentNodes;
-    }
-  }
-
-  protected NodesByClass nodesByClass() {
-    Set<Binding> bindings = network().nodes().stream()
-        .filter(node -> node instanceof Binding)
-        .map(Binding.class::cast)
-        .collect(toCollection(LinkedHashSet::new));
-    Set<MissingBinding> missingBindings = network().nodes().stream()
-        .filter(node -> node instanceof MissingBinding)
-        .map(MissingBinding.class::cast)
-        .collect(toCollection(LinkedHashSet::new));
-    Set<ComponentNode> componentNodes = network().nodes().stream()
-        .filter(node -> node instanceof ComponentNode)
-        .map(ComponentNode.class::cast)
-        .collect(toCollection(LinkedHashSet::new));
-    return new NodesByClass(bindings, missingBindings, componentNodes);
+    return dependencyGraph.get();
   }
 
   private Stream<DependencyEdge> dependencyEdgeStream() {
@@ -450,9 +381,6 @@ public abstract class BindingGraph {
      * fictional component based on a module.
      */
     boolean isRealComponent();
-
-    /** The entry points on this component. */
-    Set<DependencyRequest> entryPoints();
 
     /** The scopes declared on this component. */
     Set<Scope> scopes();
