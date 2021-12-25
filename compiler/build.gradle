@@ -27,6 +27,7 @@ javadoc {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1120' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -50,6 +51,7 @@ dependencies {
     implementation('io.github.jbock-java:javapoet:1.14')
     shadow('io.github.jbock-java:auto-common:1.2.1')
     implementation('io.github.jbock-java:guava:31.0.1.0')
+    implementation('io.github.jbock-java:guava-graph:1.0')
     shadow(core)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     testImplementation(core)
