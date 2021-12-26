@@ -79,6 +79,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -215,10 +216,10 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void validateCreators() {
-      ImmutableList<DeclaredType> creators =
+      List<DeclaredType> creators =
           creatorAnnotationsFor(componentAnnotation()).stream()
               .flatMap(annotation -> enclosedAnnotatedTypes(component, annotation).stream())
-              .collect(toImmutableList());
+              .collect(Collectors.toList());
       creators.forEach(
           creator -> report.addSubreport(creatorValidator.validate(asTypeElement(creator))));
       if (creators.size() > 1) {
@@ -299,7 +300,7 @@ public final class ComponentValidator implements ClearableCache {
             returnType,
             componentKind().legalSubcomponentKinds().stream()
                 .map(ComponentKind::annotation)
-                .collect(toImmutableSet()));
+                .collect(Collectors.toSet()));
       }
 
       private Optional<AnnotationMirror> subcomponentCreatorAnnotation() {
@@ -322,7 +323,7 @@ public final class ComponentValidator implements ClearableCache {
         // subcomponents and their modules separately from how it is done in ComponentDescriptor and
         // ModuleDescriptor
         @SuppressWarnings("deprecation")
-        ImmutableSet<TypeElement> transitiveModules =
+        Set<TypeElement> transitiveModules =
             getTransitiveModules(types, elements, moduleTypes);
 
         Set<TypeElement> variableTypes = Sets.newHashSet();
