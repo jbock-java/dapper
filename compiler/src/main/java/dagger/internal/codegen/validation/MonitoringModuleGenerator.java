@@ -40,6 +40,7 @@ import dagger.producers.ProductionScope;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import dagger.producers.monitoring.internal.Monitors;
 import jakarta.inject.Inject;
+import java.util.List;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -58,8 +59,8 @@ final class MonitoringModuleGenerator extends SourceFileGenerator<TypeElement> {
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(TypeElement componentElement) {
-    return ImmutableList.of(
+  public List<TypeSpec.Builder> topLevelTypes(TypeElement componentElement) {
+    return List.of(
         classBuilder(SourceFiles.generatedMonitoringModuleName(componentElement))
             .addAnnotation(Module.class)
             .addModifiers(ABSTRACT)

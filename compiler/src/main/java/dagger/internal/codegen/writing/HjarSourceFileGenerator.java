@@ -28,6 +28,8 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
@@ -53,10 +55,10 @@ public final class HjarSourceFileGenerator<T> extends SourceFileGenerator<T> {
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(T input) {
+  public List<TypeSpec.Builder> topLevelTypes(T input) {
     return delegate.topLevelTypes(input).stream()
         .map(completeType -> skeletonType(completeType.build()))
-        .collect(toImmutableList());
+        .collect(Collectors.toList());
   }
 
   private TypeSpec.Builder skeletonType(TypeSpec completeType) {
