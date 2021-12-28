@@ -16,22 +16,14 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
-
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -44,10 +36,16 @@ import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.getOnlyElement;
 
 /** Extension of {@link Types} that adds Dagger-specific methods. */
 public final class DaggerTypes implements Types {
@@ -289,45 +287,6 @@ public final class DaggerTypes implements Types {
           @Override
           public Void visitError(ErrorType errorType, Void p) {
             throw new TypeNotPresentException(type.toString(), null);
-          }
-        },
-        null);
-  }
-
-  private static final ImmutableSet<ClassName> FUTURE_TYPES =
-      ImmutableSet.of(TypeNames.LISTENABLE_FUTURE, TypeNames.FLUENT_FUTURE);
-
-  public static boolean isFutureType(TypeMirror type) {
-    if (type.getKind() != TypeKind.DECLARED) {
-      return false;
-    }
-    TypeElement typeElement = MoreElements.asType(MoreTypes.asDeclared(type).asElement());
-    return FUTURE_TYPES.stream()
-        .map(ClassName::canonicalName)
-        .anyMatch(canonicalName -> canonicalName.equals(typeElement.getQualifiedName().toString()));
-  }
-
-  public static boolean hasTypeVariable(TypeMirror type) {
-    return type.accept(
-        new SimpleTypeVisitor8<Boolean, Void>() {
-          @Override
-          public Boolean visitArray(ArrayType arrayType, Void p) {
-            return arrayType.getComponentType().accept(this, p);
-          }
-
-          @Override
-          public Boolean visitDeclared(DeclaredType declaredType, Void p) {
-            return declaredType.getTypeArguments().stream().anyMatch(type -> type.accept(this, p));
-          }
-
-          @Override
-          public Boolean visitTypeVariable(TypeVariable t, Void aVoid) {
-            return true;
-          }
-
-          @Override
-          protected Boolean defaultAction(TypeMirror e, Void aVoid) {
-            return false;
           }
         },
         null);

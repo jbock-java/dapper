@@ -41,6 +41,7 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
+
 import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -160,17 +161,7 @@ public final class DependencyRequestFactory {
         productionMethod);
     TypeMirror type = productionMethodType.getReturnType();
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(productionMethod);
-    // Only a component production method can be a request for a ListenableFuture, so we
-    // special-case it here.
-    if (isTypeOf(ListenableFuture.class, type)) {
-      return DependencyRequest.builder()
-          .kind(FUTURE)
-          .key(keyFactory.forQualifiedType(qualifier, unwrapType(type)))
-          .requestElement(productionMethod)
-          .build();
-    } else {
-      return newDependencyRequest(productionMethod, type, qualifier);
-    }
+    return newDependencyRequest(productionMethod, type, qualifier);
   }
 
   DependencyRequest forComponentMembersInjectionMethod(

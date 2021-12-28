@@ -16,21 +16,19 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
-import static dagger.internal.codegen.Compilers.compilerWithOptions;
-import static dagger.internal.codegen.Compilers.daggerCompiler;
-
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import javax.tools.JavaFileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import javax.tools.JavaFileObject;
+import java.util.Collection;
+
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static dagger.internal.codegen.Compilers.compilerWithOptions;
+import static dagger.internal.codegen.Compilers.daggerCompiler;
 
 @RunWith(Parameterized.class)
 public class ProductionComponentProcessorTest {

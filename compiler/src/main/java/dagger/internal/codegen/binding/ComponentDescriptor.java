@@ -16,17 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static dagger.internal.codegen.base.Suppliers.memoizeInt;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static java.util.Objects.requireNonNull;
-import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.type.TypeKind.VOID;
-
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableBiMap;
@@ -42,6 +31,11 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import dagger.producers.CancellationPolicy;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,10 +43,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.Suppliers.memoizeInt;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
+import static javax.lang.model.element.Modifier.ABSTRACT;
+import static javax.lang.model.type.TypeKind.VOID;
 
 /**
  * A component declaration.
@@ -490,10 +490,5 @@ public final class ComponentDescriptor {
         && !method.getReturnType().getKind().equals(VOID)
         && !elements.getTypeElement(Object.class).equals(method.getEnclosingElement())
         && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(method.getSimpleName().toString());
-  }
-
-  /** Returns {@code true} if a method could be a component production entry point. */
-  static boolean isComponentProductionMethod(DaggerElements elements, ExecutableElement method) {
-    return isComponentContributionMethod(elements, method) && isFutureType(method.getReturnType());
   }
 }

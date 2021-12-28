@@ -16,30 +16,28 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static java.util.Objects.requireNonNull;
-
 import com.google.auto.common.Equivalence;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
+
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 
 /** A value object representing the mechanism by which a {@link Key} can be produced. */
 public final class ProductionBinding extends ContributionBinding {
@@ -160,19 +158,6 @@ public final class ProductionBinding extends ContributionBinding {
     FUTURE,
     /** A {@code Set<ListenableFuture<T>>}. */
     SET_OF_FUTURE;
-
-    /** Returns the kind of object a {@code @Produces}-annotated method returns. */
-    public static ProductionKind fromProducesMethod(ExecutableElement producesMethod) {
-      if (isFutureType(producesMethod.getReturnType())) {
-        return FUTURE;
-      } else if (ContributionType.fromBindingElement(producesMethod)
-          .equals(ContributionType.SET_VALUES)
-          && isFutureType(SetType.from(producesMethod.getReturnType()).elementType())) {
-        return SET_OF_FUTURE;
-      } else {
-        return IMMEDIATE;
-      }
-    }
   }
 
   /**

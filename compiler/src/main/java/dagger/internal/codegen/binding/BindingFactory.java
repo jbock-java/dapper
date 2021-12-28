@@ -16,6 +16,33 @@
 
 package dagger.internal.codegen.binding;
 
+import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
+import dagger.Module;
+import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.DependencyRequest;
+import dagger.model.Key;
+import dagger.model.RequestKind;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
+import java.util.function.BiFunction;
+
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -25,7 +52,6 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
-import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentProductionMethod;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.binding.ContributionBinding.bindingKindForMultibindingKey;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
@@ -35,49 +61,15 @@ import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.BOUND_INSTANCE;
 import static dagger.model.BindingKind.COMPONENT;
 import static dagger.model.BindingKind.COMPONENT_DEPENDENCY;
-import static dagger.model.BindingKind.COMPONENT_PRODUCTION;
 import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.MEMBERS_INJECTOR;
 import static dagger.model.BindingKind.OPTIONAL;
-import static dagger.model.BindingKind.PRODUCTION;
 import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
-
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
-import dagger.Module;
-import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.binding.ProductionBinding.ProductionKind;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.DependencyRequest;
-import dagger.model.Key;
-import dagger.model.RequestKind;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Binding} objects. */
 public final class BindingFactory {
@@ -258,10 +250,7 @@ public final class BindingFactory {
    */
   public ContributionBinding syntheticMultibinding(
       Key key, Iterable<ContributionBinding> multibindingContributions) {
-    ContributionBinding.Builder<?, ?> builder =
-        multibindingRequiresProduction(key, multibindingContributions)
-            ? ProductionBinding.builder()
-            : ProvisionBinding.builder();
+    ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder();
     return builder
         .contributionType(ContributionType.UNIQUE)
         .key(key)
@@ -269,20 +258,6 @@ public final class BindingFactory {
             dependencyRequestFactory.forMultibindingContributions(key, multibindingContributions))
         .kind(bindingKindForMultibindingKey(key))
         .build();
-  }
-
-  private boolean multibindingRequiresProduction(
-      Key key, Iterable<ContributionBinding> multibindingContributions) {
-    if (MapType.isMap(key)) {
-      MapType mapType = MapType.from(key);
-      if (mapType.valuesAreTypeOf(Producer.class) || mapType.valuesAreTypeOf(Produced.class)) {
-        return true;
-      }
-    } else if (SetType.isSet(key) && SetType.from(key).elementsAreTypeOf(Produced.class)) {
-      return true;
-    }
-    return Iterables.any(
-        multibindingContributions, binding -> binding.bindingType().equals(BindingType.PRODUCTION));
   }
 
   /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
@@ -322,22 +297,11 @@ public final class BindingFactory {
       ComponentDescriptor componentDescriptor, ExecutableElement dependencyMethod) {
     checkArgument(dependencyMethod.getKind().equals(METHOD));
     checkArgument(dependencyMethod.getParameters().isEmpty());
-    ContributionBinding.Builder<?, ?> builder;
-    if (componentDescriptor.isProduction()
-        && isComponentProductionMethod(elements, dependencyMethod)) {
-      builder =
-          ProductionBinding.builder()
-              .key(keyFactory.forProductionComponentMethod(dependencyMethod))
-              .kind(COMPONENT_PRODUCTION)
-              .thrownTypes(dependencyMethod.getThrownTypes());
-    } else {
-      builder =
-          ProvisionBinding.builder()
-              .key(keyFactory.forComponentMethod(dependencyMethod))
-              .nullableType(getNullableType(dependencyMethod))
-              .kind(COMPONENT_PROVISION)
-              .scope(uniqueScopeOf(dependencyMethod));
-    }
+    ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder()
+        .key(keyFactory.forComponentMethod(dependencyMethod))
+        .nullableType(getNullableType(dependencyMethod))
+        .kind(COMPONENT_PROVISION)
+        .scope(uniqueScopeOf(dependencyMethod));
     return builder
         .contributionType(ContributionType.UNIQUE)
         .bindingElement(dependencyMethod)
@@ -409,11 +373,6 @@ public final class BindingFactory {
   ContributionBinding delegateBinding(
       DelegateDeclaration delegateDeclaration, ContributionBinding actualBinding) {
     switch (actualBinding.bindingType()) {
-      case PRODUCTION:
-        return buildDelegateBinding(
-            ProductionBinding.builder().nullableType(actualBinding.nullableType()),
-            delegateDeclaration,
-            Producer.class);
 
       case PROVISION:
         return buildDelegateBinding(
@@ -473,13 +432,7 @@ public final class BindingFactory {
           .build();
     }
 
-    boolean requiresProduction =
-        underlyingKeyBindings.stream()
-            .anyMatch(binding -> binding.bindingType() == BindingType.PRODUCTION)
-            || requestKind.equals(RequestKind.PRODUCER) // handles producerFromProvider cases
-            || requestKind.equals(RequestKind.PRODUCED); // handles producerFromProvider cases
-
-    return (requiresProduction ? ProductionBinding.builder() : ProvisionBinding.builder())
+    return ProvisionBinding.builder()
         .contributionType(ContributionType.UNIQUE)
         .key(key)
         .kind(OPTIONAL)

@@ -53,17 +53,13 @@ import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.auto.common.MoreTypes.isType;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.Optionals.firstPresent;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.ElementKind.METHOD;
 
@@ -105,16 +101,6 @@ public final class KeyFactory {
     return forMethod(componentMethod, componentMethod.getReturnType());
   }
 
-  Key forProductionComponentMethod(ExecutableElement componentMethod) {
-    checkArgument(componentMethod.getKind().equals(METHOD));
-    TypeMirror returnType = componentMethod.getReturnType();
-    TypeMirror keyType =
-        isFutureType(returnType)
-            ? getOnlyElement(MoreTypes.asDeclared(returnType).getTypeArguments())
-            : returnType;
-    return forMethod(componentMethod, keyType);
-  }
-
   Key forSubcomponentCreatorMethod(
       ExecutableElement subcomponentCreatorMethod, DeclaredType declaredContainer) {
     checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
@@ -130,11 +116,6 @@ public final class KeyFactory {
   public Key forProvidesMethod(ExecutableElement method, TypeElement contributingModule) {
     return forBindingMethod(
         method, contributingModule, Optional.of(elements.getTypeElement(Provider.class)));
-  }
-
-  public Key forProducesMethod(ExecutableElement method, TypeElement contributingModule) {
-    return forBindingMethod(
-        method, contributingModule, Optional.of(elements.getTypeElement(Producer.class)));
   }
 
   /** Returns the key bound by a {@link Binds} method. */
@@ -159,21 +140,6 @@ public final class KeyFactory {
             types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), method));
     ContributionType contributionType = ContributionType.fromBindingElement(method);
     TypeMirror returnType = methodType.getReturnType();
-    if (frameworkType.isPresent()
-        && frameworkType.get().equals(elements.getTypeElement(Producer.class))
-        && isType(returnType)) {
-      if (isFutureType(methodType.getReturnType())) {
-        returnType = getOnlyElement(MoreTypes.asDeclared(returnType).getTypeArguments());
-      } else if (contributionType.equals(ContributionType.SET_VALUES)
-          && SetType.isSet(returnType)) {
-        SetType setType = SetType.from(returnType);
-        if (isFutureType(setType.elementType())) {
-          returnType =
-              types.getDeclaredType(
-                  elements.getTypeElement(Set.class), unwrapType(setType.elementType()));
-        }
-      }
-    }
     TypeMirror keyType = bindingMethodKeyType(returnType, method, contributionType, frameworkType);
     Key key = forMethod(method, keyType);
     return contributionType.equals(ContributionType.UNIQUE)
