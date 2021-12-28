@@ -22,6 +22,8 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
+
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 public class MultibindingTest {
@@ -130,58 +132,6 @@ public class MultibindingTest {
         .hadErrorContaining(
             "Map<String,String> "
                 + "cannot be provided without an @Provides-annotated method")
-        .inFile(component)
-        .onLineContaining("interface TestComponent");
-  }
-
-  @Test
-  public void produceConcreteSet_andRequestSetOfProduced() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            "import dagger.producers.ProducerModule;",
-            "import dagger.producers.Produces;",
-            "import java.util.Collections;",
-            "import java.util.Set;",
-            "",
-            "@ProducerModule",
-            "class TestModule {",
-            "  @Produces",
-            "  Set<String> setOfString() {",
-            "    return Collections.emptySet();",
-            "  }",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import com.google.common.util.concurrent.ListenableFuture;",
-            "import dagger.BindsInstance;",
-            "import dagger.producers.Produced;",
-            "import dagger.producers.Production;",
-            "import dagger.producers.ProductionComponent;",
-            "import java.util.concurrent.Executor;",
-            "import java.util.Set;",
-            "",
-            "@ProductionComponent(modules = TestModule.class)",
-            "interface TestComponent {",
-            "  ListenableFuture<Set<Produced<String>>> setOfProduced();",
-            "",
-            "  @ProductionComponent.Builder",
-            "  interface Builder {",
-            "    @BindsInstance Builder executor(@Production Executor executor);",
-            "    TestComponent build();",
-            "  }",
-            "}");
-    Compilation compilation = daggerCompiler().compile(module, component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "Set<Produced<String>> "
-                + "cannot be provided without an @Provides- or @Produces-annotated method")
         .inFile(component)
         .onLineContaining("interface TestComponent");
   }
