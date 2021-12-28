@@ -50,6 +50,8 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.producers.internal.CancellationListener;
 import jakarta.inject.Inject;
+
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
@@ -91,7 +93,7 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(ComponentDescriptor componentDescriptor) {
+  public List<TypeSpec.Builder> topLevelTypes(ComponentDescriptor componentDescriptor) {
     ClassName generatedTypeName = getRootComponentClassName(componentDescriptor);
     TypeSpec.Builder generatedComponent =
         TypeSpec.classBuilder(generatedTypeName)
@@ -163,7 +165,7 @@ final class ComponentHjarGenerator extends SourceFileGenerator<ComponentDescript
           .addMethod(onProducerFutureCancelledMethod());
     }
 
-    return ImmutableList.of(generatedComponent);
+    return List.of(generatedComponent);
   }
 
   private MethodSpec emptyComponentMethod(TypeElement typeElement, ExecutableElement baseMethod) {

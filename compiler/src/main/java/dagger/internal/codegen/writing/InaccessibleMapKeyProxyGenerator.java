@@ -30,8 +30,10 @@ import dagger.internal.codegen.binding.MapKeys;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
+
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
+import java.util.List;
 
 /**
  * Generates a class that exposes a non-{@code public} {@link
@@ -57,7 +59,7 @@ public final class InaccessibleMapKeyProxyGenerator
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(ContributionBinding binding) {
+  public List<TypeSpec.Builder> topLevelTypes(ContributionBinding binding) {
     return MapKeys.mapKeyFactoryMethod(binding, types, elements)
         .map(
             method ->
@@ -65,7 +67,7 @@ public final class InaccessibleMapKeyProxyGenerator
                     .addModifiers(PUBLIC, FINAL)
                     .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
                     .addMethod(method))
-        .map(ImmutableList::of)
-        .orElse(ImmutableList.of());
+        .map(List::of)
+        .orElse(List.of());
   }
 }

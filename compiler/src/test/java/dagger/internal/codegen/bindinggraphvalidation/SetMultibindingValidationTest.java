@@ -205,7 +205,7 @@ public class SetMultibindingValidationTest {
             "Multiple set contributions into Set<Foo> for the same contribution key: FooImpl");
     assertThat(compilation)
         .hadErrorContaining(
-            "ParentComponent → ChildComponent");
+            "ParentComponent \u2192 ChildComponent");
   }
 
   @Test
@@ -288,6 +288,6 @@ public class SetMultibindingValidationTest {
                 + "FooImplWithMult");
     assertThat(compilation)
         .hadErrorContaining(
-            "ParentComponent → ChildComponent");
+            "ParentComponent \u2192 ChildComponent");
   }
 }

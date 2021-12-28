@@ -27,6 +27,8 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import jakarta.inject.Inject;
+
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -50,7 +52,7 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(BindingGraph bindingGraph) {
+  public List<TypeSpec.Builder> topLevelTypes(BindingGraph bindingGraph) {
     ComponentImplementation componentImplementation =
         topLevelImplementationComponentFactory
             .create(bindingGraph)
@@ -65,6 +67,6 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
         componentImplementation
             .name()
             .equals(getRootComponentClassName(bindingGraph.componentDescriptor())));
-    return ImmutableList.of(componentImplementation.generate().toBuilder());
+    return List.of(componentImplementation.generate().toBuilder());
   }
 }

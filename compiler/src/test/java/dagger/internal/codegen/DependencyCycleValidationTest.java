@@ -519,7 +519,7 @@ public class DependencyCycleValidationTest {
                 "    Object is injected at",
                 "        CycleModule.string(object)",
                 "    String is requested at",
-                "        Child.entry() [Parent → Child]"))
+                "        Child.entry() [Parent \u2192 Child]"))
         .inFile(parent)
         .onLineContaining("interface Parent");
   }

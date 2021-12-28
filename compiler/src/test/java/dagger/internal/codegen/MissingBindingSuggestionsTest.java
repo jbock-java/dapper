@@ -226,7 +226,7 @@ public class MissingBindingSuggestionsTest {
                 "        Parent.bar()",
                 "The following other entry points also depend on it:",
                 "    Parent.foo()",
-                "    Child.foo() [Parent → Child]"))
+                "    Child.foo() [Parent \u2192 Child]"))
         .inFile(parent)
         .onLineContaining("interface Parent");
   }
@@ -309,9 +309,9 @@ public class MissingBindingSuggestionsTest {
                 "        Parent.bar()",
                 "The following other entry points also depend on it:",
                 "    Parent.foo()",
-                "    Child1.foo() [Parent → Child1]",
-                "    Child2.foo() [Parent → Child2]",
-                "    Child1.baz() [Parent → Child1]"))
+                "    Child1.foo() [Parent \u2192 Child1]",
+                "    Child2.foo() [Parent \u2192 Child2]",
+                "    Child1.baz() [Parent \u2192 Child1]"))
         .inFile(parent)
         .onLineContaining("interface Parent");
   }

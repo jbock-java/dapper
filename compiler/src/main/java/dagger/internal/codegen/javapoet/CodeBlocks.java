@@ -30,6 +30,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+
 import java.util.stream.Collector;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;

@@ -16,12 +16,6 @@
 
 package dagger.internal.codegen;
 
-import static com.google.auto.common.BasicAnnotationProcessor.Step;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
-import static java.util.stream.Collectors.toList;
-import static javax.lang.model.util.ElementFilter.methodsIn;
-import static javax.lang.model.util.ElementFilter.typesIn;
-
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -31,7 +25,6 @@ import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.DelegateDeclaration;
 import dagger.internal.codegen.binding.DelegateDeclaration.Factory;
-import dagger.internal.codegen.binding.ProductionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.ModuleValidator;
@@ -40,13 +33,20 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import jakarta.inject.Inject;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.google.auto.common.BasicAnnotationProcessor.Step;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static java.util.stream.Collectors.toList;
+import static javax.lang.model.util.ElementFilter.methodsIn;
+import static javax.lang.model.util.ElementFilter.typesIn;
 
 /**
  * A {@link Step} that validates module classes and generates factories for binding
@@ -57,7 +57,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final ModuleValidator moduleValidator;
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  private final SourceFileGenerator<ProductionBinding> producerFactoryGenerator;
   private final SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator;
   private final InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator;
   private final DelegateDeclaration.Factory delegateDeclarationFactory;
@@ -69,7 +68,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      SourceFileGenerator<ProductionBinding> producerFactoryGenerator,
       @ModuleGenerator SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator,
       InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator,
       Factory delegateDeclarationFactory) {
@@ -78,7 +76,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;
     this.factoryGenerator = factoryGenerator;
-    this.producerFactoryGenerator = producerFactoryGenerator;
     this.moduleConstructorProxyGenerator = moduleConstructorProxyGenerator;
     this.inaccessibleMapKeyProxyGenerator = inaccessibleMapKeyProxyGenerator;
     this.delegateDeclarationFactory = delegateDeclarationFactory;
@@ -115,8 +112,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     for (ExecutableElement method : methodsIn(module.getEnclosedElements())) {
       if (isAnnotationPresent(method, TypeNames.PROVIDES)) {
         generate(factoryGenerator, bindingFactory.providesMethodBinding(method, module));
-      } else if (isAnnotationPresent(method, TypeNames.PRODUCES)) {
-        generate(producerFactoryGenerator, bindingFactory.producesMethodBinding(method, module));
       } else if (isAnnotationPresent(method, TypeNames.BINDS)) {
         inaccessibleMapKeyProxyGenerator.generate(bindsMethodBinding(module, method), messager);
       }

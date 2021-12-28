@@ -612,7 +612,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContainingMatch(
             "(?s)\\QDouble cannot be provided\\E.*"
-                + "\\QGrandchild.object() [Parent → Child → Grandchild]\\E$")
+                + "\\QGrandchild.object() [Parent \u2192 Child \u2192 Grandchild]\\E$")
         .inFile(parent)
         .onLineContaining("interface Parent");
   }
@@ -667,7 +667,7 @@ public class MissingBindingValidationTest {
                 "    Object is requested at",
                 "        TestComponent.object()",
                 "It is also requested at:",
-                "    TestModule.string(notBound, …)",
+                "    TestModule.string(notBound, \u2026)",
                 "The following other entry points also depend on it:",
                 "    TestComponent.string()"))
         .inFile(component)
@@ -725,16 +725,16 @@ public class MissingBindingValidationTest {
                 "    String is requested at",
                 "        TestComponent.string()",
                 "It is also requested at:",
-                "    Foo(one, …)",
-                "    Foo(…, two, …)",
-                "    Foo(…, three, …)",
-                "    Foo(…, four, …)",
-                "    Foo(…, five, …)",
-                "    Foo(…, six, …)",
-                "    Foo(…, seven, …)",
-                "    Foo(…, eight, …)",
-                "    Foo(…, nine, …)",
-                "    Foo(…, ten, …)",
+                "    Foo(one, \u2026)",
+                "    Foo(\u2026, two, \u2026)",
+                "    Foo(\u2026, three, \u2026)",
+                "    Foo(\u2026, four, \u2026)",
+                "    Foo(\u2026, five, \u2026)",
+                "    Foo(\u2026, six, \u2026)",
+                "    Foo(\u2026, seven, \u2026)",
+                "    Foo(\u2026, eight, \u2026)",
+                "    Foo(\u2026, nine, \u2026)",
+                "    Foo(\u2026, ten, \u2026)",
                 "    and 3 others"))
         .inFile(component)
         .onLineContaining("interface TestComponent");
@@ -846,8 +846,8 @@ public class MissingBindingValidationTest {
                 "        Parent.bar()",
                 "The following other entry points also depend on it:",
                 "    Parent.foo()",
-                "    Child.foo() [Parent → Child]",
-                "    Child.baz() [Parent → Child]"))
+                "    Child.foo() [Parent \u2192 Child]",
+                "    Child.baz() [Parent \u2192 Child]"))
         .inFile(parent)
         .onLineContaining("interface Parent");
   }

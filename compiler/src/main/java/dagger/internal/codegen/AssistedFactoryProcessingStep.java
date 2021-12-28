@@ -59,6 +59,7 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import jakarta.inject.Inject;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
@@ -258,7 +259,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
     //   }
     // }
     @Override
-    public ImmutableList<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
+    public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
       TypeElement factory = asType(binding.bindingElement().get());
 
       ClassName name = generatedClassNameForBinding(binding);
@@ -319,7 +320,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
                       name,
                       delegateFactoryParam)
                   .build());
-      return ImmutableList.of(builder);
+      return List.of(builder);
     }
 
     /** Returns the generated factory {@link TypeName type} for an @AssistedInject constructor. */

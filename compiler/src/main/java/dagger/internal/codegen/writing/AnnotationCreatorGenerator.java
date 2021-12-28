@@ -40,6 +40,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -89,7 +90,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(TypeElement annotationType) {
+  public List<TypeSpec.Builder> topLevelTypes(TypeElement annotationType) {
     ClassName generatedTypeName = getAnnotationCreatorClassName(annotationType);
     TypeSpec.Builder annotationCreatorBuilder =
         classBuilder(generatedTypeName)
@@ -100,7 +101,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
       annotationCreatorBuilder.addMethod(buildCreateMethod(generatedTypeName, annotationElement));
     }
 
-    return ImmutableList.of(annotationCreatorBuilder);
+    return List.of(annotationCreatorBuilder);
   }
 
   private MethodSpec buildCreateMethod(ClassName generatedTypeName, TypeElement annotationElement) {

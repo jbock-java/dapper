@@ -20,7 +20,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
-import dagger.internal.codegen.binding.ProductionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.writing.FactoryGenerator;
@@ -28,7 +27,7 @@ import dagger.internal.codegen.writing.HjarSourceFileGenerator;
 import dagger.internal.codegen.writing.MembersInjectorGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.writing.ModuleProxies.ModuleConstructorProxyGenerator;
-import dagger.internal.codegen.writing.ProducerFactoryGenerator;
+
 import javax.lang.model.element.TypeElement;
 
 @Module
@@ -37,12 +36,6 @@ abstract class SourceFileGeneratorsModule {
   @Provides
   static SourceFileGenerator<ProvisionBinding> factoryGenerator(
       FactoryGenerator generator, CompilerOptions compilerOptions) {
-    return hjarWrapper(generator, compilerOptions);
-  }
-
-  @Provides
-  static SourceFileGenerator<ProductionBinding> producerFactoryGenerator(
-      ProducerFactoryGenerator generator, CompilerOptions compilerOptions) {
     return hjarWrapper(generator, compilerOptions);
   }
 

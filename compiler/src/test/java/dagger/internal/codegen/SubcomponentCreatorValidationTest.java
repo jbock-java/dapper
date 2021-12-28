@@ -674,10 +674,10 @@ public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelpe
     Compilation compilation = compile(componentFile, childComponentFile);
     assertThat(compilation).failed();
     String firstBinding = creatorKind.equals(FACTORY)
-        ? "ChildComponent.Factory.create(s1, …)"
+        ? "ChildComponent.Factory.create(s1, \u2026)"
         : "@BindsInstance void ChildComponent.Builder.set1(String)";
     String secondBinding = creatorKind.equals(FACTORY)
-        ? "ChildComponent.Factory.create(…, s2)"
+        ? "ChildComponent.Factory.create(\u2026, s2)"
         : "@BindsInstance void ChildComponent.Builder.set2(String)";
     assertThat(compilation)
         .hadErrorContaining(
@@ -685,7 +685,7 @@ public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelpe
                 "String is bound multiple times:",
                 "    " + firstBinding,
                 "    " + secondBinding,
-                "    in component: [ParentComponent → ChildComponent]"))
+                "    in component: [ParentComponent \u2192 ChildComponent]"))
         .inFile(componentFile)
         .onLineContaining("interface ParentComponent {");
   }

@@ -16,6 +16,34 @@
 
 package dagger.internal.codegen.writing;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import dagger.MembersInjector;
+import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.FrameworkField;
+import dagger.internal.codegen.binding.MembersInjectionBinding;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
+import dagger.model.DependencyRequest;
+import jakarta.inject.Inject;
+
+import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+
 import static com.google.common.base.Preconditions.checkState;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -39,31 +67,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
-import dagger.MembersInjector;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.FrameworkField;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
-import dagger.model.DependencyRequest;
-import jakarta.inject.Inject;
-import java.util.Map.Entry;
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.Element;
-
 /**
  * Generates {@link MembersInjector} implementations from {@link MembersInjectionBinding} instances.
  */
@@ -85,10 +88,10 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(MembersInjectionBinding binding) {
+  public List<TypeSpec.Builder> topLevelTypes(MembersInjectionBinding binding) {
     // Empty members injection bindings are special and don't need source files.
     if (binding.injectionSites().isEmpty()) {
-      return ImmutableList.of();
+      return List.of();
     }
 
     // Members injectors for classes with no local injection sites and no @Inject
@@ -96,7 +99,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
     if (!binding.hasLocalInjectionSites()
         && injectedConstructors(binding.membersInjectedType()).isEmpty()
         && assistedInjectedConstructors(binding.membersInjectedType()).isEmpty()) {
-      return ImmutableList.of();
+      return List.of();
     }
 
 
@@ -142,7 +145,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     createMethodBuilder.addCode(
         "return new $T(", parameterizedGeneratedTypeNameForBinding(binding));
-    ImmutableList.Builder<CodeBlock> constructorInvocationParameters = ImmutableList.builder();
+    List<CodeBlock> constructorInvocationParameters = new ArrayList<>();
 
     boolean usesRawFrameworkTypes = false;
     UniqueNameSet fieldNames = new UniqueNameSet();
@@ -179,7 +182,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
     }
 
     createMethodBuilder.addCode(
-        constructorInvocationParameters.build().stream().collect(toParametersCodeBlock()));
+        constructorInvocationParameters.stream().collect(toParametersCodeBlock()));
     createMethodBuilder.addCode(");");
 
     injectorTypeBuilder.addMethod(constructorBuilder.build());
@@ -210,6 +213,6 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     gwtIncompatibleAnnotation(binding).ifPresent(injectorTypeBuilder::addAnnotation);
 
-    return ImmutableList.of(injectorTypeBuilder);
+    return List.of(injectorTypeBuilder);
   }
 }

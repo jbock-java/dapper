@@ -954,7 +954,7 @@ public class DuplicateBindingsValidationTest {
                 "Foo is bound multiple times:",
                 "    @Inject Foo(Set<String>) [Injected1]",
                 "    @Provides Foo Provided1.Provided1Module.provideFoo(Set<String>) "
-                    + "[Injected1 → Injected2 → Provided1]"))
+                    + "[Injected1 \u2192 Injected2 \u2192 Provided1]"))
         .inFile(injected1)
         .onLineContaining("interface Injected1 {");
   }

@@ -97,16 +97,16 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   }
 
   @Override
-  public ImmutableList<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
+  public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
     // We don't want to write out resolved bindings -- we want to write out the generic version.
     checkArgument(!binding.unresolved().isPresent());
     checkArgument(binding.bindingElement().isPresent());
 
     if (binding.factoryCreationStrategy().equals(DELEGATE)) {
-      return ImmutableList.of();
+      return List.of();
     }
 
-    return ImmutableList.of(factoryBuilder(binding));
+    return List.of(factoryBuilder(binding));
   }
 
   private TypeSpec.Builder factoryBuilder(ProvisionBinding binding) {

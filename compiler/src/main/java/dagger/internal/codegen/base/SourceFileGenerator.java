@@ -17,12 +17,7 @@
 package dagger.internal.codegen.base;
 
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
-import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
-
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.JavaFile;
@@ -32,11 +27,16 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import java.util.List;
-import java.util.Optional;
+
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
+import java.util.List;
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
+import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 
 /**
  * A template class that provides a framework for properly handling IO while generating source files

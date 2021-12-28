@@ -298,7 +298,7 @@ public final class FullBindingGraphValidationTest {
           "    @Binds Object AModule.object(String)",
           "    @BindsInstance SubcomponentWithErrors.Builder"
               + " SubcomponentWithErrors.Builder.object(Object)",
-          "    in component: [ModuleWithSubcomponentWithErrors → SubcomponentWithErrors]",
+          "    in component: [ModuleWithSubcomponentWithErrors \u2192 SubcomponentWithErrors]",
           "",
           "======================",
           "Full classname legend:",
@@ -448,7 +448,7 @@ public final class FullBindingGraphValidationTest {
           "\033[1;31m[Dagger/DuplicateBindings]\033[0m Object is bound multiple times:",
           "    @Binds Object AModule.object(String)",
           "    @Binds Object CombinedWithASubcomponentHasErrors.object(Number)",
-          "    in component: [CombinedWithASubcomponentHasErrors → ASubcomponent]",
+          "    in component: [CombinedWithASubcomponentHasErrors \u2192 ASubcomponent]",
           "",
           "======================",
           "Full classname legend:",
