@@ -16,6 +16,41 @@
 
 package dagger.internal.codegen.binding;
 
+import com.google.auto.common.MoreTypes;
+import com.google.common.collect.ImmutableSet;
+import dagger.Binds;
+import dagger.BindsOptionalOf;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.FrameworkTypes;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.base.SimpleAnnotationMirror;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.Key;
+import dagger.model.Key.MultibindingContributionIdentifier;
+import dagger.multibindings.Multibinds;
+import dagger.producers.Produced;
+import dagger.producers.Producer;
+import dagger.producers.Production;
+import dagger.producers.internal.ProductionImplementation;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.stream.Stream;
+
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.isType;
@@ -31,43 +66,6 @@ import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.ElementKind.METHOD;
-
-import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
-import dagger.Binds;
-import dagger.BindsOptionalOf;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.FrameworkTypes;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.OptionalType;
-import dagger.internal.codegen.base.RequestKinds;
-import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.base.SimpleAnnotationMirror;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.Key;
-import dagger.model.Key.MultibindingContributionIdentifier;
-import dagger.model.RequestKind;
-import dagger.multibindings.Multibinds;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
-import dagger.producers.Production;
-import dagger.producers.internal.ProductionImplementation;
-import dagger.producers.monitoring.ProductionComponentMonitor;
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.stream.Stream;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Key}s. */
 public final class KeyFactory {
@@ -274,10 +272,6 @@ public final class KeyFactory {
         .build();
   }
 
-  public Key forProductionComponentMonitor() {
-    return Key.builder(elements.getTypeElement(ProductionComponentMonitor.class).asType()).build();
-  }
-
   /**
    * If {@code requestKey} is for a {@code Map<K, V>} or {@code Map<K, Produced<V>>}, returns keys
    * for {@code Map<K, Provider<V>>} and {@code Map<K, Producer<V>>} (if Dagger-Producers is on
@@ -420,7 +414,7 @@ public final class KeyFactory {
 
   /**
    * If {@code key}'s type is {@code Optional<T>} for some {@code T}, returns a key with the same
-   * qualifier whose type is {@linkplain RequestKinds#extractKeyType(RequestKind, TypeMirror)}
+   * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, TypeMirror)}
    * extracted} from {@code T}.
    */
   Optional<Key> unwrapOptional(Key key) {

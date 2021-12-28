@@ -224,30 +224,6 @@ public final class BindingFactory {
         .build();
   }
 
-  /**
-   * Returns a {@link dagger.model.BindingKind#PRODUCTION} binding for a {@code @Produces}-annotated
-   * method.
-   *
-   * @param contributedBy the installed module that declares or inherits the method
-   */
-  public ProductionBinding producesMethodBinding(
-      ExecutableElement producesMethod, TypeElement contributedBy) {
-    // TODO(beder): Add nullability checking with Java 8.
-    ProductionBinding.Builder builder =
-        setMethodBindingProperties(
-            ProductionBinding.builder(),
-            producesMethod,
-            contributedBy,
-            keyFactory.forProducesMethod(producesMethod, contributedBy),
-            this::producesMethodBinding)
-            .kind(PRODUCTION)
-            .productionKind(ProductionKind.fromProducesMethod(producesMethod))
-            .thrownTypes(producesMethod.getThrownTypes())
-            .executorRequest(dependencyRequestFactory.forProductionImplementationExecutor())
-            .monitorRequest(dependencyRequestFactory.forProductionComponentMonitor());
-    return builder.build();
-  }
-
   private <C extends ContributionBinding, B extends ContributionBinding.Builder<C, B>>
   B setMethodBindingProperties(
       B builder,

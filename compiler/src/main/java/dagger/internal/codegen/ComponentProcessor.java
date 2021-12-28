@@ -41,17 +41,17 @@ import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
-import dagger.internal.codegen.validation.MonitoringModuleProcessingStep;
 import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * The annotation processor responsible for generating the classes that drive the Dagger 2.0
@@ -160,7 +160,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
         AssistedProcessingStep assistedProcessingStep,
-        MonitoringModuleProcessingStep monitoringModuleProcessingStep,
         MultibindingAnnotationsProcessingStep multibindingAnnotationsProcessingStep,
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
@@ -174,7 +173,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
           assistedInjectProcessingStep,
           assistedFactoryProcessingStep,
           assistedProcessingStep,
-          monitoringModuleProcessingStep,
           multibindingAnnotationsProcessingStep,
           bindsInstanceProcessingStep,
           moduleProcessingStep,

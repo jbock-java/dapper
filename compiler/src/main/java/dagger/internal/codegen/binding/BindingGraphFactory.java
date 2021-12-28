@@ -16,25 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.auto.common.MoreTypes.isType;
-import static com.google.auto.common.MoreTypes.isTypeOf;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
-import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
-import static dagger.internal.codegen.binding.SourceFiles.generatedMonitoringModuleName;
-import static dagger.model.BindingKind.ASSISTED_INJECTION;
-import static dagger.model.BindingKind.DELEGATE;
-import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.OPTIONAL;
-import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static dagger.model.RequestKind.MEMBERS_INJECTION;
-import static java.util.function.Predicate.isEqual;
-import static javax.lang.model.util.ElementFilter.methodsIn;
-
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -56,10 +37,13 @@ import dagger.model.Key;
 import dagger.model.Scope;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import dagger.producers.internal.ProductionExecutorModule;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
+
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -71,9 +55,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
+
+import static com.google.auto.common.MoreTypes.asTypeElement;
+import static com.google.auto.common.MoreTypes.isType;
+import static com.google.auto.common.MoreTypes.isTypeOf;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
+import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
+import static dagger.model.BindingKind.ASSISTED_INJECTION;
+import static dagger.model.BindingKind.DELEGATE;
+import static dagger.model.BindingKind.INJECTION;
+import static dagger.model.BindingKind.OPTIONAL;
+import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static dagger.model.RequestKind.MEMBERS_INJECTION;
+import static java.util.function.Predicate.isEqual;
+import static javax.lang.model.util.ElementFilter.methodsIn;
 
 /** A factory for {@link BindingGraph} objects. */
 @Singleton
@@ -261,8 +260,6 @@ public final class BindingGraphFactory implements ClearableCache {
     return shouldIncludeImplicitProductionModules(componentDescriptor, parentResolver)
         ? new ImmutableSet.Builder<ModuleDescriptor>()
         .addAll(componentDescriptor.modules())
-        .add(descriptorForMonitoringModule(componentDescriptor.typeElement()))
-        .add(descriptorForProductionExecutorModule())
         .build()
         : componentDescriptor.modules();
   }
@@ -273,25 +270,6 @@ public final class BindingGraphFactory implements ClearableCache {
         && ((!component.isSubcomponent() && component.isRealComponent())
         || (parentResolver.isPresent()
         && !parentResolver.get().componentDescriptor.isProduction()));
-  }
-
-  /**
-   * Returns a descriptor for a generated module that handles monitoring for production components.
-   * This module is generated in the {@link
-   * dagger.internal.codegen.validation.MonitoringModuleProcessingStep}.
-   *
-   * @throws TypeNotPresentException if the module has not been generated yet. This will cause the
-   *     processor to retry in a later processing round.
-   */
-  private ModuleDescriptor descriptorForMonitoringModule(TypeElement componentDefinitionType) {
-    return moduleDescriptorFactory.create(
-        elements.checkTypePresent(
-            generatedMonitoringModuleName(componentDefinitionType).toString()));
-  }
-
-  /** Returns a descriptor {@link ProductionExecutorModule}. */
-  private ModuleDescriptor descriptorForProductionExecutorModule() {
-    return moduleDescriptorFactory.create(elements.getTypeElement(ProductionExecutorModule.class));
   }
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */

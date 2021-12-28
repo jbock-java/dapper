@@ -195,13 +195,6 @@ public final class DependencyRequestFactory {
         .build();
   }
 
-  DependencyRequest forProductionComponentMonitor() {
-    return DependencyRequest.builder()
-        .kind(PROVIDER)
-        .key(keyFactory.forProductionComponentMonitor())
-        .build();
-  }
-
   /**
    * Returns a synthetic request for the present value of an optional binding generated from a
    * {@link dagger.BindsOptionalOf} declaration.

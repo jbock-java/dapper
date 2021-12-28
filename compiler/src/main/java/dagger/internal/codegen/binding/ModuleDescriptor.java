@@ -216,9 +216,6 @@ public final class ModuleDescriptor {
         if (isAnnotationPresent(moduleMethod, Provides.class)) {
           bindings.add(bindingFactory.providesMethodBinding(moduleMethod, moduleElement));
         }
-        if (isAnnotationPresent(moduleMethod, Produces.class)) {
-          bindings.add(bindingFactory.producesMethodBinding(moduleMethod, moduleElement));
-        }
         if (isAnnotationPresent(moduleMethod, Binds.class)) {
           delegates.add(bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
         }

@@ -100,15 +100,6 @@ abstract class MethodBindingExpression extends BindingExpression {
             : CodeBlock.of("$L.$L", shardImplementation.shardFieldReference(), methodCall));
   }
 
-  @Override
-  Expression getDependencyExpressionForComponentMethod(
-      ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
-    return producerEntryPointView
-        .getProducerEntryPointField(this, componentMethod, component.name())
-        .orElseGet(
-            () -> super.getDependencyExpressionForComponentMethod(componentMethod, component));
-  }
-
   /** Adds the method to the component (if necessary) the first time it's called. */
   protected abstract void addMethod();
 

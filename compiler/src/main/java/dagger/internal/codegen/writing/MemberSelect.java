@@ -164,8 +164,7 @@ abstract class MemberSelect {
 
   /**
    * A static member select for an empty set factory. Calls {@link
-   * dagger.internal.SetFactory#empty()}, {@link dagger.producers.internal.SetProducer#empty()}, or
-   * {@link dagger.producers.internal.SetOfProducedProducer#empty()}, depending on the set bindings.
+   * dagger.internal.SetFactory#empty()}.
    */
   private static MemberSelect emptySetFactory(ContributionBinding binding) {
     return new ParameterizedStaticMethod(
