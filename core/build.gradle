@@ -6,12 +6,6 @@ plugins {
 
 group = 'io.github.jbock-java'
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
-    }
-}
-
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '11'
