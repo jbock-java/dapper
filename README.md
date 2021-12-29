@@ -8,6 +8,7 @@ with some modifications:
 * removed the `unwrapValue` attribute from the `MapKey` annotation, it is now effectively always `true`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * removed some kotlin-related special-casing
+* remove the `experimental_turbine_hjar` option
 
 Dapper was forked from dagger version `2.37`, which is the last dagger
 version that did not depend on the [xprocessing](https://github.com/google/dagger/issues/2926) kotlin library.

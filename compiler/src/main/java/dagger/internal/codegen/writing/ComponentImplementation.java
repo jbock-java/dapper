@@ -82,6 +82,7 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -925,35 +926,7 @@ public final class ComponentImplementation {
         }
       }
 
-      if (isComponentShard()) {
-        cancelParentStatement().ifPresent(methodBuilder::addCode);
-      }
-
       addMethod(MethodSpecKind.CANCELLATION_LISTENER_METHOD, methodBuilder.build());
-    }
-
-    private Optional<CodeBlock> cancelParentStatement() {
-      if (!shouldPropagateCancellationToParent()) {
-        return Optional.empty();
-      }
-      return Optional.of(
-          CodeBlock.builder()
-              .addStatement(
-                  "$L.$N($N)",
-                  parent.get().componentFieldReference(),
-                  CANCELLATION_LISTENER_METHOD_NAME,
-                  MAY_INTERRUPT_IF_RUNNING_PARAM)
-              .build());
-    }
-
-    private boolean shouldPropagateCancellationToParent() {
-      return parent.isPresent()
-          && parent
-          .get()
-          .componentDescriptor()
-          .cancellationPolicy()
-          .map(policy -> policy.fromSubcomponents().equals(PROPAGATE))
-          .orElse(false);
     }
 
     /**

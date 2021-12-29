@@ -188,7 +188,7 @@ public final class BindingGraphFactory implements ClearableCache {
     ImmutableSet.Builder<SubcomponentDeclaration> subcomponentDeclarations = ImmutableSet.builder();
 
     // Collect transitive module bindings and multibinding declarations.
-    for (ModuleDescriptor moduleDescriptor : modules(componentDescriptor, parentResolver)) {
+    for (ModuleDescriptor moduleDescriptor : componentDescriptor.modules()) {
       explicitBindingsBuilder.addAll(moduleDescriptor.bindings());
       multibindingDeclarations.addAll(moduleDescriptor.multibindingDeclarations());
       subcomponentDeclarations.addAll(moduleDescriptor.subcomponentDeclarations());
@@ -220,7 +220,7 @@ public final class BindingGraphFactory implements ClearableCache {
     if (createFullBindingGraph) {
       // Resolve the keys for all bindings in all modules, stripping any multibinding contribution
       // identifier so that the multibinding itself is resolved.
-      modules(componentDescriptor, parentResolver).stream()
+      componentDescriptor.modules().stream()
           .flatMap(module -> module.allBindingKeys().stream())
           .map(key -> key.toBuilder().multibindingContributionIdentifier(Optional.empty()).build())
           .forEach(requestResolver::resolve);
@@ -247,29 +247,6 @@ public final class BindingGraphFactory implements ClearableCache {
         ImmutableMap.copyOf(requestResolver.getResolvedContributionBindings()),
         ImmutableMap.copyOf(requestResolver.getResolvedMembersInjectionBindings()),
         ImmutableList.copyOf(subgraphs.build()));
-  }
-
-  /**
-   * Returns all the modules that should be installed in the component. For production components
-   * and production subcomponents that have a parent that is not a production component or
-   * subcomponent, also includes the production monitoring module for the component and the
-   * production executor module.
-   */
-  private Set<ModuleDescriptor> modules(
-      ComponentDescriptor componentDescriptor, Optional<Resolver> parentResolver) {
-    return shouldIncludeImplicitProductionModules(componentDescriptor, parentResolver)
-        ? new ImmutableSet.Builder<ModuleDescriptor>()
-        .addAll(componentDescriptor.modules())
-        .build()
-        : componentDescriptor.modules();
-  }
-
-  private boolean shouldIncludeImplicitProductionModules(
-      ComponentDescriptor component, Optional<Resolver> parentResolver) {
-    return component.isProduction()
-        && ((!component.isSubcomponent() && component.isRealComponent())
-        || (parentResolver.isPresent()
-        && !parentResolver.get().componentDescriptor.isProduction()));
   }
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */
@@ -586,12 +563,6 @@ public final class BindingGraphFactory implements ClearableCache {
       if ((binding.scope().isPresent() && binding.scope().get().isProductionScope())
           || binding.bindingType().equals(BindingType.PRODUCTION)) {
         for (Resolver requestResolver : getResolverLineage()) {
-          // Resolve @Inject @ProductionScope bindings at the highest production component.
-          if (binding.kind().equals(INJECTION)
-              && requestResolver.componentDescriptor.isProduction()) {
-            return Optional.of(requestResolver);
-          }
-
           // Resolve explicit @Produces and @ProductionScope bindings at the highest component that
           // installs the binding.
           if (requestResolver.containsExplicitBinding(binding)) {

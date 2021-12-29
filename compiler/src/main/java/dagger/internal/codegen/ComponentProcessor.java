@@ -164,7 +164,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
-        ComponentHjarProcessingStep componentHjarProcessingStep,
         BindingMethodProcessingStep bindingMethodProcessingStep,
         CompilerOptions compilerOptions) {
       return ImmutableList.of(
@@ -176,9 +175,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
           multibindingAnnotationsProcessingStep,
           bindsInstanceProcessingStep,
           moduleProcessingStep,
-          compilerOptions.headerCompilation()
-              ? componentHjarProcessingStep
-              : componentProcessingStep,
+          componentProcessingStep,
           bindingMethodProcessingStep);
     }
   }

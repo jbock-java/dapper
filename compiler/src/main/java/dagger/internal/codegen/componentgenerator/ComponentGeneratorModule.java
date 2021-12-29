@@ -28,15 +28,4 @@ public interface ComponentGeneratorModule {
 
   @Binds
   abstract SourceFileGenerator<BindingGraph> componentGenerator(ComponentGenerator generator);
-
-  // The HjarSourceFileGenerator wrapper first generates the entire TypeSpec before stripping out
-  // things that aren't needed for the hjar. However, this can be really expensive for the component
-  // because it is usually the most expensive file to generate, and most of its content is not
-  // needed in the hjar. Thus, instead of wrapping the ComponentGenerator in HjarSourceFileGenerator
-  // we provide a completely separate processing step, ComponentHjarProcessingStep, and generator,
-  // ComponentHjarGenerator, for when generating hjars for components, which can avoid generating
-  // the parts of the component that would have been stripped out by the HjarSourceFileGenerator.
-  @Binds
-  abstract SourceFileGenerator<ComponentDescriptor> componentHjarGenerator(
-      ComponentHjarGenerator hjarGenerator);
 }

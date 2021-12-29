@@ -347,16 +347,6 @@ public final class ComponentDescriptor {
     return !isSubcomponent() || creatorDescriptor().isPresent();
   }
 
-  /**
-   * Returns the {@link CancellationPolicy} for this component, or an empty optional if either the
-   * component is not a production component or no {@code CancellationPolicy} annotation is present.
-   */
-  public Optional<CancellationPolicy> cancellationPolicy() {
-    return isProduction()
-        ? Optional.ofNullable(typeElement().getAnnotation(CancellationPolicy.class))
-        : Optional.empty();
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

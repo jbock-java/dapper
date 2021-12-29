@@ -72,8 +72,6 @@ public abstract class CompilerOptions {
 
   public abstract boolean warnIfInjectionFactoryNotGeneratedUpstream();
 
-  public abstract boolean headerCompilation();
-
   public abstract ValidationType fullBindingGraphValidationType();
 
   /**
