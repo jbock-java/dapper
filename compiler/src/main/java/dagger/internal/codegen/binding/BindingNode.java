@@ -170,11 +170,6 @@ public final class BindingNode implements dagger.model.Binding {
   }
 
   @Override
-  public boolean isProduction() {
-    return delegate().bindingType().equals(PRODUCTION);
-  }
-
-  @Override
   public BindingKind kind() {
     return delegate().kind();
   }

@@ -19,17 +19,12 @@ package dagger.internal.codegen.bindinggraphvalidation;
 import static com.google.common.base.Verify.verify;
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
-import static dagger.internal.codegen.base.RequestKinds.canBeSatisfiedByProductionBinding;
-import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.MissingBinding;
-import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
@@ -82,10 +77,7 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     if (isValidImplicitProvisionKey(key, types)) {
       errorMessage.append("an @Inject constructor or ");
     }
-    errorMessage.append("an @Provides-"); // TODO(dpb): s/an/a
-    if (allIncomingDependenciesCanUseProduction(missingBinding, graph)) {
-      errorMessage.append(" or @Produces-");
-    }
+    errorMessage.append("a @Provides-");
     errorMessage.append("annotated method.");
     if (isValidMembersInjectionKey(key) && typeHasInjectionSites(key)) {
       errorMessage.append(
@@ -100,27 +92,6 @@ final class MissingBindingValidator implements BindingGraphPlugin {
                     .append("\nA binding with matching key exists in component: ")
                     .append(component.getQualifiedName()));
     return errorMessage.toString();
-  }
-
-  private boolean allIncomingDependenciesCanUseProduction(
-      MissingBinding missingBinding, BindingGraph graph) {
-    return graph.network().inEdges(missingBinding).stream()
-        .flatMap(instancesOf(DependencyEdge.class))
-        .allMatch(edge -> dependencyCanBeProduction(edge, graph));
-  }
-
-  // TODO(ronshapiro): merge with
-  // ProvisionDependencyOnProduerBindingValidator.dependencyCanUseProduction
-  private boolean dependencyCanBeProduction(DependencyEdge edge, BindingGraph graph) {
-    Node source = graph.network().incidentNodes(edge).source();
-    if (source instanceof ComponentNode) {
-      return canBeSatisfiedByProductionBinding(edge.dependencyRequest().kind());
-    }
-    if (source instanceof dagger.model.Binding) {
-      return ((dagger.model.Binding) source).isProduction();
-    }
-    throw new IllegalArgumentException(
-        "expected a dagger.model.Binding or ComponentNode: " + source);
   }
 
   private boolean typeHasInjectionSites(Key key) {

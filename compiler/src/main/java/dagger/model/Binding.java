@@ -81,9 +81,6 @@ public interface Binding extends MaybeBinding {
    */
   boolean isNullable();
 
-  /** Returns {@code true} if this is a production binding, e.g. an {@code @Produces} method. */
-  boolean isProduction();
-
   /** The kind of binding this instance represents. */
   BindingKind kind();
 

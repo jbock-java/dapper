@@ -67,13 +67,6 @@ public enum ComponentCreatorAnnotation {
     return componentAnnotation().simpleName().endsWith("Subcomponent");
   }
 
-  /**
-   * Returns {@code true} if the creator annotation is for a production component or subcomponent.
-   */
-  public final boolean isProductionCreatorAnnotation() {
-    return componentAnnotation().simpleName().startsWith("Production");
-  }
-
   /** The creator kind the annotation is associated with. */
   // TODO(dpb): Remove ComponentCreatorKind.
   public ComponentCreatorKind creatorKind() {
@@ -90,30 +83,12 @@ public enum ComponentCreatorAnnotation {
     return stream().collect(toAnnotationClasses());
   }
 
-  /** Returns all root component creator annotations. */
-  public static ImmutableSet<ClassName> rootComponentCreatorAnnotations() {
-    return stream()
-        .filter(
-            componentCreatorAnnotation ->
-                !componentCreatorAnnotation.isSubcomponentCreatorAnnotation())
-        .collect(toAnnotationClasses());
-  }
-
   /** Returns all subcomponent creator annotations. */
   public static ImmutableSet<ClassName> subcomponentCreatorAnnotations() {
     return stream()
         .filter(
             componentCreatorAnnotation ->
                 componentCreatorAnnotation.isSubcomponentCreatorAnnotation())
-        .collect(toAnnotationClasses());
-  }
-
-  /** Returns all production component creator annotations. */
-  public static ImmutableSet<ClassName> productionCreatorAnnotations() {
-    return stream()
-        .filter(
-            componentCreatorAnnotation ->
-                componentCreatorAnnotation.isProductionCreatorAnnotation())
         .collect(toAnnotationClasses());
   }
 

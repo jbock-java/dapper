@@ -17,11 +17,9 @@
 package dagger.internal.codegen.base;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
-import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreTypes.asTypeElements;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.javapoet.TypeNames.PRODUCER_MODULE;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static java.util.Objects.requireNonNull;
@@ -97,12 +95,6 @@ public abstract class ComponentAnnotation {
    * {@code @ProductionSubcomponent}.
    */
   public abstract boolean isSubcomponent();
-
-  /**
-   * Returns {@code true} if the annotation is a {@code @ProductionComponent},
-   * {@code @ProductionSubcomponent}, or {@code @ProducerModule}.
-   */
-  public abstract boolean isProduction();
 
   /**
    * Returns {@code true} if the annotation is a real component annotation and not a module
@@ -189,16 +181,10 @@ public abstract class ComponentAnnotation {
         RealComponentAnnotation.builder().annotation(annotation);
 
     if (isTypeOf(TypeNames.COMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isProduction(false).isSubcomponent(false).build();
+      return annotationBuilder.isSubcomponent(false).build();
     }
     if (isTypeOf(TypeNames.SUBCOMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isProduction(false).isSubcomponent(true).build();
-    }
-    if (isTypeOf(TypeNames.PRODUCTION_COMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isProduction(true).isSubcomponent(false).build();
-    }
-    if (isTypeOf(TypeNames.PRODUCTION_SUBCOMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isProduction(true).isSubcomponent(true).build();
+      return annotationBuilder.isSubcomponent(true).build();
     }
     throw new IllegalArgumentException(
         annotation
@@ -248,15 +234,12 @@ public abstract class ComponentAnnotation {
 
     final AnnotationMirror annotation;
     final boolean isSubcomponent;
-    final boolean isProduction;
 
     RealComponentAnnotation(
         AnnotationMirror annotation,
-        boolean isSubcomponent,
-        boolean isProduction) {
+        boolean isSubcomponent) {
       this.annotation = requireNonNull(annotation);
       this.isSubcomponent = isSubcomponent;
-      this.isProduction = isProduction;
     }
 
     @Override
@@ -267,11 +250,6 @@ public abstract class ComponentAnnotation {
     @Override
     public boolean isSubcomponent() {
       return isSubcomponent;
-    }
-
-    @Override
-    public boolean isProduction() {
-      return isProduction;
     }
 
     @Override
@@ -315,13 +293,12 @@ public abstract class ComponentAnnotation {
       if (o == null || getClass() != o.getClass()) return false;
       RealComponentAnnotation that = (RealComponentAnnotation) o;
       return isSubcomponent == that.isSubcomponent
-          && isProduction == that.isProduction
           && annotation.equals(that.annotation);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(annotation, isSubcomponent, isProduction);
+      return Objects.hash(annotation, isSubcomponent);
     }
 
     static Builder builder() {
@@ -331,7 +308,6 @@ public abstract class ComponentAnnotation {
     static final class Builder {
       AnnotationMirror annotation;
       Boolean isSubcomponent;
-      Boolean isProduction;
 
       ComponentAnnotation.RealComponentAnnotation.Builder annotation(AnnotationMirror annotation) {
         this.annotation = annotation;
@@ -343,13 +319,8 @@ public abstract class ComponentAnnotation {
         return this;
       }
 
-      ComponentAnnotation.RealComponentAnnotation.Builder isProduction(boolean isProduction) {
-        this.isProduction = isProduction;
-        return this;
-      }
-
       RealComponentAnnotation build() {
-        return new RealComponentAnnotation(annotation, isSubcomponent, isProduction);
+        return new RealComponentAnnotation(annotation, isSubcomponent);
       }
     }
   }
@@ -377,12 +348,6 @@ public abstract class ComponentAnnotation {
     @Override
     public boolean isSubcomponent() {
       return false;
-    }
-
-    @Override
-    public boolean isProduction() {
-      return ClassName.get(asType(moduleAnnotation().annotation().getAnnotationType().asElement()))
-          .equals(PRODUCER_MODULE);
     }
 
     @Override

@@ -800,7 +800,7 @@ public class AssistedFactoryErrorsTest {
     assertThat(compilation)
         .hadErrorContaining(
             "\033[1;31m[Dagger/MissingBinding]\033[0m "
-                + "Foo cannot be provided without an @Inject constructor or an @Provides-annotated "
+                + "Foo cannot be provided without an @Inject constructor or a @Provides-annotated "
                 + "method.");
   }
 

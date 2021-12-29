@@ -35,7 +35,6 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
-import static dagger.producers.CancellationPolicy.Propagation.PROPAGATE;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -74,7 +73,6 @@ import dagger.internal.codegen.binding.KeyVariableNamer;
 import dagger.internal.codegen.binding.MethodSignature;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -82,7 +80,7 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
-
+import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -235,8 +233,6 @@ public final class ComponentImplementation {
   public static final ParameterSpec MAY_INTERRUPT_IF_RUNNING_PARAM =
       ParameterSpec.builder(boolean.class, "mayInterruptIfRunning").build();
 
-  private static final String CANCELLATION_LISTENER_METHOD_NAME = "onProducerFutureCancelled";
-
   /**
    * How many statements per {@code initialize()} or {@code onProducerFutureCancelled()} method
    * before they get partitioned.
@@ -247,11 +243,10 @@ public final class ComponentImplementation {
   private final ImmutableMap<Binding, ShardImplementation> shardsByBinding;
   private final Map<ShardImplementation, FieldSpec> shardFieldsByImplementation = new HashMap<>();
   private final List<CodeBlock> shardInitializations = new ArrayList<>();
-  private final List<CodeBlock> shardCancellations = new ArrayList<>();
   private final Optional<ComponentImplementation> parent;
   private final ChildComponentImplementationFactory childComponentImplementationFactory;
-  private final jakarta.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider;
-  private final jakarta.inject.Provider<ComponentCreatorImplementationFactory>
+  private final Provider<ComponentBindingExpressions> bindingExpressionsProvider;
+  private final Provider<ComponentCreatorImplementationFactory>
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
   private final ComponentNames componentNames;
@@ -264,8 +259,8 @@ public final class ComponentImplementation {
       @ParentComponent Optional<ComponentImplementation> parent,
       ChildComponentImplementationFactory childComponentImplementationFactory,
       // Inject as Provider<> to prevent a cycle.
-      jakarta.inject.Provider<ComponentBindingExpressions> bindingExpressionsProvider,
-      jakarta.inject.Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
+      Provider<ComponentBindingExpressions> bindingExpressionsProvider,
+      Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
       BindingGraph graph,
       ComponentNames componentNames,
       CompilerOptions compilerOptions,
@@ -274,8 +269,7 @@ public final class ComponentImplementation {
     this.parent = parent;
     this.childComponentImplementationFactory = childComponentImplementationFactory;
     this.bindingExpressionsProvider = bindingExpressionsProvider;
-    this.componentCreatorImplementationFactoryProvider =
-        componentCreatorImplementationFactoryProvider;
+    this.componentCreatorImplementationFactoryProvider = componentCreatorImplementationFactoryProvider;
     this.graph = graph;
     this.componentNames = componentNames;
     this.elements = elements;
@@ -465,9 +459,6 @@ public final class ComponentImplementation {
 
     private ShardImplementation(ClassName name) {
       this.name = name;
-      if (graph.componentDescriptor().isProduction()) {
-        claimMethodName(CANCELLATION_LISTENER_METHOD_NAME);
-      }
 
       // Build the map of constructor parameters for this shard and claim the field names to prevent
       // collisions between the constructor parameters and fields.
@@ -631,11 +622,6 @@ public final class ComponentImplementation {
       return constructorParameters.get(requirement).name;
     }
 
-    /** Claims a new method name for the component. Does nothing if method name already exists. */
-    public void claimMethodName(CharSequence name) {
-      componentMethodNames.claim(name);
-    }
-
     /** Generates the component and returns the resulting {@link TypeSpec.Builder}. */
     private TypeSpec generate() {
       TypeSpec.Builder builder = classBuilder(name);
@@ -650,14 +636,6 @@ public final class ComponentImplementation {
       }
 
       addConstructorAndInitializationMethods();
-
-      if (graph.componentDescriptor().isProduction()) {
-        if (isComponentShard() || !cancellations.isEmpty()) {
-          TypeSpecs.addSupertype(
-              builder, elements.getTypeElement(TypeNames.CANCELLATION_LISTENER.canonicalName()));
-          addCancellationListenerImplementation();
-        }
-      }
 
       modifiers().forEach(builder::addModifiers);
       fieldSpecsMap.asMap().values().forEach(builder::addFields);
@@ -878,55 +856,6 @@ public final class ComponentImplementation {
       }
 
       addMethod(MethodSpecKind.CONSTRUCTOR, constructor.build());
-    }
-
-    private void addCancellationListenerImplementation() {
-      MethodSpec.Builder methodBuilder =
-          methodBuilder(CANCELLATION_LISTENER_METHOD_NAME)
-              .addModifiers(PUBLIC)
-              .addAnnotation(Override.class)
-              .addParameter(MAY_INTERRUPT_IF_RUNNING_PARAM);
-
-      // Reversing should order cancellations starting from entry points and going down to leaves
-      // rather than the other way around. This shouldn't really matter but seems *slightly*
-      // preferable because:
-      // When a future that another future depends on is cancelled, that cancellation will propagate
-      // up the future graph toward the entry point. Cancelling in reverse order should ensure that
-      // everything that depends on a particular node has already been cancelled when that node is
-      // cancelled, so there's no need to propagate. Otherwise, when we cancel a leaf node, it might
-      // propagate through most of the graph, making most of the cancel calls that follow in the
-      // onProducerFutureCancelled method do nothing.
-      if (isComponentShard()) {
-        methodBuilder.addCode(
-            CodeBlocks.concat(ImmutableList.copyOf(shardCancellations).reverse()));
-      } else if (!cancellations.isEmpty()) {
-        shardCancellations.add(
-            CodeBlock.of(
-                "$N.$N($N);",
-                shardFieldsByImplementation.get(this),
-                CANCELLATION_LISTENER_METHOD_NAME,
-                MAY_INTERRUPT_IF_RUNNING_PARAM));
-      }
-
-      ImmutableList<CodeBlock> cancellationStatements =
-          ImmutableList.copyOf(cancellations.values()).reverse();
-      if (cancellationStatements.size() < STATEMENTS_PER_METHOD) {
-        methodBuilder.addCode(CodeBlocks.concat(cancellationStatements)).build();
-      } else {
-        ImmutableList<MethodSpec> cancelProducersMethods =
-            createPartitionedMethods(
-                "cancelProducers",
-                ImmutableList.of(MAY_INTERRUPT_IF_RUNNING_PARAM),
-                cancellationStatements,
-                methodName -> methodBuilder(methodName).addModifiers(PRIVATE));
-        for (MethodSpec cancelProducersMethod : cancelProducersMethods) {
-          methodBuilder.addStatement(
-              "$N($N)", cancelProducersMethod, MAY_INTERRUPT_IF_RUNNING_PARAM);
-          addMethod(MethodSpecKind.CANCELLATION_LISTENER_METHOD, cancelProducersMethod);
-        }
-      }
-
-      addMethod(MethodSpecKind.CANCELLATION_LISTENER_METHOD, methodBuilder.build());
     }
 
     /**

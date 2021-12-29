@@ -21,9 +21,6 @@ import static com.google.auto.common.MoreTypes.isType;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
-import static dagger.internal.codegen.javapoet.TypeNames.listenableFutureOf;
-import static dagger.internal.codegen.javapoet.TypeNames.producedOf;
-import static dagger.internal.codegen.javapoet.TypeNames.producerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.model.RequestKind.LAZY;
@@ -79,15 +76,6 @@ public final class RequestKinds {
 
       case PROVIDER_OF_LAZY:
         return providerOf(lazyOf(keyType));
-
-      case PRODUCER:
-        return producerOf(keyType);
-
-      case PRODUCED:
-        return producedOf(keyType);
-
-      case FUTURE:
-        return listenableFutureOf(keyType);
 
       default:
         throw new AssertionError(requestKind);
@@ -163,26 +151,6 @@ public final class RequestKinds {
     Class<?> result = FRAMEWORK_CLASSES.get(requestKind);
     checkArgument(result != null, "no framework class for %s", requestKind);
     return result;
-  }
-
-  /**
-   * Returns {@code true} if requests for {@code requestKind} can be satisfied by a production
-   * binding.
-   */
-  public static boolean canBeSatisfiedByProductionBinding(RequestKind requestKind) {
-    switch (requestKind) {
-      case INSTANCE:
-      case PROVIDER:
-      case LAZY:
-      case PROVIDER_OF_LAZY:
-      case MEMBERS_INJECTION:
-        return false;
-      case PRODUCER:
-      case PRODUCED:
-      case FUTURE:
-        return true;
-    }
-    throw new AssertionError();
   }
 
   private RequestKinds() {

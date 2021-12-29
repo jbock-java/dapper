@@ -51,7 +51,6 @@ abstract class MethodBindingExpression extends BindingExpression {
   private final BindingRequest request;
   private final ContributionBinding binding;
   private final BindingMethodImplementation bindingMethodImplementation;
-  private final ProducerEntryPointView producerEntryPointView;
   private final BindingExpression wrappedBindingExpression;
   private final DaggerTypes types;
 
@@ -67,7 +66,6 @@ abstract class MethodBindingExpression extends BindingExpression {
     this.binding = checkNotNull(binding);
     this.bindingMethodImplementation = bindingMethodImplementation(methodImplementationStrategy);
     this.wrappedBindingExpression = checkNotNull(wrappedBindingExpression);
-    this.producerEntryPointView = new ProducerEntryPointView(shardImplementation, types);
     this.types = checkNotNull(types);
   }
 

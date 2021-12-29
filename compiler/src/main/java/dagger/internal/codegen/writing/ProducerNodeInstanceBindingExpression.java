@@ -21,7 +21,6 @@ import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
@@ -35,7 +34,6 @@ import dagger.producers.internal.Producers;
 final class ProducerNodeInstanceBindingExpression extends FrameworkInstanceBindingExpression {
   private final ShardImplementation shardImplementation;
   private final Key key;
-  private final ProducerEntryPointView producerEntryPointView;
 
   @AssistedInject
   ProducerNodeInstanceBindingExpression(
@@ -47,7 +45,6 @@ final class ProducerNodeInstanceBindingExpression extends FrameworkInstanceBindi
     super(binding, frameworkInstanceSupplier, types, elements);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.key = binding.key();
-    this.producerEntryPointView = new ProducerEntryPointView(shardImplementation, types);
   }
 
   @Override
@@ -66,15 +63,6 @@ final class ProducerNodeInstanceBindingExpression extends FrameworkInstanceBindi
             result.codeBlock(),
             ComponentImplementation.MAY_INTERRUPT_IF_RUNNING_PARAM));
     return result;
-  }
-
-  @Override
-  Expression getDependencyExpressionForComponentMethod(
-      ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
-    return producerEntryPointView
-        .getProducerEntryPointField(this, componentMethod, component.name())
-        .orElseGet(
-            () -> super.getDependencyExpressionForComponentMethod(componentMethod, component));
   }
 
   @AssistedFactory

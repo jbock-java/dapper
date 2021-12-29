@@ -23,19 +23,16 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Multimaps.asMap;
-import static com.google.common.collect.Sets.intersection;
 import static dagger.internal.codegen.base.ComponentAnnotation.anyComponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.productionCreatorAnnotations;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.binding.ComponentKind.annotationsFor;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getTransitiveModules;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.builderMethodRequiresNoArgs;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.moreThanOneRefToSubcomponent;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
@@ -54,7 +51,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import dagger.Component;
 import dagger.internal.codegen.base.ClearableCache;
@@ -306,9 +302,7 @@ public final class ComponentValidator implements ClearableCache {
       private Optional<AnnotationMirror> subcomponentCreatorAnnotation() {
         return checkForAnnotations(
             returnType,
-            componentAnnotation().isProduction()
-                ? intersection(subcomponentCreatorAnnotations(), productionCreatorAnnotations())
-                : subcomponentCreatorAnnotations());
+            subcomponentCreatorAnnotations());
       }
 
       private void validateSubcomponentFactoryMethod(AnnotationMirror subcomponentAnnotation) {
@@ -326,7 +320,7 @@ public final class ComponentValidator implements ClearableCache {
         Set<TypeElement> transitiveModules =
             getTransitiveModules(types, elements, moduleTypes);
 
-        Set<TypeElement> variableTypes = Sets.newHashSet();
+        Set<TypeElement> variableTypes = new HashSet<>();
 
         for (int i = 0; i < parameterTypes.size(); i++) {
           VariableElement parameter = parameters.get(i);

@@ -60,44 +60,6 @@ public final class ComponentDependenciesTest {
   }
 
   @Test
-  public void dependenciesWithTwoOfSameMethodOnDifferentInterfaces_producers_fail() {
-    JavaFileObject interfaceOne = JavaFileObjects.forSourceLines("test.One",
-        "package test;",
-        "",
-        "import com.google.common.util.concurrent.ListenableFuture;",
-        "",
-        "interface One {",
-        "  ListenableFuture<String> getOne();",
-        "}");
-    JavaFileObject interfaceTwo = JavaFileObjects.forSourceLines("test.Two",
-        "package test;",
-        "",
-        "import com.google.common.util.concurrent.ListenableFuture;",
-        "",
-        "interface Two {",
-        "  ListenableFuture<String> getTwo();",
-        "}");
-    JavaFileObject mergedInterface = JavaFileObjects.forSourceLines("test.Merged",
-        "package test;",
-        "",
-        "interface Merged extends One, Two {}");
-    JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
-        "package test;",
-        "",
-        "import com.google.common.util.concurrent.ListenableFuture;",
-        "import dagger.producers.ProductionComponent;",
-        "",
-        "@ProductionComponent(dependencies = Merged.class)",
-        "interface TestComponent {",
-        "  ListenableFuture<String> getString();",
-        "}");
-    Compilation compilation = daggerCompiler().compile(
-        interfaceOne, interfaceTwo, mergedInterface, componentFile);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorContaining("DuplicateBindings");
-  }
-
-  @Test
   public void dependenciesWithTwoOfSameMethodButDifferentNullability_fail() {
     JavaFileObject interfaceOne = JavaFileObjects.forSourceLines("test.One",
         "package test;",

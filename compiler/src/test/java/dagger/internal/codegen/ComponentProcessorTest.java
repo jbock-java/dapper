@@ -1817,7 +1817,7 @@ public class ComponentProcessorTest {
     assertThat(compilation).failed();
     assertThat(compilation)
         .hadErrorContaining(
-            "test.B<? extends test.A> cannot be provided without an @Provides-annotated method");
+            "test.B<? extends test.A> cannot be provided without a @Provides-annotated method");
   }
 
   // https://github.com/google/dagger/issues/630
@@ -1838,7 +1838,7 @@ public class ComponentProcessorTest {
         compilerWithOptions(compilerMode.javacopts()).compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
-        .hadErrorContaining("String[] cannot be provided without an @Provides-annotated method");
+        .hadErrorContaining("String[] cannot be provided without a @Provides-annotated method");
   }
 
   @Test

@@ -55,7 +55,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
-        .hadErrorContaining("Bar cannot be provided without an @Provides-annotated method.")
+        .hadErrorContaining("Bar cannot be provided without a @Provides-annotated method.")
         .inFile(component)
         .onLineContaining("interface MyComponent");
   }
@@ -83,7 +83,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             "\033[1;31m[Dagger/MissingBinding]\033[0m TestClass.A cannot be provided "
-                + "without an @Provides-annotated method.")
+                + "without a @Provides-annotated method.")
         .inFile(component)
         .onLineContaining("interface AComponent");
   }
@@ -113,12 +113,13 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             "\033[1;31m[Dagger/MissingBinding]\033[0m @TestClass.Q TestClass.A cannot be provided "
-                + "without an @Provides-annotated method.")
+                + "without a @Provides-annotated method.")
         .inFile(component)
         .onLineContaining("interface AComponent");
   }
 
-  @Test public void constructorInjectionWithoutAnnotation() {
+  @Test
+  public void constructorInjectionWithoutAnnotation() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",
@@ -143,13 +144,14 @@ public class MissingBindingValidationTest {
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
         .hadErrorContaining(
-            "TestClass.A cannot be provided without an @Inject constructor or an "
+            "TestClass.A cannot be provided without an @Inject constructor or a "
                 + "@Provides-annotated method.")
         .inFile(component)
         .onLineContaining("interface AComponent");
   }
 
-  @Test public void membersInjectWithoutProvision() {
+  @Test
+  public void membersInjectWithoutProvision() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",
@@ -178,7 +180,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
         .hadErrorContaining(
-            "TestClass.B cannot be provided without an @Inject constructor or an "
+            "TestClass.B cannot be provided without an @Inject constructor or a "
                 + "@Provides-annotated method. This type supports members injection but cannot be "
                 + "implicitly provided.")
         .inFile(component)
@@ -248,10 +250,11 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             "Foo<? extends Number> cannot be provided "
-                + "without an @Provides-annotated method");
+                + "without a @Provides-annotated method");
   }
 
-  @Test public void longChainOfDependencies() {
+  @Test
+  public void longChainOfDependencies() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestClass",
@@ -308,7 +311,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             message(
-                "TestClass.A cannot be provided without an @Provides-annotated method.",
+                "TestClass.A cannot be provided without a @Provides-annotated method.",
                 "    TestClass.A is injected at",
                 "        TestClass.B(a)",
                 "    TestClass.B is injected at",
@@ -363,7 +366,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             message(
-                "String cannot be provided without an @Inject constructor or an "
+                "String cannot be provided without an @Inject constructor or a "
                     + "@Provides-annotated method.",
                 "    String is injected at",
                 "        TestImplementation(missingBinding)",
@@ -375,7 +378,8 @@ public class MissingBindingValidationTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test public void resolvedParametersInDependencyTrace() {
+  @Test
+  public void resolvedParametersInDependencyTrace() {
     JavaFileObject generic = JavaFileObjects.forSourceLines("test.Generic",
         "package test;",
         "",
@@ -418,7 +422,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             message(
-                "List cannot be provided without an @Provides-annotated method.",
+                "List cannot be provided without a @Provides-annotated method.",
                 "    List is injected at",
                 "        TestClass(list)",
                 "    TestClass is injected at",
@@ -429,7 +433,8 @@ public class MissingBindingValidationTest {
                 "        TestComponent.usesTest()"));
   }
 
-  @Test public void resolvedVariablesInDependencyTrace() {
+  @Test
+  public void resolvedVariablesInDependencyTrace() {
     JavaFileObject generic = JavaFileObjects.forSourceLines("test.Generic",
         "package test;",
         "",
@@ -473,7 +478,7 @@ public class MissingBindingValidationTest {
     assertThat(compilation)
         .hadErrorContaining(
             message(
-                "List cannot be provided without an @Provides-annotated method.",
+                "List cannot be provided without a @Provides-annotated method.",
                 "    List is injected at",
                 "        TestClass(list)",
                 "    TestClass is injected at",
@@ -661,7 +666,7 @@ public class MissingBindingValidationTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m "
-                    + "NotBound cannot be provided without an @Provides-annotated method.",
+                    + "NotBound cannot be provided without a @Provides-annotated method.",
                 "    NotBound is injected at",
                 "        TestModule.object(notBound)",
                 "    Object is requested at",
@@ -721,7 +726,7 @@ public class MissingBindingValidationTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m String cannot be provided without an "
-                    + "@Inject constructor or an @Provides-annotated method.",
+                    + "@Inject constructor or a @Provides-annotated method.",
                 "    String is requested at",
                 "        TestComponent.string()",
                 "It is also requested at:",
@@ -772,7 +777,7 @@ public class MissingBindingValidationTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m String cannot be provided without an "
-                    + "@Inject constructor or an @Provides-annotated method.",
+                    + "@Inject constructor or a @Provides-annotated method.",
                 "    String is requested at",
                 "        TestComponent.string1()",
                 "The following other entry points also depend on it:",
@@ -839,7 +844,7 @@ public class MissingBindingValidationTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m Baz cannot be provided without an "
-                    + "@Inject constructor or an @Provides-annotated method.",
+                    + "@Inject constructor or a @Provides-annotated method.",
                 "    Baz is injected at",
                 "        Bar(baz)",
                 "    Bar is requested at",

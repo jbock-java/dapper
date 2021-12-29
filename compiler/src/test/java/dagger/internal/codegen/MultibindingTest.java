@@ -131,7 +131,7 @@ public class MultibindingTest {
     assertThat(compilation)
         .hadErrorContaining(
             "Map<String,String> "
-                + "cannot be provided without an @Provides-annotated method")
+                + "cannot be provided without a @Provides-annotated method")
         .inFile(component)
         .onLineContaining("interface TestComponent");
   }

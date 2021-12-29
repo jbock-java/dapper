@@ -38,8 +38,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       anonymousProviderCreationExpressionFactory;
   private final DelegatingFrameworkInstanceCreationExpression.Factory
       delegatingFrameworkInstanceCreationExpressionFactory;
-  private final DependencyMethodProducerCreationExpression.Factory
-      dependencyMethodProducerCreationExpressionFactory;
   private final DependencyMethodProviderCreationExpression.Factory
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
@@ -49,7 +47,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       membersInjectorProviderCreationExpressionFactory;
   private final OptionalFactoryInstanceCreationExpression.Factory
       optionalFactoryInstanceCreationExpressionFactory;
-  private final ProducerCreationExpression.Factory producerCreationExpressionFactory;
   private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
   @Inject
@@ -59,8 +56,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       AnonymousProviderCreationExpression.Factory anonymousProviderCreationExpressionFactory,
       DelegatingFrameworkInstanceCreationExpression.Factory
           delegatingFrameworkInstanceCreationExpressionFactory,
-      DependencyMethodProducerCreationExpression.Factory
-          dependencyMethodProducerCreationExpressionFactory,
       DependencyMethodProviderCreationExpression.Factory
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
@@ -70,15 +65,12 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
           membersInjectorProviderCreationExpressionFactory,
       OptionalFactoryInstanceCreationExpression.Factory
           optionalFactoryInstanceCreationExpressionFactory,
-      ProducerCreationExpression.Factory producerCreationExpressionFactory,
       SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.anonymousProviderCreationExpressionFactory = anonymousProviderCreationExpressionFactory;
     this.delegatingFrameworkInstanceCreationExpressionFactory =
         delegatingFrameworkInstanceCreationExpressionFactory;
-    this.dependencyMethodProducerCreationExpressionFactory =
-        dependencyMethodProducerCreationExpressionFactory;
     this.dependencyMethodProviderCreationExpressionFactory =
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
@@ -88,7 +80,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         membersInjectorProviderCreationExpressionFactory;
     this.optionalFactoryInstanceCreationExpressionFactory =
         optionalFactoryInstanceCreationExpressionFactory;
-    this.producerCreationExpressionFactory = producerCreationExpressionFactory;
     this.setFactoryCreationExpressionFactory = setFactoryCreationExpressionFactory;
   }
 
@@ -126,12 +117,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       case INJECTION:
       case PROVISION:
         return injectionOrProvisionProviderCreationExpressionFactory.create(binding);
-
-      case COMPONENT_PRODUCTION:
-        return dependencyMethodProducerCreationExpressionFactory.create(binding);
-
-      case PRODUCTION:
-        return producerCreationExpressionFactory.create(binding);
 
       case MULTIBOUND_SET:
         return setFactoryCreationExpressionFactory.create(binding);

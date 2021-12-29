@@ -21,7 +21,6 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
-import static dagger.internal.codegen.base.Scopes.productionScope;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
@@ -195,10 +194,7 @@ public final class ComponentDescriptorFactory {
             ComponentCreatorDescriptor.create(
                 getOnlyElement(enclosedCreators), elements, types, dependencyRequestFactory));
 
-    ImmutableSet<Scope> scopes = scopesOf(typeElement);
-    if (componentAnnotation.isProduction()) {
-      scopes = ImmutableSet.<Scope>builder().addAll(scopes).add(productionScope(elements)).build();
-    }
+    Set<Scope> scopes = scopesOf(typeElement);
 
     return new ComponentDescriptor(
         componentAnnotation,
@@ -246,10 +242,7 @@ public final class ComponentDescriptorFactory {
             "component method cannot be void: %s",
             componentMethod);
         descriptor.dependencyRequest(
-            componentAnnotation.isProduction()
-                ? dependencyRequestFactory.forComponentProductionMethod(
-                componentMethod, resolvedComponentMethod)
-                : dependencyRequestFactory.forComponentProvisionMethod(
+            dependencyRequestFactory.forComponentProvisionMethod(
                 componentMethod, resolvedComponentMethod));
         break;
 

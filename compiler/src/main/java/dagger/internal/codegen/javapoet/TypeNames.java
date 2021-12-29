@@ -158,25 +158,9 @@ public final class TypeNames {
   public static ParameterizedTypeName membersInjectorOf(TypeName membersInjectorType) {
     return ParameterizedTypeName.get(MEMBERS_INJECTOR, membersInjectorType);
   }
-
-  public static ParameterizedTypeName producedOf(TypeName typeName) {
-    return ParameterizedTypeName.get(PRODUCED, typeName);
-  }
-
-  public static ParameterizedTypeName producerOf(TypeName typeName) {
-    return ParameterizedTypeName.get(PRODUCER, typeName);
-  }
-
-  public static ParameterizedTypeName dependencyMethodProducerOf(TypeName typeName) {
-    return ParameterizedTypeName.get(DEPENDENCY_METHOD_PRODUCER, typeName);
-  }
-
+  
   public static ParameterizedTypeName providerOf(TypeName typeName) {
     return ParameterizedTypeName.get(PROVIDER, typeName);
-  }
-
-  public static ParameterizedTypeName setOf(TypeName elementType) {
-    return ParameterizedTypeName.get(SET, elementType);
   }
 
   /**

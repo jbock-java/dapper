@@ -146,14 +146,6 @@ public final class ComponentDescriptor {
   }
 
   /**
-   * Returns {@code true} if this is a production component or subcomponent, or a
-   * {@code @ProducerModule} when doing module binding validation.
-   */
-  public boolean isProduction() {
-    return annotation().isProduction();
-  }
-
-  /**
    * Returns {@code true} if this is a real component, and not a fictional one used to validate
    * module bindings.
    */

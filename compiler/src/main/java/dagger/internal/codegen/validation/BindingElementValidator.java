@@ -353,7 +353,7 @@ public abstract class BindingElementValidator<E extends Element> {
      * one {@linkplain Scope scope} annotation.
      */
     private void checkScopes() {
-      ImmutableSet<Scope> scopes = scopesOf(element);
+      Set<Scope> scopes = scopesOf(element);
       String error = null;
       switch (allowsScoping) {
         case ALLOWS_SCOPING:

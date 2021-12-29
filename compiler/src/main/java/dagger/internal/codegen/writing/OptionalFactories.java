@@ -22,14 +22,12 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.javapoet.TypeNames.abstractProducerOf;
-import static dagger.internal.codegen.javapoet.TypeNames.listenableFutureOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.ABSENT_OPTIONAL_FIELD;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.ABSENT_OPTIONAL_METHOD;
@@ -40,11 +38,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -64,14 +57,12 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.RequestKind;
 import dagger.producers.Producer;
-import dagger.producers.internal.Producers;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.Executor;
 
 /** The nested class and static methods required by the component to implement optional bindings. */
 // TODO(dpb): Name members simply if a component uses only one of Guava or JDK Optional.
@@ -388,89 +379,17 @@ final class OptionalFactories {
     MethodSpec.Builder getMethodBuilder =
         methodBuilder(spec.factoryMethodName()).addAnnotation(Override.class).addModifiers(PUBLIC);
 
-    switch (spec.frameworkType()) {
-      case PROVIDER:
-        return getMethodBuilder
-            .returns(spec.optionalType())
-            .addCode(
-                "return $L;",
-                spec.optionalKind()
-                    .presentExpression(
-                        FrameworkType.PROVIDER.to(
-                            spec.valueKind(), CodeBlock.of("$N", delegateField))))
-            .build();
-
-      case PRODUCER_NODE:
-        getMethodBuilder.returns(listenableFutureOf(spec.optionalType()));
-
-        switch (spec.valueKind()) {
-          case FUTURE: // return a ListenableFuture<Optional<ListenableFuture<T>>>
-          case PRODUCER: // return a ListenableFuture<Optional<Producer<T>>>
-            return getMethodBuilder
-                .addCode(
-                    "return $T.immediateFuture($L);",
-                    Futures.class,
-                    spec.optionalKind()
-                        .presentExpression(
-                            FrameworkType.PRODUCER_NODE.to(
-                                spec.valueKind(), CodeBlock.of("$N", delegateField))))
-                .build();
-
-          case INSTANCE: // return a ListenableFuture<Optional<T>>
-            return getMethodBuilder
-                .addCode(
-                    "return $L;",
-                    transformFutureToOptional(
-                        spec.optionalKind(),
-                        spec.typeVariable(),
-                        CodeBlock.of("$N.get()", delegateField)))
-                .build();
-
-          case PRODUCED: // return a ListenableFuture<Optional<Produced<T>>>
-            return getMethodBuilder
-                .addCode(
-                    "return $L;",
-                    transformFutureToOptional(
-                        spec.optionalKind(),
-                        spec.valueType(),
-                        CodeBlock.of(
-                            "$T.createFutureProduced($N.get())", Producers.class, delegateField)))
-                .build();
-
-          default:
-            throw new UnsupportedOperationException(
-                spec.factoryType() + " objects are not supported");
-        }
+    if (spec.frameworkType() != FrameworkType.PROVIDER) {
+      throw new AssertionError(spec.frameworkType());
     }
-    throw new AssertionError(spec.frameworkType());
-  }
-
-  /**
-   * An expression that uses {@link Futures#transform(ListenableFuture, Function, Executor)} to
-   * transform a {@code ListenableFuture<inputType>} into a {@code
-   * ListenableFuture<Optional<inputType>>}.
-   *
-   * @param inputFuture an expression of type {@code ListenableFuture<inputType>}
-   */
-  private static CodeBlock transformFutureToOptional(
-      OptionalKind optionalKind, TypeName inputType, CodeBlock inputFuture) {
-    return CodeBlock.of(
-        "$T.transform($L, $L, $T.directExecutor())",
-        Futures.class,
-        inputFuture,
-        anonymousClassBuilder("")
-            .addSuperinterface(
-                ParameterizedTypeName.get(
-                    ClassName.get(Function.class), inputType, optionalKind.of(inputType)))
-            .addMethod(
-                methodBuilder("apply")
-                    .addAnnotation(Override.class)
-                    .addModifiers(PUBLIC)
-                    .returns(optionalKind.of(inputType))
-                    .addParameter(inputType, "input")
-                    .addCode("return $L;", optionalKind.presentExpression(CodeBlock.of("input")))
-                    .build())
-            .build(),
-        MoreExecutors.class);
+    return getMethodBuilder
+        .returns(spec.optionalType())
+        .addCode(
+            "return $L;",
+            spec.optionalKind()
+                .presentExpression(
+                    FrameworkType.PROVIDER.to(
+                        spec.valueKind(), CodeBlock.of("$N", delegateField))))
+        .build();
   }
 }

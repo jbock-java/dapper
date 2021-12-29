@@ -38,7 +38,6 @@ import com.squareup.javapoet.MethodSpec;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
-import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -84,8 +83,6 @@ public final class ComponentBindingExpressions {
   private final ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory;
   private final UnscopedDirectInstanceBindingExpressionFactory
       unscopedDirectInstanceBindingExpressionFactory;
-  private final ProducerFromProviderCreationExpression.Factory
-      producerFromProviderCreationExpressionFactory;
   private final UnscopedFrameworkInstanceCreationExpressionFactory
       unscopedFrameworkInstanceCreationExpressionFactory;
   private final DaggerTypes types;
@@ -109,7 +106,6 @@ public final class ComponentBindingExpressions {
       ProducerNodeInstanceBindingExpression.Factory producerNodeInstanceBindingExpressionFactory,
       ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory,
       UnscopedDirectInstanceBindingExpressionFactory unscopedDirectInstanceBindingExpressionFactory,
-      ProducerFromProviderCreationExpression.Factory producerFromProviderCreationExpressionFactory,
       UnscopedFrameworkInstanceCreationExpressionFactory
           unscopedFrameworkInstanceCreationExpressionFactory,
       DaggerTypes types,
@@ -130,8 +126,6 @@ public final class ComponentBindingExpressions {
     this.providerInstanceBindingExpressionFactory = providerInstanceBindingExpressionFactory;
     this.unscopedDirectInstanceBindingExpressionFactory =
         unscopedDirectInstanceBindingExpressionFactory;
-    this.producerFromProviderCreationExpressionFactory =
-        producerFromProviderCreationExpressionFactory;
     this.unscopedFrameworkInstanceCreationExpressionFactory =
         unscopedFrameworkInstanceCreationExpressionFactory;
     this.types = types;
@@ -335,9 +329,6 @@ public final class ComponentBindingExpressions {
         return derivedFromFrameworkInstanceBindingExpressionFactory.create(
             request, FrameworkType.PROVIDER);
 
-      case PRODUCER:
-        return producerFromProviderBindingExpression(binding);
-
       case FUTURE:
         return immediateFutureBindingExpressionFactory.create(key);
 
@@ -380,21 +371,6 @@ public final class ComponentBindingExpressions {
           binding, RequestKind.PROVIDER, switchingProviders.newBindingExpression(binding));
     }
     return frameworkInstanceBindingExpression(binding);
-  }
-
-  /**
-   * Returns a binding expression that uses a {@link dagger.producers.Producer} field for a
-   * provision binding.
-   */
-  private FrameworkInstanceBindingExpression producerFromProviderBindingExpression(
-      ContributionBinding binding) {
-    checkArgument(binding.bindingType().equals(BindingType.PROVISION));
-    return producerNodeInstanceBindingExpressionFactory.create(
-        binding,
-        new FrameworkFieldInitializer(
-            componentImplementation,
-            binding,
-            producerFromProviderCreationExpressionFactory.create(binding)));
   }
 
   /**

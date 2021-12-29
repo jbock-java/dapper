@@ -559,17 +559,6 @@ public final class BindingGraphFactory implements ClearableCache {
     }
 
     private Optional<Resolver> getOwningResolver(ContributionBinding binding) {
-      // TODO(ronshapiro): extract the different pieces of this method into their own methods
-      if ((binding.scope().isPresent() && binding.scope().get().isProductionScope())
-          || binding.bindingType().equals(BindingType.PRODUCTION)) {
-        for (Resolver requestResolver : getResolverLineage()) {
-          // Resolve explicit @Produces and @ProductionScope bindings at the highest component that
-          // installs the binding.
-          if (requestResolver.containsExplicitBinding(binding)) {
-            return Optional.of(requestResolver);
-          }
-        }
-      }
 
       if (binding.scope().isPresent() && binding.scope().get().isReusable()) {
         for (Resolver requestResolver : getResolverLineage().reverse()) {

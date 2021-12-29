@@ -53,14 +53,13 @@ public final class ErrorMessages {
 
   public static ComponentMessages componentMessagesFor(ComponentAnnotation componentAnnotation) {
     return new ComponentMessages(
-        transformation(componentAnnotation.isProduction(), componentAnnotation.isSubcomponent()));
+        transformation(componentAnnotation.isSubcomponent()));
   }
 
   public static ComponentCreatorMessages creatorMessagesFor(
       ComponentCreatorAnnotation creatorAnnotation) {
     Function<String, String> transformation =
         transformation(
-            creatorAnnotation.isProductionCreatorAnnotation(),
             creatorAnnotation.isSubcomponentCreatorAnnotation());
     switch (creatorAnnotation.creatorKind()) {
       case BUILDER:
@@ -71,10 +70,8 @@ public final class ErrorMessages {
     throw new AssertionError(creatorAnnotation);
   }
 
-  private static Function<String, String> transformation(
-      boolean isProduction, boolean isSubcomponent) {
-    Function<String, String> transformation = isProduction ? PRODUCTION : UnaryOperator.identity();
-    return isSubcomponent ? transformation.andThen(SUBCOMPONENT) : transformation;
+  private static Function<String, String> transformation(boolean isSubcomponent) {
+    return isSubcomponent ? SUBCOMPONENT : UnaryOperator.identity();
   }
 
   private abstract static class Messages {

@@ -23,7 +23,6 @@ import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
@@ -80,11 +79,6 @@ public final class Scope {
   /** Returns {@code true} if this scope is the {@code @Reusable} scope. */
   public boolean isReusable() {
     return isScope(dagger.Reusable.class);
-  }
-
-  /** Returns {@code true} if this scope is the {@link ProductionScope @ProductionScope} scope. */
-  public boolean isProductionScope() {
-    return isScope(ProductionScope.class);
   }
 
   private boolean isScope(Class<? extends Annotation> annotation) {

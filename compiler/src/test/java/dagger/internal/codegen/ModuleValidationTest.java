@@ -163,74 +163,6 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void moduleSubcomponents_listsProductionSubcomponentBuilder() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            moduleType.importStatement(),
-            "",
-            moduleType.annotationWithSubcomponent("Sub.Builder.class"),
-            "class TestModule {}");
-    JavaFileObject subcomponent =
-        JavaFileObjects.forSourceLines(
-            "test.Sub",
-            "package test;",
-            "",
-            "import dagger.producers.ProductionSubcomponent;",
-            "",
-            "@ProductionSubcomponent",
-            "interface Sub {",
-            "  @ProductionSubcomponent.Builder",
-            "  interface Builder {",
-            "    Sub build();",
-            "  }",
-            "}");
-    Compilation compilation = daggerCompiler().compile(module, subcomponent);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "test.Sub.Builder is a @ProductionSubcomponent.Builder. Did you mean to use test.Sub?")
-        .inFile(module)
-        .onLine(5);
-  }
-
-  @Test
-  public void moduleSubcomponents_listsProductionSubcomponentFactory() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            moduleType.importStatement(),
-            "",
-            moduleType.annotationWithSubcomponent("Sub.Factory.class"),
-            "class TestModule {}");
-    JavaFileObject subcomponent =
-        JavaFileObjects.forSourceLines(
-            "test.Sub",
-            "package test;",
-            "",
-            "import dagger.producers.ProductionSubcomponent;",
-            "",
-            "@ProductionSubcomponent",
-            "interface Sub {",
-            "  @ProductionSubcomponent.Factory",
-            "  interface Factory {",
-            "    Sub create();",
-            "  }",
-            "}");
-    Compilation compilation = daggerCompiler().compile(module, subcomponent);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "test.Sub.Factory is a @ProductionSubcomponent.Factory. Did you mean to use test.Sub?")
-        .inFile(module)
-        .onLine(5);
-  }
-
-  @Test
   public void moduleSubcomponents_noSubcomponentCreator() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
@@ -256,38 +188,6 @@ public final class ModuleValidationTest {
         .hadErrorContaining(
             "test.NoBuilder doesn't have a @Subcomponent.Builder or @Subcomponent.Factory, which "
                 + "is required when used with @"
-                + moduleType.simpleName()
-                + ".subcomponents")
-        .inFile(module)
-        .onLine(5);
-  }
-
-  @Test
-  public void moduleSubcomponents_noProductionSubcomponentCreator() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            moduleType.importStatement(),
-            "",
-            moduleType.annotationWithSubcomponent("NoBuilder.class"),
-            "class TestModule {}");
-    JavaFileObject subcomponent =
-        JavaFileObjects.forSourceLines(
-            "test.NoBuilder",
-            "package test;",
-            "",
-            "import dagger.producers.ProductionSubcomponent;",
-            "",
-            "@ProductionSubcomponent",
-            "interface NoBuilder {}");
-    Compilation compilation = daggerCompiler().compile(module, subcomponent);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "test.NoBuilder doesn't have a @ProductionSubcomponent.Builder or "
-                + "@ProductionSubcomponent.Factory, which is required when used with @"
                 + moduleType.simpleName()
                 + ".subcomponents")
         .inFile(module)

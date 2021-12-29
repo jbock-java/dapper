@@ -433,7 +433,6 @@ public final class ComponentDescriptorValidator {
           || scopedDependencyStack.isEmpty()) {
         // TODO(beder): transitively check scopes of production components too.
         rootComponentAnnotation(dependency)
-            .filter(componentAnnotation -> !componentAnnotation.isProduction())
             .ifPresent(
                 componentAnnotation -> {
                   ImmutableSet<TypeElement> scopedDependencies =
