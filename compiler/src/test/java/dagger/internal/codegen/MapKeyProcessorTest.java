@@ -19,7 +19,6 @@ package dagger.internal.codegen;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
-import com.google.auto.value.processor.AutoAnnotationProcessor;
 import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class MapKeyProcessorTest {
     assertAbout(javaSources())
         .that(ImmutableList.of(enumKeyFile, pathEnumFile))
         .withCompilerOptions(compilerMode.javacopts())
-        .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
+        .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
         .containsLines("test.PathKeyCreator", generatedKeyCreator);
@@ -138,7 +137,7 @@ public class MapKeyProcessorTest {
     assertAbout(javaSources())
         .that(ImmutableList.of(enumKeyFile, pathEnumFile))
         .withCompilerOptions(compilerMode.javacopts())
-        .processedWith(new ComponentProcessor(), new AutoAnnotationProcessor())
+        .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
         .containsLines("test.Container_PathKeyCreator", generatedKeyCreator);

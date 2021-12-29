@@ -16,19 +16,19 @@
 
 package dagger.internal.codegen;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.testing.compile.Compiler;
+
+import javax.annotation.processing.Processor;
+import java.io.File;
+import java.util.Arrays;
+
 import static com.google.common.base.StandardSystemProperty.JAVA_CLASS_PATH;
 import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
 import static com.google.testing.compile.Compiler.javac;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
-
-import com.google.auto.value.processor.AutoAnnotationProcessor;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.testing.compile.Compiler;
-import java.io.File;
-import java.util.Arrays;
-import javax.annotation.processing.Processor;
 
 /** {@link Compiler} instances for testing Dagger. */
 public final class Compilers {
