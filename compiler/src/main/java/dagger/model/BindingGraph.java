@@ -239,7 +239,7 @@ public abstract class BindingGraph {
    * Returns the bindings that a given binding directly requests as a dependency. Does not include
    * any {@link MissingBinding}s.
    */
-  public ImmutableSet<Binding> requestedBindings(Binding binding) {
+  public Set<Binding> requestedBindings(Binding binding) {
     return network().successors(binding).stream()
         .flatMap(instancesOf(Binding.class))
         .collect(toImmutableSet());

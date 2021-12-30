@@ -78,7 +78,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
   private ValidationReport<TypeElement> validateUncached(TypeElement type) {
     ValidationReport.Builder<TypeElement> report = ValidationReport.about(type);
 
-    ImmutableSet<ComponentCreatorAnnotation> creatorAnnotations = getCreatorAnnotations(type);
+    Set<ComponentCreatorAnnotation> creatorAnnotations = getCreatorAnnotations(type);
     if (!validateOnlyOneCreatorAnnotation(creatorAnnotations, report)) {
       return report.build();
     }
@@ -92,7 +92,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
   }
 
   private boolean validateOnlyOneCreatorAnnotation(
-      ImmutableSet<ComponentCreatorAnnotation> creatorAnnotations,
+      Set<ComponentCreatorAnnotation> creatorAnnotations,
       ValidationReport.Builder<?> report) {
     // creatorAnnotations should never be empty because this should only ever be called for
     // types that have been found to have some creator annotation

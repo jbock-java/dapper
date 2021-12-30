@@ -50,35 +50,13 @@ public enum ComponentKind {
   MODULE(TypeNames.MODULE, true, false),
   ;
 
-  private static final ImmutableSet<ComponentKind> ROOT_COMPONENT_KINDS =
-      valuesOf(ComponentKind.class)
-          .filter(kind -> !kind.isForModuleValidation())
-          .filter(kind -> kind.isRoot())
-          .collect(toImmutableSet());
-
-  private static final ImmutableSet<ComponentKind> SUBCOMPONENT_KINDS =
-      valuesOf(ComponentKind.class)
-          .filter(kind -> !kind.isForModuleValidation())
-          .filter(kind -> !kind.isRoot())
-          .collect(toImmutableSet());
-
-  /** Returns the set of kinds for root components. */
-  public static ImmutableSet<ComponentKind> rootComponentKinds() {
-    return ROOT_COMPONENT_KINDS;
-  }
-
-  /** Returns the set of kinds for subcomponents. */
-  public static ImmutableSet<ComponentKind> subcomponentKinds() {
-    return SUBCOMPONENT_KINDS;
-  }
-
   /** Returns the annotations for components of the given kinds. */
-  public static ImmutableSet<ClassName> annotationsFor(Iterable<ComponentKind> kinds) {
+  public static Set<ClassName> annotationsFor(Iterable<ComponentKind> kinds) {
     return stream(kinds).map(ComponentKind::annotation).collect(toImmutableSet());
   }
 
   /** Returns the set of component kinds the given {@code element} has annotations for. */
-  public static ImmutableSet<ComponentKind> getComponentKinds(TypeElement element) {
+  public static Set<ComponentKind> getComponentKinds(TypeElement element) {
     return valuesOf(ComponentKind.class)
         .filter(kind -> isAnnotationPresent(element, kind.annotation()))
         .collect(toImmutableSet());
@@ -92,7 +70,7 @@ public enum ComponentKind {
    *     annotations
    */
   public static Optional<ComponentKind> forAnnotatedElement(TypeElement element) {
-    ImmutableSet<ComponentKind> kinds = getComponentKinds(element);
+    Set<ComponentKind> kinds = getComponentKinds(element);
     if (kinds.size() > 1) {
       throw new IllegalArgumentException(
           element + " cannot be annotated with more than one of " + annotationsFor(kinds));

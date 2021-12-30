@@ -86,7 +86,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
   }
 
   @Override
-  protected void process(TypeElement element, ImmutableSet<ClassName> annotations) {
+  protected void process(TypeElement element, Set<ClassName> annotations) {
     if (!disjoint(annotations, rootComponentAnnotations())) {
       processRootComponent(element);
     }

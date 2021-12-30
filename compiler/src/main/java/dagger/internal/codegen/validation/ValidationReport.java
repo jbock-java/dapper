@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.StreamSupport;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -56,9 +58,8 @@ public final class ValidationReport<T extends Element> {
   }
 
   /** Returns the items from this report and all transitive subreports. */
-  public ImmutableSet<Item> allItems() {
-    return ImmutableSet.copyOf(SUBREPORTS.depthFirstPreOrder(this))
-        .stream()
+  public Set<Item> allItems() {
+    return StreamSupport.stream(SUBREPORTS.depthFirstPreOrder(this).spliterator(), false)
         .flatMap(report -> report.items.stream())
         .collect(toImmutableSet());
   }

@@ -31,6 +31,7 @@ import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.Set;
 
 /** Validates that there are not multiple set binding contributions to the same binding. */
 final class SetMultibindingValidator implements BindingGraphPlugin {
@@ -82,7 +83,7 @@ final class SetMultibindingValidator implements BindingGraphPlugin {
 
   /** Returns the delegate target of a delegate binding (going through other delegates as well). */
   private Key dereferenceDelegateBinding(Binding binding, BindingGraph bindingGraph) {
-    ImmutableSet<Binding> delegateSet = bindingGraph.requestedBindings(binding);
+    Set<Binding> delegateSet = bindingGraph.requestedBindings(binding);
     if (delegateSet.isEmpty()) {
       // There may not be a delegate if the delegate is missing. In this case, we just take the
       // requested key and return that.

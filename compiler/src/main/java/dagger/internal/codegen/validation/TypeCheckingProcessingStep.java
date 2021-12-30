@@ -49,7 +49,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
   }
 
   @Override
-  public final ImmutableSet<String> annotations() {
+  public final Set<String> annotations() {
     return annotationClassNames().stream().map(ClassName::canonicalName).collect(toImmutableSet());
   }
 
@@ -87,7 +87,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
    *
    * @param annotations the subset of {@link Step#annotations()} that annotate {@code element}
    */
-  protected abstract void process(E element, ImmutableSet<ClassName> annotations);
+  protected abstract void process(E element, Set<ClassName> annotations);
 
   /** Returns the set of annotations processed by this {@link Step}. */
   protected abstract Set<ClassName> annotationClassNames();

@@ -181,7 +181,7 @@ public final class DiagnosticMessageGenerator {
     }
 
     // Print any dependency requests that aren't shown as part of the dependency trace.
-    ImmutableSet<Element> requestsToPrint =
+    Set<Element> requestsToPrint =
         requests.stream()
             // if printing entry points, skip entry points and the traced request
             .filter(
@@ -300,7 +300,7 @@ public final class DiagnosticMessageGenerator {
   }
 
   /** Returns all the nonsynthetic dependency requests for a binding. */
-  ImmutableSet<DependencyEdge> requests(MaybeBinding binding) {
+  Set<DependencyEdge> requests(MaybeBinding binding) {
     return graph.network().inEdges(binding).stream()
         .flatMap(instancesOf(DependencyEdge.class))
         .filter(edge -> edge.dependencyRequest().requestElement().isPresent())

@@ -42,6 +42,7 @@ import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -167,7 +168,7 @@ final class ComponentHierarchyValidator {
       ValidationReport.Builder<TypeElement> report,
       ComponentDescriptor componentDescriptor,
       SetMultimap<ComponentDescriptor, ModuleDescriptor> producerModulesByComponent) {
-    ImmutableSet<ModuleDescriptor> producerModules =
+    Set<ModuleDescriptor> producerModules =
         componentDescriptor.modules().stream()
             .filter(module -> module.kind().equals(ModuleKind.PRODUCER_MODULE))
             .collect(toImmutableSet());
@@ -206,7 +207,7 @@ final class ComponentHierarchyValidator {
       // TODO(ronshapiro): optimize ModuleDescriptor.hashCode()/equals. Otherwise this could be
       // quite costly
       SetMultimap<ComponentDescriptor, ModuleDescriptor> modulesWithScopes) {
-    ImmutableSet<ModuleDescriptor> modules =
+    Set<ModuleDescriptor> modules =
         component.modules().stream().filter(this::hasScopedDeclarations).collect(toImmutableSet());
     modulesWithScopes.putAll(component, modules);
     for (ComponentDescriptor childComponent : component.childComponents()) {

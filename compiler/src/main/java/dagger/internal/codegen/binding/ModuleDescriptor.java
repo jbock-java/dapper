@@ -137,12 +137,12 @@ public final class ModuleDescriptor {
           .build());
 
   /** Returns all of the bindings declared in this module. */
-  public ImmutableSet<BindingDeclaration> allBindingDeclarations() {
+  public Set<BindingDeclaration> allBindingDeclarations() {
     return allBindingDeclarations.get();
   }
 
   /** Returns the keys of all bindings declared by this module. */
-  ImmutableSet<Key> allBindingKeys() {
+  Set<Key> allBindingKeys() {
     return allBindingDeclarations().stream().map(BindingDeclaration::key).collect(toImmutableSet());
   }
 
@@ -269,11 +269,11 @@ public final class ModuleDescriptor {
 
     // @ContributesAndroidInjector generates a module that is implicitly included in the enclosing
     // module
-    private ImmutableSet<TypeElement> implicitlyIncludedModules(TypeElement moduleElement) {
+    private Set<TypeElement> implicitlyIncludedModules(TypeElement moduleElement) {
       TypeElement contributesAndroidInjector =
           elements.getTypeElement("dagger.android.ContributesAndroidInjector");
       if (contributesAndroidInjector == null) {
-        return ImmutableSet.of();
+        return Set.of();
       }
       return methodsIn(moduleElement.getEnclosedElements()).stream()
           .filter(method -> isAnnotationPresent(method, contributesAndroidInjector.asType()))

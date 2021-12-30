@@ -29,6 +29,7 @@ import dagger.model.BindingGraph.DependencyEdge;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.Set;
 
 /**
  * Reports errors or warnings (depending on the {@code -Adagger.nullableValidation} value) for each
@@ -68,7 +69,7 @@ final class NullableBindingValidator implements BindingGraphPlugin {
         .collect(toImmutableList());
   }
 
-  private ImmutableSet<DependencyEdge> nonNullableDependencies(
+  private Set<DependencyEdge> nonNullableDependencies(
       BindingGraph bindingGraph, dagger.model.Binding binding) {
     return bindingGraph.network().inEdges(binding).stream()
         .flatMap(instancesOf(DependencyEdge.class))

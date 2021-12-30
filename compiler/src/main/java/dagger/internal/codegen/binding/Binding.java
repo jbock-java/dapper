@@ -82,7 +82,7 @@ public abstract class Binding extends BindingDeclaration {
    * The explicit set of {@link DependencyRequest dependencies} required to satisfy this binding as
    * defined by the user-defined injection sites.
    */
-  public abstract ImmutableSet<DependencyRequest> explicitDependencies();
+  public abstract Set<DependencyRequest> explicitDependencies();
 
   /**
    * The set of {@link DependencyRequest dependencies} that are added by the framework rather than a

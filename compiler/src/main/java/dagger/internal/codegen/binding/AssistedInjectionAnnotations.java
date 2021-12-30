@@ -48,6 +48,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -65,7 +66,7 @@ public final class AssistedInjectionAnnotations {
   }
 
   /** Returns the list of abstract factory methods for the given factory {@link TypeElement}. */
-  public static ImmutableSet<ExecutableElement> assistedFactoryMethods(
+  public static Set<ExecutableElement> assistedFactoryMethods(
       TypeElement factory, DaggerElements elements) {
     return elements.getLocalAndInheritedMethods(factory).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
@@ -75,7 +76,7 @@ public final class AssistedInjectionAnnotations {
 
   /** Returns {@code true} if the element uses assisted injection. */
   public static boolean isAssistedInjectionType(TypeElement typeElement) {
-    ImmutableSet<ExecutableElement> injectConstructors = assistedInjectedConstructors(typeElement);
+    Set<ExecutableElement> injectConstructors = assistedInjectedConstructors(typeElement);
     return !injectConstructors.isEmpty()
         && isAnnotationPresent(getOnlyElement(injectConstructors), AssistedInject.class);
   }
@@ -141,7 +142,7 @@ public final class AssistedInjectionAnnotations {
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@link AssistedInject}. */
-  public static ImmutableSet<ExecutableElement> assistedInjectedConstructors(TypeElement type) {
+  public static Set<ExecutableElement> assistedInjectedConstructors(TypeElement type) {
     return constructorsIn(type.getEnclosedElements()).stream()
         .filter(constructor -> isAnnotationPresent(constructor, AssistedInject.class))
         .collect(toImmutableSet());

@@ -29,6 +29,7 @@ import dagger.model.Key;
 import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -39,7 +40,7 @@ import javax.lang.model.element.VariableElement;
 /** Represents the full members injection of a particular type. */
 public final class MembersInjectionBinding extends Binding {
   private final Key key;
-  private final ImmutableSet<DependencyRequest> explicitDependencies;
+  private final Set<DependencyRequest> explicitDependencies;
   private final TypeElement membersInjectedType;
   private final Optional<MembersInjectionBinding> unresolved;
   private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
@@ -53,7 +54,7 @@ public final class MembersInjectionBinding extends Binding {
 
   MembersInjectionBinding(
       Key key,
-      ImmutableSet<DependencyRequest> explicitDependencies,
+      Set<DependencyRequest> explicitDependencies,
       TypeElement membersInjectedType,
       Optional<MembersInjectionBinding> unresolved,
       ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites) {
@@ -99,7 +100,7 @@ public final class MembersInjectionBinding extends Binding {
   }
 
   @Override
-  public ImmutableSet<DependencyRequest> explicitDependencies() {
+  public Set<DependencyRequest> explicitDependencies() {
     return explicitDependencies;
   }
 

@@ -57,7 +57,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
 
   @Override
   protected void process(
-      ExecutableElement assistedInjectElement, ImmutableSet<ClassName> annotations) {
+      ExecutableElement assistedInjectElement, Set<ClassName> annotations) {
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 

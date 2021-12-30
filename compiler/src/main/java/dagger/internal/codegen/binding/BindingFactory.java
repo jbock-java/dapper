@@ -33,6 +33,7 @@ import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -471,7 +472,7 @@ public final class BindingFactory {
     }
     ImmutableSortedSet<InjectionSite> injectionSites =
         injectionSiteFactory.getInjectionSites(declaredType);
-    ImmutableSet<DependencyRequest> dependencies =
+    Set<DependencyRequest> dependencies =
         injectionSites.stream()
             .flatMap(injectionSite -> injectionSite.dependencies().stream())
             .collect(toImmutableSet());

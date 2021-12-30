@@ -34,6 +34,7 @@ import dagger.model.Key;
 import dagger.model.Scope;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
@@ -51,7 +52,7 @@ public final class ProvisionBinding extends ContributionBinding {
   private final BindingKind kind;
   private final Optional<DeclaredType> nullableType;
   private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation;
-  private final ImmutableSet<DependencyRequest> provisionDependencies;
+  private final Set<DependencyRequest> provisionDependencies;
   private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
   private final Optional<ProvisionBinding> unresolved;
   private final Optional<Scope> scope;
@@ -62,12 +63,12 @@ public final class ProvisionBinding extends ContributionBinding {
           wrappedMapKeyAnnotation(), provisionDependencies(),
           injectionSites(), unresolved(), scope()));
 
-  private final Supplier<ImmutableSet<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
+  private final Supplier<Set<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
       ImmutableSet.<DependencyRequest>builder()
           .addAll(provisionDependencies())
           .addAll(membersInjectionDependencies())
           .build());
-  private final Supplier<ImmutableSet<DependencyRequest>> membersInjectionDependencies = Suppliers.memoize(() -> injectionSites()
+  private final Supplier<Set<DependencyRequest>> membersInjectionDependencies = Suppliers.memoize(() -> injectionSites()
       .stream()
       .flatMap(i -> i.dependencies().stream())
       .collect(toImmutableSet()));
@@ -81,7 +82,7 @@ public final class ProvisionBinding extends ContributionBinding {
       BindingKind kind,
       Optional<DeclaredType> nullableType,
       Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation,
-      ImmutableSet<DependencyRequest> provisionDependencies,
+      Set<DependencyRequest> provisionDependencies,
       ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
       Optional<ProvisionBinding> unresolved,
       Optional<Scope> scope) {
@@ -99,7 +100,7 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   @Override
-  public ImmutableSet<DependencyRequest> explicitDependencies() {
+  public Set<DependencyRequest> explicitDependencies() {
     return explicitDependencies.get();
   }
 
@@ -141,11 +142,11 @@ public final class ProvisionBinding extends ContributionBinding {
   /**
    * Dependencies necessary to invoke an {@code @Inject} constructor or {@code @Provides} method.
    */
-  public ImmutableSet<DependencyRequest> provisionDependencies() {
+  public Set<DependencyRequest> provisionDependencies() {
     return provisionDependencies;
   }
 
-  ImmutableSet<DependencyRequest> membersInjectionDependencies() {
+  Set<DependencyRequest> membersInjectionDependencies() {
     return membersInjectionDependencies.get();
   }
 
@@ -236,7 +237,7 @@ public final class ProvisionBinding extends ContributionBinding {
     private BindingKind kind;
     private Optional<DeclaredType> nullableType = Optional.empty();
     private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation = Optional.empty();
-    private ImmutableSet<DependencyRequest> provisionDependencies;
+    private Set<DependencyRequest> provisionDependencies;
     private ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
     private Optional<Scope> scope = Optional.empty();

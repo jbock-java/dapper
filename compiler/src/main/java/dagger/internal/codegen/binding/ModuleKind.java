@@ -40,7 +40,7 @@ public enum ModuleKind {
   PRODUCER_MODULE(TypeNames.PRODUCER_MODULE);
 
   /** Returns the annotations for modules of the given kinds. */
-  public static ImmutableSet<ClassName> annotationsFor(Set<ModuleKind> kinds) {
+  public static Set<ClassName> annotationsFor(Set<ModuleKind> kinds) {
     return kinds.stream().map(ModuleKind::annotation).collect(toImmutableSet());
   }
 

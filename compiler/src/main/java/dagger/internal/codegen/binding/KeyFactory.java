@@ -227,7 +227,7 @@ public final class KeyFactory {
    * for {@code Map<K, Provider<V>>} and {@code Map<K, Producer<V>>} (if Dagger-Producers is on
    * the classpath).
    */
-  ImmutableSet<Key> implicitFrameworkMapKeys(Key requestKey) {
+  Set<Key> implicitFrameworkMapKeys(Key requestKey) {
     return Stream.of(implicitMapProviderKeyFrom(requestKey), implicitMapProducerKeyFrom(requestKey))
         .filter(Optional::isPresent)
         .map(Optional::get)

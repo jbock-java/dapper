@@ -97,12 +97,12 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.ASSISTED_FACTORY);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.ASSISTED_FACTORY);
   }
 
   @Override
-  protected void process(TypeElement factory, ImmutableSet<ClassName> annotations) {
+  protected void process(TypeElement factory, Set<ClassName> annotations) {
     ValidationReport<TypeElement> report = new AssistedFactoryValidator().validate(factory);
     report.printMessagesTo(messager);
     if (report.isClean()) {
@@ -132,7 +132,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
         report.addError("Nested @AssistedFactory-annotated types must be static. ", factory);
       }
 
-      ImmutableSet<ExecutableElement> abstractFactoryMethods =
+      Set<ExecutableElement> abstractFactoryMethods =
           AssistedInjectionAnnotations.assistedFactoryMethods(factory, elements);
 
       if (abstractFactoryMethods.isEmpty()) {

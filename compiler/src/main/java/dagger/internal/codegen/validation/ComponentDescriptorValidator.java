@@ -410,9 +410,9 @@ public final class ComponentDescriptorValidator {
     private void validateDependencyScopeHierarchy(
         ComponentDescriptor component,
         TypeElement dependency,
-        Deque<ImmutableSet<Scope>> scopeStack,
+        Deque<Set<Scope>> scopeStack,
         Deque<TypeElement> scopedDependencyStack) {
-      ImmutableSet<Scope> scopes = scopesOf(dependency);
+      Set<Scope> scopes = scopesOf(dependency);
       if (stackOverlaps(scopeStack, scopes)) {
         scopedDependencyStack.push(dependency);
         // Current scope has already appeared in the component chain.
@@ -435,7 +435,7 @@ public final class ComponentDescriptorValidator {
         rootComponentAnnotation(dependency)
             .ifPresent(
                 componentAnnotation -> {
-                  ImmutableSet<TypeElement> scopedDependencies =
+                  Set<TypeElement> scopedDependencies =
                       scopedTypesIn(componentAnnotation.dependencies());
                   if (!scopedDependencies.isEmpty()) {
                     // empty can be ignored (base-case)
@@ -455,8 +455,8 @@ public final class ComponentDescriptorValidator {
       }
     }
 
-    private <T> boolean stackOverlaps(Deque<ImmutableSet<T>> stack, ImmutableSet<T> set) {
-      for (ImmutableSet<T> entry : stack) {
+    private <T> boolean stackOverlaps(Deque<Set<T>> stack, Set<T> set) {
+      for (Set<T> entry : stack) {
         if (!Sets.intersection(entry, set).isEmpty()) {
           return true;
         }
@@ -481,7 +481,7 @@ public final class ComponentDescriptorValidator {
      * Returns a set of type elements containing only those found in the input set that have a
      * scoping annotation.
      */
-    private ImmutableSet<TypeElement> scopedTypesIn(Collection<TypeElement> types) {
+    private Set<TypeElement> scopedTypesIn(Collection<TypeElement> types) {
       return types.stream().filter(type -> !scopesOf(type).isEmpty()).collect(toImmutableSet());
     }
   }

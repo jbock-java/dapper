@@ -32,6 +32,7 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -70,7 +71,7 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  protected void process(TypeElement mapKeyAnnotationType, ImmutableSet<ClassName> annotations) {
+  protected void process(TypeElement mapKeyAnnotationType, Set<ClassName> annotations) {
     ValidationReport<Element> mapKeyReport = mapKeyValidator.validate(mapKeyAnnotationType);
     mapKeyReport.printMessagesTo(messager);
 

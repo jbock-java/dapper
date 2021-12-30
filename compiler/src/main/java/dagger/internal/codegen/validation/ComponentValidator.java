@@ -138,7 +138,7 @@ public final class ComponentValidator implements ClearableCache {
   private class ElementValidator {
     private final TypeElement component;
     private final ValidationReport.Builder<TypeElement> report;
-    private final ImmutableSet<ComponentKind> componentKinds;
+    private final Set<ComponentKind> componentKinds;
 
     // Populated by ComponentMethodValidators
     private final SetMultimap<Element, ExecutableElement> referencedSubcomponents =
@@ -479,7 +479,7 @@ public final class ComponentValidator implements ClearableCache {
       }
     }
 
-    private ImmutableSet<Key> distinctKeys(Set<ExecutableElement> methods) {
+    private Set<Key> distinctKeys(Set<ExecutableElement> methods) {
       return methods.stream()
           .map(this::dependencyRequest)
           .map(DependencyRequest::key)

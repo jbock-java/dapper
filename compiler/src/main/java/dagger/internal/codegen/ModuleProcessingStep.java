@@ -96,7 +96,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  protected void process(TypeElement module, ImmutableSet<ClassName> annotations) {
+  protected void process(TypeElement module, Set<ClassName> annotations) {
     if (processedModuleElements.contains(module)) {
       return;
     }

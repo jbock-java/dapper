@@ -22,6 +22,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
 import jakarta.inject.Singleton;
 
+import java.util.Set;
 import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public final class Scopes {
   }
 
   /** Returns all of the associated scopes for a source code element. */
-  public static ImmutableSet<Scope> scopesOf(Element element) {
+  public static Set<Scope> scopesOf(Element element) {
     return AnnotationMirrors.getAnnotatedAnnotations(element, jakarta.inject.Scope.class)
         .stream()
         .map(Scope::scope)

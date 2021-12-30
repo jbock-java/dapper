@@ -54,7 +54,7 @@ public final class BindingGraphPlugins {
   }
 
   /** Returns {@link BindingGraphPlugin#supportedOptions()} from all the plugins. */
-  public ImmutableSet<String> allSupportedOptions() {
+  public Set<String> allSupportedOptions() {
     return plugins.stream()
         .flatMap(plugin -> plugin.supportedOptions().stream())
         .collect(toImmutableSet());

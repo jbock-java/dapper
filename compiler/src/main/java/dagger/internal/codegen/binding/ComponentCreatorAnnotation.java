@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import javax.lang.model.element.TypeElement;
@@ -79,12 +80,12 @@ public enum ComponentCreatorAnnotation {
   }
 
   /** Returns all component creator annotations. */
-  public static ImmutableSet<ClassName> allCreatorAnnotations() {
+  public static Set<ClassName> allCreatorAnnotations() {
     return stream().collect(toAnnotationClasses());
   }
 
   /** Returns all subcomponent creator annotations. */
-  public static ImmutableSet<ClassName> subcomponentCreatorAnnotations() {
+  public static Set<ClassName> subcomponentCreatorAnnotations() {
     return stream()
         .filter(
             componentCreatorAnnotation ->
@@ -93,7 +94,7 @@ public enum ComponentCreatorAnnotation {
   }
 
   /** Returns the legal creator annotations for the given {@code componentAnnotation}. */
-  public static ImmutableSet<ClassName> creatorAnnotationsFor(
+  public static Set<ClassName> creatorAnnotationsFor(
       ComponentAnnotation componentAnnotation) {
     return stream()
         .filter(
@@ -106,7 +107,7 @@ public enum ComponentCreatorAnnotation {
   }
 
   /** Returns all creator annotations present on the given {@code type}. */
-  public static ImmutableSet<ComponentCreatorAnnotation> getCreatorAnnotations(TypeElement type) {
+  public static Set<ComponentCreatorAnnotation> getCreatorAnnotations(TypeElement type) {
     return stream()
         .filter(cca -> isAnnotationPresent(type, cca.annotation()))
         .collect(toImmutableSet());
@@ -116,7 +117,7 @@ public enum ComponentCreatorAnnotation {
     return valuesOf(ComponentCreatorAnnotation.class);
   }
 
-  private static Collector<ComponentCreatorAnnotation, ?, ImmutableSet<ClassName>>
+  private static Collector<ComponentCreatorAnnotation, ?, Set<ClassName>>
   toAnnotationClasses() {
     return mapping(ComponentCreatorAnnotation::annotation, toImmutableSet());
   }

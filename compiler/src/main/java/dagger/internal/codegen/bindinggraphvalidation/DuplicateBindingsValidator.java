@@ -106,7 +106,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
    * descendant component because it depends on local multibindings or optional bindings. Hence each
    * "set" is represented as a multimap from binding element (ignoring component path) to binding.
    */
-  private ImmutableSet<ImmutableSetMultimap<BindingElement, Binding>> duplicateBindingSets(
+  private Set<ImmutableSetMultimap<BindingElement, Binding>> duplicateBindingSets(
       BindingGraph bindingGraph) {
     return groupBindingsByKey(bindingGraph).stream()
         .flatMap(bindings -> mutuallyVisibleSubsets(bindings).stream())
@@ -115,7 +115,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
         .collect(toImmutableSet());
   }
 
-  private static ImmutableSet<ImmutableSet<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
+  private static Set<ImmutableSet<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
     return valueSetsForEachKey(
         bindingGraph.bindings().stream()
             .filter(binding -> !binding.kind().equals(MEMBERS_INJECTION))
@@ -126,7 +126,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
    * Returns the subsets of the input set that contain bindings that are all visible from the same
    * component. A binding is visible from its component and all its descendants.
    */
-  private static ImmutableSet<ImmutableSet<Binding>> mutuallyVisibleSubsets(
+  private static Set<ImmutableSet<Binding>> mutuallyVisibleSubsets(
       Set<Binding> duplicateBindings) {
     ImmutableListMultimap<ComponentPath, Binding> bindingsByComponentPath =
         Multimaps.index(duplicateBindings, Binding::componentPath);
@@ -239,7 +239,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private String incompatibleBindingsMessage(
       Binding oneBinding, ImmutableSet<Binding> duplicateBindings, BindingGraph graph) {
     Key key = oneBinding.key();
-    ImmutableSet<dagger.model.Binding> multibindings =
+    Set<Binding> multibindings =
         duplicateBindings.stream()
             .filter(binding -> binding.kind().isMultibinding())
             .collect(toImmutableSet());
@@ -249,11 +249,11 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     java.util.Formatter messageFormatter = new java.util.Formatter(message);
     messageFormatter.format("%s has incompatible bindings or declarations:\n", key);
     message.append(INDENT);
-    dagger.model.Binding multibinding = getOnlyElement(multibindings);
+    Binding multibinding = getOnlyElement(multibindings);
     messageFormatter.format("%s bindings and declarations:", multibindingTypeString(multibinding));
     formatDeclarations(message, 2, declarations(graph, multibindings));
 
-    Set<dagger.model.Binding> uniqueBindings =
+    Set<Binding> uniqueBindings =
         Sets.filter(duplicateBindings, binding -> !binding.equals(multibinding));
     message.append('\n').append(INDENT).append("Unique bindings and declarations:");
     formatDeclarations(
@@ -276,8 +276,8 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
         builder, ImmutableList.copyOf(bindingDeclarations), indentLevel);
   }
 
-  private ImmutableSet<BindingDeclaration> declarations(
-      BindingGraph graph, Set<dagger.model.Binding> bindings) {
+  private Set<BindingDeclaration> declarations(
+      BindingGraph graph, Set<Binding> bindings) {
     return bindings.stream()
         .flatMap(binding -> declarations(graph, binding).stream())
         .distinct()
@@ -286,7 +286,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   private ImmutableSet<BindingDeclaration> declarations(
-      BindingGraph graph, dagger.model.Binding binding) {
+      BindingGraph graph, Binding binding) {
     ImmutableSet.Builder<BindingDeclaration> declarations = ImmutableSet.builder();
     BindingNode bindingNode = (BindingNode) binding;
     bindingNode.associatedDeclarations().forEach(declarations::add);
@@ -300,7 +300,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     return declarations.build();
   }
 
-  private String multibindingTypeString(dagger.model.Binding multibinding) {
+  private String multibindingTypeString(Binding multibinding) {
     switch (multibinding.kind()) {
       case MULTIBOUND_MAP:
         return "Map";
@@ -311,7 +311,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     }
   }
 
-  private static <E> ImmutableSet<ImmutableSet<E>> valueSetsForEachKey(Multimap<?, E> multimap) {
+  private static <E> Set<ImmutableSet<E>> valueSetsForEachKey(Multimap<?, E> multimap) {
     return multimap.asMap().values().stream().map(ImmutableSet::copyOf).collect(toImmutableSet());
   }
 

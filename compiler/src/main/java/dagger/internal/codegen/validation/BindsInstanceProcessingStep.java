@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 
@@ -45,12 +46,12 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.BINDS_INSTANCE);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.BINDS_INSTANCE);
   }
 
   @Override
-  protected void process(Element element, ImmutableSet<ClassName> annotations) {
+  protected void process(Element element, Set<ClassName> annotations) {
     switch (element.getKind()) {
       case PARAMETER:
         parameterValidator.validate(MoreElements.asVariable(element)).printMessagesTo(messager);

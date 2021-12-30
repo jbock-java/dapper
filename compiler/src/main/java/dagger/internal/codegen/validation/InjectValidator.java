@@ -216,7 +216,7 @@ public final class InjectValidator implements ClearableCache {
       builder.addError("Types may only contain one injected constructor", constructorElement);
     }
 
-    ImmutableSet<Scope> scopes = scopesOf(enclosingElement);
+    Set<Scope> scopes = scopesOf(enclosingElement);
     if (injectAnnotation == AssistedInject.class) {
       for (Scope scope : scopes) {
         builder.addError(

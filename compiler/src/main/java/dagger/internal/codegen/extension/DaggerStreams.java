@@ -26,8 +26,10 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -48,11 +50,11 @@ public final class DaggerStreams {
 
   /**
    * Returns a {@link Collector} that accumulates the input elements into a new {@link
-   * ImmutableSet}, in encounter order.
+   * Set}, in encounter order.
    */
   // TODO(b/68008628): Use ImmutableSet.toImmutableSet().
-  public static <T> Collector<T, ?, ImmutableSet<T>> toImmutableSet() {
-    return collectingAndThen(toList(), ImmutableSet::copyOf);
+  public static <T> Collector<T, ?, Set<T>> toImmutableSet() {
+    return collectingAndThen(toList(), LinkedHashSet::new);
   }
 
   /**

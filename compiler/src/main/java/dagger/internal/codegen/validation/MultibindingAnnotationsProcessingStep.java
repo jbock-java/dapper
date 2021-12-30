@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 
@@ -46,12 +47,12 @@ public final class MultibindingAnnotationsProcessingStep
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
   }
 
   @Override
-  protected void process(ExecutableElement method, ImmutableSet<ClassName> annotations) {
+  protected void process(ExecutableElement method, Set<ClassName> annotations) {
     if (!anyBindingMethodValidator.isBindingMethod(method)) {
       annotations.forEach(
           annotation ->

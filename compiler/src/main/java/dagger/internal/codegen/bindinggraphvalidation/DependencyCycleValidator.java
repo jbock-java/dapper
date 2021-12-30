@@ -131,7 +131,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     if (bindingGraph.isFullBindingGraph()) {
       diagnosticReporter.reportComponent(
           ERROR,
-          bindingGraph.componentNode(cycle.nodes().asList().get(0).componentPath()).get(),
+          bindingGraph.componentNode(cycle.nodes().iterator().next().componentPath()).get(),
           errorMessage(cycle, bindingGraph));
       return;
     }
@@ -147,7 +147,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   private ImmutableList<Node> shortestPathToCycleFromAnEntryPoint(
       Cycle<Node> cycle, BindingGraph bindingGraph) {
-    Node someCycleNode = cycle.nodes().asList().get(0);
+    Node someCycleNode = cycle.nodes().iterator().next();
     ComponentNode componentContainingCycle =
         bindingGraph.componentNode(someCycleNode.componentPath()).get();
     ImmutableList<Node> pathToCycle =
@@ -284,7 +284,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     }
 
     /** Returns the nodes that participate in the cycle. */
-    ImmutableSet<N> nodes() {
+    Set<N> nodes() {
       return endpointPairs().stream()
           .flatMap(pair -> Stream.of(pair.source(), pair.target()))
           .collect(toImmutableSet());

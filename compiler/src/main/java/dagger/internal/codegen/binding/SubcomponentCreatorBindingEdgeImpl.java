@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.SubcomponentCreatorBindingEdge;
+import java.util.Set;
 import javax.lang.model.element.TypeElement;
 
 /** An implementation of {@link SubcomponentCreatorBindingEdge}. */
@@ -36,7 +37,7 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
   }
 
   @Override
-  public ImmutableSet<TypeElement> declaringModules() {
+  public Set<TypeElement> declaringModules() {
     return subcomponentDeclarations.stream()
         .map(SubcomponentDeclaration::contributingModule)
         .flatMap(presentValues())

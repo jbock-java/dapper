@@ -117,7 +117,7 @@ public final class ComponentDescriptorFactory {
 
   private ComponentDescriptor create(
       TypeElement typeElement, ComponentAnnotation componentAnnotation) {
-    ImmutableSet<ComponentRequirement> componentDependencies =
+    Set<ComponentRequirement> componentDependencies =
         componentAnnotation.dependencyTypes().stream()
             .map(ComponentRequirement::forDependency)
             .collect(toImmutableSet());
@@ -181,7 +181,7 @@ public final class ComponentDescriptorFactory {
     }
 
     // Validation should have ensured that this set will have at most one element.
-    ImmutableSet<DeclaredType> enclosedCreators =
+    Set<DeclaredType> enclosedCreators =
         creatorAnnotationsFor(componentAnnotation).stream()
             .flatMap(
                 creatorAnnotation ->

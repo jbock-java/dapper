@@ -77,8 +77,8 @@ public final class BindingGraph {
     this.topLevelBindingGraph = requireNonNull(topLevelBindingGraph);
   }
 
-  private final Supplier<ImmutableSet<ComponentRequirement>> componentRequirements = memoize(() -> {
-    ImmutableSet<TypeElement> requiredModules =
+  private final Supplier<Set<ComponentRequirement>> componentRequirements = memoize(() -> {
+    Set<TypeElement> requiredModules =
         stream(Traverser.forTree(BindingGraph::subgraphs).depthFirstPostOrder(this))
             .flatMap(graph -> graph.bindingModules.stream())
             .filter(ownedModuleTypes()::contains)
@@ -295,7 +295,7 @@ public final class BindingGraph {
   private ImmutableMap<Key, BindingNode> membersInjectionBindings;
   private ImmutableSet<ModuleDescriptor> inheritedModules;
   private ImmutableSet<ModuleDescriptor> ownedModules;
-  private ImmutableSet<TypeElement> bindingModules;
+  private Set<TypeElement> bindingModules;
 
   /** Returns the {@link ComponentNode} for this graph. */
   public dagger.model.BindingGraph.ComponentNode componentNode() {
@@ -369,7 +369,7 @@ public final class BindingGraph {
    * subcomponents}, this set will be the transitive modules that are not owned by any of their
    * ancestors.
    */
-  public ImmutableSet<TypeElement> ownedModuleTypes() {
+  public Set<TypeElement> ownedModuleTypes() {
     return ownedModules.stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
   }
 
@@ -419,12 +419,12 @@ public final class BindingGraph {
    *   <li>bound instances
    * </ul>
    */
-  public ImmutableSet<ComponentRequirement> componentRequirements() {
+  public Set<ComponentRequirement> componentRequirements() {
     return componentRequirements.get();
   }
 
   /** Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph}. */
-  public ImmutableSet<ComponentDescriptor> componentDescriptors() {
+  public Set<ComponentDescriptor> componentDescriptors() {
     return topLevelBindingGraph().componentNodes().stream()
         .map(componentNode -> ((ComponentNodeImpl) componentNode).componentDescriptor())
         .collect(toImmutableSet());

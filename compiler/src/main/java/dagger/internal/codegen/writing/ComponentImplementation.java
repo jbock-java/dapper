@@ -882,9 +882,9 @@ public final class ComponentImplementation {
     }
   }
 
-  private static ImmutableList<ComponentRequirement> constructorRequirements(BindingGraph graph) {
+  private static List<ComponentRequirement> constructorRequirements(BindingGraph graph) {
     if (graph.componentDescriptor().hasCreator()) {
-      return graph.componentRequirements().asList();
+      return new ArrayList<>(graph.componentRequirements());
     } else if (graph.factoryMethod().isPresent()) {
       return graph.factoryMethodParameters().keySet().asList();
     } else {

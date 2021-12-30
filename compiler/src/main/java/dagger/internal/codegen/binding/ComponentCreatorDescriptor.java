@@ -37,6 +37,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -166,14 +167,14 @@ public final class ComponentCreatorDescriptor {
   }
 
   /** Returns the set of requirements for modules and component dependencies for this creator. */
-  public ImmutableSet<ComponentRequirement> moduleAndDependencyRequirements() {
+  public Set<ComponentRequirement> moduleAndDependencyRequirements() {
     return userSettableRequirements().stream()
         .filter(requirement -> !requirement.isBoundInstance())
         .collect(toImmutableSet());
   }
 
   /** Returns the set of bound instance requirements for this creator. */
-  ImmutableSet<ComponentRequirement> boundInstanceRequirements() {
+  Set<ComponentRequirement> boundInstanceRequirements() {
     return userSettableRequirements().stream()
         .filter(ComponentRequirement::isBoundInstance)
         .collect(toImmutableSet());

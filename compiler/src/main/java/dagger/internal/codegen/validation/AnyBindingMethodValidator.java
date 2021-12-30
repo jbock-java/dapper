@@ -31,12 +31,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
 
 /** Validates any binding method. */
 @Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
-  private final ImmutableMap<ClassName, BindingMethodValidator> validators;
+  private final Map<ClassName, BindingMethodValidator> validators;
   private final Map<ExecutableElement, ValidationReport<ExecutableElement>> reports =
       new HashMap<>();
 
@@ -51,7 +52,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
   }
 
   /** Returns the binding method annotations considered by this validator. */
-  ImmutableSet<ClassName> methodAnnotations() {
+  Set<ClassName> methodAnnotations() {
     return validators.keySet();
   }
 
@@ -90,7 +91,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
 
   private ValidationReport<ExecutableElement> validateUncached(ExecutableElement method) {
     ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(method);
-    ImmutableSet<ClassName> bindingMethodAnnotations =
+    Set<ClassName> bindingMethodAnnotations =
         methodAnnotations().stream()
             .filter(annotation -> isAnnotationPresent(method, annotation))
             .collect(toImmutableSet());

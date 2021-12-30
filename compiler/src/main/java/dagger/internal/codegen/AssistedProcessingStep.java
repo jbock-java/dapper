@@ -30,6 +30,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -63,7 +64,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   }
 
   @Override
-  protected void process(VariableElement assisted, ImmutableSet<ClassName> annotations) {
+  protected void process(VariableElement assisted, Set<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 

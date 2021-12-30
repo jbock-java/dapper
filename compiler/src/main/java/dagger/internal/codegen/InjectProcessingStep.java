@@ -74,7 +74,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   }
 
   @Override
-  protected void process(Element injectElement, ImmutableSet<ClassName> annotations) {
+  protected void process(Element injectElement, Set<ClassName> annotations) {
     // Only process an element once to avoid getting duplicate errors when an element is annotated
     // with multiple inject annotations.
     if (processedElements.contains(injectElement)) {
