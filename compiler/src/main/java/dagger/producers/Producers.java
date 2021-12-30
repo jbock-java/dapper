@@ -30,11 +30,6 @@ public final class Producers {
     return new ImmediateProducer<>(Futures.immediateFuture(value));
   }
 
-  /** Returns a producer that fails with the given exception. */
-  public static <T> Producer<T> immediateFailedProducer(final Throwable throwable) {
-    return new ImmediateProducer<>(Futures.<T>immediateFailedFuture(throwable));
-  }
-
   /** A {@link CancellableProducer} with an immediate result. */
   private static final class ImmediateProducer<T> implements CancellableProducer<T> {
     private final ListenableFuture<T> future;

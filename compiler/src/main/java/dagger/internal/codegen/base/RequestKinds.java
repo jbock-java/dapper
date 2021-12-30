@@ -16,6 +16,15 @@
 
 package dagger.internal.codegen.base;
 
+import com.google.common.collect.ImmutableMap;
+import com.squareup.javapoet.TypeName;
+import dagger.Lazy;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.RequestKind;
+import jakarta.inject.Provider;
+
+import javax.lang.model.type.TypeMirror;
+
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.isType;
 import static com.google.auto.common.MoreTypes.isTypeOf;
@@ -24,22 +33,9 @@ import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.model.RequestKind.LAZY;
-import static dagger.model.RequestKind.PRODUCED;
-import static dagger.model.RequestKind.PRODUCER;
 import static dagger.model.RequestKind.PROVIDER;
 import static dagger.model.RequestKind.PROVIDER_OF_LAZY;
 import static javax.lang.model.type.TypeKind.DECLARED;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.squareup.javapoet.TypeName;
-import dagger.Lazy;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.RequestKind;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
-import jakarta.inject.Provider;
-import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@link RequestKind}s. */
 public final class RequestKinds {
@@ -53,9 +49,6 @@ public final class RequestKinds {
 
       case PROVIDER_OF_LAZY:
         return types.wrapType(requestType(LAZY, type, types), Provider.class);
-
-      case FUTURE:
-        return types.wrapType(type, ListenableFuture.class);
 
       default:
         return types.wrapType(type, frameworkClass(requestKind));
@@ -85,9 +78,7 @@ public final class RequestKinds {
   private static final ImmutableMap<RequestKind, Class<?>> FRAMEWORK_CLASSES =
       ImmutableMap.of(
           PROVIDER, Provider.class,
-          LAZY, Lazy.class,
-          PRODUCER, Producer.class,
-          PRODUCED, Produced.class);
+          LAZY, Lazy.class);
 
   /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(TypeMirror type) {
@@ -144,8 +135,7 @@ public final class RequestKinds {
    *
    * <p>This concept is not well defined and should probably be removed and inlined into the cases
    * that need it. For example, {@link RequestKind#PROVIDER_OF_LAZY} has <em>2</em> wrapping
-   * classes, and {@link RequestKind#FUTURE} is wrapped with a {@link ListenableFuture}, but for
-   * historical/implementation reasons has not had an associated framework class.
+   * classes.
    */
   public static Class<?> frameworkClass(RequestKind requestKind) {
     Class<?> result = FRAMEWORK_CLASSES.get(requestKind);

@@ -62,14 +62,6 @@ final class DependencyVariableNamer {
         return variableName.endsWith("Provider") && !variableName.equals("Provider")
             ? variableName.substring(0, variableName.length() - 8)
             : variableName;
-      case PRODUCED:
-        return variableName.startsWith("produced") && !variableName.equals("produced")
-            ? toLowerCamel(variableName.substring(8))
-            : variableName;
-      case PRODUCER:
-        return variableName.endsWith("Producer") && !variableName.equals("Producer")
-            ? variableName.substring(0, variableName.length() - 8)
-            : variableName;
       default:
         throw new AssertionError();
     }

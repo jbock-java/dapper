@@ -65,7 +65,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
-import dagger.producers.ProductionComponent;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;
@@ -88,8 +87,7 @@ import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
- * Performs superficial validation of the contract of the {@link Component} and {@link
- * ProductionComponent} annotations.
+ * Performs superficial validation of the contract of the {@link Component} annotation.
  */
 @Singleton
 public final class ComponentValidator implements ClearableCache {

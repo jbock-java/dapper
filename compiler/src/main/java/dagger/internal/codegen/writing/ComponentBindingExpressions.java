@@ -267,8 +267,6 @@ public final class ComponentBindingExpressions {
       case PROVISION:
         return provisionBindingExpression((ContributionBinding) binding, request);
 
-      case PRODUCTION:
-        return productionBindingExpression((ContributionBinding) binding, request);
     }
     throw new AssertionError(binding);
   }
@@ -315,7 +313,6 @@ public final class ComponentBindingExpressions {
   /** Returns a binding expression for a provision binding. */
   private BindingExpression provisionBindingExpression(
       ContributionBinding binding, BindingRequest request) {
-    Key key = request.key();
     switch (request.requestKind()) {
       case INSTANCE:
         return instanceBindingExpression(binding);
@@ -324,28 +321,15 @@ public final class ComponentBindingExpressions {
         return providerBindingExpression(binding);
 
       case LAZY:
-      case PRODUCED:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceBindingExpressionFactory.create(
             request, FrameworkType.PROVIDER);
-
-      case FUTURE:
-        return immediateFutureBindingExpressionFactory.create(key);
 
       case MEMBERS_INJECTION:
         throw new IllegalArgumentException();
     }
 
     throw new AssertionError();
-  }
-
-  /** Returns a binding expression for a production binding. */
-  private BindingExpression productionBindingExpression(
-      ContributionBinding binding, BindingRequest request) {
-    return request.frameworkType().isPresent()
-        ? frameworkInstanceBindingExpression(binding)
-        : derivedFromFrameworkInstanceBindingExpressionFactory.create(
-        request, FrameworkType.PRODUCER_NODE);
   }
 
   /**

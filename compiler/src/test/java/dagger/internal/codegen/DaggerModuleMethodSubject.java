@@ -28,7 +28,6 @@ import com.google.common.truth.Truth;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.Module;
-import dagger.producers.ProducerModule;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -46,13 +45,6 @@ final class DaggerModuleMethodSubject extends Subject {
       return assertAbout(daggerModuleMethod())
           .that(method)
           .withDeclaration("@Module abstract class %s { %s }");
-    }
-
-    /** Starts a clause testing a Dagger {@link ProducerModule @ProducerModule} method. */
-    static DaggerModuleMethodSubject assertThatProductionModuleMethod(String method) {
-      return assertAbout(daggerModuleMethod())
-          .that(method)
-          .withDeclaration("@ProducerModule abstract class %s { %s }");
     }
 
     /** Starts a clause testing a method in an unannotated class. */

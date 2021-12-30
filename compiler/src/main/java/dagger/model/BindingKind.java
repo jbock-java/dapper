@@ -34,8 +34,7 @@ public enum BindingKind {
   ASSISTED_FACTORY,
 
   /**
-   * An implicit binding for a {@link dagger.Component}- or {@link
-   * dagger.producers.ProductionComponent}-annotated type.
+   * An implicit binding for a {@link dagger.Component}-annotated type.
    */
   COMPONENT,
 
@@ -65,28 +64,15 @@ public enum BindingKind {
   /** A binding for a {@link dagger.BindsInstance}-annotated builder method. */
   BOUND_INSTANCE,
 
-  /** A binding for a {@link dagger.producers.Produces}-annotated method. */
-  PRODUCTION,
-
-  /**
-   * A binding for a production method on a production component's {@linkplain
-   * dagger.producers.ProductionComponent#dependencies()} dependency} that returns a {@link
-   * com.google.common.util.concurrent.ListenableFuture} or {@link
-   * com.google.common.util.concurrent.FluentFuture}. Methods on production component dependencies
-   * that don't return a future are considered {@linkplain #COMPONENT_PROVISION component provision
-   * bindings}.
-   */
-  COMPONENT_PRODUCTION,
-
   /**
    * A synthetic binding for a multibound set that depends on individual multibinding {@link
-   * #PROVISION} or {@link #PRODUCTION} contributions.
+   * #PROVISION} contributions.
    */
   MULTIBOUND_SET,
 
   /**
    * A synthetic binding for a multibound map that depends on the individual multibinding {@link
-   * #PROVISION} or {@link #PRODUCTION} contributions.
+   * #PROVISION} contributions.
    */
   MULTIBOUND_MAP,
 

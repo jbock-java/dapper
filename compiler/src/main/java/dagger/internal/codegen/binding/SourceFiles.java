@@ -108,10 +108,8 @@ public class SourceFiles {
       case LAZY:
         return CodeBlock.of("$T.lazy($L)", DOUBLE_CHECK, frameworkTypeMemberSelect);
       case INSTANCE:
-      case FUTURE:
         return CodeBlock.of("$L.get()", frameworkTypeMemberSelect);
       case PROVIDER:
-      case PRODUCER:
         return frameworkTypeMemberSelect;
       case PROVIDER_OF_LAZY:
         return CodeBlock.of("$T.create($L)", PROVIDER_OF_LAZY, frameworkTypeMemberSelect);
@@ -142,7 +140,6 @@ public class SourceFiles {
           case ASSISTED_INJECTION:
           case INJECTION:
           case PROVISION:
-          case PRODUCTION:
             return elementBasedClassName(
                 MoreElements.asExecutable(binding.bindingElement().get()), "Factory");
 

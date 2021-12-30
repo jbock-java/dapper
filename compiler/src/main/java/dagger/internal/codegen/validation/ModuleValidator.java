@@ -16,6 +16,50 @@
 
 package dagger.internal.codegen.validation;
 
+import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
+import com.google.auto.common.Visibility;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
+import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.binding.BindingGraphFactory;
+import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import dagger.internal.codegen.binding.ComponentDescriptorFactory;
+import dagger.internal.codegen.binding.MethodSignatureFormatter;
+import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.BindingGraph;
+import jakarta.inject.Inject;
+import jakarta.inject.Scope;
+import jakarta.inject.Singleton;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.SimpleAnnotationValueVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor8;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.Visibility.PRIVATE;
@@ -40,79 +84,19 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.auto.common.Visibility;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
-import com.squareup.javapoet.ClassName;
-import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.binding.BindingGraphFactory;
-import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
-import dagger.internal.codegen.binding.ComponentDescriptorFactory;
-import dagger.internal.codegen.binding.MethodSignatureFormatter;
-import dagger.internal.codegen.binding.ModuleKind;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.BindingGraph;
-import jakarta.inject.Inject;
-import jakarta.inject.Scope;
-import jakarta.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
-
 /**
- * A {@linkplain ValidationReport validator} for {@link dagger.Module}s or {@link
- * dagger.producers.ProducerModule}s.
+ * A {@linkplain ValidationReport validator} for {@link dagger.Module}s.
  */
 @Singleton
 public final class ModuleValidator {
-  private static final ImmutableSet<ClassName> SUBCOMPONENT_TYPES =
-      ImmutableSet.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
-  private static final ImmutableSet<ClassName> SUBCOMPONENT_CREATOR_TYPES =
-      ImmutableSet.of(
+  private static final Set<ClassName> SUBCOMPONENT_TYPES =
+      Set.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
+  private static final Set<ClassName> SUBCOMPONENT_CREATOR_TYPES =
+      Set.of(
           TypeNames.SUBCOMPONENT_BUILDER,
           TypeNames.SUBCOMPONENT_FACTORY,
           TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER,
           TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY);
-  private static final Optional<Class<?>> ANDROID_PROCESSOR;
-  private static final String CONTRIBUTES_ANDROID_INJECTOR_NAME =
-      "dagger.android.ContributesAndroidInjector";
-  private static final String ANDROID_PROCESSOR_NAME = "dagger.android.processor.AndroidProcessor";
-
-  static {
-    Class<?> clazz;
-    try {
-      clazz = Class.forName(ANDROID_PROCESSOR_NAME, false, ModuleValidator.class.getClassLoader());
-    } catch (ClassNotFoundException ignored) {
-      clazz = null;
-    }
-    ANDROID_PROCESSOR = Optional.ofNullable(clazz);
-  }
 
   private final DaggerTypes types;
   private final DaggerElements elements;
@@ -150,7 +134,7 @@ public final class ModuleValidator {
    *
    * <p>This logic depends on this method being called before {@linkplain #validate(TypeElement)
    * validating} any module or {@linkplain #validateReferencedModules(TypeElement, AnnotationMirror,
-   * ImmutableSet, Set) component}.
+   * Set, Set) component}.
    */
   public void addKnownModules(Collection<TypeElement> modules) {
     knownModules.addAll(modules);
@@ -173,33 +157,12 @@ public final class ModuleValidator {
       TypeElement module, Set<TypeElement> visitedModules) {
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(module);
     ModuleKind moduleKind = ModuleKind.forAnnotatedElement(module).get();
-    TypeElement contributesAndroidInjectorElement =
-        elements.getTypeElement(CONTRIBUTES_ANDROID_INJECTOR_NAME);
-    TypeMirror contributesAndroidInjector =
-        contributesAndroidInjectorElement != null
-            ? contributesAndroidInjectorElement.asType()
-            : null;
     List<ExecutableElement> moduleMethods = methodsIn(module.getEnclosedElements());
     List<ExecutableElement> bindingMethods = new ArrayList<>();
     for (ExecutableElement moduleMethod : moduleMethods) {
       if (anyBindingMethodValidator.isBindingMethod(moduleMethod)) {
         builder.addSubreport(anyBindingMethodValidator.validate(moduleMethod));
         bindingMethods.add(moduleMethod);
-      }
-
-      for (AnnotationMirror annotation : moduleMethod.getAnnotationMirrors()) {
-        if (!ANDROID_PROCESSOR.isPresent()
-            && MoreTypes.equivalence()
-            .equivalent(contributesAndroidInjector, annotation.getAnnotationType())) {
-          builder.addSubreport(
-              ValidationReport.about(moduleMethod)
-                  .addError(
-                      String.format(
-                          "@%s was used, but %s was not found on the processor path",
-                          CONTRIBUTES_ANDROID_INJECTOR_NAME, ANDROID_PROCESSOR_NAME))
-                  .build());
-          break;
-        }
       }
     }
 
@@ -399,11 +362,11 @@ public final class ModuleValidator {
   ValidationReport<TypeElement> validateReferencedModules(
       TypeElement annotatedType,
       AnnotationMirror annotation,
-      ImmutableSet<ModuleKind> validModuleKinds,
+      Set<ModuleKind> validModuleKinds,
       Set<TypeElement> visitedModules) {
     ValidationReport.Builder<TypeElement> subreport = ValidationReport.about(annotatedType);
-    ImmutableSet<ClassName> validModuleAnnotations =
-        validModuleKinds.stream().map(ModuleKind::annotation).collect(toImmutableSet());
+    Set<ClassName> validModuleAnnotations =
+        validModuleKinds.stream().map(ModuleKind::annotation).collect(Collectors.toSet());
 
     for (AnnotationValue includedModule : getModules(annotation)) {
       asType(includedModule)
@@ -481,7 +444,7 @@ public final class ModuleValidator {
     TypeElement currentClass = subject;
     TypeMirror objectType = elements.getTypeElement(Object.class).asType();
     // We keep track of methods that failed so we don't spam with multiple failures.
-    Set<ExecutableElement> failedMethods = Sets.newHashSet();
+    Set<ExecutableElement> failedMethods = new HashSet<>();
     ListMultimap<Name, ExecutableElement> allMethodsByName =
         MultimapBuilder.hashKeys().arrayListValues().build(moduleMethodsByName);
 
@@ -541,7 +504,7 @@ public final class ModuleValidator {
       case MEMBER:
       case TOP_LEVEL:
         if (moduleEffectiveVisibility.equals(PUBLIC)) {
-          ImmutableSet<TypeElement> invalidVisibilityIncludes =
+          Set<TypeElement> invalidVisibilityIncludes =
               getModuleIncludesWithInvalidVisibility(moduleAnnotation);
           if (!invalidVisibilityIncludes.isEmpty()) {
             reportBuilder.addError(
@@ -551,19 +514,19 @@ public final class ModuleValidator {
                         + "reduce the visibility of this module, make the included modules "
                         + "public, or make all of the binding methods on the included modules "
                         + "abstract or static.",
-                    formatListForErrorMessage(invalidVisibilityIncludes.asList())),
-                moduleElement);
+                    formatListForErrorMessage(new ArrayList<>(invalidVisibilityIncludes)),
+                    moduleElement));
           }
         }
     }
   }
 
-  private ImmutableSet<TypeElement> getModuleIncludesWithInvalidVisibility(
+  private Set<TypeElement> getModuleIncludesWithInvalidVisibility(
       ModuleAnnotation moduleAnnotation) {
     return moduleAnnotation.includes().stream()
         .filter(include -> !effectiveVisibilityOfElement(include).equals(PUBLIC))
         .filter(this::requiresModuleInstance)
-        .collect(toImmutableSet());
+        .collect(Collectors.toSet());
   }
 
   /**

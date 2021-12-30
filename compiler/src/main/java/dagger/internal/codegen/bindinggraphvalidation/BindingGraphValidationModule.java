@@ -34,7 +34,6 @@ public interface BindingGraphValidationModule {
       CompositeBindingGraphPlugin.Factory factory,
       CompilerOptions compilerOptions,
       DependencyCycleValidator validation1,
-      DependsOnProductionExecutorValidator validation2,
       DuplicateBindingsValidator validation3,
       IncompatiblyScopedBindingsValidator validation4,
       InjectBindingValidator validation5,
@@ -45,7 +44,6 @@ public interface BindingGraphValidationModule {
       SubcomponentFactoryMethodValidator validation11) {
     ImmutableSet<BindingGraphPlugin> plugins = ImmutableSet.of(
         validation1,
-        validation2,
         validation3,
         validation4,
         validation5,

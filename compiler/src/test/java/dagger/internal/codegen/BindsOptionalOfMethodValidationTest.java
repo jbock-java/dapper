@@ -16,39 +16,27 @@
 
 package dagger.internal.codegen;
 
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
+import org.junit.Test;
+
+import javax.tools.JavaFileObject;
+
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
-import com.google.common.collect.ImmutableList;
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
-import dagger.Module;
-import dagger.producers.ProducerModule;
-import jakarta.inject.Inject;
-import jakarta.inject.Qualifier;
-import jakarta.inject.Singleton;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
 /** Tests {@code BindsOptionalOfMethodValidator}. */
-@RunWith(Parameterized.class)
 public class BindsOptionalOfMethodValidationTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> data() {
-    return ImmutableList.copyOf(new Object[][] {{Module.class}, {ProducerModule.class}});
-  }
 
   private final String moduleDeclaration;
 
-  public BindsOptionalOfMethodValidationTest(Class<? extends Annotation> moduleAnnotation) {
-    moduleDeclaration = "@" + moduleAnnotation.getCanonicalName() + " abstract class %s { %s }";
+  public BindsOptionalOfMethodValidationTest() {
+    moduleDeclaration = "@Module abstract class %s { %s }";
   }
 
   @Test

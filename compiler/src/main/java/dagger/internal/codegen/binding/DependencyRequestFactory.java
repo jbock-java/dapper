@@ -16,24 +16,7 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreTypes.isTypeOf;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.base.RequestKinds.frameworkClass;
-import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
-import static dagger.model.RequestKind.FUTURE;
-import static dagger.model.RequestKind.INSTANCE;
-import static dagger.model.RequestKind.MEMBERS_INJECTION;
-import static dagger.model.RequestKind.PRODUCER;
-import static dagger.model.RequestKind.PROVIDER;
-
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
 import dagger.Lazy;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
@@ -42,8 +25,6 @@ import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 
-import java.util.List;
-import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -51,6 +32,21 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
+import static dagger.internal.codegen.base.RequestKinds.frameworkClass;
+import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
+import static dagger.model.RequestKind.INSTANCE;
+import static dagger.model.RequestKind.MEMBERS_INJECTION;
+import static dagger.model.RequestKind.PROVIDER;
 
 /**
  * Factory for {@link DependencyRequest}s.
@@ -105,8 +101,8 @@ public final class DependencyRequestFactory {
   }
 
   // TODO(b/28555349): support PROVIDER_OF_LAZY here too
-  private static final ImmutableSet<RequestKind> WRAPPING_MAP_VALUE_FRAMEWORK_TYPES =
-      ImmutableSet.of(PROVIDER, PRODUCER);
+  private static final Set<RequestKind> WRAPPING_MAP_VALUE_FRAMEWORK_TYPES =
+      Set.of(PROVIDER);
 
   private RequestKind multibindingContributionRequestKind(
       Key multibindingKey, ContributionBinding multibindingContribution) {
@@ -176,13 +172,6 @@ public final class DependencyRequestFactory {
         .kind(MEMBERS_INJECTION)
         .key(keyFactory.forMembersInjectedType(membersInjectedType))
         .requestElement(membersInjectionMethod)
-        .build();
-  }
-
-  DependencyRequest forProductionImplementationExecutor() {
-    return DependencyRequest.builder()
-        .kind(PROVIDER)
-        .key(keyFactory.forProductionImplementationExecutor())
         .build();
   }
 

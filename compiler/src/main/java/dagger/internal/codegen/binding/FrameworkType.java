@@ -59,15 +59,6 @@ public enum FrameworkType {
         case PROVIDER_OF_LAZY:
           return CodeBlock.of("$T.create($L)", ProviderOfLazy.class, from);
 
-        case PRODUCER:
-          return CodeBlock.of("$T.producerFromProvider($L)", Producers.class, from);
-
-        case FUTURE:
-          return CodeBlock.of("$T.immediateFuture($L)", Futures.class, to(INSTANCE, from));
-
-        case PRODUCED:
-          return CodeBlock.of("$T.successful($L)", Produced.class, to(INSTANCE, from));
-
         default:
           throw new IllegalArgumentException(
               String.format("Cannot request a %s from a %s", requestKind, this));
@@ -88,10 +79,6 @@ public enum FrameworkType {
           TypeMirror lazyType = types.rewrapType(from.type(), Lazy.class);
           return Expression.create(types.wrapType(lazyType, Provider.class), codeBlock);
 
-        case FUTURE:
-          return Expression.create(
-              types.rewrapType(from.type(), ListenableFuture.class), codeBlock);
-
         default:
           return Expression.create(
               types.rewrapType(from.type(), RequestKinds.frameworkClass(requestKind)), codeBlock);
@@ -104,11 +91,6 @@ public enum FrameworkType {
     @Override
     public CodeBlock to(RequestKind requestKind, CodeBlock from) {
       switch (requestKind) {
-        case FUTURE:
-          return CodeBlock.of("$L.get()", from);
-
-        case PRODUCER:
-          return from;
 
         default:
           throw new IllegalArgumentException(
@@ -119,14 +101,6 @@ public enum FrameworkType {
     @Override
     public Expression to(RequestKind requestKind, Expression from, DaggerTypes types) {
       switch (requestKind) {
-        case FUTURE:
-          return Expression.create(
-              types.rewrapType(from.type(), ListenableFuture.class),
-              to(requestKind, from.codeBlock()));
-
-        case PRODUCER:
-          return Expression.create(from.type(), to(requestKind, from.codeBlock()));
-
         default:
           throw new IllegalArgumentException(
               String.format("Cannot request a %s from a %s", requestKind, this));
@@ -139,8 +113,6 @@ public enum FrameworkType {
     switch (bindingType) {
       case PROVISION:
         return PROVIDER;
-      case PRODUCTION:
-        return PRODUCER_NODE;
       case MEMBERS_INJECTION:
     }
     throw new AssertionError(bindingType);
@@ -161,11 +133,6 @@ public enum FrameworkType {
     switch (this) {
       case PROVIDER:
         return Provider.class;
-      case PRODUCER_NODE:
-        // TODO(cgdecker): Replace this with new class for representing internal producer nodes.
-        // Currently the new class is CancellableProducer, but it may be changed to ProducerNode and
-        // made to not implement Producer.
-        return Producer.class;
     }
     throw new AssertionError("Unknown value: " + this.name());
   }
@@ -180,8 +147,6 @@ public enum FrameworkType {
     switch (this) {
       case PROVIDER:
         return RequestKind.PROVIDER;
-      case PRODUCER_NODE:
-        return RequestKind.PRODUCER;
     }
     throw new AssertionError("Unknown value: " + this.name());
   }

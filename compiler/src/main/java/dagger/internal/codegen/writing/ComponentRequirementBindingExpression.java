@@ -28,8 +28,7 @@ import dagger.internal.codegen.javapoet.Expression;
 
 /**
  * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of
- * {@linkplain dagger.Component#dependencies() component} and {@linkplain
- * dagger.producers.ProductionComponent#dependencies() production component dependencies}.
+ * {@linkplain dagger.Component#dependencies() component} dependencies.
  */
 final class ComponentRequirementBindingExpression extends SimpleInvocationBindingExpression {
   private final ComponentRequirement componentRequirement;

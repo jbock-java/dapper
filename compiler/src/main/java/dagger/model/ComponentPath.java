@@ -51,8 +51,7 @@ public final class ComponentPath {
 
 
   /**
-   * Returns the root {@link dagger.Component}- or {@link
-   * dagger.producers.ProductionComponent}-annotated type
+   * Returns the root {@link dagger.Component}-annotated type
    */
   public TypeElement rootComponent() {
     return components().get(0);

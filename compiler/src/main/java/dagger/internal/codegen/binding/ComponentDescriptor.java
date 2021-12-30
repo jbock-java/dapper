@@ -162,8 +162,7 @@ public final class ComponentDescriptor {
   }
 
   /**
-   * The set of component dependencies listed in {@link Component#dependencies} or {@link
-   * dagger.producers.ProductionComponent#dependencies()}.
+   * The set of component dependencies listed in {@link Component#dependencies}.
    */
   public Set<ComponentRequirement> dependencies() {
     return dependencies;

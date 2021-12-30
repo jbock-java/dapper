@@ -239,23 +239,6 @@ final class OptionalFactories {
       return frameworkType().frameworkClassOf(typeVariable());
     }
 
-    /** Returns the superclass the generated factory should have, if any. */
-    Optional<ParameterizedTypeName> superclass() {
-      switch (frameworkType()) {
-        case PRODUCER_NODE:
-          // TODO(cgdecker): This probably isn't a big issue for now, but it's possible this
-          // shouldn't be an AbstractProducer:
-          // - As AbstractProducer, it'll only call the delegate's get() method once and then cache
-          //   that result (essentially) rather than calling the delegate's get() method each time
-          //   its get() method is called (which was what it did before the cancellation change).
-          // - It's not 100% clear to me whether the view-creation methods should return a view of
-          //   the same view created by the delegate or if they should just return their own views.
-          return Optional.of(abstractProducerOf(optionalType()));
-        default:
-          return Optional.empty();
-      }
-    }
-
     /** Returns the superinterface the generated factory should have, if any. */
     Optional<ParameterizedTypeName> superinterface() {
       switch (frameworkType()) {
@@ -308,10 +291,6 @@ final class OptionalFactories {
    *       Provider<Optional<Lazy<T>>>}.
    *   <li>If {@code optionalRequestKind} is {@link RequestKind#PROVIDER_OF_LAZY}, the class
    *       implements {@code Provider<Optional<Provider<Lazy<T>>>>}.
-   *   <li>If {@code optionalRequestKind} is {@link RequestKind#PRODUCER}, the class implements
-   *       {@code Producer<Optional<Producer<T>>>}.
-   *   <li>If {@code optionalRequestKind} is {@link RequestKind#PRODUCED}, the class implements
-   *       {@code Producer<Optional<Produced<T>>>}.
    * </ul>
    *
    * @param delegateFactory an expression for a {@link Provider} or {@link Producer} of the
@@ -343,7 +322,6 @@ final class OptionalFactories {
                 spec.factoryType(),
                 delegateField.type);
 
-    spec.superclass().ifPresent(factoryClassBuilder::superclass);
     spec.superinterface().ifPresent(factoryClassBuilder::addSuperinterface);
 
     return factoryClassBuilder

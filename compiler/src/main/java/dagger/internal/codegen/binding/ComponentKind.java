@@ -26,7 +26,10 @@ import static java.util.EnumSet.allOf;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.TypeElement;
 
 /** Enumeration of the different kinds of components. */
@@ -37,9 +40,6 @@ public enum ComponentKind {
   /** {@code @Subcomponent} */
   SUBCOMPONENT(TypeNames.SUBCOMPONENT, false, false),
 
-  /** {@code @ProductionComponent} */
-  PRODUCTION_COMPONENT(TypeNames.PRODUCTION_COMPONENT, true, true),
-
   /** {@code @ProductionSubcomponent} */
   PRODUCTION_SUBCOMPONENT(TypeNames.PRODUCTION_SUBCOMPONENT, false, true),
 
@@ -48,12 +48,6 @@ public enum ComponentKind {
    * type in order to validate the module's bindings.
    */
   MODULE(TypeNames.MODULE, true, false),
-
-  /**
-   * Kind for a descriptor was generated from a {@link dagger.producers.ProducerModule} instead of a
-   * component type in order to validate the module's bindings.
-   */
-  PRODUCER_MODULE(TypeNames.PRODUCER_MODULE, true, true),
   ;
 
   private static final ImmutableSet<ComponentKind> ROOT_COMPONENT_KINDS =
@@ -129,10 +123,8 @@ public enum ComponentKind {
   }
 
   /** Returns the kinds of subcomponents a component of this kind can have. */
-  public ImmutableSet<ComponentKind> legalSubcomponentKinds() {
-    return isProducer()
-        ? immutableEnumSet(PRODUCTION_SUBCOMPONENT)
-        : immutableEnumSet(SUBCOMPONENT, PRODUCTION_SUBCOMPONENT);
+  public Set<ComponentKind> legalSubcomponentKinds() {
+    return EnumSet.of(SUBCOMPONENT);
   }
 
   /**
@@ -150,13 +142,6 @@ public enum ComponentKind {
 
   /** Returns {@code true} if the descriptor is for a module in order to validate its bindings. */
   public boolean isForModuleValidation() {
-    switch (this) {
-      case MODULE:
-      case PRODUCER_MODULE:
-        return true;
-      default:
-        // fall through
-    }
-    return false;
+    return this == ComponentKind.MODULE;
   }
 }

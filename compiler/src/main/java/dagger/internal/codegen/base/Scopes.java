@@ -16,27 +16,22 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-
 import com.google.auto.common.AnnotationMirrors;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
-import dagger.producers.ProductionScope;
 import jakarta.inject.Singleton;
+
+import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-import javax.lang.model.element.Element;
+
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 /** Common names and convenience methods for {@link Scope}s. */
 public final class Scopes {
-
-  /** Returns a representation for {@link ProductionScope @ProductionScope} scope. */
-  public static Scope productionScope(DaggerElements elements) {
-    return scope(elements, ProductionScope.class);
-  }
 
   /** Returns a representation for {@link Singleton @Singleton} scope. */
   public static Scope singletonScope(DaggerElements elements) {

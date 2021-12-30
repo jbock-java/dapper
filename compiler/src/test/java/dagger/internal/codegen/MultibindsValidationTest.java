@@ -16,33 +16,15 @@
 
 package dagger.internal.codegen;
 
+import jakarta.inject.Qualifier;
+import org.junit.Test;
+
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
-import com.google.common.collect.ImmutableList;
-import dagger.Module;
-import dagger.producers.ProducerModule;
-import jakarta.inject.Qualifier;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-@RunWith(Parameterized.class)
 public class MultibindsValidationTest {
 
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return ImmutableList.copyOf(new Object[][] {{Module.class}, {ProducerModule.class}});
-  }
-
-  private final String moduleDeclaration;
-
-  public MultibindsValidationTest(Class<? extends Annotation> moduleAnnotation) {
-    moduleDeclaration = "@" + moduleAnnotation.getCanonicalName() + " abstract class %s { %s }";
-  }
+  private final String moduleDeclaration = "@Module abstract class %s { %s }";
 
   @Test
   public void notWithinModule() {
@@ -137,8 +119,8 @@ public class MultibindsValidationTest {
   @Test
   public void overqualifiedSet() {
     assertThatModuleMethod(
-            "@Multibinds @SomeQualifier @OtherQualifier "
-                + "abstract Set<Object> tooManyQualifiersSet();")
+        "@Multibinds @SomeQualifier @OtherQualifier "
+            + "abstract Set<Object> tooManyQualifiersSet();")
         .withDeclaration(moduleDeclaration)
         .importing(SomeQualifier.class, OtherQualifier.class)
         .hasError("may not use more than one @Qualifier");
@@ -147,8 +129,8 @@ public class MultibindsValidationTest {
   @Test
   public void overqualifiedMap() {
     assertThatModuleMethod(
-            "@Multibinds @SomeQualifier @OtherQualifier "
-                + "abstract Map<String, Object> tooManyQualifiersMap();")
+        "@Multibinds @SomeQualifier @OtherQualifier "
+            + "abstract Map<String, Object> tooManyQualifiersMap();")
         .withDeclaration(moduleDeclaration)
         .importing(SomeQualifier.class, OtherQualifier.class)
         .hasError("may not use more than one @Qualifier");
@@ -161,8 +143,10 @@ public class MultibindsValidationTest {
   }
 
   @Qualifier
-  public @interface SomeQualifier {}
+  public @interface SomeQualifier {
+  }
 
   @Qualifier
-  public @interface OtherQualifier {}
+  public @interface OtherQualifier {
+  }
 }

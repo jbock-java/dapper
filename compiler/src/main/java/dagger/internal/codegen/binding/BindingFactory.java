@@ -286,15 +286,11 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#COMPONENT_PROVISION} or {@link
-   * dagger.model.BindingKind#COMPONENT_PRODUCTION} binding for a method on a component's
-   * dependency.
-   *
-   * @param componentDescriptor the component with the dependency, not the dependency that has the
-   *     method
+   * Returns a {@link dagger.model.BindingKind#COMPONENT_PROVISION}
+   * binding for a method on a component's dependency.
    */
   public ContributionBinding componentDependencyMethodBinding(
-      ComponentDescriptor componentDescriptor, ExecutableElement dependencyMethod) {
+      ExecutableElement dependencyMethod) {
     checkArgument(dependencyMethod.getKind().equals(METHOD));
     checkArgument(dependencyMethod.getParameters().isEmpty());
     ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder()

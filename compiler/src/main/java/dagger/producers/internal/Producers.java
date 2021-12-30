@@ -88,14 +88,6 @@ public final class Producers {
     }
   }
 
-  private static final Producer<Map<Object, Object>> EMPTY_MAP_PRODUCER =
-      dagger.producers.Producers.<Map<Object, Object>>immediateProducer(ImmutableMap.of());
-
-  @SuppressWarnings("unchecked") // safe contravariant cast
-  public static <K, V> Producer<Map<K, V>> emptyMapProducer() {
-    return (Producer<Map<K, V>>) (Producer) EMPTY_MAP_PRODUCER;
-  }
-
   /**
    * A {@link CancellableProducer} which can't be cancelled because it represents an
    * already-completed task.

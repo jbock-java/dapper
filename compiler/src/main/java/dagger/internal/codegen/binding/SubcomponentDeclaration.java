@@ -68,8 +68,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   }
 
   /**
-   * Key for the {@link dagger.Subcomponent.Builder} or {@link
-   * dagger.producers.ProductionSubcomponent.Builder} of {@link #subcomponentType()}.
+   * Key for the {@link dagger.Subcomponent.Builder} of {@link #subcomponentType()}.
    */
   @Override
   public Key key() {
@@ -77,8 +76,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   }
 
   /**
-   * The type element that defines the {@link dagger.Subcomponent} or {@link
-   * dagger.producers.ProductionSubcomponent} for this declaration.
+   * The type element that defines the {@link dagger.Subcomponent} for this declaration.
    */
   TypeElement subcomponentType() {
     return subcomponentType;

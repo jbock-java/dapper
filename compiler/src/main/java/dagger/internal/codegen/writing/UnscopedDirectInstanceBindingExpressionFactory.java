@@ -122,8 +122,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
         return Optional.empty();
 
       case MEMBERS_INJECTION:
-      case COMPONENT_PRODUCTION:
-      case PRODUCTION:
         // Fall through
     }
     throw new AssertionError("Unexpected binding kind: " + binding.kind());

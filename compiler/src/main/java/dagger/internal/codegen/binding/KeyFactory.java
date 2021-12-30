@@ -25,7 +25,6 @@ import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.base.SimpleAnnotationMirror;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
@@ -33,8 +32,6 @@ import dagger.model.Key.MultibindingContributionIdentifier;
 import dagger.multibindings.Multibinds;
 import dagger.producers.Produced;
 import dagger.producers.Producer;
-import dagger.producers.Production;
-import dagger.producers.internal.ProductionImplementation;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
@@ -48,7 +45,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
@@ -224,18 +220,6 @@ public final class KeyFactory {
 
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
     return Key.builder(boxPrimitives(type)).qualifier(qualifier).build();
-  }
-
-  public Key forProductionExecutor() {
-    return Key.builder(elements.getTypeElement(Executor.class).asType())
-        .qualifier(SimpleAnnotationMirror.of(elements.getTypeElement(Production.class)))
-        .build();
-  }
-
-  public Key forProductionImplementationExecutor() {
-    return Key.builder(elements.getTypeElement(Executor.class).asType())
-        .qualifier(SimpleAnnotationMirror.of(elements.getTypeElement(ProductionImplementation.class)))
-        .build();
   }
 
   /**

@@ -130,8 +130,6 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
    */
   private String componentMethodRequestVerb(DependencyRequest request) {
     switch (request.kind()) {
-      case FUTURE:
-      case PRODUCER:
       case INSTANCE:
       case LAZY:
       case PROVIDER:
@@ -140,9 +138,6 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
 
       case MEMBERS_INJECTION:
         return "injected";
-
-      case PRODUCED:
-        break;
     }
     throw new AssertionError("illegal request kind for method: " + request);
   }

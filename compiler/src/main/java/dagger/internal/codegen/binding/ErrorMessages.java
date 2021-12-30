@@ -19,6 +19,8 @@ package dagger.internal.codegen.binding;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import dagger.internal.codegen.base.ComponentAnnotation;
+
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -29,23 +31,16 @@ import javax.lang.model.type.TypeMirror;
 /** The collection of error messages to be reported back to users. */
 public final class ErrorMessages {
 
-  private static final UnaryOperator<String> PRODUCTION =
-      s ->
-          s.replace("component", "production component")
-              .replace("Component", "ProductionComponent");
-
   private static final UnaryOperator<String> SUBCOMPONENT =
       s -> s.replace("component", "subcomponent").replace("Component", "Subcomponent");
 
   private static final UnaryOperator<String> FACTORY = s -> s.replace("Builder", "Factory");
 
-  private static final ImmutableMap<ComponentKind, Function<String, String>>
+  private static final Map<ComponentKind, Function<String, String>>
       COMPONENT_TRANSFORMATIONS =
-      ImmutableMap.of(
+      Map.of(
           ComponentKind.COMPONENT, UnaryOperator.identity(),
-          ComponentKind.SUBCOMPONENT, SUBCOMPONENT,
-          ComponentKind.PRODUCTION_COMPONENT, PRODUCTION,
-          ComponentKind.PRODUCTION_SUBCOMPONENT, PRODUCTION.andThen(SUBCOMPONENT));
+          ComponentKind.SUBCOMPONENT, SUBCOMPONENT);
 
   public static ComponentMessages componentMessagesFor(ComponentKind componentKind) {
     return new ComponentMessages(COMPONENT_TRANSFORMATIONS.get(componentKind));

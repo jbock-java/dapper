@@ -16,34 +16,23 @@
 
 package dagger.internal.codegen;
 
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
+import dagger.Module;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import javax.tools.JavaFileObject;
+import java.lang.annotation.Annotation;
+
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
-import dagger.Module;
-import dagger.producers.ProducerModule;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-import javax.tools.JavaFileObject;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-@RunWith(Parameterized.class)
 public final class ModuleValidationTest {
-
-  @Parameterized.Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return Arrays.asList(new Object[][] {{ModuleType.MODULE}, {ModuleType.PRODUCER_MODULE}});
-  }
 
   private enum ModuleType {
     MODULE(Module.class),
-    PRODUCER_MODULE(ProducerModule.class),
     ;
 
     private final Class<? extends Annotation> annotation;
@@ -65,11 +54,7 @@ public final class ModuleValidationTest {
     }
   }
 
-  private final ModuleType moduleType;
-
-  public ModuleValidationTest(ModuleType moduleType) {
-    this.moduleType = moduleType;
-  }
+  private final ModuleType moduleType = ModuleType.MODULE;
 
   @Test
   public void moduleSubcomponents_notASubcomponent() {
@@ -216,7 +201,7 @@ public final class ModuleValidationTest {
   @Test
   public void tooManyAnnotations() {
     assertThatModuleMethod(
-            "@BindsOptionalOf @Multibinds abstract Set<Object> tooManyAnnotations();")
+        "@BindsOptionalOf @Multibinds abstract Set<Object> tooManyAnnotations();")
         .hasError("is annotated with more than one of");
   }
 

@@ -16,35 +16,30 @@
 
 package dagger.internal.codegen;
 
-import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
-import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.multibindings.IntKey;
 import dagger.multibindings.LongKey;
-import dagger.producers.ProducerModule;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.util.Collection;
 import jakarta.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-@RunWith(Parameterized.class)
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.util.Collection;
+import java.util.List;
+
+import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
+import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 public class BindsMethodValidationTest {
-  @Parameters
-  public static Collection<Object[]> data() {
-    return ImmutableList.copyOf(new Object[][] {{Module.class}, {ProducerModule.class}});
-  }
 
   private final String moduleDeclaration;
 
-  public BindsMethodValidationTest(Class<? extends Annotation> moduleAnnotation) {
-    moduleDeclaration = "@" + moduleAnnotation.getCanonicalName() + " abstract class %s { %s }";
+  public BindsMethodValidationTest() {
+    moduleDeclaration = "@Module abstract class %s { %s }";
   }
 
   @Test

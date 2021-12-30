@@ -16,16 +16,14 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertThat;
-import static dagger.model.RequestKind.INSTANCE;
-import static dagger.model.RequestKind.LAZY;
-import static dagger.model.RequestKind.PRODUCED;
-import static dagger.model.RequestKind.PRODUCER;
-import static dagger.model.RequestKind.PROVIDER;
-
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
 import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
+import static dagger.model.RequestKind.INSTANCE;
+import static dagger.model.RequestKind.LAZY;
+import static dagger.model.RequestKind.PROVIDER;
 
 /** Test case for {@link FrameworkTypeMapper}. */
 public class FrameworkTypeMapperTest {
@@ -35,14 +33,5 @@ public class FrameworkTypeMapperTest {
     assertThat(mapper.getFrameworkType(INSTANCE)).isEqualTo(FrameworkType.PROVIDER);
     assertThat(mapper.getFrameworkType(LAZY)).isEqualTo(FrameworkType.PROVIDER);
     assertThat(mapper.getFrameworkType(PROVIDER)).isEqualTo(FrameworkType.PROVIDER);
-  }
-
-  @Test public void forProducer() {
-    FrameworkTypeMapper mapper = FrameworkTypeMapper.FOR_PRODUCER;
-    assertThat(mapper.getFrameworkType(INSTANCE)).isEqualTo(FrameworkType.PRODUCER_NODE);
-    assertThat(mapper.getFrameworkType(LAZY)).isEqualTo(FrameworkType.PROVIDER);
-    assertThat(mapper.getFrameworkType(PROVIDER)).isEqualTo(FrameworkType.PROVIDER);
-    assertThat(mapper.getFrameworkType(PRODUCER)).isEqualTo(FrameworkType.PRODUCER_NODE);
-    assertThat(mapper.getFrameworkType(PRODUCED)).isEqualTo(FrameworkType.PRODUCER_NODE);
   }
 }

@@ -16,12 +16,10 @@
 
 package dagger.model;
 
+import dagger.Lazy;
+
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-
-import dagger.Lazy;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
 
 /**
  * Represents the different kinds of {@link javax.lang.model.type.TypeMirror types} that may be
@@ -49,17 +47,6 @@ public enum RequestKind {
    */
   MEMBERS_INJECTION,
 
-  /** A request for a {@link Producer}. E.g.: {@code Producer<FooType>} */
-  PRODUCER,
-
-  /** A request for a {@link Produced}. E.g.: {@code Produced<FooType>} */
-  PRODUCED,
-
-  /**
-   * A request for a {@link com.google.common.util.concurrent.ListenableFuture}. E.g.: {@code
-   * ListenableFuture<FooType>}. These can only be requested by component interfaces.
-   */
-  FUTURE,
   ;
 
   /** Returns a string that represents requests of this kind for a key. */
@@ -73,9 +60,6 @@ public enum RequestKind {
 
       case MEMBERS_INJECTION:
         return String.format("injectMembers(%s)", key);
-
-      case FUTURE:
-        return String.format("ListenableFuture<%s>", key);
 
       default:
         return String.format("%s<%s>", UPPER_UNDERSCORE.to(UPPER_CAMEL, name()), key);

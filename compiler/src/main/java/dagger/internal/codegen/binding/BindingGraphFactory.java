@@ -147,7 +147,7 @@ public final class BindingGraphFactory implements ClearableCache {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(elements, method)) {
           ContributionBinding binding = bindingFactory.componentDependencyMethodBinding(
-              componentDescriptor, method);
+              method);
           if (dedupeBindings.put(
               method.getSimpleName().toString(),
               // Remove the binding element since we know that will be different, but everything

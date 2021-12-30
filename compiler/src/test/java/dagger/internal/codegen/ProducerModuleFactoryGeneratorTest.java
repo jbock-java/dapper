@@ -17,24 +17,15 @@
 // TODO(beder): Merge the error-handling tests with the ModuleFactoryGeneratorTest.
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
-import static dagger.internal.codegen.Compilers.daggerCompiler;
-import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
-import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatProductionModuleMethod;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import jakarta.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
+
+import javax.tools.JavaFileObject;
+
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static dagger.internal.codegen.Compilers.daggerCompiler;
+import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 
 public class ProducerModuleFactoryGeneratorTest {
 
@@ -42,130 +33,6 @@ public class ProducerModuleFactoryGeneratorTest {
   public void producesMethodNotInModule() {
     assertThatMethodInUnannotatedClass("@Produces String produceString() { return null; }")
         .hasError("@Produces methods can only be present within a @ProducerModule");
-  }
-
-  @Test
-  public void producesMethodAbstract() {
-    assertThatProductionModuleMethod("@Produces abstract String produceString();")
-        .hasError("@Produces methods cannot be abstract");
-  }
-
-  @Test
-  public void producesMethodPrivate() {
-    assertThatProductionModuleMethod("@Produces private String produceString() { return null; }")
-        .hasError("@Produces methods cannot be private");
-  }
-
-  @Test
-  public void producesMethodReturnVoid() {
-    assertThatProductionModuleMethod("@Produces void produceNothing() {}")
-        .hasError("@Produces methods must return a value (not void)");
-  }
-
-  @Test
-  public void producesProvider() {
-    assertThatProductionModuleMethod("@Produces Provider<String> produceProvider() {}")
-        .hasError("@Produces methods must not return framework types");
-  }
-
-  @Test
-  public void producesLazy() {
-    assertThatProductionModuleMethod("@Produces Lazy<String> produceLazy() {}")
-        .hasError("@Produces methods must not return framework types");
-  }
-
-  @Test
-  public void producesMembersInjector() {
-    assertThatProductionModuleMethod(
-        "@Produces MembersInjector<String> produceMembersInjector() {}")
-        .hasError("@Produces methods must not return framework types");
-  }
-
-  @Test
-  public void producesProducer() {
-    assertThatProductionModuleMethod("@Produces Producer<String> produceProducer() {}")
-        .hasError("@Produces methods must not return framework types");
-  }
-
-  @Test
-  public void producesProduced() {
-    assertThatProductionModuleMethod("@Produces Produced<String> produceProduced() {}")
-        .hasError("@Produces methods must not return framework types");
-  }
-
-  @Test
-  public void producesMethodReturnRawFuture() {
-    assertThatProductionModuleMethod("@Produces ListenableFuture produceRaw() {}")
-        .importing(ListenableFuture.class)
-        .hasError("@Produces methods cannot return a raw ListenableFuture");
-  }
-
-  @Test
-  public void producesMethodReturnWildcardFuture() {
-    assertThatProductionModuleMethod("@Produces ListenableFuture<?> produceRaw() {}")
-        .importing(ListenableFuture.class)
-        .hasError(
-            "@Produces methods can return only a primitive, an array, a type variable, "
-                + "a declared type, or a ListenableFuture of one of those types");
-  }
-
-  @Test
-  public void producesMethodWithTypeParameter() {
-    assertThatProductionModuleMethod("@Produces <T> String produceString() { return null; }")
-        .hasError("@Produces methods may not have type parameters");
-  }
-
-  @Test
-  public void producesMethodSetValuesWildcard() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet Set<?> produceWildcard() { return null; }")
-        .hasError(
-            "@Produces methods can return only a primitive, an array, a type variable, "
-                + "a declared type, or a ListenableFuture of one of those types");
-  }
-
-  @Test
-  public void producesMethodSetValuesRawSet() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet Set produceSomething() { return null; }")
-        .hasError("@Produces methods annotated with @ElementsIntoSet cannot return a raw Set");
-  }
-
-  @Test
-  public void producesMethodSetValuesNotASet() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet List<String> produceStrings() { return null; }")
-        .hasError(
-            "@Produces methods of type set values must return a Set or ListenableFuture of Set");
-  }
-
-  @Test
-  public void producesMethodSetValuesWildcardInFuture() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet "
-            + "ListenableFuture<Set<?>> produceWildcard() { return null; }")
-        .importing(ListenableFuture.class)
-        .hasError(
-            "@Produces methods can return only a primitive, an array, a type variable, "
-                + "a declared type, or a ListenableFuture of one of those types");
-  }
-
-  @Test
-  public void producesMethodSetValuesFutureRawSet() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet ListenableFuture<Set> produceSomething() { return null; }")
-        .importing(ListenableFuture.class)
-        .hasError("@Produces methods annotated with @ElementsIntoSet cannot return a raw Set");
-  }
-
-  @Test
-  public void producesMethodSetValuesFutureNotASet() {
-    assertThatProductionModuleMethod(
-        "@Produces @ElementsIntoSet "
-            + "ListenableFuture<List<String>> produceStrings() { return null; }")
-        .importing(ListenableFuture.class)
-        .hasError(
-            "@Produces methods of type set values must return a Set or ListenableFuture of Set");
   }
 
   @Test
@@ -192,20 +59,6 @@ public class ProducerModuleFactoryGeneratorTest {
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorContaining(errorMessage).inFile(moduleFile).onLine(8);
     assertThat(compilation).hadErrorContaining(errorMessage).inFile(moduleFile).onLine(12);
-  }
-
-  @Test
-  public void producesMethodThrowsThrowable() {
-    assertThatProductionModuleMethod("@Produces int produceInt() throws Throwable { return 0; }")
-        .hasError(
-            "@Produces methods may only throw unchecked exceptions or exceptions subclassing "
-                + "Exception");
-  }
-
-  @Test
-  public void producesMethodWithScope() {
-    assertThatProductionModuleMethod("@Produces @Singleton String str() { return \"\"; }")
-        .hasError("@Produces methods cannot be scoped");
   }
 
   @Test
@@ -354,43 +207,5 @@ public class ProducerModuleFactoryGeneratorTest {
         "}");
     Compilation compilation = daggerCompiler().compile(moduleFile);
     assertThat(compilation).succeeded();
-  }
-
-  @Test
-  public void producesMethodMultipleQualifiersOnMethod() {
-    assertThatProductionModuleMethod(
-        "@Produces @QualifierA @QualifierB static String produceString() { return null; }")
-        .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
-        .hasError("may not use more than one @Qualifier");
-  }
-
-  @Test
-  public void producesMethodMultipleQualifiersOnParameter() {
-    assertThatProductionModuleMethod(
-        "@Produces static String produceString(@QualifierA @QualifierB Object input) "
-            + "{ return null; }")
-        .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
-        .hasError("may not use more than one @Qualifier");
-  }
-
-  @Test
-  public void producesMethodWildcardDependency() {
-    assertThatProductionModuleMethod(
-        "@Produces static String produceString(Provider<? extends Number> numberProvider) "
-            + "{ return null; }")
-        .importing(ListenableFuture.class, QualifierA.class, QualifierB.class)
-        .hasError(
-            "Dagger does not support injecting Provider<T>, Lazy<T>, Producer<T>, or Produced<T> "
-                + "when T is a wildcard type such as ? extends java.lang.Number");
-  }
-
-  @Qualifier
-  @Retention(RUNTIME)
-  public @interface QualifierA {
-  }
-
-  @Qualifier
-  @Retention(RUNTIME)
-  public @interface QualifierB {
   }
 }
