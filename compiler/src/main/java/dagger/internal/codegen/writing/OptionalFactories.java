@@ -27,7 +27,6 @@ import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
-import static dagger.internal.codegen.javapoet.TypeNames.abstractProducerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.ABSENT_OPTIONAL_FIELD;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.ABSENT_OPTIONAL_METHOD;
@@ -241,23 +240,12 @@ final class OptionalFactories {
 
     /** Returns the superinterface the generated factory should have, if any. */
     Optional<ParameterizedTypeName> superinterface() {
-      switch (frameworkType()) {
-        case PROVIDER:
-          return Optional.of(factoryType());
-        default:
-          return Optional.empty();
-      }
+      return Optional.of(factoryType());
     }
 
     /** Returns the name of the factory method to generate. */
     String factoryMethodName() {
-      switch (frameworkType()) {
-        case PROVIDER:
-          return "get";
-        case PRODUCER_NODE:
-          return "compute";
-      }
-      throw new AssertionError(frameworkType());
+      return "get";
     }
 
     /** The name of the factory class. */

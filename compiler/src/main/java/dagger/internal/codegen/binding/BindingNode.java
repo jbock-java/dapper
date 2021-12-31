@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.binding.BindingType.PRODUCTION;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;

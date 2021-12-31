@@ -33,26 +33,23 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 final class DerivedFromFrameworkInstanceBindingExpression extends BindingExpression {
   private final BindingRequest bindingRequest;
   private final BindingRequest frameworkRequest;
-  private final FrameworkType frameworkType;
   private final ComponentBindingExpressions componentBindingExpressions;
   private final DaggerTypes types;
 
   @AssistedInject
   DerivedFromFrameworkInstanceBindingExpression(
       @Assisted BindingRequest bindingRequest,
-      @Assisted FrameworkType frameworkType,
       ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types) {
     this.bindingRequest = checkNotNull(bindingRequest);
-    this.frameworkType = checkNotNull(frameworkType);
-    this.frameworkRequest = bindingRequest(bindingRequest.key(), frameworkType);
+    this.frameworkRequest = bindingRequest(bindingRequest.key(), FrameworkType.PROVIDER);
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;
   }
 
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
-    return frameworkType.to(
+    return FrameworkType.to(
         bindingRequest.requestKind(),
         componentBindingExpressions.getDependencyExpression(frameworkRequest, requestingClass),
         types);
@@ -64,12 +61,12 @@ final class DerivedFromFrameworkInstanceBindingExpression extends BindingExpress
     Expression frameworkInstance =
         componentBindingExpressions.getDependencyExpressionForComponentMethod(
             frameworkRequest, componentMethod, component);
-    return frameworkType.to(bindingRequest.requestKind(), frameworkInstance, types);
+    return FrameworkType.to(bindingRequest.requestKind(), frameworkInstance, types);
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     DerivedFromFrameworkInstanceBindingExpression create(
-        BindingRequest request, FrameworkType frameworkType);
+        BindingRequest request);
   }
 }

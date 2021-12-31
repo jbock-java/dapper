@@ -24,9 +24,6 @@ import static com.google.common.base.Verify.verify;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCED_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCER_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_PRODUCER;
 import static dagger.internal.codegen.javapoet.TypeNames.MAP_PROVIDER_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
 import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
@@ -53,7 +50,6 @@ import dagger.internal.SetFactory;
 import dagger.internal.codegen.base.MapType;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
-import dagger.producers.Producer;
 import jakarta.inject.Provider;
 import java.util.List;
 import javax.lang.model.SourceVersion;
@@ -129,7 +125,6 @@ public class SourceFiles {
   public static ClassName generatedClassNameForBinding(Binding binding) {
     switch (binding.bindingType()) {
       case PROVISION:
-      case PRODUCTION:
         ContributionBinding contribution = (ContributionBinding) binding;
         switch (contribution.kind()) {
           case ASSISTED_INJECTION:
@@ -223,12 +218,6 @@ public class SourceFiles {
     switch (binding.bindingType()) {
       case PROVISION:
         return mapType.valuesAreTypeOf(Provider.class) ? MAP_PROVIDER_FACTORY : MAP_FACTORY;
-      case PRODUCTION:
-        return mapType.valuesAreFrameworkType()
-            ? mapType.valuesAreTypeOf(Producer.class)
-            ? MAP_OF_PRODUCER_PRODUCER
-            : MAP_OF_PRODUCED_PRODUCER
-            : MAP_PRODUCER;
       default:
         throw new IllegalArgumentException(binding.bindingType().toString());
     }

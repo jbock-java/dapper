@@ -24,8 +24,6 @@ import static dagger.internal.codegen.binding.SourceFiles.setFactoryClassName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.PRODUCERS;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static javax.lang.model.type.TypeKind.DECLARED;
@@ -36,7 +34,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
@@ -149,17 +146,11 @@ abstract class MemberSelect {
 
   /** A {@link MemberSelect} for a factory of an empty map. */
   private static MemberSelect emptyMapFactory(ContributionBinding contributionBinding) {
-    BindingType bindingType = contributionBinding.bindingType();
     ImmutableList<TypeMirror> typeParameters =
         ImmutableList.copyOf(
             MoreTypes.asDeclared(contributionBinding.key().type()).getTypeArguments());
-    if (bindingType.equals(BindingType.PRODUCTION)) {
-      return new ParameterizedStaticMethod(
-          PRODUCERS, typeParameters, CodeBlock.of("emptyMapProducer()"), PRODUCER);
-    } else {
-      return new ParameterizedStaticMethod(
-          MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
-    }
+    return new ParameterizedStaticMethod(
+        MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
   }
 
   /**

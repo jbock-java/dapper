@@ -843,9 +843,7 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       private boolean dependsOnLocalBindingsUncached(Binding binding) {
-        if ((!binding.scope().isPresent() || binding.scope().get().isReusable())
-            // TODO(beder): Figure out what happens with production subcomponents.
-            && !binding.bindingType().equals(BindingType.PRODUCTION)) {
+        if (binding.scope().isEmpty() || binding.scope().get().isReusable()) {
           for (DependencyRequest dependency : binding.dependencies()) {
             if (dependsOnLocalBindings(dependency.key())) {
               return true;

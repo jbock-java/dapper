@@ -25,7 +25,4 @@ public enum BindingType {
 
   /** A binding with this type is a {@link MembersInjectionBinding}. */
   MEMBERS_INJECTION,
-
-  /** A binding with this type is a {@code ProductionBinding}. */
-  PRODUCTION,
 }

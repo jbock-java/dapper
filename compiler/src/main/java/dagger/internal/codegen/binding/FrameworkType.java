@@ -30,7 +30,6 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
-import dagger.producers.Producer;
 import jakarta.inject.Provider;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
@@ -38,70 +37,8 @@ import javax.lang.model.type.TypeMirror;
 /** One of the core types initialized as fields in a generated component. */
 public enum FrameworkType {
   /** A {@code Provider}. */
-  PROVIDER {
-    @Override
-    public CodeBlock to(RequestKind requestKind, CodeBlock from) {
-      switch (requestKind) {
-        case INSTANCE:
-          return CodeBlock.of("$L.get()", from);
-
-        case LAZY:
-          return CodeBlock.of("$T.lazy($L)", dagger.internal.DoubleCheck.class, from);
-
-        case PROVIDER:
-          return from;
-
-        case PROVIDER_OF_LAZY:
-          return CodeBlock.of("$T.create($L)", ProviderOfLazy.class, from);
-
-        default:
-          throw new IllegalArgumentException(
-              String.format("Cannot request a %s from a %s", requestKind, this));
-      }
-    }
-
-    @Override
-    public Expression to(RequestKind requestKind, Expression from, DaggerTypes types) {
-      CodeBlock codeBlock = to(requestKind, from.codeBlock());
-      switch (requestKind) {
-        case INSTANCE:
-          return Expression.create(types.unwrapTypeOrObject(from.type()), codeBlock);
-
-        case PROVIDER:
-          return from;
-
-        case PROVIDER_OF_LAZY:
-          TypeMirror lazyType = types.rewrapType(from.type(), Lazy.class);
-          return Expression.create(types.wrapType(lazyType, Provider.class), codeBlock);
-
-        default:
-          return Expression.create(
-              types.rewrapType(from.type(), RequestKinds.frameworkClass(requestKind)), codeBlock);
-      }
-    }
-  },
-
-  /** A {@link Producer}. */
-  PRODUCER_NODE {
-    @Override
-    public CodeBlock to(RequestKind requestKind, CodeBlock from) {
-      switch (requestKind) {
-
-        default:
-          throw new IllegalArgumentException(
-              String.format("Cannot request a %s from a %s", requestKind, this));
-      }
-    }
-
-    @Override
-    public Expression to(RequestKind requestKind, Expression from, DaggerTypes types) {
-      switch (requestKind) {
-        default:
-          throw new IllegalArgumentException(
-              String.format("Cannot request a %s from a %s", requestKind, this));
-      }
-    }
-  };
+  PROVIDER,
+  ;
 
   /** Returns the framework type appropriate for fields for a given binding type. */
   public static FrameworkType forBindingType(BindingType bindingType) {
@@ -125,11 +62,7 @@ public enum FrameworkType {
 
   /** The class of fields of this type. */
   public Class<?> frameworkClass() {
-    switch (this) {
-      case PROVIDER:
-        return Provider.class;
-    }
-    throw new AssertionError("Unknown value: " + this.name());
+    return Provider.class;
   }
 
   /** Returns the {@link #frameworkClass()} parameterized with a type. */
@@ -139,11 +72,7 @@ public enum FrameworkType {
 
   /** The request kind that an instance of this framework type can satisfy directly, if any. */
   public RequestKind requestKind() {
-    switch (this) {
-      case PROVIDER:
-        return RequestKind.PROVIDER;
-    }
-    throw new AssertionError("Unknown value: " + this.name());
+    return RequestKind.PROVIDER;
   }
 
   /**
@@ -156,7 +85,25 @@ public enum FrameworkType {
    * @throws IllegalArgumentException if a valid expression cannot be generated for {@code
    *     requestKind}
    */
-  public abstract CodeBlock to(RequestKind requestKind, CodeBlock from);
+  public static CodeBlock to(RequestKind requestKind, CodeBlock from) {
+    switch (requestKind) {
+      case INSTANCE:
+        return CodeBlock.of("$L.get()", from);
+
+      case LAZY:
+        return CodeBlock.of("$T.lazy($L)", dagger.internal.DoubleCheck.class, from);
+
+      case PROVIDER:
+        return from;
+
+      case PROVIDER_OF_LAZY:
+        return CodeBlock.of("$T.create($L)", ProviderOfLazy.class, from);
+
+      default:
+        throw new IllegalArgumentException(
+            String.format("Cannot request a %s from a %s", requestKind, "Provider"));
+    }
+  }
 
   /**
    * Returns an {@link Expression} that evaluates to a requested object given an expression that
@@ -168,7 +115,24 @@ public enum FrameworkType {
    * @throws IllegalArgumentException if a valid expression cannot be generated for {@code
    *     requestKind}
    */
-  public abstract Expression to(RequestKind requestKind, Expression from, DaggerTypes types);
+  public static Expression to(RequestKind requestKind, Expression from, DaggerTypes types) {
+    CodeBlock codeBlock = to(requestKind, from.codeBlock());
+    switch (requestKind) {
+      case INSTANCE:
+        return Expression.create(types.unwrapTypeOrObject(from.type()), codeBlock);
+
+      case PROVIDER:
+        return from;
+
+      case PROVIDER_OF_LAZY:
+        TypeMirror lazyType = types.rewrapType(from.type(), Lazy.class);
+        return Expression.create(types.wrapType(lazyType, Provider.class), codeBlock);
+
+      default:
+        return Expression.create(
+            types.rewrapType(from.type(), RequestKinds.frameworkClass(requestKind)), codeBlock);
+    }
+  }
 
   @Override
   public String toString() {

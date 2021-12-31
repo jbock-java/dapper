@@ -264,8 +264,7 @@ public final class ComponentBindingExpressions {
   }
 
   /**
-   * Returns a binding expression that uses a {@code Provider} for provision bindings
-   * or a {@link dagger.producers.Producer} for production bindings.
+   * Returns a binding expression that uses a {@code Provider} for provision bindings.
    */
   private BindingExpression frameworkInstanceBindingExpression(ContributionBinding binding) {
     // TODO(bcorso): Consider merging the static factory creation logic into CreationExpressions?
@@ -312,7 +311,7 @@ public final class ComponentBindingExpressions {
       case LAZY:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceBindingExpressionFactory.create(
-            request, FrameworkType.PROVIDER);
+            request);
 
       case MEMBERS_INJECTION:
         throw new IllegalArgumentException();
@@ -368,7 +367,7 @@ public final class ComponentBindingExpressions {
       }
     }
     return derivedFromFrameworkInstanceBindingExpressionFactory.create(
-        bindingRequest(binding.key(), RequestKind.INSTANCE), FrameworkType.PROVIDER);
+        bindingRequest(binding.key(), RequestKind.INSTANCE));
   }
 
   /**
