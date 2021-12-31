@@ -20,38 +20,26 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.SpiModule.TestingPlugins;
-import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.SourceFileGenerationException;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.InjectBindingRegistry;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
-import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
-import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
-import dagger.internal.codegen.validation.BindingGraphPlugins;
 import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
 import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.spi.BindingGraphPlugin;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
 
 /**
  * The annotation processor responsible for generating the classes that drive the Dagger 2.0
@@ -62,18 +50,7 @@ import java.util.Set;
 public class ComponentProcessor extends BasicAnnotationProcessor {
   private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
-  @Inject
-  InjectBindingRegistry injectBindingRegistry;
-  @Inject
-  SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  @Inject
-  SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject
-  ImmutableList<Step> processingSteps;
-  @Inject
-  BindingGraphPlugins bindingGraphPlugins;
-  @Inject
-  Set<ClearableCache> clearableCaches;
+  private ComponentProcessorHelper helper;
 
   public ComponentProcessor() {
     this.testingPlugins = Optional.empty();
@@ -108,19 +85,13 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
 
   @Override
   public Set<String> getSupportedOptions() {
-    return Sets.union(
-            ProcessingEnvironmentCompilerOptions.supportedOptions(),
-            bindingGraphPlugins.allSupportedOptions())
-        .immutableCopy();
+    return helper.getSupportedOptions();
   }
 
   @Override
   protected Iterable<? extends Step> steps() {
-    ProcessorComponent.factory().create(processingEnv, testingPlugins).inject(this);
-
-    bindingGraphPlugins.initializePlugins();
-
-    return processingSteps;
+    helper = ProcessorComponent.factory().create(processingEnv, testingPlugins).helper();
+    return helper.steps();
   }
 
   @Singleton
@@ -137,7 +108,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
           SpiModule.class
       })
   interface ProcessorComponent {
-    void inject(ComponentProcessor processor);
+    ComponentProcessorHelper helper();
 
     static Factory factory() {
       return DaggerComponentProcessor_ProcessorComponent.factory();
@@ -164,8 +135,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
-        BindingMethodProcessingStep bindingMethodProcessingStep,
-        CompilerOptions compilerOptions) {
+        BindingMethodProcessingStep bindingMethodProcessingStep) {
       return ImmutableList.of(
           mapKeyProcessingStep,
           injectProcessingStep,
@@ -182,14 +152,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
 
   @Override
   protected void postRound(RoundEnvironment roundEnv) {
-    if (!roundEnv.processingOver()) {
-      try {
-        injectBindingRegistry.generateSourcesForRequiredBindings(
-            factoryGenerator, membersInjectorGenerator);
-      } catch (SourceFileGenerationException e) {
-        e.printMessageTo(processingEnv.getMessager());
-      }
-    }
-    clearableCaches.forEach(ClearableCache::clearCache);
+    helper.postRound(roundEnv);
   }
 }
