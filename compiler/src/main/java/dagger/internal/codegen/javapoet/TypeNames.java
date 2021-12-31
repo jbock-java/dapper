@@ -70,23 +70,8 @@ public final class TypeNames {
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 
   // Dagger Producers classnames
-  public static final ClassName ABSTRACT_PRODUCER =
-      ClassName.get("dagger.producers.internal", "AbstractProducer");
-  public static final ClassName CANCELLATION_LISTENER =
-      ClassName.get("dagger.producers.internal", "CancellationListener");
   public static final ClassName CANCELLATION_POLICY =
       ClassName.get("dagger.producers", "CancellationPolicy");
-  public static final ClassName DEPENDENCY_METHOD_PRODUCER =
-      ClassName.get("dagger.producers.internal", "DependencyMethodProducer");
-  public static final ClassName MAP_OF_PRODUCED_PRODUCER =
-      ClassName.get("dagger.producers.internal", "MapOfProducedProducer");
-  public static final ClassName MAP_OF_PRODUCER_PRODUCER =
-      ClassName.get("dagger.producers.internal", "MapOfProducerProducer");
-  public static final ClassName MAP_PRODUCER =
-      ClassName.get("dagger.producers.internal", "MapProducer");
-  public static final ClassName PRODUCED = ClassName.get("dagger.producers", "Produced");
-  public static final ClassName PRODUCER = ClassName.get("dagger.producers", "Producer");
-  public static final ClassName PRODUCERS = ClassName.get("dagger.producers.internal", "Producers");
   public static final ClassName PRODUCER_MODULE =
       ClassName.get("dagger.producers", "ProducerModule");
   public static final ClassName PRODUCES = ClassName.get("dagger.producers", "Produces");
@@ -102,34 +87,16 @@ public final class TypeNames {
       PRODUCTION_SUBCOMPONENT.nestedClass("Builder");
   public static final ClassName PRODUCTION_SUBCOMPONENT_FACTORY =
       PRODUCTION_SUBCOMPONENT.nestedClass("Factory");
-  public static final ClassName SET_OF_PRODUCED_PRODUCER =
-      ClassName.get("dagger.producers.internal", "SetOfProducedProducer");
-  public static final ClassName SET_PRODUCER =
-      ClassName.get("dagger.producers.internal", "SetProducer");
 
   // Other classnames
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
-  public static final ClassName LIST = ClassName.get("java.util", "List");
-  public static final ClassName SET = ClassName.get("java.util", "Set");
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
 
   // protect against relocation in the com.google namespace
-  public static final ClassName LISTENABLE_FUTURE =
-      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "ListenableFuture");
   public static final ClassName AUTO_ANNOTATION =
       ClassName.get(String.join(".", "com", "google", "auto", "value"), "AutoAnnotation");
   public static final ClassName CAN_IGNORE_RETURN_VALUE =
       ClassName.get(String.join(".", "com", "google", "errorprone", "annotations"), "CanIgnoreReturnValue");
-
-  /**
-   * {@link TypeName#VOID} is lowercase-v {@code void} whereas this represents the class, {@link
-   * Void}.
-   */
-  public static final ClassName VOID_CLASS = ClassName.get(Void.class);
-
-  public static ParameterizedTypeName abstractProducerOf(TypeName typeName) {
-    return ParameterizedTypeName.get(ABSTRACT_PRODUCER, typeName);
-  }
 
   public static ParameterizedTypeName factoryOf(TypeName factoryType) {
     return ParameterizedTypeName.get(FACTORY, factoryType);
@@ -137,14 +104,6 @@ public final class TypeNames {
 
   public static ParameterizedTypeName lazyOf(TypeName typeName) {
     return ParameterizedTypeName.get(LAZY, typeName);
-  }
-
-  public static ParameterizedTypeName listOf(TypeName typeName) {
-    return ParameterizedTypeName.get(LIST, typeName);
-  }
-
-  public static ParameterizedTypeName listenableFutureOf(TypeName typeName) {
-    return ParameterizedTypeName.get(LISTENABLE_FUTURE, typeName);
   }
 
   public static ParameterizedTypeName membersInjectorOf(TypeName membersInjectorType) {

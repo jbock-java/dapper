@@ -48,17 +48,17 @@ import javax.lang.model.type.TypeMirror;
  */
 public abstract class ComponentAnnotation {
   /** The root component annotation types. */
-  private static final ImmutableSet<ClassName> ROOT_COMPONENT_ANNOTATIONS =
-      ImmutableSet.of(TypeNames.COMPONENT, TypeNames.PRODUCTION_COMPONENT);
+  private static final Set<ClassName> ROOT_COMPONENT_ANNOTATIONS =
+      Set.of(TypeNames.COMPONENT);
 
   /** The subcomponent annotation types. */
-  private static final ImmutableSet<ClassName> SUBCOMPONENT_ANNOTATIONS =
-      ImmutableSet.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
+  private static final Set<ClassName> SUBCOMPONENT_ANNOTATIONS =
+      Set.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
 
   // TODO(erichang): Move ComponentCreatorAnnotation into /base and use that here?
   /** The component/subcomponent creator annotation types. */
-  private static final ImmutableSet<ClassName> CREATOR_ANNOTATIONS =
-      ImmutableSet.of(
+  private static final Set<ClassName> CREATOR_ANNOTATIONS =
+      Set.of(
           TypeNames.COMPONENT_BUILDER,
           TypeNames.COMPONENT_FACTORY,
           TypeNames.PRODUCTION_COMPONENT_BUILDER,
@@ -198,22 +198,22 @@ public abstract class ComponentAnnotation {
   }
 
   /** The root component annotation types. */
-  public static ImmutableSet<ClassName> rootComponentAnnotations() {
+  public static Set<ClassName> rootComponentAnnotations() {
     return ROOT_COMPONENT_ANNOTATIONS;
   }
 
   /** The subcomponent annotation types. */
-  public static ImmutableSet<ClassName> subcomponentAnnotations() {
+  public static Set<ClassName> subcomponentAnnotations() {
     return SUBCOMPONENT_ANNOTATIONS;
   }
 
   /** All component annotation types. */
-  public static ImmutableSet<ClassName> allComponentAnnotations() {
+  public static Set<ClassName> allComponentAnnotations() {
     return ALL_COMPONENT_ANNOTATIONS;
   }
 
   /** All component and creator annotation types. */
-  public static ImmutableSet<ClassName> allComponentAndCreatorAnnotations() {
+  public static Set<ClassName> allComponentAndCreatorAnnotations() {
     return ALL_COMPONENT_AND_CREATOR_ANNOTATIONS;
   }
 

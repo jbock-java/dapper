@@ -26,7 +26,6 @@ import static java.util.Collections.disjoint;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;

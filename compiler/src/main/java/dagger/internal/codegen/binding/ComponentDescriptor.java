@@ -26,8 +26,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -36,16 +34,21 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -102,7 +105,7 @@ public final class ComponentDescriptor {
   }
 
   private final Supplier<Set<ComponentRequirement>> requirements = Suppliers.memoize(() -> {
-    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
+    Set<ComponentRequirement> requirements = new LinkedHashSet<>();
     modules().stream()
         .filter(
             module ->
@@ -113,8 +116,8 @@ public final class ComponentDescriptor {
     requirements.addAll(
         creatorDescriptor()
             .map(ComponentCreatorDescriptor::boundInstanceRequirements)
-            .orElse(ImmutableSet.of()));
-    return requirements.build();
+            .orElse(Set.of()));
+    return requirements;
   });
 
   private final IntSupplier hashCode = memoizeInt(() -> {
@@ -126,11 +129,11 @@ public final class ComponentDescriptor {
       Maps.uniqueIndex(childComponents(), ComponentDescriptor::typeElement));
 
   private final Supplier<Map<BindingRequest, ComponentMethodDescriptor>> firstMatchingComponentMethods = Suppliers.memoize(() -> {
-        Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
+        Map<BindingRequest, ComponentMethodDescriptor> methods = new LinkedHashMap<>();
         for (ComponentMethodDescriptor method : entryPointMethods()) {
           methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
         }
-        return ImmutableMap.copyOf(methods);
+        return methods;
       });
 
   /** The annotation that specifies that {@link #typeElement()} is a component. */

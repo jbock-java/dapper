@@ -33,7 +33,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 
 /**
- * Init code moved away from ComponentProcessor so we don't need members injection.
+ * Init code moved away from ComponentProcessor, so we don't need members injection.
  */
 public class ComponentProcessorHelper {
 

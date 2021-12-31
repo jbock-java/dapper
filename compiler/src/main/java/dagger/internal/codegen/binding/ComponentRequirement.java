@@ -192,7 +192,6 @@ public final class ComponentRequirement {
     return isAnyAnnotationPresent(
         method,
         TypeNames.PROVIDES,
-        TypeNames.PRODUCES,
         // TODO(ronshapiro): it would be cool to have internal meta-annotations that could describe
         // these, like @AbstractBindingMethod
         TypeNames.BINDS,

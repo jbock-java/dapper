@@ -33,7 +33,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ModuleAnnotation;
@@ -42,7 +41,9 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -122,8 +123,8 @@ public final class ComponentDescriptorFactory {
             .map(ComponentRequirement::forDependency)
             .collect(toImmutableSet());
 
-    ImmutableMap.Builder<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod =
-        ImmutableMap.builder();
+    Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod =
+        new LinkedHashMap<>();
 
     for (ComponentRequirement componentDependency : componentDependencies) {
       for (ExecutableElement dependencyMethod :
@@ -163,7 +164,7 @@ public final class ComponentDescriptorFactory {
           elements.getUnimplementedMethods(typeElement);
       for (ExecutableElement componentMethod : unimplementedMethods) {
         ComponentMethodDescriptor componentMethodDescriptor =
-            getDescriptorForComponentMethod(typeElement, componentAnnotation, componentMethod);
+            getDescriptorForComponentMethod(typeElement, componentMethod);
         componentMethodsBuilder.add(componentMethodDescriptor);
         componentMethodDescriptor
             .subcomponent()
@@ -201,7 +202,7 @@ public final class ComponentDescriptorFactory {
         typeElement,
         componentDependencies,
         transitiveModules,
-        dependenciesByDependencyMethod.build(),
+        dependenciesByDependencyMethod,
         scopes,
         subcomponentsFromModules,
         subcomponentsByFactoryMethod.build(),
@@ -212,7 +213,6 @@ public final class ComponentDescriptorFactory {
 
   private ComponentMethodDescriptor getDescriptorForComponentMethod(
       TypeElement componentElement,
-      ComponentAnnotation componentAnnotation,
       ExecutableElement componentMethod) {
     ComponentMethodDescriptor.Builder descriptor =
         ComponentMethodDescriptor.builder(componentMethod);
