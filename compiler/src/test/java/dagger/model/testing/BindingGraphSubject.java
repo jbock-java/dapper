@@ -20,11 +20,11 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertAbout;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
+import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
 /** A Truth subject for making assertions on a {@link BindingGraph}. */
@@ -83,7 +83,7 @@ public final class BindingGraphSubject extends Subject {
   }
 
   private BindingSubject bindingWithKeyString(String keyString) {
-    ImmutableSet<Binding> bindings = getBindingNodes(keyString);
+    Set<Binding> bindings = getBindingNodes(keyString);
     // TODO(dpb): Handle multiple bindings for the same key.
     check("bindingsWithKey(%s)", keyString).that(bindings).hasSize(1);
     return check("bindingWithKey(%s)", keyString)
@@ -91,7 +91,7 @@ public final class BindingGraphSubject extends Subject {
         .that(getOnlyElement(bindings));
   }
 
-  private ImmutableSet<Binding> getBindingNodes(String keyString) {
+  private Set<Binding> getBindingNodes(String keyString) {
     return actual.bindings().stream()
         .filter(binding -> binding.key().toString().equals(keyString))
         .collect(toImmutableSet());
