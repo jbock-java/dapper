@@ -75,11 +75,8 @@ public final class ComponentBindingExpressions {
   private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
   private final DerivedFromFrameworkInstanceBindingExpression.Factory
       derivedFromFrameworkInstanceBindingExpressionFactory;
-  private final ImmediateFutureBindingExpression.Factory immediateFutureBindingExpressionFactory;
   private final MembersInjectionBindingExpression.Factory membersInjectionBindingExpressionFactory;
   private final PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory;
-  private final ProducerNodeInstanceBindingExpression.Factory
-      producerNodeInstanceBindingExpressionFactory;
   private final ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory;
   private final UnscopedDirectInstanceBindingExpressionFactory
       unscopedDirectInstanceBindingExpressionFactory;
@@ -100,10 +97,8 @@ public final class ComponentBindingExpressions {
       DelegateBindingExpression.Factory delegateBindingExpressionFactory,
       DerivedFromFrameworkInstanceBindingExpression.Factory
           derivedFromFrameworkInstanceBindingExpressionFactory,
-      ImmediateFutureBindingExpression.Factory immediateFutureBindingExpressionFactory,
       MembersInjectionBindingExpression.Factory membersInjectionBindingExpressionFactory,
       PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory,
-      ProducerNodeInstanceBindingExpression.Factory producerNodeInstanceBindingExpressionFactory,
       ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory,
       UnscopedDirectInstanceBindingExpressionFactory unscopedDirectInstanceBindingExpressionFactory,
       UnscopedFrameworkInstanceCreationExpressionFactory
@@ -118,11 +113,8 @@ public final class ComponentBindingExpressions {
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
     this.derivedFromFrameworkInstanceBindingExpressionFactory =
         derivedFromFrameworkInstanceBindingExpressionFactory;
-    this.immediateFutureBindingExpressionFactory = immediateFutureBindingExpressionFactory;
     this.membersInjectionBindingExpressionFactory = membersInjectionBindingExpressionFactory;
     this.privateMethodBindingExpressionFactory = privateMethodBindingExpressionFactory;
-    this.producerNodeInstanceBindingExpressionFactory =
-        producerNodeInstanceBindingExpressionFactory;
     this.providerInstanceBindingExpressionFactory = providerInstanceBindingExpressionFactory;
     this.unscopedDirectInstanceBindingExpressionFactory =
         unscopedDirectInstanceBindingExpressionFactory;
@@ -293,9 +285,6 @@ public final class ComponentBindingExpressions {
     switch (binding.bindingType()) {
       case PROVISION:
         return providerInstanceBindingExpressionFactory.create(binding, frameworkInstanceSupplier);
-      case PRODUCTION:
-        return producerNodeInstanceBindingExpressionFactory.create(
-            binding, frameworkInstanceSupplier);
       default:
         throw new AssertionError("invalid binding type: " + binding.bindingType());
     }

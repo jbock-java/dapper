@@ -153,11 +153,6 @@ public final class ComponentImplementation {
     /** A static method that always returns an absent {@code Optional} value for the binding. */
     ABSENT_OPTIONAL_METHOD,
 
-    /**
-     * The {@link dagger.producers.internal.CancellationListener#onProducerFutureCancelled(boolean)}
-     * method for a production component.
-     */
-    CANCELLATION_LISTENER_METHOD
   }
 
   /** A type of nested class that this component can contain. */

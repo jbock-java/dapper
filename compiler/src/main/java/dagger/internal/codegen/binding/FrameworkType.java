@@ -18,10 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-import static dagger.model.RequestKind.INSTANCE;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -33,9 +30,7 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
-import dagger.producers.Produced;
 import dagger.producers.Producer;
-import dagger.producers.internal.Producers;
 import jakarta.inject.Provider;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
