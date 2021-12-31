@@ -68,20 +68,6 @@ public class MultibindsValidationTest {
   }
 
   @Test
-  public void producerMap() {
-    assertThatModuleMethod("@Multibinds abstract Map<String, Producer<Object>> producerMap();")
-        .withDeclaration(moduleDeclaration)
-        .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
-  }
-
-  @Test
-  public void producedMap() {
-    assertThatModuleMethod("@Multibinds abstract Map<String, Produced<Object>> producedMap();")
-        .withDeclaration(moduleDeclaration)
-        .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
-  }
-
-  @Test
   public void rawSet() {
     assertThatModuleMethod("@Multibinds abstract Set rawSet();")
         .withDeclaration(moduleDeclaration)
@@ -98,20 +84,6 @@ public class MultibindsValidationTest {
   @Test
   public void providerSet() {
     assertThatModuleMethod("@Multibinds abstract Set<Provider<Object>> providerSet();")
-        .withDeclaration(moduleDeclaration)
-        .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
-  }
-
-  @Test
-  public void producerSet() {
-    assertThatModuleMethod("@Multibinds abstract Set<Producer<Object>> producerSet();")
-        .withDeclaration(moduleDeclaration)
-        .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
-  }
-
-  @Test
-  public void producedSet() {
-    assertThatModuleMethod("@Multibinds abstract Set<Produced<Object>> producedSet();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }

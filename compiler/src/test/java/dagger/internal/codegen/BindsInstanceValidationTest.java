@@ -130,33 +130,4 @@ public final class BindsInstanceValidationTest {
         .inFile(notAbstract)
         .onLine(6);
   }
-
-  @Test
-  public void bindsInstanceFrameworkType() {
-    JavaFileObject bindsFrameworkType =
-        JavaFileObjects.forSourceLines(
-            "test.BindsInstanceFrameworkType",
-            "package test;",
-            "",
-            "import dagger.BindsInstance;",
-            "import dagger.producers.Producer;",
-            "import jakarta.inject.Provider;",
-            "",
-            "interface BindsInstanceFrameworkType {",
-            "  @BindsInstance void bindsProvider(Provider<Object> objectProvider);",
-            "  @BindsInstance void bindsProducer(Producer<Object> objectProducer);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(bindsFrameworkType);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("@BindsInstance parameters must not be framework types")
-        .inFile(bindsFrameworkType)
-        .onLine(8);
-
-    assertThat(compilation)
-        .hadErrorContaining("@BindsInstance parameters must not be framework types")
-        .inFile(bindsFrameworkType)
-        .onLine(9);
-  }
-
 }

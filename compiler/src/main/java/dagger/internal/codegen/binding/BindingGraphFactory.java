@@ -469,9 +469,6 @@ public final class BindingGraphFactory implements ClearableCache {
     private ImmutableSet<Key> keysMatchingRequestUncached(Key requestKey) {
       ImmutableSet.Builder<Key> keys = ImmutableSet.builder();
       keys.add(requestKey);
-      keyFactory.unwrapSetKey(requestKey, Produced.class).ifPresent(keys::add);
-      keyFactory.rewrapMapKey(requestKey, Producer.class, Provider.class).ifPresent(keys::add);
-      keyFactory.rewrapMapKey(requestKey, Provider.class, Producer.class).ifPresent(keys::add);
       keys.addAll(keyFactory.implicitFrameworkMapKeys(requestKey));
       return keys.build();
     }

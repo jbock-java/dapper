@@ -302,7 +302,6 @@ public final class InjectValidator implements ClearableCache {
   private void validateDependencyRequest(
       ValidationReport.Builder<?> builder, VariableElement parameter) {
     dependencyRequestValidator.validateDependencyRequest(builder, parameter, parameter.asType());
-    dependencyRequestValidator.checkNotProducer(builder, parameter);
   }
 
   public ValidationReport<TypeElement> validateMembersInjectionType(TypeElement typeElement) {

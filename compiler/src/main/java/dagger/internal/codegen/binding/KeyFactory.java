@@ -348,21 +348,6 @@ public final class KeyFactory {
   }
 
   /**
-   * If {@code key}'s type is {@code Set<WrappingClass<Bar>>}, returns a key with type {@code Set
-   * <Bar>} with the same qualifier. Otherwise returns {@link Optional#empty()}.
-   */
-  Optional<Key> unwrapSetKey(Key key, Class<?> wrappingClass) {
-    if (SetType.isSet(key)) {
-      SetType setType = SetType.from(key);
-      if (!setType.isRawType() && setType.elementsAreTypeOf(wrappingClass)) {
-        return Optional.of(
-            key.toBuilder().type(setOf(setType.unwrappedElementType(wrappingClass))).build());
-      }
-    }
-    return Optional.empty();
-  }
-
-  /**
    * If {@code key}'s type is {@code Optional<T>} for some {@code T}, returns a key with the same
    * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, TypeMirror)}
    * extracted} from {@code T}.

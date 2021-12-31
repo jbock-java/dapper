@@ -26,7 +26,6 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.MembersInjector;
 import dagger.assisted.Assisted;
-import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.model.RequestKind;
@@ -35,7 +34,6 @@ import java.util.Collection;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -138,24 +136,6 @@ final class DependencyRequestValidator {
                   requestElement, membersInjectorType.getTypeArguments().get(0)));
         }
       }
-    }
-  }
-
-  /**
-   * Adds an error if the given dependency request is for a {@link dagger.producers.Producer} or
-   * {@link dagger.producers.Produced}.
-   *
-   * <p>Only call this when processing a provision binding.
-   */
-  // TODO(dpb): Should we disallow Producer entry points in non-production components?
-  void checkNotProducer(ValidationReport.Builder<?> report, VariableElement requestElement) {
-    TypeMirror requestType = requestElement.asType();
-    if (FrameworkTypes.isProducerType(requestType)) {
-      report.addError(
-          String.format(
-              "%s may only be injected in @Produces methods",
-              MoreTypes.asTypeElement(requestType).getSimpleName()),
-          requestElement);
     }
   }
 }

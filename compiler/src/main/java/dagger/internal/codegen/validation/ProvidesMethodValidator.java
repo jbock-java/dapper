@@ -28,12 +28,9 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 
 /** A validator for {@link dagger.Provides} methods. */
 final class ProvidesMethodValidator extends BindingMethodValidator {
-
-  private final DependencyRequestValidator dependencyRequestValidator;
 
   @Inject
   ProvidesMethodValidator(
@@ -52,7 +49,6 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
         ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
         injectionAnnotations);
-    this.dependencyRequestValidator = dependencyRequestValidator;
   }
 
   @Override
@@ -67,13 +63,6 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
 
     @Override
     protected void checkAdditionalMethodProperties() {
-    }
-
-    /** Adds an error if a {@link dagger.Provides @Provides} method depends on a producer type. */
-    @Override
-    protected void checkParameter(VariableElement parameter) {
-      super.checkParameter(parameter);
-      dependencyRequestValidator.checkNotProducer(report, parameter);
     }
   }
 }

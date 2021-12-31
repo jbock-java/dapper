@@ -86,18 +86,6 @@ public class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  public void providesMethodReturnsProducer() {
-    assertThatModuleMethod("@Provides Producer<String> provideProducer() {}")
-        .hasError("@Provides methods must not return framework types");
-  }
-
-  @Test
-  public void providesMethodReturnsProduced() {
-    assertThatModuleMethod("@Provides Produced<String> provideProduced() {}")
-        .hasError("@Provides methods must not return framework types");
-  }
-
-  @Test
   public void providesMethodWithTypeParameter() {
     assertThatModuleMethod("@Provides <T> String typeParameter() { return null; }")
         .hasError("@Provides methods may not have type parameters");
@@ -1338,48 +1326,6 @@ public class ModuleFactoryGeneratorTest {
         .hadErrorContaining("cannot use more than one @Scope")
         .inFile(moduleFile)
         .onLineContaining("@ScopeB");
-  }
-
-  @Test
-  public void providerDependsOnProduced() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import dagger.producers.Producer;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides String provideString(Producer<Integer> producer) {",
-        "    return \"foo\";",
-        "  }",
-        "}");
-    Compilation compilation = daggerCompiler().compile(moduleFile);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Producer may only be injected in @Produces methods");
-  }
-
-  @Test
-  public void providerDependsOnProducer() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import dagger.producers.Produced;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides String provideString(Produced<Integer> produced) {",
-        "    return \"foo\";",
-        "  }",
-        "}");
-    Compilation compilation = daggerCompiler().compile(moduleFile);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Produced may only be injected in @Produces methods");
   }
 
   @Test
