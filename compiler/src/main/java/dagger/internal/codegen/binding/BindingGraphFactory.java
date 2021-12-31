@@ -16,6 +16,24 @@
 
 package dagger.internal.codegen.binding;
 
+import static com.google.auto.common.MoreTypes.asTypeElement;
+import static com.google.auto.common.MoreTypes.isType;
+import static com.google.auto.common.MoreTypes.isTypeOf;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
+import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
+import static dagger.model.BindingKind.ASSISTED_INJECTION;
+import static dagger.model.BindingKind.DELEGATE;
+import static dagger.model.BindingKind.INJECTION;
+import static dagger.model.BindingKind.OPTIONAL;
+import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static dagger.model.RequestKind.MEMBERS_INJECTION;
+import static java.util.function.Predicate.isEqual;
+import static javax.lang.model.util.ElementFilter.methodsIn;
+
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -35,15 +53,8 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -55,24 +66,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-
-import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.auto.common.MoreTypes.isType;
-import static com.google.auto.common.MoreTypes.isTypeOf;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
-import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
-import static dagger.model.BindingKind.ASSISTED_INJECTION;
-import static dagger.model.BindingKind.DELEGATE;
-import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.OPTIONAL;
-import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static dagger.model.RequestKind.MEMBERS_INJECTION;
-import static java.util.function.Predicate.isEqual;
-import static javax.lang.model.util.ElementFilter.methodsIn;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 
 /** A factory for {@link BindingGraph} objects. */
 @Singleton

@@ -16,6 +16,26 @@
 
 package dagger.internal.codegen.binding;
 
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.UPPER_CAMEL;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCED_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCER_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_PROVIDER_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
+import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
+import static dagger.model.BindingKind.ASSISTED_INJECTION;
+import static dagger.model.BindingKind.INJECTION;
+import static dagger.model.BindingKind.MULTIBOUND_MAP;
+import static dagger.model.BindingKind.MULTIBOUND_SET;
+import static javax.lang.model.SourceVersion.isName;
+
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -31,42 +51,17 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.SetFactory;
 import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.SetType;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
-import dagger.producers.Produced;
 import dagger.producers.Producer;
 import jakarta.inject.Provider;
-
+import java.util.List;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
-import java.util.List;
-
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Verify.verify;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCED_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCER_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_PROVIDER_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
-import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.SET_OF_PRODUCED_PRODUCER;
-import static dagger.internal.codegen.javapoet.TypeNames.SET_PRODUCER;
-import static dagger.model.BindingKind.ASSISTED_INJECTION;
-import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.MULTIBOUND_MAP;
-import static dagger.model.BindingKind.MULTIBOUND_SET;
-import static javax.lang.model.SourceVersion.isName;
 
 /** Utilities for generating files. */
 public class SourceFiles {
@@ -218,12 +213,7 @@ public class SourceFiles {
    */
   public static ClassName setFactoryClassName(ContributionBinding binding) {
     checkArgument(binding.kind().equals(MULTIBOUND_SET));
-    if (binding.bindingType().equals(BindingType.PROVISION)) {
-      return SET_FACTORY;
-    } else {
-      SetType setType = SetType.from(binding.key());
-      return setType.elementsAreTypeOf(Produced.class) ? SET_OF_PRODUCED_PRODUCER : SET_PRODUCER;
-    }
+    return SET_FACTORY;
   }
 
   /** The {@link java.util.Map} factory class name appropriate for map bindings. */

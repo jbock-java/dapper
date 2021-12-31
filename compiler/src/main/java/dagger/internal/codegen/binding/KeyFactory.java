@@ -16,8 +16,17 @@
 
 package dagger.internal.codegen.binding;
 
+import static com.google.auto.common.MoreElements.isAnnotationPresent;
+import static com.google.auto.common.MoreTypes.asExecutable;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
+import static dagger.internal.codegen.binding.MapKeys.getMapKey;
+import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static javax.lang.model.element.ElementKind.METHOD;
+
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.internal.codegen.base.ContributionType;
@@ -30,11 +39,12 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
 import dagger.model.Key.MultibindingContributionIdentifier;
 import dagger.multibindings.Multibinds;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -42,22 +52,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.binding.MapKeys.getMapKey;
-import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.extension.Optionals.firstPresent;
-import static java.util.Arrays.asList;
-import static javax.lang.model.element.ElementKind.METHOD;
 
 /** A factory for {@link Key}s. */
 public final class KeyFactory {
@@ -228,7 +222,7 @@ public final class KeyFactory {
    * the classpath).
    */
   Set<Key> implicitFrameworkMapKeys(Key requestKey) {
-    return Stream.of(implicitMapProviderKeyFrom(requestKey), implicitMapProducerKeyFrom(requestKey))
+    return Stream.of(implicitMapProviderKeyFrom(requestKey))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(toImmutableSet());
@@ -241,26 +235,11 @@ public final class KeyFactory {
    * returned.
    */
   Optional<Key> implicitMapProviderKeyFrom(Key possibleMapKey) {
-    return firstPresent(
-        rewrapMapKey(possibleMapKey, Produced.class, Provider.class),
-        wrapMapKey(possibleMapKey, Provider.class));
+    return wrapMapKey(possibleMapKey, Provider.class);
   }
 
   /**
-   * Optionally extract a {@link Key} for the underlying production binding(s) if such a
-   * valid key can be inferred from the given key.  Specifically, if the key represents a
-   * {@link Map}{@code <K, V>} or {@code Map<K, Produced<V>>}, a key of
-   * {@code Map<K, Producer<V>>} will be returned.
-   */
-  Optional<Key> implicitMapProducerKeyFrom(Key possibleMapKey) {
-    return firstPresent(
-        rewrapMapKey(possibleMapKey, Produced.class, Producer.class),
-        wrapMapKey(possibleMapKey, Producer.class));
-  }
-
-  /**
-   * If {@code key}'s type is {@code Map<K, Provider<V>>}, {@code Map<K, Producer<V>>}, or {@code
-   * Map<K, Produced<V>>}, returns a key with the same qualifier and {@link
+   * If {@code key}'s type is {@code Map<K, Provider<V>>}, returns a key with the same qualifier and {@link
    * Key#multibindingContributionIdentifier()} whose type is simply {@code Map<K, V>}.
    *
    * <p>Otherwise, returns {@code key}.
@@ -269,12 +248,10 @@ public final class KeyFactory {
     if (MapType.isMap(key)) {
       MapType mapType = MapType.from(key);
       if (!mapType.isRawType()) {
-        for (Class<?> frameworkClass : asList(Provider.class, Producer.class, Produced.class)) {
-          if (mapType.valuesAreTypeOf(frameworkClass)) {
-            return key.toBuilder()
-                .type(mapOf(mapType.keyType(), mapType.unwrappedValueType(frameworkClass)))
-                .build();
-          }
+        if (mapType.valuesAreTypeOf(Provider.class)) {
+          return key.toBuilder()
+              .type(mapOf(mapType.keyType(), mapType.unwrappedValueType(Provider.class)))
+              .build();
         }
       }
     }

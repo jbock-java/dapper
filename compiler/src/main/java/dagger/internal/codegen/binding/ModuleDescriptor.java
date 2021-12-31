@@ -46,7 +46,6 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
 import dagger.multibindings.Multibinds;
-import dagger.producers.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;

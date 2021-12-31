@@ -74,26 +74,6 @@ public final class SetType {
     return MoreTypes.isType(elementType()) && MoreTypes.isTypeOf(clazz, elementType());
   }
 
-  /**
-   * {@code T} if {@link #elementType()} is a {@code WrappingClass<T>}.
-   *
-   * @throws IllegalStateException if {@link #elementType()} is not a {@code WrappingClass<T>}
-   * @throws IllegalArgumentException if {@code wrappingClass} does not have exactly one type
-   *     parameter
-   */
-  public TypeMirror unwrappedElementType(Class<?> wrappingClass) {
-    checkArgument(
-        wrappingClass.getTypeParameters().length == 1,
-        "%s must have exactly one type parameter",
-        wrappingClass);
-    checkArgument(
-        elementsAreTypeOf(wrappingClass),
-        "expected elements to be %s, but this type is %s",
-        wrappingClass,
-        declaredSetType());
-    return MoreTypes.asDeclared(elementType()).getTypeArguments().get(0);
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

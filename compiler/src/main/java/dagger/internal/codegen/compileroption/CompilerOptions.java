@@ -21,8 +21,6 @@ import javax.tools.Diagnostic;
 
 /** A collection of options that dictate how the compiler will run. */
 public abstract class CompilerOptions {
-  public abstract boolean usesProducers();
-
   /**
    * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
    *
@@ -32,8 +30,6 @@ public abstract class CompilerOptions {
    * per-provision instantiation time.
    */
   public abstract boolean fastInit(TypeElement element);
-
-  public abstract boolean writeProducerNameInToken();
 
   public abstract Diagnostic.Kind nullableValidationKind();
 

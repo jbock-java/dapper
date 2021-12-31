@@ -44,10 +44,6 @@ public interface BindingMethodValidatorsModule {
 
   @Binds
   @IntoSet
-  BindingMethodValidator produces(ProducesMethodValidator validator);
-
-  @Binds
-  @IntoSet
   BindingMethodValidator binds(BindsMethodValidator validator);
 
   @Binds

@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.MapKeys.getMapKeyExpression;
 import static dagger.internal.codegen.binding.SourceFiles.mapFactoryClassName;
 
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -30,9 +29,8 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
-import dagger.producers.Produced;
-import dagger.producers.Producer;
 import jakarta.inject.Provider;
+import java.util.List;
 import javax.lang.model.type.TypeMirror;
 
 /** A factory creation expression for a multibound map. */
@@ -65,8 +63,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
       // TODO(ronshapiro): either inline this into mapFactoryClassName, or add a
       // mapType.unwrappedValueType() method that doesn't require a framework type
       TypeMirror valueType = mapType.valueType();
-      for (Class<?> frameworkClass :
-          ImmutableSet.of(Provider.class, Producer.class, Produced.class)) {
+      for (Class<?> frameworkClass : List.of(Provider.class)) {
         if (mapType.valuesAreTypeOf(frameworkClass)) {
           valueType = mapType.unwrappedValueType(frameworkClass);
           break;
@@ -90,7 +87,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     MapFactoryCreationExpression create(ContributionBinding binding);
   }
 }

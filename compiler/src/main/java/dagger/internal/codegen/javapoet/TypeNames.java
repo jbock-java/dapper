@@ -102,10 +102,6 @@ public final class TypeNames {
       PRODUCTION_SUBCOMPONENT.nestedClass("Builder");
   public static final ClassName PRODUCTION_SUBCOMPONENT_FACTORY =
       PRODUCTION_SUBCOMPONENT.nestedClass("Factory");
-  public static final ClassName PRODUCER_TOKEN =
-      ClassName.get("dagger.producers.monitoring", "ProducerToken");
-  public static final ClassName PRODUCTION_COMPONENT_MONITOR_FACTORY =
-      ClassName.get("dagger.producers.monitoring", "ProductionComponentMonitor", "Factory");
   public static final ClassName SET_OF_PRODUCED_PRODUCER =
       ClassName.get("dagger.producers.internal", "SetOfProducedProducer");
   public static final ClassName SET_PRODUCER =
@@ -118,12 +114,8 @@ public final class TypeNames {
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
 
   // protect against relocation in the com.google namespace
-  public static final ClassName FUTURES =
-      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "Futures");
   public static final ClassName LISTENABLE_FUTURE =
       ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "ListenableFuture");
-  public static final ClassName FLUENT_FUTURE =
-      ClassName.get(String.join(".", "com", "google", "common", "util", "concurrent"), "FluentFuture");
   public static final ClassName AUTO_ANNOTATION =
       ClassName.get(String.join(".", "com", "google", "auto", "value"), "AutoAnnotation");
   public static final ClassName CAN_IGNORE_RETURN_VALUE =

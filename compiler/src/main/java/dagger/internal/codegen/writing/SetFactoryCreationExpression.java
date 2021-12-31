@@ -29,7 +29,6 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.model.DependencyRequest;
-import dagger.producers.Produced;
 
 /** A factory creation expression for a multibound set. */
 final class SetFactoryCreationExpression extends MultibindingFactoryCreationExpression {
@@ -53,10 +52,7 @@ final class SetFactoryCreationExpression extends MultibindingFactoryCreationExpr
     if (!useRawType()) {
       SetType setType = SetType.from(binding.key());
       builder.add(
-          "<$T>",
-          setType.elementsAreTypeOf(Produced.class)
-              ? setType.unwrappedElementType(Produced.class)
-              : setType.elementType());
+          "<$T>", setType.elementType());
     }
 
     int individualProviders = 0;
@@ -94,8 +90,8 @@ final class SetFactoryCreationExpression extends MultibindingFactoryCreationExpr
     return builder.add(".build()").build();
   }
 
-  @AssistedFactory
-  static interface Factory {
+ @AssistedFactory
+  interface Factory {
     SetFactoryCreationExpression create(ContributionBinding binding);
   }
 }

@@ -31,18 +31,8 @@ public final class JavacPluginCompilerOptions extends CompilerOptions {
   }
 
   @Override
-  public boolean usesProducers() {
-    return true;
-  }
-
-  @Override
   public boolean fastInit(TypeElement element) {
     return false;
-  }
-
-  @Override
-  public boolean writeProducerNameInToken() {
-    return true;
   }
 
   @Override

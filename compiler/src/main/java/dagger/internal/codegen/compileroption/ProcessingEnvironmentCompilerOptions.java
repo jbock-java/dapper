@@ -16,25 +16,6 @@
 
 package dagger.internal.codegen.compileroption;
 
-import com.google.auto.common.MoreElements;
-import com.google.common.base.Ascii;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import dagger.producers.Produces;
-import jakarta.inject.Inject;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -51,7 +32,6 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_MULTIBINDING_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM;
-import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WRITE_PRODUCER_NAME_IN_TOKEN;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.KeyOnlyOption.USE_GRADLE_INCREMENTAL_PROCESSING;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.DISABLE_INTER_COMPONENT_SCOPE_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.EXPLICIT_BINDING_CONFLICTS_WITH_INJECT;
@@ -66,6 +46,23 @@ import static dagger.internal.codegen.compileroption.ValidationType.WARNING;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
+
+import com.google.auto.common.MoreElements;
+import com.google.common.base.Ascii;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import jakarta.inject.Inject;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 
 /** {@link CompilerOptions} for the given {@link ProcessingEnvironment}. */
 public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions {
@@ -85,19 +82,8 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
-  public boolean usesProducers() {
-    return processingEnvironment.getElementUtils().getTypeElement(Produces.class.getCanonicalName())
-        != null;
-  }
-
-  @Override
   public boolean fastInit(TypeElement component) {
     return isEnabled(FAST_INIT);
-  }
-
-  @Override
-  public boolean writeProducerNameInToken() {
-    return isEnabled(WRITE_PRODUCER_NAME_IN_TOKEN);
   }
 
   @Override
@@ -263,8 +249,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     EXPERIMENTAL_ANDROID_MODE,
 
     FORMAT_GENERATED_SOURCE,
-
-    WRITE_PRODUCER_NAME_IN_TOKEN,
 
     WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM,
 

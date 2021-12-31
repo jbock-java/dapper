@@ -19,11 +19,9 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.base.RequestKinds.requestType;
 
-import dagger.Provides;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.producers.Produces;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -44,8 +42,6 @@ import javax.lang.model.util.ElementKindVisitor8;
  *   <dd>{@code @Qualifier SomeType is provided at\n ComponentType.method()}
  *   <dt>For component injection methods
  *   <dd>{@code SomeType is injected at\n ComponentType.method(foo)}
- *   <dt>For parameters to {@link Provides @Provides}, {@link Produces @Produces}, or {@code
- *       @Inject} methods:
  *   <dd>{@code @Qualified ResolvedType is injected at\n EnclosingType.method([…, ]param[, …])}
  *   <dt>For parameters to {@code @Inject} constructors:
  *   <dd>{@code @Qualified ResolvedType is injected at\n EnclosingType([…, ]param[, …])}

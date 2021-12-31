@@ -97,9 +97,6 @@ public interface Producer<T> {
    * trigger the submission of this task to the executor, if it has not already been triggered. In
    * order to trigger this task's submission, the transitive dependencies required to produce the
    * {@code T} will be submitted to the executor, as their dependencies become available.
-   *
-   * <p>If the key is bound to a {@link Produces} method, then calling this method multiple times
-   * will return the same future.
    */
   ListenableFuture<T> get();
 }

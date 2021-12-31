@@ -303,8 +303,8 @@ public abstract class BindingElementValidator<E extends Element> {
      *   <li>the element doesn't allow {@linkplain MultibindingAnnotations multibinding annotations}
      *       and has any
      *   <li>the element does allow them but has more than one
-     *   <li>the element has a multibinding annotation and its {@link dagger.Provides} or {@link
-     *       dagger.producers.Produces} annotation has a {@code type} parameter.
+     *   <li>the element has a multibinding annotation and its {@link dagger.Provides}
+     *       annotation has a {@code type} parameter.
      * </ul>
      */
     private void checkMultibindings() {
