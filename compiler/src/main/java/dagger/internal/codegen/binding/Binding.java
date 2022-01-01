@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.Suppliers.memoize;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
@@ -82,28 +81,11 @@ public abstract class Binding extends BindingDeclaration {
    */
   public abstract Set<DependencyRequest> explicitDependencies();
 
-  /**
-   * The set of {@link DependencyRequest dependencies} that are added by the framework rather than a
-   * user-defined injection site. This returns an unmodifiable set.
-   */
-  public Set<DependencyRequest> implicitDependencies() {
-    return Set.of();
-  }
-
   private final Supplier<Set<DependencyRequest>> dependencies =
-      memoize(
-          () -> {
-            Set<DependencyRequest> implicitDependencies = implicitDependencies();
-            return Set.copyOf(
-                implicitDependencies.isEmpty()
-                    ? explicitDependencies()
-                    : Util.union(implicitDependencies, explicitDependencies()));
-          });
+      memoize(this::explicitDependencies);
 
   /**
-   * The set of {@link DependencyRequest dependencies} required to satisfy this binding. This is the
-   * union of {@link #explicitDependencies()} and {@link #implicitDependencies()}. This returns an
-   * unmodifiable set.
+   * The set of {@link DependencyRequest dependencies} required to satisfy this binding.
    */
   public final Set<DependencyRequest> dependencies() {
     return dependencies.get();
