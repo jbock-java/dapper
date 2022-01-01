@@ -22,22 +22,26 @@ import static dagger.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -65,14 +69,15 @@ public final class ProvisionBinding extends ContributionBinding {
           injectionSites(), unresolved(), scope()));
 
   private final Supplier<Set<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
-      ImmutableSet.<DependencyRequest>builder()
-          .addAll(provisionDependencies())
-          .addAll(membersInjectionDependencies())
-          .build());
+      Stream.of(provisionDependencies(), membersInjectionDependencies())
+          .flatMap(Collection::stream)
+          .collect(DaggerStreams.toImmutableSet()));
+
   private final Supplier<Set<DependencyRequest>> membersInjectionDependencies = Suppliers.memoize(() -> injectionSites()
       .stream()
       .flatMap(i -> i.dependencies().stream())
       .collect(toImmutableSet()));
+
   private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
 
   ProvisionBinding(
@@ -178,8 +183,8 @@ public final class ProvisionBinding extends ContributionBinding {
 
   public static Builder builder() {
     return new Builder()
-        .provisionDependencies(ImmutableSet.of())
-        .injectionSites(ImmutableSortedSet.of());
+        .provisionDependencies(Set.of())
+        .injectionSites(Collections.emptySortedSet());
   }
 
   @Override
@@ -187,8 +192,8 @@ public final class ProvisionBinding extends ContributionBinding {
     return new Builder(this);
   }
 
-  private static final ImmutableSet<BindingKind> KINDS_TO_CHECK_FOR_NULL =
-      ImmutableSet.of(PROVISION, COMPONENT_PROVISION);
+  private static final Set<BindingKind> KINDS_TO_CHECK_FOR_NULL =
+      new LinkedHashSet<>(List.of(PROVISION, COMPONENT_PROVISION));
 
   public boolean shouldCheckForNull(CompilerOptions compilerOptions) {
     return KINDS_TO_CHECK_FOR_NULL.contains(kind())

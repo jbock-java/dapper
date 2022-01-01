@@ -24,8 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.graph.ImmutableNetwork;
@@ -48,6 +46,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -153,7 +153,7 @@ final class BindingGraphConverter {
         NetworkBuilder.directed().allowsParallelEdges(true).allowsSelfLoops(true).build();
     private final Set<BindingNode> bindings = new HashSet<>();
 
-    private final Map<ResolvedBindingsWithPath, ImmutableSet<BindingNode>> resolvedBindingsMap =
+    private final Map<ResolvedBindingsWithPath, Set<BindingNode>> resolvedBindingsMap =
         new HashMap<>();
 
     /** Constructs a converter for a root (component, not subcomponent) binding graph. */
@@ -354,16 +354,16 @@ final class BindingGraphConverter {
           .resolvedBindings(bindingRequest(dependencyRequest));
     }
 
-    private ImmutableSet<BindingNode> bindingNodes(ResolvedBindings resolvedBindings) {
+    private Set<BindingNode> bindingNodes(ResolvedBindings resolvedBindings) {
       ResolvedBindingsWithPath resolvedBindingsWithPath =
           ResolvedBindingsWithPath.create(resolvedBindings, componentPath());
       return resolvedBindingsMap.computeIfAbsent(
           resolvedBindingsWithPath, this::uncachedBindingNodes);
     }
 
-    private ImmutableSet<BindingNode> uncachedBindingNodes(
+    private Set<BindingNode> uncachedBindingNodes(
         ResolvedBindingsWithPath resolvedBindingsWithPath) {
-      ImmutableSet.Builder<BindingNode> bindingNodes = ImmutableSet.builder();
+      Set<BindingNode> bindingNodes = new LinkedHashSet<>();
       resolvedBindingsWithPath.resolvedBindings()
           .allBindings()
           .asMap()
@@ -374,7 +374,7 @@ final class BindingGraphConverter {
                       bindingNode(resolvedBindingsWithPath.resolvedBindings(), binding, component));
                 }
               });
-      return bindingNodes.build();
+      return bindingNodes;
     }
 
     private BindingNode bindingNode(
@@ -392,7 +392,7 @@ final class BindingGraphConverter {
       // Put all missing binding nodes in the root component. This simplifies the binding graph
       // and produces better error messages for users since all dependents point to the same node.
       return MissingBindingImpl.create(
-          ComponentPath.create(ImmutableList.of(componentPath().rootComponent())),
+          ComponentPath.create(List.of(componentPath().rootComponent())),
           dependencies.key());
     }
 
