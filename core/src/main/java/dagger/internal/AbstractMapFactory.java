@@ -17,12 +17,12 @@
 package dagger.internal;
 
 import static dagger.internal.DaggerCollections.newLinkedHashMapWithExpectedSize;
-import static dagger.internal.Preconditions.checkNotNull;
 import static java.util.Collections.unmodifiableMap;
 
+import jakarta.inject.Provider;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import jakarta.inject.Provider;
+import java.util.Objects;
 
 /**
  * An {@code abstract} {@link Factory} implementation used to implement {@link Map} bindings.
@@ -61,7 +61,7 @@ abstract class AbstractMapFactory<K, V, V2> implements Factory<Map<K, V2>> {
 
     /** Associates {@code key} with {@code providerOfValue}. */
     Builder<K, V, V2> put(K key, Provider<V> providerOfValue) {
-      map.put(checkNotNull(key, "key"), checkNotNull(providerOfValue, "provider"));
+      map.put(Objects.requireNonNull(key, "key"), Objects.requireNonNull(providerOfValue, "provider"));
       return this;
     }
 

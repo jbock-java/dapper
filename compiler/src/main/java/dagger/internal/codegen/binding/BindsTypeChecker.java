@@ -16,14 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
@@ -76,8 +77,8 @@ public final class BindsTypeChecker {
     throw new AssertionError("Unknown contribution type: " + contributionType);
   }
 
-  private ImmutableList<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
-    ImmutableList.Builder<ExecutableElement> methodsForName = ImmutableList.builder();
+  private List<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
+    List<ExecutableElement> methodsForName = new ArrayList<>();
     for (ExecutableElement method :
       // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
       // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
@@ -88,9 +89,8 @@ public final class BindsTypeChecker {
         methodsForName.add(method);
       }
     }
-    ExecutableElement method = getOnlyElement(methodsForName.build());
-    return ImmutableList.copyOf(
-        MoreTypes.asExecutable(types.asMemberOf(type, method)).getParameterTypes());
+    ExecutableElement method = getOnlyElement(methodsForName);
+    return List.copyOf(MoreTypes.asExecutable(types.asMemberOf(type, method)).getParameterTypes());
   }
 
   private TypeMirror methodParameterType(DeclaredType type, String methodName) {

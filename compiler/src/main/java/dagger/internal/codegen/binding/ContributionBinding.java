@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.MoreAnnotationMirrors.unwrapOptionalE
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.CLASS_CONSTRUCTOR;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
-import static java.util.Arrays.asList;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
@@ -31,7 +30,6 @@ import dagger.internal.codegen.base.SetType;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -166,8 +164,6 @@ public abstract class ContributionBinding extends Binding implements HasContribu
     public final B clearBindingElement() {
       return bindingElement(Optional.empty());
     }
-
-    ;
 
     abstract B contributingModule(TypeElement contributingModule);
 

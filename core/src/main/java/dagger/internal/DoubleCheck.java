@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
 import jakarta.inject.Provider;
@@ -77,7 +77,7 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
   // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> delegate)"
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Provider<T> provider(P delegate) {
-    checkNotNull(delegate);
+    requireNonNull(delegate);
     if (delegate instanceof DoubleCheck) {
       /* This should be a rare case, but if we have a scoped @Binds that delegates to a scoped
        * binding, we shouldn't cache the value again. */
@@ -100,6 +100,6 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
       // the same, so it will be fine for that case.
       return lazy;
     }
-    return new DoubleCheck<T>(checkNotNull(provider));
+    return new DoubleCheck<T>(requireNonNull(provider));
   }
 }

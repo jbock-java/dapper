@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import jakarta.inject.Provider;
 
@@ -50,7 +50,7 @@ public final class DelegateFactory<T> implements Factory<T> {
    * method will throw a {@link ClassCastException}.
    */
   public static <T> void setDelegate(Provider<T> delegateFactory, Provider<T> delegate) {
-    checkNotNull(delegate);
+    requireNonNull(delegate);
     DelegateFactory<T> asDelegateFactory = (DelegateFactory<T>) delegateFactory;
     if (asDelegateFactory.delegate != null) {
       throw new IllegalStateException();
@@ -64,7 +64,7 @@ public final class DelegateFactory<T> implements Factory<T> {
    * @throws NullPointerException if the delegate has not been set
    */
   Provider<T> getDelegate() {
-    return checkNotNull(delegate);
+    return requireNonNull(delegate);
   }
 }
 

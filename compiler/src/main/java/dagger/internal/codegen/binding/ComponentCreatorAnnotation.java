@@ -16,16 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Ascii.toUpperCase;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.mapping;
 
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -49,7 +48,7 @@ public enum ComponentCreatorAnnotation {
 
   ComponentCreatorAnnotation(ClassName annotation) {
     this.annotation = annotation;
-    this.creatorKind = ComponentCreatorKind.valueOf(toUpperCase(annotation.simpleName()));
+    this.creatorKind = ComponentCreatorKind.valueOf(annotation.simpleName().toUpperCase(Locale.ROOT));
     this.componentAnnotation = annotation.enclosingClassName();
   }
 
@@ -88,8 +87,7 @@ public enum ComponentCreatorAnnotation {
   public static Set<ClassName> subcomponentCreatorAnnotations() {
     return stream()
         .filter(
-            componentCreatorAnnotation ->
-                componentCreatorAnnotation.isSubcomponentCreatorAnnotation())
+            ComponentCreatorAnnotation::isSubcomponentCreatorAnnotation)
         .collect(toAnnotationClasses());
   }
 

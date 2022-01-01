@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import jakarta.inject.Provider;
 
@@ -65,6 +65,6 @@ public final class SingleCheck<T> implements Provider<T> {
     if (provider instanceof SingleCheck || provider instanceof DoubleCheck) {
       return provider;
     }
-    return new SingleCheck<T>(checkNotNull(provider));
+    return new SingleCheck<T>(requireNonNull(provider));
   }
 }

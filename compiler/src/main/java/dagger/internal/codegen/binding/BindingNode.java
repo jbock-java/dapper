@@ -26,7 +26,6 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
 import dagger.multibindings.Multibinds;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

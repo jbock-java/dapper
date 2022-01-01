@@ -19,9 +19,9 @@ package dagger.internal;
 import static dagger.internal.DaggerCollections.hasDuplicates;
 import static dagger.internal.DaggerCollections.newHashSetWithExpectedSize;
 import static dagger.internal.DaggerCollections.presizedList;
-import static dagger.internal.Preconditions.checkNotNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -123,11 +123,11 @@ public final class SetFactory<T> implements Factory<Set<T>> {
 
     Set<T> providedValues = newHashSetWithExpectedSize(size);
     for (int i = 0, c = individualProviders.size(); i < c; i++) {
-      providedValues.add(checkNotNull(individualProviders.get(i).get()));
+      providedValues.add(requireNonNull(individualProviders.get(i).get()));
     }
     for (int i = 0, c = providedCollections.size(); i < c; i++) {
       for (T element : providedCollections.get(i)) {
-        providedValues.add(checkNotNull(element));
+        providedValues.add(requireNonNull(element));
       }
     }
 

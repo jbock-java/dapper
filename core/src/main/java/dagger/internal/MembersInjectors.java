@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import dagger.MembersInjector;
 import jakarta.inject.Inject;
@@ -40,7 +40,7 @@ public final class MembersInjectors {
     INSTANCE;
 
     @Override public void injectMembers(Object instance) {
-      checkNotNull(instance, "Cannot inject members into a null reference");
+      requireNonNull(instance, "Cannot inject members into a null reference");
     }
   }
 

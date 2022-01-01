@@ -18,9 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
@@ -32,6 +31,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import dagger.BindsInstance;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -211,7 +211,7 @@ public final class ComponentCreatorDescriptor {
             method);
       }
     }
-    verify(factoryMethod != null); // validation should have ensured this.
+    Preconditions.checkState(factoryMethod != null); // validation should have ensured this.
 
     ImmutableSetMultimap.Builder<ComponentRequirement, VariableElement> factoryParameters =
         ImmutableSetMultimap.builder();

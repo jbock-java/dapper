@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
 import jakarta.inject.Provider;
@@ -49,6 +49,6 @@ public final class ProviderOfLazy<T> implements Provider<Lazy<T>> {
    * @see #get()
    */
   public static <T> Provider<Lazy<T>> create(Provider<T> provider) {
-    return new ProviderOfLazy<T>(checkNotNull(provider));
+    return new ProviderOfLazy<T>(requireNonNull(provider));
   }
 }
