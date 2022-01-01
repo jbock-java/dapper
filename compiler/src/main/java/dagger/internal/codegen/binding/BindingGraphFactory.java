@@ -19,8 +19,6 @@ package dagger.internal.codegen.binding;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isType;
 import static com.google.auto.common.MoreTypes.isTypeOf;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
@@ -31,6 +29,7 @@ import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static dagger.model.RequestKind.MEMBERS_INJECTION;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.isEqual;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
@@ -48,6 +47,7 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Keys;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
@@ -283,13 +283,13 @@ public final class BindingGraphFactory implements ClearableCache {
         ImmutableSetMultimap<Key, DelegateDeclaration> delegateDeclarations,
         ImmutableSetMultimap<Key, OptionalBindingDeclaration> optionalBindingDeclarations) {
       this.parentResolver = parentResolver;
-      this.componentDescriptor = checkNotNull(componentDescriptor);
-      this.explicitBindings = checkNotNull(explicitBindings);
+      this.componentDescriptor = requireNonNull(componentDescriptor);
+      this.explicitBindings = requireNonNull(explicitBindings);
       this.explicitBindingsSet = ImmutableSet.copyOf(explicitBindings.values());
-      this.multibindingDeclarations = checkNotNull(multibindingDeclarations);
-      this.subcomponentDeclarations = checkNotNull(subcomponentDeclarations);
-      this.delegateDeclarations = checkNotNull(delegateDeclarations);
-      this.optionalBindingDeclarations = checkNotNull(optionalBindingDeclarations);
+      this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
+      this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
+      this.delegateDeclarations = requireNonNull(delegateDeclarations);
+      this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
       this.explicitMultibindings = multibindingContributionsByMultibindingKey(explicitBindingsSet);
       this.delegateMultibindingDeclarations =
           multibindingContributionsByMultibindingKey(delegateDeclarations.values());
@@ -400,7 +400,7 @@ public final class BindingGraphFactory implements ClearableCache {
      * binding error at the root component).
      */
     private boolean isCorrectlyScopedInSubcomponent(ProvisionBinding binding) {
-      checkArgument(binding.kind() == INJECTION || binding.kind() == ASSISTED_INJECTION);
+      Preconditions.checkArgument(binding.kind() == INJECTION || binding.kind() == ASSISTED_INJECTION);
       if (!rootComponent().isSubcomponent()
           || !binding.scope().isPresent()
           || binding.scope().get().isReusable()) {
@@ -433,7 +433,7 @@ public final class BindingGraphFactory implements ClearableCache {
      * will be used to detect which subcomponents need to be resolved.
      */
     private void addSubcomponentToOwningResolver(ProvisionBinding subcomponentCreatorBinding) {
-      checkArgument(subcomponentCreatorBinding.kind().equals(SUBCOMPONENT_CREATOR));
+      Preconditions.checkArgument(subcomponentCreatorBinding.kind().equals(SUBCOMPONENT_CREATOR));
       Resolver owningResolver = getOwningResolver(subcomponentCreatorBinding).get();
 
       TypeElement builderType = MoreTypes.asTypeElement(subcomponentCreatorBinding.key().type());
@@ -823,7 +823,7 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       private boolean dependsOnLocalBindingsUncached(Key key) {
-        checkArgument(
+        Preconditions.checkArgument(
             getPreviouslyResolvedBindings(key).isPresent(),
             "no previously resolved bindings in %s for %s",
             Resolver.this,

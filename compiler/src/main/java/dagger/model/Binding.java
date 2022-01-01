@@ -19,6 +19,7 @@ package dagger.model;
 import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.MaybeBinding;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -45,7 +46,7 @@ public interface Binding extends MaybeBinding {
    * The dependencies of this binding. The order of the dependencies corresponds to the order in
    * which they will be injected when the binding is requested.
    */
-  ImmutableSet<DependencyRequest> dependencies();
+  Set<DependencyRequest> dependencies();
 
   /**
    * The {@link Element} that declares this binding. Absent for {@linkplain BindingKind binding

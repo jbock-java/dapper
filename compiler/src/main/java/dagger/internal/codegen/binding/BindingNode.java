@@ -18,8 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.model.BindingKind;
@@ -28,8 +26,13 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
 import dagger.multibindings.Multibinds;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -44,9 +47,9 @@ public final class BindingNode implements dagger.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
-      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
-      ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
-      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
+      Set<MultibindingDeclaration> multibindingDeclarations,
+      Set<OptionalBindingDeclaration> optionalBindingDeclarations,
+      Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     return new BindingNode(
         component,
@@ -59,17 +62,17 @@ public final class BindingNode implements dagger.model.Binding {
 
   private final ComponentPath componentPath;
   private final dagger.internal.codegen.binding.Binding delegate;
-  private final ImmutableSet<MultibindingDeclaration> multibindingDeclarations;
-  private final ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations;
-  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
+  private final Set<MultibindingDeclaration> multibindingDeclarations;
+  private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
+  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
   private BindingNode(
       ComponentPath componentPath,
       dagger.internal.codegen.binding.Binding delegate,
-      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
-      ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
-      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
+      Set<MultibindingDeclaration> multibindingDeclarations,
+      Set<OptionalBindingDeclaration> optionalBindingDeclarations,
+      Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.componentPath = requireNonNull(componentPath);
     this.delegate = requireNonNull(delegate);
@@ -88,15 +91,15 @@ public final class BindingNode implements dagger.model.Binding {
     return delegate;
   }
 
-  public ImmutableSet<MultibindingDeclaration> multibindingDeclarations() {
+  public Set<MultibindingDeclaration> multibindingDeclarations() {
     return multibindingDeclarations;
   }
 
-  public ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations() {
+  public Set<OptionalBindingDeclaration> optionalBindingDeclarations() {
     return optionalBindingDeclarations;
   }
 
-  public ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations() {
+  public Set<SubcomponentDeclaration> subcomponentDeclarations() {
     return subcomponentDeclarations;
   }
 
@@ -128,9 +131,10 @@ public final class BindingNode implements dagger.model.Binding {
    *   <li>{@linkplain Multibinds multibinding} declarations
    * </ul>
    */
-  public Iterable<BindingDeclaration> associatedDeclarations() {
-    return Iterables.concat(
-        multibindingDeclarations(), optionalBindingDeclarations(), subcomponentDeclarations());
+  public List<BindingDeclaration> associatedDeclarations() {
+    return Stream.of(multibindingDeclarations(), optionalBindingDeclarations(), subcomponentDeclarations())
+        .flatMap(Set::stream)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -139,7 +143,7 @@ public final class BindingNode implements dagger.model.Binding {
   }
 
   @Override
-  public ImmutableSet<DependencyRequest> dependencies() {
+  public Set<DependencyRequest> dependencies() {
     return delegate().dependencies();
   }
 

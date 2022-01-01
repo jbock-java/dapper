@@ -53,6 +53,7 @@ import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -285,11 +286,10 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
         .collect(toImmutableSet());
   }
 
-  private ImmutableSet<BindingDeclaration> declarations(
+  private Set<BindingDeclaration> declarations(
       BindingGraph graph, Binding binding) {
-    ImmutableSet.Builder<BindingDeclaration> declarations = ImmutableSet.builder();
     BindingNode bindingNode = (BindingNode) binding;
-    bindingNode.associatedDeclarations().forEach(declarations::add);
+    Set<BindingDeclaration> declarations = new LinkedHashSet<>(bindingNode.associatedDeclarations());
     if (bindingDeclarationFormatter.canFormat(bindingNode.delegate())) {
       declarations.add(bindingNode.delegate());
     } else {
@@ -297,7 +297,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
           .flatMap(requestedBinding -> declarations(graph, requestedBinding).stream())
           .forEach(declarations::add);
     }
-    return declarations.build();
+    return declarations;
   }
 
   private String multibindingTypeString(Binding multibinding) {

@@ -103,7 +103,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     // We don't want to write out resolved bindings -- we want to write out the generic version.
     checkState(
-        !binding.unresolved().isPresent(),
+        binding.unresolved().isEmpty(),
         "tried to generate a MembersInjector for a binding of a resolved generic type: %s",
         binding);
 

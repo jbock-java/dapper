@@ -68,6 +68,7 @@ import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
@@ -286,7 +287,7 @@ final class InjectionMethods {
      * @param instanceType the type of the {@code instance} parameter
      */
     static CodeBlock invokeAll(
-        ImmutableSet<InjectionSite> injectionSites,
+        Set<InjectionSite> injectionSites,
         ClassName generatedTypeName,
         CodeBlock instanceCodeBlock,
         TypeMirror instanceType,

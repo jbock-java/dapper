@@ -52,6 +52,7 @@ import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import jakarta.inject.Provider;
 import java.util.List;
+import java.util.Set;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -114,7 +115,7 @@ public class SourceFiles {
    * #frameworkTypeUsageStatement(CodeBlock, RequestKind) use them}.
    */
   public static ImmutableMap<DependencyRequest, CodeBlock> frameworkFieldUsages(
-      ImmutableSet<DependencyRequest> dependencies,
+      Set<DependencyRequest> dependencies,
       ImmutableMap<DependencyRequest, FieldSpec> fields) {
     return Maps.toMap(
         dependencies,

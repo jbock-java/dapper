@@ -23,7 +23,6 @@ import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFr
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.MEMBERS_INJECTION_METHOD;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -44,6 +43,7 @@ import dagger.model.Key;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -135,7 +135,7 @@ final class MembersInjectionMethods {
     return Expression.create(membersInjectedType, methodCall);
   }
 
-  private static ImmutableSet<InjectionSite> injectionSites(Binding binding) {
+  private static Set<InjectionSite> injectionSites(Binding binding) {
     if (binding instanceof ProvisionBinding) {
       return ((ProvisionBinding) binding).injectionSites();
     } else if (binding instanceof MembersInjectionBinding) {
