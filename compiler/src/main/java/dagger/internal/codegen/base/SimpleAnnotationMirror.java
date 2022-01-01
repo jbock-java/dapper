@@ -16,12 +16,9 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Functions;
-import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
@@ -39,11 +36,11 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
 
   private SimpleAnnotationMirror(
       TypeElement annotationType, Map<String, ? extends AnnotationValue> namedValues) {
-    checkArgument(
+    Preconditions.checkArgument(
         annotationType.getKind().equals(ElementKind.ANNOTATION_TYPE),
         "annotationType must be an annotation: %s",
         annotationType);
-    checkArgument(
+    Preconditions.checkArgument(
         methodsIn(annotationType.getEnclosedElements()).stream()
             .map(element -> element.getSimpleName().toString())
             .collect(Collectors.toSet())
@@ -54,10 +51,8 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
     this.annotationType = annotationType;
     this.namedValues = namedValues;
     this.elementValues =
-        Maps.toMap(
-            methodsIn(annotationType.getEnclosedElements()),
-            Functions.compose(
-                Functions.forMap(namedValues), element -> element.getSimpleName().toString()));
+        Util.asMap(methodsIn(annotationType.getEnclosedElements()),
+            element -> namedValues.get(element.getSimpleName().toString()));
   }
 
   @Override

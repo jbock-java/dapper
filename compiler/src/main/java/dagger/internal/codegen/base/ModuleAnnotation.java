@@ -18,18 +18,17 @@ package dagger.internal.codegen.base;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -37,8 +36,8 @@ import javax.lang.model.element.TypeElement;
 
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
 public final class ModuleAnnotation {
-  private static final ImmutableSet<ClassName> MODULE_ANNOTATIONS =
-      ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE);
+  private static final Set<ClassName> MODULE_ANNOTATIONS =
+      new LinkedHashSet<>(List.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE));
 
   private final Supplier<List<TypeElement>> includes = Suppliers.memoize(() ->
       includesAsAnnotationValues().stream()
@@ -118,7 +117,7 @@ public final class ModuleAnnotation {
    *     {@code false}
    */
   public static ModuleAnnotation moduleAnnotation(AnnotationMirror annotation) {
-    checkArgument(
+    Preconditions.checkArgument(
         isModuleAnnotation(annotation),
         "%s is not a Module or ProducerModule annotation",
         annotation);

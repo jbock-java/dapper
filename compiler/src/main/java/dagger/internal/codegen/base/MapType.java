@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
@@ -67,7 +65,7 @@ public final class MapType {
    * @throws IllegalStateException if {@link #isRawType()} is true.
    */
   public TypeMirror keyType() {
-    checkState(!isRawType());
+    Preconditions.checkState(!isRawType());
     return declaredMapType().getTypeArguments().get(0);
   }
 
@@ -77,7 +75,7 @@ public final class MapType {
    * @throws IllegalStateException if {@link #isRawType()} is true.
    */
   public TypeMirror valueType() {
-    checkState(!isRawType());
+    Preconditions.checkState(!isRawType());
     return declaredMapType().getTypeArguments().get(1);
   }
 
@@ -106,7 +104,7 @@ public final class MapType {
    *     framework type
    */
   public TypeMirror unwrappedFrameworkValueType() {
-    checkState(
+    Preconditions.checkState(
         valuesAreFrameworkType(), "called unwrappedFrameworkValueType() on %s", declaredMapType());
     return uncheckedUnwrappedValueType();
   }
@@ -120,11 +118,11 @@ public final class MapType {
    *     parameter
    */
   public TypeMirror unwrappedValueType(Class<?> wrappingClass) {
-    checkArgument(
+    Preconditions.checkArgument(
         wrappingClass.getTypeParameters().length == 1,
         "%s must have exactly one type parameter",
         wrappingClass);
-    checkState(valuesAreTypeOf(wrappingClass), "expected values to be %s: %s", wrappingClass, this);
+    Preconditions.checkState(valuesAreTypeOf(wrappingClass), "expected values to be %s: %s", wrappingClass, this);
     return uncheckedUnwrappedValueType();
   }
 
@@ -165,7 +163,7 @@ public final class MapType {
    * @throws IllegalArgumentException if {@code type} is not a {@link Map} type
    */
   public static MapType from(TypeMirror type) {
-    checkArgument(isMap(type), "%s is not a Map", type);
+    Preconditions.checkArgument(isMap(type), "%s is not a Map", type);
     return new MapType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
   }
 

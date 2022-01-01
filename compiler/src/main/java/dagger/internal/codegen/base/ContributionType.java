@@ -49,7 +49,7 @@ public enum ContributionType {
 
   /**
    * The contribution type from a binding element's annotations. Presumes a well-formed binding
-   * element (at most one of @IntoSet, @IntoMap, @ElementsIntoSet and @Provides.type). {@link
+   * element (at most one of @IntoSet, @IntoMap, @ElementsIntoSet and @Provides.type). {@code
    * dagger.internal.codegen.validation.BindingMethodValidator} and {@link
    * dagger.internal.codegen.validation.BindsInstanceProcessingStep} validate correctness on their
    * own.

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
@@ -147,7 +146,7 @@ public final class OptionalType {
    * @throws IllegalArgumentException if {@code type} is not an {@code Optional} type
    */
   public static OptionalType from(TypeMirror type) {
-    checkArgument(isOptional(type), "%s must be an Optional", type);
+    Preconditions.checkArgument(isOptional(type), "%s must be an Optional", type);
     return new OptionalType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
   }
 

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.squareup.javapoet.ClassName;
@@ -38,7 +37,7 @@ public final class SourceFileGenerationException extends Exception {
   SourceFileGenerationException(
       Optional<ClassName> generatedClassName, Throwable cause, Element associatedElement) {
     super(createMessage(generatedClassName, cause.getMessage()), cause);
-    this.associatedElement = checkNotNull(associatedElement);
+    this.associatedElement = Preconditions.checkNotNull(associatedElement);
   }
 
   private static String createMessage(Optional<ClassName> generatedClassName, String message) {

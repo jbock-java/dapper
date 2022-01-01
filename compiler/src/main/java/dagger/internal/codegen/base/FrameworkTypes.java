@@ -19,10 +19,11 @@ package dagger.internal.codegen.base;
 import static com.google.auto.common.MoreTypes.isType;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.Lazy;
 import dagger.MembersInjector;
 import jakarta.inject.Provider;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
@@ -31,8 +32,8 @@ import javax.lang.model.type.TypeMirror;
  * type that the framework itself defines.
  */
 public final class FrameworkTypes {
-  private static final ImmutableSet<Class<?>> PROVISION_TYPES =
-      ImmutableSet.of(Provider.class, Lazy.class, MembersInjector.class);
+  private static final Set<Class<?>> PROVISION_TYPES =
+      new LinkedHashSet<>(List.of(Provider.class, Lazy.class, MembersInjector.class));
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(TypeMirror type) {

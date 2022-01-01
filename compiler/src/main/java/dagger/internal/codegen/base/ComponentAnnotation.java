@@ -24,17 +24,18 @@ import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
@@ -53,12 +54,13 @@ public abstract class ComponentAnnotation {
 
   /** The subcomponent annotation types. */
   private static final Set<ClassName> SUBCOMPONENT_ANNOTATIONS =
-      Set.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
+      new LinkedHashSet<>(List.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT));
+
 
   // TODO(erichang): Move ComponentCreatorAnnotation into /base and use that here?
   /** The component/subcomponent creator annotation types. */
   private static final Set<ClassName> CREATOR_ANNOTATIONS =
-      Set.of(
+      new LinkedHashSet<>(List.of(
           TypeNames.COMPONENT_BUILDER,
           TypeNames.COMPONENT_FACTORY,
           TypeNames.PRODUCTION_COMPONENT_BUILDER,
@@ -66,21 +68,19 @@ public abstract class ComponentAnnotation {
           TypeNames.SUBCOMPONENT_BUILDER,
           TypeNames.SUBCOMPONENT_FACTORY,
           TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER,
-          TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY);
+          TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY));
 
   /** All component annotation types. */
-  private static final ImmutableSet<ClassName> ALL_COMPONENT_ANNOTATIONS =
-      ImmutableSet.<ClassName>builder()
-          .addAll(ROOT_COMPONENT_ANNOTATIONS)
-          .addAll(SUBCOMPONENT_ANNOTATIONS)
-          .build();
+  private static final Set<ClassName> ALL_COMPONENT_ANNOTATIONS =
+      Stream.of(ROOT_COMPONENT_ANNOTATIONS, SUBCOMPONENT_ANNOTATIONS)
+          .flatMap(Set::stream)
+          .collect(Collectors.collectingAndThen(Collectors.toList(), LinkedHashSet::new));
 
   /** All component and creator annotation types. */
-  private static final ImmutableSet<ClassName> ALL_COMPONENT_AND_CREATOR_ANNOTATIONS =
-      ImmutableSet.<ClassName>builder()
-          .addAll(ALL_COMPONENT_ANNOTATIONS)
-          .addAll(CREATOR_ANNOTATIONS)
-          .build();
+  private static final Set<ClassName> ALL_COMPONENT_AND_CREATOR_ANNOTATIONS =
+      Stream.of(ALL_COMPONENT_ANNOTATIONS, CREATOR_ANNOTATIONS)
+          .flatMap(Set::stream)
+          .collect(Collectors.collectingAndThen(Collectors.toList(), LinkedHashSet::new));
 
   /** The annotation itself. */
   public abstract AnnotationMirror annotation();
@@ -225,7 +225,7 @@ public abstract class ComponentAnnotation {
   private static final class RealComponentAnnotation extends ComponentAnnotation {
 
     final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
-        isSubcomponent() ? ImmutableList.of() : getAnnotationValues("dependencies"));
+        isSubcomponent() ? List.of() : getAnnotationValues("dependencies"));
     final Supplier<List<TypeMirror>> dependencyTypes = Suppliers.memoize(super::dependencyTypes);
     final Supplier<List<TypeElement>> dependencies = Suppliers.memoize(super::dependencies);
     final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
@@ -357,7 +357,7 @@ public abstract class ComponentAnnotation {
 
     @Override
     public List<AnnotationValue> dependencyValues() {
-      return ImmutableList.of();
+      return List.of();
     }
 
     @Override

@@ -20,6 +20,7 @@ import static com.google.auto.common.MoreElements.asExecutable;
 import static com.google.auto.common.MoreElements.hasModifiers;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -225,12 +226,11 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /** Returns the annotations present on {@code element} of all types. */
-  @SafeVarargs
-  public static ImmutableSet<AnnotationMirror> getAllAnnotations(
-      Element element, ClassName first, ClassName... rest) {
-    return ImmutableSet.copyOf(
-        Iterables.filter(
-            element.getAnnotationMirrors(), hasAnnotationTypeIn(asList(first, rest))::test));
+  public static Set<AnnotationMirror> getAllAnnotations(
+      Element element, List<ClassName> annotations) {
+    return element.getAnnotationMirrors().stream()
+        .filter(hasAnnotationTypeIn(annotations))
+        .collect(toImmutableSet());
   }
 
   // Note: This is similar to auto-common's MoreElements except using ClassName rather than Class.

@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.base;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -70,7 +71,7 @@ public final class Util {
   }
 
   public static <K, V> Map<K, V> asMap(
-      Set<K> set, Function<? super K, V> function) {
+      Collection<K> set, Function<? super K, V> function) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>((int) (set.size() * 1.5));
     for (K k : set) {
       result.put(k, function.apply(k));

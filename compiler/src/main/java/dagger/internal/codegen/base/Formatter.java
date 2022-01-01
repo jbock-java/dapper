@@ -16,10 +16,8 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkElementIndex;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import java.util.Collection;
+import java.util.function.Function;
 
 /**
  * A formatter which transforms an instance of a particular type into a string
@@ -41,12 +39,7 @@ public abstract class Formatter<T> implements Function<T, String> {
   /**
    * Performs the transformation of an object into a string representation in conformity with the
    * {@link Function}{@code <T, String>} contract, delegating to {@link #format(Object)}.
-   *
-   * @deprecated Call {@link #format(Object)} instead. This method exists to make formatters easy to
-   *     use when functions are required, but shouldn't be called directly.
    */
-  @SuppressWarnings("javadoc")
-  @Deprecated
   @Override
   public final String apply(T object) {
     return format(object);
@@ -54,17 +47,16 @@ public abstract class Formatter<T> implements Function<T, String> {
 
   /** Formats {@code items}, one per line. Stops after {@value #LIST_LIMIT} items. */
   public void formatIndentedList(
-      StringBuilder builder, Iterable<? extends T> items, int indentLevel) {
-    for (T item : Iterables.limit(items, LIST_LIMIT)) {
+      StringBuilder builder, Collection<? extends T> items, int indentLevel) {
+    items.stream().limit(LIST_LIMIT).forEach(item -> {
       String formatted = format(item);
-      if (formatted.isEmpty()) {
-        continue;
+      if (!formatted.isEmpty()) {
+        builder.append('\n');
+        appendIndent(builder, indentLevel);
+        builder.append(formatted);
       }
-      builder.append('\n');
-      appendIndent(builder, indentLevel);
-      builder.append(formatted);
-    }
-    int numberOfOtherItems = Iterables.size(items) - LIST_LIMIT;
+    });
+    int numberOfOtherItems = items.size() - LIST_LIMIT;
     if (numberOfOtherItems > 0) {
       builder.append('\n');
       appendIndent(builder, indentLevel);
@@ -82,7 +74,8 @@ public abstract class Formatter<T> implements Function<T, String> {
   }
 
   public static String formatArgumentInList(int index, int size, CharSequence name) {
-    checkElementIndex(index, size);
+    Preconditions.checkArgument(index >= 0);
+    Preconditions.checkArgument(index < size);
     StringBuilder builder = new StringBuilder();
     if (index > 0) {
       builder.append("…, ");

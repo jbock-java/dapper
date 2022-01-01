@@ -308,7 +308,7 @@ public abstract class BindingElementValidator<E extends Element> {
      * </ul>
      */
     private void checkMultibindings() {
-      ImmutableSet<AnnotationMirror> multibindingAnnotations =
+      Set<AnnotationMirror> multibindingAnnotations =
           MultibindingAnnotations.forElement(element);
 
       switch (allowsMultibindings) {

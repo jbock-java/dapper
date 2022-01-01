@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.Equivalence;
@@ -67,13 +66,6 @@ public final class SetType {
     return declaredSetType().getTypeArguments().get(0);
   }
 
-  /**
-   * {@code true} if {@link #elementType()} is a {@code clazz}.
-   */
-  public boolean elementsAreTypeOf(Class<?> clazz) {
-    return MoreTypes.isType(elementType()) && MoreTypes.isTypeOf(clazz, elementType());
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -107,7 +99,7 @@ public final class SetType {
    * @throws IllegalArgumentException if {@code type} is not a {@link Set} type
    */
   public static SetType from(TypeMirror type) {
-    checkArgument(isSet(type), "%s must be a Set", type);
+    Preconditions.checkArgument(isSet(type), "%s must be a Set", type);
     return new SetType(MoreTypes.equivalence().wrap(MoreTypes.asDeclared(type)));
   }
 

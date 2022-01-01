@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -26,6 +25,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -93,9 +93,9 @@ final class SwitchingProviders {
       ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types) {
     // Currently, the SwitchingProviders types are only added to the componentShard.
-    this.shardImplementation = checkNotNull(componentImplementation).getComponentShard();
-    this.componentBindingExpressions = checkNotNull(componentBindingExpressions);
-    this.types = checkNotNull(types);
+    this.shardImplementation = requireNonNull(componentImplementation).getComponentShard();
+    this.componentBindingExpressions = requireNonNull(componentBindingExpressions);
+    this.types = requireNonNull(types);
   }
 
   /**
@@ -133,7 +133,7 @@ final class SwitchingProviders {
     private final ClassName switchingProviderType;
 
     SwitchingProviderBuilder(ClassName switchingProviderType) {
-      this.switchingProviderType = checkNotNull(switchingProviderType);
+      this.switchingProviderType = requireNonNull(switchingProviderType);
     }
 
     Expression getProviderExpression(ContributionBinding binding, ClassName requestingClass) {

@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
+import java.util.Set;
 
 /** Static factories to create {@link AnnotationSpec}s. */
 public final class AnnotationSpecs {
@@ -44,7 +45,7 @@ public final class AnnotationSpecs {
   }
 
   /** Creates an {@link AnnotationSpec} for {@link SuppressWarnings}. */
-  public static AnnotationSpec suppressWarnings(ImmutableSet<Suppression> suppressions) {
+  public static AnnotationSpec suppressWarnings(Set<Suppression> suppressions) {
     checkArgument(!suppressions.isEmpty());
     AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
     suppressions.forEach(suppression -> builder.addMember("value", "$S", suppression.value));

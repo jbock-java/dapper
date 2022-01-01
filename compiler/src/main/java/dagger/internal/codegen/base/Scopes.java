@@ -16,20 +16,17 @@
 
 package dagger.internal.codegen.base;
 
+import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+
 import com.google.auto.common.AnnotationMirrors;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
 import jakarta.inject.Singleton;
-
-import java.util.Set;
-import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-
-import static com.google.common.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import java.util.Set;
+import javax.lang.model.element.Element;
 
 /** Common names and convenience methods for {@link Scope}s. */
 public final class Scopes {
@@ -52,8 +49,14 @@ public final class Scopes {
    * exception if there are more than one.
    */
   public static Optional<Scope> uniqueScopeOf(Element element) {
-    // TODO(ronshapiro): Use MoreCollectors.toOptional() once we can use guava-jre
-    return Optional.ofNullable(getOnlyElement(scopesOf(element), null));
+    Set<Scope> scopes = scopesOf(element);
+    if (scopes.isEmpty()) {
+      return Optional.empty();
+    }
+    if (scopes.size() >= 2) {
+      throw new IllegalArgumentException("Expecting at most one scope but found: " + scopes);
+    }
+    return Optional.of(scopes.iterator().next());
   }
 
   /**

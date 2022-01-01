@@ -16,19 +16,18 @@
 
 package dagger.internal.codegen.base;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import jakarta.inject.Provider;
 
+import java.util.Map;
 import javax.lang.model.type.TypeMirror;
 
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.isType;
 import static com.google.auto.common.MoreTypes.isTypeOf;
-import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
@@ -75,8 +74,8 @@ public final class RequestKinds {
     }
   }
 
-  private static final ImmutableMap<RequestKind, Class<?>> FRAMEWORK_CLASSES =
-      ImmutableMap.of(
+  private static final Map<RequestKind, Class<?>> FRAMEWORK_CLASSES =
+      Map.of(
           PROVIDER, Provider.class,
           LAZY, Lazy.class);
 
@@ -121,7 +120,7 @@ public final class RequestKinds {
       case PROVIDER_OF_LAZY:
         return extractKeyType(LAZY, extractKeyType(PROVIDER, type));
       default:
-        checkArgument(isType(type));
+        Preconditions.checkArgument(isType(type));
         return DaggerTypes.unwrapType(type);
     }
   }
@@ -139,7 +138,7 @@ public final class RequestKinds {
    */
   public static Class<?> frameworkClass(RequestKind requestKind) {
     Class<?> result = FRAMEWORK_CLASSES.get(requestKind);
-    checkArgument(result != null, "no framework class for %s", requestKind);
+    Preconditions.checkArgument(result != null, "no framework class for %s", requestKind);
     return result;
   }
 

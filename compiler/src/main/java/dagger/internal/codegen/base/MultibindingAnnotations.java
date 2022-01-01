@@ -18,8 +18,9 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.langmodel.DaggerElements.getAllAnnotations;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.List;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
@@ -28,8 +29,8 @@ import javax.lang.model.element.Element;
  * dagger.multibindings.ElementsIntoSet}, and {@link dagger.multibindings.IntoMap}.
  */
 public final class MultibindingAnnotations {
-  public static ImmutableSet<AnnotationMirror> forElement(Element method) {
+  public static Set<AnnotationMirror> forElement(Element method) {
     return getAllAnnotations(
-        method, TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
+        method, List.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP));
   }
 }
