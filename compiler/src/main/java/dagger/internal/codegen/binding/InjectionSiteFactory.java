@@ -23,7 +23,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
@@ -32,10 +31,12 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -63,8 +64,8 @@ final class InjectionSiteFactory {
   }
 
   /** Returns the injection sites for a type. */
-  ImmutableSortedSet<InjectionSite> getInjectionSites(DeclaredType declaredType) {
-    Set<InjectionSite> injectionSites = new HashSet<>();
+  SortedSet<InjectionSite> getInjectionSites(DeclaredType declaredType) {
+    Set<InjectionSite> injectionSites = new LinkedHashSet<>();
     List<TypeElement> ancestors = new ArrayList<>();
     InjectionSiteVisitor injectionSiteVisitor = new InjectionSiteVisitor();
     for (Optional<DeclaredType> currentType = Optional.of(declaredType);
@@ -76,7 +77,7 @@ final class InjectionSiteFactory {
         injectionSiteVisitor.visit(enclosedElement, type).ifPresent(injectionSites::add);
       }
     }
-    return ImmutableSortedSet.copyOf(
+    TreeSet<InjectionSite> result = new TreeSet<>(
         // supertypes before subtypes
         Comparator.comparing(
                 (InjectionSite injectionSite) ->
@@ -86,8 +87,10 @@ final class InjectionSiteFactory {
             .thenComparing(injectionSite -> injectionSite.element().getKind())
             // then sort by whichever element comes first in the parent
             // this isn't necessary, but makes the processor nice and predictable
-            .thenComparing(InjectionSite::element, DECLARATION_ORDER),
-        injectionSites);
+            .thenComparing(InjectionSite::element, DECLARATION_ORDER)
+    );
+    result.addAll(injectionSites);
+    return result;
   }
 
   private final class InjectionSiteVisitor

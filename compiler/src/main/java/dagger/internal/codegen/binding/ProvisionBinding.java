@@ -35,6 +35,7 @@ import dagger.model.Scope;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
@@ -53,7 +54,7 @@ public final class ProvisionBinding extends ContributionBinding {
   private final Optional<DeclaredType> nullableType;
   private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation;
   private final Set<DependencyRequest> provisionDependencies;
-  private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+  private final SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
   private final Optional<ProvisionBinding> unresolved;
   private final Optional<Scope> scope;
 
@@ -83,7 +84,7 @@ public final class ProvisionBinding extends ContributionBinding {
       Optional<DeclaredType> nullableType,
       Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation,
       Set<DependencyRequest> provisionDependencies,
-      ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
+      SortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
       Optional<ProvisionBinding> unresolved,
       Optional<Scope> scope) {
     this.contributionType = requireNonNull(contributionType);
@@ -154,7 +155,7 @@ public final class ProvisionBinding extends ContributionBinding {
    * {@link InjectionSite}s for all {@code @Inject} members if {@link #kind()} is {@link
    * BindingKind#INJECTION}, otherwise empty.
    */
-  public ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
+  public SortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
     return injectionSites;
   }
 
@@ -191,8 +192,8 @@ public final class ProvisionBinding extends ContributionBinding {
 
   public boolean shouldCheckForNull(CompilerOptions compilerOptions) {
     return KINDS_TO_CHECK_FOR_NULL.contains(kind())
-        && !contributedPrimitiveType().isPresent()
-        && !nullableType().isPresent()
+        && contributedPrimitiveType().isEmpty()
+        && nullableType().isEmpty()
         && compilerOptions.doCheckForNulls();
   }
 
@@ -238,7 +239,7 @@ public final class ProvisionBinding extends ContributionBinding {
     private Optional<DeclaredType> nullableType = Optional.empty();
     private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation = Optional.empty();
     private Set<DependencyRequest> provisionDependencies;
-    private ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+    private SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
     private Optional<Scope> scope = Optional.empty();
 
@@ -260,7 +261,7 @@ public final class ProvisionBinding extends ContributionBinding {
     }
 
     @Override
-    public Builder dependencies(Iterable<DependencyRequest> dependencies) {
+    public Builder dependencies(Set<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
     }
 
@@ -312,12 +313,12 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    Builder provisionDependencies(Iterable<DependencyRequest> provisionDependencies) {
-      this.provisionDependencies = ImmutableSet.copyOf(provisionDependencies);
+    Builder provisionDependencies(Set<DependencyRequest> provisionDependencies) {
+      this.provisionDependencies = provisionDependencies;
       return this;
     }
 
-    public Builder injectionSites(ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites) {
+    public Builder injectionSites(SortedSet<InjectionSite> injectionSites) {
       this.injectionSites = injectionSites;
       return this;
     }

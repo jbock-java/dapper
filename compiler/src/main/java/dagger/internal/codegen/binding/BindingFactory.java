@@ -16,34 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
-import dagger.Module;
-import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.DependencyRequest;
-import dagger.model.Key;
-import dagger.model.RequestKind;
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
-
-import java.util.Set;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
-import java.util.function.BiFunction;
-
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -71,6 +43,33 @@ import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
+
+import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
+import dagger.Module;
+import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.DependencyRequest;
+import dagger.model.Key;
+import dagger.model.RequestKind;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.function.BiFunction;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Binding} objects. */
 public final class BindingFactory {
@@ -131,7 +130,7 @@ public final class BindingFactory {
 
     // Collect all dependency requests within the provision method.
     // Note: we filter out @Assisted parameters since these aren't considered dependency requests.
-    ImmutableSet.Builder<DependencyRequest> provisionDependencies = ImmutableSet.builder();
+    Set<DependencyRequest> provisionDependencies = new LinkedHashSet<>();
     for (int i = 0; i < constructorElement.getParameters().size(); i++) {
       VariableElement parameter = constructorElement.getParameters().get(i);
       TypeMirror parameterType = constructorType.getParameterTypes().get(i);
@@ -147,7 +146,7 @@ public final class BindingFactory {
             .contributionType(ContributionType.UNIQUE)
             .bindingElement(constructorElement)
             .key(key)
-            .provisionDependencies(provisionDependencies.build())
+            .provisionDependencies(provisionDependencies)
             .injectionSites(injectionSiteFactory.getInjectionSites(constructedType))
             .kind(
                 isAnnotationPresent(constructorElement, AssistedInject.class)
@@ -188,7 +187,7 @@ public final class BindingFactory {
         .key(Key.builder(factoryType).build())
         .bindingElement(factory)
         .provisionDependencies(
-            ImmutableSet.of(
+            Set.of(
                 DependencyRequest.builder()
                     .key(Key.builder(factoryMethodType.getReturnType()).build())
                     .kind(RequestKind.PROVIDER)
@@ -327,7 +326,7 @@ public final class BindingFactory {
   /**
    * Returns a {@link dagger.model.BindingKind#SUBCOMPONENT_CREATOR} binding declared by a component
    * method that returns a subcomponent builder. Use {{@link
-   * #subcomponentCreatorBinding(ImmutableSet)}} for bindings declared using {@link
+   * #subcomponentCreatorBinding(Set)}} for bindings declared using {@link
    * Module#subcomponents()}.
    *
    * @param component the component that declares or inherits the method
@@ -352,7 +351,7 @@ public final class BindingFactory {
    * Module#subcomponents()}.
    */
   ProvisionBinding subcomponentCreatorBinding(
-      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations) {
+      Set<SubcomponentDeclaration> subcomponentDeclarations) {
     SubcomponentDeclaration subcomponentDeclaration = subcomponentDeclarations.iterator().next();
     return ProvisionBinding.builder()
         .contributionType(ContributionType.UNIQUE)
@@ -420,7 +419,7 @@ public final class BindingFactory {
   ContributionBinding syntheticOptionalBinding(
       Key key,
       RequestKind requestKind,
-      ImmutableCollection<? extends Binding> underlyingKeyBindings) {
+      Collection<? extends Binding> underlyingKeyBindings) {
     if (underlyingKeyBindings.isEmpty()) {
       return ProvisionBinding.builder()
           .contributionType(ContributionType.UNIQUE)
@@ -470,7 +469,7 @@ public final class BindingFactory {
           types.erasure(declaredType));
       declaredType = resolved;
     }
-    ImmutableSortedSet<InjectionSite> injectionSites =
+    SortedSet<InjectionSite> injectionSites =
         injectionSiteFactory.getInjectionSites(declaredType);
     Set<DependencyRequest> dependencies =
         injectionSites.stream()

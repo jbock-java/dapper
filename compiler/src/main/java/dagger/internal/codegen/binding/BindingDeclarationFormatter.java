@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static javax.lang.model.element.ElementKind.PARAMETER;
@@ -25,10 +24,11 @@ import static javax.lang.model.type.TypeKind.EXECUTABLE;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.Formatter;
 import jakarta.inject.Inject;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -37,8 +37,8 @@ import javax.lang.model.type.TypeKind;
  * Formats a {@link BindingDeclaration} into a {@link String} suitable for use in error messages.
  */
 public final class BindingDeclarationFormatter extends Formatter<BindingDeclaration> {
-  private static final ImmutableSet<TypeKind> FORMATTABLE_ELEMENT_TYPE_KINDS =
-      immutableEnumSet(EXECUTABLE, DECLARED);
+  private static final Set<TypeKind> FORMATTABLE_ELEMENT_TYPE_KINDS =
+      EnumSet.of(EXECUTABLE, DECLARED);
 
   private final MethodSignatureFormatter methodSignatureFormatter;
 

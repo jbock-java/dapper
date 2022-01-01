@@ -31,7 +31,11 @@ import dagger.internal.codegen.base.SetType;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -145,10 +149,10 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    * ContributionBinding}.
    */
   public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {
-    public abstract B dependencies(Iterable<DependencyRequest> dependencies);
+    public abstract B dependencies(Set<DependencyRequest> dependencies);
 
     public B dependencies(DependencyRequest... dependencies) {
-      return dependencies(asList(dependencies));
+      return dependencies(new LinkedHashSet<>(List.of(dependencies)));
     }
 
     public abstract B unresolved(C unresolved);

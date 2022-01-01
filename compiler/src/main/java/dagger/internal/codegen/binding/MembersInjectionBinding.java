@@ -30,6 +30,7 @@ import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -43,7 +44,7 @@ public final class MembersInjectionBinding extends Binding {
   private final Set<DependencyRequest> explicitDependencies;
   private final TypeElement membersInjectedType;
   private final Optional<MembersInjectionBinding> unresolved;
-  private final ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
+  private final SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
 
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(key(),
@@ -57,7 +58,7 @@ public final class MembersInjectionBinding extends Binding {
       Set<DependencyRequest> explicitDependencies,
       TypeElement membersInjectedType,
       Optional<MembersInjectionBinding> unresolved,
-      ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites) {
+      SortedSet<InjectionSite> injectionSites) {
     this.key = requireNonNull(key);
     this.explicitDependencies = requireNonNull(explicitDependencies);
     this.membersInjectedType = requireNonNull(membersInjectedType);
@@ -90,7 +91,7 @@ public final class MembersInjectionBinding extends Binding {
   }
 
   /** The set of individual sites where {@code Inject} is applied. */
-  public ImmutableSortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
+  public SortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
     return injectionSites;
   }
 
