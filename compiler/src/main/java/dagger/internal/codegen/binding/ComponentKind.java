@@ -16,17 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
-import static java.util.EnumSet.allOf;
 
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
-
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -94,10 +90,10 @@ public enum ComponentKind {
   }
 
   /** Returns the kinds of modules that can be used with a component of this kind. */
-  public ImmutableSet<ModuleKind> legalModuleKinds() {
+  public Set<ModuleKind> legalModuleKinds() {
     return isProducer()
-        ? immutableEnumSet(allOf(ModuleKind.class))
-        : immutableEnumSet(ModuleKind.MODULE);
+        ? EnumSet.allOf(ModuleKind.class)
+        : EnumSet.of(ModuleKind.MODULE);
   }
 
   /** Returns the kinds of subcomponents a component of this kind can have. */
@@ -106,8 +102,7 @@ public enum ComponentKind {
   }
 
   /**
-   * Returns {@code true} if the descriptor is for a root component (not a subcomponent) or is for
-   * {@linkplain #isForModuleValidation() module-validation}.
+   * Returns {@code true} if the descriptor is for a root component (not a subcomponent).
    */
   public boolean isRoot() {
     return isRoot;
@@ -116,10 +111,5 @@ public enum ComponentKind {
   /** Returns true if this is a production component. */
   public boolean isProducer() {
     return production;
-  }
-
-  /** Returns {@code true} if the descriptor is for a module in order to validate its bindings. */
-  public boolean isForModuleValidation() {
-    return this == ComponentKind.MODULE;
   }
 }

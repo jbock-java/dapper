@@ -16,27 +16,30 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-
-import com.google.common.base.Ascii;
+import java.util.Locale;
 
 /** Enumeration of the different kinds of component creators. */
 public enum ComponentCreatorKind {
   /** {@code @Component.Builder} or one of its subcomponent/production variants. */
-  BUILDER,
+  BUILDER("Builder"),
 
   /** {@code @Component.Factory} or one of its subcomponent/production variants. */
-  FACTORY,
+  FACTORY("Factory"),
   ;
+
+  private final String typeName;
+
+  ComponentCreatorKind(String typeName) {
+    this.typeName = typeName;
+  }
 
   /** Name to use as (or as part of) a type name for a creator of this kind. */
   public String typeName() {
-    return UPPER_UNDERSCORE.to(UPPER_CAMEL, name());
+    return typeName;
   }
 
   /** Name to use for a component's static method returning a creator of this kind. */
   public String methodName() {
-    return Ascii.toLowerCase(name());
+    return name().toLowerCase(Locale.ROOT);
   }
 }

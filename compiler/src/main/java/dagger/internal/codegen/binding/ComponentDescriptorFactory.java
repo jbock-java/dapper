@@ -18,10 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
@@ -36,6 +35,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -222,7 +222,7 @@ public final class ComponentDescriptorFactory {
             types.asMemberOf(MoreTypes.asDeclared(componentElement.asType()), componentMethod));
     TypeMirror returnType = resolvedComponentMethod.getReturnType();
     if (returnType.getKind().equals(DECLARED)
-        && !injectionAnnotations.getQualifier(componentMethod).isPresent()) {
+        && injectionAnnotations.getQualifier(componentMethod).isEmpty()) {
       TypeElement returnTypeElement = asTypeElement(returnType);
       if (subcomponentAnnotation(returnTypeElement).isPresent()) {
         // It's a subcomponent factory method. There is no dependency request, and there could be
@@ -237,7 +237,7 @@ public final class ComponentDescriptorFactory {
 
     switch (componentMethod.getParameters().size()) {
       case 0:
-        checkArgument(
+        Preconditions.checkArgument(
             !returnType.getKind().equals(VOID),
             "component method cannot be void: %s",
             componentMethod);
@@ -247,7 +247,7 @@ public final class ComponentDescriptorFactory {
         break;
 
       case 1:
-        checkArgument(
+        Preconditions.checkArgument(
             returnType.getKind().equals(VOID)
                 || MoreTypes.equivalence()
                 .equivalent(returnType, resolvedComponentMethod.getParameterTypes().get(0)),

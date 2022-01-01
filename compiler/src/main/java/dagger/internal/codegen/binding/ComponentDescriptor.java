@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.Suppliers.memoizeInt;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
@@ -34,13 +31,12 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -219,9 +215,9 @@ public final class ComponentDescriptor {
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
   public ComponentRequirement getDependencyThatDefinesMethod(Element method) {
-    checkArgument(
+    Preconditions.checkArgument(
         method instanceof ExecutableElement, "method must be an executable element: %s", method);
-    return checkNotNull(
+    return Preconditions.checkNotNull(
         dependenciesByDependencyMethod().get(method), "no dependency implements %s", method);
   }
 
@@ -295,7 +291,7 @@ public final class ComponentDescriptor {
 
   /** Returns the child component with the given builder type. */
   ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
-    return checkNotNull(
+    return Preconditions.checkNotNull(
         childComponentsByBuilderType.get().get(builderType),
         "no child component found for builder type %s",
         builderType.getQualifiedName());
@@ -391,7 +387,7 @@ public final class ComponentDescriptor {
      * return type, this is the equivalent of {@code methodElement().getReturnType()}.
      */
     public TypeMirror resolvedReturnType(DaggerTypes types) {
-      checkState(dependencyRequest().isPresent());
+      Preconditions.checkState(dependencyRequest().isPresent());
 
       TypeMirror returnType = methodElement().getReturnType();
       if (returnType.getKind().isPrimitive() || returnType.getKind().equals(VOID)) {
