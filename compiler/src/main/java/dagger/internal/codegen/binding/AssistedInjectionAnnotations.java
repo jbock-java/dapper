@@ -148,13 +148,13 @@ public final class AssistedInjectionAnnotations {
         .collect(toImmutableSet());
   }
 
-  public static ImmutableList<VariableElement> assistedParameters(Binding binding) {
+  public static List<VariableElement> assistedParameters(Binding binding) {
     return binding.kind() == BindingKind.ASSISTED_INJECTION
         ? assistedParameters(asExecutable(binding.bindingElement().get()))
-        : ImmutableList.of();
+        : List.of();
   }
 
-  private static ImmutableList<VariableElement> assistedParameters(ExecutableElement constructor) {
+  private static List<VariableElement> assistedParameters(ExecutableElement constructor) {
     return constructor.getParameters().stream()
         .filter(AssistedInjectionAnnotations::isAssistedParameter)
         .collect(toImmutableList());

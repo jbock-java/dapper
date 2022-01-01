@@ -43,7 +43,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Represents a {@link com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
+ * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
  */
 abstract class MemberSelect {
 
@@ -96,7 +96,7 @@ abstract class MemberSelect {
         case PROVISION:
           TypeMirror keyType = contributionBinding.key().type();
           if (keyType.getKind().equals(DECLARED)) {
-            ImmutableList<TypeVariableName> typeVariables =
+            List<TypeVariableName> typeVariables =
                 bindingTypeElementTypeVariableNames(contributionBinding);
             if (!typeVariables.isEmpty()) {
               List<? extends TypeMirror> typeArguments =

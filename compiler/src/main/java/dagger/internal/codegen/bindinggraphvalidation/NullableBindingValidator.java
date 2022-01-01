@@ -24,11 +24,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.model.Binding;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.DependencyEdge;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,7 +65,7 @@ final class NullableBindingValidator implements BindingGraphPlugin {
     return "Dagger/Nullable";
   }
 
-  private ImmutableList<dagger.model.Binding> nullableBindings(BindingGraph bindingGraph) {
+  private List<Binding> nullableBindings(BindingGraph bindingGraph) {
     return bindingGraph.bindings().stream()
         .filter(binding -> binding.isNullable())
         .collect(toImmutableList());

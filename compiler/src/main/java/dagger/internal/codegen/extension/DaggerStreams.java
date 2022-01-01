@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,8 +44,8 @@ public final class DaggerStreams {
    * ImmutableList}, in encounter order.
    */
   // TODO(b/68008628): Use ImmutableList.toImmutableList().
-  public static <T> Collector<T, ?, ImmutableList<T>> toImmutableList() {
-    return collectingAndThen(toList(), ImmutableList::copyOf);
+  public static <T> Collector<T, ?, List<T>> toImmutableList() {
+    return Collectors.toList();
   }
 
   /**

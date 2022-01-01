@@ -84,7 +84,6 @@ import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -185,7 +184,7 @@ public final class ComponentImplementation {
    */
   private static ImmutableMap<Binding, ShardImplementation> createShardsByBinding(
       ShardImplementation componentShard, BindingGraph graph, CompilerOptions compilerOptions) {
-    ImmutableList<ImmutableList<Binding>> partitions = bindingPartitions(graph, compilerOptions);
+    List<List<Binding>> partitions = bindingPartitions(graph, compilerOptions);
     ImmutableMap.Builder<Binding, ShardImplementation> builder = ImmutableMap.builder();
     for (int i = 0; i < partitions.size(); i++) {
       ShardImplementation shard = i == 0 ? componentShard : componentShard.createShard("Shard" + i);
@@ -194,20 +193,20 @@ public final class ComponentImplementation {
     return builder.build();
   }
 
-  private static ImmutableList<ImmutableList<Binding>> bindingPartitions(
+  private static List<List<Binding>> bindingPartitions(
       BindingGraph graph, CompilerOptions compilerOptions) {
     int bindingsPerShard = compilerOptions.keysPerComponentShard(graph.componentTypeElement());
     int maxPartitions = (graph.localBindingNodes().size() / bindingsPerShard) + 1;
     if (maxPartitions <= 1) {
-      return ImmutableList.of(
+      return List.of(
           graph.localBindingNodes().stream().map(BindingNode::delegate).collect(toImmutableList()));
     }
 
     // Iterate through all SCCs in order until all bindings local to this component are partitioned.
     List<Binding> currPartition = new ArrayList<>(bindingsPerShard);
-    ImmutableList.Builder<ImmutableList<Binding>> partitions =
-        ImmutableList.builderWithExpectedSize(maxPartitions);
-    for (ImmutableSet<Node> nodes : graph.topLevelBindingGraph().stronglyConnectedNodes()) {
+    List<List<Binding>> partitions =
+        new ArrayList<>((int) (1.5 * maxPartitions));
+    for (Set<Node> nodes : graph.topLevelBindingGraph().stronglyConnectedNodes()) {
       nodes.stream()
           .flatMap(instancesOf(BindingNode.class))
           .filter(bindingNode -> bindingNode.componentPath().equals(graph.componentPath()))
@@ -219,14 +218,10 @@ public final class ComponentImplementation {
       }
     }
     if (!currPartition.isEmpty()) {
-      partitions.add(ImmutableList.copyOf(currPartition));
+      partitions.add(List.copyOf(currPartition));
     }
-    return partitions.build();
+    return partitions;
   }
-
-  /** The boolean parameter of the onProducerFutureCancelled method. */
-  public static final ParameterSpec MAY_INTERRUPT_IF_RUNNING_PARAM =
-      ParameterSpec.builder(boolean.class, "mayInterruptIfRunning").build();
 
   /**
    * How many statements per {@code initialize()} or {@code onProducerFutureCancelled()} method
@@ -310,7 +305,7 @@ public final class ComponentImplementation {
   }
 
   /** Returns the fields for all components in the component path except the current component. */
-  public ImmutableList<FieldSpec> creatorComponentFields() {
+  public List<FieldSpec> creatorComponentFields() {
     return componentFieldsByImplementation.entrySet().stream()
         .filter(entry -> !this.equals(entry.getKey()))
         .map(Map.Entry::getValue)
@@ -441,7 +436,6 @@ public final class ComponentImplementation {
     private final UniqueNameSet componentFieldNames = new UniqueNameSet();
     private final UniqueNameSet componentMethodNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
-    private final Map<Key, CodeBlock> cancellations = new LinkedHashMap<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
     private final ImmutableMap<ComponentRequirement, ParameterSpec> constructorParameters;
     private final ListMultimap<FieldSpecKind, FieldSpec> fieldSpecsMap =
@@ -573,14 +567,6 @@ public final class ComponentImplementation {
     /** Adds the given code block that initializes a {@link ComponentRequirement}. */
     void addComponentRequirementInitialization(CodeBlock codeBlock) {
       componentRequirementInitializations.add(codeBlock);
-    }
-
-    /**
-     * Adds the given cancellation statement to the cancellation listener method of the component.
-     */
-    void addCancellation(Key key, CodeBlock codeBlock) {
-      // Store cancellations by key to avoid adding the same cancellation twice.
-      cancellations.putIfAbsent(key, codeBlock);
     }
 
     /** Returns a new, unique field name for the component based on the given name. */
@@ -822,7 +808,7 @@ public final class ComponentImplementation {
       // yet whether a field will end up needing to be created for a specific requirement, and we
       // don't want to create a field that ends up only being used during initialization.
       CodeBlock args = parameterNames(parameters);
-      ImmutableList<MethodSpec> initializationMethods =
+      List<MethodSpec> initializationMethods =
           createPartitionedMethods(
               "initialize",
               makeFinal(parameters),
@@ -859,7 +845,7 @@ public final class ComponentImplementation {
      * STATEMENTS_PER_METHOD} statements in it and such that the returned methods, if called in
      * order, will execute the {@code statements} in the given order.
      */
-    private ImmutableList<MethodSpec> createPartitionedMethods(
+    private List<MethodSpec> createPartitionedMethods(
         String methodName,
         Iterable<ParameterSpec> parameters,
         List<CodeBlock> statements,
@@ -888,7 +874,7 @@ public final class ComponentImplementation {
     }
   }
 
-  private static ImmutableList<ParameterSpec> makeFinal(List<ParameterSpec> parameters) {
+  private static List<ParameterSpec> makeFinal(List<ParameterSpec> parameters) {
     return parameters.stream()
         .map(param -> param.toBuilder().addModifiers(FINAL).build())
         .collect(toImmutableList());

@@ -168,10 +168,10 @@ public class SourceFiles {
 
   public static TypeName parameterizedGeneratedTypeNameForBinding(Binding binding) {
     ClassName className = generatedClassNameForBinding(binding);
-    ImmutableList<TypeVariableName> typeParameters = bindingTypeElementTypeVariableNames(binding);
+    List<TypeVariableName> typeParameters = bindingTypeElementTypeVariableNames(binding);
     return typeParameters.isEmpty()
         ? className
-        : ParameterizedTypeName.get(className, Iterables.toArray(typeParameters, TypeName.class));
+        : ParameterizedTypeName.get(className, typeParameters.toArray(new TypeName[0]));
   }
 
   public static ClassName membersInjectorNameForType(TypeElement typeElement) {
@@ -223,14 +223,14 @@ public class SourceFiles {
     }
   }
 
-  public static ImmutableList<TypeVariableName> bindingTypeElementTypeVariableNames(
+  public static List<TypeVariableName> bindingTypeElementTypeVariableNames(
       Binding binding) {
     if (binding instanceof ContributionBinding) {
       ContributionBinding contributionBinding = (ContributionBinding) binding;
       if (!(contributionBinding.kind() == INJECTION
           || contributionBinding.kind() == ASSISTED_INJECTION)
           && !contributionBinding.requiresModuleInstance()) {
-        return ImmutableList.of();
+        return List.of();
       }
     }
     List<? extends TypeParameterElement> typeParameters =

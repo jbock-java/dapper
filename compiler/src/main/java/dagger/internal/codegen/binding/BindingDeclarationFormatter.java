@@ -25,10 +25,10 @@ import static javax.lang.model.type.TypeKind.EXECUTABLE;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.Formatter;
 import jakarta.inject.Inject;
+import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -100,7 +100,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
   }
 
   private String formatSubcomponentDeclaration(SubcomponentDeclaration subcomponentDeclaration) {
-    ImmutableList<TypeElement> moduleSubcomponents =
+    List<TypeElement> moduleSubcomponents =
         subcomponentDeclaration.moduleAnnotation().subcomponents();
     int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType());
     StringBuilder annotationValue = new StringBuilder();

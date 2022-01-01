@@ -19,7 +19,6 @@ package dagger.internal.codegen.base;
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -35,21 +34,21 @@ public final class MoreAnnotationValues {
    *
    * @throws IllegalArgumentException unless {@code annotationValue} represents an array
    */
-  public static ImmutableList<AnnotationValue> asAnnotationValues(AnnotationValue annotationValue) {
+  public static List<AnnotationValue> asAnnotationValues(AnnotationValue annotationValue) {
     return annotationValue.accept(AS_ANNOTATION_VALUES, null);
   }
 
-  private static final AnnotationValueVisitor<ImmutableList<AnnotationValue>, String>
+  private static final AnnotationValueVisitor<List<AnnotationValue>, String>
       AS_ANNOTATION_VALUES =
-      new SimpleAnnotationValueVisitor8<ImmutableList<AnnotationValue>, String>() {
+      new SimpleAnnotationValueVisitor8<>() {
         @Override
-        public ImmutableList<AnnotationValue> visitArray(
+        public List<AnnotationValue> visitArray(
             List<? extends AnnotationValue> vals, String elementName) {
-          return ImmutableList.copyOf(vals);
+          return List.copyOf(vals);
         }
 
         @Override
-        protected ImmutableList<AnnotationValue> defaultAction(Object o, String elementName) {
+        protected List<AnnotationValue> defaultAction(Object o, String elementName) {
           throw new IllegalArgumentException(elementName + " is not an array: " + o);
         }
       };

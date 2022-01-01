@@ -23,6 +23,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.Equivalence;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Name;
@@ -64,7 +65,7 @@ public final class MoreAnnotationMirrors {
    *
    * @throws IllegalArgumentException unless that member represents an array of types
    */
-  public static ImmutableList<TypeMirror> getTypeListValue(
+  public static List<TypeMirror> getTypeListValue(
       AnnotationMirror annotationMirror, String name) {
     return asAnnotationValues(getAnnotationValue(annotationMirror, name))
         .stream()

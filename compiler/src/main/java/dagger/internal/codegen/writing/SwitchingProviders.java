@@ -48,8 +48,10 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Provider;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.lang.model.type.TypeMirror;
@@ -193,11 +195,11 @@ final class SwitchingProviders {
       return builder.addMethod(constructor.build()).build();
     }
 
-    private ImmutableList<MethodSpec> getMethods() {
-      ImmutableList<CodeBlock> switchCodeBlockPartitions = switchCodeBlockPartitions();
+    private List<MethodSpec> getMethods() {
+      List<CodeBlock> switchCodeBlockPartitions = switchCodeBlockPartitions();
       if (switchCodeBlockPartitions.size() == 1) {
         // There are less than MAX_CASES_PER_SWITCH cases, so no need for extra get methods.
-        return ImmutableList.of(
+        return List.of(
             methodBuilder("get")
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressWarnings(UNCHECKED))
@@ -215,7 +217,7 @@ final class SwitchingProviders {
               .returns(T)
               .beginControlFlow("switch (id / $L)", MAX_CASES_PER_SWITCH);
 
-      ImmutableList.Builder<MethodSpec> getMethods = ImmutableList.builder();
+      List<MethodSpec> getMethods = new ArrayList<>();
       for (int i = 0; i < switchCodeBlockPartitions.size(); i++) {
         MethodSpec method =
             methodBuilder("get" + i)
@@ -230,10 +232,11 @@ final class SwitchingProviders {
 
       routerMethod.addStatement("default: throw new $T(id)", AssertionError.class).endControlFlow();
 
-      return getMethods.add(routerMethod.build()).build();
+      getMethods.add(routerMethod.build());
+      return getMethods;
     }
 
-    private ImmutableList<CodeBlock> switchCodeBlockPartitions() {
+    private List<CodeBlock> switchCodeBlockPartitions() {
       return Lists.partition(ImmutableList.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
           .stream()
           .map(

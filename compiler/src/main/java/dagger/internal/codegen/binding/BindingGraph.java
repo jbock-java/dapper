@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
@@ -24,10 +23,11 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.model.BindingGraph.Edge;
+import static dagger.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -42,15 +42,18 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
+import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.Key;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -62,16 +65,16 @@ import javax.lang.model.element.VariableElement;
  */
 public final class BindingGraph {
 
-  private final Supplier<ImmutableList<BindingGraph>> subgraphs = memoize(() ->
+  private final Supplier<List<BindingGraph>> subgraphs = memoize(() ->
       topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
           .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
           .collect(toImmutableList()));
 
-  private final dagger.model.BindingGraph.ComponentNode componentNode;
+  private final ComponentNode componentNode;
   private final dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph;
 
   private BindingGraph(
-      dagger.model.BindingGraph.ComponentNode componentNode,
+      ComponentNode componentNode,
       dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph) {
     this.componentNode = requireNonNull(componentNode);
     this.topLevelBindingGraph = requireNonNull(topLevelBindingGraph);
@@ -103,7 +106,9 @@ public final class BindingGraph {
   public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
 
     private final Supplier<ImmutableListMultimap<ComponentPath, BindingNode>> bindingsByComponent = memoize(() ->
-        Multimaps.index(transform(bindings(), BindingNode.class::cast), Node::componentPath));
+        Multimaps.index(bindings().stream().map(BindingNode.class::cast).collect(Collectors.toList()),
+            Node::componentPath));
+
     private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
       Map<Node, Integer> nodeOrderMap = Maps.newHashMapWithExpectedSize(network().nodes().size());
       int i = 0;
@@ -112,6 +117,7 @@ public final class BindingGraph {
       }
       return Comparator.comparing(nodeOrderMap::get);
     });
+
     private final Supplier<ImmutableSet<ImmutableSet<Node>>> stronglyConnectedNodes = memoize(() -> TarjanSCCs.compute(
         ImmutableSet.copyOf(network().nodes()),
         // NetworkBuilder does not have a stable successor order, so we have to roll our own
@@ -199,26 +205,26 @@ public final class BindingGraph {
 
   private static final class NodesByClass {
     final Set<dagger.model.Binding> bindings;
-    final Set<dagger.model.BindingGraph.MissingBinding> missingBindings;
+    final Set<MissingBinding> missingBindings;
     final Set<ComponentNode> componentNodes;
 
     NodesByClass(
         Set<dagger.model.Binding> bindings,
-        Set<dagger.model.BindingGraph.MissingBinding> missingBindings,
+        Set<MissingBinding> missingBindings,
         Set<ComponentNode> componentNodes) {
       this.bindings = bindings;
       this.missingBindings = missingBindings;
       this.componentNodes = componentNodes;
     }
 
-    static NodesByClass create(ImmutableNetwork<dagger.model.BindingGraph.Node, dagger.model.BindingGraph.Edge> network) {
+    static NodesByClass create(ImmutableNetwork<Node, Edge> network) {
       Set<dagger.model.Binding> bindings = network.nodes().stream()
           .filter(node -> node instanceof dagger.model.Binding)
           .map(dagger.model.Binding.class::cast)
           .collect(toCollection(LinkedHashSet::new));
-      Set<dagger.model.BindingGraph.MissingBinding> missingBindings = network.nodes().stream()
-          .filter(node -> node instanceof dagger.model.BindingGraph.MissingBinding)
-          .map(dagger.model.BindingGraph.MissingBinding.class::cast)
+      Set<MissingBinding> missingBindings = network.nodes().stream()
+          .filter(node -> node instanceof MissingBinding)
+          .map(MissingBinding.class::cast)
           .collect(toCollection(LinkedHashSet::new));
       Set<ComponentNode> componentNodes = network.nodes().stream()
           .filter(node -> node instanceof ComponentNode)
@@ -298,7 +304,7 @@ public final class BindingGraph {
   private Set<TypeElement> bindingModules;
 
   /** Returns the {@link ComponentNode} for this graph. */
-  public dagger.model.BindingGraph.ComponentNode componentNode() {
+  public ComponentNode componentNode() {
     return componentNode;
   }
 
@@ -430,12 +436,12 @@ public final class BindingGraph {
         .collect(toImmutableSet());
   }
 
-  public ImmutableList<BindingGraph> subgraphs() {
+  public List<BindingGraph> subgraphs() {
     return subgraphs.get();
   }
 
   /** Returns the list of all {@link BindingNode}s local to this component. */
-  public ImmutableList<BindingNode> localBindingNodes() {
+  public List<BindingNode> localBindingNodes() {
     return topLevelBindingGraph().bindingsByComponent().get(componentPath());
   }
 }

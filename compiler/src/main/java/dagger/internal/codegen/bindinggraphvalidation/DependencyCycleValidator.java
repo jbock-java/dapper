@@ -51,6 +51,8 @@ import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -173,14 +175,15 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   private String errorMessage(Cycle<Node> cycle, BindingGraph graph) {
     StringBuilder message = new StringBuilder("Found a dependency cycle:");
-    ImmutableList<DependencyRequest> cycleRequests =
+    List<DependencyRequest> cycleRequests =
         cycle.endpointPairs().stream()
             // TODO(dpb): Would be nice to take the dependency graph here.
             .map(endpointPair -> nonCycleBreakingEdge(endpointPair, graph))
             .map(DependencyEdge::dependencyRequest)
-            .collect(toImmutableList())
-            .reverse();
-    dependencyRequestFormatter.formatIndentedList(message, cycleRequests, 0);
+            .collect(toImmutableList());
+    ArrayList<DependencyRequest> reversed = new ArrayList<>(cycleRequests);
+    Collections.reverse(reversed);
+    dependencyRequestFormatter.formatIndentedList(message, reversed, 0);
     return message.toString();
   }
 

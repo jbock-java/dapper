@@ -70,12 +70,6 @@ public final class ConfigurationAnnotations {
     return isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
   }
 
-  // Dagger 1 support.
-  public static ImmutableList<TypeMirror> getModuleInjects(AnnotationMirror moduleAnnotation) {
-    checkNotNull(moduleAnnotation);
-    return getTypeListValue(moduleAnnotation, "injects");
-  }
-
   /** Returns the first type that specifies this' nullability, or empty if none. */
   public static Optional<DeclaredType> getNullableType(Element element) {
     List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();

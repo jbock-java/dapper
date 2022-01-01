@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
@@ -39,22 +40,22 @@ public final class ModuleAnnotation {
   private static final ImmutableSet<ClassName> MODULE_ANNOTATIONS =
       ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE);
 
-  private final Supplier<ImmutableList<TypeElement>> includes = Suppliers.memoize(() ->
+  private final Supplier<List<TypeElement>> includes = Suppliers.memoize(() ->
       includesAsAnnotationValues().stream()
           .map(MoreAnnotationValues::asType)
           .map(MoreTypes::asTypeElement)
           .collect(toImmutableList()));
 
-  private final Supplier<ImmutableList<AnnotationValue>> includesAsAnnotationValues = Suppliers.memoize(() ->
+  private final Supplier<List<AnnotationValue>> includesAsAnnotationValues = Suppliers.memoize(() ->
       asAnnotationValues(getAnnotationValue(annotation(), "includes")));
 
-  private final Supplier<ImmutableList<TypeElement>> subcomponents = Suppliers.memoize(() ->
+  private final Supplier<List<TypeElement>> subcomponents = Suppliers.memoize(() ->
       subcomponentsAsAnnotationValues().stream()
           .map(MoreAnnotationValues::asType)
           .map(MoreTypes::asTypeElement)
           .collect(toImmutableList()));
 
-  private final Supplier<ImmutableList<AnnotationValue>> subcomponentsAsAnnotationValues = Suppliers.memoize(() ->
+  private final Supplier<List<AnnotationValue>> subcomponentsAsAnnotationValues = Suppliers.memoize(() ->
       asAnnotationValues(getAnnotationValue(annotation(), "subcomponents")));
 
   public ModuleAnnotation(AnnotationMirror annotation) {
@@ -80,12 +81,12 @@ public final class ModuleAnnotation {
    *
    * @throws IllegalArgumentException if any of the values are error types
    */
-  public ImmutableList<TypeElement> includes() {
+  public List<TypeElement> includes() {
     return includes.get();
   }
 
   /** The values specified in the {@code includes} attribute. */
-  public ImmutableList<AnnotationValue> includesAsAnnotationValues() {
+  public List<AnnotationValue> includesAsAnnotationValues() {
     return includesAsAnnotationValues.get();
   }
 
@@ -94,12 +95,12 @@ public final class ModuleAnnotation {
    *
    * @throws IllegalArgumentException if any of the values are error types
    */
-  public ImmutableList<TypeElement> subcomponents() {
+  public List<TypeElement> subcomponents() {
     return subcomponents.get();
   }
 
   /** The values specified in the {@code subcomponents} attribute. */
-  public ImmutableList<AnnotationValue> subcomponentsAsAnnotationValues() {
+  public List<AnnotationValue> subcomponentsAsAnnotationValues() {
     return subcomponentsAsAnnotationValues.get();
   }
 
