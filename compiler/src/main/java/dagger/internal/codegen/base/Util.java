@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -77,5 +78,15 @@ public final class Util {
       result.put(k, function.apply(k));
     }
     return result;
+  }
+
+  public static <E> E getOnlyElement(Collection<E> collection) {
+    if (collection.isEmpty()) {
+      throw new IllegalArgumentException("Expecting exactly one element but found empty list");
+    }
+    if (collection.size() >= 2) {
+      throw new IllegalArgumentException("Expecting exactly one element but found: " + collection);
+    }
+    return collection.iterator().next();
   }
 }

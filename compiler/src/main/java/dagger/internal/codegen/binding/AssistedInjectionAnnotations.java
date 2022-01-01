@@ -21,9 +21,8 @@ import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
@@ -36,12 +35,12 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -62,7 +61,8 @@ public final class AssistedInjectionAnnotations {
   /** Returns the factory method for the given factory {@link TypeElement}. */
   public static ExecutableElement assistedFactoryMethod(
       TypeElement factory, DaggerElements elements) {
-    return getOnlyElement(assistedFactoryMethods(factory, elements));
+    Set<ExecutableElement> executableElements = assistedFactoryMethods(factory, elements);
+    return getOnlyElement(executableElements);
   }
 
   /** Returns the list of abstract factory methods for the given factory {@link TypeElement}. */
@@ -95,7 +95,7 @@ public final class AssistedInjectionAnnotations {
    */
   public static ImmutableList<ParameterSpec> assistedParameterSpecs(
       Binding binding, DaggerTypes types) {
-    checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
+    Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
     ExecutableElement constructor = asExecutable(binding.bindingElement().get());
     ExecutableType constructorType =
         asExecutable(types.asMemberOf(asDeclared(binding.key().type()), constructor));
@@ -126,7 +126,7 @@ public final class AssistedInjectionAnnotations {
    */
   public static ImmutableList<ParameterSpec> assistedFactoryParameterSpecs(
       Binding binding, DaggerElements elements, DaggerTypes types) {
-    checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
+    Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
 
     AssistedFactoryMetadata metadata =
         AssistedFactoryMetadata.create(binding.bindingElement().get().asType(), elements, types);

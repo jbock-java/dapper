@@ -20,7 +20,6 @@ import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
-import static java.util.stream.StreamSupport.stream;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import com.google.auto.common.MoreElements;
@@ -30,7 +29,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-
+import java.util.Collection;
 import java.util.stream.Collector;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
@@ -54,17 +53,16 @@ public final class CodeBlocks {
   }
 
   /** Returns a comma-separated version of {@code codeBlocks} as one unified {@link CodeBlock}. */
-  public static CodeBlock makeParametersCodeBlock(Iterable<CodeBlock> codeBlocks) {
-    return stream(codeBlocks.spliterator(), false).collect(toParametersCodeBlock());
+  public static CodeBlock makeParametersCodeBlock(Collection<CodeBlock> codeBlocks) {
+    return codeBlocks.stream().collect(toParametersCodeBlock());
   }
 
   /**
    * Returns a comma-separated {@link CodeBlock} using the name of every parameter in {@code
    * parameters}.
    */
-  public static CodeBlock parameterNames(Iterable<ParameterSpec> parameters) {
-    // TODO(ronshapiro): Add DaggerStreams.stream(Iterable)
-    return stream(parameters.spliterator(), false)
+  public static CodeBlock parameterNames(Collection<ParameterSpec> parameters) {
+    return parameters.stream()
         .map(p -> CodeBlock.of("$N", p))
         .collect(toParametersCodeBlock());
   }
@@ -73,8 +71,8 @@ public final class CodeBlocks {
    * Returns one unified {@link CodeBlock} which joins each item in {@code codeBlocks} with a
    * newline.
    */
-  public static CodeBlock concat(Iterable<CodeBlock> codeBlocks) {
-    return stream(codeBlocks.spliterator(), false).collect(toConcatenatedCodeBlock());
+  public static CodeBlock concat(Collection<CodeBlock> codeBlocks) {
+    return codeBlocks.stream().collect(toConcatenatedCodeBlock());
   }
 
   /** Adds an annotation to a method. */
@@ -119,10 +117,6 @@ public final class CodeBlocks {
 
   public static CodeBlock type(TypeMirror type) {
     return CodeBlock.of("$T", type);
-  }
-
-  public static CodeBlock stringLiteral(String toWrap) {
-    return CodeBlock.of("$S", toWrap);
   }
 
   /** Returns a javadoc {@literal @link} tag that poins to the given {@link ExecutableElement}. */

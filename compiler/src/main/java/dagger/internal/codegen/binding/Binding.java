@@ -16,29 +16,27 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Suppliers.memoize;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 /**
  * An abstract type for classes representing a Dagger binding. Particularly, contains the {@link
@@ -53,7 +51,7 @@ public abstract class Binding extends BindingDeclaration {
    * #contributingModule()}.
    */
   public boolean requiresModuleInstance() {
-    if (!bindingElement().isPresent() || !contributingModule().isPresent()) {
+    if (bindingElement().isEmpty() || contributingModule().isEmpty()) {
       return false;
     }
     Set<Modifier> modifiers = bindingElement().get().getModifiers();
@@ -88,18 +86,18 @@ public abstract class Binding extends BindingDeclaration {
    * The set of {@link DependencyRequest dependencies} that are added by the framework rather than a
    * user-defined injection site. This returns an unmodifiable set.
    */
-  public ImmutableSet<DependencyRequest> implicitDependencies() {
-    return ImmutableSet.of();
+  public Set<DependencyRequest> implicitDependencies() {
+    return Set.of();
   }
 
-  private final Supplier<ImmutableSet<DependencyRequest>> dependencies =
+  private final Supplier<Set<DependencyRequest>> dependencies =
       memoize(
           () -> {
-            ImmutableSet<DependencyRequest> implicitDependencies = implicitDependencies();
-            return ImmutableSet.copyOf(
+            Set<DependencyRequest> implicitDependencies = implicitDependencies();
+            return Set.copyOf(
                 implicitDependencies.isEmpty()
                     ? explicitDependencies()
-                    : Sets.union(implicitDependencies, explicitDependencies()));
+                    : Util.union(implicitDependencies, explicitDependencies()));
           });
 
   /**
@@ -107,7 +105,7 @@ public abstract class Binding extends BindingDeclaration {
    * union of {@link #explicitDependencies()} and {@link #implicitDependencies()}. This returns an
    * unmodifiable set.
    */
-  public final ImmutableSet<DependencyRequest> dependencies() {
+  public final Set<DependencyRequest> dependencies() {
     return dependencies.get();
   }
 
@@ -130,22 +128,22 @@ public abstract class Binding extends BindingDeclaration {
       return false;
     }
 
-    List<TypeMirror> defaultTypes = Lists.newArrayList();
+    List<TypeMirror> defaultTypes = new ArrayList<>();
     for (TypeParameterElement parameter : element.getTypeParameters()) {
       defaultTypes.add(parameter.asType());
     }
 
     List<TypeMirror> actualTypes =
         type.accept(
-            new SimpleTypeVisitor6<List<TypeMirror>, Void>() {
+            new SimpleTypeVisitor9<List<TypeMirror>, Void>() {
               @Override
               protected List<TypeMirror> defaultAction(TypeMirror e, Void p) {
-                return ImmutableList.of();
+                return List.of();
               }
 
               @Override
               public List<TypeMirror> visitDeclared(DeclaredType t, Void p) {
-                return ImmutableList.<TypeMirror>copyOf(t.getTypeArguments());
+                return List.copyOf(t.getTypeArguments());
               }
             },
             null);
