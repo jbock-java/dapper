@@ -23,16 +23,16 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.SetMultimap;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -44,7 +44,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementKindVisitor8;
+import javax.lang.model.util.ElementKindVisitor9;
 
 /** A factory for {@link Binding} objects. */
 final class InjectionSiteFactory {
@@ -94,9 +94,9 @@ final class InjectionSiteFactory {
   }
 
   private final class InjectionSiteVisitor
-      extends ElementKindVisitor8<Optional<InjectionSite>, DeclaredType> {
-    private final SetMultimap<String, ExecutableElement> subclassMethodMap =
-        LinkedHashMultimap.create();
+      extends ElementKindVisitor9<Optional<InjectionSite>, DeclaredType> {
+    private final Map<String, Set<ExecutableElement>> subclassMethodMap =
+        new LinkedHashMap<>();
 
     InjectionSiteVisitor() {
       super(Optional.empty());
@@ -105,7 +105,13 @@ final class InjectionSiteFactory {
     @Override
     public Optional<InjectionSite> visitExecutableAsMethod(
         ExecutableElement method, DeclaredType type) {
-      subclassMethodMap.put(method.getSimpleName().toString(), method);
+      subclassMethodMap.compute(method.getSimpleName().toString(), (name, methods) -> {
+        if (methods == null) {
+          methods = new LinkedHashSet<>();
+        }
+        methods.add(method);
+        return methods;
+      });
       if (!shouldBeInjected(method)) {
         return Optional.empty();
       }
@@ -115,7 +121,7 @@ final class InjectionSiteFactory {
       // methods with the same name.
       String methodName = method.getSimpleName().toString();
       TypeElement enclosingType = MoreElements.asType(method.getEnclosingElement());
-      for (ExecutableElement subclassMethod : subclassMethodMap.get(methodName)) {
+      for (ExecutableElement subclassMethod : subclassMethodMap.getOrDefault(methodName, Set.of())) {
         if (method != subclassMethod && elements.overrides(subclassMethod, method, enclosingType)) {
           return Optional.empty();
         }

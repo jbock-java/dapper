@@ -25,8 +25,6 @@ import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import jakarta.inject.Inject;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -224,14 +222,11 @@ public final class MembersInjectionBinding extends Binding {
     }
 
     public static InjectionSite field(VariableElement element, DependencyRequest dependency) {
-      return new InjectionSite(
-          Kind.FIELD, element, Set.of(dependency));
+      return new InjectionSite(Kind.FIELD, element, Set.of(dependency));
     }
 
-    public static InjectionSite method(
-        ExecutableElement element, List<DependencyRequest> dependencies) {
-      return new InjectionSite(
-          Kind.METHOD, element, new LinkedHashSet<>(dependencies));
+    public static InjectionSite method(ExecutableElement element, Set<DependencyRequest> dependencies) {
+      return new InjectionSite(Kind.METHOD, element, dependencies);
     }
   }
 }
