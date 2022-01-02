@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.Objects.requireNonNull;
@@ -29,6 +27,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
@@ -229,7 +228,7 @@ public final class ComponentRequirement {
   public static ComponentRequirement forDependency(TypeMirror type) {
     return new ComponentRequirement(
         Kind.DEPENDENCY,
-        MoreTypes.equivalence().wrap(checkNotNull(type)),
+        MoreTypes.equivalence().wrap(requireNonNull(type)),
         Optional.empty(),
         Optional.empty(),
         simpleVariableName(MoreTypes.asTypeElement(type)));
@@ -238,7 +237,7 @@ public final class ComponentRequirement {
   public static ComponentRequirement forModule(TypeMirror type) {
     return new ComponentRequirement(
         Kind.MODULE,
-        MoreTypes.equivalence().wrap(checkNotNull(type)),
+        MoreTypes.equivalence().wrap(requireNonNull(type)),
         Optional.empty(),
         Optional.empty(),
         simpleVariableName(MoreTypes.asTypeElement(type)));
@@ -254,7 +253,7 @@ public final class ComponentRequirement {
   }
 
   public static ComponentRequirement forBoundInstance(ContributionBinding binding) {
-    checkArgument(binding.kind().equals(BindingKind.BOUND_INSTANCE));
+    Preconditions.checkArgument(binding.kind().equals(BindingKind.BOUND_INSTANCE));
     return forBoundInstance(
         binding.key(),
         binding.nullableType().isPresent(),
