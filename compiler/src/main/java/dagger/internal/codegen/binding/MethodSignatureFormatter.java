@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
 import java.util.Iterator;
@@ -107,7 +107,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
           .append(method.getSimpleName());
     }
     builder.append('(');
-    checkState(method.getParameters().size() == methodType.getParameterTypes().size());
+    Preconditions.checkState(method.getParameters().size() == methodType.getParameterTypes().size());
     Iterator<? extends VariableElement> parameters = method.getParameters().iterator();
     Iterator<? extends TypeMirror> parameterTypes = methodType.getParameterTypes().iterator();
     for (int i = 0; parameters.hasNext(); i++) {

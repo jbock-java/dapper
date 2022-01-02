@@ -20,13 +20,13 @@ import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -153,7 +153,7 @@ public final class MembersInjectionBinding extends Binding {
   public static final class InjectionSite {
     private final MembersInjectionBinding.InjectionSite.Kind kind;
     private final Element element;
-    private final ImmutableSet<DependencyRequest> dependencies;
+    private final Set<DependencyRequest> dependencies;
     private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(
         kind(),
         element(),
@@ -163,7 +163,7 @@ public final class MembersInjectionBinding extends Binding {
     InjectionSite(
         MembersInjectionBinding.InjectionSite.Kind kind,
         Element element,
-        ImmutableSet<DependencyRequest> dependencies) {
+        Set<DependencyRequest> dependencies) {
       this.kind = kind;
       this.element = element;
       this.dependencies = dependencies;
@@ -193,7 +193,7 @@ public final class MembersInjectionBinding extends Binding {
       return element;
     }
 
-    public ImmutableSet<DependencyRequest> dependencies() {
+    public Set<DependencyRequest> dependencies() {
       return dependencies;
     }
 
@@ -225,13 +225,13 @@ public final class MembersInjectionBinding extends Binding {
 
     public static InjectionSite field(VariableElement element, DependencyRequest dependency) {
       return new InjectionSite(
-          Kind.FIELD, element, ImmutableSet.of(dependency));
+          Kind.FIELD, element, Set.of(dependency));
     }
 
     public static InjectionSite method(
-        ExecutableElement element, Iterable<DependencyRequest> dependencies) {
+        ExecutableElement element, List<DependencyRequest> dependencies) {
       return new InjectionSite(
-          Kind.METHOD, element, ImmutableSet.copyOf(dependencies));
+          Kind.METHOD, element, new LinkedHashSet<>(dependencies));
     }
   }
 }

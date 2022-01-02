@@ -18,10 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.MapKeyAccessibility.isMapKeyPubliclyAccessible;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.SourceFiles.elementBasedClassName;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -35,6 +34,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import dagger.MapKey;
 import dagger.internal.codegen.base.MapKeyAccessibility;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.NoSuchElementException;
@@ -65,7 +65,7 @@ public final class MapKeys {
     Set<? extends AnnotationMirror> mapKeys = getMapKeys(bindingElement);
     return mapKeys.isEmpty()
         ? Optional.empty()
-        : Optional.<AnnotationMirror>of(getOnlyElement(mapKeys));
+        : Optional.of(getOnlyElement(mapKeys));
   }
 
   /** Returns all of the {@link MapKey} annotations that annotate {@code bindingElement}. */
@@ -82,7 +82,7 @@ public final class MapKeys {
    */
   static Optional<? extends AnnotationValue> unwrapValue(AnnotationMirror mapKey) {
     MapKey mapKeyAnnotation = mapKey.getAnnotationType().asElement().getAnnotation(MapKey.class);
-    checkArgument(
+    Preconditions.checkArgument(
         mapKeyAnnotation != null, "%s is not annotated with @MapKey", mapKey.getAnnotationType());
     return mapKeyAnnotation.unwrapValue()
         ? Optional.of(getOnlyElement(getAnnotationValuesWithDefaults(mapKey).values()))
@@ -105,7 +105,7 @@ public final class MapKeys {
    */
   public static DeclaredType getUnwrappedMapKeyType(
       final DeclaredType mapKeyAnnotationType, final DaggerTypes types) {
-    checkArgument(
+    Preconditions.checkArgument(
         MoreTypes.asTypeElement(mapKeyAnnotationType).getKind() == ElementKind.ANNOTATION_TYPE,
         "%s is not an annotation type",
         mapKeyAnnotationType);

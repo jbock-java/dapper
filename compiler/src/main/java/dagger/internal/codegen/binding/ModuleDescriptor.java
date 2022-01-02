@@ -20,8 +20,6 @@ import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
@@ -42,6 +40,7 @@ import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
@@ -54,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -240,18 +240,18 @@ public final class ModuleDescriptor {
     }
 
     /** Returns all the modules transitively included by given modules, including the arguments. */
-    ImmutableSet<ModuleDescriptor> transitiveModules(Iterable<TypeElement> modules) {
+    ImmutableSet<ModuleDescriptor> transitiveModules(Set<TypeElement> modules) {
       return ImmutableSet.copyOf(
           Traverser.forGraph(
-                  (ModuleDescriptor module) -> transform(module.includedModules(), this::create))
-              .depthFirstPreOrder(transform(modules, this::create)));
+                  (ModuleDescriptor module) -> module.includedModules().stream().map(this::create).collect(Collectors.toList()))
+              .depthFirstPreOrder(modules.stream().map(this::create).collect(Collectors.toList())));
     }
 
     private Set<TypeElement> collectIncludedModules(
         Set<TypeElement> includedModules, TypeElement moduleElement) {
       TypeMirror superclass = moduleElement.getSuperclass();
       if (!superclass.getKind().equals(NONE)) {
-        verify(superclass.getKind().equals(DECLARED));
+        Preconditions.checkState(superclass.getKind().equals(DECLARED));
         TypeElement superclassElement = MoreTypes.asTypeElement(superclass);
         if (!superclassElement.getQualifiedName().contentEquals(Object.class.getCanonicalName())) {
           collectIncludedModules(includedModules, superclassElement);
