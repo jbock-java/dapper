@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -37,8 +34,14 @@ import javax.lang.model.type.TypeMirror;
 /** One of the core types initialized as fields in a generated component. */
 public enum FrameworkType {
   /** A {@code Provider}. */
-  PROVIDER,
+  PROVIDER("Provider"),
   ;
+
+  private final String stringRepresentation;
+
+  FrameworkType(String stringRepresentation) {
+    this.stringRepresentation = stringRepresentation;
+  }
 
   /** Returns the framework type appropriate for fields for a given binding type. */
   public static FrameworkType forBindingType(BindingType bindingType) {
@@ -136,6 +139,6 @@ public enum FrameworkType {
 
   @Override
   public String toString() {
-    return UPPER_UNDERSCORE.to(UPPER_CAMEL, super.toString());
+    return stringRepresentation;
   }
 }

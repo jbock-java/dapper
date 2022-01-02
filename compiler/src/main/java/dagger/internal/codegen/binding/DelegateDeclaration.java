@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static java.util.Objects.requireNonNull;
@@ -28,6 +27,7 @@ import com.google.common.collect.Iterables;
 import dagger.Binds;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
@@ -140,7 +140,7 @@ public final class DelegateDeclaration extends BindingDeclaration
 
     public DelegateDeclaration create(
         ExecutableElement bindsMethod, TypeElement contributingModule) {
-      checkArgument(MoreElements.isAnnotationPresent(bindsMethod, Binds.class));
+      Preconditions.checkArgument(MoreElements.isAnnotationPresent(bindsMethod, Binds.class));
       ExecutableType resolvedMethod =
           MoreTypes.asExecutable(
               types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), bindsMethod));

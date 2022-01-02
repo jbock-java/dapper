@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.model.BindingKind.MEMBERS_INJECTOR;
 
-import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -118,7 +117,8 @@ public final class FrameworkField {
 
         @Override
         public String visitType(TypeElement e, Binding p) {
-          return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, e.getSimpleName().toString());
+          String name = e.getSimpleName().toString();
+          return Character.toLowerCase(name.charAt(0)) + name.substring(1);
         }
 
         @Override

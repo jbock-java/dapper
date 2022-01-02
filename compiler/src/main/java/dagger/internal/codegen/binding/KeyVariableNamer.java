@@ -16,22 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import java.util.Iterator;
+import java.util.Set;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.SimpleTypeVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 /**
  * Suggests a variable name for a type based on a {@link Key}. Prefer {@link
@@ -39,8 +37,8 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  */
 public final class KeyVariableNamer {
   /** Simple names that are very common. Inspired by https://errorprone.info/bugpattern/BadImport */
-  private static final ImmutableSet<String> VERY_SIMPLE_NAMES =
-      ImmutableSet.of(
+  private static final Set<String> VERY_SIMPLE_NAMES =
+      Set.of(
           "Builder",
           "Factory",
           "Component",
@@ -48,7 +46,7 @@ public final class KeyVariableNamer {
           "Injector");
 
   private static final TypeVisitor<Void, StringBuilder> TYPE_NAMER =
-      new SimpleTypeVisitor8<Void, StringBuilder>() {
+      new SimpleTypeVisitor9<>() {
         @Override
         public Void visitDeclared(DeclaredType declaredType, StringBuilder builder) {
           TypeElement element = MoreTypes.asTypeElement(declaredType);
@@ -74,7 +72,8 @@ public final class KeyVariableNamer {
 
         @Override
         public Void visitPrimitive(PrimitiveType type, StringBuilder builder) {
-          builder.append(LOWER_CAMEL.to(UPPER_CAMEL, type.toString()));
+          String str = type.toString();
+          builder.append(Character.toUpperCase(str.charAt(0))).append(str.substring(1));
           return null;
         }
 
@@ -91,7 +90,9 @@ public final class KeyVariableNamer {
 
   public static String name(Key key) {
     if (key.multibindingContributionIdentifier().isPresent()) {
-      return key.multibindingContributionIdentifier().get().bindingElement();
+      @SuppressWarnings("deprecation")
+      String bindingElement = key.multibindingContributionIdentifier().get().bindingElement();
+      return bindingElement;
     }
 
     StringBuilder builder = new StringBuilder();
@@ -103,6 +104,6 @@ public final class KeyVariableNamer {
 
     key.type().accept(TYPE_NAMER, builder);
 
-    return protectAgainstKeywords(UPPER_CAMEL.to(LOWER_CAMEL, builder.toString()));
+    return protectAgainstKeywords(Character.toLowerCase(builder.charAt(0)) + builder.substring(1));
   }
 }

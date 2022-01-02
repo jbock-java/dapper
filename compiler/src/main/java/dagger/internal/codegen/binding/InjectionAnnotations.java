@@ -17,13 +17,12 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.SuperficialValidation;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
+import dagger.internal.codegen.extension.DaggerStreams;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,13 +44,13 @@ public final class InjectionAnnotations {
     if (!SuperficialValidation.validateElement(e)) {
       throw new TypeNotPresentException(e.toString(), null);
     }
-    checkNotNull(e);
+    requireNonNull(e);
     Collection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
     switch (qualifierAnnotations.size()) {
       case 0:
         return Optional.empty();
       case 1:
-        return Optional.<AnnotationMirror>of(qualifierAnnotations.iterator().next());
+        return Optional.of(qualifierAnnotations.iterator().next());
       default:
         throw new IllegalArgumentException(
             e + " was annotated with more than one @Qualifier annotation");
@@ -65,9 +64,9 @@ public final class InjectionAnnotations {
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
-  public static ImmutableSet<ExecutableElement> injectedConstructors(TypeElement type) {
-    return FluentIterable.from(constructorsIn(type.getEnclosedElements()))
+  public static Set<ExecutableElement> injectedConstructors(TypeElement type) {
+    return constructorsIn(type.getEnclosedElements()).stream()
         .filter(constructor -> isAnnotationPresent(constructor, Inject.class))
-        .toSet();
+        .collect(DaggerStreams.toImmutableSet());
   }
 }

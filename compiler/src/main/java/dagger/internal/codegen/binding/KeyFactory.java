@@ -18,12 +18,11 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import com.google.auto.common.MoreTypes;
@@ -33,6 +32,7 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -62,8 +62,8 @@ public final class KeyFactory {
   @Inject
   KeyFactory(
       DaggerTypes types, DaggerElements elements, InjectionAnnotations injectionAnnotations) {
-    this.types = checkNotNull(types);
-    this.elements = checkNotNull(elements);
+    this.types = requireNonNull(types);
+    this.elements = requireNonNull(elements);
     this.injectionAnnotations = injectionAnnotations;
   }
 
@@ -87,13 +87,13 @@ public final class KeyFactory {
   }
 
   Key forComponentMethod(ExecutableElement componentMethod) {
-    checkArgument(componentMethod.getKind().equals(METHOD));
+    Preconditions.checkArgument(componentMethod.getKind().equals(METHOD));
     return forMethod(componentMethod, componentMethod.getReturnType());
   }
 
   Key forSubcomponentCreatorMethod(
       ExecutableElement subcomponentCreatorMethod, DeclaredType declaredContainer) {
-    checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
+    Preconditions.checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
     ExecutableType resolvedMethod =
         asExecutable(types.asMemberOf(declaredContainer, subcomponentCreatorMethod));
     return Key.builder(resolvedMethod.getReturnType()).build();
@@ -110,13 +110,13 @@ public final class KeyFactory {
 
   /** Returns the key bound by a {@link Binds} method. */
   Key forBindsMethod(ExecutableElement method, TypeElement contributingModule) {
-    checkArgument(isAnnotationPresent(method, Binds.class));
+    Preconditions.checkArgument(isAnnotationPresent(method, Binds.class));
     return forBindingMethod(method, contributingModule, Optional.empty());
   }
 
   /** Returns the base key bound by a {@link BindsOptionalOf} method. */
   Key forBindsOptionalOfMethod(ExecutableElement method, TypeElement contributingModule) {
-    checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
+    Preconditions.checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
     return forBindingMethod(method, contributingModule, Optional.empty());
   }
 
@@ -124,7 +124,7 @@ public final class KeyFactory {
       ExecutableElement method,
       TypeElement contributingModule,
       Optional<TypeElement> frameworkType) {
-    checkArgument(method.getKind().equals(METHOD));
+    Preconditions.checkArgument(method.getKind().equals(METHOD));
     ExecutableType methodType =
         MoreTypes.asExecutable(
             types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), method));
@@ -147,7 +147,7 @@ public final class KeyFactory {
    * even for maps used by {@code Producer}s.
    */
   Key forMultibindsMethod(ExecutableType executableType, ExecutableElement method) {
-    checkArgument(method.getKind().equals(METHOD), "%s must be a method", method);
+    Preconditions.checkArgument(method.getKind().equals(METHOD), "%s must be a method", method);
     TypeMirror returnType = executableType.getReturnType();
     TypeMirror keyType =
         MapType.isMap(returnType)
@@ -176,7 +176,7 @@ public final class KeyFactory {
             : mapOf(mapKeyType, returnType);
       case SET_VALUES:
         // TODO(gak): do we want to allow people to use "covariant return" here?
-        checkArgument(SetType.isSet(returnType));
+        Preconditions.checkArgument(SetType.isSet(returnType));
         return returnType;
     }
     throw new AssertionError();
@@ -262,7 +262,7 @@ public final class KeyFactory {
    * Converts a {@link Key} of type {@code Map<K, V>} to {@code Map<K, Provider<V>>}.
    */
   private Key wrapMapValue(Key key, Class<?> newWrappingClass) {
-    checkArgument(
+    Preconditions.checkArgument(
         FrameworkTypes.isFrameworkType(elements.getTypeElement(newWrappingClass).asType()));
     return wrapMapKey(key, newWrappingClass).get();
   }
@@ -279,7 +279,7 @@ public final class KeyFactory {
    */
   public Optional<Key> rewrapMapKey(
       Key possibleMapKey, Class<?> currentWrappingClass, Class<?> newWrappingClass) {
-    checkArgument(!currentWrappingClass.equals(newWrappingClass));
+    Preconditions.checkArgument(!currentWrappingClass.equals(newWrappingClass));
     if (MapType.isMap(possibleMapKey)) {
       MapType mapType = MapType.from(possibleMapKey);
       if (!mapType.isRawType() && mapType.valuesAreTypeOf(currentWrappingClass)) {

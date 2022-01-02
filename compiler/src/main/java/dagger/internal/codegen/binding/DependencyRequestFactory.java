@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.Lazy;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
@@ -25,6 +24,7 @@ import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 
+import java.util.LinkedHashSet;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -64,27 +64,27 @@ public final class DependencyRequestFactory {
     this.injectionAnnotations = injectionAnnotations;
   }
 
-  ImmutableSet<DependencyRequest> forRequiredResolvedVariables(
+  Set<DependencyRequest> forRequiredResolvedVariables(
       List<? extends VariableElement> variables, List<? extends TypeMirror> resolvedTypes) {
     checkState(resolvedTypes.size() == variables.size());
-    ImmutableSet.Builder<DependencyRequest> builder = ImmutableSet.builder();
+    Set<DependencyRequest> builder = new LinkedHashSet<>();
     for (int i = 0; i < variables.size(); i++) {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
     }
-    return builder.build();
+    return builder;
   }
 
   /**
    * Creates synthetic dependency requests for each individual multibinding contribution in {@code
    * multibindingContributions}.
    */
-  ImmutableSet<DependencyRequest> forMultibindingContributions(
+  Set<DependencyRequest> forMultibindingContributions(
       Key multibindingKey, Iterable<ContributionBinding> multibindingContributions) {
-    ImmutableSet.Builder<DependencyRequest> requests = ImmutableSet.builder();
+    Set<DependencyRequest> requests = new LinkedHashSet<>();
     for (ContributionBinding multibindingContribution : multibindingContributions) {
       requests.add(forMultibindingContribution(multibindingKey, multibindingContribution));
     }
-    return requests.build();
+    return requests;
   }
 
   /** Creates a synthetic dependency request for one individual {@code multibindingContribution}. */
@@ -166,7 +166,7 @@ public final class DependencyRequestFactory {
     checkNotNull(membersInjectionMethodType);
     Optional<AnnotationMirror> qualifier =
         injectionAnnotations.getQualifier(membersInjectionMethod);
-    checkArgument(!qualifier.isPresent());
+    checkArgument(qualifier.isEmpty());
     TypeMirror membersInjectedType = getOnlyElement(membersInjectionMethodType.getParameterTypes());
     return DependencyRequest.builder()
         .kind(MEMBERS_INJECTION)

@@ -16,14 +16,12 @@
 
 package dagger.internal.codegen.binding;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import dagger.internal.codegen.base.ComponentAnnotation;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -87,7 +85,7 @@ public final class ErrorMessages {
       super(transformation);
     }
 
-    public final String moreThanOne() {
+    public String moreThanOne() {
       return process("@Component has more than one @Component.Builder or @Component.Factory: %s");
     }
   }
@@ -204,7 +202,7 @@ public final class ErrorMessages {
           buildMethod.getSimpleName(),
           returnType,
           component.getQualifiedName(),
-          Joiner.on(", ").join(additionalMethods));
+          additionalMethods.stream().map(ExecutableElement::toString).collect(Collectors.joining(", ")));
     }
 
     public final String bindsInstanceNotAllowedOnBothSetterMethodAndParameter() {
