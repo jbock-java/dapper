@@ -16,8 +16,7 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableCollection;
@@ -25,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import java.util.Objects;
@@ -173,7 +173,7 @@ final class ResolvedBindings {
 
   /** The component that owns {@code binding}. */
   TypeElement owningComponent(ContributionBinding binding) {
-    checkArgument(
+    Preconditions.checkArgument(
         contributionBindings().contains(binding),
         "binding is not resolved for %s: %s",
         key(),

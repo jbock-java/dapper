@@ -20,13 +20,14 @@ import static com.google.auto.common.AnnotationMirrors.getAnnotationElementAndVa
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -114,8 +115,8 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       this.keyFactory = keyFactory;
     }
 
-    ImmutableSet<SubcomponentDeclaration> forModule(TypeElement module) {
-      ImmutableSet.Builder<SubcomponentDeclaration> declarations = ImmutableSet.builder();
+    Set<SubcomponentDeclaration> forModule(TypeElement module) {
+      Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
       ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).get();
       Element subcomponentAttribute =
           getAnnotationElementAndValue(moduleAnnotation.annotation(), "subcomponents").getKey();
@@ -129,7 +130,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
                 subcomponent,
                 moduleAnnotation));
       }
-      return declarations.build();
+      return declarations;
     }
   }
 }

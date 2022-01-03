@@ -17,7 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import dagger.BindsOptionalOf;

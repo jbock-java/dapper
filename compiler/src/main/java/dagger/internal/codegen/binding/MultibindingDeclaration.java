@@ -17,13 +17,14 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -126,7 +127,7 @@ public final class MultibindingDeclaration extends BindingDeclaration
     /** A multibinding declaration for a {@link Multibinds @Multibinds} method. */
     MultibindingDeclaration forMultibindsMethod(
         ExecutableElement moduleMethod, TypeElement moduleElement) {
-      checkArgument(isAnnotationPresent(moduleMethod, Multibinds.class));
+      Preconditions.checkArgument(isAnnotationPresent(moduleMethod, Multibinds.class));
       return forDeclaredMethod(
           moduleMethod,
           MoreTypes.asExecutable(
