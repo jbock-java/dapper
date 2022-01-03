@@ -59,7 +59,7 @@ public class BindsOptionalOfMethodValidationTest {
   @Test
   public void notInModule() {
     assertThatMethodInUnannotatedClass("@BindsOptionalOf abstract Object notInModule();")
-        .hasError("within a @Module or @ProducerModule");
+        .hasError("within a @Module");
   }
 
   @Test

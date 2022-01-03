@@ -21,8 +21,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.EnumSet;
@@ -35,9 +33,7 @@ import javax.lang.model.element.TypeElement;
 public enum ModuleKind {
   /** {@code @Module} */
   MODULE(TypeNames.MODULE),
-
-  /** {@code @ProducerModule} */
-  PRODUCER_MODULE(TypeNames.PRODUCER_MODULE);
+  ;
 
   /** Returns the annotations for modules of the given kinds. */
   public static Set<ClassName> annotationsFor(Set<ModuleKind> kinds) {
@@ -90,12 +86,10 @@ public enum ModuleKind {
   }
 
   /** Returns the kinds of modules that a module of this kind is allowed to include. */
-  public ImmutableSet<ModuleKind> legalIncludedModuleKinds() {
+  public Set<ModuleKind> legalIncludedModuleKinds() {
     switch (this) {
       case MODULE:
-        return Sets.immutableEnumSet(MODULE);
-      case PRODUCER_MODULE:
-        return Sets.immutableEnumSet(MODULE, PRODUCER_MODULE);
+        return EnumSet.of(MODULE);
     }
     throw new AssertionError(this);
   }

@@ -16,50 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.auto.common.Visibility;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multimaps;
-import com.squareup.javapoet.ClassName;
-import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.binding.BindingGraphFactory;
-import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
-import dagger.internal.codegen.binding.ComponentDescriptorFactory;
-import dagger.internal.codegen.binding.MethodSignatureFormatter;
-import dagger.internal.codegen.binding.ModuleKind;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.BindingGraph;
-import jakarta.inject.Inject;
-import jakarta.inject.Scope;
-import jakarta.inject.Singleton;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.Visibility.PRIVATE;
@@ -84,19 +40,60 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
+import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
+import com.google.auto.common.Visibility;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
+import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.binding.BindingGraphFactory;
+import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import dagger.internal.codegen.binding.ComponentDescriptorFactory;
+import dagger.internal.codegen.binding.MethodSignatureFormatter;
+import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.BindingGraph;
+import jakarta.inject.Inject;
+import jakarta.inject.Scope;
+import jakarta.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.SimpleAnnotationValueVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor8;
+
 /**
  * A {@linkplain ValidationReport validator} for {@link dagger.Module}s.
  */
 @Singleton
 public final class ModuleValidator {
   private static final Set<ClassName> SUBCOMPONENT_TYPES =
-      Set.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
+      Set.of(TypeNames.SUBCOMPONENT);
   private static final Set<ClassName> SUBCOMPONENT_CREATOR_TYPES =
       Set.of(
           TypeNames.SUBCOMPONENT_BUILDER,
-          TypeNames.SUBCOMPONENT_FACTORY,
-          TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER,
-          TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY);
+          TypeNames.SUBCOMPONENT_FACTORY);
 
   private final DaggerTypes types;
   private final DaggerElements elements;

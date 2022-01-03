@@ -26,7 +26,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
@@ -35,12 +34,9 @@ import com.google.common.collect.Sets;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ModuleDescriptor;
-import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
-import java.util.Collection;
-import java.util.Formatter;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -70,7 +66,6 @@ final class ComponentHierarchyValidator {
       validateScopeHierarchy(
           report, componentDescriptor, LinkedHashMultimap.<ComponentDescriptor, Scope>create());
     }
-    validateProductionModuleUniqueness(report, componentDescriptor, LinkedHashMultimap.create());
     return report.build();
   }
 
@@ -162,43 +157,6 @@ final class ComponentHierarchyValidator {
           compilerOptions.scopeCycleValidationType().diagnosticKind().get(),
           subject.typeElement());
     }
-  }
-
-  private void validateProductionModuleUniqueness(
-      ValidationReport.Builder<TypeElement> report,
-      ComponentDescriptor componentDescriptor,
-      SetMultimap<ComponentDescriptor, ModuleDescriptor> producerModulesByComponent) {
-    Set<ModuleDescriptor> producerModules =
-        componentDescriptor.modules().stream()
-            .filter(module -> module.kind().equals(ModuleKind.PRODUCER_MODULE))
-            .collect(toImmutableSet());
-
-    producerModulesByComponent.putAll(componentDescriptor, producerModules);
-    for (ComponentDescriptor childComponent : componentDescriptor.childComponents()) {
-      validateProductionModuleUniqueness(report, childComponent, producerModulesByComponent);
-    }
-    producerModulesByComponent.removeAll(componentDescriptor);
-
-
-    SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules =
-        Multimaps.filterValues(producerModulesByComponent, producerModules::contains);
-    if (repeatedModules.isEmpty()) {
-      return;
-    }
-
-    StringBuilder error = new StringBuilder();
-    Formatter formatter = new Formatter(error);
-
-    formatter.format("%s repeats @ProducerModules:", componentDescriptor.typeElement());
-
-    for (Map.Entry<ComponentDescriptor, Collection<ModuleDescriptor>> entry :
-        repeatedModules.asMap().entrySet()) {
-      formatter.format("\n  %s also installs: ", entry.getKey().typeElement());
-      COMMA_SEPARATED_JOINER
-          .appendTo(error, Iterables.transform(entry.getValue(), m -> m.moduleElement()));
-    }
-
-    report.addError(error.toString());
   }
 
   private void validateRepeatedScopedDeclarations(

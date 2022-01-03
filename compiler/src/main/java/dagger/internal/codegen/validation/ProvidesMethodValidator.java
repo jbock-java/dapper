@@ -21,12 +21,12 @@ import static dagger.internal.codegen.validation.BindingElementValidator.AllowsS
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_CONCRETE;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.RUNTIME_EXCEPTION;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
 
 /** A validator for {@link dagger.Provides} methods. */
@@ -42,7 +42,7 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
         elements,
         types,
         TypeNames.PROVIDES,
-        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
+        Set.of(TypeNames.MODULE),
         dependencyRequestValidator,
         MUST_BE_CONCRETE,
         RUNTIME_EXCEPTION,

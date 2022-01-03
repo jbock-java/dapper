@@ -54,7 +54,7 @@ public abstract class ComponentAnnotation {
 
   /** The subcomponent annotation types. */
   private static final Set<ClassName> SUBCOMPONENT_ANNOTATIONS =
-      new LinkedHashSet<>(List.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT));
+      Set.of(TypeNames.SUBCOMPONENT);
 
 
   // TODO(erichang): Move ComponentCreatorAnnotation into /base and use that here?
@@ -63,12 +63,8 @@ public abstract class ComponentAnnotation {
       new LinkedHashSet<>(List.of(
           TypeNames.COMPONENT_BUILDER,
           TypeNames.COMPONENT_FACTORY,
-          TypeNames.PRODUCTION_COMPONENT_BUILDER,
-          TypeNames.PRODUCTION_COMPONENT_FACTORY,
           TypeNames.SUBCOMPONENT_BUILDER,
-          TypeNames.SUBCOMPONENT_FACTORY,
-          TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER,
-          TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY));
+          TypeNames.SUBCOMPONENT_FACTORY));
 
   /** All component annotation types. */
   private static final Set<ClassName> ALL_COMPONENT_ANNOTATIONS =

@@ -262,9 +262,6 @@ public final class ComponentDescriptorValidator {
         case MODULE:
           methodAnnotations = "@Provides";
           break;
-        case PRODUCER_MODULE:
-          methodAnnotations = "@Provides or @Produces";
-          break;
         default:
           throw new AssertionError(module.kind());
       }

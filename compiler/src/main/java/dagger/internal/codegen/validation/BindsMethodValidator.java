@@ -23,7 +23,6 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
@@ -32,6 +31,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -52,7 +52,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
         elements,
         types,
         TypeNames.BINDS,
-        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
+        Set.of(TypeNames.MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,

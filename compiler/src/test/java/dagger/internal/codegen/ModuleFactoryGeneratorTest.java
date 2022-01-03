@@ -46,7 +46,7 @@ public class ModuleFactoryGeneratorTest {
   @Test
   public void providesMethodNotInModule() {
     assertThatMethodInUnannotatedClass("@Provides String provideString() { return null; }")
-        .hasError("@Provides methods can only be present within a @Module or @ProducerModule");
+        .hasError("@Provides methods can only be present within a @Module");
   }
 
   @Test

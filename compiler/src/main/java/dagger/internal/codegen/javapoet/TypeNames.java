@@ -69,25 +69,6 @@ public final class TypeNames {
   public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal", "SingleCheck");
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 
-  // Dagger Producers classnames
-  public static final ClassName CANCELLATION_POLICY =
-      ClassName.get("dagger.producers", "CancellationPolicy");
-  public static final ClassName PRODUCER_MODULE =
-      ClassName.get("dagger.producers", "ProducerModule");
-  public static final ClassName PRODUCES = ClassName.get("dagger.producers", "Produces");
-  public static final ClassName PRODUCTION_COMPONENT =
-      ClassName.get("dagger.producers", "ProductionComponent");
-  public static final ClassName PRODUCTION_COMPONENT_BUILDER =
-      PRODUCTION_COMPONENT.nestedClass("Builder");
-  public static final ClassName PRODUCTION_COMPONENT_FACTORY =
-      PRODUCTION_COMPONENT.nestedClass("Factory");
-  public static final ClassName PRODUCTION_SUBCOMPONENT =
-      ClassName.get("dagger.producers", "ProductionSubcomponent");
-  public static final ClassName PRODUCTION_SUBCOMPONENT_BUILDER =
-      PRODUCTION_SUBCOMPONENT.nestedClass("Builder");
-  public static final ClassName PRODUCTION_SUBCOMPONENT_FACTORY =
-      PRODUCTION_SUBCOMPONENT.nestedClass("Factory");
-
   // Other classnames
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
@@ -109,7 +90,7 @@ public final class TypeNames {
   public static ParameterizedTypeName membersInjectorOf(TypeName membersInjectorType) {
     return ParameterizedTypeName.get(MEMBERS_INJECTOR, membersInjectorType);
   }
-  
+
   public static ParameterizedTypeName providerOf(TypeName typeName) {
     return ParameterizedTypeName.get(PROVIDER, typeName);
   }

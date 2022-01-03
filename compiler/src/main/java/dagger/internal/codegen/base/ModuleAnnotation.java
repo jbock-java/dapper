@@ -25,7 +25,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +36,7 @@ import javax.lang.model.element.TypeElement;
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
 public final class ModuleAnnotation {
   private static final Set<ClassName> MODULE_ANNOTATIONS =
-      new LinkedHashSet<>(List.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE));
+      Set.of(TypeNames.MODULE);
 
   private final Supplier<List<TypeElement>> includes = Suppliers.memoize(() ->
       includesAsAnnotationValues().stream()
@@ -129,7 +128,7 @@ public final class ModuleAnnotation {
    * annotates {@code typeElement}.
    */
   public static Optional<ModuleAnnotation> moduleAnnotation(TypeElement typeElement) {
-    return getAnyAnnotation(typeElement, TypeNames.MODULE, TypeNames.PRODUCER_MODULE)
+    return getAnyAnnotation(typeElement, TypeNames.MODULE)
         .map(ModuleAnnotation::moduleAnnotation);
   }
 }

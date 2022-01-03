@@ -18,8 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
@@ -32,7 +30,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
 import dagger.Binds;
@@ -62,22 +59,22 @@ import javax.lang.model.type.TypeMirror;
 public final class ModuleDescriptor {
 
   private final TypeElement moduleElement;
-  private final ImmutableSet<TypeElement> includedModules;
-  private final ImmutableSet<ContributionBinding> bindings;
-  private final ImmutableSet<MultibindingDeclaration> multibindingDeclarations;
-  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
-  private final ImmutableSet<DelegateDeclaration> delegateDeclarations;
-  private final ImmutableSet<OptionalBindingDeclaration> optionalDeclarations;
+  private final Set<TypeElement> includedModules;
+  private final Set<ContributionBinding> bindings;
+  private final Set<MultibindingDeclaration> multibindingDeclarations;
+  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
+  private final Set<DelegateDeclaration> delegateDeclarations;
+  private final Set<OptionalBindingDeclaration> optionalDeclarations;
   private final ModuleKind kind;
 
   ModuleDescriptor(
       TypeElement moduleElement,
-      ImmutableSet<TypeElement> includedModules,
-      ImmutableSet<ContributionBinding> bindings,
-      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
-      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
-      ImmutableSet<DelegateDeclaration> delegateDeclarations,
-      ImmutableSet<OptionalBindingDeclaration> optionalDeclarations,
+      Set<TypeElement> includedModules,
+      Set<ContributionBinding> bindings,
+      Set<MultibindingDeclaration> multibindingDeclarations,
+      Set<SubcomponentDeclaration> subcomponentDeclarations,
+      Set<DelegateDeclaration> delegateDeclarations,
+      Set<OptionalBindingDeclaration> optionalDeclarations,
       ModuleKind kind) {
     this.moduleElement = requireNonNull(moduleElement);
     this.includedModules = requireNonNull(includedModules);
@@ -93,31 +90,31 @@ public final class ModuleDescriptor {
     return moduleElement;
   }
 
-  ImmutableSet<TypeElement> includedModules() {
+  Set<TypeElement> includedModules() {
     return includedModules;
   }
 
-  public ImmutableSet<ContributionBinding> bindings() {
+  public Set<ContributionBinding> bindings() {
     return bindings;
   }
 
   /** The multibinding declarations contained in this module. */
-  ImmutableSet<MultibindingDeclaration> multibindingDeclarations() {
+  Set<MultibindingDeclaration> multibindingDeclarations() {
     return multibindingDeclarations;
   }
 
   /** The {@link Module#subcomponents() subcomponent declarations} contained in this module. */
-  ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations() {
+  Set<SubcomponentDeclaration> subcomponentDeclarations() {
     return subcomponentDeclarations;
   }
 
   /** The {@link Binds} method declarations that define delegate bindings. */
-  ImmutableSet<DelegateDeclaration> delegateDeclarations() {
+  Set<DelegateDeclaration> delegateDeclarations() {
     return delegateDeclarations;
   }
 
   /** The {@link BindsOptionalOf} method declarations that define optional bindings. */
-  ImmutableSet<OptionalBindingDeclaration> optionalDeclarations() {
+  Set<OptionalBindingDeclaration> optionalDeclarations() {
     return optionalDeclarations;
   }
 
@@ -126,14 +123,15 @@ public final class ModuleDescriptor {
     return kind;
   }
 
-  private final Supplier<ImmutableSet<BindingDeclaration>> allBindingDeclarations = Suppliers.memoize(() ->
-      ImmutableSet.<BindingDeclaration>builder()
-          .addAll(bindings())
-          .addAll(delegateDeclarations())
-          .addAll(multibindingDeclarations())
-          .addAll(optionalDeclarations())
-          .addAll(subcomponentDeclarations())
-          .build());
+  private final Supplier<Set<BindingDeclaration>> allBindingDeclarations = Suppliers.memoize(() -> {
+    Set<BindingDeclaration> result = new LinkedHashSet<>();
+    result.addAll(bindings());
+    result.addAll(delegateDeclarations());
+    result.addAll(multibindingDeclarations());
+    result.addAll(optionalDeclarations());
+    result.addAll(subcomponentDeclarations());
+    return result;
+  });
 
   /** Returns all of the bindings declared in this module. */
   public Set<BindingDeclaration> allBindingDeclarations() {
@@ -204,12 +202,12 @@ public final class ModuleDescriptor {
     }
 
     public ModuleDescriptor createUncached(TypeElement moduleElement) {
-      ImmutableSet.Builder<ContributionBinding> bindings = ImmutableSet.builder();
-      ImmutableSet.Builder<DelegateDeclaration> delegates = ImmutableSet.builder();
-      ImmutableSet.Builder<MultibindingDeclaration> multibindingDeclarations =
-          ImmutableSet.builder();
-      ImmutableSet.Builder<OptionalBindingDeclaration> optionalDeclarations =
-          ImmutableSet.builder();
+      Set<ContributionBinding> bindings = new LinkedHashSet<>();
+      Set<DelegateDeclaration> delegates = new LinkedHashSet<>();
+      Set<MultibindingDeclaration> multibindingDeclarations =
+          new LinkedHashSet<>();
+      Set<OptionalBindingDeclaration> optionalDeclarations =
+          new LinkedHashSet<>();
 
       for (ExecutableElement moduleMethod : methodsIn(elements.getAllMembers(moduleElement))) {
         if (isAnnotationPresent(moduleMethod, Provides.class)) {
@@ -230,21 +228,23 @@ public final class ModuleDescriptor {
 
       return new ModuleDescriptor(
           moduleElement,
-          ImmutableSet.copyOf(collectIncludedModules(new LinkedHashSet<>(), moduleElement)),
-          bindings.build(),
-          multibindingDeclarations.build(),
+          collectIncludedModules(new LinkedHashSet<>(), moduleElement),
+          bindings,
+          multibindingDeclarations,
           subcomponentDeclarationFactory.forModule(moduleElement),
-          delegates.build(),
-          optionalDeclarations.build(),
+          delegates,
+          optionalDeclarations,
           ModuleKind.forAnnotatedElement(moduleElement).get());
     }
 
     /** Returns all the modules transitively included by given modules, including the arguments. */
-    ImmutableSet<ModuleDescriptor> transitiveModules(Set<TypeElement> modules) {
-      return ImmutableSet.copyOf(
-          Traverser.forGraph(
-                  (ModuleDescriptor module) -> module.includedModules().stream().map(this::create).collect(Collectors.toList()))
-              .depthFirstPreOrder(modules.stream().map(this::create).collect(Collectors.toList())));
+    Set<ModuleDescriptor> transitiveModules(Set<TypeElement> modules) {
+      Set<ModuleDescriptor> result = new LinkedHashSet<>();
+      Traverser.forGraph(
+              (ModuleDescriptor module) -> module.includedModules().stream().map(this::create).collect(Collectors.toList()))
+          .depthFirstPreOrder(modules.stream().map(this::create).collect(Collectors.toList()))
+          .forEach(result::add);
+      return result;
     }
 
     private Set<TypeElement> collectIncludedModules(
@@ -281,11 +281,12 @@ public final class ModuleDescriptor {
     }
 
     private String implicitlyIncludedModuleName(ExecutableElement method) {
+      String name = method.getSimpleName().toString();
       return getPackage(method).getQualifiedName()
           + "."
           + classFileName(ClassName.get(MoreElements.asType(method.getEnclosingElement())))
           + "_"
-          + LOWER_CAMEL.to(UPPER_CAMEL, method.getSimpleName().toString());
+          + Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
     @Override

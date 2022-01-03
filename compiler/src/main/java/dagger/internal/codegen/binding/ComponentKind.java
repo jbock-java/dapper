@@ -31,19 +31,16 @@ import javax.lang.model.element.TypeElement;
 /** Enumeration of the different kinds of components. */
 public enum ComponentKind {
   /** {@code @Component} */
-  COMPONENT(TypeNames.COMPONENT, true, false),
+  COMPONENT(TypeNames.COMPONENT, true),
 
   /** {@code @Subcomponent} */
-  SUBCOMPONENT(TypeNames.SUBCOMPONENT, false, false),
-
-  /** {@code @ProductionSubcomponent} */
-  PRODUCTION_SUBCOMPONENT(TypeNames.PRODUCTION_SUBCOMPONENT, false, true),
+  SUBCOMPONENT(TypeNames.SUBCOMPONENT, false),
 
   /**
    * Kind for a descriptor that was generated from a {@link dagger.Module} instead of a component
    * type in order to validate the module's bindings.
    */
-  MODULE(TypeNames.MODULE, true, false),
+  MODULE(TypeNames.MODULE, true),
   ;
 
   /** Returns the annotations for components of the given kinds. */
@@ -76,12 +73,10 @@ public enum ComponentKind {
 
   private final ClassName annotation;
   private final boolean isRoot;
-  private final boolean production;
 
-  ComponentKind(ClassName annotation, boolean isRoot, boolean production) {
+  ComponentKind(ClassName annotation, boolean isRoot) {
     this.annotation = annotation;
     this.isRoot = isRoot;
-    this.production = production;
   }
 
   /** Returns the annotation that marks a component of this kind. */
@@ -91,9 +86,7 @@ public enum ComponentKind {
 
   /** Returns the kinds of modules that can be used with a component of this kind. */
   public Set<ModuleKind> legalModuleKinds() {
-    return isProducer()
-        ? EnumSet.allOf(ModuleKind.class)
-        : EnumSet.of(ModuleKind.MODULE);
+    return EnumSet.of(ModuleKind.MODULE);
   }
 
   /** Returns the kinds of subcomponents a component of this kind can have. */
@@ -106,10 +99,5 @@ public enum ComponentKind {
    */
   public boolean isRoot() {
     return isRoot;
-  }
-
-  /** Returns true if this is a production component. */
-  public boolean isProducer() {
-    return production;
   }
 }

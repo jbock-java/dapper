@@ -29,7 +29,7 @@ public class MultibindsValidationTest {
   @Test
   public void notWithinModule() {
     assertThatMethodInUnannotatedClass("@Multibinds abstract Set<Object> emptySet();")
-        .hasError("@Multibinds methods can only be present within a @Module or @ProducerModule");
+        .hasError("@Multibinds methods can only be present within a @Module");
   }
 
   @Test

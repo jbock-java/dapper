@@ -47,7 +47,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
@@ -167,7 +166,6 @@ public final class ComponentValidator implements ClearableCache {
         return moreThanOneComponentAnnotation();
       }
 
-      validateUseOfCancellationPolicy();
       validateIsAbstractType();
       validateCreators();
       validateNoReusableAnnotation();
@@ -187,15 +185,6 @@ public final class ComponentValidator implements ClearableCache {
               + annotationsFor(componentKinds);
       report.addError(error, component);
       return report.build();
-    }
-
-    private void validateUseOfCancellationPolicy() {
-      if (isAnnotationPresent(component, TypeNames.CANCELLATION_POLICY)
-          && !componentKind().isProducer()) {
-        report.addError(
-            "@CancellationPolicy may only be applied to production components and subcomponents",
-            component);
-      }
     }
 
     private void validateIsAbstractType() {
@@ -488,9 +477,7 @@ public final class ComponentValidator implements ClearableCache {
 
     private DependencyRequest dependencyRequest(ExecutableElement method) {
       ExecutableType methodType = asExecutable(types.asMemberOf(componentType(), method));
-      return ComponentKind.forAnnotatedElement(component).get().isProducer()
-          ? dependencyRequestFactory.forComponentProductionMethod(method, methodType)
-          : dependencyRequestFactory.forComponentProvisionMethod(method, methodType);
+      return dependencyRequestFactory.forComponentProvisionMethod(method, methodType);
     }
   }
 
