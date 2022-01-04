@@ -386,7 +386,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
       return ResolvedBindings.forContributionBindings(
           requestKey,
-          Multimaps.index(bindings, binding -> getOwningComponent(requestKey, binding)),
+          Multimaps.index(bindings, binding -> getOwningComponent(requestKey, binding)).asMap(),
           multibindingDeclarations,
           subcomponentDeclarations,
           optionalBindingDeclarations);

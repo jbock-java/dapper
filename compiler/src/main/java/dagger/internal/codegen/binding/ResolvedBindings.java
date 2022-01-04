@@ -16,20 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.Key;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -43,103 +43,108 @@ import javax.lang.model.element.TypeElement;
  */
 final class ResolvedBindings {
 
- private final Supplier<ImmutableSet<ContributionBinding>> contributionBindings = Suppliers.memoize(() ->
-     ImmutableSet.copyOf(allContributionBindings().values()));
+  private final Supplier<Set<ContributionBinding>> contributionBindings = Suppliers.memoize(() ->
+      allContributionBindings().values().stream()
+          .flatMap(Set::stream)
+          .collect(DaggerStreams.toImmutableSet()));
 
- private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(key(),
-     allContributionBindings(),
-     allMembersInjectionBindings(),
-     multibindingDeclarations(),
-     subcomponentDeclarations(),
-     optionalBindingDeclarations()));
+  private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(key(),
+      allContributionBindings(),
+      allMembersInjectionBindings(),
+      multibindingDeclarations(),
+      subcomponentDeclarations(),
+      optionalBindingDeclarations()));
 
- private final Key key;
- private final ImmutableSetMultimap<TypeElement, ContributionBinding> allContributionBindings;
- private final ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings;
- private final ImmutableSet<MultibindingDeclaration> multibindingDeclarations;
- private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
- private final ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations;
+  private final Key key;
+  private final Map<TypeElement, Set<ContributionBinding>> allContributionBindings;
+  private final Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings;
+  private final Set<MultibindingDeclaration> multibindingDeclarations;
+  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
+  private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
 
- ResolvedBindings(
-     Key key,
-     ImmutableSetMultimap<TypeElement, ContributionBinding> allContributionBindings,
-     ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings,
-     ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
-     ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
-     ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations) {
-  this.key = requireNonNull(key);
-  this.allContributionBindings = requireNonNull(allContributionBindings);
-  this.allMembersInjectionBindings = requireNonNull(allMembersInjectionBindings);
-  this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
-  this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
-  this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
- }
+  ResolvedBindings(
+      Key key,
+      Map<TypeElement, Set<ContributionBinding>> allContributionBindings,
+      Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings,
+      Set<MultibindingDeclaration> multibindingDeclarations,
+      Set<SubcomponentDeclaration> subcomponentDeclarations,
+      Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
+    this.key = requireNonNull(key);
+    this.allContributionBindings = requireNonNull(allContributionBindings);
+    this.allMembersInjectionBindings = requireNonNull(allMembersInjectionBindings);
+    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
+    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
+    this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
+  }
 
 
- /** The binding key for which the {@link #bindings()} have been resolved. */
- Key key() {
-  return key;
- }
+  /** The binding key for which the {@link #bindings()} have been resolved. */
+  Key key() {
+    return key;
+  }
 
   /**
    * The {@link ContributionBinding}s for {@link #key()} indexed by the component that owns the
    * binding. Each key in the multimap is a part of the same component ancestry.
    */
-  ImmutableSetMultimap<TypeElement, ContributionBinding> allContributionBindings() {
-   return allContributionBindings;
+  Map<TypeElement, Set<ContributionBinding>> allContributionBindings() {
+    return allContributionBindings;
   }
 
   /**
    * The {@link MembersInjectionBinding}s for {@link #key()} indexed by the component that owns the
    * binding.  Each key in the map is a part of the same component ancestry.
    */
-  ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings() {
-   return allMembersInjectionBindings;
+  Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings() {
+    return allMembersInjectionBindings;
   }
 
   /** The multibinding declarations for {@link #key()}. */
-  ImmutableSet<MultibindingDeclaration> multibindingDeclarations() {
-   return multibindingDeclarations;
+  Set<MultibindingDeclaration> multibindingDeclarations() {
+    return multibindingDeclarations;
   }
 
   /** The subcomponent declarations for {@link #key()}. */
-  ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations() {
-   return subcomponentDeclarations;
+  Set<SubcomponentDeclaration> subcomponentDeclarations() {
+    return subcomponentDeclarations;
   }
 
   /** The optional binding declarations for {@link #key()}. */
-  ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations() {
-   return optionalBindingDeclarations;
+  Set<OptionalBindingDeclaration> optionalBindingDeclarations() {
+    return optionalBindingDeclarations;
   }
 
- @Override
- public boolean equals(Object o) {
-  if (this == o) return true;
-  if (o == null || getClass() != o.getClass()) return false;
-  ResolvedBindings that = (ResolvedBindings) o;
-  return key.equals(that.key)
-      && allContributionBindings.equals(that.allContributionBindings)
-      && allMembersInjectionBindings.equals(that.allMembersInjectionBindings)
-      && multibindingDeclarations.equals(that.multibindingDeclarations)
-      && subcomponentDeclarations.equals(that.subcomponentDeclarations)
-      && optionalBindingDeclarations.equals(that.optionalBindingDeclarations);
- }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ResolvedBindings that = (ResolvedBindings) o;
+    return key.equals(that.key)
+        && allContributionBindings.equals(that.allContributionBindings)
+        && allMembersInjectionBindings.equals(that.allMembersInjectionBindings)
+        && multibindingDeclarations.equals(that.multibindingDeclarations)
+        && subcomponentDeclarations.equals(that.subcomponentDeclarations)
+        && optionalBindingDeclarations.equals(that.optionalBindingDeclarations);
+  }
 
- @Override
- public int hashCode() {
-  return hash.getAsInt();
- }
+  @Override
+  public int hashCode() {
+    return hash.getAsInt();
+  }
 
- /** All bindings for {@link #key()}, indexed by the component that owns the binding. */
- ImmutableSetMultimap<TypeElement, ? extends Binding> allBindings() {
-    return !allMembersInjectionBindings().isEmpty()
-        ? allMembersInjectionBindings().asMultimap()
-        : allContributionBindings();
+  /** All bindings for {@link #key()}, indexed by the component that owns the binding. */
+  Map<TypeElement, Set<? extends Binding>> allBindings() {
+    if (allMembersInjectionBindings().isEmpty()) {
+      @SuppressWarnings(value = {"unchecked", "rawtypes"})
+      Map<TypeElement, Set<? extends Binding>> contributionBindings = (Map) allContributionBindings();
+      return contributionBindings;
+    }
+    return Util.transformValues(allMembersInjectionBindings(), Set::of);
   }
 
   /** All bindings for {@link #key()}, regardless of which component owns them. */
-  ImmutableCollection<? extends Binding> bindings() {
-    return allBindings().values();
+  Set<? extends Binding> bindings() {
+    return allBindings().values().stream().flatMap(Set::stream).collect(Collectors.toSet());
   }
 
   /**
@@ -155,15 +160,15 @@ final class ResolvedBindings {
   }
 
   /** All bindings for {@link #key()} that are owned by a component. */
-  ImmutableSet<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
-    return allBindings().get(component.typeElement());
+  Set<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
+    return allBindings().getOrDefault(component.typeElement(), Set.of());
   }
 
   /**
    * All contribution bindings, regardless of owning component. Empty if this is a members-injection
    * binding.
    */
-  ImmutableSet<ContributionBinding> contributionBindings() {
+  Set<ContributionBinding> contributionBindings() {
     // TODO(ronshapiro): consider optimizing ImmutableSet.copyOf(Collection) for small immutable
     // collections so that it doesn't need to call toArray(). Even though this method is memoized,
     // toArray() can take ~150ms for large components, and there are surely other places in the
@@ -173,28 +178,31 @@ final class ResolvedBindings {
 
   /** The component that owns {@code binding}. */
   TypeElement owningComponent(ContributionBinding binding) {
-    Preconditions.checkArgument(
-        contributionBindings().contains(binding),
-        "binding is not resolved for %s: %s",
-        key(),
-        binding);
-    return getOnlyElement(allContributionBindings().inverse().get(binding));
+    for (Map.Entry<TypeElement, Set<ContributionBinding>> entry : allContributionBindings.entrySet()) {
+      if (entry.getValue().contains(binding)) {
+        return entry.getKey();
+      }
+    }
+    throw new IllegalStateException(
+        String.format("binding is not resolved for %s: %s",
+            key(),
+            binding));
   }
 
   /** Creates a {@link ResolvedBindings} for contribution bindings. */
   static ResolvedBindings forContributionBindings(
       Key key,
-      Multimap<TypeElement, ContributionBinding> contributionBindings,
-      Iterable<MultibindingDeclaration> multibindings,
-      Iterable<SubcomponentDeclaration> subcomponentDeclarations,
-      Iterable<OptionalBindingDeclaration> optionalBindingDeclarations) {
+      Map<TypeElement, Collection<ContributionBinding>> contributionBindings,
+      Set<MultibindingDeclaration> multibindings,
+      Set<SubcomponentDeclaration> subcomponentDeclarations,
+      Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
     return new ResolvedBindings(
         key,
-        ImmutableSetMultimap.copyOf(contributionBindings),
-        ImmutableMap.of(),
-        ImmutableSet.copyOf(multibindings),
-        ImmutableSet.copyOf(subcomponentDeclarations),
-        ImmutableSet.copyOf(optionalBindingDeclarations));
+        Util.transformValues(contributionBindings, LinkedHashSet::new),
+        Map.of(),
+        multibindings,
+        subcomponentDeclarations,
+        optionalBindingDeclarations);
   }
 
   /**
@@ -206,11 +214,11 @@ final class ResolvedBindings {
       MembersInjectionBinding ownedMembersInjectionBinding) {
     return new ResolvedBindings(
         key,
-        ImmutableSetMultimap.of(),
-        ImmutableMap.of(owningComponent.typeElement(), ownedMembersInjectionBinding),
-        ImmutableSet.of(),
-        ImmutableSet.of(),
-        ImmutableSet.of());
+        Map.of(),
+        Map.of(owningComponent.typeElement(), ownedMembersInjectionBinding),
+        Set.of(),
+        Set.of(),
+        Set.of());
   }
 
   /**
@@ -219,10 +227,10 @@ final class ResolvedBindings {
   static ResolvedBindings noBindings(Key key) {
     return new ResolvedBindings(
         key,
-        ImmutableSetMultimap.of(),
-        ImmutableMap.of(),
-        ImmutableSet.of(),
-        ImmutableSet.of(),
-        ImmutableSet.of());
+        Map.of(),
+        Map.of(),
+        Set.of(),
+        Set.of(),
+        Set.of());
   }
 }
