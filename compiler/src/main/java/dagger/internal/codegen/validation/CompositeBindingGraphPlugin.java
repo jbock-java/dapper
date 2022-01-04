@@ -24,7 +24,6 @@ import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -47,7 +46,7 @@ import javax.tools.Diagnostic;
  */
 public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
-  private final ImmutableSet<BindingGraphPlugin> plugins;
+  private final Set<BindingGraphPlugin> plugins;
   private final String pluginName;
   private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
@@ -61,13 +60,13 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     public CompositeBindingGraphPlugin create(
-        ImmutableSet<BindingGraphPlugin> plugins, String pluginName) {
+        Set<BindingGraphPlugin> plugins, String pluginName) {
       return new CompositeBindingGraphPlugin(plugins, pluginName, messageGeneratorFactory);
     }
   }
 
   private CompositeBindingGraphPlugin(
-      ImmutableSet<BindingGraphPlugin> plugins,
+      Set<BindingGraphPlugin> plugins,
       String pluginName,
       DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
     this.plugins = plugins;

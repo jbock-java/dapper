@@ -27,19 +27,20 @@ import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.Set;
 import javax.lang.model.element.TypeElement;
 
 /** Validates a {@link BindingGraph}. */
 @Singleton
 public final class BindingGraphValidator {
-  private final ImmutableSet<BindingGraphPlugin> validationPlugins;
+  private final Set<BindingGraphPlugin> validationPlugins;
   private final ImmutableSet<BindingGraphPlugin> externalPlugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final CompilerOptions compilerOptions;
 
   @Inject
   BindingGraphValidator(
-      @Validation ImmutableSet<BindingGraphPlugin> validationPlugins,
+      @Validation Set<BindingGraphPlugin> validationPlugins,
       ImmutableSet<BindingGraphPlugin> externalPlugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
       CompilerOptions compilerOptions) {
@@ -92,7 +93,7 @@ public final class BindingGraphValidator {
 
   /** Returns {@code false} if any of the plugins reported an error. */
   private boolean runPlugins(
-      ImmutableSet<BindingGraphPlugin> plugins, BindingGraph graph, boolean errorsAsWarnings) {
+      Set<BindingGraphPlugin> plugins, BindingGraph graph, boolean errorsAsWarnings) {
     boolean isClean = true;
     for (BindingGraphPlugin plugin : plugins) {
       DiagnosticReporterImpl reporter =

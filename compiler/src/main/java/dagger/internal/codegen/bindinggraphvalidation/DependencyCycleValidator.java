@@ -16,11 +16,6 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getLast;
-import static com.google.common.collect.Iterables.limit;
-import static com.google.common.collect.Iterables.skip;
-import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
@@ -29,9 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.Graphs;
 import com.google.common.graph.ImmutableNetwork;
@@ -39,6 +31,7 @@ import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.NetworkBuilder;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
@@ -53,6 +46,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -84,7 +79,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     }
     // Check each endpoint pair only once, no matter how many parallel edges connect them.
     Set<EndpointPair<Node>> dependencyEndpointPairs = dependencyGraph.asGraph().edges();
-    Set<EndpointPair<Node>> visited = newHashSetWithExpectedSize(dependencyEndpointPairs.size());
+    Set<EndpointPair<Node>> visited = new HashSet<>((int) (1.5 * dependencyEndpointPairs.size()));
     for (EndpointPair<Node> endpointPair : dependencyEndpointPairs) {
       cycleContainingEndpointPair(endpointPair, dependencyGraph, visited)
           .ifPresent(cycle -> reportCycle(cycle, bindingGraph, diagnosticReporter));
@@ -101,7 +96,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     }
 
     // If there's a path from the target back to the source, there's a cycle.
-    ImmutableList<Node> cycleNodes =
+    List<Node> cycleNodes =
         shortestPath(dependencyGraph, endpoints.target(), endpoints.source());
     if (cycleNodes.isEmpty()) {
       return Optional.empty();
@@ -138,7 +133,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
       return;
     }
 
-    ImmutableList<Node> path = shortestPathToCycleFromAnEntryPoint(cycle, bindingGraph);
+    List<Node> path = shortestPathToCycleFromAnEntryPoint(cycle, bindingGraph);
     Node cycleStartNode = path.get(path.size() - 1);
     Node previousNode = path.get(path.size() - 2);
     DependencyEdge dependencyToReport =
@@ -147,12 +142,12 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         ERROR, dependencyToReport, errorMessage(cycle.shift(cycleStartNode), bindingGraph));
   }
 
-  private ImmutableList<Node> shortestPathToCycleFromAnEntryPoint(
+  private List<Node> shortestPathToCycleFromAnEntryPoint(
       Cycle<Node> cycle, BindingGraph bindingGraph) {
     Node someCycleNode = cycle.nodes().iterator().next();
     ComponentNode componentContainingCycle =
         bindingGraph.componentNode(someCycleNode.componentPath()).get();
-    ImmutableList<Node> pathToCycle =
+    List<Node> pathToCycle =
         shortestPath(bindingGraph.network(), componentContainingCycle, someCycleNode);
     return subpathToCycle(pathToCycle, cycle);
   }
@@ -161,12 +156,12 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
    * Returns the subpath from the head of {@code path} to the first node in {@code path} that's in
    * the cycle.
    */
-  private ImmutableList<Node> subpathToCycle(ImmutableList<Node> path, Cycle<Node> cycle) {
-    ImmutableList.Builder<Node> subpath = ImmutableList.builder();
+  private List<Node> subpathToCycle(List<Node> path, Cycle<Node> cycle) {
+    List<Node> subpath = new ArrayList<>();
     for (Node node : path) {
       subpath.add(node);
       if (cycle.nodes().contains(node)) {
-        return subpath.build();
+        return subpath;
       }
     }
     throw new IllegalArgumentException(
@@ -271,9 +266,9 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
    * is the source of the next pair. The target of the last pair is the source of the first pair.
    */
   static final class Cycle<N> {
-    private final ImmutableSet<EndpointPair<N>> endpointPairs;
+    private final Set<EndpointPair<N>> endpointPairs;
 
-    Cycle(ImmutableSet<EndpointPair<N>> endpointPairs) {
+    Cycle(Set<EndpointPair<N>> endpointPairs) {
       this.endpointPairs = endpointPairs;
     }
 
@@ -282,7 +277,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
      * pair is the source of the next pair. The target of the last pair is the source of the first
      * pair.
      */
-    ImmutableSet<EndpointPair<N>> endpointPairs() {
+    Set<EndpointPair<N>> endpointPairs() {
       return endpointPairs;
     }
 
@@ -304,16 +299,24 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
      * @return a cycle equivalent to this one but whose first pair starts with {@code startNode}
      */
     Cycle<N> shift(N startNode) {
-      int startIndex = Iterables.indexOf(endpointPairs(), pair -> pair.source().equals(startNode));
-      checkArgument(
+      List<EndpointPair<N>> endpointPairs = new ArrayList<>(endpointPairs());
+      int startIndex = -1;
+      for (int i = 0; i < endpointPairs.size(); i++) {
+        EndpointPair<N> pair = endpointPairs.get(i);
+        if (pair.source().equals(startNode)) {
+          startIndex = i;
+          break;
+        }
+      }
+      Preconditions.checkArgument(
           startIndex >= 0, "startNode (%s) is not part of this cycle: %s", startNode, this);
       if (startIndex == 0) {
         return this;
       }
-      ImmutableSet.Builder<EndpointPair<N>> shifted = ImmutableSet.builder();
-      shifted.addAll(skip(endpointPairs(), startIndex));
-      shifted.addAll(limit(endpointPairs(), size() - startIndex));
-      return new Cycle<>(shifted.build());
+      Set<EndpointPair<N>> shifted = new LinkedHashSet<>();
+      shifted.addAll(endpointPairs.subList(startIndex, this.endpointPairs.size()));
+      shifted.addAll(endpointPairs.subList(0, size() - startIndex));
+      return new Cycle<>(shifted);
     }
 
     @Override
@@ -326,13 +329,13 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
      * pair of nodes as well as an edge from the last node to the first.
      */
     static <N> Cycle<N> fromPath(List<N> nodes) {
-      checkArgument(!nodes.isEmpty());
-      ImmutableSet.Builder<EndpointPair<N>> cycle = ImmutableSet.builder();
-      cycle.add(EndpointPair.ordered(getLast(nodes), nodes.get(0)));
+      Preconditions.checkArgument(!nodes.isEmpty());
+      Set<EndpointPair<N>> cycle = new LinkedHashSet<>();
+      cycle.add(EndpointPair.ordered(nodes.get(nodes.size() - 1), nodes.get(0)));
       for (int i = 0; i < nodes.size() - 1; i++) {
         cycle.add(EndpointPair.ordered(nodes.get(i), nodes.get(i + 1)));
       }
-      return new Cycle<>(cycle.build());
+      return new Cycle<>(cycle);
     }
   }
 }
