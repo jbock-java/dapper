@@ -39,7 +39,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -60,7 +59,9 @@ import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.model.DependencyRequest;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -124,11 +125,11 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
             .addAnnotation(Override.class)
             .addParameter(injectedTypeName, "instance");
 
-    ImmutableMap<DependencyRequest, FrameworkField> fields =
+    Map<DependencyRequest, FrameworkField> fields =
         generateBindingFieldsForDependencies(binding);
 
-    ImmutableMap.Builder<DependencyRequest, FieldSpec> dependencyFieldsBuilder =
-        ImmutableMap.builder();
+    Map<DependencyRequest, FieldSpec> dependencyFields =
+        new LinkedHashMap<>();
 
     MethodSpec.Builder constructorBuilder = constructorBuilder().addModifiers(PUBLIC);
 
@@ -175,7 +176,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
       FieldSpec field = fieldBuilder.build();
       injectorTypeBuilder.addField(field);
       constructorBuilder.addStatement("this.$1N = $1N", field);
-      dependencyFieldsBuilder.put(dependency, field);
+      dependencyFields.put(dependency, field);
       constructorInvocationParameters.add(CodeBlock.of("$N", field));
     }
 
@@ -185,8 +186,6 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     injectorTypeBuilder.addMethod(constructorBuilder.build());
     injectorTypeBuilder.addMethod(createMethodBuilder.build());
-
-    ImmutableMap<DependencyRequest, FieldSpec> dependencyFields = dependencyFieldsBuilder.build();
 
     injectMembersBuilder.addCode(
         InjectionSiteMethod.invokeAll(

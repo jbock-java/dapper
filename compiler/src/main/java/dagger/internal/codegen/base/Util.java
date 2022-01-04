@@ -71,7 +71,7 @@ public final class Util {
     return Collections.unmodifiableSet(result);
   }
 
-  public static <K, V> Map<K, V> asMap(
+  public static <K, V> Map<K, V> toMap(
       Collection<K> set, Function<? super K, V> function) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>((int) (set.size() * 1.5));
     for (K k : set) {

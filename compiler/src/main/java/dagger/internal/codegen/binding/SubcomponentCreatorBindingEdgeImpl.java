@@ -21,7 +21,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.SubcomponentCreatorBindingEdge;
 import java.util.Set;
 import javax.lang.model.element.TypeElement;
@@ -29,10 +28,10 @@ import javax.lang.model.element.TypeElement;
 /** An implementation of {@link SubcomponentCreatorBindingEdge}. */
 public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCreatorBindingEdge {
 
-  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
+  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
 
   SubcomponentCreatorBindingEdgeImpl(
-      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations) {
+      Set<SubcomponentDeclaration> subcomponentDeclarations) {
     this.subcomponentDeclarations = subcomponentDeclarations;
   }
 

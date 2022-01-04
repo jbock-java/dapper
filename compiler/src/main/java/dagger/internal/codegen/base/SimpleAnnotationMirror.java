@@ -51,7 +51,7 @@ public final class SimpleAnnotationMirror implements AnnotationMirror {
     this.annotationType = annotationType;
     this.namedValues = namedValues;
     this.elementValues =
-        Util.asMap(methodsIn(annotationType.getEnclosedElements()),
+        Util.toMap(methodsIn(annotationType.getEnclosedElements()),
             element -> namedValues.get(element.getSimpleName().toString()));
   }
 
