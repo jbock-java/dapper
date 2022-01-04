@@ -26,8 +26,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
@@ -45,7 +43,9 @@ import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.type.DeclaredType;
 
 /**
@@ -92,7 +92,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
    *   <li>{@code Map<K, Producer<V>>}
    * </ol>
    */
-  private ImmutableSet<Binding> mapMultibindings(BindingGraph bindingGraph) {
+  private Set<Binding> mapMultibindings(BindingGraph bindingGraph) {
     ImmutableSetMultimap<Key, Binding> mapMultibindings =
         bindingGraph.bindings().stream()
             .filter(node -> node.kind().equals(MULTIBOUND_MAP))
@@ -119,13 +119,13 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
                 MapType.from(key).valuesAreTypeOf(Producer.class)
                     && !plainValueMapMultibindings.containsKey(keyFactory.unwrapMapValueType(key))
                     && !providerValueMapMultibindings.containsKey(
-                    keyFactory.rewrapMapKey(key, Producer.class, Provider.class).get()));
+                    keyFactory.rewrapMapKey(key, Producer.class, Provider.class).orElseThrow()));
 
-    return new ImmutableSet.Builder<Binding>()
-        .addAll(plainValueMapMultibindings.values())
-        .addAll(providerValueMapMultibindings.values())
-        .addAll(producerValueMapMultibindings.values())
-        .build();
+    LinkedHashSet<Binding> result = new LinkedHashSet<>();
+    result.addAll(plainValueMapMultibindings.values());
+    result.addAll(providerValueMapMultibindings.values());
+    result.addAll(producerValueMapMultibindings.values());
+    return result;
   }
 
   private Set<ContributionBinding> mapBindingContributions(
@@ -205,7 +205,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
 
     bindingDeclarationFormatter.formatIndentedList(
         message,
-        ImmutableList.sortedCopyOf(BindingDeclaration.COMPARATOR, contributionsForOneMapKey),
+        contributionsForOneMapKey.stream().sorted(BindingDeclaration.COMPARATOR).collect(Collectors.toList()),
         1);
     return message.toString();
   }

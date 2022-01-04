@@ -178,31 +178,10 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     @Override
-    public void reportBinding(
-        Diagnostic.Kind diagnosticKind,
-        MaybeBinding binding,
-        String messageFormat,
-        Object firstArg,
-        Object... moreArgs) {
-      reportBinding(diagnosticKind, binding, formatMessage(messageFormat, firstArg, moreArgs));
-    }
-
-    @Override
     public void reportDependency(
         Diagnostic.Kind diagnosticKind, DependencyEdge dependencyEdge, String message) {
       addMessage(diagnosticKind,
           String.format("%s%s", message, messageGenerator.getMessage(dependencyEdge)));
-    }
-
-    @Override
-    public void reportDependency(
-        Diagnostic.Kind diagnosticKind,
-        DependencyEdge dependencyEdge,
-        String messageFormat,
-        Object firstArg,
-        Object... moreArgs) {
-      reportDependency(
-          diagnosticKind, dependencyEdge, formatMessage(messageFormat, firstArg, moreArgs));
     }
 
     @Override

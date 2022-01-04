@@ -54,33 +54,11 @@ public interface DiagnosticReporter {
   void reportBinding(Diagnostic.Kind diagnosticKind, MaybeBinding binding, String message);
 
   /**
-   * Reports a diagnostic for a binding or missing binding. Includes information about how the
-   * binding is reachable from entry points.
-   */
-  void reportBinding(
-      Diagnostic.Kind diagnosticKind,
-      MaybeBinding binding,
-      String messageFormat,
-      Object firstArg,
-      Object... moreArgs);
-
-  /**
    * Reports a diagnostic for a dependency. Includes information about how the dependency is
    * reachable from entry points.
    */
   void reportDependency(
       Diagnostic.Kind diagnosticKind, DependencyEdge dependencyEdge, String message);
-
-  /**
-   * Reports a diagnostic for a dependency. Includes information about how the dependency is
-   * reachable from entry points.
-   */
-  void reportDependency(
-      Diagnostic.Kind diagnosticKind,
-      DependencyEdge dependencyEdge,
-      String messageFormat,
-      Object firstArg,
-      Object... moreArgs);
 
   /** Reports a diagnostic for a subcomponent factory method. */
   void reportSubcomponentFactoryMethod(

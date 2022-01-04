@@ -108,33 +108,12 @@ final class DiagnosticReporterFactory {
     }
 
     @Override
-    public void reportBinding(
-        Diagnostic.Kind diagnosticKind,
-        MaybeBinding binding,
-        String messageFormat,
-        Object firstArg,
-        Object... moreArgs) {
-      reportBinding(diagnosticKind, binding, formatMessage(messageFormat, firstArg, moreArgs));
-    }
-
-    @Override
     public void reportDependency(
         Diagnostic.Kind diagnosticKind, DependencyEdge dependencyEdge, String message) {
       printMessage(
           diagnosticKind,
           message + diagnosticMessageGenerator.getMessage(dependencyEdge),
           rootComponent);
-    }
-
-    @Override
-    public void reportDependency(
-        Diagnostic.Kind diagnosticKind,
-        DependencyEdge dependencyEdge,
-        String messageFormat,
-        Object firstArg,
-        Object... moreArgs) {
-      reportDependency(
-          diagnosticKind, dependencyEdge, formatMessage(messageFormat, firstArg, moreArgs));
     }
 
     @Override
