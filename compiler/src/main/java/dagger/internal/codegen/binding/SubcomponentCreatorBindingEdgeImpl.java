@@ -17,12 +17,13 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Util.getOnlyElement;
-import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 
 import dagger.model.BindingGraph.SubcomponentCreatorBindingEdge;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 
 /** An implementation of {@link SubcomponentCreatorBindingEdge}. */
@@ -39,8 +40,8 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
   public Set<TypeElement> declaringModules() {
     return subcomponentDeclarations.stream()
         .map(SubcomponentDeclaration::contributingModule)
-        .flatMap(presentValues())
-        .collect(toImmutableSet());
+        .flatMap(Optional::stream)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override

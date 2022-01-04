@@ -18,14 +18,15 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 
 /** Enumeration of the different kinds of components. */
@@ -50,9 +51,9 @@ public enum ComponentKind {
 
   /** Returns the set of component kinds the given {@code element} has annotations for. */
   public static Set<ComponentKind> getComponentKinds(TypeElement element) {
-    return valuesOf(ComponentKind.class)
+    return Arrays.stream(ComponentKind.values())
         .filter(kind -> isAnnotationPresent(element, kind.annotation()))
-        .collect(toImmutableSet());
+        .collect(Collectors.toCollection(() -> EnumSet.noneOf(ComponentKind.class)));
   }
 
   /**

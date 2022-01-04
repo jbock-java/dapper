@@ -17,6 +17,7 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
+import static dagger.internal.codegen.extension.DaggerStreams._toImmutableSetMultimap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.model.BindingKind.INJECTION;
@@ -26,7 +27,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
@@ -119,7 +119,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     return valueSetsForEachKey(
         bindingGraph.bindings().stream()
             .filter(binding -> !binding.kind().equals(MEMBERS_INJECTION))
-            .collect(toImmutableSetMultimap(Binding::key, binding -> binding)));
+            .collect(_toImmutableSetMultimap(Binding::key, binding -> binding)));
   }
 
   /**
@@ -130,19 +130,25 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
       Set<Binding> duplicateBindings) {
     Map<ComponentPath, List<Binding>> bindingsByComponentPath = duplicateBindings.stream()
         .collect(Collectors.groupingBy(Binding::componentPath, LinkedHashMap::new, Collectors.toList()));
-    ImmutableSetMultimap.Builder<ComponentPath, Binding> mutuallyVisibleBindings =
-        ImmutableSetMultimap.builder();
+    Map<ComponentPath, Set<Binding>> mutuallyVisibleBindings =
+        new LinkedHashMap<>();
     bindingsByComponentPath
         .forEach(
             (componentPath, bindings) -> {
-              mutuallyVisibleBindings.putAll(componentPath, bindings);
+              mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindings), (set1, set2) -> {
+                set1.addAll(set2);
+                return set1;
+              });
               for (ComponentPath ancestor = componentPath; !ancestor.atRoot(); ) {
                 ancestor = ancestor.parent();
                 List<Binding> bindingsInAncestor = bindingsByComponentPath.getOrDefault(ancestor, List.of());
-                mutuallyVisibleBindings.putAll(componentPath, bindingsInAncestor);
+                mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindingsInAncestor), (set1, set2) -> {
+                  set1.addAll(set2);
+                  return set1;
+                });
               }
             });
-    return valueSetsForEachKey(mutuallyVisibleBindings.build());
+    return valueSetsForEachKey(mutuallyVisibleBindings);
   }
 
   private void reportDuplicateBindings(
@@ -310,8 +316,8 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     }
   }
 
-  private static <E> Set<Set<E>> valueSetsForEachKey(Multimap<?, E> multimap) {
-    return multimap.asMap().values().stream().map(LinkedHashSet::new).collect(toImmutableSet());
+  private static <E> Set<Set<E>> valueSetsForEachKey(Map<?, Set<E>> multimap) {
+    return new LinkedHashSet<>(multimap.values());
   }
 
   /** Returns the binding of the given kind that is closest to the root component. */

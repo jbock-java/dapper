@@ -25,7 +25,6 @@ import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
-import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.DECLARATION_ORDER;
@@ -57,6 +56,7 @@ import dagger.model.ComponentPath;
 import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.Element;
@@ -189,7 +189,7 @@ public final class DiagnosticMessageGenerator {
                     graph.isFullBindingGraph()
                         || (!request.isEntryPoint() && !isTracedRequest(dependencyTrace, request)))
             .map(request -> request.dependencyRequest().requestElement())
-            .flatMap(presentValues())
+            .flatMap(Optional::stream)
             .collect(toImmutableSet());
     if (!requestsToPrint.isEmpty()) {
       message

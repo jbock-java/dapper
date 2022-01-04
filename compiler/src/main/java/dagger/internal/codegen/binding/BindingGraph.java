@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
@@ -291,7 +290,7 @@ public final class BindingGraph {
     bindingGraph.bindingModules =
         contributionBindings.values().stream()
             .map(BindingNode::contributingModule)
-            .flatMap(presentValues())
+            .flatMap(Optional::stream)
             .collect(toImmutableSet());
 
     return bindingGraph;

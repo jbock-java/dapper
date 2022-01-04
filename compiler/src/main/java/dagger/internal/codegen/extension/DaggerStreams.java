@@ -17,7 +17,6 @@
 package dagger.internal.codegen.extension;
 
 import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -56,7 +55,7 @@ public final class DaggerStreams {
    */
   // TODO(b/68008628): Use ImmutableSet.toImmutableSet().
   public static <T> Collector<T, ?, Set<T>> toImmutableSet() {
-    return collectingAndThen(toList(), LinkedHashSet::new);
+    return Collectors.toCollection(LinkedHashSet::new);
   }
 
   /**
@@ -102,13 +101,10 @@ public final class DaggerStreams {
         },
         Collector.of(
             LinkedHashMap::new,
-            (Map<K, Set<V>> builder, Map.Entry<K, Set<V>> entry) ->
-                builder.compute(entry.getKey(), (k, v) -> {
-                  if (v == null) {
-                    v = new LinkedHashSet<>();
-                  }
-                  v.addAll(entry.getValue());
-                  return v;
+            (map, entry) ->
+                map.merge(entry.getKey(), entry.getValue(), (set1, set2) -> {
+                  set1.addAll(set2);
+                  return set1;
                 }),
             (left, right) -> {
               right.forEach((k, v) ->
@@ -136,20 +132,6 @@ public final class DaggerStreams {
   /** Returns a stream of all values of the given {@code enumType}. */
   public static <E extends Enum<E>> Stream<E> valuesOf(Class<E> enumType) {
     return EnumSet.allOf(enumType).stream();
-  }
-
-  /**
-   * A function that you can use to extract the present values from a stream of {@link Optional}s.
-   *
-   * <pre>{@code
-   * Set<Foo> foos =
-   *     optionalFoos()
-   *         .flatMap(DaggerStreams.presentValues())
-   *         .collect(toSet());
-   * }</pre>
-   */
-  public static <T> Function<Optional<T>, Stream<T>> presentValues() {
-    return optional -> optional.map(Stream::of).orElse(Stream.empty());
   }
 
   /**

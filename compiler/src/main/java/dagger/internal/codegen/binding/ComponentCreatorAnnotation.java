@@ -17,16 +17,19 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.mapping;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.TypeElement;
 
@@ -108,11 +111,11 @@ public enum ComponentCreatorAnnotation {
   }
 
   private static Stream<ComponentCreatorAnnotation> stream() {
-    return valuesOf(ComponentCreatorAnnotation.class);
+    return Arrays.stream(ComponentCreatorAnnotation.values());
   }
 
   private static Collector<ComponentCreatorAnnotation, ?, Set<ClassName>>
   toAnnotationClasses() {
-    return mapping(ComponentCreatorAnnotation::annotation, toImmutableSet());
+    return mapping(ComponentCreatorAnnotation::annotation, Collectors.toCollection(LinkedHashSet::new));
   }
 }
