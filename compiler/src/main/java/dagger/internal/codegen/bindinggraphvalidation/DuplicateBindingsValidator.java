@@ -138,7 +138,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
               mutuallyVisibleBindings.putAll(componentPath, bindings);
               for (ComponentPath ancestor = componentPath; !ancestor.atRoot(); ) {
                 ancestor = ancestor.parent();
-                List<Binding> bindingsInAncestor = bindingsByComponentPath.get(ancestor);
+                List<Binding> bindingsInAncestor = bindingsByComponentPath.getOrDefault(ancestor, List.of());
                 mutuallyVisibleBindings.putAll(componentPath, bindingsInAncestor);
               }
             });

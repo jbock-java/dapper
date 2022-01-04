@@ -23,8 +23,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,15 +84,42 @@ public final class DaggerStreams {
   // TODO(b/68008628): Use ImmutableSetMultimap.toImmutableSetMultimap().
   public static <T, K, V> Collector<T, ?, ImmutableSetMultimap<K, V>> toImmutableSetMultimap(
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-    return Collectors.mapping(
-        value -> Maps.immutableEntry(keyMapper.apply(value), valueMapper.apply(value)),
-        Collector.of(
-            ImmutableSetMultimap::builder,
-            (ImmutableSetMultimap.Builder<K, V> builder, Map.Entry<K, V> entry) ->
-                builder.put(entry),
-            (left, right) -> left.putAll(right.build()),
-            ImmutableSetMultimap.Builder::build));
+    return collectingAndThen(_toImmutableSetMultimap(keyMapper, valueMapper),
+        map -> {
+          ImmutableSetMultimap.Builder<K, V> builder = ImmutableSetMultimap.builder();
+          map.forEach(builder::putAll);
+          return builder.build();
+        });
   }
+
+  public static <T, K, V> Collector<T, ?, Map<K, Set<V>>> _toImmutableSetMultimap(
+      Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+    return Collectors.mapping(
+        value -> {
+          Set<V> values = new LinkedHashSet<>();
+          values.add(valueMapper.apply(value));
+          return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
+        },
+        Collector.of(
+            LinkedHashMap::new,
+            (Map<K, Set<V>> builder, Map.Entry<K, Set<V>> entry) ->
+                builder.compute(entry.getKey(), (k, v) -> {
+                  if (v == null) {
+                    v = new LinkedHashSet<>();
+                  }
+                  v.addAll(entry.getValue());
+                  return v;
+                }),
+            (left, right) -> {
+              right.forEach((k, v) ->
+                  left.merge(k, v, (set1, set2) -> {
+                    set1.addAll(set2);
+                    return set1;
+                  }));
+              return left;
+            }));
+  }
+
 
   /**
    * Returns a function from {@link Object} to {@code Stream<T>}, which returns a stream containing

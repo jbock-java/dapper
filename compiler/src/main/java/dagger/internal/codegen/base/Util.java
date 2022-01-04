@@ -20,12 +20,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /** General utilities for the annotation processor. */
 public final class Util {
@@ -65,10 +63,10 @@ public final class Util {
   }
 
   public static <E> Set<E> union(Set<E> set1, Set<E> set2) {
-    LinkedHashSet<E> result = Stream.concat(
-            set1.stream(), set2.stream().filter((E e) -> !set1.contains(e)))
-        .collect(Collectors.toCollection(LinkedHashSet::new));
-    return Collections.unmodifiableSet(result);
+    Set<E> result = new LinkedHashSet<>((int) (1.5 * (set1.size() + set2.size())));
+    result.addAll(set1);
+    result.addAll(set2);
+    return result;
   }
 
   public static <K, V> Map<K, V> toMap(
