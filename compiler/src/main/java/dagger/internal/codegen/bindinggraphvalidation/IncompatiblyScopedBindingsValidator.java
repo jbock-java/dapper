@@ -24,8 +24,6 @@ import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimaps;
 import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -35,6 +33,9 @@ import dagger.model.BindingGraph.ComponentNode;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.tools.Diagnostic;
@@ -62,8 +63,8 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
 
   @Override
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
-    ImmutableSetMultimap.Builder<ComponentNode, dagger.model.Binding> incompatibleBindings =
-        ImmutableSetMultimap.builder();
+    Map<ComponentNode, Set<Binding>> incompatibleBindings =
+        new LinkedHashMap<>();
     for (dagger.model.Binding binding : bindingGraph.bindings()) {
       binding
           .scope()
@@ -80,11 +81,14 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                       || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
-                  incompatibleBindings.put(componentNode, binding);
+                  incompatibleBindings.merge(componentNode, new LinkedHashSet<>(Set.of(binding)), (set1, set2) -> {
+                    set1.addAll(set2);
+                    return set1;
+                  });
                 }
               });
     }
-    Multimaps.asMap(incompatibleBindings.build())
+    incompatibleBindings
         .forEach((componentNode, bindings) -> report(componentNode, bindings, diagnosticReporter));
   }
 
