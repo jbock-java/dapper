@@ -25,10 +25,8 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
@@ -50,6 +48,7 @@ import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,12 +128,11 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
    */
   private static Set<Set<Binding>> mutuallyVisibleSubsets(
       Set<Binding> duplicateBindings) {
-    ImmutableListMultimap<ComponentPath, Binding> bindingsByComponentPath =
-        Multimaps.index(duplicateBindings, Binding::componentPath);
+    Map<ComponentPath, List<Binding>> bindingsByComponentPath = duplicateBindings.stream()
+        .collect(Collectors.groupingBy(Binding::componentPath, LinkedHashMap::new, Collectors.toList()));
     ImmutableSetMultimap.Builder<ComponentPath, Binding> mutuallyVisibleBindings =
         ImmutableSetMultimap.builder();
     bindingsByComponentPath
-        .asMap()
         .forEach(
             (componentPath, bindings) -> {
               mutuallyVisibleBindings.putAll(componentPath, bindings);

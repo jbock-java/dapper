@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.groupingBy;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ final class LegacyBindingGraph {
       List<LegacyBindingGraph> graphs) {
     Map<TypeElement, Collection<LegacyBindingGraph>> duplicateGraphs =
         graphs.stream()
-        .collect(groupingBy(graph -> graph.componentDescriptor().typeElement()))
+        .collect(groupingBy(graph -> graph.componentDescriptor().typeElement(), LinkedHashMap::new, Collectors.toList()))
         .entrySet().stream()
         .filter(overlapping -> overlapping.getValue().size() > 1)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
