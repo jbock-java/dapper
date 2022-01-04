@@ -299,7 +299,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
      * @return a cycle equivalent to this one but whose first pair starts with {@code startNode}
      */
     Cycle<N> shift(N startNode) {
-      List<EndpointPair<N>> endpointPairs = new ArrayList<>(endpointPairs());
+      List<EndpointPair<N>> endpointPairs = List.copyOf(endpointPairs());
       int startIndex = -1;
       for (int i = 0; i < endpointPairs.size(); i++) {
         EndpointPair<N> pair = endpointPairs.get(i);

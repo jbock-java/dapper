@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
@@ -27,21 +25,19 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
 import dagger.internal.codegen.binding.MultibindingDeclaration;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
@@ -51,13 +47,17 @@ import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
@@ -89,7 +89,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     // same two modules, then fixing the error in one subcomponent will uncover the second
     // subcomponent to fix.
     // TODO(ronshapiro): Explore ways to address such underreporting without overreporting.
-    Set<ImmutableSet<BindingElement>> reportedDuplicateBindingSets = new HashSet<>();
+    Set<Set<BindingElement>> reportedDuplicateBindingSets = new HashSet<>();
     duplicateBindingSets(bindingGraph)
         .forEach(
             duplicateBindings -> {
@@ -116,7 +116,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
         .collect(toImmutableSet());
   }
 
-  private static Set<ImmutableSet<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
+  private static Set<Set<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
     return valueSetsForEachKey(
         bindingGraph.bindings().stream()
             .filter(binding -> !binding.kind().equals(MEMBERS_INJECTION))
@@ -127,7 +127,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
    * Returns the subsets of the input set that contain bindings that are all visible from the same
    * component. A binding is visible from its component and all its descendants.
    */
-  private static Set<ImmutableSet<Binding>> mutuallyVisibleSubsets(
+  private static Set<Set<Binding>> mutuallyVisibleSubsets(
       Set<Binding> duplicateBindings) {
     ImmutableListMultimap<ComponentPath, Binding> bindingsByComponentPath =
         Multimaps.index(duplicateBindings, Binding::componentPath);
@@ -140,7 +140,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
               mutuallyVisibleBindings.putAll(componentPath, bindings);
               for (ComponentPath ancestor = componentPath; !ancestor.atRoot(); ) {
                 ancestor = ancestor.parent();
-                ImmutableList<Binding> bindingsInAncestor = bindingsByComponentPath.get(ancestor);
+                List<Binding> bindingsInAncestor = bindingsByComponentPath.get(ancestor);
                 mutuallyVisibleBindings.putAll(componentPath, bindingsInAncestor);
               }
             });
@@ -151,7 +151,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
       ImmutableSetMultimap<BindingElement, Binding> duplicateBindings,
       BindingGraph bindingGraph,
       DiagnosticReporter diagnosticReporter) {
-    if (explicitBindingConfictsWithInject(duplicateBindings.keySet())) {
+    if (explicitBindingConflictsWithInject(duplicateBindings.keySet())) {
       compilerOptions
           .explicitBindingConflictsWithInjectValidationType()
           .diagnosticKind()
@@ -164,8 +164,8 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
                       bindingGraph.rootComponentNode()));
       return;
     }
-    ImmutableSet<Binding> bindings = ImmutableSet.copyOf(duplicateBindings.values());
-    Binding oneBinding = bindings.asList().get(0);
+    Set<Binding> bindings = new LinkedHashSet<>(duplicateBindings.values());
+    Binding oneBinding = bindings.iterator().next();
     String message = bindings.stream().anyMatch(binding -> binding.kind().isMultibinding())
         ? incompatibleBindingsMessage(oneBinding, bindings, bindingGraph)
         : duplicateBindingMessage(oneBinding, bindings, bindingGraph);
@@ -185,11 +185,12 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   /**
    * Returns {@code true} if the bindings contain one {@code @Inject} binding and one that isn't.
    */
-  private static boolean explicitBindingConfictsWithInject(
-      ImmutableSet<BindingElement> duplicateBindings) {
-    ImmutableMultiset<BindingKind> bindingKinds =
-        Multimaps.index(duplicateBindings, BindingElement::bindingKind).keys();
-    return bindingKinds.count(INJECTION) == 1 && bindingKinds.size() == 2;
+  private static boolean explicitBindingConflictsWithInject(
+      Set<BindingElement> duplicateBindings) {
+    Map<BindingKind, List<BindingElement>> bindingKinds = duplicateBindings.stream()
+        .collect(Collectors.groupingBy(BindingElement::bindingKind));
+    List<BindingElement> injectBindings = bindingKinds.getOrDefault(INJECTION, List.of());
+    return !injectBindings.isEmpty() && bindingKinds.size() > injectBindings.size();
   }
 
   private void reportExplicitBindingConflictsWithInject(
@@ -227,7 +228,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   private String duplicateBindingMessage(
-      Binding oneBinding, ImmutableSet<Binding> duplicateBindings, BindingGraph graph) {
+      Binding oneBinding, Set<Binding> duplicateBindings, BindingGraph graph) {
     StringBuilder message =
         new StringBuilder().append(oneBinding.key()).append(" is bound multiple times:");
     formatDeclarations(message, 1, declarations(graph, duplicateBindings));
@@ -238,31 +239,31 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   private String incompatibleBindingsMessage(
-      Binding oneBinding, ImmutableSet<Binding> duplicateBindings, BindingGraph graph) {
+      Binding oneBinding, Set<Binding> duplicateBindings, BindingGraph graph) {
     Key key = oneBinding.key();
     Set<Binding> multibindings =
         duplicateBindings.stream()
             .filter(binding -> binding.kind().isMultibinding())
             .collect(toImmutableSet());
-    verify(
+    Preconditions.checkState(
         multibindings.size() == 1, "expected only one multibinding for %s: %s", key, multibindings);
     StringBuilder message = new StringBuilder();
     java.util.Formatter messageFormatter = new java.util.Formatter(message);
     messageFormatter.format("%s has incompatible bindings or declarations:\n", key);
     message.append(INDENT);
-    Binding multibinding = getOnlyElement(multibindings);
+    Binding multibinding = Util.getOnlyElement(multibindings);
     messageFormatter.format("%s bindings and declarations:", multibindingTypeString(multibinding));
     formatDeclarations(message, 2, declarations(graph, multibindings));
 
     Set<Binding> uniqueBindings =
-        Sets.filter(duplicateBindings, binding -> !binding.equals(multibinding));
+        duplicateBindings.stream().filter(binding -> !binding.equals(multibinding))
+            .collect(DaggerStreams.toImmutableSet());
     message.append('\n').append(INDENT).append("Unique bindings and declarations:");
     formatDeclarations(
         message,
         2,
-        Sets.filter(
-            declarations(graph, uniqueBindings),
-            declaration -> !(declaration instanceof MultibindingDeclaration)));
+        declarations(graph, uniqueBindings).stream().filter(declaration -> !(declaration instanceof MultibindingDeclaration))
+            .collect(DaggerStreams.toImmutableSet()));
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
     }
@@ -272,9 +273,9 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private void formatDeclarations(
       StringBuilder builder,
       int indentLevel,
-      Iterable<? extends BindingDeclaration> bindingDeclarations) {
+      Collection<? extends BindingDeclaration> bindingDeclarations) {
     bindingDeclarationFormatter.formatIndentedList(
-        builder, ImmutableList.copyOf(bindingDeclarations), indentLevel);
+        builder, List.copyOf(bindingDeclarations), indentLevel);
   }
 
   private Set<BindingDeclaration> declarations(
@@ -311,13 +312,13 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     }
   }
 
-  private static <E> Set<ImmutableSet<E>> valueSetsForEachKey(Multimap<?, E> multimap) {
-    return multimap.asMap().values().stream().map(ImmutableSet::copyOf).collect(toImmutableSet());
+  private static <E> Set<Set<E>> valueSetsForEachKey(Multimap<?, E> multimap) {
+    return multimap.asMap().values().stream().map(LinkedHashSet::new).collect(toImmutableSet());
   }
 
   /** Returns the binding of the given kind that is closest to the root component. */
   private static Binding rootmostBindingWithKind(
-      Predicate<BindingKind> bindingKindPredicate, ImmutableCollection<Binding> bindings) {
+      Predicate<BindingKind> bindingKindPredicate, Collection<Binding> bindings) {
     return bindings.stream()
         .filter(b -> bindingKindPredicate.test(b.kind()))
         .min(BY_LENGTH_OF_COMPONENT_PATH)
@@ -341,14 +342,6 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
 
     BindingKind bindingKind() {
       return bindingKind;
-    }
-
-    Optional<Element> bindingElement() {
-      return bindingElement;
-    }
-
-    Optional<TypeElement> contributingModule() {
-      return contributingModule;
     }
 
     @Override
