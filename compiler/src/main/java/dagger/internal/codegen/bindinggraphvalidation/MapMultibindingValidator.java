@@ -133,12 +133,12 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
       Binding multiboundMapBinding,
       Set<ContributionBinding> contributions,
       DiagnosticReporter diagnosticReporter) {
-    ImmutableSetMultimap<?, ContributionBinding> contributionsByMapKey =
-        ImmutableSetMultimap.copyOf(
-            Multimaps.index(contributions, ContributionBinding::wrappedMapKeyAnnotation));
+    Map<?, Set<ContributionBinding>> contributionsByMapKey =
+        contributions.stream().collect(Collectors.groupingBy(ContributionBinding::wrappedMapKeyAnnotation,
+            Collectors.toSet()));
 
     for (Set<ContributionBinding> contributionsForOneMapKey :
-        Multimaps.asMap(contributionsByMapKey).values()) {
+        contributionsByMapKey.values()) {
       if (contributionsForOneMapKey.size() > 1) {
         diagnosticReporter.reportBinding(
             ERROR,
