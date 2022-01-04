@@ -18,15 +18,12 @@ package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.extension.DaggerStreams._toImmutableSetMultimap;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.MEMBERS_INJECTION;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
@@ -35,7 +32,6 @@ import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
 import dagger.internal.codegen.binding.MultibindingDeclaration;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
@@ -106,13 +102,13 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
    * descendant component because it depends on local multibindings or optional bindings. Hence each
    * "set" is represented as a multimap from binding element (ignoring component path) to binding.
    */
-  private Set<ImmutableSetMultimap<BindingElement, Binding>> duplicateBindingSets(
+  private Set<Map<BindingElement, Set<Binding>>> duplicateBindingSets(
       BindingGraph bindingGraph) {
     return groupBindingsByKey(bindingGraph).stream()
         .flatMap(bindings -> mutuallyVisibleSubsets(bindings).stream())
         .map(BindingElement::index)
         .filter(duplicates -> duplicates.keySet().size() > 1)
-        .collect(toImmutableSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private static Set<Set<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
@@ -152,7 +148,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   private void reportDuplicateBindings(
-      ImmutableSetMultimap<BindingElement, Binding> duplicateBindings,
+      Map<BindingElement, Set<Binding>> duplicateBindings,
       BindingGraph bindingGraph,
       DiagnosticReporter diagnosticReporter) {
     if (explicitBindingConflictsWithInject(duplicateBindings.keySet())) {
@@ -168,7 +164,9 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
                       bindingGraph.rootComponentNode()));
       return;
     }
-    Set<Binding> bindings = new LinkedHashSet<>(duplicateBindings.values());
+    Set<Binding> bindings = duplicateBindings.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
     Binding oneBinding = bindings.iterator().next();
     String message = bindings.stream().anyMatch(binding -> binding.kind().isMultibinding())
         ? incompatibleBindingsMessage(oneBinding, bindings, bindingGraph)
@@ -198,14 +196,15 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   }
 
   private void reportExplicitBindingConflictsWithInject(
-      ImmutableSetMultimap<BindingElement, Binding> duplicateBindings,
+      Map<BindingElement, Set<Binding>> duplicateBindings,
       DiagnosticReporter diagnosticReporter,
       Kind diagnosticKind,
       ComponentNode rootComponent) {
+    List<Binding> bindings = duplicateBindings.values().stream().flatMap(Set::stream).collect(Collectors.toList());
     Binding injectBinding =
-        rootmostBindingWithKind(k -> k.equals(INJECTION), duplicateBindings.values());
+        rootmostBindingWithKind(k -> k.equals(INJECTION), bindings);
     Binding explicitBinding =
-        rootmostBindingWithKind(k -> !k.equals(INJECTION), duplicateBindings.values());
+        rootmostBindingWithKind(k -> !k.equals(INJECTION), bindings);
     StringBuilder message =
         new StringBuilder()
             .append(explicitBinding.key())
@@ -248,7 +247,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     Set<Binding> multibindings =
         duplicateBindings.stream()
             .filter(binding -> binding.kind().isMultibinding())
-            .collect(toImmutableSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     Preconditions.checkState(
         multibindings.size() == 1, "expected only one multibinding for %s: %s", key, multibindings);
     StringBuilder message = new StringBuilder();
@@ -261,13 +260,13 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
 
     Set<Binding> uniqueBindings =
         duplicateBindings.stream().filter(binding -> !binding.equals(multibinding))
-            .collect(DaggerStreams.toImmutableSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     message.append('\n').append(INDENT).append("Unique bindings and declarations:");
     formatDeclarations(
         message,
         2,
         declarations(graph, uniqueBindings).stream().filter(declaration -> !(declaration instanceof MultibindingDeclaration))
-            .collect(DaggerStreams.toImmutableSet()));
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
     }
@@ -286,9 +285,8 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
       BindingGraph graph, Set<Binding> bindings) {
     return bindings.stream()
         .flatMap(binding -> declarations(graph, binding).stream())
-        .distinct()
         .sorted(BindingDeclaration.COMPARATOR)
-        .collect(toImmutableSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private Set<BindingDeclaration> declarations(
@@ -322,11 +320,11 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
 
   /** Returns the binding of the given kind that is closest to the root component. */
   private static Binding rootmostBindingWithKind(
-      Predicate<BindingKind> bindingKindPredicate, Collection<Binding> bindings) {
+      Predicate<BindingKind> bindingKindPredicate, List<Binding> bindings) {
     return bindings.stream()
         .filter(b -> bindingKindPredicate.test(b.kind()))
         .min(BY_LENGTH_OF_COMPONENT_PATH)
-        .get();
+        .orElseThrow();
   }
 
   /** The identifying information about a binding, excluding its {@link Binding#componentPath()}. */
@@ -363,8 +361,8 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
       return Objects.hash(bindingKind, bindingElement, contributingModule);
     }
 
-    static ImmutableSetMultimap<BindingElement, Binding> index(Set<Binding> bindings) {
-      return bindings.stream().collect(toImmutableSetMultimap(BindingElement::forBinding, b -> b));
+    static Map<BindingElement, Set<Binding>> index(Set<Binding> bindings) {
+      return bindings.stream().collect(_toImmutableSetMultimap(BindingElement::forBinding, b -> b));
     }
 
     private static BindingElement forBinding(Binding binding) {
