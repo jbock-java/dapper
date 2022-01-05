@@ -19,19 +19,16 @@ package dagger.internal.codegen.bindinggraphvalidation;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.asTypeElements;
-import static com.google.common.collect.Sets.union;
+import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentRequirement.componentCanMakeNewInstances;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentNodeImpl;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.Binding;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -42,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
@@ -87,16 +85,16 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
     Set<TypeElement> factoryMethodParameters =
         subgraphFactoryMethodParameters(edge, graph);
     ComponentNode child = (ComponentNode) graph.network().incidentNodes(edge).target();
-    SetView<TypeElement> modulesOwnedByChild = ownedModules(child, graph);
+    Set<TypeElement> modulesOwnedByChild = ownedModules(child, graph);
     return graph.bindings().stream()
         // bindings owned by child
         .filter(binding -> binding.componentPath().equals(child.componentPath()))
         // that require a module instance
-        .filter(binding -> binding.requiresModuleInstance())
-        .map(binding -> binding.contributingModule().get())
+        .filter(Binding::requiresModuleInstance)
+        .map(binding -> binding.contributingModule().orElseThrow())
         .distinct()
         // module owned by child
-        .filter(module -> modulesOwnedByChild.contains(module))
+        .filter(modulesOwnedByChild::contains)
         // module not in the method parameters
         .filter(module -> !factoryMethodParameters.contains(module))
         // module doesn't have an accessible no-arg constructor
@@ -113,8 +111,8 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
     return asTypeElements(factoryMethodType.getParameterTypes());
   }
 
-  private SetView<TypeElement> ownedModules(ComponentNode component, BindingGraph graph) {
-    return Sets.difference(
+  private Set<TypeElement> ownedModules(ComponentNode component, BindingGraph graph) {
+    return Util.difference(
         ((ComponentNodeImpl) component).componentDescriptor().moduleTypes(),
         inheritedModules(component, graph));
   }
@@ -127,11 +125,11 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private Function<ComponentNode, Set<TypeElement>> uncachedInheritedModules(BindingGraph graph) {
     return componentNode ->
         componentNode.componentPath().atRoot()
-            ? ImmutableSet.of()
+            ? Set.of()
             : graph
             .componentNode(componentNode.componentPath().parent())
             .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
-            .get();
+            .orElseThrow();
   }
 
   private void reportMissingModuleParameters(
@@ -151,6 +149,6 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
             .componentPath()
             .currentComponent()
             .getQualifiedName(),
-        Joiner.on(", ").join(missingModules));
+        missingModules.stream().map(TypeElement::toString).collect(Collectors.joining(", ")));
   }
 }

@@ -17,12 +17,7 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
@@ -30,8 +25,10 @@ import dagger.model.BindingGraph.DependencyEdge;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Reports errors or warnings (depending on the {@code -Adagger.nullableValidation} value) for each
@@ -67,8 +64,8 @@ final class NullableBindingValidator implements BindingGraphPlugin {
 
   private List<Binding> nullableBindings(BindingGraph bindingGraph) {
     return bindingGraph.bindings().stream()
-        .filter(binding -> binding.isNullable())
-        .collect(toImmutableList());
+        .filter(Binding::isNullable)
+        .collect(Collectors.toList());
   }
 
   private Set<DependencyEdge> nonNullableDependencies(
@@ -76,10 +73,10 @@ final class NullableBindingValidator implements BindingGraphPlugin {
     return bindingGraph.network().inEdges(binding).stream()
         .flatMap(instancesOf(DependencyEdge.class))
         .filter(edge -> !edge.dependencyRequest().isNullable())
-        .collect(toImmutableSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
-  @VisibleForTesting
+  // Visible for testing
   static String nullableToNonNullable(String key, String binding) {
     return String.format("%s is not nullable, but is being provided by %s", key, binding);
   }
