@@ -16,11 +16,7 @@
 
 package dagger.internal.codegen.extension;
 
-import static java.util.stream.Collectors.collectingAndThen;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
@@ -29,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -42,7 +37,7 @@ public final class DaggerStreams {
 
   /**
    * Returns a {@link Collector} that accumulates the input elements into a new {@link
-   * ImmutableList}, in encounter order.
+   * List}, in encounter order.
    */
   // TODO(b/68008628): Use ImmutableList.toImmutableList().
   public static <T> Collector<T, ?, List<T>> toImmutableList() {
@@ -76,22 +71,11 @@ public final class DaggerStreams {
   }
 
   /**
-   * Returns a {@link Collector} that accumulates elements into an {@code ImmutableSetMultimap}
+   * Returns a {@link Collector} that accumulates elements into a {@code Map}
    * whose keys and values are the result of applying the provided mapping functions to the input
-   * elements. Entries appear in the result {@code ImmutableSetMultimap} in encounter order.
+   * elements. Entries appear in the result {@code Map} in encounter order.
    */
-  // TODO(b/68008628): Use ImmutableSetMultimap.toImmutableSetMultimap().
-  public static <T, K, V> Collector<T, ?, ImmutableSetMultimap<K, V>> toImmutableSetMultimap(
-      Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-    return collectingAndThen(_toImmutableSetMultimap(keyMapper, valueMapper),
-        map -> {
-          ImmutableSetMultimap.Builder<K, V> builder = ImmutableSetMultimap.builder();
-          map.forEach(builder::putAll);
-          return builder.build();
-        });
-  }
-
-  public static <T, K, V> Collector<T, ?, Map<K, Set<V>>> _toImmutableSetMultimap(
+  public static <T, K, V> Collector<T, ?, Map<K, Set<V>>> toImmutableSetMultimap(
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
     return Collectors.mapping(
         value -> {

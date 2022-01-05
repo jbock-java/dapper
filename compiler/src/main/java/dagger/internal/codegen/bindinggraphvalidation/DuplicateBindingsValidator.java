@@ -17,7 +17,7 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
-import static dagger.internal.codegen.extension.DaggerStreams._toImmutableSetMultimap;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.MEMBERS_INJECTION;
 import static java.util.Comparator.comparing;
@@ -115,7 +115,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     return valueSetsForEachKey(
         bindingGraph.bindings().stream()
             .filter(binding -> !binding.kind().equals(MEMBERS_INJECTION))
-            .collect(_toImmutableSetMultimap(Binding::key, binding -> binding)));
+            .collect(toImmutableSetMultimap(Binding::key, binding -> binding)));
   }
 
   /**
@@ -362,7 +362,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     }
 
     static Map<BindingElement, Set<Binding>> index(Set<Binding> bindings) {
-      return bindings.stream().collect(_toImmutableSetMultimap(BindingElement::forBinding, b -> b));
+      return bindings.stream().collect(toImmutableSetMultimap(BindingElement::forBinding, b -> b));
     }
 
     private static BindingElement forBinding(Binding binding) {

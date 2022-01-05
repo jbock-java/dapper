@@ -96,7 +96,7 @@ public final class DiagnosticMessageGenerator {
   private final Function<TypeElement, Iterable<TypeElement>> supertypes;
 
   /** The shortest path (value) from an entry point (column) to a binding (row). */
-  private final Table<MaybeBinding, DependencyEdge, ImmutableList<Node>> shortestPaths =
+  private final Table<MaybeBinding, DependencyEdge, List<Node>> shortestPaths =
       HashBasedTable.create();
 
   private static <K, V> Function<K, V> memoize(Function<K, V> uncached) {
@@ -276,7 +276,7 @@ public final class DiagnosticMessageGenerator {
                 // finally prefer entry points declared first in their enclosing type
                 .thenComparing(requestElementDeclarationOrder()));
 
-    ImmutableList<Node> shortestBindingPath =
+    List<Node> shortestBindingPath =
         shortestPathFromEntryPoint(entryPointForTrace, binding);
     verify(
         !shortestBindingPath.isEmpty(),
@@ -324,7 +324,7 @@ public final class DiagnosticMessageGenerator {
     return comparing(entryPoint -> shortestPathFromEntryPoint(entryPoint, binding).size());
   }
 
-  ImmutableList<Node> shortestPathFromEntryPoint(DependencyEdge entryPoint, MaybeBinding binding) {
+  List<Node> shortestPathFromEntryPoint(DependencyEdge entryPoint, MaybeBinding binding) {
     return shortestPaths
         .row(binding)
         .computeIfAbsent(

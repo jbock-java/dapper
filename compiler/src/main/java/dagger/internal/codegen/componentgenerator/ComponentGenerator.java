@@ -16,18 +16,16 @@
 
 package dagger.internal.codegen.componentgenerator;
 
-import static com.google.common.base.Verify.verify;
 import static dagger.internal.codegen.writing.ComponentNames.getRootComponentClassName;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeSpec;
 import dagger.Component;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import jakarta.inject.Inject;
-
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.processing.Filer;
@@ -63,7 +61,7 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
             .parentRequirementExpressions(Optional.empty())
             .build()
             .componentImplementation();
-    verify(
+    Preconditions.checkState(
         componentImplementation
             .name()
             .equals(getRootComponentClassName(bindingGraph.componentDescriptor())));

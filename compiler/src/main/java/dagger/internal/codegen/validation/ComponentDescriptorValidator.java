@@ -27,8 +27,8 @@ import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Scopes.singletonScope;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -36,8 +36,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
@@ -326,7 +324,7 @@ public final class ComponentDescriptorValidator {
       }
 
       // Validate that declared creator requirements (modules, dependencies) have unique types.
-      ImmutableSetMultimap<Wrapper<TypeMirror>, Element> declaredRequirementsByType =
+      Map<Wrapper<TypeMirror>, Set<Element>> declaredRequirementsByType =
           Multimaps.filterKeys(
                   creator.unvalidatedRequirementElements(),
                   creatorModuleAndDependencyRequirements::contains)
@@ -334,7 +332,6 @@ public final class ComponentDescriptorValidator {
               .collect(
                   toImmutableSetMultimap(entry -> entry.getKey().wrappedType(), Entry::getValue));
       declaredRequirementsByType
-          .asMap()
           .forEach(
               (typeWrapper, elementsForType) -> {
                 if (elementsForType.size() > 1) {

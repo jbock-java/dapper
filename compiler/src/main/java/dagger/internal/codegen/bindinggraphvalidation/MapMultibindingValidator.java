@@ -17,7 +17,7 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
-import static dagger.internal.codegen.extension.DaggerStreams._toImmutableSetMultimap;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.MULTIBOUND_MAP;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -93,7 +93,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
     Map<Key, Set<Binding>> mapMultibindings =
         bindingGraph.bindings().stream()
             .filter(node -> node.kind().equals(MULTIBOUND_MAP))
-            .collect(_toImmutableSetMultimap(Binding::key, node -> node));
+            .collect(toImmutableSetMultimap(Binding::key, node -> node));
 
     // Mutlbindings for Map<K, V>
     Map<Key, Set<Binding>> plainValueMapMultibindings =

@@ -16,15 +16,17 @@
 
 package dagger.internal.codegen.extension;
 
-import static com.google.common.collect.Sets.difference;
 import static com.google.common.graph.Graphs.reachableNodes;
+import static dagger.internal.codegen.base.Util.difference;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Graph;
 import com.google.common.graph.SuccessorsFunction;
+import dagger.internal.codegen.base.Util;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -43,21 +45,21 @@ public final class DaggerGraphs {
    * @throws IllegalArgumentException if {@code nodeU} or {@code nodeV} is not present in {@code
    *     graph}
    */
-  public static <N> ImmutableList<N> shortestPath(SuccessorsFunction<N> graph, N nodeU, N nodeV) {
+  public static <N> List<N> shortestPath(SuccessorsFunction<N> graph, N nodeU, N nodeV) {
     if (nodeU.equals(nodeV)) {
-      return ImmutableList.of(nodeU);
+      return List.of(nodeU);
     }
-    Set<N> successors = ImmutableSet.copyOf(graph.successors(nodeU));
+    Set<N> successors = Util.setOf(graph.successors(nodeU));
     if (successors.contains(nodeV)) {
-      return ImmutableList.of(nodeU, nodeV);
+      return List.of(nodeU, nodeV);
     }
 
     Map<N, N> visitedNodeToPathPredecessor = new HashMap<>(); // encodes shortest path tree
     for (N node : successors) {
       visitedNodeToPathPredecessor.put(node, nodeU);
     }
-    Queue<N> currentNodes = new ArrayDeque<N>(successors);
-    Queue<N> nextNodes = new ArrayDeque<N>();
+    Queue<N> currentNodes = new ArrayDeque<>(successors);
+    Queue<N> nextNodes = new ArrayDeque<>();
 
     // Perform a breadth-first traversal starting with the successors of nodeU.
     while (!currentNodes.isEmpty()) {
@@ -69,14 +71,15 @@ public final class DaggerGraphs {
           }
           visitedNodeToPathPredecessor.put(nextNode, currentNode);
           if (nextNode.equals(nodeV)) {
-            ImmutableList.Builder<N> builder = ImmutableList.builder();
+            List<N> builder = new ArrayList<>();
             N node = nodeV;
             builder.add(node);
             while (!node.equals(nodeU)) {
               node = visitedNodeToPathPredecessor.get(node);
               builder.add(node);
             }
-            return builder.build().reverse();
+            Collections.reverse(builder);
+            return builder;
           }
           nextNodes.add(nextNode);
         }
@@ -86,12 +89,12 @@ public final class DaggerGraphs {
       nextNodes = emptyQueue; // reusing empty queue faster than allocating new one
     }
 
-    return ImmutableList.of();
+    return List.of();
   }
 
   /** Returns the nodes in a graph that are not reachable from a node. */
-  public static <N> ImmutableSet<N> unreachableNodes(Graph<N> graph, N node) {
-    return ImmutableSet.copyOf(difference(graph.nodes(), reachableNodes(graph, node)));
+  public static <N> Set<N> unreachableNodes(Graph<N> graph, N node) {
+    return difference(graph.nodes(), reachableNodes(graph, node));
   }
 
   private DaggerGraphs() {

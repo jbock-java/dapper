@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.extension;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,7 @@ public final class DaggerCollectors {
     }
 
     void add(Object o) {
-      checkNotNull(o);
+      requireNonNull(o);
       if (element == null) {
         this.element = o;
       } else if (extras == null) {
