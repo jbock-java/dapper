@@ -45,7 +45,6 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -67,6 +66,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -118,7 +118,7 @@ final class InjectionMethods {
     static MethodSpec create(
         ProvisionBinding binding,
         CompilerOptions compilerOptions) {
-      ExecutableElement element = asExecutable(binding.bindingElement().get());
+      ExecutableElement element = asExecutable(binding.bindingElement().orElseThrow());
       switch (element.getKind()) {
         case CONSTRUCTOR:
           return constructorProxy(element);
@@ -157,16 +157,16 @@ final class InjectionMethods {
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
         ClassName requestingClass) {
-      ImmutableMap<VariableElement, DependencyRequest> dependencyRequestMap =
+      Map<VariableElement, DependencyRequest> dependencyRequestMap =
           binding.provisionDependencies().stream()
               .collect(
                   toImmutableMap(
-                      request -> MoreElements.asVariable(request.requestElement().get()),
+                      request -> MoreElements.asVariable(request.requestElement().orElseThrow()),
                       request -> request));
 
       ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
       for (VariableElement parameter :
-          asExecutable(binding.bindingElement().get()).getParameters()) {
+          asExecutable(binding.bindingElement().orElseThrow()).getParameters()) {
         if (AssistedInjectionAnnotations.isAssistedParameter(parameter)) {
           arguments.add(CodeBlock.of("$L", parameter.getSimpleName()));
         } else if (dependencyRequestMap.containsKey(parameter)) {
@@ -203,7 +203,7 @@ final class InjectionMethods {
      */
     static boolean requiresInjectionMethod(
         ProvisionBinding binding, CompilerOptions compilerOptions, ClassName requestingClass) {
-      ExecutableElement method = MoreElements.asExecutable(binding.bindingElement().get());
+      ExecutableElement method = MoreElements.asExecutable(binding.bindingElement().orElseThrow());
       return !binding.injectionSites().isEmpty()
           || binding.shouldCheckForNull(compilerOptions)
           || !isElementAccessibleFrom(method, requestingClass.packageName())
@@ -376,7 +376,7 @@ final class InjectionMethods {
       if (!dependency.kind().equals(RequestKind.INSTANCE)) {
         TypeName usageTypeName = accessibleType(dependency);
         codeBlock.add("($T) ($T)", usageTypeName, rawTypeName(usageTypeName));
-      } else if (dependency.requestElement().get().asType().getKind().equals(TypeKind.TYPEVAR)) {
+      } else if (dependency.requestElement().orElseThrow().asType().getKind().equals(TypeKind.TYPEVAR)) {
         codeBlock.add("($T)", keyType);
       }
     }

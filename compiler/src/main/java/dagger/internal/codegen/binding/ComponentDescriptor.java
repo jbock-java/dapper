@@ -24,7 +24,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import dagger.Component;
@@ -278,7 +277,7 @@ public final class ComponentDescriptor {
     return childComponentsDeclaredByBuilderEntryPoints;
   }
 
-  private final Supplier<ImmutableMap<TypeElement, ComponentDescriptor>>
+  private final Supplier<Map<TypeElement, ComponentDescriptor>>
       childComponentsByBuilderType =
       Suppliers.memoize(
           () ->
@@ -286,7 +285,7 @@ public final class ComponentDescriptor {
                   .filter(child -> child.creatorDescriptor().isPresent())
                   .collect(
                       toImmutableMap(
-                          child -> child.creatorDescriptor().get().typeElement(),
+                          child -> child.creatorDescriptor().orElseThrow().typeElement(),
                           child -> child)));
 
   /** Returns the child component with the given builder type. */

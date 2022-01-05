@@ -60,7 +60,7 @@ public final class ComponentNames {
   private static final Splitter QUALIFIED_NAME_SPLITTER = Splitter.on('.');
 
   private final ImmutableMap<ComponentDescriptor, String> namesByDescriptor;
-  private final ImmutableMap<Key, ComponentDescriptor> descriptorsByCreatorKey;
+  private final Map<Key, ComponentDescriptor> descriptorsByCreatorKey;
 
   @Inject
   ComponentNames(@TopLevel BindingGraph graph, KeyFactory keyFactory) {
@@ -103,7 +103,7 @@ public final class ComponentNames {
     return ImmutableMap.copyOf(subcomponentImplSimpleNames);
   }
 
-  private static ImmutableMap<Key, ComponentDescriptor> descriptorsByCreatorKey(
+  private static Map<Key, ComponentDescriptor> descriptorsByCreatorKey(
       KeyFactory keyFactory, ImmutableSet<ComponentDescriptor> subcomponents) {
     return subcomponents.stream()
         .filter(subcomponent -> subcomponent.creatorDescriptor().isPresent())

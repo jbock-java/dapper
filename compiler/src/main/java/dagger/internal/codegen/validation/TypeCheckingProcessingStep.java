@@ -55,7 +55,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
 
   @Override
   public ImmutableSet<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
-    ImmutableMap<String, ClassName> annotationClassNames =
+    Map<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
     checkState(

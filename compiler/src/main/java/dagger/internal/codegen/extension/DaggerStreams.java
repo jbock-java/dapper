@@ -16,11 +16,8 @@
 
 package dagger.internal.codegen.extension;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,20 +51,15 @@ public final class DaggerStreams {
   }
 
   /**
-   * Returns a {@link Collector} that accumulates elements into an {@code ImmutableMap} whose keys
+   * Returns a {@link Collector} that accumulates elements into an {@code Map} whose keys
    * and values are the result of applying the provided mapping functions to the input elements.
-   * Entries appear in the result {@code ImmutableMap} in encounter order.
+   * Entries appear in the result {@code Map} in encounter order.
    */
-  // TODO(b/68008628): Use ImmutableMap.toImmutableMap().
-  public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(
+  public static <T, K, V> Collector<T, ?, Map<K, V>> toImmutableMap(
       Function<? super T, K> keyMapper, Function<? super T, V> valueMapper) {
-    return Collectors.mapping(
-        value -> Maps.immutableEntry(keyMapper.apply(value), valueMapper.apply(value)),
-        Collector.of(
-            ImmutableMap::builder,
-            (ImmutableMap.Builder<K, V> builder, Map.Entry<K, V> entry) -> builder.put(entry),
-            (left, right) -> left.putAll(right.build()),
-            ImmutableMap.Builder::build));
+    return Collectors.toMap(keyMapper, valueMapper, (v1, v2) -> {
+      throw new IllegalStateException("found 2 values for the same key: " + v1 + ", " + v2);
+    }, LinkedHashMap::new);
   }
 
   /**
@@ -111,11 +103,6 @@ public final class DaggerStreams {
    */
   public static <T> Function<Object, Stream<T>> instancesOf(Class<T> to) {
     return f -> to.isInstance(f) ? Stream.of(to.cast(f)) : Stream.empty();
-  }
-
-  /** Returns a stream of all values of the given {@code enumType}. */
-  public static <E extends Enum<E>> Stream<E> valuesOf(Class<E> enumType) {
-    return EnumSet.allOf(enumType).stream();
   }
 
   /**

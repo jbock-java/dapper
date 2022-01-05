@@ -83,6 +83,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,7 +243,7 @@ public final class ComponentImplementation {
   private final ComponentNames componentNames;
   private final DaggerElements elements;
   private final DaggerTypes types;
-  private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
+  private final Map<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
 
   @Inject
   ComponentImplementation(
@@ -312,13 +313,13 @@ public final class ComponentImplementation {
         .collect(toImmutableList());
   }
 
-  private static ImmutableMap<ComponentImplementation, FieldSpec>
+  private static Map<ComponentImplementation, FieldSpec>
   createComponentFieldsByImplementation(
       ComponentImplementation componentImplementation) {
     checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
-    ImmutableList.Builder<ComponentImplementation> builder = ImmutableList.builder();
+    List<ComponentImplementation> builder = new ArrayList<>();
     for (ComponentImplementation curr = componentImplementation;
          curr != null;
          curr = curr.parent.orElse(null)) {
@@ -326,7 +327,8 @@ public final class ComponentImplementation {
     }
     // For better readability when adding these fields/parameters to generated code, we collect the
     // component implementations in reverse order so that parents appear before children.
-    return builder.build().reverse().stream()
+    Collections.reverse(builder);
+    return builder.stream()
         .collect(
             toImmutableMap(
                 componentImpl -> componentImpl,
@@ -437,7 +439,7 @@ public final class ComponentImplementation {
     private final UniqueNameSet componentMethodNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
-    private final ImmutableMap<ComponentRequirement, ParameterSpec> constructorParameters;
+    private final Map<ComponentRequirement, ParameterSpec> constructorParameters;
     private final ListMultimap<FieldSpecKind, FieldSpec> fieldSpecsMap =
         MultimapBuilder.enumKeys(FieldSpecKind.class).arrayListValues().build();
     private final ListMultimap<MethodSpecKind, MethodSpec> methodSpecsMap =
@@ -482,7 +484,7 @@ public final class ComponentImplementation {
     }
 
     /** Returns the fields for all components in the component path by component implementation. */
-    public ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation() {
+    public Map<ComponentImplementation, FieldSpec> componentFieldsByImplementation() {
       return componentFieldsByImplementation;
     }
 
@@ -773,7 +775,7 @@ public final class ComponentImplementation {
     /** Creates and adds the constructor and methods needed for initializing the component. */
     private void addConstructorAndInitializationMethods() {
       MethodSpec.Builder constructor = constructorBuilder().addModifiers(PRIVATE);
-      ImmutableList<ParameterSpec> parameters = constructorParameters.values().asList();
+      List<ParameterSpec> parameters = new ArrayList<>(constructorParameters.values());
 
       if (isComponentShard()) {
         // Add a constructor parameter and initialization for each component field. We initialize
@@ -831,7 +833,7 @@ public final class ComponentImplementation {
       } else {
         // This initialization is called from the componentShard, so we need to use those args.
         CodeBlock componentArgs =
-            parameterNames(componentShard.constructorParameters.values().asList());
+            parameterNames(componentShard.constructorParameters.values());
         FieldSpec shardField = shardFieldsByImplementation.get(this);
         shardInitializations.add(CodeBlock.of("$N = new $T($L);", shardField, name, componentArgs));
       }
@@ -867,7 +869,7 @@ public final class ComponentImplementation {
     if (graph.componentDescriptor().hasCreator()) {
       return new ArrayList<>(graph.componentRequirements());
     } else if (graph.factoryMethod().isPresent()) {
-      return graph.factoryMethodParameters().keySet().asList();
+      return new ArrayList<>(graph.factoryMethodParameters().keySet());
     } else {
       throw new AssertionError(
           "Expected either a component creator or factory method but found neither.");

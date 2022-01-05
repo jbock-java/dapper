@@ -126,7 +126,7 @@ public final class BindingGraph {
             network().successors(node).stream().sorted(nodeOrder()).collect(toImmutableList())));
 
     private final boolean isFullBindingGraph;
-    private final ImmutableMap<ComponentPath, ComponentNode> mComponentNodes;
+    private final Map<ComponentPath, ComponentNode> mComponentNodes;
     private final ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes;
 
     TopLevelBindingGraph(
@@ -135,7 +135,7 @@ public final class BindingGraph {
         Set<MissingBinding> missingBindings,
         Set<ComponentNode> componentNodes,
         boolean isFullBindingGraph,
-        ImmutableMap<ComponentPath, ComponentNode> mComponentNodes,
+        Map<ComponentPath, ComponentNode> mComponentNodes,
         ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes) {
       super(network, bindings, missingBindings, componentNodes);
       this.isFullBindingGraph = isFullBindingGraph;
@@ -152,7 +152,7 @@ public final class BindingGraph {
         ImmutableNetwork<Node, Edge> network, boolean isFullBindingGraph) {
       NodesByClass nodesByClass = NodesByClass.create(network);
 
-      ImmutableMap<ComponentPath, ComponentNode> mComponentNodes =
+      Map<ComponentPath, ComponentNode> mComponentNodes =
           nodesByClass.componentNodes.stream()
               .collect(
                   toImmutableMap(ComponentNode::componentPath, componentNode -> componentNode));
@@ -407,7 +407,7 @@ public final class BindingGraph {
    * BindingGraph#factoryMethod factory method}.
    */
   // TODO(dpb): Consider disallowing modules if none of their bindings are used.
-  public ImmutableMap<ComponentRequirement, VariableElement> factoryMethodParameters() {
+  public Map<ComponentRequirement, VariableElement> factoryMethodParameters() {
     return factoryMethod().get().getParameters().stream()
         .collect(
             toImmutableMap(
