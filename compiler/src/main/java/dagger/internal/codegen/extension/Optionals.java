@@ -16,17 +16,14 @@
 
 package dagger.internal.codegen.extension;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.asList;
-
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /** Utilities for {@link Optional}s. */
 public final class Optionals {
   public static <T> Comparator<Optional<T>> emptiesLast(Comparator<? super T> valueComparator) {
-    checkNotNull(valueComparator);
+    Objects.requireNonNull(valueComparator);
     return Comparator.comparing(o -> o.orElse(null), Comparator.nullsLast(valueComparator));
   }
 

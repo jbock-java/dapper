@@ -20,11 +20,11 @@ import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -128,7 +128,7 @@ public final class ModuleAnnotation {
    * annotates {@code typeElement}.
    */
   public static Optional<ModuleAnnotation> moduleAnnotation(TypeElement typeElement) {
-    return getAnyAnnotation(typeElement, TypeNames.MODULE)
+    return DaggerElements.getAnyAnnotation(typeElement, List.of(TypeNames.MODULE))
         .map(ModuleAnnotation::moduleAnnotation);
   }
 }

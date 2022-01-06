@@ -20,12 +20,12 @@ import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 import static com.google.auto.common.MoreTypes.asTypeElements;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -162,7 +162,7 @@ public abstract class ComponentAnnotation {
 
   private static Optional<ComponentAnnotation> anyComponentAnnotation(
       TypeElement typeElement, Collection<ClassName> annotations) {
-    return getAnyAnnotation(typeElement, annotations).map(ComponentAnnotation::componentAnnotation);
+    return DaggerElements.getAnyAnnotation(typeElement, annotations).map(ComponentAnnotation::componentAnnotation);
   }
 
   /** Returns {@code true} if the argument is a component annotation. */

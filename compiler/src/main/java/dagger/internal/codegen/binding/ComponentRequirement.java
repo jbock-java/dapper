@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -32,6 +31,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.model.Key;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -188,14 +188,14 @@ public final class ComponentRequirement {
   private boolean isBindingMethod(ExecutableElement method) {
     // TODO(cgdecker): At the very least, we should have utility methods to consolidate this stuff
     // in one place; listing individual annotations all over the place is brittle.
-    return isAnyAnnotationPresent(
+    return DaggerElements.isAnyAnnotationPresent(
         method,
-        TypeNames.PROVIDES,
-        // TODO(ronshapiro): it would be cool to have internal meta-annotations that could describe
-        // these, like @AbstractBindingMethod
-        TypeNames.BINDS,
-        TypeNames.MULTIBINDS,
-        TypeNames.BINDS_OPTIONAL_OF);
+        List.of(TypeNames.PROVIDES,
+            // TODO(ronshapiro): it would be cool to have internal meta-annotations that could describe
+            // these, like @AbstractBindingMethod
+            TypeNames.BINDS,
+            TypeNames.MULTIBINDS,
+            TypeNames.BINDS_OPTIONAL_OF));
   }
 
   /** The key for this requirement, if one is available. */

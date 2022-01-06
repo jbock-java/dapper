@@ -34,7 +34,6 @@ import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCrea
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -225,12 +224,12 @@ public final class ModuleValidator {
                 @Override
                 public Void visitDeclared(DeclaredType declaredType, Void aVoid) {
                   TypeElement attributeType = asTypeElement(declaredType);
-                  if (isAnyAnnotationPresent(attributeType, SUBCOMPONENT_TYPES)) {
+                  if (DaggerElements.isAnyAnnotationPresent(attributeType, SUBCOMPONENT_TYPES)) {
                     validateSubcomponentHasBuilder(
                         attributeType, moduleAnnotation.annotation(), builder);
                   } else {
                     builder.addError(
-                        isAnyAnnotationPresent(attributeType, SUBCOMPONENT_CREATOR_TYPES)
+                        DaggerElements.isAnyAnnotationPresent(attributeType, SUBCOMPONENT_CREATOR_TYPES)
                             ? moduleSubcomponentsIncludesCreator(attributeType)
                             : moduleSubcomponentsIncludesNonSubcomponent(attributeType),
                         subject,
@@ -383,7 +382,7 @@ public final class ModuleValidator {
                         "%s is listed as a module, but has type parameters",
                         module.getQualifiedName());
                   }
-                  if (!isAnyAnnotationPresent(module, validModuleAnnotations)) {
+                  if (!DaggerElements.isAnyAnnotationPresent(module, validModuleAnnotations)) {
                     reportError(
                         "%s is listed as a module, but is not annotated with %s",
                         module.getQualifiedName(),

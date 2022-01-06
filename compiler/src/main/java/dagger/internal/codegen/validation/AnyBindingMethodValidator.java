@@ -20,13 +20,12 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * #methodAnnotations()}.
    */
   boolean isBindingMethod(ExecutableElement method) {
-    return isAnyAnnotationPresent(method, methodAnnotations());
+    return DaggerElements.isAnyAnnotationPresent(method, methodAnnotations());
   }
 
   /**

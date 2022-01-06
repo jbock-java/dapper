@@ -17,11 +17,11 @@
 package dagger.internal.codegen.langmodel;
 
 import static com.google.auto.common.MoreElements.getPackage;
-import static com.google.common.base.Preconditions.checkArgument;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import com.google.auto.common.MoreElements;
+import dagger.internal.codegen.base.Preconditions;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -39,8 +39,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.SimpleElementVisitor6;
-import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
@@ -73,7 +72,7 @@ public final class Accessibility {
     return type.accept(new TypeAccessibilityVisitor(packageName), null);
   }
 
-  private static final class TypeAccessibilityVisitor extends SimpleTypeVisitor6<Boolean, Void> {
+  private static final class TypeAccessibilityVisitor extends SimpleTypeVisitor8<Boolean, Void> {
     final Optional<String> packageName;
 
     TypeAccessibilityVisitor() {
@@ -176,7 +175,7 @@ public final class Accessibility {
   }
 
   private static final class ElementAccessibilityVisitor
-      extends SimpleElementVisitor6<Boolean, Void> {
+      extends SimpleElementVisitor8<Boolean, Void> {
     final Optional<String> packageName;
 
     ElementAccessibilityVisitor() {
@@ -244,13 +243,13 @@ public final class Accessibility {
     @Override
     public Boolean visitVariable(VariableElement element, Void p) {
       ElementKind kind = element.getKind();
-      checkArgument(kind.isField(), "checking a variable that isn't a field: %s", kind);
+      Preconditions.checkArgument(kind.isField(), "checking a variable that isn't a field: %s", kind);
       return accessibleMember(element);
     }
   }
 
   private static final TypeVisitor<Boolean, Optional<String>> RAW_TYPE_ACCESSIBILITY_VISITOR =
-      new SimpleTypeVisitor8<Boolean, Optional<String>>() {
+      new SimpleTypeVisitor8<>() {
         @Override
         protected Boolean defaultAction(TypeMirror e, Optional<String> requestingPackage) {
           return isTypeAccessibleFrom(e, requestingPackage);

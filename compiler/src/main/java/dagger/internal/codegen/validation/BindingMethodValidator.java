@@ -17,7 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.MoreElements.asType;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -43,37 +42,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   private final ImmutableSet<ClassName> enclosingElementAnnotations;
   private final Abstractness abstractness;
   private final ExceptionSuperclass exceptionSuperclass;
-
-  /**
-   * Creates a validator object.
-   *
-   * @param methodAnnotation the annotation on a method that identifies it as a binding method
-   * @param enclosingElementAnnotation the method must be declared in a class or interface annotated
-   *     with this annotation
-   */
-  protected BindingMethodValidator(
-      DaggerElements elements,
-      DaggerTypes types,
-      DependencyRequestValidator dependencyRequestValidator,
-      ClassName methodAnnotation,
-      ClassName enclosingElementAnnotation,
-      Abstractness abstractness,
-      ExceptionSuperclass exceptionSuperclass,
-      AllowsMultibindings allowsMultibindings,
-      AllowsScoping allowsScoping,
-      InjectionAnnotations injectionAnnotations) {
-    this(
-        elements,
-        types,
-        methodAnnotation,
-        ImmutableSet.of(enclosingElementAnnotation),
-        dependencyRequestValidator,
-        abstractness,
-        exceptionSuperclass,
-        allowsMultibindings,
-        allowsScoping,
-        injectionAnnotations);
-  }
 
   /**
    * Creates a validator object.
@@ -159,7 +127,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
      */
     private void checkEnclosingElement() {
       TypeElement enclosingElement = asType(element.getEnclosingElement());
-      if (!isAnyAnnotationPresent(enclosingElement, enclosingElementAnnotations)) {
+      if (!DaggerElements.isAnyAnnotationPresent(enclosingElement, enclosingElementAnnotations)) {
         report.addError(
             bindingMethods(
                 "can only be present within a @%s",

@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnot
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static javax.lang.model.util.ElementFilter.typesIn;
 
 import com.google.auto.common.MoreElements;
@@ -62,7 +61,7 @@ public final class ConfigurationAnnotations {
   }
 
   static boolean isSubcomponentCreator(Element element) {
-    return isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
+    return DaggerElements.isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
   }
 
   /** Returns the first type that specifies this' nullability, or empty if none. */

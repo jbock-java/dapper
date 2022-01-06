@@ -35,7 +35,6 @@ import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMess
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.moreThanOneRefToSubcomponent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.Comparator.comparing;
 import static javax.lang.model.element.ElementKind.CLASS;
@@ -527,7 +526,7 @@ public final class ComponentValidator implements ClearableCache {
         new SimpleTypeVisitor8<Optional<AnnotationMirror>, Void>(Optional.empty()) {
           @Override
           public Optional<AnnotationMirror> visitDeclared(DeclaredType t, Void p) {
-            return getAnyAnnotation(t.asElement(), annotations);
+            return DaggerElements.getAnyAnnotation(t.asElement(), annotations);
           }
         },
         null);
