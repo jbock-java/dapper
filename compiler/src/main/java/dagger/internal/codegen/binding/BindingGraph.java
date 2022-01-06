@@ -27,18 +27,15 @@ import static dagger.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.Traverser;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
+import dagger.internal.codegen.base.Util;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.Node;
@@ -85,7 +82,7 @@ public final class BindingGraph {
             .flatMap(graph -> graph.bindingModules.stream())
             .filter(ownedModuleTypes()::contains)
             .collect(toImmutableSet());
-    ImmutableSet.Builder<ComponentRequirement> requirements = ImmutableSet.builder();
+    Set<ComponentRequirement> requirements = new LinkedHashSet<>();
     componentDescriptor().requirements().stream()
         .filter(
             requirement ->
@@ -95,7 +92,7 @@ public final class BindingGraph {
     if (factoryMethod().isPresent()) {
       requirements.addAll(factoryMethodParameters().keySet());
     }
-    return requirements.build();
+    return requirements;
   });
 
   /**
@@ -104,9 +101,8 @@ public final class BindingGraph {
    */
   public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
 
-    private final Supplier<ImmutableListMultimap<ComponentPath, BindingNode>> bindingsByComponent = memoize(() ->
-        Multimaps.index(bindings().stream().map(BindingNode.class::cast).collect(Collectors.toList()),
-            Node::componentPath));
+    private final Supplier<Map<ComponentPath, List<BindingNode>>> bindingsByComponent = memoize(() -> bindings().stream().map(BindingNode.class::cast).collect(
+        Collectors.groupingBy(Node::componentPath)));
 
     private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
       Map<Node, Integer> nodeOrderMap = Maps.newHashMapWithExpectedSize(network().nodes().size());
@@ -187,7 +183,7 @@ public final class BindingGraph {
      * Returns an index of each {@link BindingNode} by its {@link ComponentPath}. Accessing this for
      * a component and its parent components is faster than doing a graph traversal.
      */
-    ImmutableListMultimap<ComponentPath, BindingNode> bindingsByComponent() {
+    Map<ComponentPath, List<BindingNode>> bindingsByComponent() {
       return bindingsByComponent.get();
     }
 
@@ -259,7 +255,7 @@ public final class BindingGraph {
     Stream.iterate(componentNode.componentPath(), ComponentPath::parent)
         // Stream.iterate is inifinte stream so we need limit it to the known size of the path.
         .limit(componentNode.componentPath().components().size())
-        .flatMap(path -> topLevelBindingGraph.bindingsByComponent().get(path).stream())
+        .flatMap(path -> topLevelBindingGraph.bindingsByComponent().getOrDefault(path, List.of()).stream())
         .forEach(
             bindingNode -> {
               if (bindingNode.delegate() instanceof ContributionBinding) {
@@ -276,17 +272,17 @@ public final class BindingGraph {
     Set<ModuleDescriptor> modules =
         ((ComponentNodeImpl) componentNode).componentDescriptor().modules();
 
-    ImmutableSet<ModuleDescriptor> inheritedModules =
+    Set<ModuleDescriptor> inheritedModules =
         parent.isPresent()
-            ? Sets.union(parent.get().ownedModules, parent.get().inheritedModules).immutableCopy()
-            : ImmutableSet.of();
+            ? Util.union(parent.get().ownedModules, parent.get().inheritedModules)
+            : Set.of();
 
     // Set these fields directly on the instance rather than passing these in as input to the
     // AutoValue to prevent exposing this data outside of the class.
     bindingGraph.inheritedModules = inheritedModules;
-    bindingGraph.ownedModules = Sets.difference(modules, inheritedModules).immutableCopy();
-    bindingGraph.contributionBindings = ImmutableMap.copyOf(contributionBindings);
-    bindingGraph.membersInjectionBindings = ImmutableMap.copyOf(membersInjectionBindings);
+    bindingGraph.ownedModules = Util.difference(modules, inheritedModules);
+    bindingGraph.contributionBindings = Map.copyOf(contributionBindings);
+    bindingGraph.membersInjectionBindings = Map.copyOf(membersInjectionBindings);
     bindingGraph.bindingModules =
         contributionBindings.values().stream()
             .map(BindingNode::contributingModule)
@@ -296,10 +292,10 @@ public final class BindingGraph {
     return bindingGraph;
   }
 
-  private ImmutableMap<Key, BindingNode> contributionBindings;
-  private ImmutableMap<Key, BindingNode> membersInjectionBindings;
-  private ImmutableSet<ModuleDescriptor> inheritedModules;
-  private ImmutableSet<ModuleDescriptor> ownedModules;
+  private Map<Key, BindingNode> contributionBindings;
+  private Map<Key, BindingNode> membersInjectionBindings;
+  private Set<ModuleDescriptor> inheritedModules;
+  private Set<ModuleDescriptor> ownedModules;
   private Set<TypeElement> bindingModules;
 
   /** Returns the {@link ComponentNode} for this graph. */
@@ -441,6 +437,6 @@ public final class BindingGraph {
 
   /** Returns the list of all {@link BindingNode}s local to this component. */
   public List<BindingNode> localBindingNodes() {
-    return topLevelBindingGraph().bindingsByComponent().get(componentPath());
+    return topLevelBindingGraph().bindingsByComponent().getOrDefault(componentPath(), List.of());
   }
 }
