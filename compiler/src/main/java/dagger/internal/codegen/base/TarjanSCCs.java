@@ -70,7 +70,7 @@ public final class TarjanSCCs {
           stronglyConnect(node);
         }
       }
-      return Set.copyOf(stronglyConnectedComponents);
+      return new LinkedHashSet<>(stronglyConnectedComponents);
     }
 
     private void stronglyConnect(NodeT node) {
