@@ -22,6 +22,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableSet;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.validation.BindingGraphValidator;
@@ -32,6 +33,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 /** Contains the bindings for {@link BindingGraphValidator} from external SPI providers. */
 @Module
@@ -48,6 +50,17 @@ abstract class SpiModule {
         () ->
             ImmutableSet.copyOf(
                 ServiceLoader.load(BindingGraphPlugin.class, processorClassLoader)));
+  }
+
+  @Binds
+  abstract Set<BindingGraphPlugin> externalPluginsAsSet(
+      ImmutableSet<BindingGraphPlugin> plugins);
+
+  @Provides
+  @TestingPlugins
+  static Optional<ImmutableSet<BindingGraphPlugin>> testingPluginsAsImmutableSet(
+      @TestingPlugins Optional<Set<BindingGraphPlugin>> testingPlugins) {
+    return testingPlugins.map(ImmutableSet::copyOf);
   }
 
   @Qualifier

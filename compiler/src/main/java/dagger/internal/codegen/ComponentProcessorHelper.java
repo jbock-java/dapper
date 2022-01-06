@@ -17,7 +17,6 @@
 package dagger.internal.codegen;
 
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
@@ -28,6 +27,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.BindingGraphPlugins;
 import jakarta.inject.Inject;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
@@ -40,7 +40,7 @@ public class ComponentProcessorHelper {
   private final InjectBindingRegistry injectBindingRegistry;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
   private final SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  private final ImmutableList<BasicAnnotationProcessor.Step> processingSteps;
+  private final List<BasicAnnotationProcessor.Step> processingSteps;
   private final BindingGraphPlugins bindingGraphPlugins;
   private final Set<ClearableCache> clearableCaches;
   private final Messager messager;
@@ -50,7 +50,7 @@ public class ComponentProcessorHelper {
       InjectBindingRegistry injectBindingRegistry,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
       SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator,
-      ImmutableList<BasicAnnotationProcessor.Step> processingSteps,
+      List<BasicAnnotationProcessor.Step> processingSteps,
       BindingGraphPlugins bindingGraphPlugins,
       Set<ClearableCache> clearableCaches,
       Messager messager) {

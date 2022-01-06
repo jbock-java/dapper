@@ -16,15 +16,14 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -41,7 +40,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
       new HashMap<>();
 
   @Inject
-  AnyBindingMethodValidator(ImmutableMap<ClassName, BindingMethodValidator> validators) {
+  AnyBindingMethodValidator(Map<ClassName, BindingMethodValidator> validators) {
     this.validators = validators;
   }
 
@@ -101,7 +100,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
 
       case 1:
         report.addSubreport(
-            validators.get(getOnlyElement(bindingMethodAnnotations)).validate(method));
+            validators.get(Util.getOnlyElement(bindingMethodAnnotations)).validate(method));
         break;
 
       default:

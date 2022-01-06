@@ -18,13 +18,12 @@ package dagger.internal.codegen;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.SpiModule.TestingPlugins;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
 import dagger.internal.codegen.validation.BindingMethodProcessingStep;
@@ -35,6 +34,7 @@ import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -48,7 +48,7 @@ import javax.lang.model.SourceVersion;
  * <p>TODO(gak): give this some better documentation
  */
 public class ComponentProcessor extends BasicAnnotationProcessor {
-  private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
+  private final Optional<Set<BindingGraphPlugin>> testingPlugins;
 
   private ComponentProcessorHelper helper;
 
@@ -57,7 +57,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   }
 
   private ComponentProcessor(Iterable<BindingGraphPlugin> testingPlugins) {
-    this.testingPlugins = Optional.of(ImmutableSet.copyOf(testingPlugins));
+    this.testingPlugins = Optional.of(Util.setOf(testingPlugins));
   }
 
   /**
@@ -118,14 +118,14 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     interface Factory {
       ProcessorComponent create(
           @BindsInstance ProcessingEnvironment processingEnv,
-          @BindsInstance @TestingPlugins Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins);
+          @BindsInstance @TestingPlugins Optional<Set<BindingGraphPlugin>> testingPlugins);
     }
   }
 
   @Module
   interface ProcessingStepsModule {
     @Provides
-    static ImmutableList<Step> processingSteps(
+    static List<Step> processingSteps(
         MapKeyProcessingStep mapKeyProcessingStep,
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,
@@ -136,7 +136,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
         BindingMethodProcessingStep bindingMethodProcessingStep) {
-      return ImmutableList.of(
+      return List.of(
           mapKeyProcessingStep,
           injectProcessingStep,
           assistedInjectProcessingStep,

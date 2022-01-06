@@ -24,6 +24,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,6 +38,10 @@ public interface BindingMethodValidatorsModule {
       Set<BindingMethodValidator> validators) {
     return uniqueIndex(validators, BindingMethodValidator::methodAnnotation);
   }
+
+  @Binds
+  Map<ClassName, BindingMethodValidator> indexValidatorsAsMap(
+      ImmutableMap<ClassName, BindingMethodValidator> validators);
 
   @Binds
   @IntoSet
