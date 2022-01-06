@@ -27,7 +27,6 @@ import static dagger.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.Traverser;
@@ -112,8 +111,8 @@ public final class BindingGraph {
       return Comparator.comparing(nodeOrderMap::get);
     });
 
-    private final Supplier<ImmutableSet<ImmutableSet<Node>>> stronglyConnectedNodes = memoize(() -> TarjanSCCs.compute(
-        ImmutableSet.copyOf(network().nodes()),
+    private final Supplier<Set<Set<Node>>> stronglyConnectedNodes = memoize(() -> TarjanSCCs.compute(
+        network().nodes(),
         // NetworkBuilder does not have a stable successor order, so we have to roll our own
         // based on the node order, which is stable.
         // TODO(bcorso): Fix once https://github.com/google/guava/issues/2650 is fixed.
@@ -198,7 +197,7 @@ public final class BindingGraph {
     }
 
     /** Returns the set of strongly connected nodes in this graph in reverse topological order. */
-    public ImmutableSet<ImmutableSet<Node>> stronglyConnectedNodes() {
+    public Set<Set<Node>> stronglyConnectedNodes() {
       return stronglyConnectedNodes.get();
     }
   }

@@ -19,13 +19,13 @@ package dagger.internal.codegen.base;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.Math.min;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +39,13 @@ import java.util.Set;
 public final class TarjanSCCs {
 
   /** Returns the set of strongly connected components in reverse topological order. */
-  public static <NodeT> ImmutableSet<ImmutableSet<NodeT>> compute(
-      ImmutableCollection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
+  public static <NodeT> Set<Set<NodeT>> compute(
+      Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
     return new TarjanSCC<>(nodes, successorsFunction).compute();
   }
 
   private static class TarjanSCC<NodeT> {
-    private final ImmutableCollection<NodeT> nodes;
+    private final Collection<NodeT> nodes;
     private final SuccessorsFunction<NodeT> successorsFunction;
     private final Deque<NodeT> stack;
     private final Set<NodeT> onStack;
@@ -53,7 +53,7 @@ public final class TarjanSCCs {
     private final Map<NodeT, Integer> lowLinks;
     private final List<ImmutableSet<NodeT>> stronglyConnectedComponents = new ArrayList<>();
 
-    TarjanSCC(ImmutableCollection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
+    TarjanSCC(Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
       this.nodes = nodes;
       this.successorsFunction = successorsFunction;
       this.stack = new ArrayDeque<>(nodes.size());
@@ -62,7 +62,7 @@ public final class TarjanSCCs {
       this.lowLinks = Maps.newHashMapWithExpectedSize(nodes.size());
     }
 
-    private ImmutableSet<ImmutableSet<NodeT>> compute() {
+    private Set<Set<NodeT>> compute() {
       checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
       for (NodeT node : nodes) {
         if (!indexes.containsKey(node)) {
