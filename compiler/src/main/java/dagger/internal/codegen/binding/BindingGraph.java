@@ -28,8 +28,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.Traverser;
@@ -42,6 +40,7 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.Key;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -105,7 +104,7 @@ public final class BindingGraph {
         Collectors.groupingBy(Node::componentPath)));
 
     private final Supplier<Comparator<Node>> nodeOrder = memoize(() -> {
-      Map<Node, Integer> nodeOrderMap = Maps.newHashMapWithExpectedSize(network().nodes().size());
+      Map<Node, Integer> nodeOrderMap = new HashMap<>(Math.max(10, (int) (1.5 * network().nodes().size())));
       int i = 0;
       for (Node node : network().nodes()) {
         nodeOrderMap.put(node, i++);
@@ -123,7 +122,7 @@ public final class BindingGraph {
 
     private final boolean isFullBindingGraph;
     private final Map<ComponentPath, ComponentNode> mComponentNodes;
-    private final ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes;
+    private final Map<ComponentNode, Set<ComponentNode>> mSubcomponentNodes;
 
     TopLevelBindingGraph(
         ImmutableNetwork<Node, Edge> network,
@@ -132,7 +131,7 @@ public final class BindingGraph {
         Set<ComponentNode> componentNodes,
         boolean isFullBindingGraph,
         Map<ComponentPath, ComponentNode> mComponentNodes,
-        ImmutableSetMultimap<ComponentNode, ComponentNode> mSubcomponentNodes) {
+        Map<ComponentNode, Set<ComponentNode>> mSubcomponentNodes) {
       super(network, bindings, missingBindings, componentNodes);
       this.isFullBindingGraph = isFullBindingGraph;
       this.mComponentNodes = mComponentNodes;
@@ -153,17 +152,23 @@ public final class BindingGraph {
               .collect(
                   toImmutableMap(ComponentNode::componentPath, componentNode -> componentNode));
 
-      ImmutableSetMultimap.Builder<ComponentNode, ComponentNode> subcomponentNodesBuilder =
-          ImmutableSetMultimap.builder();
+      Map<ComponentNode, Set<ComponentNode>> subcomponentNodesBuilder =
+          new LinkedHashMap<>();
       nodesByClass.componentNodes.stream()
           .filter(componentNode -> !componentNode.componentPath().atRoot())
           .forEach(
-              componentNode ->
-                  subcomponentNodesBuilder.put(
-                      mComponentNodes.get(componentNode.componentPath().parent()), componentNode));
+              componentNode -> {
+                ComponentNode key = mComponentNodes.get(componentNode.componentPath().parent());
+                subcomponentNodesBuilder.merge(key,
+                    new LinkedHashSet<>(Set.of(componentNode)),
+                    (set1, set2) -> {
+                      set1.addAll(set2);
+                      return set1;
+                    });
+              });
       return new TopLevelBindingGraph(network,
           nodesByClass.bindings, nodesByClass.missingBindings, nodesByClass.componentNodes,
-          isFullBindingGraph, mComponentNodes, subcomponentNodesBuilder.build());
+          isFullBindingGraph, mComponentNodes, subcomponentNodesBuilder);
     }
 
     // This overrides dagger.model.BindingGraph with a more efficient implementation.
@@ -175,8 +180,8 @@ public final class BindingGraph {
     }
 
     /** Returns the set of subcomponent nodes of the given component node. */
-    ImmutableSet<ComponentNode> subcomponentNodes(ComponentNode componentNode) {
-      return mSubcomponentNodes.get(componentNode);
+    Set<ComponentNode> subcomponentNodes(ComponentNode componentNode) {
+      return mSubcomponentNodes.getOrDefault(componentNode, Set.of());
     }
 
     /**
