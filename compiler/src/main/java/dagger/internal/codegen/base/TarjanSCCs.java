@@ -19,14 +19,14 @@ package dagger.internal.codegen.base;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.Math.min;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,15 +51,16 @@ public final class TarjanSCCs {
     private final Set<NodeT> onStack;
     private final Map<NodeT, Integer> indexes;
     private final Map<NodeT, Integer> lowLinks;
-    private final List<ImmutableSet<NodeT>> stronglyConnectedComponents = new ArrayList<>();
+    private final List<Set<NodeT>> stronglyConnectedComponents = new ArrayList<>();
 
     TarjanSCC(Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
       this.nodes = nodes;
       this.successorsFunction = successorsFunction;
       this.stack = new ArrayDeque<>(nodes.size());
-      this.onStack = Sets.newHashSetWithExpectedSize(nodes.size());
-      this.indexes = Maps.newHashMapWithExpectedSize(nodes.size());
-      this.lowLinks = Maps.newHashMapWithExpectedSize(nodes.size());
+      int capacity = Math.max(16, (int) (1.5 * nodes.size()));
+      this.onStack = new HashSet<>(capacity);
+      this.indexes = new HashMap<>(capacity);
+      this.lowLinks = new HashMap<>(capacity);
     }
 
     private Set<Set<NodeT>> compute() {
@@ -69,7 +70,7 @@ public final class TarjanSCCs {
           stronglyConnect(node);
         }
       }
-      return ImmutableSet.copyOf(stronglyConnectedComponents);
+      return Set.copyOf(stronglyConnectedComponents);
     }
 
     private void stronglyConnect(NodeT node) {
@@ -87,21 +88,21 @@ public final class TarjanSCCs {
         } else if (onStack.contains(successor)) {
           // Successor is on the stack and hence in the current SCC.
           lowLinks.put(node, min(lowLinks.get(node), indexes.get(successor)));
-        } else {
-          // Successor is not on the stack and hence in an already processed SCC, so ignore.
         }
+        // else:
+        //   Successor is not on the stack and hence in an already processed SCC, so ignore.
       }
 
       // If node is the root of the SCC, pop the stack until reaching the root to get all SCC nodes.
       if (lowLinks.get(node).equals(indexes.get(node))) {
-        ImmutableSet.Builder<NodeT> scc = ImmutableSet.builder();
+        Set<NodeT> scc = new LinkedHashSet<>();
         NodeT currNode;
         do {
           currNode = stack.pop();
           onStack.remove(currNode);
           scc.add(currNode);
         } while (!node.equals(currNode));
-        stronglyConnectedComponents.add(scc.build());
+        stronglyConnectedComponents.add(scc);
       }
     }
   }
