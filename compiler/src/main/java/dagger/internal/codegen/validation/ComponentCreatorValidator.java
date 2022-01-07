@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
@@ -26,7 +26,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ObjectArrays;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
@@ -39,6 +38,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,7 +131,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     /** Validates the creator type. */
-    final ValidationReport<TypeElement> validate() {
+    ValidationReport<TypeElement> validate() {
       if (!isAnnotationPresent(component, annotation.componentAnnotation())) {
         report.addError(messages.mustBeInComponent());
       }
@@ -172,7 +172,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
       List<? extends Element> allElements = type.getEnclosedElements();
       List<ExecutableElement> constructors = ElementFilter.constructorsIn(allElements);
 
-      boolean valid = true;
+      boolean valid;
       if (constructors.size() != 1) {
         valid = false;
       } else {
@@ -343,7 +343,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
       TypeElement componentType = MoreElements.asType(component);
       if (!types.isSameType(componentType.asType(), returnType)) {
-        ImmutableSet<ExecutableElement> methodsOnlyInComponent =
+        Set<ExecutableElement> methodsOnlyInComponent =
             methodsOnlyInComponent(componentType);
         if (!methodsOnlyInComponent.isEmpty()) {
           report.addWarning(
@@ -398,11 +398,11 @@ public final class ComponentCreatorValidator implements ClearableCache {
     /**
      * Returns all methods defind in {@code componentType} which are not inherited from a supertype.
      */
-    private ImmutableSet<ExecutableElement> methodsOnlyInComponent(TypeElement componentType) {
+    private Set<ExecutableElement> methodsOnlyInComponent(TypeElement componentType) {
       // TODO(ronshapiro): Ideally this shouldn't return methods which are redeclared from a
       // supertype, but do not change the return type. We don't have a good/simple way of checking
       // that, and it doesn't seem likely, so the warning won't be too bad.
-      return ImmutableSet.copyOf(methodsIn(componentType.getEnclosedElements()));
+      return new LinkedHashSet<>(methodsIn(componentType.getEnclosedElements()));
     }
   }
 }

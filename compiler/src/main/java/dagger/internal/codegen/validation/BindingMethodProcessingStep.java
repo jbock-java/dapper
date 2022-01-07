@@ -16,11 +16,9 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.Preconditions;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;
@@ -48,7 +46,7 @@ public final class BindingMethodProcessingStep
 
   @Override
   protected void process(ExecutableElement method, Set<ClassName> annotations) {
-    checkArgument(
+    Preconditions.checkArgument(
         anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",
         method,

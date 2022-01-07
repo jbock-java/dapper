@@ -19,7 +19,6 @@ package dagger.internal.codegen.validation;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
@@ -34,14 +33,14 @@ import javax.lang.model.element.TypeElement;
 @Singleton
 public final class BindingGraphValidator {
   private final Set<BindingGraphPlugin> validationPlugins;
-  private final ImmutableSet<BindingGraphPlugin> externalPlugins;
+  private final Set<BindingGraphPlugin> externalPlugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final CompilerOptions compilerOptions;
 
   @Inject
   BindingGraphValidator(
       @Validation Set<BindingGraphPlugin> validationPlugins,
-      ImmutableSet<BindingGraphPlugin> externalPlugins,
+      Set<BindingGraphPlugin> externalPlugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
       CompilerOptions compilerOptions) {
     this.validationPlugins = validationPlugins;

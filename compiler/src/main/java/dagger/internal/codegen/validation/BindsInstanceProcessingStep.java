@@ -17,7 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;

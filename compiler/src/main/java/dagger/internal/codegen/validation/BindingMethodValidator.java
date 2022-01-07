@@ -21,12 +21,12 @@ import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -39,7 +39,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   private final DaggerTypes types;
   private final DependencyRequestValidator dependencyRequestValidator;
   private final ClassName methodAnnotation;
-  private final ImmutableSet<ClassName> enclosingElementAnnotations;
+  private final Set<ClassName> enclosingElementAnnotations;
   private final Abstractness abstractness;
   private final ExceptionSuperclass exceptionSuperclass;
 
@@ -54,7 +54,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
       DaggerElements elements,
       DaggerTypes types,
       ClassName methodAnnotation,
-      Iterable<ClassName> enclosingElementAnnotations,
+      Set<ClassName> enclosingElementAnnotations,
       DependencyRequestValidator dependencyRequestValidator,
       Abstractness abstractness,
       ExceptionSuperclass exceptionSuperclass,
@@ -65,7 +65,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
     this.elements = elements;
     this.types = types;
     this.methodAnnotation = methodAnnotation;
-    this.enclosingElementAnnotations = ImmutableSet.copyOf(enclosingElementAnnotations);
+    this.enclosingElementAnnotations = enclosingElementAnnotations;
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.abstractness = abstractness;
     this.exceptionSuperclass = exceptionSuperclass;
@@ -217,7 +217,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
           ValidationReport.Builder<ExecutableElement> report) {
         if (!element.getThrownTypes().isEmpty()) {
           report.addError(validator.bindingMethods("may not throw"));
-          return;
         }
       }
     },

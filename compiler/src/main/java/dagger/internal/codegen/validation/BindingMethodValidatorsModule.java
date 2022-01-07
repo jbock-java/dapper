@@ -16,16 +16,20 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.collect.Maps.uniqueIndex;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static java.util.stream.Collectors.collectingAndThen;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.multibindings.IntoSet;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Binds each {@link BindingMethodValidator} into a map, keyed by {@link
@@ -33,15 +37,16 @@ import java.util.Set;
  */
 @Module
 public interface BindingMethodValidatorsModule {
-  @Provides
-  static ImmutableMap<ClassName, BindingMethodValidator> indexValidators(
-      Set<BindingMethodValidator> validators) {
-    return uniqueIndex(validators, BindingMethodValidator::methodAnnotation);
-  }
 
-  @Binds
-  Map<ClassName, BindingMethodValidator> indexValidatorsAsMap(
-      ImmutableMap<ClassName, BindingMethodValidator> validators);
+  @Provides
+  static Map<ClassName, BindingMethodValidator> indexValidators(
+      Set<BindingMethodValidator> validators) {
+    return validators.stream().collect(collectingAndThen(
+        toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
+        map -> map.entrySet().stream()
+            .map(e -> new SimpleImmutableEntry<>(e.getKey(), getOnlyElement(e.getValue())))
+            .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue))));
+  }
 
   @Binds
   @IntoSet
