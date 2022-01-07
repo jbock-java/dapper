@@ -26,7 +26,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
 import dagger.BindsInstance;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
@@ -34,6 +33,7 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,15 +62,15 @@ public final class ComponentCreatorDescriptor {
   private final ComponentCreatorAnnotation annotation;
   private final TypeElement typeElement;
   private final ExecutableElement factoryMethod;
-  private final ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods;
-  private final ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters;
+  private final Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods;
+  private final Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters;
 
   private ComponentCreatorDescriptor(
       ComponentCreatorAnnotation annotation,
       TypeElement typeElement,
       ExecutableElement factoryMethod,
-      ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods,
-      ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters) {
+      Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods,
+      Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters) {
     this.annotation = requireNonNull(annotation);
     this.typeElement = requireNonNull(typeElement);
     this.factoryMethod = requireNonNull(factoryMethod);
@@ -104,7 +104,7 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  ImmutableSetMultimap<ComponentRequirement, ExecutableElement> unvalidatedSetterMethods() {
+  Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods() {
     return unvalidatedSetterMethods;
   }
 
@@ -114,7 +114,7 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  ImmutableSetMultimap<ComponentRequirement, VariableElement> unvalidatedFactoryParameters() {
+  Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters() {
     return unvalidatedFactoryParameters;
   }
 
@@ -125,15 +125,15 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  public ImmutableSetMultimap<ComponentRequirement, Element>
+  @SuppressWarnings(value = {"unchecked", "rawtypes"})
+  public Map<ComponentRequirement, Set<Element>>
   unvalidatedRequirementElements() {
     // ComponentCreatorValidator ensures that there are either setter methods or factory method
     // parameters, but not both, so we can cheat a little here since we know that only one of
     // the two multimaps will be non-empty.
-    return ImmutableSetMultimap.copyOf( // no actual copy
-        unvalidatedSetterMethods().isEmpty()
-            ? unvalidatedFactoryParameters()
-            : unvalidatedSetterMethods());
+    return unvalidatedSetterMethods().isEmpty()
+        ? (Map) unvalidatedFactoryParameters()
+        : (Map) unvalidatedSetterMethods();
   }
 
   /**
@@ -154,8 +154,8 @@ public final class ComponentCreatorDescriptor {
     return factoryParameters.get();
   }
 
-  private static <K, V> Map<K, V> flatten(Multimap<K, V> multimap) {
-    return Util.transformValues(multimap.asMap(), Util::getOnlyElement);
+  private static <K, V> Map<K, V> flatten(Map<K, Set<V>> multimap) {
+    return Util.transformValues(multimap, Util::getOnlyElement);
   }
 
   /** Returns the set of component requirements this creator allows the user to set. */
@@ -229,7 +229,9 @@ public final class ComponentCreatorDescriptor {
     // Validation should have ensured exactly one creator annotation is present on the type.
     ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(typeElement));
     return new ComponentCreatorDescriptor(
-        annotation, typeElement, factoryMethod, setterMethods.build(), factoryParameters.build());
+        annotation, typeElement, factoryMethod,
+        Util.transformValues(setterMethods.build().asMap(), LinkedHashSet::new),
+        Util.transformValues(factoryParameters.build().asMap(), LinkedHashSet::new));
   }
 
   private static ComponentRequirement requirement(

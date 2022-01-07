@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static java.util.stream.Collectors.collectingAndThen;
 
@@ -24,9 +23,8 @@ import com.squareup.javapoet.ClassName;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.base.Util;
 import dagger.multibindings.IntoSet;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -43,9 +41,7 @@ public interface BindingMethodValidatorsModule {
       Set<BindingMethodValidator> validators) {
     return validators.stream().collect(collectingAndThen(
         toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
-        map -> map.entrySet().stream()
-            .map(e -> new SimpleImmutableEntry<>(e.getKey(), getOnlyElement(e.getValue())))
-            .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue))));
+        map -> Util.transformValues(map, Util::getOnlyElement)));
   }
 
   @Binds

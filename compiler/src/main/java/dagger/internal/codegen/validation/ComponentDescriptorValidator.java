@@ -17,8 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Collections2.transform;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
@@ -27,8 +25,9 @@ import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Scopes.singletonScope;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -36,8 +35,8 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
@@ -47,12 +46,14 @@ import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleDescriptor;
+import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -62,6 +63,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -118,7 +120,7 @@ public final class ComponentDescriptorValidator {
         new LinkedHashMap<>();
 
     ComponentValidation(ComponentDescriptor rootComponent) {
-      this.rootComponent = checkNotNull(rootComponent);
+      this.rootComponent = requireNonNull(rootComponent);
     }
 
     /** Returns a report that contains all validation messages found during traversal. */
@@ -170,7 +172,7 @@ public final class ComponentDescriptorValidator {
         appendIndentedComponentsList(message, dependencyStack);
         dependencyStack.pop();
         reportComponentItem(
-            compilerOptions.scopeCycleValidationType().diagnosticKind().get(),
+            compilerOptions.scopeCycleValidationType().diagnosticKind().orElseThrow(),
             component,
             message.toString());
       } else if (compilerOptions.validateTransitiveComponentDependencies()
@@ -255,22 +257,15 @@ public final class ComponentDescriptorValidator {
     }
 
     private String abstractModuleHasInstanceBindingMethodsError(ModuleDescriptor module) {
-      String methodAnnotations;
-      switch (module.kind()) {
-        case MODULE:
-          methodAnnotations = "@Provides";
-          break;
-        default:
-          throw new AssertionError(module.kind());
-      }
+      Preconditions.checkArgument(module.kind() == ModuleKind.MODULE, module.kind());
       return String.format(
-          "%s is abstract and has instance %s methods. Consider making the methods static or "
+          "%s is abstract and has instance @Provides methods. Consider making the methods static or "
               + "including a non-abstract subclass of the module instead.",
-          module.moduleElement(), methodAnnotations);
+          module.moduleElement());
     }
 
     private void validateCreators(ComponentDescriptor component) {
-      if (!component.creatorDescriptor().isPresent()) {
+      if (component.creatorDescriptor().isEmpty()) {
         // If no builder, nothing to validate.
         return;
       }
@@ -294,9 +289,11 @@ public final class ComponentDescriptorValidator {
       DeclaredType container = asDeclared(creator.typeElement().asType());
       if (!inapplicableRequirementsOnCreator.isEmpty()) {
         Collection<Element> excessElements =
-            Multimaps.filterKeys(
-                    creator.unvalidatedRequirementElements(), in(inapplicableRequirementsOnCreator))
-                .values();
+            creator.unvalidatedRequirementElements().entrySet().stream()
+                .filter(e -> inapplicableRequirementsOnCreator.contains(e.getKey()))
+                .map(Entry::getValue)
+                .flatMap(Set::stream)
+                .collect(Collectors.toList());
         String formatted =
             excessElements.stream()
                 .map(element -> formatElement(element, container))
@@ -325,10 +322,9 @@ public final class ComponentDescriptorValidator {
 
       // Validate that declared creator requirements (modules, dependencies) have unique types.
       Map<Wrapper<TypeMirror>, Set<Element>> declaredRequirementsByType =
-          Multimaps.filterKeys(
-                  creator.unvalidatedRequirementElements(),
-                  creatorModuleAndDependencyRequirements::contains)
-              .entries().stream()
+          creator.unvalidatedRequirementElements().entrySet().stream()
+              .filter(entry -> creatorModuleAndDependencyRequirements.contains(entry.getKey()))
+              .flatMap(entry -> entry.getValue().stream().map(value -> new SimpleImmutableEntry<>(entry.getKey(), value)))
               .collect(
                   toImmutableSetMultimap(entry -> entry.getKey().wrappedType(), Entry::getValue));
       declaredRequirementsByType
