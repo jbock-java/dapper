@@ -68,7 +68,7 @@ public final class Util {
   }
 
   public static <E> Set<E> union(Set<E> set1, Set<E> set2) {
-    Set<E> result = new LinkedHashSet<>(Math.max(10, (int) (1.5 * (set1.size() + set2.size()))));
+    Set<E> result = new LinkedHashSet<>(Math.max(4, (int) (1.5 * (set1.size() + set2.size()))));
     result.addAll(set1);
     result.addAll(set2);
     return result;
@@ -76,7 +76,7 @@ public final class Util {
 
   public static <K, V> Map<K, V> toMap(
       Collection<K> set, Function<? super K, V> function) {
-    LinkedHashMap<K, V> result = new LinkedHashMap<>(Math.max(10, (int) (set.size() * 1.5)));
+    LinkedHashMap<K, V> result = new LinkedHashMap<>(Math.max(4, (int) (1.5 * set.size())));
     for (K k : set) {
       result.put(k, function.apply(k));
     }
@@ -95,7 +95,7 @@ public final class Util {
 
   public static <K, V1, V2>
   Map<K, V2> transformValues(Map<K, V1> fromMap, Function<? super V1, V2> function) {
-    LinkedHashMap<K, V2> result = new LinkedHashMap<>(Math.max(10, (int) (fromMap.size() * 1.5)));
+    LinkedHashMap<K, V2> result = new LinkedHashMap<>(Math.max(5, (int) (fromMap.size() * 1.5)));
     fromMap.forEach((k, v) -> result.put(k, function.apply(v)));
     return result;
   }

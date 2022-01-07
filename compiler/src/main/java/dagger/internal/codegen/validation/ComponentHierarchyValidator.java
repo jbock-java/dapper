@@ -21,31 +21,29 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 /** Validates the relationships between parent components and subcomponents. */
 final class ComponentHierarchyValidator {
-  private static final Joiner COMMA_SEPARATED_JOINER = Joiner.on(", ");
   private final CompilerOptions compilerOptions;
 
   @Inject
@@ -59,7 +57,7 @@ final class ComponentHierarchyValidator {
     validateSubcomponentMethods(
         report,
         componentDescriptor,
-        Maps.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
+        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
     validateRepeatedScopedDeclarations(report, componentDescriptor, LinkedHashMultimap.create());
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
@@ -72,7 +70,7 @@ final class ComponentHierarchyValidator {
   private void validateSubcomponentMethods(
       ValidationReport.Builder<?> report,
       ComponentDescriptor componentDescriptor,
-      ImmutableMap<TypeElement, TypeElement> existingModuleToOwners) {
+      Map<TypeElement, TypeElement> existingModuleToOwners) {
     componentDescriptor
         .childComponentsDeclaredByFactoryMethods()
         .forEach(
@@ -86,24 +84,22 @@ final class ComponentHierarchyValidator {
                 validateFactoryMethodParameters(report, method, existingModuleToOwners);
               }
 
+              Set<TypeElement> difference = Util.difference(childComponent.moduleTypes(), existingModuleToOwners.keySet());
+              Map<TypeElement, TypeElement> newExistingModuleToOwners = new LinkedHashMap<>(Math.max(16, (int) (1.5 * (existingModuleToOwners.size() + difference.size()))));
+              newExistingModuleToOwners.putAll(existingModuleToOwners);
+              difference.forEach(module ->
+                  newExistingModuleToOwners.put(childComponent.typeElement(), module));
               validateSubcomponentMethods(
                   report,
                   childComponent,
-                  new ImmutableMap.Builder<TypeElement, TypeElement>()
-                      .putAll(existingModuleToOwners)
-                      .putAll(
-                          Maps.toMap(
-                              Sets.difference(
-                                  childComponent.moduleTypes(), existingModuleToOwners.keySet()),
-                              module -> childComponent.typeElement()))
-                      .build());
+                  newExistingModuleToOwners);
             });
   }
 
   private void validateFactoryMethodParameters(
       ValidationReport.Builder<?> report,
       ComponentMethodDescriptor subcomponentMethodDescriptor,
-      ImmutableMap<TypeElement, TypeElement> existingModuleToOwners) {
+      Map<TypeElement, TypeElement> existingModuleToOwners) {
     for (VariableElement factoryMethodParameter :
         subcomponentMethodDescriptor.methodElement().getParameters()) {
       TypeElement moduleType = MoreTypes.asTypeElement(factoryMethodParameter.asType());
@@ -208,17 +204,17 @@ final class ComponentHierarchyValidator {
                     .append("\n    - ")
                     .append(conflictingModule.moduleElement().getQualifiedName())
                     .append(" with scopes: ")
-                    .append(COMMA_SEPARATED_JOINER.join(moduleScopes(conflictingModule)));
+                    .append(moduleScopes(conflictingModule).stream().map(Scope::toString).collect(Collectors.joining(", ")));
               }
             });
     return error.toString();
   }
 
-  private ImmutableSet<Scope> moduleScopes(ModuleDescriptor module) {
-    return FluentIterable.concat(module.allBindingDeclarations())
-        .transform(declaration -> uniqueScopeOf(declaration.bindingElement().get()))
-        .filter(scope -> scope.isPresent() && !scope.get().isReusable())
-        .transform(scope -> scope.get())
-        .toSet();
+  private Set<Scope> moduleScopes(ModuleDescriptor module) {
+    return module.allBindingDeclarations().stream()
+        .map(declaration -> uniqueScopeOf(declaration.bindingElement().orElseThrow()))
+        .filter(scope -> scope.isPresent() && !scope.orElseThrow().isReusable())
+        .map(Optional::orElseThrow)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }
