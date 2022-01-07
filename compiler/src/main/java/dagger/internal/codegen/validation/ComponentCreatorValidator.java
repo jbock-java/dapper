@@ -26,7 +26,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ObjectArrays;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ErrorMessages;
@@ -357,9 +356,9 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /**
      * Generates one of two error messages. If the method is enclosed in the subject, we target the
-     * error to the method itself. Otherwise we target the error to the subject and list the method
+     * error to the method itself. Otherwise, we target the error to the subject and list the method
      * as an argument. (Otherwise we have no way of knowing if the method is being compiled in this
-     * pass too, so javac might not be able to pinpoint it's line of code.)
+     * pass too, so javac might not be able to pinpoint its line of code.)
      */
     /*
      * For Component.Builder, the prototypical example would be if someone had:
@@ -377,11 +376,22 @@ public final class ComponentCreatorValidator implements ClearableCache {
         ExecutableElement method,
         String enclosedError,
         String inheritedError,
-        Object... extraArgs) {
+        Object extraArg) {
       if (method.getEnclosingElement().equals(type)) {
-        report.addError(String.format(enclosedError, extraArgs), method);
+        report.addError(String.format(enclosedError, extraArg), method);
       } else {
-        report.addError(String.format(inheritedError, ObjectArrays.concat(extraArgs, method)));
+        report.addError(String.format(inheritedError, extraArg, method));
+      }
+    }
+
+    private void error(
+        ExecutableElement method,
+        String enclosedError,
+        String inheritedError) {
+      if (method.getEnclosingElement().equals(type)) {
+        report.addError(enclosedError, method);
+      } else {
+        report.addError(String.format(inheritedError, method));
       }
     }
 

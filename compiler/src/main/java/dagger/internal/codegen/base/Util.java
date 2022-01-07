@@ -56,10 +56,15 @@ public final class Util {
   }
 
   public static <E> Set<E> difference(Set<E> set1, Set<E> set2) {
-    LinkedHashSet<E> result = set1.stream()
+    return set1.stream()
         .filter(e -> !set2.contains(e))
         .collect(Collectors.toCollection(LinkedHashSet::new));
-    return Collections.unmodifiableSet(result);
+  }
+
+  public static <E> Set<E> intersection(Set<E> set1, Set<E> set2) {
+    return set1.stream()
+        .filter(set2::contains)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   public static <E> Set<E> union(Set<E> set1, Set<E> set2) {

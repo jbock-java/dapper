@@ -17,7 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.collect.Collections2.transform;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 import static dagger.internal.codegen.base.Formatter.INDENT;
@@ -35,8 +34,8 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import com.google.auto.common.Equivalence.Wrapper;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.Sets;
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
@@ -58,6 +57,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -283,7 +283,7 @@ public final class ComponentDescriptorValidator {
       // Requirements that the creator can set that don't match any requirements that the component
       // actually has.
       Set<ComponentRequirement> inapplicableRequirementsOnCreator =
-          Sets.difference(
+          Util.difference(
               creatorModuleAndDependencyRequirements, componentModuleAndDependencyRequirements);
 
       DeclaredType container = asDeclared(creator.typeElement().asType());
@@ -304,12 +304,13 @@ public final class ComponentDescriptorValidator {
 
       // Component requirements that the creator must be able to set
       Set<ComponentRequirement> mustBePassed =
-          Sets.filter(
-              componentModuleAndDependencyRequirements,
-              input -> input.nullPolicy(elements).equals(NullPolicy.THROW));
+          componentModuleAndDependencyRequirements.stream()
+              .filter(
+              input -> input.nullPolicy(elements).equals(NullPolicy.THROW))
+              .collect(Collectors.toCollection(LinkedHashSet::new));
       // Component requirements that the creator must be able to set, but can't
       Set<ComponentRequirement> missingRequirements =
-          Sets.difference(mustBePassed, creatorModuleAndDependencyRequirements);
+          Util.difference(mustBePassed, creatorModuleAndDependencyRequirements);
 
       if (!missingRequirements.isEmpty()) {
         report(component)
@@ -340,8 +341,8 @@ public final class ComponentDescriptorValidator {
                           String.format(
                               messages.multipleSettersForModuleOrDependencyType(),
                               type,
-                              transform(
-                                  elementsForType, element -> formatElement(element, container))),
+                              elementsForType.stream().map(
+                                  element -> formatElement(element, container)).collect(toList())),
                           creator.typeElement());
                 }
               });
@@ -447,7 +448,7 @@ public final class ComponentDescriptorValidator {
 
     private <T> boolean stackOverlaps(Deque<Set<T>> stack, Set<T> set) {
       for (Set<T> entry : stack) {
-        if (!Sets.intersection(entry, set).isEmpty()) {
+        if (!Util.intersection(entry, set).isEmpty()) {
           return true;
         }
       }
