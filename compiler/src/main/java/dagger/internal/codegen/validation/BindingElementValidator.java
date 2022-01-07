@@ -17,13 +17,13 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Verify.verifyNotNull;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKeys;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
@@ -193,7 +193,7 @@ public abstract class BindingElementValidator<E extends Element> {
 
         case SET:
         case MAP:
-          bindingElementType().ifPresent(type -> checkKeyType(type));
+          bindingElementType().ifPresent(this::checkKeyType);
           break;
 
         case SET_VALUES:
@@ -238,7 +238,7 @@ public abstract class BindingElementValidator<E extends Element> {
      */
     // TODO(gak): should we allow "covariant return" for set values?
     protected void checkSetValuesType() {
-      bindingElementType().ifPresent(keyType -> checkSetValuesType(keyType));
+      bindingElementType().ifPresent(this::checkSetValuesType);
     }
 
     /** Adds an error if {@code type} is not a {@code Set<T>} for a reasonable {@code T}. */
@@ -335,7 +335,7 @@ public abstract class BindingElementValidator<E extends Element> {
       // TODO(ronshapiro): move this into ProvidesMethodValidator
       if (bindingAnnotation.equals(TypeNames.PROVIDES)) {
         AnnotationMirror bindingAnnotationMirror =
-            getAnnotationMirror(element, bindingAnnotation).get();
+            getAnnotationMirror(element, bindingAnnotation).orElseThrow();
         boolean usesProvidesType = false;
         for (ExecutableElement member : bindingAnnotationMirror.getElementValues().keySet()) {
           usesProvidesType |= member.getSimpleName().contentEquals("type");
@@ -365,7 +365,7 @@ public abstract class BindingElementValidator<E extends Element> {
           error = bindingElements("cannot be scoped");
           break;
       }
-      verifyNotNull(error);
+      requireNonNull(error);
       for (Scope scope : scopes) {
         report.addError(error, element, scope.scopeAnnotation());
       }

@@ -18,10 +18,9 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.BindingGraphPlugin;
@@ -32,7 +31,7 @@ import javax.annotation.processing.Filer;
 
 /** Initializes {@link BindingGraphPlugin}s. */
 public final class BindingGraphPlugins {
-  private final ImmutableSet<BindingGraphPlugin> plugins;
+  private final Set<BindingGraphPlugin> plugins;
   private final Filer filer;
   private final DaggerTypes types;
   private final DaggerElements elements;
@@ -41,12 +40,12 @@ public final class BindingGraphPlugins {
   @Inject
   BindingGraphPlugins(
       @Validation Set<BindingGraphPlugin> validationPlugins,
-      ImmutableSet<BindingGraphPlugin> externalPlugins,
+      Set<BindingGraphPlugin> externalPlugins,
       Filer filer,
       DaggerTypes types,
       DaggerElements elements,
       @ProcessingOptions Map<String, String> processingOptions) {
-    this.plugins = Sets.union(validationPlugins, externalPlugins).immutableCopy();
+    this.plugins = Util.union(validationPlugins, externalPlugins);
     this.filer = filer;
     this.types = types;
     this.elements = elements;
@@ -72,7 +71,9 @@ public final class BindingGraphPlugins {
     plugin.initElements(elements);
     Set<String> supportedOptions = plugin.supportedOptions();
     if (!supportedOptions.isEmpty()) {
-      plugin.initOptions(Maps.filterKeys(processingOptions, supportedOptions::contains));
+      plugin.initOptions(processingOptions.entrySet().stream()
+          .filter(entry -> supportedOptions.contains(entry.getKey()))
+          .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
   }
 }
