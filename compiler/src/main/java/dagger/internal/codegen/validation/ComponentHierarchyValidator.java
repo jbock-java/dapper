@@ -21,7 +21,6 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
@@ -176,7 +175,7 @@ final class ComponentHierarchyValidator {
     }
 
     report.addError(
-        repeatedModulesWithScopeError(component, ImmutableSetMultimap.copyOf(repeatedModules)));
+        repeatedModulesWithScopeError(component, repeatedModules));
   }
 
   private boolean hasScopedDeclarations(ModuleDescriptor module) {
@@ -185,7 +184,7 @@ final class ComponentHierarchyValidator {
 
   private String repeatedModulesWithScopeError(
       ComponentDescriptor component,
-      ImmutableSetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules) {
+      SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules) {
     StringBuilder error =
         new StringBuilder()
             .append(component.typeElement().getQualifiedName())
