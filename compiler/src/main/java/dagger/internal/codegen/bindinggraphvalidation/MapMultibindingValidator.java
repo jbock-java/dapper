@@ -17,8 +17,8 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.model.BindingKind.MULTIBOUND_MAP;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
@@ -26,6 +26,7 @@ import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
@@ -98,19 +99,13 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
     // Mutlbindings for Map<K, V>
     Map<Key, Set<Binding>> plainValueMapMultibindings =
         mapMultibindings.entrySet().stream().filter(e -> !MapType.from(e.getKey()).valuesAreFrameworkType())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (set1, set2) -> {
-              set1.addAll(set2);
-              return set2;
-            }, LinkedHashMap::new));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Util::mutableUnion, LinkedHashMap::new));
 
     // Multibindings for Map<K, Provider<V>> where Map<K, V> isn't in plainValueMapMultibindings
     Map<Key, Set<Binding>> providerValueMapMultibindings =
         mapMultibindings.entrySet().stream().filter(e -> MapType.from(e.getKey()).valuesAreTypeOf(Provider.class)
                 && !plainValueMapMultibindings.containsKey(keyFactory.unwrapMapValueType(e.getKey())))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (set1, set2) -> {
-              set1.addAll(set2);
-              return set2;
-            }, LinkedHashMap::new));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Util::mutableUnion, LinkedHashMap::new));
 
     LinkedHashSet<Binding> result = new LinkedHashSet<>();
     plainValueMapMultibindings.values().forEach(result::addAll);

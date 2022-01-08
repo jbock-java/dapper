@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /** General utilities for the annotation processor. */
@@ -74,6 +75,11 @@ public final class Util {
     return result;
   }
 
+  public static <E> Set<E> mutableUnion(Set<E> set1, Set<E> set2) {
+    set1.addAll(set2);
+    return set1;
+  }
+
   public static <K, V> Map<K, V> toMap(
       Collection<K> set, Function<? super K, V> function) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(Math.max(4, (int) (1.5 * set.size())));
@@ -97,6 +103,20 @@ public final class Util {
   Map<K, V2> transformValues(Map<K, V1> fromMap, Function<? super V1, V2> function) {
     LinkedHashMap<K, V2> result = new LinkedHashMap<>(Math.max(5, (int) (fromMap.size() * 1.5)));
     fromMap.forEach((k, v) -> result.put(k, function.apply(v)));
+    return result;
+  }
+
+  public static <K, V>
+  Map<K, Set<V>> filterValues(Map<K, Set<V>> fromMap, Predicate<V> predicate) {
+    LinkedHashMap<K, Set<V>> result = new LinkedHashMap<>();
+    fromMap.forEach((key, value) -> {
+      for (V v : value) {
+        if (!predicate.test(v)) {
+          return;
+        }
+        result.merge(key, new LinkedHashSet<>(Set.of(v)), Util::mutableUnion);
+      }
+    });
     return result;
   }
 }

@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.extension;
 
+import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -71,23 +72,16 @@ public final class DaggerStreams {
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
     return Collectors.mapping(
         value -> {
-          Set<V> values = new LinkedHashSet<>();
-          values.add(valueMapper.apply(value));
+          Set<V> values = new LinkedHashSet<>(Set.of(valueMapper.apply(value)));
           return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
         },
         Collector.of(
             LinkedHashMap::new,
             (map, entry) ->
-                map.merge(entry.getKey(), entry.getValue(), (set1, set2) -> {
-                  set1.addAll(set2);
-                  return set1;
-                }),
+                map.merge(entry.getKey(), entry.getValue(), Util::mutableUnion),
             (left, right) -> {
               right.forEach((k, v) ->
-                  left.merge(k, v, (set1, set2) -> {
-                    set1.addAll(set2);
-                    return set1;
-                  }));
+                  left.merge(k, v, Util::mutableUnion));
               return left;
             }));
   }

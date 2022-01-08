@@ -63,10 +63,7 @@ final class SetMultibindingValidator implements BindingGraphPlugin {
         dereferencedBindsTargets.merge(
             dereferenceDelegateBinding(dep, bindingGraph),
             new HashSet<>(Set.of(dep)),
-            (set1, set2) -> {
-              set1.addAll(set2);
-              return set1;
-            });
+            Util::mutableUnion);
       }
     }
 

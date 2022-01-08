@@ -25,6 +25,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.Scopes;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Binding;
@@ -81,10 +82,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                       || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
-                  incompatibleBindings.merge(componentNode, new LinkedHashSet<>(Set.of(binding)), (set1, set2) -> {
-                    set1.addAll(set2);
-                    return set1;
-                  });
+                  incompatibleBindings.merge(componentNode, new LinkedHashSet<>(Set.of(binding)), Util::mutableUnion);
                 }
               });
     }

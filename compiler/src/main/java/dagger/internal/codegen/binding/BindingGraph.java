@@ -160,10 +160,7 @@ public final class BindingGraph {
                 ComponentNode key = mComponentNodes.get(componentNode.componentPath().parent());
                 subcomponentNodesBuilder.merge(key,
                     new LinkedHashSet<>(Set.of(componentNode)),
-                    (set1, set2) -> {
-                      set1.addAll(set2);
-                      return set1;
-                    });
+                    Util::mutableUnion);
               });
       return new TopLevelBindingGraph(network,
           nodesByClass.bindings, nodesByClass.missingBindings, nodesByClass.componentNodes,

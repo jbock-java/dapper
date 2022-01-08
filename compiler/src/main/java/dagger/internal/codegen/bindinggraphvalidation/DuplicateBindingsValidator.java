@@ -131,17 +131,11 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     bindingsByComponentPath
         .forEach(
             (componentPath, bindings) -> {
-              mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindings), (set1, set2) -> {
-                set1.addAll(set2);
-                return set1;
-              });
+              mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindings), Util::mutableUnion);
               for (ComponentPath ancestor = componentPath; !ancestor.atRoot(); ) {
                 ancestor = ancestor.parent();
                 List<Binding> bindingsInAncestor = bindingsByComponentPath.getOrDefault(ancestor, List.of());
-                mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindingsInAncestor), (set1, set2) -> {
-                  set1.addAll(set2);
-                  return set1;
-                });
+                mutuallyVisibleBindings.merge(componentPath, new LinkedHashSet<>(bindingsInAncestor), Util::mutableUnion);
               }
             });
     return valueSetsForEachKey(mutuallyVisibleBindings);
