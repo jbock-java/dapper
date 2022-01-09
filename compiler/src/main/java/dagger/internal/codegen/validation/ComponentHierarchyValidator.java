@@ -21,9 +21,6 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
@@ -61,7 +58,7 @@ final class ComponentHierarchyValidator {
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
       validateScopeHierarchy(
-          report, componentDescriptor, LinkedHashMultimap.<ComponentDescriptor, Scope>create());
+          report, componentDescriptor, new LinkedHashMap<>());
     }
     return report.build();
   }
@@ -122,34 +119,36 @@ final class ComponentHierarchyValidator {
   private void validateScopeHierarchy(
       ValidationReport.Builder<TypeElement> report,
       ComponentDescriptor subject,
-      SetMultimap<ComponentDescriptor, Scope> scopesByComponent) {
-    scopesByComponent.putAll(subject, subject.scopes());
+      Map<ComponentDescriptor, Set<Scope>> scopesByComponent) {
+    subject.scopes().forEach(scope ->
+        scopesByComponent.merge(subject, new LinkedHashSet<>(Set.of(scope)), Util::mutableUnion));
 
     for (ComponentDescriptor childComponent : subject.childComponents()) {
       validateScopeHierarchy(report, childComponent, scopesByComponent);
     }
 
-    scopesByComponent.removeAll(subject);
+    scopesByComponent.remove(subject);
 
     Predicate<Scope> subjectScopes = subject.scopes()::contains;
-    SetMultimap<ComponentDescriptor, Scope> overlappingScopes =
-        Multimaps.filterValues(scopesByComponent, subjectScopes::test);
+    Map<ComponentDescriptor, Set<Scope>> overlappingScopes =
+        Util.filterValues(scopesByComponent, subjectScopes);
     if (!overlappingScopes.isEmpty()) {
       StringBuilder error =
           new StringBuilder()
               .append(subject.typeElement().getQualifiedName())
               .append(" has conflicting scopes:");
-      for (Map.Entry<ComponentDescriptor, Scope> entry : overlappingScopes.entries()) {
-        Scope scope = entry.getValue();
-        error
-            .append("\n  ")
-            .append(entry.getKey().typeElement().getQualifiedName())
-            .append(" also has ")
-            .append(getReadableSource(scope));
+      for (Map.Entry<ComponentDescriptor, Set<Scope>> entry : overlappingScopes.entrySet()) {
+        for (Scope scope : entry.getValue()) {
+          error
+              .append("\n  ")
+              .append(entry.getKey().typeElement().getQualifiedName())
+              .append(" also has ")
+              .append(getReadableSource(scope));
+        }
       }
       report.addItem(
           error.toString(),
-          compilerOptions.scopeCycleValidationType().diagnosticKind().get(),
+          compilerOptions.scopeCycleValidationType().diagnosticKind().orElseThrow(),
           subject.typeElement());
     }
   }
