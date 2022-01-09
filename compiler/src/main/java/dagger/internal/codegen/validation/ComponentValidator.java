@@ -20,8 +20,6 @@ import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Multimaps.asMap;
 import static dagger.internal.codegen.base.ComponentAnnotation.anyComponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
@@ -47,12 +45,13 @@ import com.google.auto.common.MoreTypes;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.ClassName;
 import dagger.Component;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentKind;
 import dagger.internal.codegen.binding.DependencyRequestFactory;
 import dagger.internal.codegen.binding.ErrorMessages;
@@ -149,7 +148,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private ComponentKind componentKind() {
-      return getOnlyElement(componentKinds);
+      return Util.getOnlyElement(componentKinds);
     }
 
     private ComponentAnnotation componentAnnotation() {
@@ -378,7 +377,7 @@ public final class ComponentValidator implements ClearableCache {
       }
 
       private void validateMembersInjectionMethod() {
-        TypeMirror parameterType = getOnlyElement(parameterTypes);
+        TypeMirror parameterType = Util.getOnlyElement(parameterTypes);
         report.addSubreport(
             membersInjectionValidator.validateMembersInjectionMethod(method, parameterType));
         if (!(returnType.getKind().equals(VOID) || types.isSameType(returnType, parameterType))) {
@@ -417,7 +416,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void reportConflictingEntryPoints(Collection<ExecutableElement> methods) {
-      verify(
+      Preconditions.checkState(
           methods.stream().map(ExecutableElement::getEnclosingElement).distinct().count()
               == methods.size(),
           "expected each method to be declared on a different type: %s",
@@ -436,12 +435,15 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void validateSubcomponentReferences() {
-      Maps.filterValues(referencedSubcomponents.asMap(), methods -> methods.size() > 1)
-          .forEach(
-              (subcomponent, methods) ->
-                  report.addError(
-                      String.format(moreThanOneRefToSubcomponent(), subcomponent, methods),
-                      component));
+      referencedSubcomponents.asMap().entrySet().stream()
+          .filter(e -> e.getValue().size() > 1)
+          .forEach(e -> {
+            Element subcomponent = e.getKey();
+            Collection<ExecutableElement> methods = e.getValue();
+            report.addError(
+                String.format(moreThanOneRefToSubcomponent(), subcomponent, methods),
+                component);
+          });
     }
 
     private void validateComponentDependencies() {
