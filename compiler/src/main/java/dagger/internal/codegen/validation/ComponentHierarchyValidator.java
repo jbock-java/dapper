@@ -57,7 +57,7 @@ final class ComponentHierarchyValidator {
         report,
         componentDescriptor,
         Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
-    validateRepeatedScopedDeclarations(report, componentDescriptor, LinkedHashMultimap.create());
+    validateRepeatedScopedDeclarations(report, componentDescriptor, new LinkedHashMap<>());
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
       validateScopeHierarchy(
@@ -159,17 +159,17 @@ final class ComponentHierarchyValidator {
       ComponentDescriptor component,
       // TODO(ronshapiro): optimize ModuleDescriptor.hashCode()/equals. Otherwise this could be
       // quite costly
-      SetMultimap<ComponentDescriptor, ModuleDescriptor> modulesWithScopes) {
+      Map<ComponentDescriptor, Set<ModuleDescriptor>> modulesWithScopes) {
     Set<ModuleDescriptor> modules =
         component.modules().stream().filter(this::hasScopedDeclarations).collect(toImmutableSet());
-    modulesWithScopes.putAll(component, modules);
+    modules.forEach(module -> modulesWithScopes.merge(component, new LinkedHashSet<>(Set.of(module)), Util::mutableUnion));
     for (ComponentDescriptor childComponent : component.childComponents()) {
       validateRepeatedScopedDeclarations(report, childComponent, modulesWithScopes);
     }
-    modulesWithScopes.removeAll(component);
+    modulesWithScopes.remove(component);
 
-    SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules =
-        Multimaps.filterValues(modulesWithScopes, modules::contains);
+    Map<ComponentDescriptor, Set<ModuleDescriptor>> repeatedModules =
+        Util.filterValues(modulesWithScopes, modules::contains);
     if (repeatedModules.isEmpty()) {
       return;
     }
@@ -184,14 +184,13 @@ final class ComponentHierarchyValidator {
 
   private String repeatedModulesWithScopeError(
       ComponentDescriptor component,
-      SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules) {
+      Map<ComponentDescriptor, Set<ModuleDescriptor>> repeatedModules) {
     StringBuilder error =
         new StringBuilder()
             .append(component.typeElement().getQualifiedName())
             .append(" repeats modules with scoped bindings or declarations:");
 
     repeatedModules
-        .asMap()
         .forEach(
             (conflictingComponent, conflictingModules) -> {
               error
