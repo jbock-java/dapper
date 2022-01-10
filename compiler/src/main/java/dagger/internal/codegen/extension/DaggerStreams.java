@@ -72,7 +72,7 @@ public final class DaggerStreams {
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
     return Collectors.mapping(
         value -> {
-          Set<V> values = new LinkedHashSet<>(Set.of(valueMapper.apply(value)));
+          Set<V> values = Set.of(valueMapper.apply(value));
           return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
         },
         Collector.of(

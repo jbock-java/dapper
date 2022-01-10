@@ -18,6 +18,7 @@ package dagger.internal.codegen.base;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -76,8 +77,11 @@ public final class Util {
   }
 
   public static <E> Set<E> mutableUnion(Set<E> set1, Set<E> set2) {
-    set1.addAll(set2);
-    return set1;
+    if (set1 instanceof HashSet) {
+      set1.addAll(set2);
+      return set1;
+    }
+    return union(set1, set2);
   }
 
   public static <K, V> Map<K, V> toMap(
@@ -114,7 +118,7 @@ public final class Util {
         if (!predicate.test(v)) {
           return;
         }
-        result.merge(key, new LinkedHashSet<>(Set.of(v)), Util::mutableUnion);
+        result.merge(key, Set.of(v), Util::mutableUnion);
       }
     });
     return result;

@@ -121,7 +121,7 @@ final class ComponentHierarchyValidator {
       ComponentDescriptor subject,
       Map<ComponentDescriptor, Set<Scope>> scopesByComponent) {
     subject.scopes().forEach(scope ->
-        scopesByComponent.merge(subject, new LinkedHashSet<>(Set.of(scope)), Util::mutableUnion));
+        scopesByComponent.merge(subject, Set.of(scope), Util::mutableUnion));
 
     for (ComponentDescriptor childComponent : subject.childComponents()) {
       validateScopeHierarchy(report, childComponent, scopesByComponent);
@@ -161,7 +161,7 @@ final class ComponentHierarchyValidator {
       Map<ComponentDescriptor, Set<ModuleDescriptor>> modulesWithScopes) {
     Set<ModuleDescriptor> modules =
         component.modules().stream().filter(this::hasScopedDeclarations).collect(toImmutableSet());
-    modules.forEach(module -> modulesWithScopes.merge(component, new LinkedHashSet<>(Set.of(module)), Util::mutableUnion));
+    modules.forEach(module -> modulesWithScopes.merge(component, Set.of(module), Util::mutableUnion));
     for (ComponentDescriptor childComponent : component.childComponents()) {
       validateRepeatedScopedDeclarations(report, childComponent, modulesWithScopes);
     }

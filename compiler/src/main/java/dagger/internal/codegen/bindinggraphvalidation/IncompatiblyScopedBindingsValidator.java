@@ -82,7 +82,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                       || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
-                  incompatibleBindings.merge(componentNode, new LinkedHashSet<>(Set.of(binding)), Util::mutableUnion);
+                  incompatibleBindings.merge(componentNode, Set.of(binding), Util::mutableUnion);
                 }
               });
     }

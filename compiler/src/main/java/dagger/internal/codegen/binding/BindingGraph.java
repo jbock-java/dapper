@@ -158,9 +158,7 @@ public final class BindingGraph {
           .forEach(
               componentNode -> {
                 ComponentNode key = mComponentNodes.get(componentNode.componentPath().parent());
-                subcomponentNodesBuilder.merge(key,
-                    new LinkedHashSet<>(Set.of(componentNode)),
-                    Util::mutableUnion);
+                subcomponentNodesBuilder.merge(key, Set.of(componentNode), Util::mutableUnion);
               });
       return new TopLevelBindingGraph(network,
           nodesByClass.bindings, nodesByClass.missingBindings, nodesByClass.componentNodes,
