@@ -43,8 +43,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.ClassName;
 import dagger.Component;
@@ -68,7 +66,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -140,8 +137,8 @@ public final class ComponentValidator implements ClearableCache {
     private final Set<ComponentKind> componentKinds;
 
     // Populated by ComponentMethodValidators
-    private final SetMultimap<Element, ExecutableElement> referencedSubcomponents =
-        LinkedHashMultimap.create();
+    private final Map<Element, Set<ExecutableElement>> referencedSubcomponents =
+        new LinkedHashMap<>();
 
     ElementValidator(TypeElement component) {
       this.component = component;
@@ -293,7 +290,7 @@ public final class ComponentValidator implements ClearableCache {
       }
 
       private void validateSubcomponentFactoryMethod(AnnotationMirror subcomponentAnnotation) {
-        referencedSubcomponents.put(MoreTypes.asElement(returnType), method);
+        referencedSubcomponents.merge(MoreTypes.asElement(returnType), Set.of(method), Util::mutableUnion);
 
         ComponentKind subcomponentKind =
             ComponentKind.forAnnotatedElement(MoreTypes.asTypeElement(returnType)).get();
@@ -361,7 +358,7 @@ public final class ComponentValidator implements ClearableCache {
       }
 
       private void validateSubcomponentCreatorMethod() {
-        referencedSubcomponents.put(MoreTypes.asElement(returnType).getEnclosingElement(), method);
+        referencedSubcomponents.merge(MoreTypes.asElement(returnType).getEnclosingElement(), Set.of(method), Util::mutableUnion);
 
         if (!parameters.isEmpty()) {
           report.addError(builderMethodRequiresNoArgs(), method);
@@ -436,7 +433,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void validateSubcomponentReferences() {
-      referencedSubcomponents.asMap().entrySet().stream()
+      referencedSubcomponents.entrySet().stream()
           .filter(e -> e.getValue().size() > 1)
           .forEach(e -> {
             Element subcomponent = e.getKey();
