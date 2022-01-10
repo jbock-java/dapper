@@ -29,9 +29,6 @@ import static java.util.Comparator.comparingInt;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import dagger.internal.codegen.base.ElementFormatter;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
@@ -48,6 +45,7 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,23 +97,8 @@ public final class DiagnosticMessageGenerator {
       new LinkedHashMap<>();
 
   private static <K, V> Function<K, V> memoize(Function<K, V> uncached) {
-    // If Android Guava is on the processor path, then c.g.c.b.Function (which LoadingCache
-    // implements) does not extend j.u.f.Function.
-    // TODO(erichang): Fix current breakages and try to remove this to enforce not having this on
-    // processor path.
-
-    // First, explicitly convert uncached to c.g.c.b.Function because CacheLoader.from() expects
-    // one.
-    com.google.common.base.Function<K, V> uncachedAsBaseFunction = uncached::apply;
-
-    LoadingCache<K, V> cache =
-        CacheBuilder.newBuilder().build(CacheLoader.from(uncachedAsBaseFunction));
-
-    // Second, explicitly convert LoadingCache to j.u.f.Function.
-    @SuppressWarnings("deprecation") // uncachedAsBaseFunction throws only unchecked exceptions
-    Function<K, V> memoized = cache::apply;
-
-    return memoized;
+    HashMap<K, V> map = new HashMap<>();
+    return k -> map.computeIfAbsent(k, uncached);
   }
 
   private DiagnosticMessageGenerator(
@@ -225,7 +208,7 @@ public final class DiagnosticMessageGenerator {
   }
 
   private final Formatter<DependencyEdge> entryPointFormatter =
-      new Formatter<DependencyEdge>() {
+      new Formatter<>() {
         @Override
         public String format(DependencyEdge object) {
           Element requestElement = object.dependencyRequest().requestElement().orElseThrow();
@@ -372,7 +355,7 @@ public final class DiagnosticMessageGenerator {
   Comparator<DependencyEdge> requestEnclosingTypeName() {
     return comparing(
         edge ->
-            closestEnclosingTypeElement(edge.dependencyRequest().requestElement().get())
+            closestEnclosingTypeElement(edge.dependencyRequest().requestElement().orElseThrow())
                 .getQualifiedName()
                 .toString());
   }
@@ -384,7 +367,7 @@ public final class DiagnosticMessageGenerator {
    * <p>Only useful to compare edges whose request elements were declared in the same type.
    */
   Comparator<DependencyEdge> requestElementDeclarationOrder() {
-    return comparing(edge -> edge.dependencyRequest().requestElement().get(), DECLARATION_ORDER);
+    return comparing(edge -> edge.dependencyRequest().requestElement().orElseThrow(), DECLARATION_ORDER);
   }
 
   private Node source(Edge edge) {
