@@ -20,7 +20,6 @@ import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.collect.Multimaps.asMap;
 import static dagger.internal.codegen.base.ComponentAnnotation.anyComponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
@@ -42,8 +41,6 @@ import static javax.lang.model.type.TypeKind.VOID;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.ClassName;
 import dagger.Component;
 import dagger.internal.codegen.base.ClearableCache;
@@ -151,7 +148,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private ComponentAnnotation componentAnnotation() {
-      return anyComponentAnnotation(component).get();
+      return anyComponentAnnotation(component).orElseThrow();
     }
 
     private DeclaredType componentType() {
@@ -213,12 +210,10 @@ public final class ComponentValidator implements ClearableCache {
     private void validateNoReusableAnnotation() {
       Optional<AnnotationMirror> reusableAnnotation =
           getAnnotationMirror(component, TypeNames.REUSABLE);
-      if (reusableAnnotation.isPresent()) {
-        report.addError(
-            "@Reusable cannot be applied to components or subcomponents",
-            component,
-            reusableAnnotation.get());
-      }
+      reusableAnnotation.ifPresent(annotationMirror -> report.addError(
+          "@Reusable cannot be applied to components or subcomponents",
+          component,
+          annotationMirror));
     }
 
     private void validateComponentMethods() {
@@ -293,7 +288,7 @@ public final class ComponentValidator implements ClearableCache {
         referencedSubcomponents.merge(MoreTypes.asElement(returnType), Set.of(method), Util::mutableUnion);
 
         ComponentKind subcomponentKind =
-            ComponentKind.forAnnotatedElement(MoreTypes.asTypeElement(returnType)).get();
+            ComponentKind.forAnnotatedElement(MoreTypes.asTypeElement(returnType)).orElseThrow();
         Set<TypeElement> moduleTypes =
             ComponentAnnotation.componentAnnotation(subcomponentAnnotation).modules();
 
@@ -396,18 +391,27 @@ public final class ComponentValidator implements ClearableCache {
     private void validateNoConflictingEntryPoints() {
       // Collect entry point methods that are not overridden by others. If the "same" method is
       // inherited from more than one supertype, each will be in the multimap.
-      SetMultimap<String, ExecutableElement> entryPointMethods = HashMultimap.create();
+      Map<String, Set<ExecutableElement>> entryPointMethods = new LinkedHashMap<>();
 
       methodsIn(elements.getAllMembers(component)).stream()
           .filter(
               method ->
                   isEntryPoint(method, asExecutable(types.asMemberOf(componentType(), method))))
           .forEach(
-              method ->
-                  addMethodUnlessOverridden(
-                      method, entryPointMethods.get(method.getSimpleName().toString())));
+              method -> {
+                String key = method.getSimpleName().toString();
+                Set<ExecutableElement> methods = entryPointMethods.getOrDefault(key, Set.of());
+                if (methods.stream().noneMatch(existingMethod -> overridesAsDeclared(existingMethod, method))) {
+                  methods.forEach(existingMethod -> {
+                    if (overridesAsDeclared(method, existingMethod)) {
+                      entryPointMethods.merge(key, Set.of(method), Util::difference);
+                    }
+                  });
+                  entryPointMethods.merge(key, Set.of(method), Util::mutableUnion);
+                }
+              });
 
-      for (Set<ExecutableElement> methods : asMap(entryPointMethods).values()) {
+      for (Set<ExecutableElement> methods : entryPointMethods.values()) {
         if (distinctKeys(methods).size() > 1) {
           reportConflictingEntryPoints(methods);
         }
@@ -487,13 +491,6 @@ public final class ComponentValidator implements ClearableCache {
         && methodType.getTypeVariables().isEmpty();
   }
 
-  private void addMethodUnlessOverridden(ExecutableElement method, Set<ExecutableElement> methods) {
-    if (methods.stream().noneMatch(existingMethod -> overridesAsDeclared(existingMethod, method))) {
-      methods.removeIf(existingMethod -> overridesAsDeclared(method, existingMethod));
-      methods.add(method);
-    }
-  }
-
   /**
    * Returns {@code true} if {@code overrider} overrides {@code overridden} considered from within
    * the type that declares {@code overrider}.
@@ -504,7 +501,7 @@ public final class ComponentValidator implements ClearableCache {
   }
 
   private static final TypeVisitor<Void, ValidationReport.Builder<?>> CHECK_DEPENDENCY_TYPES =
-      new SimpleTypeVisitor8<Void, ValidationReport.Builder<?>>() {
+      new SimpleTypeVisitor8<>() {
         @Override
         protected Void defaultAction(TypeMirror type, ValidationReport.Builder<?> report) {
           report.addError(type + " is not a valid component dependency type");
