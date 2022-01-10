@@ -17,7 +17,6 @@
 package dagger.internal.codegen.base;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -54,7 +53,7 @@ public final class Util {
     for (E element : elements) {
       result.add(element);
     }
-    return Collections.unmodifiableSet(result);
+    return result;
   }
 
   public static <E> Set<E> difference(Set<E> set1, Set<E> set2) {

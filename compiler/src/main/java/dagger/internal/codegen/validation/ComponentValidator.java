@@ -67,6 +67,8 @@ import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -426,10 +428,9 @@ public final class ComponentValidator implements ClearableCache {
           .typedFormatter(componentType())
           .formatIndentedList(
               message,
-              ImmutableList.sortedCopyOf(
-                  comparing(
-                      method -> asType(method.getEnclosingElement()).getQualifiedName().toString()),
-                  methods),
+              methods.stream()
+                  .sorted(comparing(method -> asType(method.getEnclosingElement()).getQualifiedName().toString()))
+                  .collect(Collectors.toList()),
               1);
       report.addError(message.toString());
     }
