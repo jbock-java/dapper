@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.getLast;
-import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
@@ -61,6 +58,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -130,8 +128,9 @@ public final class DiagnosticMessageGenerator {
     this.dependencyRequestFormatter = dependencyRequestFormatter;
     this.elementFormatter = elementFormatter;
     supertypes =
-        memoize(
-            component -> transform(types.supertypes(component.asType()), MoreTypes::asTypeElement));
+        memoize(component ->
+            StreamSupport.stream(types.supertypes(component.asType()).spliterator(), false)
+                .map(MoreTypes::asTypeElement).collect(Collectors.toList()));
   }
 
   public String getMessage(MaybeBinding binding) {
@@ -175,7 +174,8 @@ public final class DiagnosticMessageGenerator {
       dependencyTrace.forEach(
           edge -> dependencyRequestFormatter.appendFormatLine(message, edge.dependencyRequest()));
       if (!dependencyTrace.isEmpty()) {
-        appendComponentPathUnlessAtRoot(message, source(getLast(dependencyTrace)));
+        DependencyEdge last = dependencyTrace.get(dependencyTrace.size() - 1);
+        appendComponentPathUnlessAtRoot(message, source(last));
       }
     }
 
@@ -205,7 +205,7 @@ public final class DiagnosticMessageGenerator {
       entryPointFormatter.formatIndentedList(
           message,
           entryPoints.stream()
-              .filter(entryPoint -> !entryPoint.equals(getLast(dependencyTrace)))
+              .filter(entryPoint -> !entryPoint.equals(dependencyTrace.get(dependencyTrace.size() - 1)))
               .sorted(
                   // 1. List entry points in components closest to the root first.
                   // 2. List entry points declared in a component before those in a supertype.
@@ -229,7 +229,7 @@ public final class DiagnosticMessageGenerator {
       new Formatter<DependencyEdge>() {
         @Override
         public String format(DependencyEdge object) {
-          Element requestElement = object.dependencyRequest().requestElement().get();
+          Element requestElement = object.dependencyRequest().requestElement().orElseThrow();
           StringBuilder element = new StringBuilder(elementToString(requestElement));
 
           // For entry points declared in subcomponents or supertypes of the root component,
@@ -332,7 +332,8 @@ public final class DiagnosticMessageGenerator {
             ep ->
                 shortestPath(
                     node ->
-                        filter(graph.network().successors(node), MaybeBinding.class::isInstance),
+                        graph.network().successors(node).stream().filter(MaybeBinding.class::isInstance)
+                            .collect(Collectors.toList()),
                     graph.network().incidentNodes(ep).target(),
                     binding));
   }
