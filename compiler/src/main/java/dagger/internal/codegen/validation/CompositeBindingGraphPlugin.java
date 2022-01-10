@@ -16,14 +16,12 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.asList;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
+import static java.util.Objects.requireNonNull;
 
+import dagger.internal.codegen.base.Preconditions;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -32,9 +30,11 @@ import dagger.model.BindingGraph.MaybeBinding;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -144,12 +144,10 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     /** Reports all of the stored diagnostics. */
     void report() {
-      if (mergedDiagnosticKind.isPresent()) {
-        delegate.reportComponent(
-            mergedDiagnosticKind.get(),
-            graph.rootComponentNode(),
-            PackageNameCompressor.compressPackagesInMessage(messageBuilder.toString()));
-      }
+      mergedDiagnosticKind.ifPresent(kind -> delegate.reportComponent(
+          kind,
+          graph.rootComponentNode(),
+          PackageNameCompressor.compressPackagesInMessage(messageBuilder.toString())));
     }
 
     @Override
@@ -217,9 +215,9 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     /** Adds a message to the stored aggregated message. */
     private void addMessage(Diagnostic.Kind diagnosticKind, String message) {
-      checkNotNull(diagnosticKind);
-      checkNotNull(message);
-      checkState(currentPluginName != null);
+      requireNonNull(diagnosticKind);
+      requireNonNull(message);
+      requireNonNull(currentPluginName);
 
       // Add a separator if this isn't the first message
       if (mergedDiagnosticKind.isPresent()) {
@@ -233,13 +231,13 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     private static String formatMessage(String messageFormat, Object firstArg, Object[] moreArgs) {
-      return String.format(messageFormat, asList(firstArg, moreArgs).toArray());
+      return String.format(messageFormat, Stream.concat(Stream.of(firstArg), Arrays.stream(moreArgs)).toArray());
     }
 
     private void mergeDiagnosticKind(Diagnostic.Kind diagnosticKind) {
-      checkArgument(diagnosticKind != Diagnostic.Kind.MANDATORY_WARNING,
+      Preconditions.checkArgument(diagnosticKind != Diagnostic.Kind.MANDATORY_WARNING,
           "Dagger plugins should not be issuing mandatory warnings");
-      if (!mergedDiagnosticKind.isPresent()) {
+      if (mergedDiagnosticKind.isEmpty()) {
         mergedDiagnosticKind = Optional.of(diagnosticKind);
         return;
       }

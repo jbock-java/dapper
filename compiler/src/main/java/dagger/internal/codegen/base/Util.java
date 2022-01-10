@@ -16,10 +16,12 @@
 
 package dagger.internal.codegen.base;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -50,6 +52,14 @@ public final class Util {
 
   public static <E> Set<E> setOf(Iterable<? extends E> elements) {
     LinkedHashSet<E> result = new LinkedHashSet<>();
+    for (E element : elements) {
+      result.add(element);
+    }
+    return result;
+  }
+
+  public static <E> List<E> listOf(Iterable<? extends E> elements) {
+    ArrayList<E> result = new ArrayList<E>();
     for (E element : elements) {
       result.add(element);
     }

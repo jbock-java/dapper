@@ -16,11 +16,8 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Predicates.equalTo;
-import static com.google.common.base.Verify.verify;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.getLast;
-import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Iterables.transform;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
@@ -39,12 +36,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Table;
 import dagger.internal.codegen.base.ElementFormatter;
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
@@ -54,11 +51,16 @@ import dagger.model.BindingGraph.MaybeBinding;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -141,22 +143,19 @@ public final class DiagnosticMessageGenerator {
   }
 
   public String getMessage(DependencyEdge dependencyEdge) {
-    Set<DependencyEdge> requests = ImmutableSet.of(dependencyEdge);
+    Set<DependencyEdge> requests = Set.of(dependencyEdge);
 
     Set<DependencyEdge> entryPoints;
     List<DependencyEdge> dependencyTrace;
     if (dependencyEdge.isEntryPoint()) {
-      entryPoints = ImmutableSet.of(dependencyEdge);
-      dependencyTrace = ImmutableList.of(dependencyEdge);
+      entryPoints = Set.of(dependencyEdge);
+      dependencyTrace = List.of(dependencyEdge);
     } else {
       // It's not an entry point, so it's part of a binding
       dagger.model.Binding binding = (dagger.model.Binding) source(dependencyEdge);
       entryPoints = graph.entryPointEdgesDependingOnBinding(binding);
-      dependencyTrace =
-          ImmutableList.<DependencyEdge>builder()
-              .add(dependencyEdge)
-              .addAll(dependencyTrace(binding, entryPoints))
-              .build();
+      dependencyTrace = Stream.concat(Stream.of(dependencyEdge), dependencyTrace(binding, entryPoints).stream())
+          .collect(Collectors.toList());
     }
 
     return getMessageInternal(dependencyTrace, requests, entryPoints);
@@ -278,14 +277,14 @@ public final class DiagnosticMessageGenerator {
 
     List<Node> shortestBindingPath =
         shortestPathFromEntryPoint(entryPointForTrace, binding);
-    verify(
+    Preconditions.checkState(
         !shortestBindingPath.isEmpty(),
         "no dependency path from %s to %s in %s",
         entryPointForTrace,
         binding,
         graph);
 
-    ImmutableList.Builder<DependencyEdge> dependencyTrace = ImmutableList.builder();
+    List<DependencyEdge> dependencyTrace = new ArrayList<>();
     dependencyTrace.add(entryPointForTrace);
     for (int i = 0; i < shortestBindingPath.size() - 1; i++) {
       Set<Edge> dependenciesBetween =
@@ -296,7 +295,8 @@ public final class DiagnosticMessageGenerator {
       // shortest path
       dependencyTrace.add((DependencyEdge) Iterables.get(dependenciesBetween, 0));
     }
-    return dependencyTrace.build().reverse();
+    Collections.reverse(dependencyTrace);
+    return dependencyTrace;
   }
 
   /** Returns all the nonsynthetic dependency requests for a binding. */
@@ -347,10 +347,13 @@ public final class DiagnosticMessageGenerator {
    */
   Comparator<DependencyEdge> nearestComponentSupertypeFirst() {
     return comparingInt(
-        entryPoint ->
-            indexOf(
-                supertypes.apply(componentContainingEntryPoint(entryPoint)),
-                equalTo(typeDeclaringEntryPoint(entryPoint))));
+        entryPoint -> {
+          List<TypeElement> types = Util.listOf(supertypes.apply(componentContainingEntryPoint(entryPoint)));
+          TypeElement target = typeDeclaringEntryPoint(entryPoint);
+          return IntStream.range(0, types.size())
+              .filter(i -> types.get(i).equals(target))
+              .findFirst().orElse(Integer.MAX_VALUE);
+        });
   }
 
   TypeElement componentContainingEntryPoint(DependencyEdge entryPoint) {
@@ -359,7 +362,7 @@ public final class DiagnosticMessageGenerator {
 
   TypeElement typeDeclaringEntryPoint(DependencyEdge entryPoint) {
     return MoreElements.asType(
-        entryPoint.dependencyRequest().requestElement().get().getEnclosingElement());
+        entryPoint.dependencyRequest().requestElement().orElseThrow().getEnclosingElement());
   }
 
   /**
