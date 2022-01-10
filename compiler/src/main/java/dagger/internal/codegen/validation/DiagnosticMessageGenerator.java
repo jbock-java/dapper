@@ -32,9 +32,6 @@ import com.google.auto.common.MoreTypes;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Table;
 import dagger.internal.codegen.base.ElementFormatter;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
@@ -51,7 +48,9 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -96,8 +95,8 @@ public final class DiagnosticMessageGenerator {
   private final Function<TypeElement, Iterable<TypeElement>> supertypes;
 
   /** The shortest path (value) from an entry point (column) to a binding (row). */
-  private final Table<MaybeBinding, DependencyEdge, List<Node>> shortestPaths =
-      HashBasedTable.create();
+  private final Map<MaybeBinding, Map<DependencyEdge, List<Node>>> shortestPaths =
+      new LinkedHashMap<>();
 
   private static <K, V> Function<K, V> memoize(Function<K, V> uncached) {
     // If Android Guava is on the processor path, then c.g.c.b.Function (which LoadingCache
@@ -293,7 +292,7 @@ public final class DiagnosticMessageGenerator {
               .edgesConnecting(shortestBindingPath.get(i), shortestBindingPath.get(i + 1));
       // If a binding requests a key more than once, any of them should be fine to get to the
       // shortest path
-      dependencyTrace.add((DependencyEdge) Iterables.get(dependenciesBetween, 0));
+      dependencyTrace.add((DependencyEdge) dependenciesBetween.iterator().next());
     }
     Collections.reverse(dependencyTrace);
     return dependencyTrace;
@@ -326,7 +325,7 @@ public final class DiagnosticMessageGenerator {
 
   List<Node> shortestPathFromEntryPoint(DependencyEdge entryPoint, MaybeBinding binding) {
     return shortestPaths
-        .row(binding)
+        .computeIfAbsent(binding, k -> new LinkedHashMap<>())
         .computeIfAbsent(
             entryPoint,
             ep ->
