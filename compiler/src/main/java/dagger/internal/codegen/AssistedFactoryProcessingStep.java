@@ -34,7 +34,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -58,6 +57,7 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import jakarta.inject.Inject;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -186,8 +186,8 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
         }
       }
 
-      if (!ImmutableSet.copyOf(metadata.assistedInjectAssistedParameters())
-          .equals(ImmutableSet.copyOf(metadata.assistedFactoryAssistedParameters()))) {
+      if (!new LinkedHashSet<>(metadata.assistedInjectAssistedParameters())
+          .equals(new LinkedHashSet<>(metadata.assistedFactoryAssistedParameters()))) {
         report.addError(
             String.format(
                 "The parameters in the factory method must match the @Assisted parameters in %s."
