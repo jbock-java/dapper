@@ -36,7 +36,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -843,7 +842,7 @@ public final class ComponentImplementation {
         Iterable<ParameterSpec> parameters,
         List<CodeBlock> statements,
         Function<String, MethodSpec.Builder> methodBuilderCreator) {
-      return Lists.partition(statements, STATEMENTS_PER_METHOD).stream()
+      return partition(statements, STATEMENTS_PER_METHOD).stream()
           .map(
               partition ->
                   methodBuilderCreator
@@ -854,6 +853,18 @@ public final class ComponentImplementation {
                       .build())
           .collect(toImmutableList());
     }
+  }
+
+  private static <E> List<List<E>> partition(List<E> list, int size) {
+    List<List<E>> result = new ArrayList<>();
+    List<E> current = null;
+    for (int i = 0; i < list.size(); i++) {
+      if (i % size == 0) {
+        result.add(current = new ArrayList<>(size));
+      }
+      current.add(list.get(i));
+    }
+    return result;
   }
 
   private static List<ComponentRequirement> constructorRequirements(BindingGraph graph) {
