@@ -28,7 +28,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.Maps;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -180,7 +179,7 @@ final class ComponentCreatorImplementationFactory {
     private Map<ComponentRequirement, FieldSpec> addFields() {
       // Fields in an abstract creator class need to be visible from subclasses.
       Map<ComponentRequirement, FieldSpec> result =
-          Maps.toMap(
+          Util.toMap(
               Util.intersection(neededUserSettableRequirements(), setterMethods()),
               requirement ->
                   FieldSpec.builder(
@@ -193,10 +192,13 @@ final class ComponentCreatorImplementationFactory {
     }
 
     private void addSetterMethods() {
-      Maps.filterKeys(userSettableRequirements(), setterMethods()::contains)
-          .forEach(
-              (requirement, status) ->
-                  createSetterMethod(requirement, status).ifPresent(classBuilder::addMethod));
+      Set<ComponentRequirement> setterMethods = setterMethods();
+      userSettableRequirements().entrySet().stream().filter(e -> setterMethods.contains(e.getKey()))
+          .forEach(e -> {
+            ComponentRequirement requirement = e.getKey();
+            RequirementStatus status = e.getValue();
+            createSetterMethod(requirement, status).ifPresent(classBuilder::addMethod);
+          });
     }
 
     /** Creates a new setter method builder, with no method body, for the given requirement. */
@@ -374,7 +376,7 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected Map<ComponentRequirement, RequirementStatus> userSettableRequirements() {
-      return Maps.toMap(creatorDescriptor.userSettableRequirements(), this::requirementStatus);
+      return Util.toMap(creatorDescriptor.userSettableRequirements(), this::requirementStatus);
     }
 
     @Override
@@ -402,7 +404,7 @@ final class ComponentCreatorImplementationFactory {
     @Override
     protected Map<ComponentRequirement, String> factoryMethodParameters() {
       return new LinkedHashMap<>(
-          Maps.transformValues(
+          Util.transformValues(
               creatorDescriptor.factoryParameters(),
               element -> element.getSimpleName().toString()));
     }
@@ -462,7 +464,7 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected Map<ComponentRequirement, RequirementStatus> userSettableRequirements() {
-      return Maps.toMap(
+      return Util.toMap(
           setterMethods(),
           requirement ->
               componentConstructorRequirements().contains(requirement)

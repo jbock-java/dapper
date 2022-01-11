@@ -42,9 +42,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -85,6 +82,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -183,15 +182,15 @@ public final class ComponentImplementation {
    * do not depend on bindings in Shard{i+j}) and 2) bindings belonging to the same cycle are put in
    * the same shard. These two guarantees allow us to initialize each shard in a well defined order.
    */
-  private static ImmutableMap<Binding, ShardImplementation> createShardsByBinding(
+  private static Map<Binding, ShardImplementation> createShardsByBinding(
       ShardImplementation componentShard, BindingGraph graph, CompilerOptions compilerOptions) {
     List<List<Binding>> partitions = bindingPartitions(graph, compilerOptions);
-    ImmutableMap.Builder<Binding, ShardImplementation> builder = ImmutableMap.builder();
+    Map<Binding, ShardImplementation> builder = new LinkedHashMap<>();
     for (int i = 0; i < partitions.size(); i++) {
       ShardImplementation shard = i == 0 ? componentShard : componentShard.createShard("Shard" + i);
       partitions.get(i).forEach(binding -> builder.put(binding, shard));
     }
-    return builder.build();
+    return builder;
   }
 
   private static List<List<Binding>> bindingPartitions(
@@ -214,7 +213,7 @@ public final class ComponentImplementation {
           .map(BindingNode::delegate)
           .forEach(currPartition::add);
       if (currPartition.size() >= bindingsPerShard) {
-        partitions.add(ImmutableList.copyOf(currPartition));
+        partitions.add(List.copyOf(currPartition));
         currPartition = new ArrayList<>(bindingsPerShard);
       }
     }
@@ -231,7 +230,7 @@ public final class ComponentImplementation {
   private static final int STATEMENTS_PER_METHOD = 100;
 
   private final ShardImplementation componentShard;
-  private final ImmutableMap<Binding, ShardImplementation> shardsByBinding;
+  private final Map<Binding, ShardImplementation> shardsByBinding;
   private final Map<ShardImplementation, FieldSpec> shardFieldsByImplementation = new HashMap<>();
   private final List<CodeBlock> shardInitializations = new ArrayList<>();
   private final Optional<ComponentImplementation> parent;
@@ -628,17 +627,17 @@ public final class ComponentImplementation {
       return builder.build();
     }
 
-    private ImmutableSet<Modifier> modifiers() {
+    private List<Modifier> modifiers() {
       if (!isComponentShard()) {
         // TODO(bcorso): Consider making shards static and unnested too?
-        return ImmutableSet.of(PRIVATE, FINAL);
+        return List.of(PRIVATE, FINAL);
       } else if (isNested()) {
-        return ImmutableSet.of(PRIVATE, STATIC, FINAL);
+        return List.of(PRIVATE, STATIC, FINAL);
       }
       return graph.componentTypeElement().getModifiers().contains(PUBLIC)
           // TODO(ronshapiro): perhaps all generated components should be non-public?
-          ? ImmutableSet.of(PUBLIC, FINAL)
-          : ImmutableSet.of(FINAL);
+          ? List.of(PUBLIC, FINAL)
+          : List.of(FINAL);
     }
 
     private void addCreator() {
@@ -726,17 +725,16 @@ public final class ComponentImplementation {
       MethodSpec.Builder method = MethodSpec.overriding(factoryMethod, parentType, types);
       params.forEach(
           param -> method.addStatement("$T.checkNotNull($N)", Preconditions.class, param));
+      List<ParameterSpec> parameters = new ArrayList<>();
+      parameters.addAll(
+          creatorComponentFields().stream()
+              .map(field -> ParameterSpec.builder(field.type, field.name).build())
+              .collect(toImmutableList()));
+      parameters.addAll(params);
       method.addStatement(
           "return new $T($L)",
           name(),
-          parameterNames(
-              ImmutableList.<ParameterSpec>builder()
-                  .addAll(
-                      creatorComponentFields().stream()
-                          .map(field -> ParameterSpec.builder(field.type, field.name).build())
-                          .collect(toImmutableList()))
-                  .addAll(params)
-                  .build()));
+          parameterNames(parameters));
 
       parent.get().getComponentShard().addMethod(COMPONENT_METHOD, method.build());
     }
@@ -763,7 +761,7 @@ public final class ComponentImplementation {
 
     private void addShards() {
       // Generate all shards and add them to this component implementation.
-      for (ShardImplementation shard : ImmutableSet.copyOf(shardsByBinding.values())) {
+      for (ShardImplementation shard : new LinkedHashSet<>(shardsByBinding.values())) {
         if (shardFieldsByImplementation.containsKey(shard)) {
           addField(FieldSpecKind.COMPONENT_SHARD_FIELD, shardFieldsByImplementation.get(shard));
           TypeSpec shardTypeSpec = shard.generate();
