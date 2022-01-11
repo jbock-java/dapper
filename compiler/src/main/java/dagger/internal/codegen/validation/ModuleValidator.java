@@ -42,10 +42,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.common.Visibility;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multimaps;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.BindingGraphFactory;
@@ -65,11 +61,13 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
@@ -174,15 +172,17 @@ public final class ModuleValidator {
 
     validateModuleVisibility(module, moduleKind, builder);
 
-    ImmutableListMultimap<Name, ExecutableElement> bindingMethodsByName =
-        Multimaps.index(bindingMethods, ExecutableElement::getSimpleName);
+    Map<Name, List<ExecutableElement>> bindingMethodsByName =
+        bindingMethods.stream()
+            .collect(Collectors.groupingBy(ExecutableElement::getSimpleName, LinkedHashMap::new, Collectors.toList()));
 
     validateMethodsWithSameName(builder, bindingMethodsByName);
     if (module.getKind() != ElementKind.INTERFACE) {
       validateBindingMethodOverrides(
           module,
           builder,
-          Multimaps.index(moduleMethods, ExecutableElement::getSimpleName),
+          moduleMethods.stream()
+              .collect(Collectors.groupingBy(ExecutableElement::getSimpleName, LinkedHashMap::new, Collectors.toList())),
           bindingMethodsByName);
     }
     validateModifiers(module, builder);
@@ -313,14 +313,13 @@ public final class ModuleValidator {
 
   private void validateMethodsWithSameName(
       ValidationReport.Builder<TypeElement> builder,
-      ListMultimap<Name, ExecutableElement> bindingMethodsByName) {
-    for (Entry<Name, Collection<ExecutableElement>> entry :
-        bindingMethodsByName.asMap().entrySet()) {
+      Map<Name, List<ExecutableElement>> bindingMethodsByName) {
+    for (Entry<Name, List<ExecutableElement>> entry :
+        bindingMethodsByName.entrySet()) {
       if (entry.getValue().size() > 1) {
         for (ExecutableElement offendingMethod : entry.getValue()) {
           builder.addError(
-              String.format(
-                  "Cannot have more than one binding method with the same name in a single module"),
+              "Cannot have more than one binding method with the same name in a single module",
               offendingMethod);
         }
       }
@@ -419,8 +418,8 @@ public final class ModuleValidator {
   private void validateBindingMethodOverrides(
       TypeElement subject,
       ValidationReport.Builder<TypeElement> builder,
-      ImmutableListMultimap<Name, ExecutableElement> moduleMethodsByName,
-      ImmutableListMultimap<Name, ExecutableElement> bindingMethodsByName) {
+      Map<Name, List<ExecutableElement>> moduleMethodsByName,
+      Map<Name, List<ExecutableElement>> bindingMethodsByName) {
     // For every binding method, confirm it overrides nothing *and* nothing overrides it.
     // Consider the following hierarchy:
     // class Parent {
@@ -440,8 +439,7 @@ public final class ModuleValidator {
     TypeMirror objectType = elements.getTypeElement(Object.class).asType();
     // We keep track of methods that failed so we don't spam with multiple failures.
     Set<ExecutableElement> failedMethods = new HashSet<>();
-    ListMultimap<Name, ExecutableElement> allMethodsByName =
-        MultimapBuilder.hashKeys().arrayListValues().build(moduleMethodsByName);
+    Map<Name, List<ExecutableElement>> allMethodsByName = new LinkedHashMap<>(moduleMethodsByName);
 
     while (!types.isSameType(currentClass.getSuperclass(), objectType)) {
       currentClass = MoreElements.asType(types.asElement(currentClass.getSuperclass()));
@@ -449,7 +447,7 @@ public final class ModuleValidator {
       for (ExecutableElement superclassMethod : superclassMethods) {
         Name name = superclassMethod.getSimpleName();
         // For each method in the superclass, confirm our binding methods don't override it
-        for (ExecutableElement bindingMethod : bindingMethodsByName.get(name)) {
+        for (ExecutableElement bindingMethod : bindingMethodsByName.getOrDefault(name, List.of())) {
           if (failedMethods.add(bindingMethod)
               && elements.overrides(bindingMethod, superclassMethod, subject)) {
             builder.addError(
@@ -461,7 +459,7 @@ public final class ModuleValidator {
         }
         // For each binding method in superclass, confirm our methods don't override it.
         if (anyBindingMethodValidator.isBindingMethod(superclassMethod)) {
-          for (ExecutableElement method : allMethodsByName.get(name)) {
+          for (ExecutableElement method : allMethodsByName.getOrDefault(name, List.of())) {
             if (failedMethods.add(method)
                 && elements.overrides(method, superclassMethod, subject)) {
               builder.addError(
@@ -472,7 +470,8 @@ public final class ModuleValidator {
             }
           }
         }
-        allMethodsByName.put(superclassMethod.getSimpleName(), superclassMethod);
+        allMethodsByName.merge(superclassMethod.getSimpleName(), List.of(superclassMethod),
+            (list1, list2) -> Stream.of(list1, list2).flatMap(List::stream).collect(Collectors.toList()));
       }
     }
   }
