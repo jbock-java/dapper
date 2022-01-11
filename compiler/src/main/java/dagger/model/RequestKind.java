@@ -16,10 +16,10 @@
 
 package dagger.model;
 
-import dagger.Lazy;
-
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
+
+import dagger.Lazy;
 
 /**
  * Represents the different kinds of {@link javax.lang.model.type.TypeMirror types} that may be

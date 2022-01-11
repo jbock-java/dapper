@@ -22,7 +22,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -30,10 +29,9 @@ import dagger.internal.codegen.binding.MapKeys;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
-
+import java.util.List;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
-import java.util.List;
 
 /**
  * Generates a class that exposes a non-{@code public} {@link

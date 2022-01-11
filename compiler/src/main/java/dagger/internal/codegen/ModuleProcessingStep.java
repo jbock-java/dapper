@@ -81,12 +81,12 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
+  public Set<ClassName> annotationClassNames() {
     return ImmutableSet.of(TypeNames.MODULE);
   }
 
   @Override
-  public ImmutableSet<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
+  public Set<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
     List<TypeElement> modules = typesIn(elementsByAnnotation.values().stream()
         .flatMap(Set::stream)
         .collect(toList()));

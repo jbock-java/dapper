@@ -16,26 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import dagger.Lazy;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.OptionalType;
-import dagger.model.DependencyRequest;
-import dagger.model.Key;
-import dagger.model.RequestKind;
-import jakarta.inject.Inject;
-
-import java.util.LinkedHashSet;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -47,6 +27,25 @@ import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullab
 import static dagger.model.RequestKind.INSTANCE;
 import static dagger.model.RequestKind.MEMBERS_INJECTION;
 import static dagger.model.RequestKind.PROVIDER;
+
+import dagger.Lazy;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.OptionalType;
+import dagger.model.DependencyRequest;
+import dagger.model.Key;
+import dagger.model.RequestKind;
+import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * Factory for {@link DependencyRequest}s.

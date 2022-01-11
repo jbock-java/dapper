@@ -16,7 +16,6 @@
 
 package dagger.model;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph.MaybeBinding;
 import java.util.Optional;
 import java.util.Set;

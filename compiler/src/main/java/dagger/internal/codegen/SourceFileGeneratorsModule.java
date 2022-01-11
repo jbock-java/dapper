@@ -25,7 +25,6 @@ import dagger.internal.codegen.writing.FactoryGenerator;
 import dagger.internal.codegen.writing.MembersInjectorGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.writing.ModuleProxies.ModuleConstructorProxyGenerator;
-
 import javax.lang.model.element.TypeElement;
 
 @Module

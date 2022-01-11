@@ -16,15 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import com.squareup.javapoet.TypeName;
-import dagger.Lazy;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.RequestKind;
-import jakarta.inject.Provider;
-
-import java.util.Map;
-import javax.lang.model.type.TypeMirror;
-
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.isType;
 import static com.google.auto.common.MoreTypes.isTypeOf;
@@ -35,6 +26,14 @@ import static dagger.model.RequestKind.LAZY;
 import static dagger.model.RequestKind.PROVIDER;
 import static dagger.model.RequestKind.PROVIDER_OF_LAZY;
 import static javax.lang.model.type.TypeKind.DECLARED;
+
+import com.squareup.javapoet.TypeName;
+import dagger.Lazy;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.RequestKind;
+import jakarta.inject.Provider;
+import java.util.Map;
+import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@link RequestKind}s. */
 public final class RequestKinds {

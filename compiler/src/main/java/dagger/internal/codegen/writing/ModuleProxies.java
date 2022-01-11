@@ -16,23 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeSpec;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.ModuleKind;
-import dagger.internal.codegen.binding.SourceFiles;
-import dagger.internal.codegen.langmodel.Accessibility;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import jakarta.inject.Inject;
-
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import java.util.List;
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -44,6 +27,22 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
+
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeSpec;
+import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.binding.SourceFiles;
+import dagger.internal.codegen.langmodel.Accessibility;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import jakarta.inject.Inject;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 
 /** Convenience methods for generating and using module constructor proxy methods. */
 public final class ModuleProxies {

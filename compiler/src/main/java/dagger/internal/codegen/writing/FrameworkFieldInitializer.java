@@ -16,6 +16,12 @@
 
 package dagger.internal.codegen.writing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
+import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
+import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.FRAMEWORK_FIELD;
+import static javax.lang.model.element.Modifier.PRIVATE;
+
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -28,14 +34,7 @@ import dagger.internal.codegen.binding.FrameworkField;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
-
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
-import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.FRAMEWORK_FIELD;
-import static javax.lang.model.element.Modifier.PRIVATE;
 
 /**
  * An object that can initialize a framework-type component field for a binding. An instance should

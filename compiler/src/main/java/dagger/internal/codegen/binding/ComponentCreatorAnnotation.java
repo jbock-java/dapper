@@ -24,7 +24,6 @@ import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
