@@ -30,24 +30,30 @@ import dagger.Lazy;
  */
 public enum RequestKind {
   /** A default request for an instance. E.g.: {@code FooType} */
-  INSTANCE,
+  INSTANCE("Instance"),
 
   /** A request for a {@code Provider}. E.g.: {@code Provider<FooType>} */
-  PROVIDER,
+  PROVIDER("Provider"),
 
   /** A request for a {@link Lazy}. E.g.: {@code Lazy<FooType>} */
-  LAZY,
+  LAZY("Lazy"),
 
   /** A request for a {@code Provider} of a {@link Lazy}. E.g.: {@code Provider<Lazy<FooType>>} */
-  PROVIDER_OF_LAZY,
+  PROVIDER_OF_LAZY("ProviderOfLazy"),
 
   /**
    * A request for a members injection. E.g. {@code void injectMembers(FooType);}. Can only be
    * requested by component interfaces.
    */
-  MEMBERS_INJECTION,
+  MEMBERS_INJECTION("MembersInjection"),
 
   ;
+
+  private final String upperCamelName;
+
+  RequestKind(String upperCamelName) {
+    this.upperCamelName = upperCamelName;
+  }
 
   /** Returns a string that represents requests of this kind for a key. */
   public String format(Key key) {
@@ -64,5 +70,9 @@ public enum RequestKind {
       default:
         return String.format("%s<%s>", UPPER_UNDERSCORE.to(UPPER_CAMEL, name()), key);
     }
+  }
+
+  public String upperCamelName() {
+    return upperCamelName;
   }
 }

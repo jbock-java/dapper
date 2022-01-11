@@ -115,9 +115,4 @@ public final class BindingRequest {
   public TypeMirror requestedType(TypeMirror contributedType, DaggerTypes types) {
     return requestType(requestKind(), contributedType, types);
   }
-
-  /** Returns a name that can be used for the kind of request this is. */
-  public String kindName() {
-    return requestKind().toString();
-  }
 }

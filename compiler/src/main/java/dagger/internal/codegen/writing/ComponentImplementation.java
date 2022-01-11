@@ -17,11 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -40,14 +35,9 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.base.Function;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -55,8 +45,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dagger.internal.Preconditions;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingNode;
@@ -82,12 +73,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -287,7 +281,7 @@ public final class ComponentImplementation {
    * <p>Each set of {@link CompilerOptions#keysPerComponentShard(TypeElement)} will get its own shard instance.
    */
   public ShardImplementation shardImplementation(Binding binding) {
-    checkState(shardsByBinding.containsKey(binding), "No shard in %s for: %s", name(), binding);
+    Preconditions.checkState(shardsByBinding.containsKey(binding), "No shard in %s for: %s", name(), binding);
     return shardsByBinding.get(binding);
   }
 
@@ -315,7 +309,7 @@ public final class ComponentImplementation {
   private static Map<ComponentImplementation, FieldSpec>
   createComponentFieldsByImplementation(
       ComponentImplementation componentImplementation) {
-    checkArgument(
+    Preconditions.checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
     List<ComponentImplementation> builder = new ArrayList<>();
@@ -376,7 +370,7 @@ public final class ComponentImplementation {
    * @throws IllegalStateException if the component has no creator
    */
   private ComponentCreatorKind creatorKind() {
-    checkState(componentDescriptor().hasCreator());
+    Preconditions.checkState(componentDescriptor().hasCreator());
     return componentDescriptor()
         .creatorDescriptor()
         .map(ComponentCreatorDescriptor::kind)
@@ -396,12 +390,12 @@ public final class ComponentImplementation {
   /** Returns the name of the component implementation class for a component/subcomponent. */
   private static ClassName getComponentName(
       BindingGraph graph, Optional<ComponentImplementation> parent, ComponentNames componentNames) {
-    if (!parent.isPresent()) {
+    if (parent.isEmpty()) {
       return ComponentNames.getRootComponentClassName(graph.componentDescriptor());
     }
     ComponentDescriptor parentDescriptor = parent.get().graph.componentDescriptor();
     ComponentDescriptor childDescriptor = graph.componentDescriptor();
-    checkArgument(
+    Preconditions.checkArgument(
         parentDescriptor.childComponents().contains(childDescriptor),
         "%s is not a child component of %s",
         childDescriptor.typeElement(),
@@ -465,7 +459,7 @@ public final class ComponentImplementation {
     }
 
     private ShardImplementation createShard(String shardName) {
-      checkState(isComponentShard(), "Only the componentShard can create other shards.");
+      Preconditions.checkState(isComponentShard(), "Only the componentShard can create other shards.");
       return new ShardImplementation(name.nestedClass(shardName));
     }
 
@@ -492,7 +486,7 @@ public final class ComponentImplementation {
       if (!isComponentShard() && !shardFieldsByImplementation.containsKey(this)) {
         // Add the shard if this is the first time it's requested by something.
         String shardFieldName =
-            componentShard.getUniqueFieldName(UPPER_CAMEL.to(LOWER_CAMEL, name.simpleName()));
+            componentShard.getUniqueFieldName(Character.toLowerCase(name.simpleName().charAt(0)) + name.simpleName().substring(1));
         FieldSpec shardField = FieldSpec.builder(name, shardFieldName, PRIVATE).build();
 
         shardFieldsByImplementation.put(this, shardField);
@@ -592,7 +586,7 @@ public final class ComponentImplementation {
           bindingName
               + (request.isRequestKind(RequestKind.INSTANCE)
               ? ""
-              : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
+              : request.requestKind().upperCamelName());
       return getUniqueMethodName(baseMethodName);
     }
 
@@ -665,7 +659,7 @@ public final class ComponentImplementation {
     }
 
     private void createRootComponentFactoryMethod() {
-      checkState(!parent.isPresent());
+      Preconditions.checkState(parent.isEmpty());
       // Top-level components have a static method that returns a builder or factory for the
       // component. If the user defined a @Component.Builder or @Component.Factory, an
       // implementation of their type is returned. Otherwise, an autogenerated Builder type is
@@ -712,19 +706,18 @@ public final class ComponentImplementation {
 
     /** {@code true} if all of the graph's required dependencies can be automatically constructed */
     private boolean canInstantiateAllRequirements() {
-      return !Iterables.any(
-          graph.componentRequirements(),
-          dependency -> dependency.requiresAPassedInstance(elements));
+      return graph.componentRequirements().stream()
+          .noneMatch(dependency -> dependency.requiresAPassedInstance(elements));
     }
 
     private void createSubcomponentFactoryMethod(ExecutableElement factoryMethod) {
-      checkState(parent.isPresent());
+      Preconditions.checkState(parent.isPresent());
       Collection<ParameterSpec> params =
-          Maps.transformValues(graph.factoryMethodParameters(), ParameterSpec::get).values();
+          Util.transformValues(graph.factoryMethodParameters(), ParameterSpec::get).values();
       DeclaredType parentType = asDeclared(parent.get().graph().componentTypeElement().asType());
       MethodSpec.Builder method = MethodSpec.overriding(factoryMethod, parentType, types);
       params.forEach(
-          param -> method.addStatement("$T.checkNotNull($N)", Preconditions.class, param));
+          param -> method.addStatement("$T.checkNotNull($N)", dagger.internal.Preconditions.class, param));
       List<ParameterSpec> parameters = new ArrayList<>();
       parameters.addAll(
           creatorComponentFields().stream()
@@ -743,7 +736,7 @@ public final class ComponentImplementation {
       // Each component method may have been declared by several supertypes. We want to implement
       // only one method for each distinct signature.
       DeclaredType componentType = asDeclared(graph.componentTypeElement().asType());
-      Set<MethodSignature> signatures = Sets.newHashSet();
+      Set<MethodSignature> signatures = new HashSet<>();
       for (ComponentMethodDescriptor method : graph.componentDescriptor().entryPointMethods()) {
         if (signatures.add(MethodSignature.forComponentMethod(method, componentType, types))) {
           addMethod(COMPONENT_METHOD, bindingExpressionsProvider.get().getComponentMethod(method));
