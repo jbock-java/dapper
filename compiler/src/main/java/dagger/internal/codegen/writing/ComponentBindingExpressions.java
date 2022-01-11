@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
@@ -29,12 +27,13 @@ import static dagger.internal.codegen.writing.MemberSelect.staticFactoryCreation
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.MULTIBOUND_MAP;
 import static dagger.model.BindingKind.MULTIBOUND_SET;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
@@ -54,7 +53,9 @@ import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
@@ -107,7 +108,7 @@ public final class ComponentBindingExpressions {
     this.parent = parent;
     this.graph = graph;
     this.componentImplementation = componentImplementation;
-    this.componentRequirementExpressions = checkNotNull(componentRequirementExpressions);
+    this.componentRequirementExpressions = requireNonNull(componentRequirementExpressions);
     this.componentMethodBindingExpressionFactory = componentMethodBindingExpressionFactory;
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
     this.derivedFromFrameworkInstanceBindingExpressionFactory =
@@ -158,14 +159,14 @@ public final class ComponentBindingExpressions {
     return makeParametersCodeBlock(getCreateMethodArgumentsCodeBlocks(binding, requestingClass));
   }
 
-  private ImmutableList<CodeBlock> getCreateMethodArgumentsCodeBlocks(
+  private List<CodeBlock> getCreateMethodArgumentsCodeBlocks(
       ContributionBinding binding, ClassName requestingClass) {
-    ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
+    List<CodeBlock> arguments = new ArrayList<>();
 
     if (binding.requiresModuleInstance()) {
       arguments.add(
           componentRequirementExpressions.getExpressionDuringInitialization(
-              ComponentRequirement.forModule(binding.contributingModule().get().asType()),
+              ComponentRequirement.forModule(binding.contributingModule().orElseThrow().asType()),
               requestingClass));
     }
 
@@ -175,7 +176,7 @@ public final class ComponentBindingExpressions {
         .map(Expression::codeBlock)
         .forEach(arguments::add);
 
-    return arguments.build();
+    return arguments;
   }
 
   private static BindingRequest frameworkRequest(
@@ -215,7 +216,7 @@ public final class ComponentBindingExpressions {
 
   /** Returns the implementation of a component method. */
   public MethodSpec getComponentMethod(ComponentMethodDescriptor componentMethod) {
-    checkArgument(componentMethod.dependencyRequest().isPresent());
+    Preconditions.checkArgument(componentMethod.dependencyRequest().isPresent());
     BindingRequest request = bindingRequest(componentMethod.dependencyRequest().get());
     return MethodSpec.overriding(
             componentMethod.methodElement(),
@@ -244,7 +245,7 @@ public final class ComponentBindingExpressions {
       return expression;
     }
 
-    checkArgument(parent.isPresent(), "no expression found for %s", request);
+    Preconditions.checkArgument(parent.isPresent(), "no expression found for %s", request);
     return parent.get().getBindingExpression(request);
   }
 
@@ -252,7 +253,7 @@ public final class ComponentBindingExpressions {
   private BindingExpression createBindingExpression(Binding binding, BindingRequest request) {
     switch (binding.bindingType()) {
       case MEMBERS_INJECTION:
-        checkArgument(request.isRequestKind(RequestKind.MEMBERS_INJECTION));
+        Preconditions.checkArgument(request.isRequestKind(RequestKind.MEMBERS_INJECTION));
         return membersInjectionBindingExpressionFactory.create((MembersInjectionBinding) binding);
 
       case PROVISION:
@@ -293,7 +294,7 @@ public final class ComponentBindingExpressions {
     return () ->
         CodeBlock.of(
             "$T.provider($L)",
-            binding.scope().get().isReusable() ? SINGLE_CHECK : DOUBLE_CHECK,
+            binding.scope().orElseThrow().isReusable() ? SINGLE_CHECK : DOUBLE_CHECK,
             unscoped.creationExpression());
   }
 
@@ -436,7 +437,7 @@ public final class ComponentBindingExpressions {
       if (request.isRequestKind(RequestKind.PROVIDER)) {
         return MethodImplementationStrategy.SINGLE_CHECK;
       } else if (request.isRequestKind(RequestKind.INSTANCE) && needsCaching(binding)) {
-        return binding.scope().get().isReusable()
+        return binding.scope().orElseThrow().isReusable()
             ? MethodImplementationStrategy.SINGLE_CHECK
             : MethodImplementationStrategy.DOUBLE_CHECK;
       }
@@ -451,7 +452,7 @@ public final class ComponentBindingExpressions {
    * bindings whose scope is no stronger than their delegate's.
    */
   private boolean needsCaching(ContributionBinding binding) {
-    if (!binding.scope().isPresent()) {
+    if (binding.scope().isEmpty()) {
       return false;
     }
     if (binding.kind().equals(DELEGATE)) {

@@ -29,7 +29,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -39,6 +38,7 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,7 +112,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
             .addModifiers(PUBLIC, STATIC)
             .returns(TypeName.get(annotationElement.asType()));
 
-    ImmutableList.Builder<CodeBlock> parameters = ImmutableList.builder();
+    List<CodeBlock> parameters = new ArrayList<>();
     for (ExecutableElement annotationMember : methodsIn(annotationElement.getEnclosedElements())) {
       String parameterName = annotationMember.getSimpleName().toString();
       TypeName parameterType = TypeName.get(annotationMember.getReturnType());
@@ -124,7 +124,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<TypeElement>
         generatedTypeName.peerClass(
             "AutoAnnotation_" + generatedTypeName.simpleName() + "_" + createMethodName);
     createMethod.addStatement(
-        "return new $T($L)", autoAnnotationClass, makeParametersCodeBlock(parameters.build()));
+        "return new $T($L)", autoAnnotationClass, makeParametersCodeBlock(parameters));
     return createMethod.build();
   }
 

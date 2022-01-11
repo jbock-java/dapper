@@ -18,30 +18,30 @@ package dagger.internal.codegen.writing;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.binding.ComponentRequirement;
+import java.util.Map;
 
 /** The implementation of a component creator type. */
 public final class ComponentCreatorImplementation {
 
   private final TypeSpec spec;
   private final ClassName name;
-  private final ImmutableMap<ComponentRequirement, FieldSpec> fields;
+  private final Map<ComponentRequirement, FieldSpec> fields;
 
   ComponentCreatorImplementation(
       TypeSpec spec,
       ClassName name,
-      ImmutableMap<ComponentRequirement, FieldSpec> fields) {
+      Map<ComponentRequirement, FieldSpec> fields) {
     this.spec = requireNonNull(spec);
     this.name = requireNonNull(name);
     this.fields = requireNonNull(fields);
   }
   /** Creates a new {@link ComponentCreatorImplementation}. */
   public static ComponentCreatorImplementation create(
-      TypeSpec spec, ClassName name, ImmutableMap<ComponentRequirement, FieldSpec> fields) {
+      TypeSpec spec, ClassName name, Map<ComponentRequirement, FieldSpec> fields) {
     return new ComponentCreatorImplementation(spec, name, fields);
   }
 
@@ -56,7 +56,7 @@ public final class ComponentCreatorImplementation {
   }
 
   /** All fields that are present in this implementation. */
-  ImmutableMap<ComponentRequirement, FieldSpec> fields() {
+  Map<ComponentRequirement, FieldSpec> fields() {
     return fields;
   }
 }
