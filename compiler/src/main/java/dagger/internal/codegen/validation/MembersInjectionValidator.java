@@ -16,9 +16,8 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.auto.common.MoreElements;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import jakarta.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
@@ -59,7 +58,7 @@ final class MembersInjectionValidator {
    */
   ValidationReport<ExecutableElement> validateMembersInjectionMethod(
       ExecutableElement method, TypeMirror membersInjectedType) {
-    checkArgument(
+    Preconditions.checkArgument(
         method.getParameters().size() == 1, "expected a method with one parameter: %s", method);
 
     ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(method);

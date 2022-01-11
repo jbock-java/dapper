@@ -42,7 +42,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.auto.common.Visibility;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
@@ -601,10 +600,8 @@ public final class ModuleValidator {
       case 1:
         return things.get(0).toString();
       default:
-        StringBuilder output = new StringBuilder();
-        Joiner.on(", ").appendTo(output, things.subList(0, things.size() - 1));
-        output.append(" and ").append(things.get(things.size() - 1));
-        return output.toString();
+        return things.subList(0, things.size() - 1).stream().map(Object::toString).collect(joining(", "))
+            + " and " + things.get(things.size() - 1);
     }
   }
 }

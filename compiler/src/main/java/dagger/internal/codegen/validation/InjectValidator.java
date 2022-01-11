@@ -30,7 +30,6 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -42,6 +41,7 @@ import dagger.model.Scope;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -206,11 +206,9 @@ public final class InjectValidator implements ClearableCache {
     }
 
     // This is computationally expensive, but probably preferable to a giant index
-    ImmutableSet<ExecutableElement> injectConstructors =
-        ImmutableSet.<ExecutableElement>builder()
-            .addAll(injectedConstructors(enclosingElement))
-            .addAll(assistedInjectedConstructors(enclosingElement))
-            .build();
+    Set<ExecutableElement> injectConstructors = new LinkedHashSet<>();
+    injectConstructors.addAll(injectedConstructors(enclosingElement));
+    injectConstructors.addAll(assistedInjectedConstructors(enclosingElement));
 
     if (injectConstructors.size() > 1) {
       builder.addError("Types may only contain one injected constructor", constructorElement);
