@@ -22,8 +22,8 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Traverser;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -41,15 +41,15 @@ public final class ValidationReport<T extends Element> {
       Traverser.forTree(report -> report.subreports);
 
   private final T subject;
-  private final ImmutableSet<Item> items;
-  private final ImmutableSet<ValidationReport<?>> subreports;
+  private final Set<Item> items;
+  private final Set<ValidationReport<?>> subreports;
   private final boolean markedDirty;
   private boolean hasPrintedErrors;
 
   private ValidationReport(
       T subject,
-      ImmutableSet<Item> items,
-      ImmutableSet<ValidationReport<?>> subreports,
+      Set<Item> items,
+      Set<ValidationReport<?>> subreports,
       boolean markedDirty) {
     this.subject = subject;
     this.items = items;
@@ -215,8 +215,8 @@ public final class ValidationReport<T extends Element> {
   /** A {@link ValidationReport} builder. */
   public static final class Builder<T extends Element> {
     private final T subject;
-    private final ImmutableSet.Builder<Item> items = ImmutableSet.builder();
-    private final ImmutableSet.Builder<ValidationReport<?>> subreports = ImmutableSet.builder();
+    private final Set<Item> items = new LinkedHashSet<>();
+    private final Set<ValidationReport<?>> subreports = new LinkedHashSet<>();
     private boolean markedDirty;
 
     private Builder(T subject) {
@@ -228,7 +228,7 @@ public final class ValidationReport<T extends Element> {
     }
 
     Builder<T> addItems(Iterable<Item> newItems) {
-      items.addAll(newItems);
+      newItems.forEach(items::add);
       return this;
     }
 
@@ -334,7 +334,7 @@ public final class ValidationReport<T extends Element> {
     }
 
     public ValidationReport<T> build() {
-      return new ValidationReport<>(subject, items.build(), subreports.build(), markedDirty);
+      return new ValidationReport<>(subject, items, subreports, markedDirty);
     }
   }
 }

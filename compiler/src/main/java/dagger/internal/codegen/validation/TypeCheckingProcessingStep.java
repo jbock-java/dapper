@@ -26,10 +26,9 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 import com.google.auto.common.BasicAnnotationProcessor.Step;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -54,7 +53,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
   }
 
   @Override
-  public ImmutableSet<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
+  public Set<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
     Map<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
@@ -64,7 +63,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
         this.getClass().getName(),
         difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
-    ImmutableSet.Builder<Element> deferredElements = ImmutableSet.builder();
+    Set<Element> deferredElements = new LinkedHashSet<>();
     elementsByAnnotation.entrySet().stream()
         .flatMap(e -> e.getValue().stream().map(v -> new SimpleImmutableEntry<>(e.getKey(), v)))
         .collect(groupingBy(Entry::getValue, mapping(Entry::getKey, toList())))
@@ -78,7 +77,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
                 deferredElements.add(element);
               }
             });
-    return deferredElements.build();
+    return deferredElements;
   }
 
   /**
