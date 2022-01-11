@@ -18,15 +18,12 @@ package dagger.internal.codegen.validation;
 
 import static java.util.Comparator.comparing;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import dagger.internal.codegen.base.Util;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +41,9 @@ final class PackageNameCompressor {
   static final String LEGEND_FOOTER =
       "========================\nEnd of classname legend:\n========================\n";
 
-  private static final ImmutableSet<String> PACKAGES_SKIPPED_IN_LEGEND = ImmutableSet.of(
+  private static final Set<String> PACKAGES_SKIPPED_IN_LEGEND = Set.of(
       "java.lang.",
       "java.util.");
-
-  private static final Splitter PACKAGE_SPLITTER = Splitter.on('.');
-
-  private static final Joiner PACKAGE_JOINER = Joiner.on('.');
 
   // TODO(erichang): Consider validating this regex by also passing in all of the known types from
   // keys, module names, component names, etc and checking against that list. This may have some
@@ -112,7 +105,7 @@ final class PackageNameCompressor {
           .append(shortName)
           .append(": ")
           // Add enough spaces to adjust the columns
-          .append(Strings.repeat(" ", longestKey - shortName.length()))
+          .append(" ".repeat(longestKey - shortName.length()))
           .append(fullName)
           .append("\n");
     }
@@ -127,12 +120,12 @@ final class PackageNameCompressor {
    * com.bar.Baz will conflict on Baz and then resolve with foo.Baz and bar.Baz as replacements.
    */
   private static Map<String, String> shortenNames(Collection<String> names) {
-    HashMultimap<String, List<String>> shortNameToPartsMap = HashMultimap.create();
+    Map<String, Set<List<String>>> shortNameToPartsMap = new LinkedHashMap<>();
     for (String name : names) {
-      List<String> parts = new ArrayList<>(PACKAGE_SPLITTER.splitToList(name));
+      List<String> parts = new ArrayList<>(Arrays.asList(name.split("[.]", -1)));
       // Start with the just the class name as the simple name
       String className = parts.remove(parts.size() - 1);
-      shortNameToPartsMap.put(className, parts);
+      shortNameToPartsMap.merge(className, Set.of(parts), Util::mutableUnion);
     }
 
     // Iterate through looking for conflicts adding the next part of the package until there are no
@@ -140,8 +133,8 @@ final class PackageNameCompressor {
     while (true) {
       // Save the keys with conflicts to avoid concurrent modification issues
       List<String> conflictingShortNames = new ArrayList<>();
-      for (Map.Entry<String, Collection<List<String>>> entry
-          : shortNameToPartsMap.asMap().entrySet()) {
+      for (Map.Entry<String, Set<List<String>>> entry
+          : shortNameToPartsMap.entrySet()) {
         if (entry.getValue().size() > 1) {
           conflictingShortNames.add(entry.getKey());
         }
@@ -153,13 +146,13 @@ final class PackageNameCompressor {
 
       // For all conflicts, add in the next part of the package
       for (String conflictingShortName : conflictingShortNames) {
-        Set<List<String>> partsCollection = shortNameToPartsMap.removeAll(conflictingShortName);
+        Set<List<String>> partsCollection = shortNameToPartsMap.remove(conflictingShortName);
         for (List<String> parts : partsCollection) {
           String newShortName = parts.remove(parts.size() - 1) + "." + conflictingShortName;
           // If we've removed the last part of the package, then just skip it entirely because
           // now we're not shortening it at all.
           if (!parts.isEmpty()) {
-            shortNameToPartsMap.put(newShortName, parts);
+            shortNameToPartsMap.merge(newShortName, Set.of(parts), Util::mutableUnion);
           }
         }
       }
@@ -168,11 +161,11 @@ final class PackageNameCompressor {
     // Turn the multimap into a regular map now that conflicts have been resolved. Use a TreeMap
     // since we're going to need the legend sorted anyway. This map is from short name to full name.
     Map<String, String> replacementMap = new TreeMap<>();
-    for (Map.Entry<String, Collection<List<String>>> entry
-        : shortNameToPartsMap.asMap().entrySet()) {
+    for (Map.Entry<String, Set<List<String>>> entry
+        : shortNameToPartsMap.entrySet()) {
       replacementMap.put(
           entry.getKey(),
-          PACKAGE_JOINER.join(Iterables.getOnlyElement(entry.getValue())) + "." + entry.getKey());
+          String.join(".", Util.getOnlyElement(entry.getValue())) + "." + entry.getKey());
     }
     return replacementMap;
   }

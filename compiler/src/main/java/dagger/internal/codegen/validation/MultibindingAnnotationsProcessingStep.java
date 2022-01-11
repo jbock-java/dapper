@@ -20,7 +20,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirr
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import jakarta.inject.Inject;
