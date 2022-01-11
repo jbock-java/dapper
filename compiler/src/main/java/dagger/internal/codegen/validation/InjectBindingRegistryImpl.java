@@ -16,27 +16,23 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import dagger.Component;
 import dagger.MembersInjector;
 import dagger.Provides;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
@@ -52,6 +48,8 @@ import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -81,9 +79,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   final class BindingsCollection<B extends Binding> {
     private final Class<?> factoryClass;
-    private final Map<Key, B> bindingsByKey = Maps.newLinkedHashMap();
+    private final Map<Key, B> bindingsByKey = new LinkedHashMap<>();
     private final Deque<B> bindingsRequiringGeneration = new ArrayDeque<>();
-    private final Set<Key> materializedBindingKeys = Sets.newLinkedHashSet();
+    private final Set<Key> materializedBindingKeys = new LinkedHashSet<>();
 
     BindingsCollection(Class<?> factoryClass) {
       this.factoryClass = factoryClass;
@@ -93,7 +91,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       for (B binding = bindingsRequiringGeneration.poll();
            binding != null;
            binding = bindingsRequiringGeneration.poll()) {
-        checkState(!binding.unresolved().isPresent());
+        Preconditions.checkState(binding.unresolved().isEmpty());
         if (injectValidatorWhenGeneratingCode.isValidType(binding.key().type())) {
           generator.generate(binding);
         }
@@ -141,7 +139,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
     /** Returns true if the binding needs to be generated. */
     private boolean shouldGenerateBinding(B binding) {
-      return !binding.unresolved().isPresent()
+      return binding.unresolved().isEmpty()
           && !materializedBindingKeys.contains(binding.key())
           && !bindingsRequiringGeneration.contains(binding)
           && elements.getTypeElement(generatedClassNameForBinding(binding)) == null;
@@ -155,7 +153,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
           || binding.bindingTypeElement().get().getTypeParameters().isEmpty()) {
         Key key = binding.key();
         Binding previousValue = bindingsByKey.put(key, binding);
-        checkState(previousValue == null || binding.equals(previousValue),
+        Preconditions.checkState(previousValue == null || binding.equals(previousValue),
             "couldn't register %s. %s was already registered for %s",
             binding, previousValue, key);
       }
@@ -298,7 +296,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Override
   public Optional<ProvisionBinding> getOrFindProvisionBinding(Key key) {
-    checkNotNull(key);
+    requireNonNull(key);
     if (!isValidImplicitProvisionKey(key, types)) {
       return Optional.empty();
     }
@@ -309,18 +307,16 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
     // ok, let's see if we can find an @Inject constructor
     TypeElement element = MoreElements.asType(types.asElement(key.type()));
-    ImmutableSet<ExecutableElement> injectConstructors =
-        ImmutableSet.<ExecutableElement>builder()
-            .addAll(injectedConstructors(element))
-            .addAll(assistedInjectedConstructors(element))
-            .build();
+    Set<ExecutableElement> injectConstructors = new LinkedHashSet<>();
+    injectConstructors.addAll(injectedConstructors(element));
+    injectConstructors.addAll(assistedInjectedConstructors(element));
     switch (injectConstructors.size()) {
       case 0:
         // No constructor found.
         return Optional.empty();
       case 1:
         return tryRegisterConstructor(
-            Iterables.getOnlyElement(injectConstructors), Optional.of(key.type()), true);
+            Util.getOnlyElement(injectConstructors), Optional.of(key.type()), true);
       default:
         throw new IllegalStateException("Found multiple @Inject constructors: "
             + injectConstructors);
@@ -329,9 +325,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Override
   public Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key) {
-    checkNotNull(key);
+    requireNonNull(key);
     // TODO(gak): is checking the kind enough?
-    checkArgument(isValidMembersInjectionKey(key));
+    Preconditions.checkArgument(isValidMembersInjectionKey(key));
     MembersInjectionBinding binding = membersInjectionBindings.getBinding(key);
     if (binding != null) {
       return Optional.of(binding);

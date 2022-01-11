@@ -16,12 +16,10 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.collect.Lists.asList;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableSet;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -30,6 +28,10 @@ import dagger.model.BindingGraph.MaybeBinding;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -63,8 +65,8 @@ final class DiagnosticReporterFactory {
     private final String plugin;
     private final TypeElement rootComponent;
     private final boolean reportErrorsAsWarnings;
-    private final ImmutableSet.Builder<Diagnostic.Kind> reportedDiagnosticKinds =
-        ImmutableSet.builder();
+    private final Set<Diagnostic.Kind> reportedDiagnosticKinds =
+        new LinkedHashSet<>();
     private final DiagnosticMessageGenerator diagnosticMessageGenerator;
 
     DiagnosticReporterImpl(BindingGraph graph, String plugin, boolean reportErrorsAsWarnings) {
@@ -75,8 +77,8 @@ final class DiagnosticReporterFactory {
     }
 
     /** Returns which {@linkplain Diagnostic.Kind kinds} of diagnostics were reported. */
-    ImmutableSet<Diagnostic.Kind> reportedDiagnosticKinds() {
-      return reportedDiagnosticKinds.build();
+    Set<Diagnostic.Kind> reportedDiagnosticKinds() {
+      return reportedDiagnosticKinds;
     }
 
     @Override
@@ -136,7 +138,7 @@ final class DiagnosticReporterFactory {
     }
 
     private String formatMessage(String messageFormat, Object firstArg, Object[] moreArgs) {
-      return String.format(messageFormat, asList(firstArg, moreArgs).toArray());
+      return String.format(messageFormat, Stream.concat(Stream.of(firstArg), Arrays.stream(moreArgs)).toArray());
     }
 
     void printMessage(
