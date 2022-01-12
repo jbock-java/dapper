@@ -36,8 +36,6 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
  * Information about an {@code Optional} {@link TypeMirror}.
- *
- * <p>{@link com.google.common.base.Optional} and {@link java.util.Optional} are supported.
  */
 public final class OptionalType {
 
@@ -49,8 +47,6 @@ public final class OptionalType {
 
   /** A variant of {@code Optional}. */
   public enum OptionalKind {
-    /** {@link com.google.common.base.Optional}. */
-    GUAVA_OPTIONAL(com.google.common.base.Optional.class, "absent"),
 
     /** {@link java.util.Optional}. */
     JDK_OPTIONAL(java.util.Optional.class, "empty"),

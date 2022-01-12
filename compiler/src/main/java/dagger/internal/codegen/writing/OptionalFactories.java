@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -137,9 +135,7 @@ final class OptionalFactories {
    */
   private MethodSpec absentOptionalProviderMethod(OptionalKind optionalKind) {
     TypeVariableName typeVariable = TypeVariableName.get("T");
-    return methodBuilder(
-        String.format(
-            "absent%sProvider", UPPER_UNDERSCORE.to(UPPER_CAMEL, optionalKind.name())))
+    return methodBuilder("absentJdkOptionalProvider")
         .addModifiers(PRIVATE, STATIC)
         .addTypeVariable(typeVariable)
         .returns(providerOf(optionalKind.of(typeVariable)))
@@ -249,11 +245,9 @@ final class OptionalFactories {
 
     /** The name of the factory class. */
     String factoryClassName() {
-      return new StringBuilder("Present")
-          .append(UPPER_UNDERSCORE.to(UPPER_CAMEL, optionalKind().name()))
-          .append(UPPER_UNDERSCORE.to(UPPER_CAMEL, valueKind().toString()))
-          .append(frameworkType().frameworkClass().getSimpleName())
-          .toString();
+      return "PresentJdkOptional" +
+          valueKind().upperCamelName() +
+          frameworkType().frameworkClass().getSimpleName();
     }
 
     private static PresentFactorySpec of(ContributionBinding binding) {
@@ -353,7 +347,7 @@ final class OptionalFactories {
             "return $L;",
             spec.optionalKind()
                 .presentExpression(
-                    FrameworkType.PROVIDER.to(
+                    FrameworkType.to(
                         spec.valueKind(), CodeBlock.of("$N", delegateField))))
         .build();
   }

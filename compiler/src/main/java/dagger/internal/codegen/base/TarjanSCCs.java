@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.Math.min;
 
 import com.google.common.graph.SuccessorsFunction;
@@ -64,7 +63,7 @@ public final class TarjanSCCs {
     }
 
     private Set<Set<NodeT>> compute() {
-      checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
+      Preconditions.checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
       for (NodeT node : nodes) {
         if (!indexes.containsKey(node)) {
           stronglyConnect(node);

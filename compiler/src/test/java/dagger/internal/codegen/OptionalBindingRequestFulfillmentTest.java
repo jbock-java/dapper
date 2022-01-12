@@ -88,7 +88,7 @@ public class OptionalBindingRequestFulfillmentTest {
             "test.TestComponent",
             "package test;",
             "",
-            "import com.google.common.base.Optional;",
+            "import java.util.Optional;",
             "import dagger.Component;",
             "import dagger.Lazy;",
             "import jakarta.inject.Provider;",
@@ -106,7 +106,7 @@ public class OptionalBindingRequestFulfillmentTest {
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
         "package test;",
-        "import com.google.common.base.Optional;");
+        "import java.util.Optional;");
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedAnnotationsIndividual());
     Collections.addAll(generatedComponent,
@@ -144,12 +144,12 @@ public class OptionalBindingRequestFulfillmentTest {
         "",
         "  @Override",
         "  public Optional<DefinitelyNot> definitelyNot() {",
-        "    return Optional.absent();",
+        "    return Optional.empty();",
         "  }",
         "",
         "  @Override",
         "  public Optional<Provider<Lazy<DefinitelyNot>>> providerOfLazyOfDefinitelyNot() {",
-        "    return Optional.absent();",
+        "    return Optional.empty();",
         "  }");
     if (compilerMode == FAST_INIT_MODE) {
       Collections.addAll(generatedComponent,

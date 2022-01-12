@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 
 import com.squareup.javapoet.CodeBlock;
