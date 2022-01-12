@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.model.BindingKind.INJECTION;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
@@ -47,7 +47,7 @@ final class InjectionOrProvisionProviderCreationExpression
       @Assisted ContributionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions componentBindingExpressions) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.componentBindingExpressions = componentBindingExpressions;
   }
@@ -73,7 +73,7 @@ final class InjectionOrProvisionProviderCreationExpression
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     InjectionOrProvisionProviderCreationExpression create(ContributionBinding binding);
   }
 }

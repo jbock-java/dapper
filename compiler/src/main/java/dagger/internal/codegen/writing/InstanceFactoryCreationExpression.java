@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.internal.InstanceFactory;
@@ -38,7 +38,7 @@ final class InstanceFactoryCreationExpression implements FrameworkInstanceCreati
 
   InstanceFactoryCreationExpression(boolean nullable, Supplier<CodeBlock> instanceExpression) {
     this.nullable = nullable;
-    this.instanceExpression = checkNotNull(instanceExpression);
+    this.instanceExpression = requireNonNull(instanceExpression);
   }
 
   @Override

@@ -173,7 +173,7 @@ final class MapBindingExpression extends SimpleInvocationBindingExpression {
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     MapBindingExpression create(ProvisionBinding binding);
   }
 }
