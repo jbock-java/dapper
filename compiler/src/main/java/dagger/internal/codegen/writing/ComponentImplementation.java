@@ -35,8 +35,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -71,6 +69,7 @@ import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -432,12 +431,9 @@ public final class ComponentImplementation {
     private final List<CodeBlock> initializations = new ArrayList<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
     private final Map<ComponentRequirement, ParameterSpec> constructorParameters;
-    private final ListMultimap<FieldSpecKind, FieldSpec> fieldSpecsMap =
-        MultimapBuilder.enumKeys(FieldSpecKind.class).arrayListValues().build();
-    private final ListMultimap<MethodSpecKind, MethodSpec> methodSpecsMap =
-        MultimapBuilder.enumKeys(MethodSpecKind.class).arrayListValues().build();
-    private final ListMultimap<TypeSpecKind, TypeSpec> typeSpecsMap =
-        MultimapBuilder.enumKeys(TypeSpecKind.class).arrayListValues().build();
+    private final Map<FieldSpecKind, List<FieldSpec>> fieldSpecsMap = new EnumMap<>(FieldSpecKind.class);
+    private final Map<MethodSpecKind, List<MethodSpec>> methodSpecsMap = new EnumMap<>(MethodSpecKind.class);
+    private final Map<TypeSpecKind, List<TypeSpec>> typeSpecsMap = new EnumMap<>(TypeSpecKind.class);
     private final List<Supplier<TypeSpec>> typeSuppliers = new ArrayList<>();
 
     private ShardImplementation(ClassName name) {
@@ -533,19 +529,19 @@ public final class ComponentImplementation {
 
     /** Adds the given field to the component. */
     public void addField(FieldSpecKind fieldKind, FieldSpec fieldSpec) {
-      fieldSpecsMap.put(fieldKind, fieldSpec);
+      fieldSpecsMap.merge(fieldKind, List.of(fieldSpec), Util::mutableConcat);
     }
 
     // TODO(dpb): Consider taking MethodSpec, and returning identical MethodSpec with unique name?
 
     /** Adds the given method to the component. */
     public void addMethod(MethodSpecKind methodKind, MethodSpec methodSpec) {
-      methodSpecsMap.put(methodKind, methodSpec);
+      methodSpecsMap.merge(methodKind, List.of(methodSpec), Util::mutableConcat);
     }
 
     /** Adds the given type to the component. */
     public void addType(TypeSpecKind typeKind, TypeSpec typeSpec) {
-      typeSpecsMap.put(typeKind, typeSpec);
+      typeSpecsMap.merge(typeKind, List.of(typeSpec), Util::mutableConcat);
     }
 
     /** Adds a {@link Supplier} for the SwitchingProvider for the component. */
@@ -613,9 +609,9 @@ public final class ComponentImplementation {
       addConstructorAndInitializationMethods();
 
       modifiers().forEach(builder::addModifiers);
-      fieldSpecsMap.asMap().values().forEach(builder::addFields);
-      methodSpecsMap.asMap().values().forEach(builder::addMethods);
-      typeSpecsMap.asMap().values().forEach(builder::addTypes);
+      fieldSpecsMap.values().forEach(builder::addFields);
+      methodSpecsMap.values().forEach(builder::addMethods);
+      typeSpecsMap.values().forEach(builder::addTypes);
       typeSuppliers.stream().map(Supplier::get).forEach(builder::addType);
       return builder.build();
     }
@@ -842,7 +838,7 @@ public final class ComponentImplementation {
         Iterable<ParameterSpec> parameters,
         List<CodeBlock> statements,
         Function<String, MethodSpec.Builder> methodBuilderCreator) {
-      return partition(statements, STATEMENTS_PER_METHOD).stream()
+      return Util.partition(statements, STATEMENTS_PER_METHOD).stream()
           .map(
               partition ->
                   methodBuilderCreator
@@ -853,18 +849,6 @@ public final class ComponentImplementation {
                       .build())
           .collect(toImmutableList());
     }
-  }
-
-  private static <E> List<List<E>> partition(List<E> list, int size) {
-    List<List<E>> result = new ArrayList<>();
-    List<E> current = null;
-    for (int i = 0; i < list.size(); i++) {
-      if (i % size == 0) {
-        result.add(current = new ArrayList<>(size));
-      }
-      current.add(list.get(i));
-    }
-    return result;
   }
 
   private static List<ComponentRequirement> constructorRequirements(BindingGraph graph) {

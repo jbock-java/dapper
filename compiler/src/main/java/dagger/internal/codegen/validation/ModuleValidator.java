@@ -44,6 +44,7 @@ import com.google.auto.common.MoreTypes;
 import com.google.auto.common.Visibility;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
