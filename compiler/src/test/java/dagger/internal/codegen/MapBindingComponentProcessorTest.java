@@ -50,7 +50,7 @@ public class MapBindingComponentProcessorTest {
   }
 
   @Test
-  public void mapBindingsWithEnumKey() throws IOException {
+  public void mapBindingsWithEnumKey() {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -159,7 +159,7 @@ public class MapBindingComponentProcessorTest {
                 "  }",
                 "",
                 "  private Map<PathEnum, Provider<Handler>> mapOfPathEnumAndProviderOfHandler() {",
-                "    return ImmutableMap.<PathEnum, Provider<Handler>>of(PathEnum.ADMIN, provideAdminHandlerProvider(), PathEnum.LOGIN, provideLoginHandlerProvider());",
+                "    return MapBuilder.<PathEnum, Provider<Handler>>newMapBuilder(2).put(PathEnum.ADMIN, provideAdminHandlerProvider()).put(PathEnum.LOGIN, provideLoginHandlerProvider()).build();",
                 "  }",
                 "",
                 "  @Override",
@@ -221,10 +221,8 @@ public class MapBindingComponentProcessorTest {
                 componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @Ignore // AutoAnnotationProcessor
@@ -505,7 +503,7 @@ public class MapBindingComponentProcessorTest {
             "  }",
             "",
             "  private Map<String, Provider<Handler>> mapOfStringAndProviderOfHandler() {",
-            "    return ImmutableMap.<String, Provider<Handler>>of(\"Admin\", provideAdminHandlerProvider(), \"Login\", provideLoginHandlerProvider());",
+            "    return MapBuilder.<String, Provider<Handler>>newMapBuilder(2).put(\"Admin\", provideAdminHandlerProvider()).put(\"Login\", provideLoginHandlerProvider()).build();",
             "  }",
             "",
             "  @Override",
@@ -573,11 +571,8 @@ public class MapBindingComponentProcessorTest {
                 AdminHandlerFile,
                 componentFile);
     assertThat(compilation).succeeded();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @Ignore // AutoAnnotationProcessor
@@ -842,7 +837,7 @@ public class MapBindingComponentProcessorTest {
                 "  private volatile Provider<Map<PathEnum, Handler>> mapOfPathEnumAndHandlerProvider;",
                 "",
                 "  private Map<PathEnum, Handler> mapOfPathEnumAndHandler() {",
-                "    return ImmutableMap.<PathEnum, Handler>of(PathEnum.ADMIN, MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(mapModuleOne), PathEnum.LOGIN, MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(mapModuleTwo));",
+                "    return MapBuilder.<PathEnum, Handler>newMapBuilder(2).put(PathEnum.ADMIN, MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(mapModuleOne)).put(PathEnum.LOGIN, MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(mapModuleTwo)).build();",
                 "  }",
                 "",
                 "  @Override",
@@ -902,10 +897,8 @@ public class MapBindingComponentProcessorTest {
 
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @Test

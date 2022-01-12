@@ -177,43 +177,43 @@ public class MapBindingExpressionWithGuavaTest {
             .addLines(
                 "  @Override",
                 "  public Map<String, String> strings() {",
-                "    return ImmutableMap.<String, String>of();",
+                "    return Collections.<String, String>emptyMap();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<String, Provider<String>> providerStrings() {",
-                "    return ImmutableMap.<String, Provider<String>>of();",
+                "    return Collections.<String, Provider<String>>emptyMap();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Integer, Integer> ints() {",
-                "    return ImmutableMap.<Integer, Integer>of(0, MapModule.provideInt());",
+                "    return Collections.<Integer, Integer>singletonMap(0, MapModule.provideInt());",
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Integer, Provider<Integer>> providerInts() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "    return ImmutableMap.<Integer, Provider<Integer>>of(0, MapModule_ProvideIntFactory.create());")
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, MapModule_ProvideIntFactory.create());")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "    return ImmutableMap.<Integer, Provider<Integer>>of(0, provideIntProvider());")
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, provideIntProvider());")
             .addLines(
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Long, Long> longs() {",
-                "    return ImmutableMap.<Long, Long>of(0L, MapModule.provideLong0(), 1L, MapModule.provideLong1(), 2L, MapModule.provideLong2());",
+                "    return MapBuilder.<Long, Long>newMapBuilder(3).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).build();",
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "    return ImmutableMap.<Long, Provider<Long>>of(0L, MapModule_ProvideLong0Factory.create(), 1L, MapModule_ProvideLong1Factory.create(), 2L, MapModule_ProvideLong2Factory.create());")
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).build();")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "    return ImmutableMap.<Long, Provider<Long>>of(0L, provideLong0Provider(), 1L, provideLong1Provider(), 2L, provideLong2Provider());")
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3).put(0L, provideLong0Provider()).put(1L, provideLong1Provider()).put(2L, provideLong2Provider()).build();")
             .addLines(
                 "  }",
                 "",
@@ -258,17 +258,17 @@ public class MapBindingExpressionWithGuavaTest {
             .addLines(
                 "    @Override",
                 "    public Map<Long, Long> longs() {",
-                "      return ImmutableMap.<Long, Long>builderWithExpectedSize(6).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).put(3L, SubcomponentMapModule.provideLong3()).put(4L, SubcomponentMapModule.provideLong4()).put(5L, SubcomponentMapModule.provideLong5()).build();",
+                "      return MapBuilder.<Long, Long>newMapBuilder(6).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).put(3L, SubcomponentMapModule.provideLong3()).put(4L, SubcomponentMapModule.provideLong4()).put(5L, SubcomponentMapModule.provideLong5()).build();",
                 "    }",
                 "",
                 "    @Override",
                 "    public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
                 DEFAULT_MODE,
-                "      return ImmutableMap.<Long, Provider<Long>>builderWithExpectedSize(6).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).put(3L, SubcomponentMapModule_ProvideLong3Factory.create()).put(4L, SubcomponentMapModule_ProvideLong4Factory.create()).put(5L, SubcomponentMapModule_ProvideLong5Factory.create()).build();")
+                "      return MapBuilder.<Long, Provider<Long>>newMapBuilder(6).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).put(3L, SubcomponentMapModule_ProvideLong3Factory.create()).put(4L, SubcomponentMapModule_ProvideLong4Factory.create()).put(5L, SubcomponentMapModule_ProvideLong5Factory.create()).build();")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "      return ImmutableMap.<Long, Provider<Long>>builderWithExpectedSize(6).put(0L, testComponent.provideLong0Provider()).put(1L, testComponent.provideLong1Provider()).put(2L, testComponent.provideLong2Provider()).put(3L, provideLong3Provider()).put(4L, provideLong4Provider()).put(5L, provideLong5Provider()).build();")
+                "      return MapBuilder.<Long, Provider<Long>>newMapBuilder(6).put(0L, testComponent.provideLong0Provider()).put(1L, testComponent.provideLong1Provider()).put(2L, testComponent.provideLong2Provider()).put(3L, provideLong3Provider()).put(4L, provideLong4Provider()).put(5L, provideLong5Provider()).build();")
             .addLines(
                 "    }")
             .addLinesIn(
@@ -376,7 +376,7 @@ public class MapBindingExpressionWithGuavaTest {
         "final class DaggerTestComponent implements TestComponent {",
         "  @Override",
         "  public UsesInaccessible usesInaccessible() {",
-        "    return UsesInaccessible_Factory.newInstance((Map) ImmutableMap.of());",
+        "    return UsesInaccessible_Factory.newInstance((Map) Collections.emptyMap());",
         "  }",
         "}");
     Compilation compilation =
@@ -441,7 +441,7 @@ public class MapBindingExpressionWithGuavaTest {
         "  private static final class ChildImpl implements Child {",
         "    @Override",
         "    public Map<String, Object> objectMap() {",
-        "      return ImmutableMap.<String, Object>of(\"parent key\", ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
+        "      return Collections.<String, Object>singletonMap(\"parent key\", ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
         "    }",
         "  }",
         "}");
