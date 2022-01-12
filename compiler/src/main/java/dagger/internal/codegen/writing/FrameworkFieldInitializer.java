@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.FRAMEWORK_FIELD;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 import com.google.auto.common.MoreTypes;
@@ -81,9 +81,9 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
       ComponentImplementation componentImplementation,
       ContributionBinding binding,
       FrameworkInstanceCreationExpression frameworkInstanceCreationExpression) {
-    this.binding = checkNotNull(binding);
-    this.shardImplementation = checkNotNull(componentImplementation).shardImplementation(binding);
-    this.frameworkInstanceCreationExpression = checkNotNull(frameworkInstanceCreationExpression);
+    this.binding = requireNonNull(binding);
+    this.shardImplementation = requireNonNull(componentImplementation).shardImplementation(binding);
+    this.frameworkInstanceCreationExpression = requireNonNull(frameworkInstanceCreationExpression);
   }
 
   /**
@@ -93,7 +93,7 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
   @Override
   public final MemberSelect memberSelect() {
     initializeField();
-    return MemberSelect.localField(shardImplementation, checkNotNull(fieldSpec).name);
+    return MemberSelect.localField(shardImplementation, requireNonNull(fieldSpec).name);
   }
 
   /** Adds the field and its initialization code to the component. */

@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -40,10 +40,10 @@ abstract class FrameworkInstanceBindingExpression extends BindingExpression {
       FrameworkInstanceSupplier frameworkInstanceSupplier,
       DaggerTypes types,
       DaggerElements elements) {
-    this.binding = checkNotNull(binding);
-    this.frameworkInstanceSupplier = checkNotNull(frameworkInstanceSupplier);
-    this.types = checkNotNull(types);
-    this.elements = checkNotNull(elements);
+    this.binding = requireNonNull(binding);
+    this.frameworkInstanceSupplier = requireNonNull(frameworkInstanceSupplier);
+    this.types = requireNonNull(types);
+    this.elements = requireNonNull(elements);
   }
 
   /**

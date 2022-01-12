@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -42,8 +42,8 @@ final class ImmediateFutureBindingExpression extends BindingExpression {
       ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types) {
     this.key = key;
-    this.componentBindingExpressions = checkNotNull(componentBindingExpressions);
-    this.types = checkNotNull(types);
+    this.componentBindingExpressions = requireNonNull(componentBindingExpressions);
+    this.types = requireNonNull(types);
   }
 
   @Override

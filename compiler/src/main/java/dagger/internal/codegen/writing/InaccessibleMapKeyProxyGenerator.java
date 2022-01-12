@@ -53,7 +53,7 @@ public final class InaccessibleMapKeyProxyGenerator
   @Override
   public Element originatingElement(ContributionBinding binding) {
     // a map key is only ever present on bindings that have a binding element
-    return binding.bindingElement().get();
+    return binding.bindingElement().orElseThrow();
   }
 
   @Override

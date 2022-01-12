@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Maps.transformValues;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -36,16 +34,12 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
-import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static dagger.model.BindingKind.PROVISION;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -54,8 +48,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.Factory;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
@@ -66,8 +62,11 @@ import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 
@@ -99,8 +98,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   @Override
   public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
     // We don't want to write out resolved bindings -- we want to write out the generic version.
-    checkArgument(!binding.unresolved().isPresent());
-    checkArgument(binding.bindingElement().isPresent());
+    Preconditions.checkArgument(!binding.unresolved().isPresent());
+    Preconditions.checkArgument(binding.bindingElement().isPresent());
 
     if (binding.factoryCreationStrategy().equals(DELEGATE)) {
       return List.of();
@@ -121,7 +120,6 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     addCreateMethod(binding, factoryBuilder);
 
     factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions));
-    gwtIncompatibleAnnotation(binding).ifPresent(factoryBuilder::addAnnotation);
 
     return factoryBuilder;
   }
@@ -141,11 +139,11 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(constructor.build());
   }
 
-  private ImmutableList<ParameterSpec> constructorParams(ProvisionBinding binding) {
-    ImmutableList.Builder<ParameterSpec> params = ImmutableList.builder();
+  private List<ParameterSpec> constructorParams(ProvisionBinding binding) {
+    List<ParameterSpec> params = new ArrayList<>();
     moduleParameter(binding).ifPresent(params::add);
     frameworkFields(binding).values().forEach(field -> params.add(toParameter(field)));
-    return params.build();
+    return params;
   }
 
   private Optional<ParameterSpec> moduleParameter(ProvisionBinding binding) {
@@ -157,17 +155,16 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     return Optional.empty();
   }
 
-  private ImmutableMap<DependencyRequest, FieldSpec> frameworkFields(ProvisionBinding binding) {
+  private Map<DependencyRequest, FieldSpec> frameworkFields(ProvisionBinding binding) {
     UniqueNameSet uniqueFieldNames = new UniqueNameSet();
     // TODO(bcorso, dpb): Add a test for the case when a Factory parameter is named "module".
     moduleParameter(binding).ifPresent(module -> uniqueFieldNames.claim(module.name));
-    return ImmutableMap.copyOf(
-        transformValues(
-            generateBindingFieldsForDependencies(binding),
-            field ->
-                FieldSpec.builder(
-                        field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
-                    .build()));
+    return Util.transformValues(
+        generateBindingFieldsForDependencies(binding),
+        field ->
+            FieldSpec.builder(
+                    field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
+                .build());
   }
 
   private void addCreateMethod(ProvisionBinding binding, TypeSpec.Builder factoryBuilder) {
@@ -208,7 +205,9 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         createMethodBuilder.addStatement(
             "return new $T($L)",
             parameterizedGeneratedTypeNameForBinding(binding),
-            makeParametersCodeBlock(Lists.transform(params, input -> CodeBlock.of("$N", input))));
+            makeParametersCodeBlock(params.stream()
+                .map(input -> CodeBlock.of("$N", input))
+                .collect(Collectors.toList())));
         break;
       default:
         throw new AssertionError();
@@ -232,7 +231,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
       getMethod.addAnnotation(Override.class);
     }
 
-    ImmutableMap<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
+    Map<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
     CodeBlock invokeNewInstance =
         ProvisionMethod.invoke(
             binding,

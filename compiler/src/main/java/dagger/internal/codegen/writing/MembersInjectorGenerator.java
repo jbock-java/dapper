@@ -33,7 +33,6 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.membersInjectorOf;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -207,8 +206,6 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
         injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite));
       }
     }
-
-    gwtIncompatibleAnnotation(binding).ifPresent(injectorTypeBuilder::addAnnotation);
 
     return List.of(injectorTypeBuilder);
   }

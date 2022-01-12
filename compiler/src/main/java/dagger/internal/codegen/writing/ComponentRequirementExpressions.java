@@ -16,18 +16,17 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.COMPONENT_REQUIREMENT_FIELD;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.google.common.base.Supplier;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -36,6 +35,7 @@ import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -123,7 +123,7 @@ public final class ComponentRequirementExpressions {
     private final Supplier<MemberSelect> field = memoize(this::createField);
 
     private AbstractField(ComponentRequirement componentRequirement) {
-      this.componentRequirement = checkNotNull(componentRequirement);
+      this.componentRequirement = requireNonNull(componentRequirement);
     }
 
     @Override
@@ -153,7 +153,7 @@ public final class ComponentRequirementExpressions {
 
     InstantiableModuleField(ComponentRequirement module) {
       super(module);
-      checkArgument(module.kind().isModule());
+      Preconditions.checkArgument(module.kind().isModule());
       this.moduleElement = module.typeElement();
     }
 

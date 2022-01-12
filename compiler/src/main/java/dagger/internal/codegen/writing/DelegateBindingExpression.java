@@ -16,18 +16,18 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.requestType;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.model.BindingKind.DELEGATE;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindsTypeChecker;
@@ -53,8 +53,8 @@ final class DelegateBindingExpression extends BindingExpression {
       ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types,
       DaggerElements elements) {
-    this.binding = checkNotNull(binding);
-    this.requestKind = checkNotNull(requestKind);
+    this.binding = requireNonNull(binding);
+    this.requestKind = requireNonNull(requestKind);
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;
     this.bindsTypeChecker = new BindsTypeChecker(types, elements);
@@ -66,7 +66,7 @@ final class DelegateBindingExpression extends BindingExpression {
    */
   static boolean isBindsScopeStrongerThanDependencyScope(
       ContributionBinding bindsBinding, BindingGraph graph) {
-    checkArgument(bindsBinding.kind().equals(DELEGATE));
+    Preconditions.checkArgument(bindsBinding.kind().equals(DELEGATE));
     Binding dependencyBinding =
         graph.contributionBinding(getOnlyElement(bindsBinding.dependencies()).key());
     ScopeKind bindsScope = ScopeKind.get(bindsBinding);

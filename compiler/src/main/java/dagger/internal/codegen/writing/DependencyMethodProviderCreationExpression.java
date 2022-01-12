@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind.COMPONENT_PROVISION_FACTORY;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -65,7 +65,7 @@ final class DependencyMethodProviderCreationExpression
       ComponentRequirementExpressions componentRequirementExpressions,
       CompilerOptions compilerOptions,
       BindingGraph graph) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.compilerOptions = compilerOptions;

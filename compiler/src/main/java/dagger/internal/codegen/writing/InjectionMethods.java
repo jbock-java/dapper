@@ -44,8 +44,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -65,6 +63,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,7 +108,7 @@ final class InjectionMethods {
    */
   static final class ProvisionMethod {
     // These names are already defined in factories and shouldn't be used for the proxy method name.
-    private static final ImmutableSet<String> BANNED_PROXY_NAMES = ImmutableSet.of("get", "create");
+    private static final Set<String> BANNED_PROXY_NAMES = Set.of("get", "create");
 
     /**
      * Returns a method that invokes the binding's {@linkplain ProvisionBinding#bindingElement()
@@ -144,16 +143,16 @@ final class InjectionMethods {
         ClassName requestingClass,
         Optional<CodeBlock> moduleReference,
         CompilerOptions compilerOptions) {
-      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
+      List<CodeBlock> arguments = new ArrayList<>();
       moduleReference.ifPresent(arguments::add);
-      invokeArguments(binding, dependencyUsage, requestingClass).forEach(arguments::add);
+      arguments.addAll(invokeArguments(binding, dependencyUsage, requestingClass));
 
       ClassName enclosingClass = generatedClassNameForBinding(binding);
       MethodSpec methodSpec = create(binding, compilerOptions);
-      return invokeMethod(methodSpec, arguments.build(), enclosingClass, requestingClass);
+      return invokeMethod(methodSpec, arguments, enclosingClass, requestingClass);
     }
 
-    static ImmutableList<CodeBlock> invokeArguments(
+    static List<CodeBlock> invokeArguments(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
         ClassName requestingClass) {
@@ -164,7 +163,7 @@ final class InjectionMethods {
                       request -> MoreElements.asVariable(request.requestElement().orElseThrow()),
                       request -> request));
 
-      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
+      List<CodeBlock> arguments = new ArrayList<>();
       for (VariableElement parameter :
           asExecutable(binding.bindingElement().orElseThrow()).getParameters()) {
         if (AssistedInjectionAnnotations.isAssistedParameter(parameter)) {
@@ -178,7 +177,7 @@ final class InjectionMethods {
         }
       }
 
-      return arguments.build();
+      return arguments;
     }
 
     private static MethodSpec constructorProxy(ExecutableElement constructor) {
@@ -330,7 +329,7 @@ final class InjectionMethods {
         ClassName generatedTypeName,
         CodeBlock instanceCodeBlock,
         Function<DependencyRequest, CodeBlock> dependencyUsage) {
-      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
+      List<CodeBlock> arguments = new ArrayList<>();
       arguments.add(instanceCodeBlock);
       if (!injectionSite.dependencies().isEmpty()) {
         arguments.addAll(
@@ -340,7 +339,7 @@ final class InjectionMethods {
       ClassName enclosingClass =
           membersInjectorNameForType(asType(injectionSite.element().getEnclosingElement()));
       MethodSpec methodSpec = create(injectionSite);
-      return invokeMethod(methodSpec, arguments.build(), enclosingClass, generatedTypeName);
+      return invokeMethod(methodSpec, arguments, enclosingClass, generatedTypeName);
     }
 
     /*
@@ -482,13 +481,13 @@ final class InjectionMethods {
     boolean useObject = !isRawTypePubliclyAccessible(enclosingType.asType());
     UniqueNameSet parameterNameSet = new UniqueNameSet();
     CodeBlock instance = copyInstance(builder, parameterNameSet, enclosingType.asType(), useObject);
-    CodeBlock argument = copyParameters(builder, parameterNameSet, ImmutableList.of(field));
+    CodeBlock argument = copyParameters(builder, parameterNameSet, List.of(field));
     return builder.addStatement("$L.$L = $L", instance, field.getSimpleName(), argument).build();
   }
 
   private static CodeBlock invokeMethod(
       MethodSpec methodSpec,
-      ImmutableList<CodeBlock> parameters,
+      List<CodeBlock> parameters,
       ClassName enclosingClass,
       ClassName requestingClass) {
     checkArgument(methodSpec.parameters.size() == parameters.size());

@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.assisted.Assisted;
@@ -40,7 +40,7 @@ final class ComponentRequirementBindingExpression extends SimpleInvocationBindin
       @Assisted ComponentRequirement componentRequirement,
       ComponentRequirementExpressions componentRequirementExpressions) {
     super(binding);
-    this.componentRequirement = checkNotNull(componentRequirement);
+    this.componentRequirement = requireNonNull(componentRequirement);
     this.componentRequirementExpressions = componentRequirementExpressions;
   }
 

@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.assisted.Assisted;
@@ -41,7 +41,7 @@ final class DerivedFromFrameworkInstanceBindingExpression extends BindingExpress
       @Assisted BindingRequest bindingRequest,
       ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types) {
-    this.bindingRequest = checkNotNull(bindingRequest);
+    this.bindingRequest = requireNonNull(bindingRequest);
     this.frameworkRequest = bindingRequest(bindingRequest.key(), FrameworkType.PROVIDER);
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;

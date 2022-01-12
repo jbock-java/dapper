@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
@@ -42,7 +42,7 @@ final class DelegatingFrameworkInstanceCreationExpression
       @Assisted ContributionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions componentBindingExpressions) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.componentImplementation = componentImplementation;
     this.componentBindingExpressions = componentBindingExpressions;
   }
@@ -60,7 +60,7 @@ final class DelegatingFrameworkInstanceCreationExpression
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     DelegatingFrameworkInstanceCreationExpression create(ContributionBinding binding);
   }
 }
