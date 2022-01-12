@@ -18,12 +18,11 @@ package dagger.internal.codegen.writing;
 
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
@@ -46,9 +45,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.InstanceFactory;
-import dagger.internal.Preconditions;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.OptionalType.OptionalKind;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
@@ -116,7 +115,7 @@ final class OptionalFactories {
    * for absent optional bindings.
    */
   CodeBlock absentOptionalProvider(ContributionBinding binding) {
-    verify(
+    Preconditions.checkState(
         binding.bindingType().equals(BindingType.PROVISION),
         "Absent optional bindings should be provisions: %s",
         binding);
@@ -321,7 +320,7 @@ final class OptionalFactories {
                 .addCode(
                     "this.$N = $T.checkNotNull($N);",
                     delegateField,
-                    Preconditions.class,
+                    dagger.internal.Preconditions.class,
                     delegateParameter)
                 .build())
         .addMethod(presentOptionalFactoryGetMethod(spec, delegateField))

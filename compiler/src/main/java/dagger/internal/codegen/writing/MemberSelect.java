@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
@@ -26,10 +25,10 @@ import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeVariableName;
@@ -65,7 +64,7 @@ abstract class MemberSelect {
     LocalField(ShardImplementation owningShard, String fieldName) {
       super(owningShard.name(), false);
       this.owningShard = owningShard;
-      this.fieldName = checkNotNull(fieldName);
+      this.fieldName = requireNonNull(fieldName);
     }
 
     @Override
@@ -84,7 +83,7 @@ abstract class MemberSelect {
    */
   static Optional<MemberSelect> staticFactoryCreation(ContributionBinding contributionBinding) {
     if (contributionBinding.factoryCreationStrategy().equals(SINGLETON_INSTANCE)
-        && !contributionBinding.scope().isPresent()) {
+        && contributionBinding.scope().isEmpty()) {
       switch (contributionBinding.kind()) {
         case MULTIBOUND_MAP:
           return Optional.of(emptyMapFactory(contributionBinding));
@@ -125,7 +124,7 @@ abstract class MemberSelect {
   private static MemberSelect parameterizedFactoryCreateMethod(
       ClassName owningClass, List<? extends TypeMirror> parameters) {
     return new ParameterizedStaticMethod(
-        owningClass, ImmutableList.copyOf(parameters), CodeBlock.of("create()"), FACTORY);
+        owningClass, List.copyOf(parameters), CodeBlock.of("create()"), FACTORY);
   }
 
   private static final class StaticMethod extends MemberSelect {
@@ -133,7 +132,7 @@ abstract class MemberSelect {
 
     StaticMethod(ClassName owningClass, CodeBlock methodCodeBlock) {
       super(owningClass, true);
-      this.methodCodeBlock = checkNotNull(methodCodeBlock);
+      this.methodCodeBlock = requireNonNull(methodCodeBlock);
     }
 
     @Override
@@ -146,8 +145,8 @@ abstract class MemberSelect {
 
   /** A {@link MemberSelect} for a factory of an empty map. */
   private static MemberSelect emptyMapFactory(ContributionBinding contributionBinding) {
-    ImmutableList<TypeMirror> typeParameters =
-        ImmutableList.copyOf(
+    List<TypeMirror> typeParameters =
+        List.copyOf(
             MoreTypes.asDeclared(contributionBinding.key().type()).getTypeArguments());
     return new ParameterizedStaticMethod(
         MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
@@ -160,19 +159,19 @@ abstract class MemberSelect {
   private static MemberSelect emptySetFactory(ContributionBinding binding) {
     return new ParameterizedStaticMethod(
         setFactoryClassName(binding),
-        ImmutableList.of(SetType.from(binding.key()).elementType()),
+        List.of(SetType.from(binding.key()).elementType()),
         CodeBlock.of("empty()"),
         FACTORY);
   }
 
   private static final class ParameterizedStaticMethod extends MemberSelect {
-    final ImmutableList<TypeMirror> typeParameters;
+    final List<TypeMirror> typeParameters;
     final CodeBlock methodCodeBlock;
     final ClassName rawReturnType;
 
     ParameterizedStaticMethod(
         ClassName owningClass,
-        ImmutableList<TypeMirror> typeParameters,
+        List<TypeMirror> typeParameters,
         CodeBlock methodCodeBlock,
         ClassName rawReturnType) {
       super(owningClass, true);

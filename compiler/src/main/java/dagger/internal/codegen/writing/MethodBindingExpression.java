@@ -16,22 +16,21 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameterSpecs;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.PRIVATE_METHOD_CACHED_PROVIDER_FIELD;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.PRIVATE_METHOD_SCOPED_FIELD;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.VOLATILE;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import dagger.internal.DoubleCheck;
 import dagger.internal.MemoizedSentinel;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -43,6 +42,7 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.model.BindingKind;
 import dagger.model.RequestKind;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javax.lang.model.type.TypeMirror;
 
 /** A binding expression that wraps another in a nullary method on the component. */
@@ -61,12 +61,12 @@ abstract class MethodBindingExpression extends BindingExpression {
       MethodImplementationStrategy methodImplementationStrategy,
       BindingExpression wrappedBindingExpression,
       DaggerTypes types) {
-    this.shardImplementation = checkNotNull(shardImplementation);
-    this.request = checkNotNull(request);
-    this.binding = checkNotNull(binding);
+    this.shardImplementation = requireNonNull(shardImplementation);
+    this.request = requireNonNull(request);
+    this.binding = requireNonNull(binding);
     this.bindingMethodImplementation = bindingMethodImplementation(methodImplementationStrategy);
-    this.wrappedBindingExpression = checkNotNull(wrappedBindingExpression);
-    this.types = checkNotNull(types);
+    this.wrappedBindingExpression = requireNonNull(wrappedBindingExpression);
+    this.types = requireNonNull(types);
   }
 
   @Override

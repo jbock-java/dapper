@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -47,6 +46,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import dagger.MembersInjector;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.FrameworkField;
@@ -102,7 +102,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
 
     // We don't want to write out resolved bindings -- we want to write out the generic version.
-    checkState(
+    Preconditions.checkState(
         binding.unresolved().isEmpty(),
         "tried to generate a MembersInjector for a binding of a resolved generic type: %s",
         binding);

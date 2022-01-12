@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.javapoet.TypeNames.INSTANCE_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.MEMBERS_INJECTORS;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.CodeBlock;
@@ -46,9 +46,9 @@ final class MembersInjectorProviderCreationExpression
       @Assisted ProvisionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions componentBindingExpressions) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
-    this.componentBindingExpressions = checkNotNull(componentBindingExpressions);
+    this.componentBindingExpressions = requireNonNull(componentBindingExpressions);
   }
 
   @Override

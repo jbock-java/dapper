@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.BindingRequest;
@@ -37,9 +37,9 @@ abstract class MultibindingFactoryCreationExpression
       ContributionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentBindingExpressions componentBindingExpressions) {
-    this.binding = checkNotNull(binding);
-    this.shardImplementation = checkNotNull(componentImplementation).shardImplementation(binding);
-    this.componentBindingExpressions = checkNotNull(componentBindingExpressions);
+    this.binding = requireNonNull(binding);
+    this.shardImplementation = requireNonNull(componentImplementation).shardImplementation(binding);
+    this.componentBindingExpressions = requireNonNull(componentBindingExpressions);
   }
 
   /** Returns the expression for a dependency of this multibinding. */

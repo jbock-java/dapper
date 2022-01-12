@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
@@ -31,6 +30,7 @@ import static javax.lang.model.util.ElementFilter.constructorsIn;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeSpec;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
@@ -78,7 +78,7 @@ public final class ModuleProxies {
 
     @Override
     public List<TypeSpec.Builder> topLevelTypes(TypeElement moduleElement) {
-      checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
+      Preconditions.checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
       return moduleProxies.nonPublicNullaryConstructor(moduleElement).isPresent()
           ? List.of(buildProxy(moduleElement))
           : List.of();
@@ -99,7 +99,7 @@ public final class ModuleProxies {
 
   /** The name of the class that hosts the module constructor proxy method. */
   private ClassName constructorProxyTypeName(TypeElement moduleElement) {
-    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
+    Preconditions.checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     ClassName moduleClassName = ClassName.get(moduleElement);
     return moduleClassName
         .topLevelClassName()
@@ -112,7 +112,7 @@ public final class ModuleProxies {
    * abstract, no proxy method can be generated.
    */
   private Optional<ExecutableElement> nonPublicNullaryConstructor(TypeElement moduleElement) {
-    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
+    Preconditions.checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     if (moduleElement.getModifiers().contains(ABSTRACT)
         || (moduleElement.getNestingKind().isNested()
         && !moduleElement.getModifiers().contains(STATIC))) {
@@ -131,7 +131,7 @@ public final class ModuleProxies {
    * constructor's generated proxy method.
    */
   public CodeBlock newModuleInstance(TypeElement moduleElement, ClassName requestingClass) {
-    checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
+    Preconditions.checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
     String packageName = requestingClass.packageName();
     return nonPublicNullaryConstructor(moduleElement)
         .filter(constructor -> !isElementAccessibleFrom(constructor, packageName))

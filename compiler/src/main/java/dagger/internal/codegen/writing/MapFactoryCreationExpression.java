@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.MapKeys.getMapKeyExpression;
 import static dagger.internal.codegen.binding.SourceFiles.mapFactoryClassName;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
@@ -49,7 +49,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
       BindingGraph graph,
       DaggerElements elements) {
     super(binding, componentImplementation, componentBindingExpressions);
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.componentImplementation = componentImplementation;
     this.graph = graph;
     this.elements = elements;

@@ -23,8 +23,6 @@ import static dagger.internal.codegen.binding.MapKeys.getMapKeyExpression;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.model.BindingKind.MULTIBOUND_MAP;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
@@ -32,6 +30,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.MapBuilder;
 import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
@@ -40,13 +39,14 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import java.util.Collections;
+import java.util.Map;
 import javax.lang.model.type.TypeMirror;
 
 /** A {@link BindingExpression} for multibound maps. */
 final class MapBindingExpression extends SimpleInvocationBindingExpression {
 
   private final ProvisionBinding binding;
-  private final ImmutableMap<DependencyRequest, ContributionBinding> dependencies;
+  private final Map<DependencyRequest, ContributionBinding> dependencies;
   private final ComponentBindingExpressions componentBindingExpressions;
   private final DaggerElements elements;
 
@@ -63,7 +63,7 @@ final class MapBindingExpression extends SimpleInvocationBindingExpression {
     this.componentBindingExpressions = componentBindingExpressions;
     this.elements = elements;
     this.dependencies =
-        Maps.toMap(binding.dependencies(), dep -> graph.contributionBinding(dep.key()));
+        Util.toMap(binding.dependencies(), dep -> graph.contributionBinding(dep.key()));
   }
 
   @Override

@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.MEMBERS_INJECTION_METHOD;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 import com.squareup.javapoet.ClassName;
@@ -65,11 +65,11 @@ final class MembersInjectionMethods {
       BindingGraph graph,
       DaggerElements elements,
       DaggerTypes types) {
-    this.componentImplementation = checkNotNull(componentImplementation);
-    this.bindingExpressions = checkNotNull(bindingExpressions);
-    this.graph = checkNotNull(graph);
-    this.elements = checkNotNull(elements);
-    this.types = checkNotNull(types);
+    this.componentImplementation = requireNonNull(componentImplementation);
+    this.bindingExpressions = requireNonNull(bindingExpressions);
+    this.graph = requireNonNull(graph);
+    this.elements = requireNonNull(elements);
+    this.types = requireNonNull(types);
   }
 
   /**
