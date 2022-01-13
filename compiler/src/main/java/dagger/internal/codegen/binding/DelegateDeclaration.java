@@ -23,12 +23,12 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.Iterables;
 import dagger.Binds;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
@@ -146,8 +146,8 @@ public final class DelegateDeclaration extends BindingDeclaration
               types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), bindsMethod));
       DependencyRequest delegateRequest =
           dependencyRequestFactory.forRequiredResolvedVariable(
-              Iterables.getOnlyElement(bindsMethod.getParameters()),
-              Iterables.getOnlyElement(resolvedMethod.getParameterTypes()));
+              Util.getOnlyElement(bindsMethod.getParameters()),
+              Util.getOnlyElement(resolvedMethod.getParameterTypes()));
       return new DelegateDeclaration(
           ContributionType.fromBindingElement(bindsMethod),
           keyFactory.forBindsMethod(bindsMethod, contributingModule),

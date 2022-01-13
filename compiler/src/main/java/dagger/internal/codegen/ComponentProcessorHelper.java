@@ -17,10 +17,10 @@
 package dagger.internal.codegen;
 
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.collect.Sets;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
@@ -64,10 +64,9 @@ public class ComponentProcessorHelper {
   }
 
   Set<String> getSupportedOptions() {
-    return Sets.union(
-            ProcessingEnvironmentCompilerOptions.supportedOptions(),
-            bindingGraphPlugins.allSupportedOptions())
-        .immutableCopy();
+    return Util.union(
+        ProcessingEnvironmentCompilerOptions.supportedOptions(),
+        bindingGraphPlugins.allSupportedOptions());
   }
 
   Iterable<? extends BasicAnnotationProcessor.Step> steps() {

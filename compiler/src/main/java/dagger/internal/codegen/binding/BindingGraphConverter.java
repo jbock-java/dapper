@@ -24,8 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
@@ -33,6 +31,7 @@ import com.google.common.graph.NetworkBuilder;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.Edge;
@@ -46,6 +45,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -95,10 +95,11 @@ final class BindingGraphConverter {
 
   // TODO(dpb): Example of BindingGraph logic applied to derived networks.
   private ComponentNode rootComponentNode(Network<Node, Edge> network) {
-    return (ComponentNode)
-        Iterables.find(
-            network.nodes(),
-            node -> node instanceof ComponentNode && node.componentPath().atRoot());
+    return network.nodes().stream()
+        .flatMap(DaggerStreams.instancesOf(ComponentNode.class))
+        .filter(node -> node.componentPath().atRoot())
+        .findFirst()
+        .orElseThrow();
   }
 
   /**
@@ -221,7 +222,9 @@ final class BindingGraphConverter {
       }
 
       if (bindingGraphPath.size() > 1) {
-        LegacyBindingGraph parent = Iterators.get(bindingGraphPath.descendingIterator(), 1);
+        Iterator<LegacyBindingGraph> it = bindingGraphPath.descendingIterator();
+        it.next();
+        LegacyBindingGraph parent = it.next();
         parent
             .componentDescriptor()
             .getFactoryMethodForChildComponent(graph.componentDescriptor())
