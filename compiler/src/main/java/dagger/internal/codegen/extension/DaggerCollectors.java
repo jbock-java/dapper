@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 
 /**
- * A copy of {@link com.google.common.collect.MoreCollectors} to avoid issues with the '-android'
+ * A copy of {@code com.google.common.collect.MoreCollectors} to avoid issues with the '-android'
  * variant of Guava. See b/68008628
  */
 public final class DaggerCollectors {
