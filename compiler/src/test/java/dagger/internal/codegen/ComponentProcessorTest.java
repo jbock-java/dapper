@@ -30,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.MembersInjector;
+import dagger.internal.codegen.base.Util;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -146,7 +147,7 @@ public class ComponentProcessorTest {
         "}");
     Compilation compilation =
         compilerWithOptions(
-            compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
+            Util.concat(compilerMode.javacopts(), List.of("-Adagger.privateMemberValidation=WARNING")))
             .compile(outerClass, componentFile);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -154,7 +155,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void simpleComponent() throws IOException {
+  public void simpleComponent() {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1926,11 +1927,11 @@ public class ComponentProcessorTest {
     Compilation compilation =
         javac()
             .withOptions(
-                compilerMode
-                    .javacopts()
-                    .append(
+                Util.concat(compilerMode
+                        .javacopts(),
+                    List.of(
                         "-Xlint:-processing",
-                        "-Adagger.warnIfInjectionFactoryNotGeneratedUpstream=enabled"))
+                        "-Adagger.warnIfInjectionFactoryNotGeneratedUpstream=enabled")))
             .withProcessors(
                 new ElementFilteringComponentProcessor(
                     Predicates.not(

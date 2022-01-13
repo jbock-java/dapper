@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 /** The configuration options for compiler modes. */
 enum CompilerMode {
@@ -36,8 +36,8 @@ enum CompilerMode {
   }
 
   /** Returns the javacopts for this compiler mode. */
-  FluentIterable<String> javacopts() {
-    return FluentIterable.from(javacopts);
+  List<String> javacopts() {
+    return javacopts;
   }
 
   /**

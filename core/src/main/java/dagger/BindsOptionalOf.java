@@ -20,12 +20,12 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import dagger.internal.Beta;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Qualifier;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * Annotates methods that declare bindings for {@code Optional} containers of values from bindings
@@ -79,11 +79,10 @@ import jakarta.inject.Qualifier;
  *   <li>{@code Optional<Producer<Foo>>}
  *   <li>{@code Optional<Produced<Foo>>}
  * </ul>
- *
- * <p>You can inject either {@code com.google.common.base.Optional} or {@code java.util.Optional}.
  */
 @Documented
 @Beta
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface BindsOptionalOf {}
+public @interface BindsOptionalOf {
+}

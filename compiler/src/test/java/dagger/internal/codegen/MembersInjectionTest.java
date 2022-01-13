@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import dagger.internal.codegen.base.Util;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -1114,7 +1115,7 @@ public class MembersInjectionTest {
         "}");
     Compilation compilation =
         compilerWithOptions(
-            compilerMode.javacopts().append("-Adagger.privateMemberValidation=WARNING"))
+            Util.concat(compilerMode.javacopts(), List.of("-Adagger.privateMemberValidation=WARNING")))
             .compile(file);
     assertThat(compilation).succeeded();
     assertThat(compilation)
