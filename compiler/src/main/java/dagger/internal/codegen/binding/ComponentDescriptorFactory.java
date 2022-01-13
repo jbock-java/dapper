@@ -31,8 +31,6 @@ import static javax.lang.model.type.TypeKind.VOID;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableSet;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Preconditions;
@@ -140,7 +138,7 @@ public final class ComponentDescriptorFactory {
     Set<TypeElement> modules =
         componentAnnotation.isRealComponent()
             ? componentAnnotation.modules()
-            : ImmutableSet.of(typeElement);
+            : Set.of(typeElement);
 
     Set<ModuleDescriptor> transitiveModules =
         moduleDescriptorFactory.transitiveModules(modules);
@@ -153,12 +151,12 @@ public final class ComponentDescriptorFactory {
       }
     }
 
-    ImmutableSet.Builder<ComponentMethodDescriptor> componentMethodsBuilder =
-        ImmutableSet.builder();
-    ImmutableBiMap.Builder<ComponentMethodDescriptor, ComponentDescriptor>
-        subcomponentsByFactoryMethod = ImmutableBiMap.builder();
-    ImmutableBiMap.Builder<ComponentMethodDescriptor, ComponentDescriptor>
-        subcomponentsByBuilderMethod = ImmutableBiMap.builder();
+    Set<ComponentMethodDescriptor> componentMethodsBuilder =
+        new LinkedHashSet<>();
+    Map<ComponentMethodDescriptor, ComponentDescriptor>
+        subcomponentsByFactoryMethod = new LinkedHashMap<>();
+    Map<ComponentMethodDescriptor, ComponentDescriptor>
+        subcomponentsByBuilderMethod = new LinkedHashMap<>();
     if (componentAnnotation.isRealComponent()) {
       Set<ExecutableElement> unimplementedMethods =
           elements.getUnimplementedMethods(typeElement);
@@ -205,9 +203,9 @@ public final class ComponentDescriptorFactory {
         dependenciesByDependencyMethod,
         scopes,
         subcomponentsFromModules,
-        subcomponentsByFactoryMethod.build(),
-        subcomponentsByBuilderMethod.build(),
-        componentMethodsBuilder.build(),
+        subcomponentsByFactoryMethod,
+        subcomponentsByBuilderMethod,
+        componentMethodsBuilder,
         creatorDescriptor);
   }
 
