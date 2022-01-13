@@ -19,9 +19,6 @@ package dagger.internal.codegen.writing;
 import static com.google.auto.common.MoreElements.asExecutable;
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.asVariable;
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
@@ -51,7 +48,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
-import dagger.internal.Preconditions;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
@@ -224,7 +221,7 @@ final class InjectionMethods {
         case METHOD:
           String methodName = method.getSimpleName().toString();
           return BANNED_PROXY_NAMES.contains(methodName)
-              ? "proxy" + LOWER_CAMEL.to(UPPER_CAMEL, methodName)
+              ? "proxy" + Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1)
               : methodName;
         default:
           throw new AssertionError(method);
@@ -360,8 +357,9 @@ final class InjectionMethods {
     private static String methodName(InjectionSite injectionSite) {
       int index = injectionSite.indexAmongAtInjectMembersWithSameSimpleName();
       String indexString = index == 0 ? "" : String.valueOf(index + 1);
+      String simpleName = injectionSite.element().getSimpleName().toString();
       return "inject"
-          + LOWER_CAMEL.to(UPPER_CAMEL, injectionSite.element().getSimpleName().toString())
+          + Character.toUpperCase(simpleName.charAt(0)) + simpleName.substring(1)
           + indexString;
     }
   }
@@ -418,7 +416,7 @@ final class InjectionMethods {
     CodeBlock checkForNull(CodeBlock maybeNull) {
       return this.equals(IGNORE)
           ? maybeNull
-          : CodeBlock.of("$T.checkNotNullFromProvides($L)", Preconditions.class, maybeNull);
+          : CodeBlock.of("$T.checkNotNullFromProvides($L)", dagger.internal.Preconditions.class, maybeNull);
     }
 
     static CheckNotNullPolicy get(ProvisionBinding binding, CompilerOptions compilerOptions) {
@@ -490,7 +488,7 @@ final class InjectionMethods {
       List<CodeBlock> parameters,
       ClassName enclosingClass,
       ClassName requestingClass) {
-    checkArgument(methodSpec.parameters.size() == parameters.size());
+    Preconditions.checkArgument(methodSpec.parameters.size() == parameters.size());
     CodeBlock parameterBlock = makeParametersCodeBlock(parameters);
     return enclosingClass.equals(requestingClass)
         ? CodeBlock.of("$L($L)", methodSpec.name, parameterBlock)

@@ -21,7 +21,6 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.Visibility.PRIVATE;
 import static com.google.auto.common.Visibility.PUBLIC;
 import static com.google.auto.common.Visibility.effectiveVisibilityOfElement;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.componentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
@@ -29,6 +28,7 @@ import static dagger.internal.codegen.base.ModuleAnnotation.isModuleAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.simpleName;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asType;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
@@ -44,7 +44,6 @@ import com.google.auto.common.MoreTypes;
 import com.google.auto.common.Visibility;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
@@ -150,7 +149,7 @@ public final class ModuleValidator {
   private ValidationReport<TypeElement> validateUncached(
       TypeElement module, Set<TypeElement> visitedModules) {
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(module);
-    ModuleKind moduleKind = ModuleKind.forAnnotatedElement(module).get();
+    ModuleKind moduleKind = ModuleKind.forAnnotatedElement(module).orElseThrow();
     List<ExecutableElement> moduleMethods = methodsIn(module.getEnclosedElements());
     List<ExecutableElement> bindingMethods = new ArrayList<>();
     for (ExecutableElement moduleMethod : moduleMethods) {
@@ -258,7 +257,7 @@ public final class ModuleValidator {
     return String.format(
         "%s is a @%s.%s. Did you mean to use %s?",
         moduleSubcomponentsAttribute.getQualifiedName(),
-        subcomponentAnnotation(subcomponentType).get().simpleName(),
+        subcomponentAnnotation(subcomponentType).orElseThrow().simpleName(),
         creatorAnnotation.creatorKind().typeName(),
         subcomponentType.getQualifiedName());
   }
@@ -282,7 +281,7 @@ public final class ModuleValidator {
         "%1$s doesn't have a @%2$s.Builder or @%2$s.Factory, which is required when used with "
             + "@%3$s.subcomponents",
         subcomponent.getQualifiedName(),
-        subcomponentAnnotation(subcomponent).get().simpleName(),
+        subcomponentAnnotation(subcomponent).orElseThrow().simpleName(),
         simpleName(moduleAnnotation));
   }
 
@@ -482,7 +481,7 @@ public final class ModuleValidator {
       ModuleKind moduleKind,
       final ValidationReport.Builder<?> reportBuilder) {
     ModuleAnnotation moduleAnnotation =
-        moduleAnnotation(getAnnotationMirror(moduleElement, moduleKind.annotation()).get());
+        moduleAnnotation(getAnnotationMirror(moduleElement, moduleKind.annotation()).orElseThrow());
     Visibility moduleVisibility = Visibility.ofElement(moduleElement);
     Visibility moduleEffectiveVisibility = effectiveVisibilityOfElement(moduleElement);
     if (moduleVisibility.equals(PRIVATE)) {
@@ -509,8 +508,8 @@ public final class ModuleValidator {
                         + "reduce the visibility of this module, make the included modules "
                         + "public, or make all of the binding methods on the included modules "
                         + "abstract or static.",
-                    formatListForErrorMessage(new ArrayList<>(invalidVisibilityIncludes)),
-                    moduleElement));
+                    formatListForErrorMessage(new ArrayList<>(invalidVisibilityIncludes))),
+                moduleElement);
           }
         }
     }
@@ -556,7 +555,7 @@ public final class ModuleValidator {
 
   private void validateSelfCycles(
       TypeElement module, ValidationReport.Builder<TypeElement> builder) {
-    ModuleAnnotation moduleAnnotation = moduleAnnotation(module).get();
+    ModuleAnnotation moduleAnnotation = moduleAnnotation(module).orElseThrow();
     moduleAnnotation
         .includesAsAnnotationValues()
         .forEach(

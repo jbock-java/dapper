@@ -16,9 +16,8 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
@@ -26,6 +25,7 @@ import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import dagger.internal.codegen.base.Preconditions;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -53,8 +53,8 @@ public final class DaggerTypes implements Types {
 
   @Inject
   public DaggerTypes(Types types, DaggerElements elements) {
-    this.types = checkNotNull(types);
-    this.elements = checkNotNull(elements);
+    this.types = requireNonNull(types);
+    this.elements = requireNonNull(elements);
   }
 
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
@@ -66,7 +66,7 @@ public final class DaggerTypes implements Types {
    * TypeMirror} does not represent a type that can be referenced by a {@link Class}
    */
   public static boolean isTypeOf(final TypeName typeName, TypeMirror type) {
-    checkNotNull(typeName);
+    requireNonNull(typeName);
     return type.accept(new IsTypeOf(typeName), null);
   }
 
@@ -159,7 +159,7 @@ public final class DaggerTypes implements Types {
    */
   public static TypeMirror unwrapType(TypeMirror type) {
     TypeMirror unwrapped = unwrapTypeOrDefault(type, null);
-    checkArgument(unwrapped != null, "%s is a raw type", type);
+    requireNonNull(unwrapped, () -> String.format("%s is a raw type", type));
     return unwrapped;
   }
 
@@ -178,7 +178,7 @@ public final class DaggerTypes implements Types {
   private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
     DeclaredType declaredType = MoreTypes.asDeclared(type);
     TypeElement typeElement = MoreElements.asType(declaredType.asElement());
-    checkArgument(
+    Preconditions.checkArgument(
         !typeElement.getTypeParameters().isEmpty(),
         "%s does not have a type parameter",
         typeElement.getQualifiedName());
@@ -217,20 +217,6 @@ public final class DaggerTypes implements Types {
       default:
         throw new IllegalArgumentException(type + " has more than 1 type argument");
     }
-  }
-
-  /**
-   * Returns a publicly accessible type based on {@code type}:
-   *
-   * <ul>
-   *   <li>If {@code type} is publicly accessible, returns it.
-   *   <li>If not, but {@code type}'s raw type is publicly accessible, returns the raw type.
-   *   <li>Otherwise returns {@link Object}.
-   * </ul>
-   */
-  public TypeMirror publiclyAccessibleType(TypeMirror type) {
-    return accessibleType(
-        type, Accessibility::isTypePubliclyAccessible, Accessibility::isRawTypePubliclyAccessible);
   }
 
   /**

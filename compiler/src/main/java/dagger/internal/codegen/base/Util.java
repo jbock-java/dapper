@@ -127,6 +127,13 @@ public final class Util {
     return collection.iterator().next();
   }
 
+  public static <E> E getOnlyElement(Collection<? extends E> collection, E defaultValue) {
+    if (collection.isEmpty()) {
+      return defaultValue;
+    }
+    return getOnlyElement(collection);
+  }
+
   public static <K, V1, V2>
   Map<K, V2> transformValues(Map<K, V1> fromMap, Function<? super V1, V2> function) {
     LinkedHashMap<K, V2> result = new LinkedHashMap<>(Math.max(5, (int) (fromMap.size() * 1.5)));
