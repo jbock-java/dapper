@@ -23,9 +23,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import dagger.Component;
 import dagger.Module;
 import dagger.Subcomponent;
@@ -69,8 +66,8 @@ public final class ComponentDescriptor {
   private final Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod;
   private final Set<Scope> scopes;
   private final Set<ComponentDescriptor> childComponentsDeclaredByModules;
-  private final ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods;
-  private final ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints;
+  private final Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods;
+  private final Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints;
   private final Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods;
   private final Optional<ComponentCreatorDescriptor> creatorDescriptor;
 
@@ -82,8 +79,8 @@ public final class ComponentDescriptor {
       Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod,
       Set<Scope> scopes,
       Set<ComponentDescriptor> childComponentsDeclaredByModules,
-      ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods,
-      ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
+      Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods,
+      Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
       Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods,
       Optional<ComponentCreatorDescriptor> creatorDescriptor) {
     this.annotation = requireNonNull(annotation);
@@ -120,16 +117,13 @@ public final class ComponentDescriptor {
     return Objects.hash(typeElement(), annotation());
   });
 
-  private final Supplier<Map<TypeElement, ComponentDescriptor>> childComponentsByElement = Suppliers.memoize(() ->
-      Maps.uniqueIndex(childComponents(), ComponentDescriptor::typeElement));
-
   private final Supplier<Map<BindingRequest, ComponentMethodDescriptor>> firstMatchingComponentMethods = Suppliers.memoize(() -> {
-        Map<BindingRequest, ComponentMethodDescriptor> methods = new LinkedHashMap<>();
-        for (ComponentMethodDescriptor method : entryPointMethods()) {
-          methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
-        }
-        return methods;
-      });
+    Map<BindingRequest, ComponentMethodDescriptor> methods = new LinkedHashMap<>();
+    for (ComponentMethodDescriptor method : entryPointMethods()) {
+      methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
+    }
+    return methods;
+  });
 
   /** The annotation that specifies that {@link #typeElement()} is a component. */
   public ComponentAnnotation annotation() {
@@ -232,11 +226,11 @@ public final class ComponentDescriptor {
    * #childComponentsDeclaredByBuilderEntryPoints() builder methods}.
    */
   public Set<ComponentDescriptor> childComponents() {
-    return ImmutableSet.<ComponentDescriptor>builder()
-        .addAll(childComponentsDeclaredByFactoryMethods().values())
-        .addAll(childComponentsDeclaredByBuilderEntryPoints().values())
-        .addAll(childComponentsDeclaredByModules())
-        .build();
+    Set<ComponentDescriptor> result = new LinkedHashSet<>();
+    result.addAll(childComponentsDeclaredByFactoryMethods().values());
+    result.addAll(childComponentsDeclaredByBuilderEntryPoints().values());
+    result.addAll(childComponentsDeclaredByModules());
+    return result;
   }
 
   /**
@@ -251,28 +245,26 @@ public final class ComponentDescriptor {
    * All {@linkplain Subcomponent direct child} components that are declared by a subcomponent
    * factory method.
    */
-  public ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
+  public Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
   childComponentsDeclaredByFactoryMethods() {
     return childComponentsDeclaredByFactoryMethods;
-  }
-
-  /** Returns a map of {@link #childComponents()} indexed by {@link #typeElement()}. */
-  public Map<TypeElement, ComponentDescriptor> childComponentsByElement() {
-    return childComponentsByElement.get();
   }
 
   /** Returns the factory method that declares a child component. */
   Optional<ComponentMethodDescriptor> getFactoryMethodForChildComponent(
       ComponentDescriptor childComponent) {
-    return Optional.ofNullable(
-        childComponentsDeclaredByFactoryMethods().inverse().get(childComponent));
+    return childComponentsDeclaredByFactoryMethods().entrySet()
+        .stream()
+        .filter(e -> e.getValue().equals(childComponent))
+        .map(Map.Entry::getKey)
+        .findFirst();
   }
 
   /**
    * All {@linkplain Subcomponent direct child} components that are declared by a subcomponent
    * builder method.
    */
-  ImmutableBiMap<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
+  Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor>
   childComponentsDeclaredByBuilderEntryPoints() {
     return childComponentsDeclaredByBuilderEntryPoints;
   }
@@ -362,6 +354,7 @@ public final class ComponentDescriptor {
       this.dependencyRequest = dependencyRequest;
       this.subcomponent = subcomponent;
     }
+
     /** The method itself. Note that this may be declared on a supertype of the component. */
     public ExecutableElement methodElement() {
       return methodElement;
