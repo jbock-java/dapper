@@ -34,8 +34,6 @@ import static java.util.function.Predicate.isEqual;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -48,6 +46,7 @@ import dagger.internal.codegen.base.Keys;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
@@ -56,6 +55,8 @@ import dagger.model.Scope;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,17 +139,19 @@ public final class BindingGraphFactory implements ClearableCache {
       // times assuming it is the exact same method. We do this by tracking a set of bindings
       // we've already added with the binding element removed since that is the only thing
       // allowed to differ.
-      HashMultimap<String, ContributionBinding> dedupeBindings = HashMultimap.create();
+      Map<String, Set<ContributionBinding>> dedupeBindings = new HashMap<>();
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(elements, method)) {
           ContributionBinding binding = bindingFactory.componentDependencyMethodBinding(
               method);
-          if (dedupeBindings.put(
+          int previousSize = dedupeBindings.getOrDefault(method.getSimpleName().toString(), Set.of()).size();
+          if (dedupeBindings.merge(
               method.getSimpleName().toString(),
               // Remove the binding element since we know that will be different, but everything
               // else we want to be the same to consider it a duplicate.
-              binding.toBuilder().clearBindingElement().build())) {
+              Set.of(binding.toBuilder().clearBindingElement().build()),
+              Util::mutableUnion).size() > previousSize) {
             explicitBindingsBuilder.add(binding);
           }
         }
@@ -228,7 +231,7 @@ public final class BindingGraphFactory implements ClearableCache {
     // done in a queue since resolving one subcomponent might resolve a key for a subcomponent
     // from a parent graph. This is done until no more new subcomponents are resolved.
     Set<ComponentDescriptor> resolvedSubcomponents = new HashSet<>();
-    ImmutableList.Builder<LegacyBindingGraph> subgraphs = ImmutableList.builder();
+    List<LegacyBindingGraph> subgraphs = new ArrayList<>();
     for (ComponentDescriptor subcomponent :
         Iterables.consumingIterable(requestResolver.subcomponentsToResolve)) {
       if (resolvedSubcomponents.add(subcomponent)) {
@@ -240,9 +243,9 @@ public final class BindingGraphFactory implements ClearableCache {
 
     return new LegacyBindingGraph(
         componentDescriptor,
-        ImmutableMap.copyOf(requestResolver.getResolvedContributionBindings()),
-        ImmutableMap.copyOf(requestResolver.getResolvedMembersInjectionBindings()),
-        ImmutableList.copyOf(subgraphs.build()));
+        new LinkedHashMap<>(requestResolver.getResolvedContributionBindings()),
+        new LinkedHashMap<>(requestResolver.getResolvedMembersInjectionBindings()),
+        List.copyOf(subgraphs));
   }
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */
@@ -544,7 +547,7 @@ public final class BindingGraphFactory implements ClearableCache {
     private boolean isResolvedInParent(Key requestKey, ContributionBinding binding) {
       Optional<Resolver> owningResolver = getOwningResolver(binding);
       if (owningResolver.isPresent() && !owningResolver.get().equals(this)) {
-        parentResolver.get().resolve(requestKey);
+        parentResolver.orElseThrow().resolve(requestKey);
         return true;
       } else {
         return false;
@@ -553,8 +556,10 @@ public final class BindingGraphFactory implements ClearableCache {
 
     private Optional<Resolver> getOwningResolver(ContributionBinding binding) {
 
+      List<Resolver> resolverLineage = new ArrayList<>(getResolverLineage());
+      Collections.reverse(resolverLineage);
       if (binding.scope().isPresent() && binding.scope().get().isReusable()) {
-        for (Resolver requestResolver : getResolverLineage().reverse()) {
+        for (Resolver requestResolver : resolverLineage) {
           // If a @Reusable binding was resolved in an ancestor, use that component.
           ResolvedBindings resolvedBindings =
               requestResolver.resolvedContributionBindings.get(binding.key());
@@ -567,7 +572,7 @@ public final class BindingGraphFactory implements ClearableCache {
         return Optional.empty();
       }
 
-      for (Resolver requestResolver : getResolverLineage().reverse()) {
+      for (Resolver requestResolver : resolverLineage) {
         if (requestResolver.containsExplicitBinding(binding)) {
           return Optional.of(requestResolver);
         }
@@ -577,7 +582,7 @@ public final class BindingGraphFactory implements ClearableCache {
       // in the † compatibility mode
       Optional<Scope> bindingScope = binding.scope();
       if (bindingScope.isPresent()) {
-        for (Resolver requestResolver : getResolverLineage().reverse()) {
+        for (Resolver requestResolver : resolverLineage) {
           if (requestResolver.componentDescriptor.scopes().contains(bindingScope.get())) {
             return Optional.of(requestResolver);
           }
@@ -616,14 +621,15 @@ public final class BindingGraphFactory implements ClearableCache {
     }
 
     /** Returns the resolver lineage from parent to child. */
-    private ImmutableList<Resolver> getResolverLineage() {
-      ImmutableList.Builder<Resolver> resolverList = ImmutableList.builder();
+    private List<Resolver> getResolverLineage() {
+      List<Resolver> resolverList = new ArrayList<>();
       for (Optional<Resolver> currentResolver = Optional.of(this);
            currentResolver.isPresent();
            currentResolver = currentResolver.get().parentResolver) {
         resolverList.add(currentResolver.get());
       }
-      return resolverList.build().reverse();
+      Collections.reverse(resolverList);
+      return resolverList;
     }
 
     /**
