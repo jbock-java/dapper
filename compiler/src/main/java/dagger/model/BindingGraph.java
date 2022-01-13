@@ -16,10 +16,10 @@
 
 package dagger.model;
 
-import static com.google.common.collect.Sets.intersection;
 import static com.google.common.graph.Graphs.inducedSubgraph;
 import static com.google.common.graph.Graphs.reachableNodes;
 import static com.google.common.graph.Graphs.transpose;
+import static dagger.internal.codegen.base.Util.intersection;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
@@ -198,7 +198,7 @@ public abstract class BindingGraph {
     return componentNodes().stream()
         .filter(node -> node.componentPath().atRoot())
         .findFirst()
-        .get();
+        .orElseThrow();
   }
 
   /** Returns the dependency edges. */
@@ -224,14 +224,7 @@ public abstract class BindingGraph {
     Network<Node, DependencyEdge> subgraphDependingOnBinding =
         inducedSubgraph(
             dependencyGraph, reachableNodes(transpose(dependencyGraph).asGraph(), binding));
-    return intersection(entryPointEdges(), subgraphDependingOnBinding.edges()).immutableCopy();
-  }
-
-  /** Returns the bindings that directly request a given binding as a dependency. */
-  public Set<Binding> requestingBindings(MaybeBinding binding) {
-    return network().predecessors(binding).stream()
-        .flatMap(instancesOf(Binding.class))
-        .collect(toImmutableSet());
+    return intersection(entryPointEdges(), subgraphDependingOnBinding.edges());
   }
 
   /**

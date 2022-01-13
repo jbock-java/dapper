@@ -16,9 +16,6 @@
 
 package dagger.model;
 
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
-
 import dagger.Lazy;
 
 /**
@@ -68,7 +65,7 @@ public enum RequestKind {
         return String.format("injectMembers(%s)", key);
 
       default:
-        return String.format("%s<%s>", UPPER_UNDERSCORE.to(UPPER_CAMEL, name()), key);
+        return String.format("%s<%s>", upperCamelName, key);
     }
   }
 

@@ -52,7 +52,6 @@ import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.RequestKind;
-import dagger.producers.Producer;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.Comparator;
@@ -193,7 +192,7 @@ final class OptionalFactories {
       this.valueKind = requireNonNull(valueKind);
     }
 
-    /** Whether the factory is a {@link Provider} or a {@link Producer}. */
+    /** Whether the factory is a {@link Provider}. */
     FrameworkType frameworkType() {
       return frameworkType;
     }
@@ -274,7 +273,7 @@ final class OptionalFactories {
    *       implements {@code Provider<Optional<Provider<Lazy<T>>>>}.
    * </ul>
    *
-   * @param delegateFactory an expression for a {@link Provider} or {@link Producer} of the
+   * @param delegateFactory an expression for a {@link Provider} of the
    *     underlying type
    */
   CodeBlock presentOptionalFactory(ContributionBinding binding, CodeBlock delegateFactory) {

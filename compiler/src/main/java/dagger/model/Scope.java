@@ -17,12 +17,12 @@
 package dagger.model;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
+import dagger.internal.codegen.base.Preconditions;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
@@ -53,7 +53,7 @@ public final class Scope {
    * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
   public static Scope scope(AnnotationMirror scopeAnnotation) {
-    checkArgument(isScope(scopeAnnotation));
+    Preconditions.checkArgument(isScope(scopeAnnotation));
     return new Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
   }
 

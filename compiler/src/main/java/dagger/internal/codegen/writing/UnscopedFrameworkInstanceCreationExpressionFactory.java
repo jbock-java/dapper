@@ -84,8 +84,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   }
 
   /**
-   * Returns an unscoped creation expression for a {@code Provider} for provision
-   * bindings or a {@link dagger.producers.Producer} for production bindings.
+   * Returns an unscoped creation expression for a {@code Provider}.
    */
   FrameworkInstanceCreationExpression create(ContributionBinding binding) {
     switch (binding.kind()) {
