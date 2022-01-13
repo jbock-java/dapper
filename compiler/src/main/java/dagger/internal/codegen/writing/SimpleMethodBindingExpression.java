@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
@@ -30,6 +29,7 @@ import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -63,7 +63,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
     super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
-    checkArgument(provisionBinding.bindingElement().isPresent());
+    Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
     this.componentBindingExpressions = componentBindingExpressions;
     this.membersInjectionMethods = membersInjectionMethods;
     this.componentRequirementExpressions = componentRequirementExpressions;

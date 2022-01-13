@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.binding.ContributionBinding;
 
@@ -25,7 +25,7 @@ abstract class SimpleInvocationBindingExpression extends BindingExpression {
   private final ContributionBinding binding;
 
   SimpleInvocationBindingExpression(ContributionBinding binding) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
   }
 
   @Override

@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.setFactoryClassName;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
@@ -42,7 +42,7 @@ final class SetFactoryCreationExpression extends MultibindingFactoryCreationExpr
       ComponentBindingExpressions componentBindingExpressions,
       BindingGraph graph) {
     super(binding, componentImplementation, componentBindingExpressions);
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.graph = graph;
   }
 
@@ -90,7 +90,7 @@ final class SetFactoryCreationExpression extends MultibindingFactoryCreationExpr
     return builder.add(".build()").build();
   }
 
- @AssistedFactory
+  @AssistedFactory
   interface Factory {
     SetFactoryCreationExpression create(ContributionBinding binding);
   }

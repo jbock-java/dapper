@@ -149,6 +149,9 @@ public final class Util {
   }
 
   public static <E> List<List<E>> partition(List<E> list, int size) {
+    if (list.size() <= size) {
+      return List.of(list);
+    }
     List<List<E>> result = new ArrayList<>();
     List<E> current = null;
     for (int i = 0; i < list.size(); i++) {

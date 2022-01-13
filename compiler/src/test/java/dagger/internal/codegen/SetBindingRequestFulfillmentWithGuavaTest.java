@@ -96,25 +96,24 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
         "package test;",
-        "",
-        "import com.google.common.collect.ImmutableSet;");
+        "");
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedAnnotationsIndividual());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  @Override",
         "  public Set<String> strings() {",
-        "    return ImmutableSet.<String>builderWithExpectedSize(2).addAll(EmptySetModule_EmptySetFactory.emptySet()).add(SetModule_StringFactory.string()).build();",
+        "    return SetBuilder.<String>newSetBuilder(2).addAll(EmptySetModule_EmptySetFactory.emptySet()).add(SetModule_StringFactory.string()).build();",
         "  }",
         "",
         "  @Override",
         "  public Set<Object> objects() {",
-        "    return ImmutableSet.<Object>of();",
+        "    return Set.<Object>of();",
         "  }",
         "",
         "  @Override",
         "  public Set<Integer> onlyContributionIsElementsIntoSet() {",
-        "    return ImmutableSet.<Integer>copyOf(EmptySetModule_OnlyContributionIsElementsIntoSetFactory.onlyContributionIsElementsIntoSet());",
+        "    return SetBuilder.<Integer>newSetBuilder(1).addAll(EmptySetModule_OnlyContributionIsElementsIntoSetFactory.onlyContributionIsElementsIntoSet()).build();",
         "  }",
         "}");
     Compilation compilation =
@@ -192,7 +191,6 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     Collections.addAll(generatedComponent,
         "package test;",
         "",
-        "import com.google.common.collect.ImmutableSet;",
         "import other.TestModule_EmptySetFactory;",
         "import other.UsesInaccessible;",
         "import other.UsesInaccessible_Factory;");
@@ -201,12 +199,12 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private Set setOfInaccessible2() {",
-        "    return ImmutableSet.copyOf(TestModule_EmptySetFactory.emptySet());",
+        "    return SetBuilder.newSetBuilder(1).addAll(TestModule_EmptySetFactory.emptySet()).build();",
         "  }",
         "",
         "  @Override",
         "  public UsesInaccessible usesInaccessible() {",
-        "    return UsesInaccessible_Factory.newInstance((Set) ImmutableSet.of(), (Set) setOfInaccessible2());",
+        "    return UsesInaccessible_Factory.newInstance((Set) Set.of(), (Set) setOfInaccessible2());",
         "  }",
         "}");
     Compilation compilation =
@@ -262,8 +260,7 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
         "package test;",
-        "",
-        "import com.google.common.collect.ImmutableSet;");
+        "");
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedAnnotationsIndividual());
     Collections.addAll(generatedComponent,
@@ -271,7 +268,7 @@ public class SetBindingRequestFulfillmentWithGuavaTest {
         "  private static final class ChildImpl implements Child {",
         "    @Override",
         "    public Set<Object> objectSet() {",
-        "      return ImmutableSet.<Object>of(ParentModule_ParentObjectFactory.parentObject());",
+        "      return Set.<Object>of(ParentModule_ParentObjectFactory.parentObject());",
         "    }",
         "  }",
         "}");

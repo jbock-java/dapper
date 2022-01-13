@@ -106,7 +106,7 @@ public class SetBindingRequestFulfillmentTest {
         "",
         "  @Override",
         "  public Set<Object> objects() {",
-        "    return Collections.<Object>emptySet();",
+        "    return Set.<Object>of();",
         "  }",
         "}");
     Compilation compilation =
@@ -161,7 +161,7 @@ public class SetBindingRequestFulfillmentTest {
             "",
             "  @Provides @ElementsIntoSet",
             "  static Set<Inaccessible2> emptySet() { ",
-            "    return Collections.emptySet();",
+            "    return Set.of();",
             "  }",
             "}");
     JavaFileObject componentFile =
@@ -197,7 +197,7 @@ public class SetBindingRequestFulfillmentTest {
         "",
         "  @Override",
         "  public UsesInaccessible usesInaccessible() {",
-        "    return UsesInaccessible_Factory.newInstance((Set) Collections.emptySet(), (Set) setOfInaccessible2());",
+        "    return UsesInaccessible_Factory.newInstance((Set) Set.of(), (Set) setOfInaccessible2());",
         "  }",
         "}");
     Compilation compilation =
@@ -256,7 +256,6 @@ public class SetBindingRequestFulfillmentTest {
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedImportsIndividual(
             "import dagger.internal.Preconditions;",
-            "import java.util.Collections;",
             "import java.util.Set;"));
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedAnnotationsIndividual());
@@ -306,7 +305,7 @@ public class SetBindingRequestFulfillmentTest {
         "",
         "    @Override",
         "    public Set<Object> objectSet() {",
-        "      return Collections.<Object>singleton(ParentModule_ParentObjectFactory.parentObject());",
+        "      return Set.<Object>of(ParentModule_ParentObjectFactory.parentObject());",
         "    }",
         "  }",
         "}");

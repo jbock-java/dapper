@@ -16,10 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.collect.Iterables.getLast;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
@@ -31,8 +30,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -40,6 +37,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.Expression;
@@ -121,7 +119,8 @@ final class SwitchingProviders {
       shardImplementation.addTypeSupplier(switchingProviderBuilder::build);
       return switchingProviderBuilder;
     }
-    return getLast(switchingProviderBuilders.values());
+    ArrayList<SwitchingProviderBuilder> values = new ArrayList<>(this.switchingProviderBuilders.values());
+    return values.get(values.size() - 1);
   }
 
   // TODO(bcorso): Consider just merging this class with SwitchingProviders.
@@ -237,7 +236,7 @@ final class SwitchingProviders {
     }
 
     private List<CodeBlock> switchCodeBlockPartitions() {
-      return Lists.partition(ImmutableList.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
+      return Util.partition(List.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
           .stream()
           .map(
               partitionCases ->

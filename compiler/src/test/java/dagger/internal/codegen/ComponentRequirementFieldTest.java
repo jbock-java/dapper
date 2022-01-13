@@ -369,7 +369,7 @@ public class ComponentRequirementFieldTest {
           "",
           "  private static final class TestSubcomponentImpl implements TestSubcomponent {",
           "    private Set<Object> setOfObject() {",
-          "      return ImmutableSet.<Object>of(ParentModule_ContributionFactory.contribution(), ChildModule_ContributionFactory.contribution());",
+          "      return SetBuilder.<Object>newSetBuilder(2).add(ParentModule_ContributionFactory.contribution()).add(ChildModule_ContributionFactory.contribution()).build();",
           "    }",
           "",
           "    private Object object() {",
