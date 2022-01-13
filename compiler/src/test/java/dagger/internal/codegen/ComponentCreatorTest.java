@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
@@ -77,7 +76,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testEmptyCreator() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject injectableTypeFile =
         JavaFileObjects.forSourceLines(
             "test.SomeInjectableType",
@@ -128,7 +126,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testCanInstantiateModulesUserCannotSet() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -328,7 +325,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testCreatorWithBindsInstanceNoStaticCreateGenerated() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject componentFile =
         javaFileBuilder("test.SimpleComponent")
             .addLines(
@@ -431,7 +427,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testCreatorWithPrimitiveBindsInstance() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject componentFile =
         javaFileBuilder("test.SimpleComponent")
             .addLines(
@@ -801,7 +796,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testMultipleSettersPerTypeFails() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -860,7 +854,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testMultipleSettersPerTypeIncludingResolvedGenericsFails() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -924,7 +917,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void testExtraSettersFails() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject componentFile =
         javaFileBuilder("test.SimpleComponent")
             .addLines(
@@ -1057,7 +1049,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void covariantFactoryMethodReturnType() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -1098,7 +1089,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void covariantFactoryMethodReturnType_hasNewMethod() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -1160,7 +1150,6 @@ public class ComponentCreatorTest extends ComponentCreatorTestHelper {
 
   @Test
   public void covariantFactoryMethodReturnType_hasNewMethod_factoryMethodInherited() {
-    assume().that(compilerType).isEqualTo(JAVAC);
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",

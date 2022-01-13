@@ -896,7 +896,7 @@ public class MembersInjectionTest {
     assertAbout(javaSource())
         .that(nestedTypesFile)
         .withCompilerOptions(compilerMode.javacopts())
-        .processedWith(
+        .processedWith(List.of(
             new ComponentProcessor(),
             new AbstractProcessor() {
               private boolean done;
@@ -932,7 +932,7 @@ public class MembersInjectionTest {
                 }
                 return false;
               }
-            })
+            }))
         .compilesWithoutError()
         .and()
         .containsLines("test.OuterType_B_MembersInjector", bMembersInjector);

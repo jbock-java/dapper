@@ -18,7 +18,7 @@ package dagger.internal.codegen;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,15 +28,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Elements;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public class ElementDescriptorsTest {
-
-  @Rule public CompilationRule compilation = new CompilationRule();
 
   static class TestClassA<T> {
     int field1;
@@ -44,6 +42,14 @@ public class ElementDescriptorsTest {
     T field3;
     List<String> field4;
   }
+
+  private Elements elements;
+
+  @BeforeEach
+  public void setUp(Elements elements) {
+    this.elements = elements;
+  }
+
 
   @Test
   public void fieldDescriptor() {
@@ -212,14 +218,14 @@ public class ElementDescriptorsTest {
   }
 
   private Set<String> getFieldDescriptors(String className) {
-    TypeElement testElement = compilation.getElements().getTypeElement(className);
+    TypeElement testElement = elements.getTypeElement(className);
     return ElementFilter.fieldsIn(testElement.getEnclosedElements()).stream()
         .map(DaggerElements::getFieldDescriptor)
         .collect(Collectors.toSet());
   }
 
   private Set<String> getMethodDescriptors(String className) {
-    TypeElement testElement = compilation.getElements().getTypeElement(className);
+    TypeElement testElement = elements.getTypeElement(className);
     return ElementFilter.methodsIn(testElement.getEnclosedElements()).stream()
         .map(DaggerElements::getMethodDescriptor)
         .collect(Collectors.toSet());

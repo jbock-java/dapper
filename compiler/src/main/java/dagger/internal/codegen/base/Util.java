@@ -51,6 +51,9 @@ public final class Util {
   }
 
   public static <E> Set<E> setOf(Iterable<? extends E> elements) {
+    if (elements instanceof Set) {
+      return (Set) elements;
+    }
     LinkedHashSet<E> result = new LinkedHashSet<>();
     for (E element : elements) {
       result.add(element);
@@ -59,6 +62,9 @@ public final class Util {
   }
 
   public static <E> List<E> listOf(Iterable<? extends E> elements) {
+    if (elements instanceof List) {
+      return (List) elements;
+    }
     ArrayList<E> result = new ArrayList<>();
     for (E element : elements) {
       result.add(element);

@@ -21,8 +21,9 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1122' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1121' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1122' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1123' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -52,11 +53,12 @@ dependencies {
     testImplementation('io.github.jbock-java:auto-common:1.2.1')
 //    testImplementation('io.github.jbock-java:auto-value-annotations:1.8.2.0')
 //    testImplementation('io.github.jbock-java:auto-value:1.8.2.0')
-    testImplementation('io.github.jbock-java:compile-testing:0.19.10')
+    testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
     testImplementation('org.junit.vintage:junit-vintage-engine:5.8.1')
     testImplementation('org.hamcrest:hamcrest-core:2.2')
     testImplementation('org.assertj:assertj-core:3.21.0')
+    testImplementation('io.github.jbock-java:guava:31.0.1.1')
     // why is this necessary?
     testImplementation('com.google.errorprone:error_prone_annotations:2.4.0')
     // why is this necessary?

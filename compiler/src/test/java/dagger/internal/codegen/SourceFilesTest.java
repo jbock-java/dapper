@@ -19,23 +19,29 @@ package dagger.internal.codegen;
 import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.binding.SourceFiles;
 import java.util.List;
 import javax.lang.model.element.TypeElement;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Elements;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Tests for {@link SourceFiles}. */
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public final class SourceFilesTest {
-  @Rule
-  public CompilationRule compilation = new CompilationRule();
+
+  private Elements elements;
+
+  @BeforeEach
+  public void setUp(Elements elements) {
+    this.elements = elements;
+  }
+
 
   private TypeElement typeElementFor(Class<?> clazz) {
-    return compilation.getElements().getTypeElement(clazz.getCanonicalName());
+    return elements.getTypeElement(clazz.getCanonicalName());
   }
 
   private static final class Int {

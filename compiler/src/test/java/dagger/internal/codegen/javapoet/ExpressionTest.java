@@ -19,22 +19,21 @@ package dagger.internal.codegen.javapoet;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.auto.common.MoreTypes;
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public class ExpressionTest {
-  @Rule
-  public CompilationRule compilationRule = new CompilationRule();
+
   private DaggerElements elements;
   private DaggerTypes types;
 
@@ -44,10 +43,10 @@ public class ExpressionTest {
   interface Subtype extends Supertype {
   }
 
-  @Before
-  public void setUp() {
-    elements = new DaggerElements(compilationRule.getElements(), compilationRule.getTypes());
-    types = new DaggerTypes(compilationRule.getTypes(), elements);
+  @BeforeEach
+  public void setUp(Elements elements, Types types) {
+    this.elements = new DaggerElements(elements, types);
+    this.types = new DaggerTypes(types, this.elements);
   }
 
   @Test

@@ -21,31 +21,27 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.javadocLinkTo;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static javax.lang.model.element.ElementKind.METHOD;
 
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import com.squareup.javapoet.CodeBlock;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Tests for {@link CodeBlocks}. */
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public final class CodeBlocksTest {
   private static final CodeBlock objectO = CodeBlock.of("$T o", Object.class);
   private static final CodeBlock stringS = CodeBlock.of("$T s", String.class);
   private static final CodeBlock intI = CodeBlock.of("$T i", int.class);
 
-  @Rule
-  public CompilationRule compilationRule = new CompilationRule();
   private Elements elements;
 
-  @Before
-  public void setUp() {
-    this.elements = compilationRule.getElements();
+  @BeforeEach
+  public void setUp(Elements elements) {
+    this.elements = elements;
   }
 
   @Test

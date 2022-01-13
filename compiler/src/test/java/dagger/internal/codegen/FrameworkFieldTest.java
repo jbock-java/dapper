@@ -22,30 +22,27 @@ import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.javapoet.TypeNames.membersInjectorOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.FrameworkField;
 import jakarta.inject.Inject;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Elements;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Test case for {@link FrameworkField}.
  */
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public class FrameworkFieldTest {
-  @Rule
-  public CompilationRule compilationRule = new CompilationRule();
 
   private ClassName xTypeName;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  public void setUp(Elements elements) {
     xTypeName =
-        ClassName.get(compilationRule.getElements().getTypeElement(X.class.getCanonicalName()));
+        ClassName.get(elements.getTypeElement(X.class.getCanonicalName()));
   }
 
   @Test

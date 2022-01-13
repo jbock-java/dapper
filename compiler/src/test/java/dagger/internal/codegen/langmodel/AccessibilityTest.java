@@ -19,30 +19,19 @@ package dagger.internal.codegen.langmodel;
 import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
 
-import com.google.testing.compile.CompilationRule;
+import com.google.testing.compile.CompilationExtension;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 @SuppressWarnings("unused") // contains a variety things used by the compilation rule for testing
 public class AccessibilityTest {
   /* test data */
   public AccessibilityTest() {
-  }
-
-  protected AccessibilityTest(Object o) {
-  }
-
-  AccessibilityTest(Object o1, Object o2) {
-  }
-
-  private AccessibilityTest(Object o1, Object o2, Object o3) {
   }
 
   public String publicField;
@@ -74,14 +63,10 @@ public class AccessibilityTest {
   private static final class PrivateNestedClass {
   }
 
-  @Rule
-  public final CompilationRule compilationRule = new CompilationRule();
-
   private TypeElement testElement;
 
-  @Before
-  public void setUp() {
-    Elements elements = compilationRule.getElements();
+  @BeforeEach
+  public void setUp(Elements elements) {
     testElement = elements.getTypeElement(AccessibilityTest.class.getCanonicalName());
   }
 
