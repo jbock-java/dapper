@@ -16,36 +16,42 @@
 
 package dagger.model;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getLast;
 import static java.util.stream.Collectors.joining;
 
-import com.google.common.collect.ImmutableList;
+import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.base.Util;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import javax.lang.model.element.TypeElement;
 
 /** A path containing a component and all of its ancestor components. */
 public final class ComponentPath {
 
-  private final ImmutableList<TypeElement> components;
+  private final List<TypeElement> components;
 
   private final int hashCode;
+  private final Supplier<ComponentPath> parent = Suppliers.memoize(() -> {
+    Preconditions.checkState(!atRoot());
+    return create(components().subList(0, components().size() - 1));
+  });
 
-  private ComponentPath(ImmutableList<TypeElement> components) {
+  private ComponentPath(List<TypeElement> components) {
     this.components = Objects.requireNonNull(components);
     this.hashCode = components.hashCode();
   }
 
   /** Returns a new {@link ComponentPath} from {@code components}. */
   public static ComponentPath create(Iterable<TypeElement> components) {
-    return new ComponentPath(ImmutableList.copyOf(components));
+    return new ComponentPath(Util.listOf(components));
   }
 
   /**
    * Returns the component types, starting from the {@linkplain #rootComponent() root
    * component} and ending with the {@linkplain #currentComponent() current component}.
    */
-  public ImmutableList<TypeElement> components() {
+  public List<TypeElement> components() {
     return components;
   }
 
@@ -59,7 +65,8 @@ public final class ComponentPath {
 
   /** Returns the component at the end of the path. */
   public TypeElement currentComponent() {
-    return getLast(components());
+    List<TypeElement> components = components();
+    return components.get(components.size() - 1);
   }
 
   /**
@@ -68,8 +75,9 @@ public final class ComponentPath {
    * @throws IllegalStateException if the current graph is the {@linkplain #atRoot() root component}
    */
   public TypeElement parentComponent() {
-    checkState(!atRoot());
-    return components().reverse().get(1);
+    Preconditions.checkState(!atRoot());
+    List<TypeElement> components = components();
+    return components.get(components.size() - 2);
   }
 
   /**
@@ -77,15 +85,13 @@ public final class ComponentPath {
    *
    * @throws IllegalStateException if the current graph is the {@linkplain #atRoot() root component}
    */
-  // TODO(ronshapiro): consider memoizing this
   public ComponentPath parent() {
-    checkState(!atRoot());
-    return create(components().subList(0, components().size() - 1));
+    return parent.get();
   }
 
   /** Returns the path from the root component to the {@code child} of the current component. */
   public ComponentPath childPath(TypeElement child) {
-    return create(ImmutableList.<TypeElement>builder().addAll(components()).add(child).build());
+    return create(Util.concat(components, List.of(child)));
   }
 
   /**
