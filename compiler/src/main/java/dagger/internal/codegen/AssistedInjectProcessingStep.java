@@ -17,13 +17,11 @@
 package dagger.internal.codegen;
 
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.base.Preconditions.checkState;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -32,6 +30,7 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import jakarta.inject.Inject;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ElementKind;
@@ -51,8 +50,8 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.ASSISTED_INJECT);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.ASSISTED_INJECT);
   }
 
   @Override
@@ -63,12 +62,12 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
 
   private final class AssistedInjectValidator {
     ValidationReport<ExecutableElement> validate(ExecutableElement constructor) {
-      checkState(constructor.getKind() == ElementKind.CONSTRUCTOR);
+      Preconditions.checkState(constructor.getKind() == ElementKind.CONSTRUCTOR);
       ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(constructor);
 
       DeclaredType assistedInjectType =
           asDeclared(closestEnclosingTypeElement(constructor).asType());
-      ImmutableList<AssistedParameter> assistedParameters =
+      List<AssistedParameter> assistedParameters =
           AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType, types);
 
       Set<AssistedParameter> uniqueAssistedParameters = new HashSet<>();

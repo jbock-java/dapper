@@ -23,8 +23,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.lang.model.util.ElementFilter.typesIn;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingFactory;
@@ -39,6 +37,7 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +58,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator;
   private final InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator;
   private final DelegateDeclaration.Factory delegateDeclarationFactory;
-  private final Set<TypeElement> processedModuleElements = Sets.newLinkedHashSet();
+  private final Set<TypeElement> processedModuleElements = new LinkedHashSet<>();
 
   @Inject
   ModuleProcessingStep(
@@ -82,7 +81,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
 
   @Override
   public Set<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.MODULE);
+    return Set.of(TypeNames.MODULE);
   }
 
   @Override

@@ -17,13 +17,13 @@
 package dagger.internal.codegen;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -38,7 +38,7 @@ import javax.lang.model.util.ElementKindVisitor8;
 // TODO(gak): add some error handling for bad source files
 final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   private final ElementVisitor<Void, Void> visitor;
-  private final Set<Element> processedElements = Sets.newLinkedHashSet();
+  private final Set<Element> processedElements = new LinkedHashSet<>();
 
   @Inject
   InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
@@ -69,8 +69,8 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+  public Set<ClassName> annotationClassNames() {
+    return new LinkedHashSet<>(List.of(TypeNames.INJECT, TypeNames.ASSISTED_INJECT));
   }
 
   @Override

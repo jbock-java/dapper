@@ -21,7 +21,6 @@ import static javax.lang.model.element.ElementKind.ANNOTATION_TYPE;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.MapKey;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -66,8 +65,8 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.MAP_KEY);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.MAP_KEY);
   }
 
   @Override

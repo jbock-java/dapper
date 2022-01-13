@@ -20,7 +20,6 @@ import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
@@ -59,8 +58,8 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   }
 
   @Override
-  public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.ASSISTED);
+  public Set<ClassName> annotationClassNames() {
+    return Set.of(TypeNames.ASSISTED);
   }
 
   @Override

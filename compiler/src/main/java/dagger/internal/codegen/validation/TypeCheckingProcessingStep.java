@@ -16,17 +16,17 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Sets.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 import com.google.auto.common.BasicAnnotationProcessor.Step;
 import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -44,7 +44,7 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
   private final Function<Element, E> downcaster;
 
   protected TypeCheckingProcessingStep(Function<Element, E> downcaster) {
-    this.downcaster = checkNotNull(downcaster);
+    this.downcaster = requireNonNull(downcaster);
   }
 
   @Override
@@ -57,11 +57,11 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
     Map<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
-    checkState(
+    Preconditions.checkState(
         annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
         "Unexpected annotations for %s: %s",
         this.getClass().getName(),
-        difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
+        Util.difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
     Set<Element> deferredElements = new LinkedHashSet<>();
     elementsByAnnotation.entrySet().stream()

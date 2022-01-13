@@ -172,8 +172,8 @@ public final class AssistedInjectionAnnotations {
     private final ExecutableElement factoryMethod;
     private final TypeElement assistedInjectElement;
     private final DeclaredType assistedInjectType;
-    private final ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters;
-    private final ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters;
+    private final List<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters;
+    private final List<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters;
 
     private AssistedFactoryMetadata(
         TypeElement factory,
@@ -181,8 +181,8 @@ public final class AssistedInjectionAnnotations {
         ExecutableElement factoryMethod,
         TypeElement assistedInjectElement,
         DeclaredType assistedInjectType,
-        ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters,
-        ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters) {
+        List<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters,
+        List<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters) {
       this.factory = requireNonNull(factory);
       this.factoryType = requireNonNull(factoryType);
       this.factoryMethod = requireNonNull(factoryMethod);
@@ -230,11 +230,11 @@ public final class AssistedInjectionAnnotations {
       return assistedInjectType;
     }
 
-    public ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters() {
+    public List<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters() {
       return assistedInjectAssistedParameters;
     }
 
-    public ImmutableList<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters() {
+    public List<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters() {
       return assistedFactoryAssistedParameters;
     }
 
@@ -325,7 +325,7 @@ public final class AssistedInjectionAnnotations {
     }
   }
 
-  public static ImmutableList<AssistedParameter> assistedInjectAssistedParameters(
+  public static List<AssistedParameter> assistedInjectAssistedParameters(
       DeclaredType assistedInjectType, DaggerTypes types) {
     // We keep track of the constructor both as an ExecutableElement to access @Assisted
     // parameters and as an ExecutableType to access the resolved parameter types.
