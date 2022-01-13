@@ -25,7 +25,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableSetMultimap;
 import dagger.BindsInstance;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
@@ -33,7 +32,7 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -192,8 +191,8 @@ public final class ComponentCreatorDescriptor {
     TypeElement typeElement = asTypeElement(type);
     TypeMirror componentType = typeElement.getEnclosingElement().asType();
 
-    ImmutableSetMultimap.Builder<ComponentRequirement, ExecutableElement> setterMethods =
-        ImmutableSetMultimap.builder();
+    Map<ComponentRequirement, Set<ExecutableElement>> setterMethods =
+        new LinkedHashMap<>();
 
     ExecutableElement factoryMethod = null;
     for (ExecutableElement method : elements.getUnimplementedMethods(typeElement)) {
@@ -204,15 +203,15 @@ public final class ComponentCreatorDescriptor {
       } else {
         VariableElement parameter = getOnlyElement(method.getParameters());
         TypeMirror parameterType = getOnlyElement(resolvedMethodType.getParameterTypes());
-        setterMethods.put(
+        setterMethods.merge(
             requirement(method, parameter, parameterType, dependencyRequestFactory, method),
-            method);
+            Set.of(method), Util::mutableUnion);
       }
     }
     Preconditions.checkState(factoryMethod != null); // validation should have ensured this.
 
-    ImmutableSetMultimap.Builder<ComponentRequirement, VariableElement> factoryParameters =
-        ImmutableSetMultimap.builder();
+    Map<ComponentRequirement, Set<VariableElement>> factoryParameters =
+        new LinkedHashMap<>();
 
     ExecutableType resolvedFactoryMethodType =
         MoreTypes.asExecutable(types.asMemberOf(type, factoryMethod));
@@ -221,17 +220,17 @@ public final class ComponentCreatorDescriptor {
     for (int i = 0; i < parameters.size(); i++) {
       VariableElement parameter = parameters.get(i);
       TypeMirror parameterType = parameterTypes.get(i);
-      factoryParameters.put(
+      factoryParameters.merge(
           requirement(factoryMethod, parameter, parameterType, dependencyRequestFactory, parameter),
-          parameter);
+          Set.of(parameter), Util::mutableUnion);
     }
 
     // Validation should have ensured exactly one creator annotation is present on the type.
     ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(typeElement));
     return new ComponentCreatorDescriptor(
         annotation, typeElement, factoryMethod,
-        Util.transformValues(setterMethods.build().asMap(), LinkedHashSet::new),
-        Util.transformValues(factoryParameters.build().asMap(), LinkedHashSet::new));
+        setterMethods,
+        factoryParameters);
   }
 
   private static ComponentRequirement requirement(

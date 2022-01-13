@@ -33,8 +33,6 @@ import static javax.lang.model.util.ElementFilter.constructorsIn;
 import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
@@ -45,7 +43,10 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.lang.model.element.Element;
@@ -93,18 +94,18 @@ public final class AssistedInjectionAnnotations {
    * of each parameter will be the name given in the {@link
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
-  public static ImmutableList<ParameterSpec> assistedParameterSpecs(
+  public static List<ParameterSpec> assistedParameterSpecs(
       Binding binding, DaggerTypes types) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
-    ExecutableElement constructor = asExecutable(binding.bindingElement().get());
+    ExecutableElement constructor = asExecutable(binding.bindingElement().orElseThrow());
     ExecutableType constructorType =
         asExecutable(types.asMemberOf(asDeclared(binding.key().type()), constructor));
     return assistedParameterSpecs(constructor.getParameters(), constructorType.getParameterTypes());
   }
 
-  private static ImmutableList<ParameterSpec> assistedParameterSpecs(
+  private static List<ParameterSpec> assistedParameterSpecs(
       List<? extends VariableElement> paramElements, List<? extends TypeMirror> paramTypes) {
-    ImmutableList.Builder<ParameterSpec> assistedParameterSpecs = ImmutableList.builder();
+    List<ParameterSpec> assistedParameterSpecs = new ArrayList<>();
     for (int i = 0; i < paramElements.size(); i++) {
       VariableElement paramElement = paramElements.get(i);
       TypeMirror paramType = paramTypes.get(i);
@@ -114,7 +115,7 @@ public final class AssistedInjectionAnnotations {
                 .build());
       }
     }
-    return assistedParameterSpecs.build();
+    return assistedParameterSpecs;
   }
 
   /**
@@ -124,12 +125,12 @@ public final class AssistedInjectionAnnotations {
    * of each parameter will be the name given in the {@link
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
-  public static ImmutableList<ParameterSpec> assistedFactoryParameterSpecs(
+  public static List<ParameterSpec> assistedFactoryParameterSpecs(
       Binding binding, DaggerElements elements, DaggerTypes types) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
 
     AssistedFactoryMetadata metadata =
-        AssistedFactoryMetadata.create(binding.bindingElement().get().asType(), elements, types);
+        AssistedFactoryMetadata.create(binding.bindingElement().orElseThrow().asType(), elements, types);
     ExecutableType factoryMethodType =
         asExecutable(types.asMemberOf(asDeclared(binding.key().type()), metadata.factoryMethod()));
     return assistedParameterSpecs(
@@ -150,7 +151,7 @@ public final class AssistedInjectionAnnotations {
 
   public static List<VariableElement> assistedParameters(Binding binding) {
     return binding.kind() == BindingKind.ASSISTED_INJECTION
-        ? assistedParameters(asExecutable(binding.bindingElement().get()))
+        ? assistedParameters(asExecutable(binding.bindingElement().orElseThrow()))
         : List.of();
   }
 
@@ -238,20 +239,20 @@ public final class AssistedInjectionAnnotations {
       return assistedFactoryAssistedParameters;
     }
 
-    public ImmutableMap<AssistedParameter, VariableElement> assistedInjectAssistedParametersMap() {
-      ImmutableMap.Builder<AssistedParameter, VariableElement> builder = ImmutableMap.builder();
+    public Map<AssistedParameter, VariableElement> assistedInjectAssistedParametersMap() {
+      Map<AssistedParameter, VariableElement> builder = new LinkedHashMap<>();
       for (AssistedParameter assistedParameter : assistedInjectAssistedParameters()) {
         builder.put(assistedParameter, assistedParameter.variableElement);
       }
-      return builder.build();
+      return builder;
     }
 
-    public ImmutableMap<AssistedParameter, VariableElement> assistedFactoryAssistedParametersMap() {
-      ImmutableMap.Builder<AssistedParameter, VariableElement> builder = ImmutableMap.builder();
+    public Map<AssistedParameter, VariableElement> assistedFactoryAssistedParametersMap() {
+      Map<AssistedParameter, VariableElement> builder = new LinkedHashMap<>();
       for (AssistedParameter assistedParameter : assistedFactoryAssistedParameters()) {
         builder.put(assistedParameter, assistedParameter.variableElement);
       }
-      return builder.build();
+      return builder;
     }
   }
 
@@ -334,7 +335,7 @@ public final class AssistedInjectionAnnotations {
     ExecutableType assistedInjectConstructorType =
         asExecutable(types.asMemberOf(assistedInjectType, assistedInjectConstructor));
 
-    ImmutableList.Builder<AssistedParameter> builder = ImmutableList.builder();
+    List<AssistedParameter> builder = new ArrayList<>();
     for (int i = 0; i < assistedInjectConstructor.getParameters().size(); i++) {
       VariableElement parameter = assistedInjectConstructor.getParameters().get(i);
       TypeMirror parameterType = assistedInjectConstructorType.getParameterTypes().get(i);
@@ -342,18 +343,18 @@ public final class AssistedInjectionAnnotations {
         builder.add(AssistedParameter.create(parameter, parameterType));
       }
     }
-    return builder.build();
+    return builder;
   }
 
-  public static ImmutableList<AssistedParameter> assistedFactoryAssistedParameters(
+  public static List<AssistedParameter> assistedFactoryAssistedParameters(
       ExecutableElement factoryMethod, ExecutableType factoryMethodType) {
-    ImmutableList.Builder<AssistedParameter> builder = ImmutableList.builder();
+    List<AssistedParameter> builder = new ArrayList<>();
     for (int i = 0; i < factoryMethod.getParameters().size(); i++) {
       VariableElement parameter = factoryMethod.getParameters().get(i);
       TypeMirror parameterType = factoryMethodType.getParameterTypes().get(i);
       builder.add(AssistedParameter.create(parameter, parameterType));
     }
-    return builder.build();
+    return builder;
   }
 
   private AssistedInjectionAnnotations() {
