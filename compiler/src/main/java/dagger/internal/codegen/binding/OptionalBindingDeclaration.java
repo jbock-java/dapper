@@ -17,10 +17,10 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import dagger.BindsOptionalOf;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
 import jakarta.inject.Inject;
@@ -95,7 +95,7 @@ final class OptionalBindingDeclaration extends BindingDeclaration {
     }
 
     OptionalBindingDeclaration forMethod(ExecutableElement method, TypeElement contributingModule) {
-      checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
+      Preconditions.checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
       return new OptionalBindingDeclaration(
           Optional.of(method),
           Optional.of(contributingModule),

@@ -18,12 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.binding.ContributionBinding.bindingKindForMultibindingKey;
@@ -41,6 +38,7 @@ import static dagger.model.BindingKind.MEMBERS_INJECTOR;
 import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
 
@@ -49,6 +47,7 @@ import com.google.auto.common.MoreTypes;
 import dagger.Module;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -106,11 +105,11 @@ public final class BindingFactory {
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
       ExecutableElement constructorElement, Optional<TypeMirror> resolvedType) {
-    checkArgument(constructorElement.getKind().equals(CONSTRUCTOR));
-    checkArgument(
+    Preconditions.checkArgument(constructorElement.getKind().equals(CONSTRUCTOR));
+    Preconditions.checkArgument(
         isAnnotationPresent(constructorElement, Inject.class)
             || isAnnotationPresent(constructorElement, AssistedInject.class));
-    checkArgument(!injectionAnnotations.getQualifier(constructorElement).isPresent());
+    Preconditions.checkArgument(!injectionAnnotations.getQualifier(constructorElement).isPresent());
 
     ExecutableType constructorType = MoreTypes.asExecutable(constructorElement.asType());
     DeclaredType constructedType =
@@ -119,7 +118,7 @@ public final class BindingFactory {
     if (!constructedType.getTypeArguments().isEmpty() && resolvedType.isPresent()) {
       DeclaredType resolved = MoreTypes.asDeclared(resolvedType.get());
       // Validate that we're resolving from the correct type.
-      checkState(
+      Preconditions.checkState(
           types.isSameType(types.erasure(resolved), types.erasure(constructedType)),
           "erased expected type: %s, erased actual type: %s",
           types.erasure(resolved),
@@ -170,7 +169,7 @@ public final class BindingFactory {
       DeclaredType resolved = MoreTypes.asDeclared(resolvedType.get());
       // Validate that we're resolving from the correct type by checking that the erasure of the
       // resolvedType is the same as the erasure of the factoryType.
-      checkState(
+      Preconditions.checkState(
           types.isSameType(types.erasure(resolved), types.erasure(factoryType)),
           "erased expected type: %s, erased actual type: %s",
           types.erasure(resolved),
@@ -223,7 +222,7 @@ public final class BindingFactory {
       TypeElement contributedBy,
       Key key,
       BiFunction<ExecutableElement, TypeElement, C> create) {
-    checkArgument(method.getKind().equals(METHOD));
+    Preconditions.checkArgument(method.getKind().equals(METHOD));
     ExecutableType methodType =
         MoreTypes.asExecutable(
             types.asMemberOf(MoreTypes.asDeclared(contributedBy.asType()), method));
@@ -262,7 +261,7 @@ public final class BindingFactory {
 
   /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
   public ProvisionBinding componentBinding(TypeElement componentDefinitionType) {
-    checkNotNull(componentDefinitionType);
+    requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
         .contributionType(ContributionType.UNIQUE)
         .bindingElement(componentDefinitionType)
@@ -276,7 +275,7 @@ public final class BindingFactory {
    * dependency.
    */
   public ProvisionBinding componentDependencyBinding(ComponentRequirement dependency) {
-    checkNotNull(dependency);
+    requireNonNull(dependency);
     return ProvisionBinding.builder()
         .contributionType(ContributionType.UNIQUE)
         .bindingElement(dependency.typeElement())
@@ -291,8 +290,8 @@ public final class BindingFactory {
    */
   public ContributionBinding componentDependencyMethodBinding(
       ExecutableElement dependencyMethod) {
-    checkArgument(dependencyMethod.getKind().equals(METHOD));
-    checkArgument(dependencyMethod.getParameters().isEmpty());
+    Preconditions.checkArgument(dependencyMethod.getKind().equals(METHOD));
+    Preconditions.checkArgument(dependencyMethod.getParameters().isEmpty());
     ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder()
         .key(keyFactory.forComponentMethod(dependencyMethod))
         .nullableType(getNullableType(dependencyMethod))
@@ -309,7 +308,7 @@ public final class BindingFactory {
    * {@code @BindsInstance}-annotated builder setter method or factory method parameter.
    */
   ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, Element element) {
-    checkArgument(element instanceof VariableElement || element instanceof ExecutableElement);
+    Preconditions.checkArgument(element instanceof VariableElement || element instanceof ExecutableElement);
     VariableElement parameterElement =
         element instanceof VariableElement
             ? MoreElements.asVariable(element)
@@ -333,8 +332,8 @@ public final class BindingFactory {
    */
   ProvisionBinding subcomponentCreatorBinding(
       ExecutableElement subcomponentCreatorMethod, TypeElement component) {
-    checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
-    checkArgument(subcomponentCreatorMethod.getParameters().isEmpty());
+    Preconditions.checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
+    Preconditions.checkArgument(subcomponentCreatorMethod.getParameters().isEmpty());
     Key key =
         keyFactory.forSubcomponentCreatorMethod(
             subcomponentCreatorMethod, asDeclared(component.asType()));
@@ -462,7 +461,7 @@ public final class BindingFactory {
     if (!declaredType.getTypeArguments().isEmpty() && resolvedType.isPresent()) {
       DeclaredType resolved = asDeclared(resolvedType.get());
       // Validate that we're resolving from the correct type.
-      checkState(
+      Preconditions.checkState(
           types.isSameType(types.erasure(resolved), types.erasure(declaredType)),
           "erased expected type: %s, erased actual type: %s",
           types.erasure(resolved),

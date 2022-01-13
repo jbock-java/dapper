@@ -16,8 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.binding.MapKeys.getMapKeyExpression;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
@@ -30,6 +29,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.MapBuilder;
 import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -59,7 +59,7 @@ final class MapBindingExpression extends SimpleInvocationBindingExpression {
     super(binding);
     this.binding = binding;
     BindingKind bindingKind = this.binding.kind();
-    checkArgument(bindingKind.equals(MULTIBOUND_MAP), bindingKind);
+    Preconditions.checkArgument(bindingKind.equals(MULTIBOUND_MAP), bindingKind);
     this.componentBindingExpressions = componentBindingExpressions;
     this.elements = elements;
     this.dependencies =

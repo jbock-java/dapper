@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -45,7 +45,7 @@ public final class BindingGraphValidator {
       CompilerOptions compilerOptions) {
     this.validationPlugins = validationPlugins;
     this.externalPlugins = externalPlugins;
-    this.diagnosticReporterFactory = checkNotNull(diagnosticReporterFactory);
+    this.diagnosticReporterFactory = requireNonNull(diagnosticReporterFactory);
     this.compilerOptions = compilerOptions;
   }
 

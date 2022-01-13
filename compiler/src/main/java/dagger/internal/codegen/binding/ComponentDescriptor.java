@@ -210,8 +210,8 @@ public final class ComponentDescriptor {
   public ComponentRequirement getDependencyThatDefinesMethod(Element method) {
     Preconditions.checkArgument(
         method instanceof ExecutableElement, "method must be an executable element: %s", method);
-    return Preconditions.checkNotNull(
-        dependenciesByDependencyMethod().get(method), "no dependency implements %s", method);
+    return requireNonNull(
+        dependenciesByDependencyMethod().get(method), () -> String.format("no dependency implements %s", method));
   }
 
   /** The scopes of the component. */
@@ -282,10 +282,10 @@ public final class ComponentDescriptor {
 
   /** Returns the child component with the given builder type. */
   ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
-    return Preconditions.checkNotNull(
+    return Objects.requireNonNull(
         childComponentsByBuilderType.get().get(builderType),
-        "no child component found for builder type %s",
-        builderType.getQualifiedName());
+        () -> String.format("no child component found for builder type %s",
+            builderType.getQualifiedName()));
   }
 
   public Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods() {

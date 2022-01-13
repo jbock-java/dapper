@@ -45,7 +45,6 @@ dependencies {
     def core = 'io.github.jbock-java:dapper:1.2'
     implementation('io.github.jbock-java:javapoet:1.14')
     shadow('io.github.jbock-java:auto-common:1.2.1')
-    implementation('io.github.jbock-java:guava:31.0.1.1')
     implementation('io.github.jbock-java:guava-graph:1.0.1')
     shadow(core)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')

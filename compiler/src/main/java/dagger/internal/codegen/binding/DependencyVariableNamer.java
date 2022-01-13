@@ -19,8 +19,6 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 
 import com.google.auto.common.MoreTypes;
-import com.google.common.base.Ascii;
-import com.google.common.base.CaseFormat;
 import dagger.Lazy;
 import dagger.model.DependencyRequest;
 import java.util.regex.Matcher;
@@ -37,12 +35,12 @@ final class DependencyVariableNamer {
   private static final Pattern LAZY_PROVIDER_PATTERN = Pattern.compile("lazy(\\w+)Provider");
 
   static String name(DependencyRequest dependency) {
-    if (!dependency.requestElement().isPresent()) {
+    if (dependency.requestElement().isEmpty()) {
       return simpleVariableName(MoreTypes.asTypeElement(dependency.key().type()));
     }
 
     String variableName = dependency.requestElement().get().getSimpleName().toString();
-    if (Ascii.isUpperCase(variableName.charAt(0))) {
+    if (Character.isUpperCase(variableName.charAt(0))) {
       variableName = toLowerCamel(variableName);
     }
     switch (dependency.kind()) {
@@ -68,6 +66,6 @@ final class DependencyVariableNamer {
   }
 
   private static String toLowerCamel(String name) {
-    return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
+    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
   }
 }

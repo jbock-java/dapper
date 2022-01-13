@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
@@ -140,7 +139,7 @@ public final class MultibindingDeclaration extends BindingDeclaration
         ExecutableType methodType,
         TypeElement contributingType) {
       TypeMirror returnType = methodType.getReturnType();
-      checkArgument(
+      Preconditions.checkArgument(
           SetType.isSet(returnType) || MapType.isMap(returnType),
           "%s must return a set or map",
           method);

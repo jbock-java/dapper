@@ -16,12 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
+import static java.util.Objects.requireNonNull;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -54,7 +55,7 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
         methodImplementationStrategy,
         wrappedBindingExpression,
         types);
-    this.componentMethod = Preconditions.checkNotNull(componentMethod);
+    this.componentMethod = requireNonNull(componentMethod);
     this.componentImplementation = componentImplementation;
   }
 

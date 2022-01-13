@@ -17,7 +17,6 @@
 package dagger.internal.codegen;
 
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.annotations.VisibleForTesting;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
@@ -64,7 +63,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
    * Creates a component processor that uses given {@link BindingGraphPlugin}s instead of loading
    * them from a {@link java.util.ServiceLoader}.
    */
-  @VisibleForTesting
+  // visible for testing
   public static ComponentProcessor forTesting(BindingGraphPlugin... testingPlugins) {
     return forTesting(Arrays.asList(testingPlugins));
   }
@@ -73,7 +72,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
    * Creates a component processor that uses given {@link BindingGraphPlugin}s instead of loading
    * them from a {@link java.util.ServiceLoader}.
    */
-  @VisibleForTesting
+  // visible for testing
   public static ComponentProcessor forTesting(Iterable<BindingGraphPlugin> testingPlugins) {
     return new ComponentProcessor(testingPlugins);
   }

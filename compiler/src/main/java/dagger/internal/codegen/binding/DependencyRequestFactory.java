@@ -16,21 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.frameworkClass;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.model.RequestKind.INSTANCE;
 import static dagger.model.RequestKind.MEMBERS_INJECTION;
 import static dagger.model.RequestKind.PROVIDER;
+import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
@@ -65,7 +64,7 @@ public final class DependencyRequestFactory {
 
   Set<DependencyRequest> forRequiredResolvedVariables(
       List<? extends VariableElement> variables, List<? extends TypeMirror> resolvedTypes) {
-    checkState(resolvedTypes.size() == variables.size());
+    Preconditions.checkState(resolvedTypes.size() == variables.size());
     Set<DependencyRequest> builder = new LinkedHashSet<>();
     for (int i = 0; i < variables.size(); i++) {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
@@ -89,7 +88,7 @@ public final class DependencyRequestFactory {
   /** Creates a synthetic dependency request for one individual {@code multibindingContribution}. */
   private DependencyRequest forMultibindingContribution(
       Key multibindingKey, ContributionBinding multibindingContribution) {
-    checkArgument(
+    Preconditions.checkArgument(
         multibindingContribution.key().multibindingContributionIdentifier().isPresent(),
         "multibindingContribution's key must have a multibinding contribution identifier: %s",
         multibindingContribution);
@@ -126,19 +125,19 @@ public final class DependencyRequestFactory {
 
   DependencyRequest forRequiredResolvedVariable(
       VariableElement variableElement, TypeMirror resolvedType) {
-    checkNotNull(variableElement);
-    checkNotNull(resolvedType);
+    requireNonNull(variableElement);
+    requireNonNull(resolvedType);
     // Ban @Assisted parameters, they are not considered dependency requests.
-    checkArgument(!AssistedInjectionAnnotations.isAssistedParameter(variableElement));
+    Preconditions.checkArgument(!AssistedInjectionAnnotations.isAssistedParameter(variableElement));
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(variableElement);
     return newDependencyRequest(variableElement, resolvedType, qualifier);
   }
 
   public DependencyRequest forComponentProvisionMethod(
       ExecutableElement provisionMethod, ExecutableType provisionMethodType) {
-    checkNotNull(provisionMethod);
-    checkNotNull(provisionMethodType);
-    checkArgument(
+    requireNonNull(provisionMethod);
+    requireNonNull(provisionMethodType);
+    Preconditions.checkArgument(
         provisionMethod.getParameters().isEmpty(),
         "Component provision methods must be empty: %s",
         provisionMethod);
@@ -146,26 +145,13 @@ public final class DependencyRequestFactory {
     return newDependencyRequest(provisionMethod, provisionMethodType.getReturnType(), qualifier);
   }
 
-  public DependencyRequest forComponentProductionMethod(
-      ExecutableElement productionMethod, ExecutableType productionMethodType) {
-    checkNotNull(productionMethod);
-    checkNotNull(productionMethodType);
-    checkArgument(
-        productionMethod.getParameters().isEmpty(),
-        "Component production methods must be empty: %s",
-        productionMethod);
-    TypeMirror type = productionMethodType.getReturnType();
-    Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(productionMethod);
-    return newDependencyRequest(productionMethod, type, qualifier);
-  }
-
   DependencyRequest forComponentMembersInjectionMethod(
       ExecutableElement membersInjectionMethod, ExecutableType membersInjectionMethodType) {
-    checkNotNull(membersInjectionMethod);
-    checkNotNull(membersInjectionMethodType);
+    requireNonNull(membersInjectionMethod);
+    requireNonNull(membersInjectionMethodType);
     Optional<AnnotationMirror> qualifier =
         injectionAnnotations.getQualifier(membersInjectionMethod);
-    checkArgument(qualifier.isEmpty());
+    Preconditions.checkArgument(qualifier.isEmpty());
     TypeMirror membersInjectedType = getOnlyElement(membersInjectionMethodType.getParameterTypes());
     return DependencyRequest.builder()
         .kind(MEMBERS_INJECTION)
@@ -180,7 +166,7 @@ public final class DependencyRequestFactory {
    */
   DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
     Optional<Key> key = keyFactory.unwrapOptional(requestKey);
-    checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
+    Preconditions.checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
     return DependencyRequest.builder()
         .kind(kind)
         .key(key.get())

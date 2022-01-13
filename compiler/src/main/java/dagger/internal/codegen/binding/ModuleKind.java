@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
 import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -75,7 +75,7 @@ public enum ModuleKind {
    */
   public AnnotationMirror getModuleAnnotation(TypeElement element) {
     Optional<AnnotationMirror> result = getAnnotationMirror(element, moduleAnnotation);
-    checkArgument(
+    Preconditions.checkArgument(
         result.isPresent(), "annotation %s is not present on type %s", moduleAnnotation, element);
     return result.get();
   }

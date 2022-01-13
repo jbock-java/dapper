@@ -17,10 +17,10 @@
 package dagger.internal.codegen;
 
 import static com.google.auto.common.MoreElements.asType;
-import static com.google.common.collect.Sets.union;
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
+import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.allCreatorAnnotations;
 import static java.util.Collections.disjoint;
 

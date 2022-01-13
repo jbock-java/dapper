@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.common.base.Verify.verify;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
@@ -28,6 +27,7 @@ import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
@@ -238,8 +238,8 @@ final class BindingGraphConverter {
         visitComponent(child, currentComponent);
       }
 
-      verify(bindingGraphPath.removeLast().equals(graph));
-      verify(componentPaths.removeLast().equals(graphPath));
+      Preconditions.checkState(bindingGraphPath.removeLast().equals(graph));
+      Preconditions.checkState(componentPaths.removeLast().equals(graphPath));
     }
 
     /**

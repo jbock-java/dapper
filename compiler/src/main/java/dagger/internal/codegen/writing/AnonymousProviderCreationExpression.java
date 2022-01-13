@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.anonymousProvider;
 import static dagger.model.RequestKind.INSTANCE;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -46,7 +46,7 @@ final class AnonymousProviderCreationExpression
       @Assisted ContributionBinding binding,
       ComponentBindingExpressions componentBindingExpressions,
       ComponentImplementation componentImplementation) {
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.componentBindingExpressions = componentBindingExpressions;
     this.requestingClass = componentImplementation.name();
   }

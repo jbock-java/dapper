@@ -16,10 +16,12 @@
 
 package dagger.internal.codegen.base;
 
+import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.validation.ValidationReport;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -37,7 +39,7 @@ public final class SourceFileGenerationException extends Exception {
   SourceFileGenerationException(
       Optional<ClassName> generatedClassName, Throwable cause, Element associatedElement) {
     super(createMessage(generatedClassName, cause.getMessage()), cause);
-    this.associatedElement = Preconditions.checkNotNull(associatedElement);
+    this.associatedElement = requireNonNull(associatedElement);
   }
 
   private static String createMessage(Optional<ClassName> generatedClassName, String message) {

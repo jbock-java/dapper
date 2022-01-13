@@ -18,10 +18,10 @@ package dagger.internal.codegen.writing;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryParameterSpecs;
+import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -60,7 +60,7 @@ final class AssistedFactoryBindingExpression extends SimpleInvocationBindingExpr
       DaggerTypes types,
       DaggerElements elements) {
     super(binding);
-    this.binding = checkNotNull(binding);
+    this.binding = requireNonNull(binding);
     this.componentBindingExpressions = componentBindingExpressions;
     this.elements = elements;
     this.types = types;
