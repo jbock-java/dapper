@@ -7,7 +7,10 @@ with some modifications:
 * full jpms support with module-name `dagger`
 * removed the `unwrapValue` attribute from the `MapKey` annotation, it is now effectively always `true`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
-* removed some kotlin-related special-casing
+* remove kotlin special-casing
+* remove gwt special-casing
+* remove guava special-casing
+* remove guava dependency
 * remove the `experimental_turbine_hjar` option
 
 Dapper was forked from dagger version `2.37`, which is the last dagger
