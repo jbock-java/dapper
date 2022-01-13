@@ -35,7 +35,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimaps;
 import dagger.MembersInjector;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ContributionType;
@@ -45,12 +44,14 @@ import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -244,8 +246,10 @@ public final class BindingGraphFactory implements ClearableCache {
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */
   private static <T extends BindingDeclaration>
-  ImmutableSetMultimap<Key, T> indexBindingDeclarationsByKey(Iterable<T> declarations) {
-    return ImmutableSetMultimap.copyOf(Multimaps.index(declarations, BindingDeclaration::key));
+  ImmutableSetMultimap<Key, T> indexBindingDeclarationsByKey(Set<T> declarations) {
+    return ImmutableSetMultimap.copyOf(
+        declarations.stream().collect(Collectors.groupingBy(BindingDeclaration::key, LinkedHashMap::new, DaggerStreams.toImmutableSet()))
+            .entrySet().stream().flatMap(e -> e.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), v))).collect(Collectors.toList()));
   }
 
   @Override
@@ -383,7 +387,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
       return ResolvedBindings.forContributionBindings(
           requestKey,
-          Multimaps.index(bindings, binding -> getOwningComponent(requestKey, binding)).asMap(),
+          bindings.stream().collect(Collectors.groupingBy((ContributionBinding binding) -> getOwningComponent(requestKey, binding))),
           multibindingDeclarations,
           subcomponentDeclarations,
           optionalBindingDeclarations);

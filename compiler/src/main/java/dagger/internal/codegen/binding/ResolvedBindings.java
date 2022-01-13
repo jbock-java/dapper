@@ -24,6 +24,7 @@ import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.Key;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -192,7 +193,7 @@ final class ResolvedBindings {
   /** Creates a {@link ResolvedBindings} for contribution bindings. */
   static ResolvedBindings forContributionBindings(
       Key key,
-      Map<TypeElement, Collection<ContributionBinding>> contributionBindings,
+      Map<TypeElement, List<ContributionBinding>> contributionBindings,
       Set<MultibindingDeclaration> multibindings,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
