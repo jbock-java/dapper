@@ -23,7 +23,6 @@ repositories {
     mavenCentral()
     maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1121' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1122' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1123' }
 }
 
 tasks.withType(AbstractArchiveTask) {
