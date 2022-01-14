@@ -25,30 +25,17 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class SubcomponentValidationTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class SubcomponentValidationTest {
 
-  private final CompilerMode compilerMode;
-
-  public SubcomponentValidationTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void factoryMethod_missingModulesWithParameters() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void factoryMethod_missingModulesWithParameters(CompilerMode compilerMode) {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
         "package test;",
         "",
@@ -98,8 +85,9 @@ public class SubcomponentValidationTest {
         .onLineContaining("ChildComponent newChildComponent();");
   }
 
-  @Test
-  public void factoryMethod_grandchild() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void factoryMethod_grandchild(CompilerMode compilerMode) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -167,8 +155,9 @@ public class SubcomponentValidationTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test
-  public void factoryMethod_nonModuleParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void factoryMethod_nonModuleParameter(CompilerMode compilerMode) {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
         "package test;",
         "",
@@ -197,8 +186,9 @@ public class SubcomponentValidationTest {
         .atColumn(43);
   }
 
-  @Test
-  public void factoryMethod_duplicateParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void factoryMethod_duplicateParameter(CompilerMode compilerMode) {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -235,8 +225,9 @@ public class SubcomponentValidationTest {
         .atColumn(71);
   }
 
-  @Test
-  public void factoryMethod_superflouousModule() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void factoryMethod_superflouousModule(CompilerMode compilerMode) {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -272,8 +263,9 @@ public class SubcomponentValidationTest {
         .onLine(7);
   }
 
-  @Test
-  public void missingBinding() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void missingBinding(CompilerMode compilerMode) {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -316,8 +308,9 @@ public class SubcomponentValidationTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test
-  public void subcomponentOnConcreteType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentOnConcreteType(CompilerMode compilerMode) {
     JavaFileObject subcomponentFile = JavaFileObjects.forSourceLines("test.NotASubcomponent",
         "package test;",
         "",
@@ -331,8 +324,9 @@ public class SubcomponentValidationTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test
-  public void scopeMismatch() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void scopeMismatch(CompilerMode compilerMode) {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.ParentComponent",
         "package test;",
         "",
@@ -371,8 +365,9 @@ public class SubcomponentValidationTest {
     assertThat(compilation).hadErrorContaining("@Singleton");
   }
 
-  @Test
-  public void delegateFactoryNotCreatedForSubcomponentWhenProviderExistsInParent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void delegateFactoryNotCreatedForSubcomponentWhenProviderExistsInParent(CompilerMode compilerMode) {
     JavaFileObject parentComponentFile =
         JavaFileObjects.forSourceLines(
             "test.ParentComponent",
@@ -420,7 +415,7 @@ public class SubcomponentValidationTest {
             "",
             "final class A {",
             "  @Inject public A(NeedsDep1 a, Dep1 b, Dep2 c) { }",
-            "  @Inject public void methodA() { }",
+            "  @Inject void methodA() { }",
             "}");
     JavaFileObject needsDep1File =
         JavaFileObjects.forSourceLines(
@@ -443,7 +438,7 @@ public class SubcomponentValidationTest {
             "@Singleton",
             "final class Dep1 {",
             "  @Inject public Dep1() { }",
-            "  @Inject public void dep1Method() { }",
+            "  @Inject void dep1Method() { }",
             "}");
     JavaFileObject dep2File =
         JavaFileObjects.forSourceLines(
@@ -456,7 +451,7 @@ public class SubcomponentValidationTest {
             "@Singleton",
             "final class Dep2 {",
             "  @Inject public Dep2() { }",
-            "  @Inject public void dep2Method() { }",
+            "  @Inject void dep2Method() { }",
             "}");
 
     String[] generatedComponent =
@@ -601,8 +596,9 @@ public class SubcomponentValidationTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void multipleSubcomponentsWithSameSimpleNamesCanExistInSameComponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void multipleSubcomponentsWithSameSimpleNamesCanExistInSameComponent(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.ParentComponent",
@@ -710,8 +706,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void subcomponentSimpleNamesDisambiguated() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentSimpleNamesDisambiguated(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.ParentComponent",
@@ -782,8 +779,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void subcomponentSimpleNamesDisambiguatedInRoot() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentSimpleNamesDisambiguatedInRoot(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "ParentComponent",
@@ -848,8 +846,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void subcomponentImplNameUsesFullyQualifiedClassNameIfNecessary() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentImplNameUsesFullyQualifiedClassNameIfNecessary(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.ParentComponent",
@@ -926,8 +925,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void parentComponentNameShouldNotBeDisambiguatedWhenItConflictsWithASubcomponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void parentComponentNameShouldNotBeDisambiguatedWhenItConflictsWithASubcomponent(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.C",
@@ -976,8 +976,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void subcomponentBuilderNamesShouldNotConflict() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentBuilderNamesShouldNotConflict(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.C",
@@ -1066,8 +1067,9 @@ public class SubcomponentValidationTest {
         .containsLines(componentGeneratedFile);
   }
 
-  @Test
-  public void duplicateBindingWithSubcomponentDeclaration() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void duplicateBindingWithSubcomponentDeclaration(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -1124,8 +1126,9 @@ public class SubcomponentValidationTest {
         .hadErrorContaining("@Module(subcomponents = Sub.class) for TestModule");
   }
 
-  @Test
-  public void subcomponentDependsOnGeneratedType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentDependsOnGeneratedType(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",

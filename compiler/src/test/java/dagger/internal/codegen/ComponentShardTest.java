@@ -21,35 +21,21 @@ import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class ComponentShardTest {
+class ComponentShardTest {
   private static final int BINDINGS_PER_SHARD = 2;
 
-  @Parameters(name = "{0}")
-  public static ImmutableCollection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
-
-  private final CompilerMode compilerMode;
-
-  public ComponentShardTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void testNewShardCreated() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testNewShardCreated(CompilerMode compilerMode) {
     // Add all bindings.
     //
     //     1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
@@ -97,7 +83,7 @@ public class ComponentShardTest {
             "  Provider<Binding7> providerBinding7();",
             "}"));
 
-    Compilation compilation = compiler().compile(javaFileObjects.build());
+    Compilation compilation = compiler(compilerMode).compile(javaFileObjects.build());
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("dagger.internal.codegen.DaggerTestComponent")
@@ -532,7 +518,7 @@ public class ComponentShardTest {
         "}");
   }
 
-  private Compiler compiler() {
+  private Compiler compiler(CompilerMode compilerMode) {
     return compilerWithOptions(
         ImmutableSet.<String>builder()
             .add("-Adagger.keysPerComponentShard=" + BINDINGS_PER_SHARD)

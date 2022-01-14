@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.List;
 
 /** The configuration options for compiler modes. */
@@ -25,14 +25,14 @@ enum CompilerMode {
   FAST_INIT_MODE("-Adagger.fastInit=enabled");
 
   /** Returns the compiler modes as a list of parameters for parameterized tests */
-  static final ImmutableList<Object[]> TEST_PARAMETERS =
-      ImmutableList.copyOf(
+  static final List<Object[]> TEST_PARAMETERS =
+      Arrays.asList(
           new Object[][]{{CompilerMode.DEFAULT_MODE}, {CompilerMode.FAST_INIT_MODE}});
 
-  private final ImmutableList<String> javacopts;
+  private final List<String> javacopts;
 
   CompilerMode(String... javacopts) {
-    this.javacopts = ImmutableList.copyOf(javacopts);
+    this.javacopts = Arrays.asList(javacopts);
   }
 
   /** Returns the javacopts for this compiler mode. */
