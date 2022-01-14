@@ -16,20 +16,19 @@
 
 package dagger.internal.codegen;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
-import dagger.Module;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import javax.tools.JavaFileObject;
-import java.lang.annotation.Annotation;
-
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
-public final class ModuleValidationTest {
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
+import dagger.Module;
+import java.lang.annotation.Annotation;
+import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+final class ModuleValidationTest {
 
   private enum ModuleType {
     MODULE(Module.class),
@@ -57,7 +56,7 @@ public final class ModuleValidationTest {
   private final ModuleType moduleType = ModuleType.MODULE;
 
   @Test
-  public void moduleSubcomponents_notASubcomponent() {
+  void moduleSubcomponents_notASubcomponent() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -80,7 +79,7 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void moduleSubcomponents_listsSubcomponentBuilder() {
+  void moduleSubcomponents_listsSubcomponentBuilder() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -114,7 +113,7 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void moduleSubcomponents_listsSubcomponentFactory() {
+  void moduleSubcomponents_listsSubcomponentFactory() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -148,7 +147,7 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void moduleSubcomponents_noSubcomponentCreator() {
+  void moduleSubcomponents_noSubcomponentCreator() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -180,7 +179,7 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void moduleSubcomponentsAreTypes() {
+  void moduleSubcomponentsAreTypes() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -199,14 +198,14 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void tooManyAnnotations() {
+  void tooManyAnnotations() {
     assertThatModuleMethod(
         "@BindsOptionalOf @Multibinds abstract Set<Object> tooManyAnnotations();")
         .hasError("is annotated with more than one of");
   }
 
   @Test
-  public void invalidIncludedModule() {
+  void invalidIncludedModule() {
     JavaFileObject badModule =
         JavaFileObjects.forSourceLines(
             "test.BadModule",
@@ -243,7 +242,7 @@ public final class ModuleValidationTest {
   }
 
   @Test
-  public void scopeOnModule() {
+  void scopeOnModule() {
     JavaFileObject badModule =
         JavaFileObjects.forSourceLines(
             "test.BadModule",
@@ -263,9 +262,9 @@ public final class ModuleValidationTest {
         .onLineContaining("@Singleton");
   }
 
-  @Ignore("issue #3")
+  @Disabled("issue #3")
   @Test
-  public void moduleIncludesSelfCycle() {
+  void moduleIncludesSelfCycle() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",

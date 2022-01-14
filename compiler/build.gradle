@@ -55,7 +55,6 @@ dependencies {
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.2')
-    testImplementation('org.junit.vintage:junit-vintage-engine:5.8.2')
     testImplementation('org.hamcrest:hamcrest-core:2.2')
     testImplementation('org.assertj:assertj-core:3.21.0')
     testImplementation('io.github.jbock-java:guava:31.0.1.1')

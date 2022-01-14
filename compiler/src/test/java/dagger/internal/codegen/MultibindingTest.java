@@ -22,14 +22,12 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
-public class MultibindingTest {
+class MultibindingTest {
 
   @Test
-  public void providesWithTwoMultibindingAnnotations_failsToCompile() {
+  void providesWithTwoMultibindingAnnotations_failsToCompile() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.MultibindingModule",
@@ -56,7 +54,7 @@ public class MultibindingTest {
   }
 
   @Test
-  public void appliedOnInvalidMethods_failsToCompile() {
+  void appliedOnInvalidMethods_failsToCompile() {
     JavaFileObject someType =
         JavaFileObjects.forSourceLines(
             "test.SomeType",
@@ -137,7 +135,7 @@ public class MultibindingTest {
   }
 
   @Test
-  public void provideExplicitSetInParent_AndMultibindingContributionInChild() {
+  void provideExplicitSetInParent_AndMultibindingContributionInChild() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",

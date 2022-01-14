@@ -16,80 +16,80 @@
 
 package dagger.internal.codegen;
 
-import jakarta.inject.Qualifier;
-import org.junit.Test;
-
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
-public class MultibindsValidationTest {
+import jakarta.inject.Qualifier;
+import org.junit.jupiter.api.Test;
+
+class MultibindsValidationTest {
 
   private final String moduleDeclaration = "@Module abstract class %s { %s }";
 
   @Test
-  public void notWithinModule() {
+  void notWithinModule() {
     assertThatMethodInUnannotatedClass("@Multibinds abstract Set<Object> emptySet();")
         .hasError("@Multibinds methods can only be present within a @Module");
   }
 
   @Test
-  public void voidMethod() {
+  void voidMethod() {
     assertThatModuleMethod("@Multibinds abstract void voidMethod();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void primitiveMethod() {
+  void primitiveMethod() {
     assertThatModuleMethod("@Multibinds abstract int primitive();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void rawMap() {
+  void rawMap() {
     assertThatModuleMethod("@Multibinds abstract Map rawMap();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void wildcardMap() {
+  void wildcardMap() {
     assertThatModuleMethod("@Multibinds abstract Map<?, ?> wildcardMap();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void providerMap() {
+  void providerMap() {
     assertThatModuleMethod("@Multibinds abstract Map<String, Provider<Object>> providerMap();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void rawSet() {
+  void rawSet() {
     assertThatModuleMethod("@Multibinds abstract Set rawSet();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void wildcardSet() {
+  void wildcardSet() {
     assertThatModuleMethod("@Multibinds abstract Set<?> wildcardSet();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void providerSet() {
+  void providerSet() {
     assertThatModuleMethod("@Multibinds abstract Set<Provider<Object>> providerSet();")
         .withDeclaration(moduleDeclaration)
         .hasError("@Multibinds methods must return Map<K, V> or Set<T>");
   }
 
   @Test
-  public void overqualifiedSet() {
+  void overqualifiedSet() {
     assertThatModuleMethod(
         "@Multibinds @SomeQualifier @OtherQualifier "
             + "abstract Set<Object> tooManyQualifiersSet();")
@@ -99,7 +99,7 @@ public class MultibindsValidationTest {
   }
 
   @Test
-  public void overqualifiedMap() {
+  void overqualifiedMap() {
     assertThatModuleMethod(
         "@Multibinds @SomeQualifier @OtherQualifier "
             + "abstract Map<String, Object> tooManyQualifiersMap();")
@@ -109,7 +109,7 @@ public class MultibindsValidationTest {
   }
 
   @Test
-  public void hasParameters() {
+  void hasParameters() {
     assertThatModuleMethod("@Multibinds abstract Set<String> parameters(Object param);")
         .hasError("@Multibinds methods cannot have parameters");
   }
