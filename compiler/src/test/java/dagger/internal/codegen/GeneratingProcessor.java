@@ -16,10 +16,9 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
@@ -35,7 +34,8 @@ final class GeneratingProcessor extends AbstractProcessor {
 
   GeneratingProcessor(String generatedClassName, String... source) {
     this.generatedClassName = generatedClassName;
-    this.generatedSource = Joiner.on("\n").join(source);
+    this.generatedSource = String.join("\n", Arrays.asList(source));
+    ;
   }
 
   @Override
@@ -45,7 +45,7 @@ final class GeneratingProcessor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return ImmutableSet.of("*");
+    return Set.of("*");
   }
 
   @Override
@@ -53,7 +53,7 @@ final class GeneratingProcessor extends AbstractProcessor {
     if (!processed) {
       processed = true;
       try (Writer writer =
-          processingEnv.getFiler().createSourceFile(generatedClassName).openWriter()) {
+               processingEnv.getFiler().createSourceFile(generatedClassName).openWriter()) {
         writer.append(generatedSource);
       } catch (IOException e) {
         throw new RuntimeException(e);

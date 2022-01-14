@@ -27,10 +27,10 @@ import static dagger.internal.codegen.binding.ComponentKind.SUBCOMPONENT;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.moreThanOneRefToSubcomponent;
 import static dagger.internal.codegen.binding.ErrorMessages.componentMessagesFor;
 
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import java.util.Arrays;
 import java.util.Collection;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelper {
   @Parameters(name = "creatorKind={0}")
   public static Collection<Object[]> parameters() {
-    return ImmutableList.copyOf(new Object[][] {{SUBCOMPONENT_BUILDER}, {SUBCOMPONENT_FACTORY}});
+    return Arrays.asList(new Object[][]{{SUBCOMPONENT_BUILDER}, {SUBCOMPONENT_FACTORY}});
   }
 
   public SubcomponentCreatorValidationTest(ComponentCreatorAnnotation componentCreatorAnnotation) {
@@ -543,7 +543,7 @@ public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelpe
     String elements =
         creatorKind.equals(BUILDER)
             ? "[void test.ChildComponent.Builder.set1(test.TestModule), "
-                + "void test.ChildComponent.Builder.set2(test.TestModule)]"
+            + "void test.ChildComponent.Builder.set2(test.TestModule)]"
             : "[test.TestModule m1, test.TestModule m2]";
     assertThat(compilation)
         .hadErrorContaining(
@@ -617,7 +617,7 @@ public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelpe
     String elements =
         creatorKind.equals(BUILDER)
             ? "[void test.ChildComponent.Builder.set1(test.TestModule), "
-                + "void test.ChildComponent.Builder.set2(test.TestModule)]"
+            + "void test.ChildComponent.Builder.set2(test.TestModule)]"
             : "[test.TestModule m1, test.TestModule t]";
     assertThat(compilation)
         .hadErrorContaining(
@@ -735,7 +735,7 @@ public class SubcomponentCreatorValidationTest extends ComponentCreatorTestHelpe
         creatorKind.equals(FACTORY)
             ? "[String s, Integer i]"
             : "[void test.ChildComponent.Builder.set1(String),"
-                + " void test.ChildComponent.Builder.set2(Integer)]";
+            + " void test.ChildComponent.Builder.set2(Integer)]";
     assertThat(compilation)
         .hadErrorContaining(
             String.format(

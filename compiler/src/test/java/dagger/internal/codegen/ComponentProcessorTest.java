@@ -24,9 +24,6 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
 import com.google.auto.common.MoreElements;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Sets;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.MembersInjector;
@@ -36,8 +33,10 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -1934,11 +1933,10 @@ public class ComponentProcessorTest {
                         "-Adagger.warnIfInjectionFactoryNotGeneratedUpstream=enabled")))
             .withProcessors(
                 new ElementFilteringComponentProcessor(
-                    Predicates.not(
-                        element ->
-                            MoreElements.getPackage(element)
-                                .getQualifiedName()
-                                .contentEquals("test.inject"))))
+                    element ->
+                        !MoreElements.getPackage(element)
+                            .getQualifiedName()
+                            .contentEquals("test.inject")))
             .compile(
                 JavaFileObjects.forSourceLines(
                     "test.TestComponent",
@@ -2741,17 +2739,17 @@ public class ComponentProcessorTest {
 
             @Override
             public Set<? extends Element> getRootElements() {
-              return Sets.filter(roundEnv.getRootElements(), filter);
+              return roundEnv.getRootElements().stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
             }
 
             @Override
             public Set<? extends Element> getElementsAnnotatedWith(Class<? extends Annotation> a) {
-              return Sets.filter(roundEnv.getElementsAnnotatedWith(a), filter);
+              return roundEnv.getElementsAnnotatedWith(a).stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
             }
 
             @Override
             public Set<? extends Element> getElementsAnnotatedWith(TypeElement a) {
-              return Sets.filter(roundEnv.getElementsAnnotatedWith(a), filter);
+              return roundEnv.getElementsAnnotatedWith(a).stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
             }
 
             @Override
