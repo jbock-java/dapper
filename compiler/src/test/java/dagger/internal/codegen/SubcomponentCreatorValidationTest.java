@@ -29,32 +29,25 @@ import static dagger.internal.codegen.binding.ErrorMessages.componentMessagesFor
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /** Tests for {@link dagger.Subcomponent.Builder} validation. */
-@RunWith(Parameterized.class)
-public class SubcomponentCreatorValidationTest {
+class SubcomponentCreatorValidationTest {
 
-  private final ComponentCreatorTestData data;
-
-  @Parameters(name = "creatorKind={0}")
-  public static Collection<Object[]> parameters() {
-    return Arrays.asList(new Object[][]{{SUBCOMPONENT_BUILDER}, {SUBCOMPONENT_FACTORY}});
+  private static List<ComponentCreatorTestData> dataSource() {
+    List<ComponentCreatorTestData> result = new ArrayList<>();
+    result.add(new ComponentCreatorTestData(DEFAULT_MODE, SUBCOMPONENT_FACTORY));
+    result.add(new ComponentCreatorTestData(DEFAULT_MODE, SUBCOMPONENT_BUILDER));
+    return result;
   }
 
-  public SubcomponentCreatorValidationTest(ComponentCreatorAnnotation componentCreatorAnnotation) {
-    this.data = new ComponentCreatorTestData(DEFAULT_MODE, componentCreatorAnnotation);
-  }
-
-  @Test
-  public void testRefSubcomponentAndSubCreatorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testRefSubcomponentAndSubCreatorFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -89,8 +82,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(componentFile);
   }
 
-  @Test
-  public void testRefSubCreatorTwiceFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testRefSubCreatorTwiceFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -124,8 +118,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(componentFile);
   }
 
-  @Test
-  public void testMoreThanOneCreatorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMoreThanOneCreatorFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -163,8 +158,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testMoreThanOneCreatorFails_differentTypes() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMoreThanOneCreatorFails_differentTypes(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -202,8 +198,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorGenericsFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorGenericsFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -231,8 +228,9 @@ public class SubcomponentCreatorValidationTest {
     assertThat(compilation).hadErrorContaining(data.messages.generics()).inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorNotInComponentFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorNotInComponentFails(ComponentCreatorTestData data) {
     JavaFileObject builder = data.preprocessedJavaFile("test.Builder",
         "package test;",
         "",
@@ -245,8 +243,9 @@ public class SubcomponentCreatorValidationTest {
     assertThat(compilation).hadErrorContaining(data.messages.mustBeInComponent()).inFile(builder);
   }
 
-  @Test
-  public void testCreatorMissingFactoryMethodFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorMissingFactoryMethodFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -274,8 +273,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testPrivateCreatorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testPrivateCreatorFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -291,8 +291,9 @@ public class SubcomponentCreatorValidationTest {
     assertThat(compilation).hadErrorContaining(data.messages.isPrivate()).inFile(childComponentFile);
   }
 
-  @Test
-  public void testNonStaticCreatorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testNonStaticCreatorFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -308,8 +309,9 @@ public class SubcomponentCreatorValidationTest {
     assertThat(compilation).hadErrorContaining(data.messages.mustBeStatic()).inFile(childComponentFile);
   }
 
-  @Test
-  public void testNonAbstractCreatorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testNonAbstractCreatorFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -327,8 +329,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorOneConstructorWithArgsFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorOneConstructorWithArgsFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -348,8 +351,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorMoreThanOneConstructorFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorMoreThanOneConstructorFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -370,8 +374,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorEnumFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorEnumFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -389,8 +394,9 @@ public class SubcomponentCreatorValidationTest {
         .inFile(childComponentFile);
   }
 
-  @Test
-  public void testCreatorFactoryMethodReturnsWrongTypeFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testCreatorFactoryMethodReturnsWrongTypeFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -411,8 +417,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(9);
   }
 
-  @Test
-  public void testInheritedCreatorFactoryMethodReturnsWrongTypeFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testInheritedCreatorFactoryMethodReturnsWrongTypeFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -437,8 +444,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(12);
   }
 
-  @Test
-  public void testTwoFactoryMethodsFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testTwoFactoryMethodsFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -460,8 +468,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(10);
   }
 
-  @Test
-  public void testInheritedTwoFactoryMethodsFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testInheritedTwoFactoryMethodsFails(ComponentCreatorTestData data) {
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -487,8 +496,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(13);
   }
 
-  @Test
-  public void testMultipleSettersPerTypeFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMultipleSettersPerTypeFails(ComponentCreatorTestData data) {
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -556,8 +566,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(11);
   }
 
-  @Test
-  public void testMultipleSettersPerTypeIncludingResolvedGenericsFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMultipleSettersPerTypeIncludingResolvedGenericsFails(ComponentCreatorTestData data) {
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -630,8 +641,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(15);
   }
 
-  @Test
-  public void testMultipleSettersPerBoundInstanceTypeFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMultipleSettersPerBoundInstanceTypeFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile =
         data.preprocessedJavaFile(
             "test.ParentComponent",
@@ -693,8 +705,9 @@ public class SubcomponentCreatorValidationTest {
         .onLineContaining("interface ParentComponent {");
   }
 
-  @Test
-  public void testExtraSettersFails() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testExtraSettersFails(ComponentCreatorTestData data) {
     JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
         "package test;",
         "",
@@ -748,8 +761,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(9);
   }
 
-  @Test
-  public void testMissingSettersFail() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testMissingSettersFail(ComponentCreatorTestData data) {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
@@ -821,8 +835,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(11);
   }
 
-  @Test
-  public void covariantFactoryMethodReturnType() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void covariantFactoryMethodReturnType(ComponentCreatorTestData data) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -861,8 +876,9 @@ public class SubcomponentCreatorValidationTest {
     assertThat(compilation).succeededWithoutWarnings();
   }
 
-  @Test
-  public void covariantFactoryMethodReturnType_hasNewMethod() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void covariantFactoryMethodReturnType_hasNewMethod(ComponentCreatorTestData data) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -922,8 +938,9 @@ public class SubcomponentCreatorValidationTest {
         .onLine(11);
   }
 
-  @Test
-  public void covariantFactoryMethodReturnType_hasNewMethod_buildMethodInherited() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void covariantFactoryMethodReturnType_hasNewMethod_buildMethodInherited(ComponentCreatorTestData data) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
