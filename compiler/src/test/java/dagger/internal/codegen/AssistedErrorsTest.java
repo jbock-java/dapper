@@ -19,30 +19,17 @@ package dagger.internal.codegen;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class AssistedErrorsTest {
-  @Parameters(name = "{0}")
-  public static ImmutableCollection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class AssistedErrorsTest {
 
-  private final CompilerMode compilerMode;
-
-  public AssistedErrorsTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void testAssistedNotWithAssistedInjectionConstructor() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedNotWithAssistedInjectionConstructor(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -74,8 +61,9 @@ public class AssistedErrorsTest {
         .onLine(11);
   }
 
-  @Test
-  public void testNestedFactoryNotStatic() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testNestedFactoryNotStatic(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",

@@ -21,30 +21,17 @@ import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class AssistedFactoryTest {
-  @Parameters(name = "{0}")
-  public static ImmutableCollection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class AssistedFactoryTest {
 
-  private final CompilerMode compilerMode;
-
-  public AssistedFactoryTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void testAssistedFactory() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedFactory(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -141,8 +128,9 @@ public class AssistedFactoryTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void testAssistedFactoryCycle() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedFactoryCycle(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",

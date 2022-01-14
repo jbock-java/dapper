@@ -19,31 +19,18 @@ package dagger.internal.codegen;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class AssistedFactoryErrorsTest {
-  @Parameters(name = "{0}")
-  public static ImmutableCollection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class AssistedFactoryErrorsTest {
 
-  private final CompilerMode compilerMode;
-
-  public AssistedFactoryErrorsTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void testFactoryNotAbstract() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryNotAbstract(CompilerMode compilerMode) {
     JavaFileObject factory =
         JavaFileObjects.forSourceLines(
             "test.Factory",
@@ -60,8 +47,9 @@ public class AssistedFactoryErrorsTest {
             "The @AssistedFactory-annotated type must be either an abstract class or interface.");
   }
 
-  @Test
-  public void testNestedFactoryNotStatic() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testNestedFactoryNotStatic(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -87,8 +75,9 @@ public class AssistedFactoryErrorsTest {
         .hadErrorContaining("Nested @AssistedFactory-annotated types must be static.");
   }
 
-  @Test
-  public void testFactoryMissingAbstractMethod() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryMissingAbstractMethod(CompilerMode compilerMode) {
     JavaFileObject factory =
         JavaFileObjects.forSourceLines(
             "test.Factory",
@@ -106,8 +95,9 @@ public class AssistedFactoryErrorsTest {
                 + " return type matches the assisted injection type.");
   }
 
-  @Test
-  public void testFactoryReturnsNonDeclaredType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryReturnsNonDeclaredType(CompilerMode compilerMode) {
     JavaFileObject noInject =
         JavaFileObjects.forSourceLines(
             "test.NoInject", "package test;", "", "final class NoInject {}");
@@ -176,8 +166,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(13);
   }
 
-  @Test
-  public void testFactoryMultipleAbstractMethods() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryMultipleAbstractMethods(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -223,8 +214,9 @@ public class AssistedFactoryErrorsTest {
                 + "method but found multiple: [createFoo1(int), createFoo2(int), createFoo3(int)]");
   }
 
-  @Test
-  public void testFactoryMismatchingParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryMismatchingParameter(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -260,8 +252,9 @@ public class AssistedFactoryErrorsTest {
                 + "      Expected: test.FooFactory#create(int)");
   }
 
-  @Test
-  public void testFactoryMismatchingGenericParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryMismatchingGenericParameter(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -297,8 +290,9 @@ public class AssistedFactoryErrorsTest {
                 + "      Expected: test.FooFactory#create(T)");
   }
 
-  @Test
-  public void testFactoryDuplicateGenericParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testFactoryDuplicateGenericParameter(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -331,8 +325,9 @@ public class AssistedFactoryErrorsTest {
             "@AssistedFactory method has duplicate @Assisted types: @Assisted java.lang.String");
   }
 
-  @Test
-  public void testAssistedInjectionRequest() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectionRequest(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -410,8 +405,9 @@ public class AssistedFactoryErrorsTest {
     assertThat(compilation).hadErrorContaining(fooProviderError).inFile(component).onLine(10);
   }
 
-  @Test
-  public void testProvidesAssistedBindings() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testProvidesAssistedBindings(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -466,8 +462,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(15);
   }
 
-  @Test
-  public void testProvidesAssistedBindingsAsFactoryBindsInstance() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testProvidesAssistedBindingsAsFactoryBindsInstance(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -518,8 +515,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(12);
   }
 
-  @Test
-  public void testProvidesAssistedBindingsAsBuilderBindsInstance() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testProvidesAssistedBindingsAsBuilderBindsInstance(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -570,8 +568,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(11);
   }
 
-  @Test
-  public void testProvidesAssistedBindingsAsOptional() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testProvidesAssistedBindingsAsOptional(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -620,8 +619,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(11);
   }
 
-  @Test
-  public void testInjectsLazyOfAssistedFactory() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testInjectsLazyOfAssistedFactory(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -664,9 +664,10 @@ public class AssistedFactoryErrorsTest {
         .onLine(8);
   }
 
-  @Ignore("issue #3")
-  @Test
-  public void testScopedAssistedInjection() {
+  @Disabled("issue #3")
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testScopedAssistedInjection(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -697,8 +698,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(8);
   }
 
-  @Test
-  public void testMultipleInjectAnnotations() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testMultipleInjectAnnotations(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -722,8 +724,9 @@ public class AssistedFactoryErrorsTest {
             "Constructors cannot be annotated with both @Inject and @AssistedInject");
   }
 
-  @Test
-  public void testAssistedInjectNotOnConstructor() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectNotOnConstructor(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -748,8 +751,9 @@ public class AssistedFactoryErrorsTest {
         .onLine(6);
   }
 
-  @Test
-  public void testAssistedInjectWithNoAssistedParametersIsNotInjectable() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithNoAssistedParametersIsNotInjectable(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -804,8 +808,9 @@ public class AssistedFactoryErrorsTest {
                 + "method.");
   }
 
-  @Test
-  public void testInaccessibleFoo() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testInaccessibleFoo(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.subpackage.InaccessibleFoo",
@@ -859,8 +864,9 @@ public class AssistedFactoryErrorsTest {
     }
   }
 
-  @Test
-  public void testAssistedFactoryMethodWithTypeParametersFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedFactoryMethodWithTypeParametersFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",

@@ -19,30 +19,17 @@ package dagger.internal.codegen;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class AssistedInjectErrorsTest {
-  @Parameters(name = "{0}")
-  public static ImmutableCollection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class AssistedInjectErrorsTest {
 
-  private final CompilerMode compilerMode;
-
-  public AssistedInjectErrorsTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void testAssistedInjectWithDuplicateTypesFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithDuplicateTypesFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -66,8 +53,9 @@ public class AssistedInjectErrorsTest {
         .onLine(8);
   }
 
-  @Test
-  public void testAssistedInjectWithDuplicateTypesEmptyQualifierFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithDuplicateTypesEmptyQualifierFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -91,8 +79,9 @@ public class AssistedInjectErrorsTest {
         .onLine(8);
   }
 
-  @Test
-  public void testAssistedInjectWithDuplicateQualifiedTypesFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithDuplicateQualifiedTypesFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -117,8 +106,9 @@ public class AssistedInjectErrorsTest {
         .onLine(8);
   }
 
-  @Test
-  public void testAssistedInjectWithDuplicateGenericTypesFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithDuplicateGenericTypesFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -144,8 +134,9 @@ public class AssistedInjectErrorsTest {
         .onLine(9);
   }
 
-  @Test
-  public void testAssistedInjectWithDuplicateParameterizedTypesFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithDuplicateParameterizedTypesFails(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -168,8 +159,9 @@ public class AssistedInjectErrorsTest {
         .onLine(8);
   }
 
-  @Test
-  public void testAssistedInjectWithUniqueParameterizedTypesPasses() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithUniqueParameterizedTypesPasses(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -188,8 +180,9 @@ public class AssistedInjectErrorsTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test
-  public void testAssistedInjectWithUniqueGenericTypesPasses() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithUniqueGenericTypesPasses(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -208,8 +201,9 @@ public class AssistedInjectErrorsTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test
-  public void testAssistedInjectWithUniqueQualifiedTypesPasses() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testAssistedInjectWithUniqueQualifiedTypesPasses(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
