@@ -23,7 +23,6 @@ import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
@@ -463,7 +462,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "    return new GenericClass<A, B>(a, a2, pa, qa, la, s, s2, ps, qs, ls, b, b2, pb, qb, lb);",
         "  }",
         "}");
-    assertAbout(javaSources()).that(ImmutableList.of(file, QUALIFIER_A))
+    assertAbout(javaSources()).that(List.of(file, QUALIFIER_A))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
@@ -1109,7 +1108,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "    return new InjectConstructor(factory);",
         "  }",
         "}");
-    assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
+    assertAbout(javaSources()).that(List.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
@@ -1164,7 +1163,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "    return new InjectConstructor(factory);",
         "  }",
         "}");
-    assertAbout(javaSources()).that(ImmutableList.of(factoryFile, file))
+    assertAbout(javaSources()).that(List.of(factoryFile, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
@@ -1227,7 +1226,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "  }",
         "}");
     assertAbout(javaSources())
-        .that(ImmutableList.of(samePackageInterface, differentPackageInterface, file))
+        .that(List.of(samePackageInterface, differentPackageInterface, file))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()
@@ -1320,7 +1319,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "    private static final OuterType_A_Factory INSTANCE = new OuterType_A_Factory();",
         "  }",
         "}");
-    assertAbout(javaSources()).that(ImmutableList.of(nestedTypesFile))
+    assertAbout(javaSources()).that(List.of(nestedTypesFile))
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
         .and()

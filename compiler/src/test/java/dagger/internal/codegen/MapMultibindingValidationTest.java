@@ -16,16 +16,18 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.collect.ImmutableList;
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
-import org.junit.jupiter.api.Test;
-
-import javax.tools.JavaFileObject;
-
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.TestUtils.message;
+
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Test;
 
 public class MapMultibindingValidationTest {
 
@@ -78,21 +80,19 @@ public class MapMultibindingValidationTest {
   }
 
   private static JavaFileObject component(String... entryPoints) {
+    List<String> lines = new ArrayList<>(Arrays.asList(
+        "package test;",
+        "",
+        "import dagger.Component;",
+        "import dagger.producers.Producer;",
+        "import java.util.Map;",
+        "import jakarta.inject.Provider;",
+        "",
+        "@Component(modules = {MapModule.class})",
+        "interface TestComponent {"));
+    Collections.addAll(lines, entryPoints);
+    lines.add("}");
     return JavaFileObjects.forSourceLines(
-        "test.TestComponent",
-        ImmutableList.<String>builder()
-            .add(
-                "package test;",
-                "",
-                "import dagger.Component;",
-                "import dagger.producers.Producer;",
-                "import java.util.Map;",
-                "import jakarta.inject.Provider;",
-                "",
-                "@Component(modules = {MapModule.class})",
-                "interface TestComponent {")
-            .add(entryPoints)
-            .add("}")
-            .build());
+        "test.TestComponent", lines);
   }
 }

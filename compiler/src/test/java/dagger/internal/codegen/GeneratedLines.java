@@ -16,11 +16,10 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Common lines outputted during code generation.
@@ -73,20 +72,16 @@ public final class GeneratedLines {
 
   /** Returns a {@code String} of sorted imports. Includes generated imports automatically. */
   public static String[] generatedImportsIndividual(String... extraImports) {
-    return ImmutableSet.<String>builder()
-        .add(IMPORT_DAGGER_GENERATED)
-        .add(IMPORT_GENERATED_ANNOTATION)
-        .add(extraImports)
-        .build()
-        .stream()
-        .sorted()
-        .toArray(String[]::new);
+    Set<String> result = new TreeSet<>();
+    result.add(IMPORT_DAGGER_GENERATED);
+    result.add(IMPORT_GENERATED_ANNOTATION);
+    Collections.addAll(result, extraImports);
+    return result.toArray(String[]::new);
   }
 
   /** Returns the annotations for a generated class. */
   public static String generatedAnnotations() {
-    return Joiner.on('\n')
-        .join(DAGGER_GENERATED_ANNOTATION, GENERATED_ANNOTATION, SUPPRESS_WARNINGS_ANNOTATION);
+    return String.join("\n", List.of(DAGGER_GENERATED_ANNOTATION, GENERATED_ANNOTATION, SUPPRESS_WARNINGS_ANNOTATION));
   }
 
   public static String[] generatedAnnotationsIndividual() {
@@ -100,19 +95,5 @@ public final class GeneratedLines {
         SUPPRESS_WARNINGS_ANNOTATION_1,
         SUPPRESS_WARNINGS_ANNOTATION_2,
         SUPPRESS_WARNINGS_ANNOTATION_3};
-  }
-
-  /** Returns the annotations for a generated class without {@code SuppressWarnings}. */
-  public static String generatedAnnotationsWithoutSuppressWarnings() {
-    return Joiner.on('\n').join(DAGGER_GENERATED_ANNOTATION, GENERATED_ANNOTATION);
-  }
-
-  public static String[] generatedAnnotationsWithoutSuppressWarningsIndividual() {
-    return new String[]{
-        DAGGER_GENERATED_ANNOTATION,
-        GENERATED_ANNOTATION_0,
-        GENERATED_ANNOTATION_1,
-        GENERATED_ANNOTATION_2,
-        GENERATED_ANNOTATION_3};
   }
 }
