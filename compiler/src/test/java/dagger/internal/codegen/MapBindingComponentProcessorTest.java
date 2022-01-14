@@ -26,9 +26,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -314,9 +312,8 @@ class MapBindingComponentProcessorTest {
     Compilation compilation = daggerCompiler().compile(mapKeys, moduleFile, componentFile);
     assertThat(compilation).succeeded();
 
-    Assertions.assertThat(compilation.generatedSourceFile("test.DaggerTestComponent")
-            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(compilerMode
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLines(
@@ -371,9 +368,8 @@ class MapBindingComponentProcessorTest {
                 "}")
             .lines()));
 
-    Assertions.assertThat(compilation.generatedSourceFile("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
-            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(compilerMode
+    assertThat(compilation).generatedSourceFile("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
+        .containsLines(List.of(compilerMode
             .javaFileBuilder("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
             .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLines(
@@ -384,9 +380,8 @@ class MapBindingComponentProcessorTest {
                 "}")
             .lines()));
 
-    Assertions.assertThat(compilation.generatedSourceFile("mapkeys.MapModule_ClassKeyMapKey")
-            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(compilerMode
+    assertThat(compilation).generatedSourceFile("mapkeys.MapModule_ClassKeyMapKey")
+        .containsLines(List.of(compilerMode
             .javaFileBuilder("mapkeys.MapModule_ClassKeyMapKey")
             .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLines(
@@ -734,10 +729,8 @@ class MapBindingComponentProcessorTest {
                 componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -941,9 +934,7 @@ class MapBindingComponentProcessorTest {
             .compile(mapModuleFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 }

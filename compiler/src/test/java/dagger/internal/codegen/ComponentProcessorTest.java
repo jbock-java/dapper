@@ -44,7 +44,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -638,10 +637,8 @@ class ComponentProcessorTest {
             .compile(aFile, bFile, cFile, moduleFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -782,10 +779,8 @@ class ComponentProcessorTest {
                 componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1063,10 +1058,8 @@ class ComponentProcessorTest {
             .compile(injectableTypeFile, injectedTypeFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1127,10 +1120,8 @@ class ComponentProcessorTest {
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1192,10 +1183,8 @@ class ComponentProcessorTest {
             .compile(injectableTypeFile, injectedTypeFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1325,10 +1314,8 @@ class ComponentProcessorTest {
             .compile(aFile, bFile, aComponentFile, bComponentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerBComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerBComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1432,10 +1419,8 @@ class ComponentProcessorTest {
             .compile(aFile, otherAFile, moduleFile, otherModuleFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1528,10 +1513,8 @@ class ComponentProcessorTest {
             .compile(injectedTypeFile, aComponentFile, bComponentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerBComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerBComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1617,10 +1600,8 @@ class ComponentProcessorTest {
             .compile(aFile, bFile, cFile, xFile, componentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -1768,10 +1749,8 @@ class ComponentProcessorTest {
             .compile(injectableTypeFile, componentSupertype, depComponentFile);
     assertThat(compilation).succeeded();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerSimpleComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -2247,7 +2226,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void nullIncorrectlyReturnedFromNonNullableInlinedProvider(CompilerMode compilerMode) throws IOException {
+  void nullIncorrectlyReturnedFromNonNullableInlinedProvider(CompilerMode compilerMode) {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2284,9 +2263,8 @@ class ComponentProcessorTest {
                     "}"));
     assertThat(compilation).succeededWithoutWarnings();
 
-    Assertions.assertThat(compilation.generatedSourceFile("test.TestModule_NonNullableStringFactory")
-            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(compilerMode
+    assertThat(compilation).generatedSourceFile("test.TestModule_NonNullableStringFactory")
+        .containsLines(List.of(compilerMode
             .javaFileBuilder("test.TestModule_NonNullableStringFactory")
             .addLines(
                 "package test;",
@@ -2332,15 +2310,13 @@ class ComponentProcessorTest {
                 "}")
             .lines();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void nullCheckingIgnoredWhenProviderReturnsPrimitive(CompilerMode compilerMode) throws IOException {
+  void nullCheckingIgnoredWhenProviderReturnsPrimitive(CompilerMode compilerMode) {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2377,9 +2353,8 @@ class ComponentProcessorTest {
                     "}"));
     assertThat(compilation).succeededWithoutWarnings();
 
-    Assertions.assertThat(compilation.generatedSourceFile("test.TestModule_PrimitiveIntegerFactory")
-            .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(compilerMode
+    assertThat(compilation).generatedSourceFile("test.TestModule_PrimitiveIntegerFactory")
+        .containsLines(List.of(compilerMode
             .javaFileBuilder("test.TestModule_PrimitiveIntegerFactory")
             .addLines("package test;")
             .addLines(GeneratedLines.generatedImportsIndividual())
@@ -2423,15 +2398,13 @@ class ComponentProcessorTest {
                 "}")
             .lines();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerTestComponent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(generatedComponent));
+    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
+        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis(CompilerMode compilerMode) throws IOException {
+  void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -2492,15 +2465,13 @@ class ComponentProcessorTest {
     Compilation compilation = daggerCompiler().compile(parent, testModule, child);
     assertThat(compilation).succeededWithoutWarnings();
 
-    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(expectedPattern));
+    assertThat(compilation).generatedSourceFile("test.DaggerParent")
+        .containsLines(List.of(expectedPattern));
   }
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentMethodInChildCallsComponentMethodInParent(CompilerMode compilerMode) throws IOException {
+  void componentMethodInChildCallsComponentMethodInParent(CompilerMode compilerMode) {
     JavaFileObject supertype =
         JavaFileObjects.forSourceLines(
             "test.Supertype",
@@ -2568,12 +2539,8 @@ class ComponentProcessorTest {
 
     Compilation compilation = daggerCompiler().compile(supertype, parent, testModule, child);
     assertThat(compilation).succeededWithoutWarnings();
-
-    String actualImpl = compilation.generatedSourceFile("test.DaggerParent")
-        .orElseThrow().getCharContent(false).toString();
-    Assertions.assertThat(actualImpl.lines().collect(Collectors.toList()))
-        .containsSubsequence(List.of(expectedPattern));
-
+    assertThat(compilation).generatedSourceFile("test.DaggerParent")
+        .containsLines(List.of(expectedPattern));
   }
 
   @Test
