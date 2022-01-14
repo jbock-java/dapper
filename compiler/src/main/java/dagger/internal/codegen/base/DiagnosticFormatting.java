@@ -39,8 +39,6 @@ public final class DiagnosticFormatting {
               + "|jakarta[.]inject"
               + "|dagger"
               + "|dagger[.]multibindings"
-              + "|com[.]google[.]common[.]base"
-              + "|com[.]google[.]common[.]collect"
               + ")[.])" // Always end with a literal .
               + "[A-Z]"); // What we want to match on but not capture.
 

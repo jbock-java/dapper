@@ -24,30 +24,17 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class MapBindingExpressionWithGuavaTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class MapBindingExpressionWithGuavaTest {
 
-  private final CompilerMode compilerMode;
-
-  public MapBindingExpressionWithGuavaTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void mapBindings() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindings(CompilerMode compilerMode) {
     JavaFileObject mapModuleFile =
         JavaFileObjects.forSourceLines(
             "test.MapModule",
@@ -318,8 +305,9 @@ public class MapBindingExpressionWithGuavaTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void inaccessible() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void inaccessible(CompilerMode compilerMode) {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible", "package other;", "", "class Inaccessible {}");
@@ -388,8 +376,9 @@ public class MapBindingExpressionWithGuavaTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void subcomponentOmitsInheritedBindings() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentOmitsInheritedBindings(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",

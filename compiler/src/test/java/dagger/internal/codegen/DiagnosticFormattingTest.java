@@ -18,20 +18,14 @@ package dagger.internal.codegen;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.base.CaseFormat;
 import dagger.internal.codegen.base.DiagnosticFormatting;
 import org.junit.jupiter.api.Test;
 
-public class DiagnosticFormattingTest {
+class DiagnosticFormattingTest {
   @Test
-  public void stripCommonTypePrefixes() {
-    String typeName = "com.google.common.collect.ImmutableList<java.lang.Boolean>";
+  void stripCommonTypePrefixes() {
+    String typeName = "java.util.List<java.lang.Boolean>";
     assertThat(DiagnosticFormatting.stripCommonTypePrefixes(typeName))
-        .isEqualTo("ImmutableList<Boolean>");
-  }
-
-  @Test
-  void name() {
-    System.out.println(CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "PROVIDER"));
+        .isEqualTo("List<Boolean>");
   }
 }

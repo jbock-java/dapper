@@ -25,34 +25,21 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ErrorMessages;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 /** Tests for {@link dagger.Component.Builder} */
-@RunWith(Parameterized.class)
-public class ComponentBuilderTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
-
-  private final CompilerMode compilerMode;
-
-  public ComponentBuilderTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
+class ComponentBuilderTest {
 
   private static final ErrorMessages.ComponentCreatorMessages MSGS =
       creatorMessagesFor(COMPONENT_BUILDER);
 
-  @Test
-  public void testUsesBuildAndSetterNames() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testUsesBuildAndSetterNames(CompilerMode compilerMode) {
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -118,8 +105,9 @@ public class ComponentBuilderTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void testSetterMethodWithMoreThanOneArgFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testSetterMethodWithMoreThanOneArgFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -150,8 +138,9 @@ public class ComponentBuilderTest {
         .onLineContaining("Builder set(Number n, Double d);");
   }
 
-  @Test
-  public void testInheritedSetterMethodWithMoreThanOneArgFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testInheritedSetterMethodWithMoreThanOneArgFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -182,8 +171,9 @@ public class ComponentBuilderTest {
         .onLineContaining("interface Builder");
   }
 
-  @Test
-  public void testSetterReturningNonVoidOrBuilderFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testSetterReturningNonVoidOrBuilderFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -209,8 +199,9 @@ public class ComponentBuilderTest {
         .onLineContaining("String set(Integer i);");
   }
 
-  @Test
-  public void testInheritedSetterReturningNonVoidOrBuilderFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testInheritedSetterReturningNonVoidOrBuilderFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -240,8 +231,9 @@ public class ComponentBuilderTest {
         .onLineContaining("interface Builder");
   }
 
-  @Test
-  public void testGenericsOnSetterMethodFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testGenericsOnSetterMethodFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -267,8 +259,9 @@ public class ComponentBuilderTest {
         .onLineContaining("<T> Builder set(T t);");
   }
 
-  @Test
-  public void testGenericsOnInheritedSetterMethodFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testGenericsOnInheritedSetterMethodFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -297,8 +290,9 @@ public class ComponentBuilderTest {
         .onLineContaining("interface Builder");
   }
 
-  @Test
-  public void testBindsInstanceNotAllowedOnBothSetterAndParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testBindsInstanceNotAllowedOnBothSetterAndParameter(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -329,8 +323,9 @@ public class ComponentBuilderTest {
         .onLineContaining("Builder s(");
   }
 
-  @Test
-  public void testBindsInstanceNotAllowedOnBothSetterAndParameter_inherited() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testBindsInstanceNotAllowedOnBothSetterAndParameter_inherited(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",

@@ -20,35 +20,18 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.TestUtils.message;
-import static org.junit.Assume.assumeFalse;
 
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@RunWith(Parameterized.class)
-public class DuplicateBindingsValidationTest {
-
-  @Parameters(name = "fullBindingGraphValidation={0}")
-  public static ImmutableList<Object[]> parameters() {
-    return ImmutableList.copyOf(new Object[][]{{false}, {true}});
-  }
-
-  private final boolean fullBindingGraphValidation;
-
-  public DuplicateBindingsValidationTest(boolean fullBindingGraphValidation) {
-    this.fullBindingGraphValidation = fullBindingGraphValidation;
-  }
+class DuplicateBindingsValidationTest {
 
   @Test
-  public void duplicateExplicitBindings_ProvidesAndComponentProvision() {
-    assumeFalse(fullBindingGraphValidation);
-
+  void duplicateExplicitBindings_ProvidesAndComponentProvision() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.Outer",
         "package test;",
         "",
@@ -85,7 +68,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(false))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -98,8 +81,9 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining("interface Child");
   }
 
-  @Test
-  public void duplicateExplicitBindings_TwoProvidesMethods() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_TwoProvidesMethods(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -140,7 +124,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -167,8 +151,9 @@ public class DuplicateBindingsValidationTest {
     assertThat(compilation).hadErrorCount(fullBindingGraphValidation ? 2 : 1);
   }
 
-  @Test
-  public void duplicateExplicitBindings_ProvidesVsBinds() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_ProvidesVsBinds(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -208,7 +193,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -232,8 +217,9 @@ public class DuplicateBindingsValidationTest {
     }
   }
 
-  @Test
-  public void duplicateExplicitBindings_multibindingsAndExplicitSets() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_multibindingsAndExplicitSets(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -278,7 +264,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -298,8 +284,9 @@ public class DuplicateBindingsValidationTest {
             fullBindingGraphValidation ? "class TestModule3" : "interface TestComponent");
   }
 
-  @Test
-  public void duplicateExplicitBindings_multibindingsAndExplicitMaps() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_multibindingsAndExplicitMaps(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -349,7 +336,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -370,8 +357,9 @@ public class DuplicateBindingsValidationTest {
             fullBindingGraphValidation ? "class TestModule3" : "interface TestComponent");
   }
 
-  @Test
-  public void duplicateExplicitBindings_UniqueBindingAndMultibindingDeclaration_Set() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_UniqueBindingAndMultibindingDeclaration_Set(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -406,7 +394,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -423,8 +411,9 @@ public class DuplicateBindingsValidationTest {
             fullBindingGraphValidation ? "class TestModule3" : "interface TestComponent");
   }
 
-  @Test
-  public void duplicateExplicitBindings_UniqueBindingAndMultibindingDeclaration_Map() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateExplicitBindings_UniqueBindingAndMultibindingDeclaration_Map(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -461,7 +450,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -479,8 +468,9 @@ public class DuplicateBindingsValidationTest {
             fullBindingGraphValidation ? "class TestModule3" : "interface TestComponent");
   }
 
-  @Test
-  public void duplicateBindings_TruncateAfterLimit() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void duplicateBindings_TruncateAfterLimit(boolean fullBindingGraphValidation) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -591,7 +581,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(component);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -613,8 +603,9 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining(fullBindingGraphValidation ? "class Modules" : "interface TestComponent");
   }
 
-  @Test
-  public void childBindingConflictsWithParent() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void childBindingConflictsWithParent(boolean fullBindingGraphValidation) {
     JavaFileObject aComponent =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -665,7 +656,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(aComponent, bComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -678,8 +669,9 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining(fullBindingGraphValidation ? "class AModule" : "interface A {");
   }
 
-  @Test
-  public void grandchildBindingConflictsWithGrandparent() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void grandchildBindingConflictsWithGrandparent(boolean fullBindingGraphValidation) {
     JavaFileObject aComponent =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -746,7 +738,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(aComponent, bComponent, cComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -759,8 +751,9 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining(fullBindingGraphValidation ? "class AModule" : "interface A {");
   }
 
-  @Test
-  public void grandchildBindingConflictsWithChild() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void grandchildBindingConflictsWithChild(boolean fullBindingGraphValidation) {
     JavaFileObject aComponent =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -822,7 +815,7 @@ public class DuplicateBindingsValidationTest {
 
     Compilation compilation =
         compilerWithOptions(
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(aComponent, bComponent, cComponent);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -836,8 +829,7 @@ public class DuplicateBindingsValidationTest {
   }
 
   @Test
-  public void childProvidesConflictsWithParentInjects() {
-    assumeFalse(fullBindingGraphValidation);
+  void childProvidesConflictsWithParentInjects() {
 
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
@@ -959,8 +951,9 @@ public class DuplicateBindingsValidationTest {
         .onLineContaining("interface Injected1 {");
   }
 
-  @Test
-  public void grandchildBindingConflictsWithParentWithNullableViolationAsWarning() {
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void grandchildBindingConflictsWithParentWithNullableViolationAsWarning(boolean fullBindingGraphValidation) {
     JavaFileObject parentConflictsWithChild =
         JavaFileObjects.forSourceLines(
             "test.ParentConflictsWithChild",
@@ -1011,7 +1004,7 @@ public class DuplicateBindingsValidationTest {
     Compilation compilation =
         compilerWithOptions(
             "-Adagger.nullableValidation=WARNING",
-            fullBindingGraphValidationOption())
+            fullBindingGraphValidationOption(fullBindingGraphValidation))
             .compile(parentConflictsWithChild, child);
     assertThat(compilation).failed();
     assertThat(compilation)
@@ -1028,12 +1021,12 @@ public class DuplicateBindingsValidationTest {
                 : "interface ParentConflictsWithChild");
   }
 
-  private String fullBindingGraphValidationOption() {
+  private String fullBindingGraphValidationOption(boolean fullBindingGraphValidation) {
     return "-Adagger.fullBindingGraphValidation=" + (fullBindingGraphValidation ? "ERROR" : "NONE");
   }
 
   @Test
-  public void reportedInParentAndChild() {
+  void reportedInParentAndChild() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
