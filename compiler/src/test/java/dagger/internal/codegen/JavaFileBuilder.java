@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.JavaFileObjects;
+import dagger.internal.codegen.base.Preconditions;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.tools.JavaFileObject;
 
@@ -32,17 +32,17 @@ import javax.tools.JavaFileObject;
  * <p>After creating a builder, you can add lines to the file. Call {@link #addLines(String...)} to
  * add lines irrespective of the settings. If you want to add different lines for different possible
  * settings, call {@link #addLinesIf(Object, String...)} to add those lines only if the given
- * setting has been added via {@link #withSetting(Object)} or {@link #withSettings(Object...)}.
+ * setting has been added via {@link #withSetting(Object)} or {@code #withSettings(Object...)}.
  */
 final class JavaFileBuilder {
   private final String qualifiedName;
   private final Set<Object> settings = new HashSet<>();
 
-  private final ImmutableList.Builder<String> sourceLines = ImmutableList.builder();
+  private final List<String> sourceLines = new ArrayList<>();
 
   /** Creates a builder for a file whose top level type has a given qualified name. */
   JavaFileBuilder(String qualifiedName) {
-    checkArgument(!qualifiedName.isEmpty());
+    Preconditions.checkArgument(!qualifiedName.isEmpty());
     this.qualifiedName = qualifiedName;
   }
 
@@ -70,7 +70,7 @@ final class JavaFileBuilder {
 
   /** Adds lines no matter what the {@link CompilerMode} is. */
   JavaFileBuilder addLines(String... lines) {
-    sourceLines.add(lines);
+    Collections.addAll(sourceLines, lines);
     return this;
   }
 
@@ -82,17 +82,17 @@ final class JavaFileBuilder {
   /** Adds lines if in the given setting is set. */
   JavaFileBuilder addLinesIf(Object setting, String... lines) {
     if (settings.contains(setting)) {
-      sourceLines.add(lines);
+      Collections.addAll(sourceLines, lines);
     }
     return this;
   }
 
   /** Builds the {@link JavaFileObject}. */
   JavaFileObject build() {
-    return JavaFileObjects.forSourceLines(qualifiedName, sourceLines.build());
+    return JavaFileObjects.forSourceLines(qualifiedName, sourceLines);
   }
 
   String[] lines() {
-    return sourceLines.build().toArray(new String[0]);
+    return sourceLines.toArray(new String[0]);
   }
 }

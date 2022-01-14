@@ -25,15 +25,13 @@ import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.base.Util;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -321,7 +319,7 @@ class MembersInjectionTest {
         "  }",
         "}");
     assertAbout(javaSources())
-        .that(ImmutableList.of(a, a2, parent, child))
+        .that(List.of(a, a2, parent, child))
         .withCompilerOptions(compilerMode.javacopts())
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -762,7 +760,7 @@ class MembersInjectionTest {
         "  }",
         "}");
     assertAbout(javaSources())
-        .that(ImmutableList.of(aFile, bFile))
+        .that(List.of(aFile, bFile))
         .withCompilerOptions(compilerMode.javacopts())
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -826,7 +824,7 @@ class MembersInjectionTest {
         "  }",
         "}");
     assertAbout(javaSources())
-        .that(ImmutableList.of(nestedTypesFile))
+        .that(List.of(nestedTypesFile))
         .withCompilerOptions(compilerMode.javacopts())
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()
@@ -901,7 +899,7 @@ class MembersInjectionTest {
 
               @Override
               public Set<String> getSupportedAnnotationTypes() {
-                return ImmutableSet.of("*");
+                return Set.of("*");
               }
 
               @Override
@@ -915,15 +913,15 @@ class MembersInjectionTest {
                                .createSourceFile("test.GeneratedType")
                                .openWriter()) {
                     writer.write(
-                        Joiner.on('\n')
-                            .join(
+                        String.join("\n",
+                            Arrays.asList(
                                 "package test;",
                                 "",
                                 "import jakarta.inject.Inject;",
                                 "",
                                 "class GeneratedType {",
                                 "  @Inject GeneratedType() {}",
-                                "}"));
+                                "}")));
                   } catch (IOException e) {
                     throw new RuntimeException(e);
                   }
@@ -1073,7 +1071,7 @@ class MembersInjectionTest {
         "}");
 
     assertAbout(javaSources())
-        .that(ImmutableList.of(foo, bar, parent, child, component))
+        .that(List.of(foo, bar, parent, child, component))
         .withCompilerOptions(compilerMode.javacopts())
         .processedWith(new ComponentProcessor())
         .compilesWithoutError()

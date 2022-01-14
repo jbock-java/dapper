@@ -21,8 +21,6 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1121' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1122' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -53,7 +51,6 @@ dependencies {
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.2')
-    testImplementation('io.github.jbock-java:guava:31.0.1.1')
     // why is this necessary?
     testImplementation('com.google.errorprone:error_prone_annotations:2.4.0')
     // why is this necessary?

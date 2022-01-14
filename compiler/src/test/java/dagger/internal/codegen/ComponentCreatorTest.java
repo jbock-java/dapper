@@ -28,7 +28,6 @@ import static dagger.internal.codegen.binding.ComponentCreatorKind.FACTORY;
 import static dagger.internal.codegen.binding.ComponentKind.COMPONENT;
 import static dagger.internal.codegen.binding.ErrorMessages.componentMessagesFor;
 
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
@@ -1275,9 +1274,7 @@ class ComponentCreatorTest {
 
   /** Compiles the given files with the set compiler mode's javacopts. */
   Compilation compile(ComponentCreatorTestData data, JavaFileObject... files) {
-    ImmutableList.Builder<String> options =
-        ImmutableList.<String>builder().addAll(data.compilerMode.javacopts());
-
-    return compilerWithOptions(options.build()).compile(files);
+    List<String> options = data.compilerMode.javacopts();
+    return compilerWithOptions(options).compile(files);
   }
 }

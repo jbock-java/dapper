@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
@@ -30,8 +28,11 @@ import com.google.testing.compile.JavaFileObjects;
 import dagger.Module;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.tools.JavaFileObject;
 
 /** A {@link Truth} subject for testing Dagger module methods. */
@@ -58,7 +59,8 @@ final class DaggerModuleMethodSubject extends Subject {
       return new Factory();
     }
 
-    private Factory() {}
+    private Factory() {
+    }
 
     @Override
     public DaggerModuleMethodSubject createSubject(FailureMetadata failureMetadata, String that) {
@@ -67,18 +69,17 @@ final class DaggerModuleMethodSubject extends Subject {
   }
 
   private final String actual;
-  private final ImmutableList.Builder<String> imports =
-      new ImmutableList.Builder<String>()
-          .add(
-              // explicitly import Module so it's not ambiguous with java.lang.Module
-              "import dagger.Module;",
-              "import dagger.*;",
-              "import dagger.multibindings.*;",
-              "import dagger.producers.*;",
-              "import java.util.*;",
-              "import jakarta.inject.*;");
+  private final List<String> imports =
+      new ArrayList<>(Arrays.asList(
+          // explicitly import Module so it's not ambiguous with java.lang.Module
+          "import dagger.Module;",
+          "import dagger.*;",
+          "import dagger.multibindings.*;",
+          "import dagger.producers.*;",
+          "import java.util.*;",
+          "import jakarta.inject.*;"));
   private String declaration;
-  private ImmutableList<JavaFileObject> additionalSources = ImmutableList.of();
+  private List<JavaFileObject> additionalSources = List.of();
 
   private DaggerModuleMethodSubject(FailureMetadata failureMetadata, String subject) {
     super(failureMetadata, subject);
@@ -128,7 +129,7 @@ final class DaggerModuleMethodSubject extends Subject {
 
   /** Additional source files that must be compiled with the module. */
   DaggerModuleMethodSubject withAdditionalSources(JavaFileObject... sources) {
-    this.additionalSources = ImmutableList.copyOf(sources);
+    this.additionalSources = Arrays.asList(sources);
     return this;
   }
 
@@ -140,7 +141,10 @@ final class DaggerModuleMethodSubject extends Subject {
     String source = moduleSource();
     JavaFileObject module = JavaFileObjects.forSourceLines("test.TestModule", source);
     Compilation compilation =
-        daggerCompiler().compile(FluentIterable.from(additionalSources).append(module));
+        daggerCompiler().compile(Stream.concat(
+                additionalSources.stream(),
+                Stream.of(module))
+            .collect(Collectors.toList()));
     assertThat(compilation).failed();
     assertThat(compilation)
         .hadErrorContaining(errorSubstring)
@@ -152,8 +156,8 @@ final class DaggerModuleMethodSubject extends Subject {
     String beforeMethod = source.substring(0, source.indexOf(actual));
     int methodLine = 1;
     for (int nextNewlineIndex = beforeMethod.indexOf('\n');
-        nextNewlineIndex >= 0;
-        nextNewlineIndex = beforeMethod.indexOf('\n', nextNewlineIndex + 1)) {
+         nextNewlineIndex >= 0;
+         nextNewlineIndex = beforeMethod.indexOf('\n', nextNewlineIndex + 1)) {
       methodLine++;
     }
     return methodLine;
@@ -164,7 +168,7 @@ final class DaggerModuleMethodSubject extends Subject {
     PrintWriter writer = new PrintWriter(stringWriter);
     writer.println("package test;");
     writer.println();
-    for (String importLine : imports.build()) {
+    for (String importLine : imports) {
       writer.println(importLine);
     }
     writer.println();

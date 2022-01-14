@@ -19,7 +19,6 @@ package dagger.internal.codegen;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
@@ -33,7 +32,7 @@ class SwitchingProviderTest {
 
   @Test
   void switchingProviderTest() {
-    ImmutableList.Builder<JavaFileObject> javaFileObjects = ImmutableList.builder();
+    List<JavaFileObject> javaFileObjects = new ArrayList<>();
     StringBuilder entryPoints = new StringBuilder();
     for (int i = 0; i <= 100; i++) {
       String bindingName = "Binding" + i;
@@ -299,7 +298,7 @@ class SwitchingProviderTest {
         "  }",
         "}");
 
-    Compilation compilation = compilerWithAndroidMode().compile(javaFileObjects.build());
+    Compilation compilation = compilerWithAndroidMode().compile(javaFileObjects);
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")

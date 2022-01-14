@@ -16,10 +16,11 @@
 
 package dagger.internal.codegen;
 
-import com.google.common.collect.ImmutableMap;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A testing plugin that captures {@link dagger.model.BindingGraph}s for tests to make assertions
@@ -28,7 +29,7 @@ import dagger.spi.DiagnosticReporter;
 // TODO(dpb): Move to dagger.spi.testing?
 final class BindingGraphCapturer implements BindingGraphPlugin {
 
-  private final ImmutableMap.Builder<String, BindingGraph> bindingGraphs = ImmutableMap.builder();
+  private final Map<String, BindingGraph> bindingGraphs = new LinkedHashMap<>();
 
   @Override
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
@@ -43,7 +44,7 @@ final class BindingGraphCapturer implements BindingGraphPlugin {
   }
 
   /** Returns a map of binding graphs, indexed by the canonical name of the root component type. */
-  public ImmutableMap<String, BindingGraph> bindingGraphs() {
-    return bindingGraphs.build();
+  public Map<String, BindingGraph> bindingGraphs() {
+    return bindingGraphs;
   }
 }

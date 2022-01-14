@@ -21,11 +21,13 @@ import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -41,18 +43,18 @@ class ComponentShardTest {
     //     1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
     //          ^--------/
     //
-    ImmutableList.Builder<JavaFileObject> javaFileObjects = ImmutableList.builder();
+    List<JavaFileObject> javaFileObjects = new ArrayList<>();
     javaFileObjects
         // Shard 2: Bindings (1)
-        .add(createBinding("Binding1", "Binding2 binding2"))
+        .add(createBinding("Binding1", "Binding2 binding2"));
         // Shard 1: Bindings (2, 3, 4, 5). Contains more than 2 bindings due to cycle.
-        .add(createBinding("Binding2", "Binding3 binding3"))
-        .add(createBinding("Binding3", "Binding4 binding4"))
-        .add(createBinding("Binding4", "Binding5 binding5, Provider<Binding2> binding2Provider"))
-        .add(createBinding("Binding5", "Binding6 binding6"))
+    javaFileObjects.add(createBinding("Binding2", "Binding3 binding3"));
+    javaFileObjects.add(createBinding("Binding3", "Binding4 binding4"));
+    javaFileObjects.add(createBinding("Binding4", "Binding5 binding5, Provider<Binding2> binding2Provider"));
+    javaFileObjects.add(createBinding("Binding5", "Binding6 binding6"));
         // Component shard: Bindings (6, 7)
-        .add(createBinding("Binding6", "Binding7 binding7"))
-        .add(createBinding("Binding7"));
+    javaFileObjects.add(createBinding("Binding6", "Binding7 binding7"));
+    javaFileObjects.add(createBinding("Binding7"));
 
     // Add the component with entry points for each binding and its provider.
     javaFileObjects.add(
@@ -83,7 +85,7 @@ class ComponentShardTest {
             "  Provider<Binding7> providerBinding7();",
             "}"));
 
-    Compilation compilation = compiler(compilerMode).compile(javaFileObjects.build());
+    Compilation compilation = compiler(compilerMode).compile(javaFileObjects);
     assertThat(compilation).succeededWithoutWarnings();
     assertThat(compilation)
         .generatedSourceFile("dagger.internal.codegen.DaggerTestComponent")
@@ -519,10 +521,9 @@ class ComponentShardTest {
   }
 
   private Compiler compiler(CompilerMode compilerMode) {
-    return compilerWithOptions(
-        ImmutableSet.<String>builder()
-            .add("-Adagger.keysPerComponentShard=" + BINDINGS_PER_SHARD)
-            .addAll(compilerMode.javacopts())
-            .build());
+    Set<String> options = new LinkedHashSet<>();
+    options.add("-Adagger.keysPerComponentShard=" + BINDINGS_PER_SHARD);
+    options.addAll(compilerMode.javacopts());
+    return compilerWithOptions(options);
   }
 }

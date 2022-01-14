@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.validation.ValidationReport;
@@ -107,7 +106,7 @@ public class ValidationReportTest {
   private static abstract class SimpleTestProcessor extends AbstractProcessor {
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-      return ImmutableSet.of("*");
+      return Set.of("*");
     }
 
     @Override
