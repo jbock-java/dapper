@@ -24,30 +24,17 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class SetBindingRequestFulfillmentTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class SetBindingRequestFulfillmentTest {
 
-  private final CompilerMode compilerMode;
-
-  public SetBindingRequestFulfillmentTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void setBindings() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void setBindings(CompilerMode compilerMode) {
     JavaFileObject emptySetModuleFile = JavaFileObjects.forSourceLines("test.EmptySetModule",
         "package test;",
         "",
@@ -110,15 +97,16 @@ public class SetBindingRequestFulfillmentTest {
         "  }",
         "}");
     Compilation compilation =
-        daggerCompilerWithoutGuava().compile(emptySetModuleFile, setModuleFile, componentFile);
+        daggerCompilerWithoutGuava(compilerMode).compile(emptySetModuleFile, setModuleFile, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void inaccessible() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void inaccessible(CompilerMode compilerMode) {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible",
@@ -201,7 +189,7 @@ public class SetBindingRequestFulfillmentTest {
         "  }",
         "}");
     Compilation compilation =
-        daggerCompilerWithoutGuava()
+        daggerCompilerWithoutGuava(compilerMode)
             .compile(module, inaccessible, inaccessible2, usesInaccessible, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)
@@ -209,8 +197,9 @@ public class SetBindingRequestFulfillmentTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void subcomponentOmitsInheritedBindings() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentOmitsInheritedBindings(CompilerMode compilerMode) {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -310,14 +299,14 @@ public class SetBindingRequestFulfillmentTest {
         "  }",
         "}");
 
-    Compilation compilation = daggerCompilerWithoutGuava().compile(parent, parentModule, child);
+    Compilation compilation = daggerCompilerWithoutGuava(compilerMode).compile(parent, parentModule, child);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerParent")
         .containsLines(generatedComponent);
   }
 
-  private Compiler daggerCompilerWithoutGuava() {
+  private Compiler daggerCompilerWithoutGuava(CompilerMode compilerMode) {
     return compilerWithOptions(compilerMode.javacopts())
         .withClasspath(CLASS_PATH_WITHOUT_GUAVA_OPTION);
   }

@@ -27,14 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
-public class SwitchingProviderTest {
+class SwitchingProviderTest {
+
   @Test
-  public void switchingProviderTest() {
+  void switchingProviderTest() {
     ImmutableList.Builder<JavaFileObject> javaFileObjects = ImmutableList.builder();
     StringBuilder entryPoints = new StringBuilder();
     for (int i = 0; i <= 100; i++) {
@@ -309,7 +307,7 @@ public class SwitchingProviderTest {
   }
 
   @Test
-  public void unscopedBinds() {
+  void unscopedBinds() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -391,7 +389,7 @@ public class SwitchingProviderTest {
   }
 
   @Test
-  public void scopedBinds() {
+  void scopedBinds() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -487,7 +485,7 @@ public class SwitchingProviderTest {
   }
 
   @Test
-  public void emptyMultibindings_avoidSwitchProviders() {
+  void emptyMultibindings_avoidSwitchProviders() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -544,7 +542,7 @@ public class SwitchingProviderTest {
   }
 
   @Test
-  public void memberInjectors() {
+  void memberInjectors() {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -592,7 +590,7 @@ public class SwitchingProviderTest {
   }
 
   @Test
-  public void optionals() {
+  void optionals() {
     JavaFileObject present =
         JavaFileObjects.forSourceLines(
             "test.Present",

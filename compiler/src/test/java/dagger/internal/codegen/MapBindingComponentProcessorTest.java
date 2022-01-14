@@ -25,32 +25,19 @@ import static dagger.internal.codegen.Compilers.daggerCompiler;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.tools.JavaFileObject;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class MapBindingComponentProcessorTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class MapBindingComponentProcessorTest {
 
-  private final CompilerMode compilerMode;
-
-  public MapBindingComponentProcessorTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void mapBindingsWithEnumKey() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindingsWithEnumKey(CompilerMode compilerMode) {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -225,9 +212,10 @@ public class MapBindingComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
-  @Ignore // AutoAnnotationProcessor
-  @Test
-  public void mapBindingsWithInaccessibleKeys() throws IOException {
+  @Disabled // AutoAnnotationProcessor
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindingsWithInaccessibleKeys(CompilerMode compilerMode) throws IOException {
     JavaFileObject mapKeys =
         JavaFileObjects.forSourceLines(
             "mapkeys.MapKeys",
@@ -382,7 +370,6 @@ public class MapBindingComponentProcessorTest {
                 "  }",
                 "}")
             .lines()));
-    ;
 
     Assertions.assertThat(compilation.generatedSourceFile("mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey")
             .orElseThrow().getCharContent(false).toString().lines().collect(Collectors.toList()))
@@ -411,8 +398,9 @@ public class MapBindingComponentProcessorTest {
             .lines()));
   }
 
-  @Test
-  public void mapBindingsWithStringKey() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindingsWithStringKey(CompilerMode compilerMode) {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -575,9 +563,10 @@ public class MapBindingComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
-  @Ignore // AutoAnnotationProcessor
-  @Test
-  public void mapBindingsWithWrappedKey() throws IOException {
+  @Disabled // AutoAnnotationProcessor
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindingsWithWrappedKey(CompilerMode compilerMode) throws IOException {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -751,8 +740,9 @@ public class MapBindingComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void mapBindingsWithNonProviderValue() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mapBindingsWithNonProviderValue(CompilerMode compilerMode) {
     JavaFileObject mapModuleOneFile = JavaFileObjects.forSourceLines("test.MapModuleOne",
         "package test;",
         "",
@@ -901,8 +891,9 @@ public class MapBindingComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
-  @Test
-  public void injectMapWithoutMapBinding() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void injectMapWithoutMapBinding(CompilerMode compilerMode) throws IOException {
     JavaFileObject mapModuleFile = JavaFileObjects.forSourceLines("test.MapModule",
         "package test;",
         "",

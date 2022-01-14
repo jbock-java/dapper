@@ -24,25 +24,11 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.CompilationSubject;
 import com.google.testing.compile.JavaFileObjects;
-import java.util.Collection;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class DelegateBindingExpressionTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
-
-  private final CompilerMode compilerMode;
-
-  public DelegateBindingExpressionTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
+class DelegateBindingExpressionTest {
 
   private static final JavaFileObject REGULAR_SCOPED =
       JavaFileObjects.forSourceLines(
@@ -113,8 +99,9 @@ public class DelegateBindingExpressionTest {
           "  Class<?> value();",
           "}");
 
-  @Test
-  public void toDoubleCheck() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void toDoubleCheck(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -135,7 +122,7 @@ public class DelegateBindingExpressionTest {
             "  Object unscoped(Unscoped delegate);",
             "}");
 
-    assertThatCompilationWithModule(module)
+    assertThatCompilationWithModule(compilerMode, module)
         .generatedSourceFile("test.DaggerTestComponent")
         .containsLines(
             compilerMode
@@ -187,8 +174,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void toSingleCheck() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void toSingleCheck(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -210,7 +198,7 @@ public class DelegateBindingExpressionTest {
             "  Object unscoped(Unscoped delegate);",
             "}");
 
-    assertThatCompilationWithModule(module)
+    assertThatCompilationWithModule(compilerMode, module)
         .generatedSourceFile("test.DaggerTestComponent")
         .containsLines(
             compilerMode
@@ -256,13 +244,14 @@ public class DelegateBindingExpressionTest {
                     "    this.reusableScopedProvider = SingleCheck.provider(ReusableScoped_Factory.create());",
                     "    this.unscopedProvider = SingleCheck.provider((Provider) Unscoped_Factory.create());",
                     "  }")
-                .addLines( //
+                .addLines(
                     "}")
                 .build());
   }
 
-  @Test
-  public void toUnscoped() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void toUnscoped(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -283,7 +272,7 @@ public class DelegateBindingExpressionTest {
             "  Object unscoped(Unscoped delegate);",
             "}");
 
-    assertThatCompilationWithModule(module)
+    assertThatCompilationWithModule(compilerMode, module)
         .generatedSourceFile("test.DaggerTestComponent")
         .containsLines(
             compilerMode
@@ -332,8 +321,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void castNeeded_rawTypes_Provider_get() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void castNeeded_rawTypes_Provider_get(CompilerMode compilerMode) {
     JavaFileObject accessibleSupertype =
         JavaFileObjects.forSourceLines(
             "other.Supertype",
@@ -431,8 +421,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void noCast_rawTypes_Provider_get_toInaccessibleType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void noCast_rawTypes_Provider_get_toInaccessibleType(CompilerMode compilerMode) {
     JavaFileObject supertype =
         JavaFileObjects.forSourceLines(
             "other.Supertype",
@@ -536,8 +527,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void castedToRawType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void castedToRawType(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -639,8 +631,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void doubleBinds() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void doubleBinds(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -738,8 +731,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void inlineFactoryOfInacessibleType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void inlineFactoryOfInacessibleType(CompilerMode compilerMode) {
     JavaFileObject supertype =
         JavaFileObjects.forSourceLines(
             "other.Supertype", "package other;", "", "public interface Supertype {}");
@@ -833,8 +827,9 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  @Test
-  public void providerWhenBindsScopeGreaterThanDependencyScope() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void providerWhenBindsScopeGreaterThanDependencyScope(CompilerMode compilerMode) {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -955,7 +950,8 @@ public class DelegateBindingExpressionTest {
                 .build());
   }
 
-  private CompilationSubject assertThatCompilationWithModule(JavaFileObject module) {
+  private CompilationSubject assertThatCompilationWithModule(
+      CompilerMode compilerMode, JavaFileObject module) {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(

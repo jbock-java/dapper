@@ -25,34 +25,21 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ErrorMessages;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 /** Tests for {@link dagger.Component.Factory} */
-@RunWith(Parameterized.class)
-public class ComponentFactoryTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
-
-  private final CompilerMode compilerMode;
-
-  public ComponentFactoryTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
+class ComponentFactoryTest {
 
   private static final ErrorMessages.ComponentCreatorMessages MSGS =
       creatorMessagesFor(COMPONENT_FACTORY);
 
-  @Test
-  public void testUsesParameterNames() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testUsesParameterNames(CompilerMode compilerMode) {
     JavaFileObject moduleFile =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -107,8 +94,9 @@ public class ComponentFactoryTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void testSetterMethodFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testSetterMethodFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -134,8 +122,9 @@ public class ComponentFactoryTest {
         .onLineContaining("Factory set(String s);");
   }
 
-  @Test
-  public void testInheritedSetterMethodFails() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testInheritedSetterMethodFails(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
