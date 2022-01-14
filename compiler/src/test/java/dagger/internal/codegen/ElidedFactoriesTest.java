@@ -22,30 +22,17 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class ElidedFactoriesTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class ElidedFactoriesTest {
 
-  private final CompilerMode compilerMode;
-
-  public ElidedFactoriesTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void simpleComponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  public void simpleComponent(CompilerMode compilerMode) {
     JavaFileObject injectedType =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
@@ -122,8 +109,9 @@ public class ElidedFactoriesTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void simpleComponent_injectsProviderOf_dependsOnScoped() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  public void simpleComponent_injectsProviderOf_dependsOnScoped(CompilerMode compilerMode) {
     JavaFileObject scopedType =
         JavaFileObjects.forSourceLines(
             "test.ScopedType",
@@ -325,8 +313,9 @@ public class ElidedFactoriesTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void scopedBinding_onlyUsedInSubcomponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  public void scopedBinding_onlyUsedInSubcomponent(CompilerMode compilerMode) {
     JavaFileObject scopedType =
         JavaFileObjects.forSourceLines(
             "test.ScopedType",

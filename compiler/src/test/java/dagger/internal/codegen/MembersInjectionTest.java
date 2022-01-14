@@ -34,7 +34,6 @@ import dagger.internal.codegen.base.Util;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -42,26 +41,14 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class MembersInjectionTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class MembersInjectionTest {
 
-  private final CompilerMode compilerMode;
-
-  public MembersInjectionTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void parentClass_noInjectedMembers() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void parentClass_noInjectedMembers(CompilerMode compilerMode) {
     JavaFileObject childFile = JavaFileObjects.forSourceLines("test.Child",
         "package test;",
         "",
@@ -107,8 +94,9 @@ public class MembersInjectionTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void parentClass_injectedMembersInSupertype() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void parentClass_injectedMembersInSupertype(CompilerMode compilerMode) {
     JavaFileObject childFile = JavaFileObjects.forSourceLines("test.Child",
         "package test;",
         "",
@@ -174,8 +162,9 @@ public class MembersInjectionTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void fieldAndMethodGenerics() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void fieldAndMethodGenerics(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -238,8 +227,9 @@ public class MembersInjectionTest {
         .containsLines("test.GenericClass_MembersInjector", expected);
   }
 
-  @Test
-  public void subclassedGenericMembersInjectors() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subclassedGenericMembersInjectors(CompilerMode compilerMode) {
     JavaFileObject a = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -339,8 +329,9 @@ public class MembersInjectionTest {
         .containsLines("test.Child_MembersInjector", expected);
   }
 
-  @Test
-  public void fieldInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void fieldInjection(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.FieldInjection",
         "package test;",
         "",
@@ -415,8 +406,9 @@ public class MembersInjectionTest {
         .containsLines("test.FieldInjection_MembersInjector", expected);
   }
 
-  @Test
-  public void fieldInjectionWithQualifier() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void fieldInjectionWithQualifier(CompilerMode compilerMode) {
     JavaFileObject file =
         JavaFileObjects.forSourceLines(
             "test.FieldInjectionWithQualifier",
@@ -486,8 +478,9 @@ public class MembersInjectionTest {
         .containsLines("test.FieldInjectionWithQualifier_MembersInjector", expected);
   }
 
-  @Test
-  public void methodInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void methodInjection(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MethodInjection",
         "package test;",
         "",
@@ -564,8 +557,9 @@ public class MembersInjectionTest {
         .containsLines("test.MethodInjection_MembersInjector", expected);
   }
 
-  @Test
-  public void mixedMemberInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void mixedMemberInjection(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines(
         "test.MixedMemberInjection",
         "package test;",
@@ -654,8 +648,9 @@ public class MembersInjectionTest {
         .containsLines("test.MixedMemberInjection_MembersInjector", expected);
   }
 
-  @Test
-  public void injectConstructorAndMembersInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void injectConstructorAndMembersInjection(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AllInjections",
         "package test;",
         "",
@@ -719,8 +714,9 @@ public class MembersInjectionTest {
         .containsLines("test.AllInjections_MembersInjector", expectedMembersInjector);
   }
 
-  @Test
-  public void supertypeMembersInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void supertypeMembersInjection(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -774,8 +770,9 @@ public class MembersInjectionTest {
         .containsLines("test.B_MembersInjector", expectedMembersInjector);
   }
 
-  @Test
-  public void simpleComponentWithNesting() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void simpleComponentWithNesting(CompilerMode compilerMode) {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines(
         "test.OuterType",
         "package test;",
@@ -837,8 +834,9 @@ public class MembersInjectionTest {
         .containsLines("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
-  @Test
-  public void componentWithNestingAndGeneratedType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentWithNestingAndGeneratedType(CompilerMode compilerMode) {
     JavaFileObject nestedTypesFile =
         JavaFileObjects.forSourceLines(
             "test.OuterType",
@@ -938,8 +936,9 @@ public class MembersInjectionTest {
         .containsLines("test.OuterType_B_MembersInjector", bMembersInjector);
   }
 
-  @Test
-  public void lowerCaseNamedMembersInjector_forLowerCaseType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void lowerCaseNamedMembersInjector_forLowerCaseType(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.foo",
@@ -981,8 +980,9 @@ public class MembersInjectionTest {
     assertThat(compilation).generatedFile(CLASS_OUTPUT, "test", "foo_MembersInjector.class");
   }
 
-  @Test
-  public void fieldInjectionForShadowedMember() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void fieldInjectionForShadowedMember(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -1081,8 +1081,9 @@ public class MembersInjectionTest {
         .containsLines("test.Child_MembersInjector", expectedMembersInjector);
   }
 
-  @Test
-  public void privateNestedClassError() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void privateNestedClassError(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1101,8 +1102,9 @@ public class MembersInjectionTest {
         .onLine(6);
   }
 
-  @Test
-  public void privateNestedClassWarning() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void privateNestedClassWarning(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1124,8 +1126,9 @@ public class MembersInjectionTest {
         .onLine(6);
   }
 
-  @Test
-  public void privateSuperclassIsOkIfNotInjectedInto() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void privateSuperclassIsOkIfNotInjectedInto(CompilerMode compilerMode) {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -1142,8 +1145,9 @@ public class MembersInjectionTest {
     assertThat(compilation).succeeded();
   }
 
-  @Test
-  public void rawFrameworkTypeField() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void rawFrameworkTypeField(CompilerMode compilerMode) {
     JavaFileObject file =
         JavaFileObjects.forSourceLines(
             "test.RawFrameworkTypes",
@@ -1170,8 +1174,9 @@ public class MembersInjectionTest {
         .onLineContaining("interface C");
   }
 
-  @Test
-  public void throwExceptionInjectedMethod() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void throwExceptionInjectedMethod(CompilerMode compilerMode) {
     JavaFileObject file =
         JavaFileObjects.forSourceLines(
             "test.",
@@ -1192,8 +1197,9 @@ public class MembersInjectionTest {
         .onLineContaining("throws Exception");
   }
 
-  @Test
-  public void rawFrameworkTypeParameter() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void rawFrameworkTypeParameter(CompilerMode compilerMode) {
     JavaFileObject file =
         JavaFileObjects.forSourceLines(
             "test.RawFrameworkTypes",
@@ -1220,8 +1226,9 @@ public class MembersInjectionTest {
         .onLineContaining("interface C");
   }
 
-  @Test
-  public void injectsPrimitive() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void injectsPrimitive(CompilerMode compilerMode) {
     JavaFileObject injectedType =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
@@ -1328,8 +1335,9 @@ public class MembersInjectionTest {
         .containsLines(factory);
   }
 
-  @Test
-  public void accessibility() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void accessibility(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "other.Foo",
@@ -1463,8 +1471,9 @@ public class MembersInjectionTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void accessibleRawType_ofInaccessibleType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void accessibleRawType_ofInaccessibleType(CompilerMode compilerMode) {
     JavaFileObject inaccessible =
         JavaFileObjects.forSourceLines(
             "other.Inaccessible",
@@ -1590,8 +1599,9 @@ public class MembersInjectionTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void publicSupertypeHiddenSubtype() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void publicSupertypeHiddenSubtype(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "other.Foo",
@@ -1688,8 +1698,9 @@ public class MembersInjectionTest {
 
   // Shows that we shouldn't create a members injector for a type that doesn't have
   // @Inject fields or @Inject constructor even if it extends and is extended by types that do.
-  @Test
-  public void middleClassNoFieldInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void middleClassNoFieldInjection(CompilerMode compilerMode) {
     JavaFileObject classA =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -1811,8 +1822,9 @@ public class MembersInjectionTest {
   // constructor and that extends a type with @Inject fields, even if it has no local field
   // injection sites
   // TODO(erichang): Are these even used anymore?
-  @Test
-  public void testConstructorInjectedFieldInjection() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testConstructorInjectedFieldInjection(CompilerMode compilerMode) {
     JavaFileObject classA =
         JavaFileObjects.forSourceLines(
             "test.A",
