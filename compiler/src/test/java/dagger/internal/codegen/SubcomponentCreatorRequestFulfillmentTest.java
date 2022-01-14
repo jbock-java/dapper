@@ -40,7 +40,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorTestHelper {
+public class SubcomponentCreatorRequestFulfillmentTest {
+
+  private final ComponentCreatorTestData data;
+
   @Parameters(name = "compilerMode={0}, creatorKind={1}")
   public static Collection<Object[]> parameters() {
     Set<List<Object>> params =
@@ -52,13 +55,13 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
 
   public SubcomponentCreatorRequestFulfillmentTest(
       CompilerMode compilerMode, ComponentCreatorAnnotation componentCreatorAnnotation) {
-    super(compilerMode, componentCreatorAnnotation);
+    this.data = new ComponentCreatorTestData(compilerMode, componentCreatorAnnotation);
   }
 
   @Test
   public void testInlinedSubcomponentCreators_componentMethod() {
     JavaFileObject subcomponent =
-        preprocessedJavaFile(
+        data.preprocessedJavaFile(
             "test.Sub",
             "package test;",
             "",
@@ -72,7 +75,7 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
             "  }",
             "}");
     JavaFileObject usesSubcomponent =
-        preprocessedJavaFile(
+        data.preprocessedJavaFile(
             "test.UsesSubcomponent",
             "package test;",
             "",
@@ -82,7 +85,7 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
             "  @Inject UsesSubcomponent(Sub.Builder subBuilder) {}",
             "}");
     JavaFileObject component =
-        preprocessedJavaFile(
+        data.preprocessedJavaFile(
             "test.C",
             "package test;",
             "",
@@ -127,10 +130,10 @@ public class SubcomponentCreatorRequestFulfillmentTest extends ComponentCreatorT
         "  }",
         "}");
 
-    Compilation compilation = compile(subcomponent, usesSubcomponent, component);
+    Compilation compilation = data.compile(subcomponent, usesSubcomponent, component);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerC")
-        .containsLines(processLines(generatedComponent));
+        .containsLines(data.processLines(generatedComponent));
   }
 }
