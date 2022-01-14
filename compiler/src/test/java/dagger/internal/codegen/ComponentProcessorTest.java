@@ -31,7 +31,6 @@ import dagger.internal.codegen.base.Util;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,26 +45,15 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-@RunWith(Parameterized.class)
-public class ComponentProcessorTest {
-  @Parameters(name = "{0}")
-  public static Collection<Object[]> parameters() {
-    return CompilerMode.TEST_PARAMETERS;
-  }
+class ComponentProcessorTest {
 
-  private final CompilerMode compilerMode;
-
-  public ComponentProcessorTest(CompilerMode compilerMode) {
-    this.compilerMode = compilerMode;
-  }
-
-  @Test
-  public void doubleBindingFromResolvedModules() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void doubleBindingFromResolvedModules(CompilerMode compilerMode) {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.ParentModule",
         "package test;",
         "",
@@ -121,8 +109,9 @@ public class ComponentProcessorTest {
         .hadErrorContaining("@Provides List<Integer> AnotherModule.provideListOfInteger()");
   }
 
-  @Test
-  public void privateNestedClassWithWarningThatIsAnErrorInComponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void privateNestedClassWithWarningThatIsAnErrorInComponent(CompilerMode compilerMode) {
     JavaFileObject outerClass = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -153,8 +142,9 @@ public class ComponentProcessorTest {
         .hadErrorContaining("Dagger does not support injection into private classes");
   }
 
-  @Test
-  public void simpleComponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void simpleComponent(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -289,8 +279,9 @@ public class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void componentWithScope() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentWithScope(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -412,8 +403,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void simpleComponentWithNesting() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void simpleComponentWithNesting(CompilerMode compilerMode) throws IOException {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",
@@ -471,8 +463,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void componentWithModule() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentWithModule(CompilerMode compilerMode) throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -572,8 +565,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void componentWithAbstractModule() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentWithAbstractModule(CompilerMode compilerMode) throws IOException {
     JavaFileObject aFile =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -656,8 +650,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void transitiveModuleDeps() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void transitiveModuleDeps(CompilerMode compilerMode) throws IOException {
     JavaFileObject always = JavaFileObjects.forSourceLines("test.AlwaysIncluded",
         "package test;",
         "",
@@ -799,8 +794,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void generatedTransitiveModule() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void generatedTransitiveModule(CompilerMode compilerMode) {
     JavaFileObject rootModule = JavaFileObjects.forSourceLines("test.RootModule",
         "package test;",
         "",
@@ -832,8 +828,9 @@ public class ComponentProcessorTest {
         .succeeded();
   }
 
-  @Test
-  public void generatedModuleInSubcomponent() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void generatedModuleInSubcomponent(CompilerMode compilerMode) {
     JavaFileObject subcomponent =
         JavaFileObjects.forSourceLines(
             "test.ChildComponent",
@@ -871,8 +868,9 @@ public class ComponentProcessorTest {
         .succeeded();
   }
 
-  @Test
-  public void subcomponentNotGeneratedIfNotUsedInGraph() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void subcomponentNotGeneratedIfNotUsedInGraph(CompilerMode compilerMode) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -972,8 +970,9 @@ public class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void testDefaultPackage() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void testDefaultPackage(CompilerMode compilerMode) {
     JavaFileObject aClass = JavaFileObjects.forSourceLines("AClass", "class AClass {}");
     JavaFileObject bClass = JavaFileObjects.forSourceLines("BClass",
         "import jakarta.inject.Inject;",
@@ -1003,8 +1002,9 @@ public class ComponentProcessorTest {
         .succeeded();
   }
 
-  @Test
-  public void membersInjection() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void membersInjection(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1075,8 +1075,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void componentInjection() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentInjection(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1138,8 +1139,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void membersInjectionInsideProvision() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void membersInjectionInsideProvision(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1202,8 +1204,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void componentDependency() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentDependency(CompilerMode compilerMode) throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1334,8 +1337,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void moduleNameCollision() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void moduleNameCollision(CompilerMode compilerMode) throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1440,8 +1444,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void ignoresDependencyMethodsFromObject() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void ignoresDependencyMethodsFromObject(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectedTypeFile =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
@@ -1535,8 +1540,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void resolutionOrder() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void resolutionOrder(CompilerMode compilerMode) throws IOException {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1623,8 +1629,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void simpleComponent_redundantComponentMethod() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void simpleComponent_redundantComponentMethod(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1720,8 +1727,9 @@ public class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void simpleComponent_inheritedComponentMethodDep() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void simpleComponent_inheritedComponentMethodDep(CompilerMode compilerMode) throws IOException {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1772,8 +1780,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void wildcardGenericsRequiresAtProvides() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void wildcardGenericsRequiresAtProvides(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1821,8 +1830,9 @@ public class ComponentProcessorTest {
   }
 
   // https://github.com/google/dagger/issues/630
-  @Test
-  public void arrayKeyRequiresAtProvides() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void arrayKeyRequiresAtProvides(CompilerMode compilerMode) {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -1841,8 +1851,9 @@ public class ComponentProcessorTest {
         .hadErrorContaining("String[] cannot be provided without a @Provides-annotated method");
   }
 
-  @Test
-  public void componentImplicitlyDependsOnGeneratedType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentImplicitlyDependsOnGeneratedType(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1877,8 +1888,9 @@ public class ComponentProcessorTest {
     assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent");
   }
 
-  @Test
-  public void componentSupertypeDependsOnGeneratedType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentSupertypeDependsOnGeneratedType(CompilerMode compilerMode) {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -1921,8 +1933,9 @@ public class ComponentProcessorTest {
    * (non-inherited) injection sites. So make sure we warn in only those cases where running the
    * Dagger processor actually generates a {@link MembersInjector}.
    */
-  @Test
-  public void unprocessedMembersInjectorNotes() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void unprocessedMembersInjectorNotes(CompilerMode compilerMode) {
     Compilation compilation =
         javac()
             .withOptions(
@@ -2038,8 +2051,9 @@ public class ComponentProcessorTest {
     assertThat(compilation).hadNoteCount(3);
   }
 
-  @Test
-  public void scopeAnnotationOnInjectConstructorNotValid() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void scopeAnnotationOnInjectConstructorNotValid(CompilerMode compilerMode) {
     JavaFileObject aScope =
         JavaFileObjects.forSourceLines(
             "test.AScope",
@@ -2068,8 +2082,9 @@ public class ComponentProcessorTest {
         .onLine(6);
   }
 
-  @Test
-  public void unusedSubcomponents_dontResolveExtraBindingsInParentComponents() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void unusedSubcomponents_dontResolveExtraBindingsInParentComponents(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -2177,7 +2192,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void bindsToDuplicateBinding_bindsKeyIsNotDuplicated() {
+  void bindsToDuplicateBinding_bindsKeyIsNotDuplicated() {
     JavaFileObject firstModule =
         JavaFileObjects.forSourceLines(
             "test.FirstModule",
@@ -2236,8 +2251,9 @@ public class ComponentProcessorTest {
         .onLineContaining("interface TestComponent");
   }
 
-  @Test
-  public void nullIncorrectlyReturnedFromNonNullableInlinedProvider() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void nullIncorrectlyReturnedFromNonNullableInlinedProvider(CompilerMode compilerMode) throws IOException {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2328,8 +2344,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void nullCheckingIgnoredWhenProviderReturnsPrimitive() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void nullCheckingIgnoredWhenProviderReturnsPrimitive(CompilerMode compilerMode) throws IOException {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(
@@ -2418,8 +2435,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(generatedComponent));
   }
 
-  @Test
-  public void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis(CompilerMode compilerMode) throws IOException {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -2486,8 +2504,9 @@ public class ComponentProcessorTest {
         .containsSubsequence(List.of(expectedPattern));
   }
 
-  @Test
-  public void componentMethodInChildCallsComponentMethodInParent() throws IOException {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void componentMethodInChildCallsComponentMethodInParent(CompilerMode compilerMode) throws IOException {
     JavaFileObject supertype =
         JavaFileObjects.forSourceLines(
             "test.Supertype",
@@ -2564,7 +2583,7 @@ public class ComponentProcessorTest {
   }
 
   @Test
-  public void moduleHasGeneratedQualifier() {
+  void moduleHasGeneratedQualifier() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -2635,8 +2654,9 @@ public class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
-  @Test
-  public void publicComponentType() {
+  @EnumSource(CompilerMode.class)
+  @ParameterizedTest
+  void publicComponentType() {
     JavaFileObject publicComponent =
         JavaFileObjects.forSourceLines(
             "test.PublicComponent",
