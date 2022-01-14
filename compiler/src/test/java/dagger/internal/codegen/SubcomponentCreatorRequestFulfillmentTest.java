@@ -16,50 +16,34 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.collect.Sets.cartesianProduct;
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_FACTORY;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.testing.compile.Compilation;
-import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-public class SubcomponentCreatorRequestFulfillmentTest {
+class SubcomponentCreatorRequestFulfillmentTest {
 
-  private final ComponentCreatorTestData data;
-
-  @Parameters(name = "compilerMode={0}, creatorKind={1}")
-  public static Collection<Object[]> parameters() {
-    Set<List<Object>> params =
-        cartesianProduct(
-            immutableEnumSet(DEFAULT_MODE, FAST_INIT_MODE),
-            immutableEnumSet(SUBCOMPONENT_FACTORY, SUBCOMPONENT_BUILDER));
-    return ImmutableList.copyOf(Iterables.transform(params, Collection::toArray));
+  private static List<ComponentCreatorTestData> dataSource() {
+    List<ComponentCreatorTestData> result = new ArrayList<>();
+    result.add(new ComponentCreatorTestData(DEFAULT_MODE, SUBCOMPONENT_FACTORY));
+    result.add(new ComponentCreatorTestData(DEFAULT_MODE, SUBCOMPONENT_BUILDER));
+    result.add(new ComponentCreatorTestData(FAST_INIT_MODE, SUBCOMPONENT_FACTORY));
+    result.add(new ComponentCreatorTestData(FAST_INIT_MODE, SUBCOMPONENT_BUILDER));
+    return result;
   }
 
-  public SubcomponentCreatorRequestFulfillmentTest(
-      CompilerMode compilerMode, ComponentCreatorAnnotation componentCreatorAnnotation) {
-    this.data = new ComponentCreatorTestData(compilerMode, componentCreatorAnnotation);
-  }
-
-  @Test
-  public void testInlinedSubcomponentCreators_componentMethod() {
+  @MethodSource("dataSource")
+  @ParameterizedTest
+  void testInlinedSubcomponentCreators_componentMethod(ComponentCreatorTestData data) {
     JavaFileObject subcomponent =
         data.preprocessedJavaFile(
             "test.Sub",
