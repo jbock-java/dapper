@@ -28,7 +28,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.MapKeyValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -46,7 +45,6 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final Messager messager;
   private final DaggerTypes types;
   private final MapKeyValidator mapKeyValidator;
-  private final AnnotationCreatorGenerator annotationCreatorGenerator;
   private final UnwrappedMapKeyGenerator unwrappedMapKeyGenerator;
 
   @Inject
@@ -54,13 +52,11 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
       Messager messager,
       DaggerTypes types,
       MapKeyValidator mapKeyValidator,
-      AnnotationCreatorGenerator annotationCreatorGenerator,
       UnwrappedMapKeyGenerator unwrappedMapKeyGenerator) {
     super(MoreElements::asType);
     this.messager = messager;
     this.types = types;
     this.mapKeyValidator = mapKeyValidator;
-    this.annotationCreatorGenerator = annotationCreatorGenerator;
     this.unwrappedMapKeyGenerator = unwrappedMapKeyGenerator;
   }
 
@@ -75,10 +71,7 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     mapKeyReport.printMessagesTo(messager);
 
     if (mapKeyReport.isClean()) {
-      MapKey mapkey = mapKeyAnnotationType.getAnnotation(MapKey.class);
-      if (!mapkey.unwrapValue()) {
-        annotationCreatorGenerator.generate(mapKeyAnnotationType, messager);
-      } else if (unwrappedValueKind(mapKeyAnnotationType).equals(ANNOTATION_TYPE)) {
+      if (unwrappedValueKind(mapKeyAnnotationType).equals(ANNOTATION_TYPE)) {
         unwrappedMapKeyGenerator.generate(mapKeyAnnotationType, messager);
       }
     }

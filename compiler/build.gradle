@@ -40,7 +40,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = 'io.github.jbock-java:dapper:1.2'
+    def core = project(':core')
     implementation('io.github.jbock-java:javapoet:1.14')
     shadow('io.github.jbock-java:auto-common:1.2.1')
     implementation('io.github.jbock-java:guava-graph:1.0.1')
@@ -51,9 +51,7 @@ dependencies {
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.2')
-    // why is this necessary?
-    testImplementation('com.google.errorprone:error_prone_annotations:2.4.0')
-    // why is this necessary?
+    // @Nullable
     testImplementation('com.google.code.findbugs:jsr305:3.0.2')
 }
 

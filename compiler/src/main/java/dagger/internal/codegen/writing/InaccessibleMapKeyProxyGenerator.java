@@ -58,7 +58,7 @@ public final class InaccessibleMapKeyProxyGenerator
 
   @Override
   public List<TypeSpec.Builder> topLevelTypes(ContributionBinding binding) {
-    return MapKeys.mapKeyFactoryMethod(binding, types, elements)
+    return MapKeys.mapKeyFactoryMethod(binding, types)
         .map(
             method ->
                 classBuilder(MapKeys.mapKeyProxyClassName(binding))

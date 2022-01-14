@@ -72,7 +72,7 @@ class MapBindingComponentProcessorTest {
         "import java.lang.annotation.Retention;",
         "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
         "",
-        "@MapKey(unwrapValue = true)",
+        "@MapKey",
         "@Retention(RUNTIME)",
         "public @interface PathKey {",
         "  PathEnum value();",
@@ -213,7 +213,7 @@ class MapBindingComponentProcessorTest {
   @Disabled // AutoAnnotationProcessor
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void mapBindingsWithInaccessibleKeys(CompilerMode compilerMode) throws IOException {
+  void mapBindingsWithInaccessibleKeys(CompilerMode compilerMode) {
     JavaFileObject mapKeys =
         JavaFileObjects.forSourceLines(
             "mapkeys.MapKeys",
@@ -561,7 +561,7 @@ class MapBindingComponentProcessorTest {
   @Disabled // AutoAnnotationProcessor
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void mapBindingsWithWrappedKey(CompilerMode compilerMode) throws IOException {
+  void mapBindingsWithWrappedKey(CompilerMode compilerMode) {
     JavaFileObject mapModuleOneFile =
         JavaFileObjects
             .forSourceLines("test.MapModuleOne",
@@ -768,7 +768,7 @@ class MapBindingComponentProcessorTest {
         "import java.lang.annotation.Retention;",
         "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
         "",
-        "@MapKey(unwrapValue = true)",
+        "@MapKey",
         "@Retention(RUNTIME)",
         "public @interface PathKey {",
         "  PathEnum value();",

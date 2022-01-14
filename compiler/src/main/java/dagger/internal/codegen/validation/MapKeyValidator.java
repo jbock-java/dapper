@@ -19,13 +19,10 @@ package dagger.internal.codegen.validation;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.MapKey;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import jakarta.inject.Inject;
 import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 /**
@@ -33,34 +30,28 @@ import javax.lang.model.type.TypeKind;
  */
 // TODO(dpb,gak): Should unwrapped MapKeys be required to have their single member be named "value"?
 public final class MapKeyValidator {
-  private final DaggerElements elements;
 
   @Inject
-  MapKeyValidator(DaggerElements elements) {
-    this.elements = elements;
+  MapKeyValidator() {
   }
 
   public ValidationReport<Element> validate(Element element) {
-    ValidationReport.Builder<Element> builder = ValidationReport.about(element);
-    List<ExecutableElement> members = methodsIn(((TypeElement) element).getEnclosedElements());
+    List<ExecutableElement> members = methodsIn(element.getEnclosedElements());
     if (members.isEmpty()) {
-      builder.addError("Map key annotations must have members", element);
-    } else if (element.getAnnotation(MapKey.class).unwrapValue()) {
-      if (members.size() > 1) {
-        builder.addError(
-            "Map key annotations with unwrapped values must have exactly one member", element);
-      } else if (members.get(0).getReturnType().getKind() == TypeKind.ARRAY) {
-        builder.addError("Map key annotations with unwrapped values cannot use arrays", element);
-      }
-    } else if (autoAnnotationIsMissing()) {
-      builder.addError(
-          "@AutoAnnotation is a necessary dependency if @MapKey(unwrapValue = false). Add a "
-              + "dependency on com.google.auto.value:auto-value:<current version>");
+      return ValidationReport.about(element)
+          .addError("Map key annotations must have members", element)
+          .build();
     }
-    return builder.build();
-  }
-
-  private boolean autoAnnotationIsMissing() {
-    return elements.getTypeElement(TypeNames.AUTO_ANNOTATION) == null;
+    if (members.size() > 1) {
+      return ValidationReport.about(element)
+          .addError("Map key annotations with unwrapped values must have exactly one member", element)
+          .build();
+    }
+    if (members.get(0).getReturnType().getKind() == TypeKind.ARRAY) {
+      return ValidationReport.about(element)
+          .addError("Map key annotations with unwrapped values cannot use arrays", element)
+          .build();
+    }
+    return ValidationReport.about(element).build();
   }
 }

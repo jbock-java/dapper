@@ -402,7 +402,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void simpleComponentWithNesting(CompilerMode compilerMode) throws IOException {
+  void simpleComponentWithNesting(CompilerMode compilerMode) {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",
@@ -443,7 +443,6 @@ class ComponentProcessorTest {
                 "    injectB(b);",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private OuterType.B injectB(OuterType.B instance) {",
                 "    OuterType_B_MembersInjector.injectA(instance, new OuterType.A());",
                 "    return instance;",
@@ -993,7 +992,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void membersInjection(CompilerMode compilerMode) throws IOException {
+  void membersInjection(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1029,8 +1028,6 @@ class ComponentProcessorTest {
             .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
-                "",
-                "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
                 "")
             .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLines(
@@ -1045,7 +1042,6 @@ class ComponentProcessorTest {
                 "    return injectSomeInjectedType(instance);",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private SomeInjectedType injectSomeInjectedType(SomeInjectedType instance) {",
                 "    SomeInjectedType_MembersInjector.injectInjectedField(instance, new SomeInjectableType());",
                 "    return instance;",
@@ -1064,7 +1060,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentInjection(CompilerMode compilerMode) throws IOException {
+  void componentInjection(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1126,7 +1122,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void membersInjectionInsideProvision(CompilerMode compilerMode) throws IOException {
+  void membersInjectionInsideProvision(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1159,8 +1155,6 @@ class ComponentProcessorTest {
             .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
-                "",
-                "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
                 "")
             .addLines(GeneratedLines.generatedAnnotationsIndividual())
             .addLines(
@@ -1170,7 +1164,6 @@ class ComponentProcessorTest {
                 "    return injectSomeInjectedType(SomeInjectedType_Factory.newInstance());",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private SomeInjectedType injectSomeInjectedType(SomeInjectedType instance) {",
                 "    SomeInjectedType_MembersInjector.injectInjectedField(instance, new SomeInjectableType());",
                 "    return instance;",
@@ -2302,7 +2295,6 @@ class ComponentProcessorTest {
                 "    injectInjectsMember(member);",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
                 "    InjectsMember_MembersInjector.injectMember(instance, TestModule_NonNullableStringFactory.nonNullableString());",
                 "    return instance;",
@@ -2390,7 +2382,6 @@ class ComponentProcessorTest {
                 "    injectInjectsMember(member);",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
                 "    InjectsMember_MembersInjector.injectMember(instance, TestModule.primitiveInteger());",
                 "    return instance;",

@@ -78,7 +78,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
       ContributionBinding contributionBinding = graph.contributionBinding(dependency.key());
       builder.add(
           ".put($L, $L)",
-          getMapKeyExpression(contributionBinding, componentImplementation.name(), elements),
+          getMapKeyExpression(contributionBinding, componentImplementation.name()),
           multibindingDependencyExpression(dependency));
     }
     builder.add(".build()");

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -520,13 +521,11 @@ class SubcomponentValidationTest {
                 "")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "  @CanIgnoreReturnValue",
                 "  private Dep1 injectDep1(Dep1 instance) {",
                 "    Dep1_MembersInjector.injectDep1Method(instance);",
                 "    return instance;",
                 "  }",
                 "",
-                "  @CanIgnoreReturnValue",
                 "  private Dep2 injectDep2(Dep2 instance) {",
                 "    Dep2_MembersInjector.injectDep2Method(instance);",
                 "    return instance;",
@@ -571,7 +570,6 @@ class SubcomponentValidationTest {
                 "      return ChildModule_ProvideObjectFactory.provideObject(childModule, a());",
                 "    }",
                 "",
-                "    @CanIgnoreReturnValue",
                 "    private A injectA(A instance) {",
                 "      A_MembersInjector.injectMethodA(instance);",
                 "      return instance;",
@@ -1126,9 +1124,8 @@ class SubcomponentValidationTest {
         .hadErrorContaining("@Module(subcomponents = Sub.class) for TestModule");
   }
 
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void subcomponentDependsOnGeneratedType(CompilerMode compilerMode) {
+  @Test
+  void subcomponentDependsOnGeneratedType() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",

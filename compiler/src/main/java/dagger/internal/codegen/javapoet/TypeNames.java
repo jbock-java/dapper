@@ -76,8 +76,6 @@ public final class TypeNames {
   // protect against relocation in the com.google namespace
   public static final ClassName AUTO_ANNOTATION =
       ClassName.get(String.join(".", "com", "google", "auto", "value"), "AutoAnnotation");
-  public static final ClassName CAN_IGNORE_RETURN_VALUE =
-      ClassName.get(String.join(".", "com", "google", "errorprone", "annotations"), "CanIgnoreReturnValue");
 
   public static ParameterizedTypeName factoryOf(TypeName factoryType) {
     return ParameterizedTypeName.get(FACTORY, factoryType);

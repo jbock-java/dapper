@@ -133,8 +133,7 @@ class MembersInjectionTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual(
-            "import com.google.errorprone.annotations.CanIgnoreReturnValue;"));
+        GeneratedLines.generatedImportsIndividual());
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedAnnotationsIndividual());
     Collections.addAll(generatedComponent,
@@ -144,7 +143,6 @@ class MembersInjectionTest {
         "    return injectChild(Child_Factory.newInstance());",
         "  }",
         "",
-        "  @CanIgnoreReturnValue",
         "  private Child injectChild(Child instance) {",
         "    Parent_MembersInjector.injectDep(instance, new Dep());",
         "    return instance;",
@@ -1435,7 +1433,6 @@ class MembersInjectionTest {
         "package test;");
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedImportsIndividual(
-            "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
             "import other.Foo_Factory;",
             "import other.Inaccessible_Factory;",
             "import other.Inaccessible_MembersInjector;",
@@ -1457,7 +1454,6 @@ class MembersInjectionTest {
         // TODO(ronshapiro): if possible, it would be great to rename "instance", but we
         // need to make sure that this doesn't conflict with any framework field in this or
         // any parent component
-        "  @CanIgnoreReturnValue",
         "  private Object injectInaccessible(Object instance) {",
         "    Inaccessible_MembersInjector.injectFoo(instance, Foo_Factory.newInstance());",
         "    Inaccessible_MembersInjector.injectMethod(instance, Foo_Factory.newInstance());",
@@ -1535,7 +1531,6 @@ class MembersInjectionTest {
                 "package test;",
                 "")
             .addLines(GeneratedLines.generatedImportsIndividual(
-                "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
                 "import other.InaccessiblesModule;",
                 "import other.InaccessiblesModule_InaccessiblesFactory;",
                 "import other.UsesInaccessibles;",
@@ -1575,8 +1570,7 @@ class MembersInjectionTest {
                 "  public UsesInaccessibles usesInaccessibles() {",
                 "    return injectUsesInaccessibles(UsesInaccessibles_Factory.newInstance());",
                 "  }",
-                "",
-                "  @CanIgnoreReturnValue")
+                "")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "  private UsesInaccessibles injectUsesInaccessibles(UsesInaccessibles instance) {",
@@ -1662,7 +1656,6 @@ class MembersInjectionTest {
         "package test;");
     Collections.addAll(generatedComponent,
         GeneratedLines.generatedImportsIndividual(
-            "import com.google.errorprone.annotations.CanIgnoreReturnValue;",
             "import other.Foo_Factory;",
             "import other.InjectsSubtype;",
             "import other.InjectsSubtype_Factory;",
@@ -1682,7 +1675,6 @@ class MembersInjectionTest {
         "    return InjectsSubtype_Factory.newInstance(subtype());",
         "  }",
         "",
-        "  @CanIgnoreReturnValue",
         "  private Object injectSubtype(Object instance) {",
         "    Supertype_MembersInjector.injectT((Supertype) instance, Foo_Factory.newInstance());",
         "    return instance;",

@@ -42,9 +42,9 @@ public final class DaggerCollections {
    */
   public static <T> List<T> presizedList(int size) {
     if (size == 0) {
-      return Collections.emptyList();
+      return List.of();
     }
-    return new ArrayList<T>(size);
+    return new ArrayList<>(size);
   }
 
   /**
@@ -54,7 +54,7 @@ public final class DaggerCollections {
     if (list.size() < 2) {
       return false;
     }
-    Set<Object> asSet = new HashSet<Object>(list);
+    Set<Object> asSet = new HashSet<>(list);
     return list.size() != asSet.size();
   }
 
@@ -63,7 +63,7 @@ public final class DaggerCollections {
    * hold {@code expectedSize} elements without growth.
    */
   static <T> HashSet<T> newHashSetWithExpectedSize(int expectedSize) {
-    return new HashSet<T>(calculateInitialCapacity(expectedSize));
+    return new HashSet<>(calculateInitialCapacity(expectedSize));
   }
 
   /**
@@ -71,7 +71,7 @@ public final class DaggerCollections {
    * <em>should</em> hold {@code expectedSize} elements without growth.
    */
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMapWithExpectedSize(int expectedSize) {
-    return new LinkedHashMap<K, V>(calculateInitialCapacity(expectedSize));
+    return new LinkedHashMap<>(calculateInitialCapacity(expectedSize));
   }
 
   private static int calculateInitialCapacity(int expectedSize) {
