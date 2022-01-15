@@ -73,10 +73,6 @@ public final class TypeNames {
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
 
-  // protect against relocation in the com.google namespace
-  public static final ClassName AUTO_ANNOTATION =
-      ClassName.get(String.join(".", "com", "google", "auto", "value"), "AutoAnnotation");
-
   public static ParameterizedTypeName factoryOf(TypeName factoryType) {
     return ParameterizedTypeName.get(FACTORY, factoryType);
   }

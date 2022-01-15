@@ -38,9 +38,8 @@ public interface BindingMethodValidatorsModule {
   static Map<ClassName, BindingMethodValidator> indexValidators(
       ProvidesMethodValidator providesMethodValidator,
       BindsMethodValidator bindsMethodValidator,
-      MultibindsMethodValidator multibindsMethodValidator,
       BindsOptionalOfMethodValidator bindsOptionalOfMethodValidator) {
-    return Stream.of(providesMethodValidator, bindsMethodValidator, multibindsMethodValidator, bindsOptionalOfMethodValidator)
+    return Stream.of(providesMethodValidator, bindsMethodValidator, bindsOptionalOfMethodValidator)
         .collect(collectingAndThen(
             toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
             map -> Util.transformValues(map, Util::getOnlyElement)));

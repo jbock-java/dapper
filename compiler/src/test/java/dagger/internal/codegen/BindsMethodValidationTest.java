@@ -20,8 +20,6 @@ import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertTh
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.multibindings.IntKey;
-import dagger.multibindings.LongKey;
 import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 import org.junit.jupiter.api.Test;

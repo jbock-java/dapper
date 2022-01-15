@@ -21,12 +21,10 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
 import dagger.internal.codegen.SpiModule.ProcessorClassLoader;
-import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.multibindings.IntoSet;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Map;
@@ -76,10 +74,6 @@ interface ProcessingEnvironmentModule {
   static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
     return new DaggerElements(processingEnvironment);
   }
-
-  @Binds
-  @IntoSet
-  ClearableCache daggerElementAsClearableCache(DaggerElements elements);
 
   @Provides
   @ProcessorClassLoader

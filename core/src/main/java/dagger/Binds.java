@@ -41,22 +41,6 @@ import java.lang.annotation.Target;
  *   <li>Must have a single parameter whose type is assignable to the return type. The return type
  *       declares the bound type (just as it would for a {@literal @}{@link dagger.Provides} method)
  *       and the parameter is the type to which it is bound.
- *       <p>For {@linkplain dagger.multibindings multibindings}, assignability is checked in similar
- *       ways:
- *       <dl>
- *         <dt>{@link dagger.multibindings.IntoSet}
- *         <dd>The parameter must be assignable to the only parameter of {@link java.util.Set#add}
- *             when viewed as a member of the return type — the parameter must be assignable to the
- *             return type.
- *         <dt>{@link dagger.multibindings.ElementsIntoSet}
- *         <dd>The parameter must be assignable to the only parameter of {@link
- *             java.util.Set#addAll} when viewed as a member of the return type — if the return type
- *             is {@code Set<E>}, the parameter must be assignable to {@code Collection<? extends
- *             E>}.
- *         <dd>The parameter must be assignable to the {@code value} parameter of {@link
- *             java.util.Map#put} when viewed as a member of a {@link java.util.Map} in which {@code
- *             V} is bound to the return type — the parameter must be assignable to the return type
- *       </dl>
  * </ul>
  */
 @Documented

@@ -29,7 +29,6 @@ import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
-import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
@@ -130,7 +129,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
         AssistedProcessingStep assistedProcessingStep,
-        MultibindingAnnotationsProcessingStep multibindingAnnotationsProcessingStep,
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
@@ -141,7 +139,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
           assistedInjectProcessingStep,
           assistedFactoryProcessingStep,
           assistedProcessingStep,
-          multibindingAnnotationsProcessingStep,
           bindsInstanceProcessingStep,
           moduleProcessingStep,
           componentProcessingStep,

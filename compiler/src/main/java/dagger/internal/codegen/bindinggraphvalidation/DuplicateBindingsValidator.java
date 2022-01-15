@@ -30,7 +30,6 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
-import dagger.internal.codegen.binding.MultibindingDeclaration;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
@@ -259,8 +258,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     formatDeclarations(
         message,
         2,
-        declarations(graph, uniqueBindings).stream().filter(declaration -> !(declaration instanceof MultibindingDeclaration))
-            .collect(Collectors.toCollection(LinkedHashSet::new)));
+        new LinkedHashSet<>(declarations(graph, uniqueBindings)));
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
     }
