@@ -1,6 +1,5 @@
 plugins {
     id('java')
-    id('com.github.johnrengelman.shadow') version('6.1.0')
     id('maven-publish')
     id('signing')
 }
@@ -32,19 +31,12 @@ tasks.withType(GenerateModuleMetadata) {
     enabled = true
 }
 
-shadowJar {
-    minimize()
-    archiveClassifier.set('')
-    relocate('com.squareup.javapoet', 'dagger.shaded.com.squareup.javapoet')
-    relocate('org.checkerframework', 'dagger.shaded.org.checkerframework')
-}
-
 dependencies {
     def core = project(':core')
     implementation('io.github.jbock-java:javapoet:1.14')
-    shadow('io.github.jbock-java:auto-common:1.2.1')
+    implementation('io.github.jbock-java:auto-common:1.2.1')
     implementation('io.github.jbock-java:guava-graph:1.0.1')
-    shadow(core)
+    implementation(core)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     testImplementation(core)
     testImplementation('io.github.jbock-java:auto-common:1.2.1')
