@@ -122,22 +122,8 @@ public final class ComponentRequirement {
     ALLOW,
   }
 
-  /**
-   * An override for the requirement's null policy. If set, this is used as the null policy instead
-   * of the default behavior in {@link #nullPolicy}.
-   *
-   * <p>Some implementations' null policy can be determined upon construction (e.g., for binding
-   * instances), but others' require Elements which must wait until {@link #nullPolicy} is called.
-   */
-  Optional<ComponentRequirement.NullPolicy> overrideNullPolicy() {
-    return Optional.empty();
-  }
-
   /** The requirement's null policy. */
   public NullPolicy nullPolicy(DaggerElements elements) {
-    if (overrideNullPolicy().isPresent()) {
-      return overrideNullPolicy().get();
-    }
     switch (kind()) {
       case MODULE:
         return componentCanMakeNewInstances(typeElement())
