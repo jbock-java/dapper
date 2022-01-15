@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
-
-import dagger.multibindings.ElementsIntoSet;
 import javax.lang.model.element.Element;
 
 /** Whether a binding or declaration is for a unique contribution or a map or set multibinding. */
@@ -53,10 +50,6 @@ public enum ContributionType {
    * own.
    */
   public static ContributionType fromBindingElement(Element element) {
-    // TODO(bcorso): Replace these class references with ClassName.
-    if (isAnnotationPresent(element, ElementsIntoSet.class)) {
-      return ContributionType.SET_VALUES;
-    }
     return ContributionType.UNIQUE;
   }
 }

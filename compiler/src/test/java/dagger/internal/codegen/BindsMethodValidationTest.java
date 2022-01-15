@@ -108,12 +108,6 @@ class BindsMethodValidationTest {
         .hasError("assignable");
   }
 
-  @Test
-  void elementsIntoSet_withRawSets() {
-    assertThatMethod("@Binds @ElementsIntoSet abstract Set bindRawSet(HashSet hashSet);")
-        .hasError("cannot return a raw Set");
-  }
-
   private DaggerModuleMethodSubject assertThatMethod(String method) {
     return assertThatModuleMethod(method).withDeclaration(moduleDeclaration);
   }

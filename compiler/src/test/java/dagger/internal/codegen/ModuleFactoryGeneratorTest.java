@@ -92,27 +92,6 @@ class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  void providesMethodSetValuesWildcard() {
-    assertThatModuleMethod("@Provides @ElementsIntoSet Set<?> provideWildcard() { return null; }")
-        .hasError(
-            "@Provides methods must return a primitive, an array, a type variable, "
-                + "or a declared type");
-  }
-
-  @Test
-  void providesMethodSetValuesRawSet() {
-    assertThatModuleMethod("@Provides @ElementsIntoSet Set provideSomething() { return null; }")
-        .hasError("@Provides methods annotated with @ElementsIntoSet cannot return a raw Set");
-  }
-
-  @Test
-  void providesMethodSetValuesNotASet() {
-    assertThatModuleMethod(
-        "@Provides @ElementsIntoSet List<String> provideStrings() { return null; }")
-        .hasError("@Provides methods annotated with @ElementsIntoSet must return a Set");
-  }
-
-  @Test
   void modulesWithTypeParamsMustBeAbstract() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
