@@ -5,7 +5,7 @@ Dapper is a fork of [dagger2](https://github.com/google/dagger),
 with some modifications:
 
 * full jpms support with module-name `dagger`
-* removed the `unwrapValue` attribute from the `MapKey` annotation, it is now effectively always `true`
+* removed the multibindings package including `@MapKey`, `@Multibinds`, `@IntoMap` and `@IntoSet`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove kotlin special-casing
 * remove gwt special-casing
