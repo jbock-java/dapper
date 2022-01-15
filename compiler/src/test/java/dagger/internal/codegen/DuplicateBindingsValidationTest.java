@@ -577,80 +577,6 @@ class DuplicateBindingsValidationTest {
         .onLineContaining(fullBindingGraphValidation ? "class BModule" : "interface A {");
   }
 
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest
-  void grandchildBindingConflictsWithParentWithNullableViolationAsWarning(boolean fullBindingGraphValidation) {
-    JavaFileObject parentConflictsWithChild =
-        JavaFileObjects.forSourceLines(
-            "test.ParentConflictsWithChild",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import javax.annotation.Nullable;",
-            "",
-            "@Component(modules = ParentConflictsWithChild.ParentModule.class)",
-            "interface ParentConflictsWithChild {",
-            "  Child.Builder child();",
-            "",
-            "  @Module(subcomponents = Child.class)",
-            "  static class ParentModule {",
-            "    @Provides @Nullable static Object nullableParentChildConflict() {",
-            "      return \"parent\";",
-            "    }",
-            "  }",
-            "}");
-    JavaFileObject child =
-        JavaFileObjects.forSourceLines(
-            "test.Child",
-            "package test;",
-            "",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import dagger.Subcomponent;",
-            "",
-            "@Subcomponent(modules = Child.ChildModule.class)",
-            "interface Child {",
-            "  Object parentChildConflictThatViolatesNullability();",
-            "",
-            "  @Subcomponent.Builder",
-            "  interface Builder {",
-            "    Child build();",
-            "  }",
-            "",
-            "  @Module",
-            "  static class ChildModule {",
-            "    @Provides static Object nonNullableParentChildConflict() {",
-            "      return \"child\";",
-            "    }",
-            "  }",
-            "}");
-
-    Compilation compilation =
-        compilerWithOptions(
-            "-Adagger.nullableValidation=WARNING",
-            fullBindingGraphValidationOption(fullBindingGraphValidation))
-            .compile(parentConflictsWithChild, child);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            message(
-                "Object is bound multiple times:",
-                "    @Provides Object Child.ChildModule.nonNullableParentChildConflict()",
-                "    @Provides @Nullable Object"
-                    + " ParentConflictsWithChild.ParentModule.nullableParentChildConflict()"))
-        .inFile(parentConflictsWithChild)
-        .onLineContaining(
-            fullBindingGraphValidation
-                ? "class ParentModule"
-                : "interface ParentConflictsWithChild");
-  }
-
-  private String fullBindingGraphValidationOption(boolean fullBindingGraphValidation) {
-    return "-Adagger.fullBindingGraphValidation=" + (fullBindingGraphValidation ? "ERROR" : "NONE");
-  }
-
   @Test
   void reportedInParentAndChild() {
     JavaFileObject parent =
@@ -717,5 +643,9 @@ class DuplicateBindingsValidationTest {
         .inFile(parent)
         .onLineContaining("interface Parent");
     assertThat(compilation).hadErrorCount(1);
+  }
+
+  private String fullBindingGraphValidationOption(boolean fullBindingGraphValidation) {
+    return "-Adagger.fullBindingGraphValidation=" + (fullBindingGraphValidation ? "ERROR" : "NONE");
   }
 }

@@ -286,55 +286,6 @@ class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  void nullableProvides() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides @Nullable String provideString() { return null; }",
-        "}");
-    List<String> factoryFile = new ArrayList<>();
-    Collections.addAll(factoryFile,
-        "package test;");
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(factoryFile,
-        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-        "  private final TestModule module;",
-        "",
-        "  public TestModule_ProvideStringFactory(TestModule module) {",
-        "    this.module = module;",
-        "  }",
-        "",
-        "  @Override",
-        "  @Nullable",
-        "  public String get() {",
-        "    return provideString(module);",
-        "  }",
-        "",
-        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-        "    return new TestModule_ProvideStringFactory(module);",
-        "  }",
-        "",
-        "  @Nullable",
-        "  public static String provideString(TestModule instance) {",
-        "    return instance.provideString();",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(List.of(moduleFile, NULLABLE))
-        .processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.TestModule_ProvideStringFactory", factoryFile);
-  }
-
-  @Test
   void multipleProvidesMethods() {
     JavaFileObject classXFile = JavaFileObjects.forSourceLines("test.X",
         "package test;",

@@ -66,12 +66,6 @@ public final class ConfigurationAnnotations {
 
   /** Returns the first type that specifies this' nullability, or empty if none. */
   public static Optional<DeclaredType> getNullableType(Element element) {
-    List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
-    for (AnnotationMirror mirror : mirrors) {
-      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
-        return Optional.of(mirror.getAnnotationType());
-      }
-    }
     return Optional.empty();
   }
 

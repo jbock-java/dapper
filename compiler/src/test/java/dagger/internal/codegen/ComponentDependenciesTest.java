@@ -58,39 +58,4 @@ public final class ComponentDependenciesTest {
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorContaining("DuplicateBindings");
   }
-
-  @Test
-  public void dependenciesWithTwoOfSameMethodButDifferentNullability_fail() {
-    JavaFileObject interfaceOne = JavaFileObjects.forSourceLines("test.One",
-        "package test;",
-        "",
-        "interface One {",
-        "  String getString();",
-        "}");
-    JavaFileObject interfaceTwo = JavaFileObjects.forSourceLines("test.Two",
-        "package test;",
-        "import javax.annotation.Nullable;",
-        "",
-        "interface Two {",
-        "  @Nullable String getString();",
-        "}");
-    JavaFileObject mergedInterface = JavaFileObjects.forSourceLines("test.Merged",
-        "package test;",
-        "",
-        "interface Merged extends One, Two {}");
-    JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "",
-        "@Component(dependencies = Merged.class)",
-        "interface TestComponent {",
-        "  String getString();",
-        "}");
-    Compilation compilation = daggerCompiler().compile(
-        interfaceOne, interfaceTwo, mergedInterface, componentFile);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorContaining("DuplicateBindings");
-  }
-
 }
