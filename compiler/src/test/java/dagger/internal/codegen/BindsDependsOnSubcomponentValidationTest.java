@@ -17,7 +17,6 @@
 package dagger.internal.codegen;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
 import com.google.testing.compile.Compilation;
@@ -65,86 +64,6 @@ public class BindsDependsOnSubcomponentValidationTest {
             "@Subcomponent(modules = ChildModule.class)",
             "interface ChildComponent {",
             "  Foo getFoo();",
-            "}");
-    JavaFileObject childModule =
-        JavaFileObjects.forSourceLines(
-            "test.ChildModule",
-            "package test;",
-            "",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "",
-            "@Module",
-            "interface ChildModule {",
-            "  @Provides static Long providLong() {",
-            "    return 0L;",
-            "  }",
-            "}");
-    JavaFileObject iface =
-        JavaFileObjects.forSourceLines("test.Foo", "package test;", "", "interface Foo {", "}");
-    JavaFileObject impl =
-        JavaFileObjects.forSourceLines(
-            "test.FooImpl",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "",
-            "class FooImpl implements Foo {",
-            "  @Inject FooImpl(Long l) {}",
-            "}");
-    Compilation compilation =
-        daggerCompiler()
-            .compile(parentComponent, parentModule, childComponent, childModule, iface, impl);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorCount(1);
-    assertThat(compilation)
-        .hadErrorContaining("Long cannot be provided without an @Inject constructor")
-        .inFile(parentComponent)
-        .onLineContaining("interface ParentComponent");
-  }
-
-  @Test
-  public void testSetValueBindings() {
-    JavaFileObject parentComponent =
-        JavaFileObjects.forSourceLines(
-            "test.ParentComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component(modules = ParentModule.class)",
-            "interface ParentComponent {",
-            "  ChildComponent getChild();",
-            "}");
-    JavaFileObject parentModule =
-        JavaFileObjects.forSourceLines(
-            "test.ParentModule",
-            "package test;",
-            "",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import dagger.multibindings.ElementsIntoSet;",
-            "import java.util.Collections;",
-            "import java.util.Set;",
-            "",
-            "@Module",
-            "interface ParentModule {",
-            "  @Provides @ElementsIntoSet",
-            "  static Set<Foo> provideFoo(FooImpl impl) {",
-            "    return Collections.singleton(impl);",
-            "  }",
-            "}");
-    JavaFileObject childComponent =
-        JavaFileObjects.forSourceLines(
-            "test.ChildComponent",
-            "package test;",
-            "",
-            "import dagger.Subcomponent;",
-            "import java.util.Set;",
-            "",
-            "@Subcomponent(modules = ChildModule.class)",
-            "interface ChildComponent {",
-            "  Set<Foo> getFooSet();",
             "}");
     JavaFileObject childModule =
         JavaFileObjects.forSourceLines(

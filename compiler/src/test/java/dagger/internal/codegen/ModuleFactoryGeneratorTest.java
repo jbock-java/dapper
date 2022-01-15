@@ -420,169 +420,6 @@ class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  void providesSetElement() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import java.util.logging.Logger;",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import dagger.multibindings.IntoSet;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides @IntoSet String provideString() {",
-        "    return \"\";",
-        "  }",
-        "}");
-    List<String> factoryFile = new ArrayList<>();
-    Collections.addAll(factoryFile,
-        "package test;");
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual(
-            "import dagger.internal.Factory;",
-            "import dagger.internal.Preconditions;"));
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(factoryFile,
-        "public final class TestModule_ProvideStringFactory implements Factory<String> {",
-        "  private final TestModule module;",
-        "",
-        "  public TestModule_ProvideStringFactory(TestModule module) {",
-        "    this.module = module;",
-        "  }",
-        "",
-        "  @Override",
-        "  public String get() {",
-        "    return provideString(module);",
-        "  }",
-        "",
-        "  public static TestModule_ProvideStringFactory create(TestModule module) {",
-        "    return new TestModule_ProvideStringFactory(module);",
-        "  }",
-        "",
-        "  public static String provideString(TestModule instance) {",
-        "    return Preconditions.checkNotNullFromProvides(instance.provideString());",
-        "  }",
-        "}");
-    assertAbout(javaSource()).that(moduleFile)
-        .processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.TestModule_ProvideStringFactory", factoryFile);
-  }
-
-  @Test
-  void providesSetElementWildcard() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import java.util.logging.Logger;",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import dagger.multibindings.IntoSet;",
-        "import java.util.ArrayList;",
-        "import java.util.List;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides @IntoSet List<List<?>> provideWildcardList() {",
-        "    return new ArrayList<>();",
-        "  }",
-        "}");
-    List<String> factoryFile = new ArrayList<>();
-    Collections.addAll(factoryFile,
-        "package test;");
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual(
-            "import dagger.internal.Factory;",
-            "import dagger.internal.Preconditions;",
-            "import java.util.List;"));
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(factoryFile,
-        "public final class TestModule_ProvideWildcardListFactory implements Factory<List<List<?>>> {",
-        "  private final TestModule module;",
-        "",
-        "  public TestModule_ProvideWildcardListFactory(TestModule module) {",
-        "    this.module = module;",
-        "  }",
-        "",
-        "  @Override",
-        "  public List<List<?>> get() {",
-        "    return provideWildcardList(module);",
-        "  }",
-        "",
-        "  public static TestModule_ProvideWildcardListFactory create(TestModule module) {",
-        "    return new TestModule_ProvideWildcardListFactory(module);",
-        "  }",
-        "",
-        "  public static List<List<?>> provideWildcardList(TestModule instance) {",
-        "    return Preconditions.checkNotNullFromProvides(instance.provideWildcardList());",
-        "  }",
-        "}");
-    assertAbout(javaSource()).that(moduleFile)
-        .processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.TestModule_ProvideWildcardListFactory", factoryFile);
-  }
-
-  @Test
-  void providesSetValues() {
-    JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
-        "package test;",
-        "",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import dagger.multibindings.ElementsIntoSet;",
-        "import java.util.Set;",
-        "",
-        "@Module",
-        "final class TestModule {",
-        "  @Provides @ElementsIntoSet Set<String> provideStrings() {",
-        "    return null;",
-        "  }",
-        "}");
-    List<String> factoryFile = new ArrayList<>();
-    Collections.addAll(factoryFile,
-        "package test;");
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual(
-            "import dagger.internal.Factory;",
-            "import dagger.internal.Preconditions;",
-            "import java.util.Set;"));
-    Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(factoryFile,
-        "public final class TestModule_ProvideStringsFactory implements Factory<Set<String>> {",
-        "  private final TestModule module;",
-        "",
-        "  public TestModule_ProvideStringsFactory(TestModule module) {",
-        "    this.module = module;",
-        "  }",
-        "",
-        "  @Override",
-        "  public Set<String> get() {",
-        "    return provideStrings(module);",
-        "  }",
-        "",
-        "  public static TestModule_ProvideStringsFactory create(TestModule module) {",
-        "    return new TestModule_ProvideStringsFactory(module);",
-        "  }",
-        "",
-        "  public static Set<String> provideStrings(TestModule instance) {",
-        "    return Preconditions.checkNotNullFromProvides(instance.provideStrings());",
-        "  }",
-        "}");
-    assertAbout(javaSource()).that(moduleFile)
-        .processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.TestModule_ProvideStringsFactory", factoryFile);
-  }
-
-  @Test
   void multipleProvidesMethodsWithSameName() {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
@@ -1132,7 +969,6 @@ class ModuleFactoryGeneratorTest {
   }
 
   private static final String BINDS_METHOD = "@Binds abstract Foo bindFoo(FooImpl impl);";
-  private static final String MULTIBINDS_METHOD = "@Multibinds abstract Set<Foo> foos();";
   private static final String STATIC_PROVIDES_METHOD =
       "@Provides static Bar provideBar() { return new Bar(); }";
   private static final String INSTANCE_PROVIDES_METHOD =
@@ -1149,27 +985,8 @@ class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  void multibindsWithInstanceProvides() {
-    Compilation compilation = compileMethodCombination(MULTIBINDS_METHOD, INSTANCE_PROVIDES_METHOD);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "A @Module may not contain both non-static and abstract binding methods");
-  }
-
-  @Test
   void bindsWithStaticProvides() {
     assertThat(compileMethodCombination(BINDS_METHOD, STATIC_PROVIDES_METHOD)).succeeded();
-  }
-
-  @Test
-  void bindsWithMultibinds() {
-    assertThat(compileMethodCombination(BINDS_METHOD, MULTIBINDS_METHOD)).succeeded();
-  }
-
-  @Test
-  void multibindsWithStaticProvides() {
-    assertThat(compileMethodCombination(MULTIBINDS_METHOD, STATIC_PROVIDES_METHOD)).succeeded();
   }
 
   @Test
@@ -1214,7 +1031,6 @@ class ModuleFactoryGeneratorTest {
         "import dagger.Binds;",
         "import dagger.Module;",
         "import dagger.Provides;",
-        "import dagger.multibindings.Multibinds;",
         "import java.util.Set;",
         "",
         "@Module abstract class TestModule {"));
