@@ -75,9 +75,6 @@ import java.lang.annotation.Target;
  *
  * <ul>
  *   <li>{@code Optional<Foo>}
- *       <!-- TODO(dpb): Update this once producers support nullability checks -->
- *   <li>{@code Optional<Producer<Foo>>}
- *   <li>{@code Optional<Produced<Foo>>}
  * </ul>
  */
 @Documented
