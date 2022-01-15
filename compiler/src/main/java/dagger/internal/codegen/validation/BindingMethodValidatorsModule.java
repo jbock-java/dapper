@@ -20,14 +20,12 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMult
 import static java.util.stream.Collectors.collectingAndThen;
 
 import com.squareup.javapoet.ClassName;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.Util;
-import dagger.multibindings.IntoSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Binds each {@link BindingMethodValidator} into a map, keyed by {@link
@@ -38,25 +36,13 @@ public interface BindingMethodValidatorsModule {
 
   @Provides
   static Map<ClassName, BindingMethodValidator> indexValidators(
-      Set<BindingMethodValidator> validators) {
-    return validators.stream().collect(collectingAndThen(
-        toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
-        map -> Util.transformValues(map, Util::getOnlyElement)));
+      ProvidesMethodValidator providesMethodValidator,
+      BindsMethodValidator bindsMethodValidator,
+      MultibindsMethodValidator multibindsMethodValidator,
+      BindsOptionalOfMethodValidator bindsOptionalOfMethodValidator) {
+    return Stream.of(providesMethodValidator, bindsMethodValidator, multibindsMethodValidator, bindsOptionalOfMethodValidator)
+        .collect(collectingAndThen(
+            toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
+            map -> Util.transformValues(map, Util::getOnlyElement)));
   }
-
-  @Binds
-  @IntoSet
-  BindingMethodValidator provides(ProvidesMethodValidator validator);
-
-  @Binds
-  @IntoSet
-  BindingMethodValidator binds(BindsMethodValidator validator);
-
-  @Binds
-  @IntoSet
-  BindingMethodValidator multibinds(MultibindsMethodValidator validator);
-
-  @Binds
-  @IntoSet
-  BindingMethodValidator bindsOptionalOf(BindsOptionalOfMethodValidator validator);
 }

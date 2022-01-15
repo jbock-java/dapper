@@ -16,26 +16,18 @@
 
 package dagger.internal.codegen;
 
-import static dagger.internal.codegen.binding.MapKeys.getUnwrappedMapKeyType;
-import static javax.lang.model.element.ElementKind.ANNOTATION_TYPE;
-
 import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import dagger.MapKey;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.MapKeyValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 
 /**
  * The annotation processor responsible for validating the mapKey annotation and auto-generate
@@ -43,21 +35,15 @@ import javax.lang.model.type.DeclaredType;
  */
 final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement> {
   private final Messager messager;
-  private final DaggerTypes types;
   private final MapKeyValidator mapKeyValidator;
-  private final UnwrappedMapKeyGenerator unwrappedMapKeyGenerator;
 
   @Inject
   MapKeyProcessingStep(
       Messager messager,
-      DaggerTypes types,
-      MapKeyValidator mapKeyValidator,
-      UnwrappedMapKeyGenerator unwrappedMapKeyGenerator) {
+      MapKeyValidator mapKeyValidator) {
     super(MoreElements::asType);
     this.messager = messager;
-    this.types = types;
     this.mapKeyValidator = mapKeyValidator;
-    this.unwrappedMapKeyGenerator = unwrappedMapKeyGenerator;
   }
 
   @Override
@@ -69,17 +55,5 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   protected void process(TypeElement mapKeyAnnotationType, Set<ClassName> annotations) {
     ValidationReport<Element> mapKeyReport = mapKeyValidator.validate(mapKeyAnnotationType);
     mapKeyReport.printMessagesTo(messager);
-
-    if (mapKeyReport.isClean()) {
-      if (unwrappedValueKind(mapKeyAnnotationType).equals(ANNOTATION_TYPE)) {
-        unwrappedMapKeyGenerator.generate(mapKeyAnnotationType, messager);
-      }
-    }
-  }
-
-  private ElementKind unwrappedValueKind(TypeElement mapKeyAnnotationType) {
-    DeclaredType unwrappedMapKeyType =
-        getUnwrappedMapKeyType(MoreTypes.asDeclared(mapKeyAnnotationType.asType()), types);
-    return unwrappedMapKeyType.asElement().getKind();
   }
 }

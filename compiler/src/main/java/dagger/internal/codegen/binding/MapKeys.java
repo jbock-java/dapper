@@ -49,6 +49,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 /** Methods for extracting {@link MapKey} annotations and key code blocks from binding elements. */
 public final class MapKeys {
@@ -87,7 +88,8 @@ public final class MapKeys {
 
   static TypeMirror mapKeyType(AnnotationMirror mapKeyAnnotation, DaggerTypes types) {
     unwrapValue(mapKeyAnnotation);
-    return getUnwrappedMapKeyType(mapKeyAnnotation.getAnnotationType(), types);}
+    return getUnwrappedMapKeyType(mapKeyAnnotation.getAnnotationType(), types);
+  }
 
   /**
    * Returns the map key type for an unwrapped {@link MapKey} annotation type. If the single member
@@ -108,7 +110,7 @@ public final class MapKeys {
         getOnlyElement(methodsIn(mapKeyAnnotationType.asElement().getEnclosedElements()));
 
     SimpleTypeVisitor6<DeclaredType, Void> keyTypeElementVisitor =
-        new SimpleTypeVisitor6<DeclaredType, Void>() {
+        new SimpleTypeVisitor9<>() {
 
           @Override
           public DeclaredType visitArray(ArrayType t, Void p) {
@@ -140,7 +142,7 @@ public final class MapKeys {
    */
   public static CodeBlock getMapKeyExpression(
       ContributionBinding binding, ClassName requestingClass) {
-    AnnotationMirror mapKeyAnnotation = binding.mapKeyAnnotation().get();
+    AnnotationMirror mapKeyAnnotation = binding.mapKeyAnnotation().orElseThrow();
     return MapKeyAccessibility.isMapKeyAccessibleFrom(
         mapKeyAnnotation, requestingClass.packageName())
         ? directMapKeyExpression(mapKeyAnnotation)
@@ -161,10 +163,10 @@ public final class MapKeys {
   private static CodeBlock directMapKeyExpression(
       AnnotationMirror mapKey) {
     AnnotationValue unwrappedValue = unwrapValue(mapKey);
-    AnnotationExpression annotationExpression = new AnnotationExpression(mapKey);
-      TypeMirror unwrappedValueType =
-          getOnlyElement(getAnnotationValuesWithDefaults(mapKey).keySet()).getReturnType();
-      return annotationExpression.getValueExpression(unwrappedValueType, unwrappedValue);
+    AnnotationExpression annotationExpression = new AnnotationExpression();
+    TypeMirror unwrappedValueType =
+        getOnlyElement(getAnnotationValuesWithDefaults(mapKey).keySet()).getReturnType();
+    return annotationExpression.getValueExpression(unwrappedValueType, unwrappedValue);
   }
 
   /**
@@ -172,7 +174,7 @@ public final class MapKeys {
    */
   public static ClassName mapKeyProxyClassName(ContributionBinding binding) {
     return elementBasedClassName(
-        MoreElements.asExecutable(binding.bindingElement().get()), "MapKey");
+        MoreElements.asExecutable(binding.bindingElement().orElseThrow()), "MapKey");
   }
 
   /**
