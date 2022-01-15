@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Test;
  * Tests that errors are reported for invalid members injection methods and {@link
  * dagger.MembersInjector} dependency requests.
  */
-public class MembersInjectionValidationTest {
+class MembersInjectionValidationTest {
   @Test
-  public void membersInjectDependsOnUnboundedType() {
+  void membersInjectDependsOnUnboundedType() {
     JavaFileObject injectsUnboundedType =
         JavaFileObjects.forSourceLines(
             "test.InjectsUnboundedType",
@@ -55,49 +55,7 @@ public class MembersInjectionValidationTest {
   }
 
   @Test
-  public void membersInjectPrimitive() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  void inject(int primitive);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Cannot inject members into int")
-        .inFile(component)
-        .onLineContaining("void inject(int primitive);");
-  }
-
-  @Test
-  public void membersInjectArray() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  void inject(Object[] array);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Cannot inject members into java.lang.Object[]")
-        .inFile(component)
-        .onLineContaining("void inject(Object[] array);");
-  }
-
-  @Test
-  public void membersInjectorOfArray() {
+  void membersInjectorOfArray() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -119,26 +77,7 @@ public class MembersInjectionValidationTest {
   }
 
   @Test
-  public void membersInjectRawType() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import java.util.Set;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  void inject(Set rawSet);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorContaining("Cannot inject members into raw type java.util.Set");
-  }
-
-  @Test
-  public void qualifiedMembersInjector() {
+  void qualifiedMembersInjector() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -161,53 +100,7 @@ public class MembersInjectionValidationTest {
   }
 
   @Test
-  public void qualifiedMembersInjectionMethod() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.MembersInjector;",
-            "import jakarta.inject.Named;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  @Named(\"foo\") void injectObject(Object object);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Cannot inject members into qualified types")
-        .inFile(component)
-        .onLineContaining("injectObject(Object object);");
-  }
-
-  @Test
-  public void qualifiedMembersInjectionMethodParameter() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.MembersInjector;",
-            "import jakarta.inject.Named;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  void injectObject(@Named(\"foo\") Object object);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Cannot inject members into qualified types")
-        .inFile(component)
-        .onLineContaining("injectObject(@Named(\"foo\") Object object);");
-  }
-
-  @Test
-  public void staticFieldInjection() {
+  void staticFieldInjection() {
     JavaFileObject injected =
         JavaFileObjects.forSourceLines(
             "test.Injected",

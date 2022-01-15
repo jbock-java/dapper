@@ -17,32 +17,17 @@
 package dagger.internal.codegen;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.Compiler.javac;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 
-import com.google.auto.common.MoreElements;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import dagger.MembersInjector;
 import dagger.internal.codegen.base.Util;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -280,7 +265,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentWithScope(CompilerMode compilerMode) throws IOException {
+  void componentWithScope(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -402,64 +387,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void simpleComponentWithNesting(CompilerMode compilerMode) {
-    JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class OuterType {",
-        "  static class A {",
-        "    @Inject A() {}",
-        "  }",
-        "  static class B {",
-        "    @Inject A a;",
-        "  }",
-        "  @Component interface SimpleComponent {",
-        "    A a();",
-        "    void inject(B b);",
-        "  }",
-        "}");
-
-    String[] generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerOuterType_SimpleComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines("final class DaggerOuterType_SimpleComponent implements OuterType.SimpleComponent {",
-                "  private DaggerOuterType_SimpleComponent() {",
-                "  }",
-                "",
-                "  @Override",
-                "  public OuterType.A a() {",
-                "    return new OuterType.A();",
-                "  }",
-                "",
-                "  @Override",
-                "  public void inject(OuterType.B b) {",
-                "    injectB(b);",
-                "  }",
-                "",
-                "  private OuterType.B injectB(OuterType.B instance) {",
-                "    OuterType_B_MembersInjector.injectA(instance, new OuterType.A());",
-                "    return instance;",
-                "  }",
-                "}")
-            .lines();
-
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts()).compile(nestedTypesFile);
-    assertThat(compilation).succeeded();
-    assertThat(compilation).generatedSourceFile("test.DaggerOuterType_SimpleComponent")
-        .containsLines(List.of(generatedComponent));
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void componentWithModule(CompilerMode compilerMode) throws IOException {
+  void componentWithModule(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -559,7 +487,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentWithAbstractModule(CompilerMode compilerMode) throws IOException {
+  void componentWithAbstractModule(CompilerMode compilerMode) {
     JavaFileObject aFile =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -642,7 +570,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void transitiveModuleDeps(CompilerMode compilerMode) throws IOException {
+  void transitiveModuleDeps(CompilerMode compilerMode) {
     JavaFileObject always = JavaFileObjects.forSourceLines("test.AlwaysIncluded",
         "package test;",
         "",
@@ -992,74 +920,6 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void membersInjection(CompilerMode compilerMode) {
-    JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class SomeInjectableType {",
-        "  @Inject SomeInjectableType() {}",
-        "}");
-    JavaFileObject injectedTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectedType",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class SomeInjectedType {",
-        "  @Inject SomeInjectableType injectedField;",
-        "  SomeInjectedType() {}",
-        "}");
-    JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.SimpleComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "import dagger.Lazy;",
-        "import jakarta.inject.Provider;",
-        "",
-        "@Component",
-        "interface SimpleComponent {",
-        "  void inject(SomeInjectedType instance);",
-        "  SomeInjectedType injectAndReturn(SomeInjectedType instance);",
-        "}");
-
-    String[] generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerSimpleComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines(
-                "final class DaggerSimpleComponent implements SimpleComponent {",
-                "  @Override",
-                "  public void inject(SomeInjectedType instance) {",
-                "    injectSomeInjectedType(instance);",
-                "  }",
-                "",
-                "  @Override",
-                "  public SomeInjectedType injectAndReturn(SomeInjectedType instance) {",
-                "    return injectSomeInjectedType(instance);",
-                "  }",
-                "",
-                "  private SomeInjectedType injectSomeInjectedType(SomeInjectedType instance) {",
-                "    SomeInjectedType_MembersInjector.injectInjectedField(instance, new SomeInjectableType());",
-                "    return instance;",
-                "  }",
-                "}")
-            .lines();
-
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
-            .compile(injectableTypeFile, injectedTypeFile, componentFile);
-    assertThat(compilation).succeeded();
-
-    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(List.of(generatedComponent));
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
   void componentInjection(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
@@ -1182,7 +1042,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentDependency(CompilerMode compilerMode) throws IOException {
+  void componentDependency(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1313,7 +1173,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void moduleNameCollision(CompilerMode compilerMode) throws IOException {
+  void moduleNameCollision(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1418,7 +1278,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void ignoresDependencyMethodsFromObject(CompilerMode compilerMode) throws IOException {
+  void ignoresDependencyMethodsFromObject(CompilerMode compilerMode) {
     JavaFileObject injectedTypeFile =
         JavaFileObjects.forSourceLines(
             "test.InjectedType",
@@ -1512,7 +1372,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void resolutionOrder(CompilerMode compilerMode) throws IOException {
+  void resolutionOrder(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",
         "",
@@ -1697,7 +1557,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void simpleComponent_inheritedComponentMethodDep(CompilerMode compilerMode) throws IOException {
+  void simpleComponent_inheritedComponentMethodDep(CompilerMode compilerMode) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -1889,132 +1749,6 @@ class ComponentProcessorTest {
             .compile(componentFile, interfaceFile);
     assertThat(compilation).succeeded();
     assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent");
-  }
-
-  /**
-   * We warn when generating a {@link MembersInjector} for a type post-hoc (i.e., if Dagger wasn't
-   * invoked when compiling the type). But Dagger only generates {@link MembersInjector}s for types
-   * with {@code @Inject} constructors if they have any injection sites, and it only
-   * generates them for types without {@code @Inject} constructors if they have local
-   * (non-inherited) injection sites. So make sure we warn in only those cases where running the
-   * Dagger processor actually generates a {@link MembersInjector}.
-   */
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void unprocessedMembersInjectorNotes(CompilerMode compilerMode) {
-    Compilation compilation =
-        javac()
-            .withOptions(
-                Util.concat(compilerMode
-                        .javacopts(),
-                    List.of(
-                        "-Xlint:-processing",
-                        "-Adagger.warnIfInjectionFactoryNotGeneratedUpstream=enabled")))
-            .withProcessors(
-                new ElementFilteringComponentProcessor(
-                    element ->
-                        !MoreElements.getPackage(element)
-                            .getQualifiedName()
-                            .contentEquals("test.inject")))
-            .compile(
-                JavaFileObjects.forSourceLines(
-                    "test.TestComponent",
-                    "package test;",
-                    "",
-                    "import dagger.Component;",
-                    "",
-                    "@Component(modules = TestModule.class)",
-                    "interface TestComponent {",
-                    "  void inject(test.inject.NoInjectMemberNoConstructor object);",
-                    "  void inject(test.inject.NoInjectMemberWithConstructor object);",
-                    "  void inject(test.inject.LocalInjectMemberNoConstructor object);",
-                    "  void inject(test.inject.LocalInjectMemberWithConstructor object);",
-                    "  void inject(test.inject.ParentInjectMemberNoConstructor object);",
-                    "  void inject(test.inject.ParentInjectMemberWithConstructor object);",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.TestModule",
-                    "package test;",
-                    "",
-                    "import dagger.Module;",
-                    "import dagger.Provides;",
-                    "",
-                    "@Module",
-                    "class TestModule {",
-                    "  @Provides static Object object() {",
-                    "    return \"object\";",
-                    "  }",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.NoInjectMemberNoConstructor",
-                    "package test.inject;",
-                    "",
-                    "public class NoInjectMemberNoConstructor {",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.NoInjectMemberWithConstructor",
-                    "package test.inject;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class NoInjectMemberWithConstructor {",
-                    "  @Inject NoInjectMemberWithConstructor() {}",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.LocalInjectMemberNoConstructor",
-                    "package test.inject;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class LocalInjectMemberNoConstructor {",
-                    "  @Inject Object object;",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.LocalInjectMemberWithConstructor",
-                    "package test.inject;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class LocalInjectMemberWithConstructor {",
-                    "  @Inject LocalInjectMemberWithConstructor() {}",
-                    "  @Inject Object object;",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.ParentInjectMemberNoConstructor",
-                    "package test.inject;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class ParentInjectMemberNoConstructor",
-                    "    extends LocalInjectMemberNoConstructor {}"),
-                JavaFileObjects.forSourceLines(
-                    "test.inject.ParentInjectMemberWithConstructor",
-                    "package test.inject;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class ParentInjectMemberWithConstructor",
-                    "    extends LocalInjectMemberNoConstructor {",
-                    "  @Inject ParentInjectMemberWithConstructor() {}",
-                    "}"));
-
-    assertThat(compilation).succeededWithoutWarnings();
-    assertThat(compilation)
-        .hadNoteContaining(
-            "Generating a MembersInjector for "
-                + "test.inject.LocalInjectMemberNoConstructor. "
-                + "Prefer to run the dagger processor over that class instead.");
-    assertThat(compilation)
-        .hadNoteContaining(
-            "Generating a MembersInjector for "
-                + "test.inject.LocalInjectMemberWithConstructor. "
-                + "Prefer to run the dagger processor over that class instead.");
-    assertThat(compilation)
-        .hadNoteContaining(
-            "Generating a MembersInjector for "
-                + "test.inject.ParentInjectMemberWithConstructor. "
-                + "Prefer to run the dagger processor over that class instead.");
-    assertThat(compilation).hadNoteCount(3);
   }
 
   @EnumSource(CompilerMode.class)
@@ -2215,182 +1949,6 @@ class ComponentProcessorTest {
         .hadErrorContaining("String is bound multiple times")
         .inFile(component)
         .onLineContaining("interface TestComponent");
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void nullIncorrectlyReturnedFromNonNullableInlinedProvider(CompilerMode compilerMode) {
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
-            .compile(
-                JavaFileObjects.forSourceLines(
-                    "test.TestModule",
-                    "package test;",
-                    "",
-                    "import dagger.Module;",
-                    "import dagger.Provides;",
-                    "",
-                    "@Module",
-                    "public abstract class TestModule {",
-                    "  @Provides static String nonNullableString() { return \"string\"; }",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.InjectsMember",
-                    "package test;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class InjectsMember {",
-                    "  @Inject String member;",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.TestComponent",
-                    "package test;",
-                    "",
-                    "import dagger.Component;",
-                    "",
-                    "@Component(modules = TestModule.class)",
-                    "interface TestComponent {",
-                    "  String nonNullableString();",
-                    "  void inject(InjectsMember member);",
-                    "}"));
-    assertThat(compilation).succeededWithoutWarnings();
-
-    assertThat(compilation).generatedSourceFile("test.TestModule_NonNullableStringFactory")
-        .containsLines(List.of(compilerMode
-            .javaFileBuilder("test.TestModule_NonNullableStringFactory")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines(
-                "public final class TestModule_NonNullableStringFactory implements Factory<String> {",
-                "  @Override",
-                "  public String get() {",
-                "    return nonNullableString();",
-                "  }",
-                "",
-                "  public static String nonNullableString() {",
-                "    return Preconditions.checkNotNullFromProvides(TestModule.nonNullableString());",
-                "  }",
-                "}")
-            .lines()));
-
-    String[] generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerTestComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines(
-                "final class DaggerTestComponent implements TestComponent {",
-                "  @Override",
-                "  public String nonNullableString() {",
-                "    return TestModule_NonNullableStringFactory.nonNullableString();",
-                "  }",
-                "",
-                "  @Override",
-                "  public void inject(InjectsMember member) {",
-                "    injectInjectsMember(member);",
-                "  }",
-                "",
-                "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
-                "    InjectsMember_MembersInjector.injectMember(instance, TestModule_NonNullableStringFactory.nonNullableString());",
-                "    return instance;",
-                "  }",
-                "}")
-            .lines();
-
-    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(List.of(generatedComponent));
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void nullCheckingIgnoredWhenProviderReturnsPrimitive(CompilerMode compilerMode) {
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
-            .compile(
-                JavaFileObjects.forSourceLines(
-                    "test.TestModule",
-                    "package test;",
-                    "",
-                    "import dagger.Module;",
-                    "import dagger.Provides;",
-                    "",
-                    "@Module",
-                    "public abstract class TestModule {",
-                    "  @Provides static int primitiveInteger() { return 1; }",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.InjectsMember",
-                    "package test;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "public class InjectsMember {",
-                    "  @Inject Integer member;",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.TestComponent",
-                    "package test;",
-                    "",
-                    "import dagger.Component;",
-                    "",
-                    "@Component(modules = TestModule.class)",
-                    "interface TestComponent {",
-                    "  Integer nonNullableInteger();",
-                    "  void inject(InjectsMember member);",
-                    "}"));
-    assertThat(compilation).succeededWithoutWarnings();
-
-    assertThat(compilation).generatedSourceFile("test.TestModule_PrimitiveIntegerFactory")
-        .containsLines(List.of(compilerMode
-            .javaFileBuilder("test.TestModule_PrimitiveIntegerFactory")
-            .addLines("package test;")
-            .addLines(GeneratedLines.generatedImportsIndividual())
-            .addLines(
-                "public final class TestModule_PrimitiveIntegerFactory implements Factory<Integer> {",
-                "  @Override",
-                "  public Integer get() {",
-                "    return primitiveInteger();",
-                "  }",
-                "",
-                "  public static int primitiveInteger() {",
-                "    return TestModule.primitiveInteger();",
-                "  }",
-                "}")
-            .lines()));
-
-    String[] generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerTestComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines(
-                "final class DaggerTestComponent implements TestComponent {",
-                "  @Override",
-                "  public Integer nonNullableInteger() {",
-                "    return TestModule.primitiveInteger();",
-                "  }",
-                "",
-                "  @Override",
-                "  public void inject(InjectsMember member) {",
-                "    injectInjectsMember(member);",
-                "  }",
-                "",
-                "  private InjectsMember injectInjectsMember(InjectsMember instance) {",
-                "    InjectsMember_MembersInjector.injectMember(instance, TestModule.primitiveInteger());",
-                "    return instance;",
-                "  }",
-                "}")
-            .lines();
-
-    assertThat(compilation).generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(List.of(generatedComponent));
   }
 
   @EnumSource(CompilerMode.class)
@@ -2661,74 +2219,5 @@ class ComponentProcessorTest {
         .generatedSourceFile("test.DaggerPublicComponent")
         .containsLines(
             daggerPublicComponent);
-  }
-
-  /**
-   * A {@link ComponentProcessor} that excludes elements using a {@link Predicate}.
-   */
-  private static final class ElementFilteringComponentProcessor extends AbstractProcessor {
-    private final ComponentProcessor componentProcessor = new ComponentProcessor();
-    private final Predicate<? super Element> filter;
-
-    /**
-     * Creates a {@link ComponentProcessor} that only processes elements that match {@code filter}.
-     */
-    public ElementFilteringComponentProcessor(Predicate<? super Element> filter) {
-      this.filter = filter;
-    }
-
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-      super.init(processingEnv);
-      componentProcessor.init(processingEnv);
-    }
-
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-      return componentProcessor.getSupportedAnnotationTypes();
-    }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-      return componentProcessor.getSupportedSourceVersion();
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-      return componentProcessor.getSupportedOptions();
-    }
-
-    @Override
-    public boolean process(
-        Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
-      return componentProcessor.process(
-          annotations,
-          new RoundEnvironment() {
-            @Override
-            public boolean processingOver() {
-              return roundEnv.processingOver();
-            }
-
-            @Override
-            public Set<? extends Element> getRootElements() {
-              return roundEnv.getRootElements().stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
-            }
-
-            @Override
-            public Set<? extends Element> getElementsAnnotatedWith(Class<? extends Annotation> a) {
-              return roundEnv.getElementsAnnotatedWith(a).stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
-            }
-
-            @Override
-            public Set<? extends Element> getElementsAnnotatedWith(TypeElement a) {
-              return roundEnv.getElementsAnnotatedWith(a).stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
-            }
-
-            @Override
-            public boolean errorRaised() {
-              return roundEnv.errorRaised();
-            }
-          });
-    }
   }
 }

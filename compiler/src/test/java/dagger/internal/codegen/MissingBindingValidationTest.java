@@ -25,9 +25,9 @@ import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 
-public class MissingBindingValidationTest {
+class MissingBindingValidationTest {
   @Test
-  public void dependOnInterface() {
+  void dependOnInterface() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.MyComponent",
         "package test;",
         "",
@@ -61,7 +61,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void entryPointDependsOnInterface() {
+  void entryPointDependsOnInterface() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestClass",
@@ -89,7 +89,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void entryPointDependsOnQualifiedInterface() {
+  void entryPointDependsOnQualifiedInterface() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestClass",
@@ -119,7 +119,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void constructorInjectionWithoutAnnotation() {
+  void constructorInjectionWithoutAnnotation() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",
@@ -151,7 +151,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void membersInjectWithoutProvision() {
+  void membersInjectWithoutProvision() {
     JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
         "",
@@ -188,41 +188,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void missingBindingWithSameKeyAsMembersInjectionMethod() {
-    JavaFileObject self =
-        JavaFileObjects.forSourceLines(
-            "test.Self",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "import jakarta.inject.Provider;",
-            "",
-            "class Self {",
-            "  @Inject Provider<Self> selfProvider;",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.SelfComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component",
-            "interface SelfComponent {",
-            "  void inject(Self target);",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(self, component);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorCount(1);
-    assertThat(compilation)
-        .hadErrorContaining("Self cannot be provided without an @Inject constructor")
-        .inFile(component)
-        .onLineContaining("interface SelfComponent");
-  }
-
-  @Test
-  public void genericInjectClassWithWildcardDependencies() {
+  void genericInjectClassWithWildcardDependencies() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -254,81 +220,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void longChainOfDependencies() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestClass",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.Lazy;",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import jakarta.inject.Inject;",
-            "import jakarta.inject.Named;",
-            "import jakarta.inject.Provider;",
-            "",
-            "final class TestClass {",
-            "  interface A {}",
-            "",
-            "  static class B {",
-            "    @Inject B(A a) {}",
-            "  }",
-            "",
-            "  static class C {",
-            "    @Inject B b;",
-            "    @Inject C(X x) {}",
-            "  }",
-            "",
-            "  interface D { }",
-            "",
-            "  static class DImpl implements D {",
-            "    @Inject DImpl(C c, B b) {}",
-            "  }",
-            "",
-            "  static class X {",
-            "    @Inject X() {}",
-            "  }",
-            "",
-            "  @Module",
-            "  static class DModule {",
-            "    @Provides @Named(\"slim shady\") D d(X x1, DImpl impl, X x2) { return impl; }",
-            "  }",
-            "",
-            "  @Component(modules = { DModule.class })",
-            "  interface AComponent {",
-            "    @Named(\"slim shady\") D getFoo();",
-            "    C injectC(C c);",
-            "    Provider<C> cProvider();",
-            "    Lazy<C> lazyC();",
-            "    Provider<Lazy<C>> lazyCProvider();",
-            "  }",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorCount(1);
-    assertThat(compilation)
-        .hadErrorContaining(
-            message(
-                "TestClass.A cannot be provided without a @Provides-annotated method.",
-                "    TestClass.A is injected at",
-                "        TestClass.B(a)",
-                "    TestClass.B is injected at",
-                "        TestClass.C.b",
-                "    TestClass.C is injected at",
-                "        TestClass.AComponent.injectC(TestClass.C)",
-                "The following other entry points also depend on it:",
-                "    TestClass.AComponent.getFoo()",
-                "    TestClass.AComponent.cProvider()",
-                "    TestClass.AComponent.lazyC()",
-                "    TestClass.AComponent.lazyCProvider()"))
-        .inFile(component)
-        .onLineContaining("interface AComponent");
-  }
-
-  @Test
-  public void bindsMethodAppearsInTrace() {
+  void bindsMethodAppearsInTrace() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "TestComponent",
@@ -379,7 +271,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void resolvedParametersInDependencyTrace() {
+  void resolvedParametersInDependencyTrace() {
     JavaFileObject generic = JavaFileObjects.forSourceLines("test.Generic",
         "package test;",
         "",
@@ -434,7 +326,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void resolvedVariablesInDependencyTrace() {
+  void resolvedVariablesInDependencyTrace() {
     JavaFileObject generic = JavaFileObjects.forSourceLines("test.Generic",
         "package test;",
         "",
@@ -490,7 +382,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void bindingUsedOnlyInSubcomponentDependsOnBindingOnlyInSubcomponent() {
+  void bindingUsedOnlyInSubcomponentDependsOnBindingOnlyInSubcomponent() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "Parent",
@@ -546,7 +438,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void manyDependencies() {
+  void manyDependencies() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -604,7 +496,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void tooManyRequests() {
+  void tooManyRequests() {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -669,7 +561,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void tooManyEntryPoints() {
+  void tooManyEntryPoints() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -720,7 +612,7 @@ public class MissingBindingValidationTest {
   }
 
   @Test
-  public void missingBindingInAllComponentsAndEntryPoints() {
+  void missingBindingInAllComponentsAndEntryPoints() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "Parent",
@@ -785,7 +677,7 @@ public class MissingBindingValidationTest {
   // incorrect caching during binding graph conversion might cause validation to pass
   // incorrectly.
   @Test
-  public void sameSubcomponentUsedInDifferentHierarchies() {
+  void sameSubcomponentUsedInDifferentHierarchies() {
     JavaFileObject parent = JavaFileObjects.forSourceLines("test.Parent",
         "package test;",
         "",
@@ -852,5 +744,4 @@ public class MissingBindingValidationTest {
         .inFile(parent)
         .onLineContaining("interface Parent");
   }
-
 }

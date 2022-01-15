@@ -255,7 +255,10 @@ public final class ComponentValidator implements ClearableCache {
               validateProvisionMethod();
               break;
             case 1:
-              validateMembersInjectionMethod();
+              report.addError(
+                  "This method isn't a valid provision method or "
+                      + "subcomponent factory method. Members injection has been disabled",
+                  method);
               break;
             default:
               reportInvalidMethod();
@@ -370,19 +373,9 @@ public final class ComponentValidator implements ClearableCache {
         dependencyRequestValidator.validateDependencyRequest(report, method, returnType);
       }
 
-      private void validateMembersInjectionMethod() {
-        TypeMirror parameterType = Util.getOnlyElement(parameterTypes);
-        report.addSubreport(
-            membersInjectionValidator.validateMembersInjectionMethod(method, parameterType));
-        if (!(returnType.getKind().equals(VOID) || types.isSameType(returnType, parameterType))) {
-          report.addError(
-              "Members injection methods may only return the injected type or void.", method);
-        }
-      }
-
       private void reportInvalidMethod() {
         report.addError(
-            "This method isn't a valid provision method, members injection method or "
+            "This method isn't a valid provision method or "
                 + "subcomponent factory method. Dagger cannot implement this method",
             method);
       }

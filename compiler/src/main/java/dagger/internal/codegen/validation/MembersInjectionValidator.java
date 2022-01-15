@@ -51,23 +51,6 @@ final class MembersInjectionValidator {
     return report.build();
   }
 
-  /**
-   * Reports errors if a members injection method on a component is invalid.
-   *
-   * @throws IllegalArgumentException if the method doesn't have exactly one parameter
-   */
-  ValidationReport<ExecutableElement> validateMembersInjectionMethod(
-      ExecutableElement method, TypeMirror membersInjectedType) {
-    Preconditions.checkArgument(
-        method.getParameters().size() == 1, "expected a method with one parameter: %s", method);
-
-    ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(method);
-    checkQualifiers(report, method);
-    checkQualifiers(report, method.getParameters().get(0));
-    membersInjectedType.accept(VALIDATE_MEMBERS_INJECTED_TYPE, report);
-    return report.build();
-  }
-
   private void checkQualifiers(ValidationReport.Builder<?> report, Element element) {
     for (AnnotationMirror qualifier : injectionAnnotations.getQualifiers(element)) {
       report.addError("Cannot inject members into qualified types", element, qualifier);
@@ -77,7 +60,7 @@ final class MembersInjectionValidator {
 
   private static final TypeVisitor<Void, ValidationReport.Builder<?>>
       VALIDATE_MEMBERS_INJECTED_TYPE =
-      new SimpleTypeVisitor8<Void, ValidationReport.Builder<?>>() {
+      new SimpleTypeVisitor8<>() {
         // Only declared types can be members-injected.
         @Override
         protected Void defaultAction(TypeMirror type, ValidationReport.Builder<?> report) {

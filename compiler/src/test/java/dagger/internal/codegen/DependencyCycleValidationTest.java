@@ -493,60 +493,6 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  void cycleFromMembersInjectionMethod_WithSameKeyAsMembersInjectionMethod() {
-    JavaFileObject a =
-        JavaFileObjects.forSourceLines(
-            "test.A",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "",
-            "class A {",
-            "  @Inject A() {}",
-            "  @Inject B b;",
-            "}");
-    JavaFileObject b =
-        JavaFileObjects.forSourceLines(
-            "test.B",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "",
-            "class B {",
-            "  @Inject B() {}",
-            "  @Inject A a;",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.CycleComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component",
-            "interface CycleComponent {",
-            "  void inject(A a);",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(a, b, component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            message(
-                "Found a dependency cycle:",
-                "    test.B is injected at",
-                "        test.A.b",
-                "    test.A is injected at",
-                "        test.B.a",
-                "    test.B is injected at",
-                "        test.A.b",
-                "    test.A is injected at",
-                "        CycleComponent.inject(test.A)"))
-        .inFile(component)
-        .onLineContaining("interface CycleComponent");
-  }
-
-  @Test
   void longCycleMaskedByShortBrokenCycles() {
     JavaFileObject cycles =
         JavaFileObjects.forSourceLines(
