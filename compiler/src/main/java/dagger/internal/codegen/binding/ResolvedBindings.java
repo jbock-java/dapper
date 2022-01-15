@@ -22,7 +22,6 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.Key;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,6 @@ final class ResolvedBindings {
   private final Key key;
   private final Map<TypeElement, Set<ContributionBinding>> allContributionBindings;
   private final Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings;
-  private final Set<MultibindingDeclaration> multibindingDeclarations;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
 
@@ -67,13 +65,11 @@ final class ResolvedBindings {
       Key key,
       Map<TypeElement, Set<ContributionBinding>> allContributionBindings,
       Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings,
-      Set<MultibindingDeclaration> multibindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
     this.key = requireNonNull(key);
     this.allContributionBindings = requireNonNull(allContributionBindings);
     this.allMembersInjectionBindings = requireNonNull(allMembersInjectionBindings);
-    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
   }
@@ -102,7 +98,7 @@ final class ResolvedBindings {
 
   /** The multibinding declarations for {@link #key()}. */
   Set<MultibindingDeclaration> multibindingDeclarations() {
-    return multibindingDeclarations;
+    return Set.of();
   }
 
   /** The subcomponent declarations for {@link #key()}. */
@@ -123,7 +119,6 @@ final class ResolvedBindings {
     return key.equals(that.key)
         && allContributionBindings.equals(that.allContributionBindings)
         && allMembersInjectionBindings.equals(that.allMembersInjectionBindings)
-        && multibindingDeclarations.equals(that.multibindingDeclarations)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations)
         && optionalBindingDeclarations.equals(that.optionalBindingDeclarations);
   }
@@ -194,14 +189,12 @@ final class ResolvedBindings {
   static ResolvedBindings forContributionBindings(
       Key key,
       Map<TypeElement, List<ContributionBinding>> contributionBindings,
-      Set<MultibindingDeclaration> multibindings,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
     return new ResolvedBindings(
         key,
         Util.transformValues(contributionBindings, LinkedHashSet::new),
         Map.of(),
-        multibindings,
         subcomponentDeclarations,
         optionalBindingDeclarations);
   }
@@ -218,7 +211,6 @@ final class ResolvedBindings {
         Map.of(),
         Map.of(owningComponent.typeElement(), ownedMembersInjectionBinding),
         Set.of(),
-        Set.of(),
         Set.of());
   }
 
@@ -230,7 +222,6 @@ final class ResolvedBindings {
         key,
         Map.of(),
         Map.of(),
-        Set.of(),
         Set.of(),
         Set.of());
   }

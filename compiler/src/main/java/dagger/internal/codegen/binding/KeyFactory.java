@@ -37,8 +37,6 @@ import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
-import dagger.model.Key.MultibindingContributionIdentifier;
-import dagger.multibindings.Multibinds;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.Map;
@@ -131,31 +129,6 @@ public final class KeyFactory {
     ContributionType contributionType = ContributionType.fromBindingElement(method);
     TypeMirror returnType = methodType.getReturnType();
     TypeMirror keyType = bindingMethodKeyType(returnType, method, contributionType, frameworkType);
-    Key key = forMethod(method, keyType);
-    return contributionType.equals(ContributionType.UNIQUE)
-        ? key
-        : key.toBuilder()
-        .multibindingContributionIdentifier(
-            new MultibindingContributionIdentifier(method, contributingModule))
-        .build();
-  }
-
-  /**
-   * Returns the key for a {@link Multibinds @Multibinds} method.
-   *
-   * <p>The key's type is either {@code Set<T>} or {@code Map<K, Provider<V>>}. The latter works
-   * even for maps used by {@code Producer}s.
-   */
-  Key forMultibindsMethod(ExecutableType executableType, ExecutableElement method) {
-    Preconditions.checkArgument(method.getKind().equals(METHOD), "%s must be a method", method);
-    TypeMirror returnType = executableType.getReturnType();
-    TypeMirror keyType =
-        MapType.isMap(returnType)
-            ? mapOfFrameworkType(
-            MapType.from(returnType).keyType(),
-            elements.getTypeElement(Provider.class),
-            MapType.from(returnType).valueType())
-            : returnType;
     return forMethod(method, keyType);
   }
 
@@ -170,9 +143,9 @@ public final class KeyFactory {
       case SET:
         return setOf(returnType);
       case MAP:
-        TypeMirror mapKeyType = mapKeyType(getMapKey(method).get(), types);
+        TypeMirror mapKeyType = mapKeyType(getMapKey(method).orElseThrow(), types);
         return frameworkType.isPresent()
-            ? mapOfFrameworkType(mapKeyType, frameworkType.get(), returnType)
+            ? mapOfFrameworkType(mapKeyType, frameworkType.orElseThrow(), returnType)
             : mapOf(mapKeyType, returnType);
       case SET_VALUES:
         // TODO(gak): do we want to allow people to use "covariant return" here?
@@ -264,39 +237,7 @@ public final class KeyFactory {
   private Key wrapMapValue(Key key, Class<?> newWrappingClass) {
     Preconditions.checkArgument(
         FrameworkTypes.isFrameworkType(elements.getTypeElement(newWrappingClass).asType()));
-    return wrapMapKey(key, newWrappingClass).get();
-  }
-
-  /**
-   * If {@code key}'s type is {@code Map<K, CurrentWrappingClass<Bar>>}, returns a key with type
-   * {@code Map<K, NewWrappingClass<Bar>>} with the same qualifier. Otherwise returns {@link
-   * Optional#empty()}.
-   *
-   * <p>Returns {@link Optional#empty()} if {@code newWrappingClass} is not in the classpath.
-   *
-   * @throws IllegalArgumentException if {@code newWrappingClass} is the same as {@code
-   *     currentWrappingClass}
-   */
-  public Optional<Key> rewrapMapKey(
-      Key possibleMapKey, Class<?> currentWrappingClass, Class<?> newWrappingClass) {
-    Preconditions.checkArgument(!currentWrappingClass.equals(newWrappingClass));
-    if (MapType.isMap(possibleMapKey)) {
-      MapType mapType = MapType.from(possibleMapKey);
-      if (!mapType.isRawType() && mapType.valuesAreTypeOf(currentWrappingClass)) {
-        TypeElement wrappingElement = elements.getTypeElement(newWrappingClass);
-        if (wrappingElement == null) {
-          // This target might not be compiled with Producers, so wrappingClass might not have an
-          // associated element.
-          return Optional.empty();
-        }
-        DeclaredType wrappedValueType =
-            types.getDeclaredType(
-                wrappingElement, mapType.unwrappedValueType(currentWrappingClass));
-        return Optional.of(
-            possibleMapKey.toBuilder().type(mapOf(mapType.keyType(), wrappedValueType)).build());
-      }
-    }
-    return Optional.empty();
+    return wrapMapKey(key, newWrappingClass).orElseThrow();
   }
 
   /**

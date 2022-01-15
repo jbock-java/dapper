@@ -56,25 +56,7 @@ public final class BindsTypeChecker {
    */
   public boolean isAssignable(
       TypeMirror rightHandSide, TypeMirror leftHandSide, ContributionType contributionType) {
-    return types.isAssignable(rightHandSide, desiredAssignableType(leftHandSide, contributionType));
-  }
-
-  private TypeMirror desiredAssignableType(
-      TypeMirror leftHandSide, ContributionType contributionType) {
-    switch (contributionType) {
-      case UNIQUE:
-        return leftHandSide;
-      case SET:
-        DeclaredType parameterizedSetType = types.getDeclaredType(setElement(), leftHandSide);
-        return methodParameterType(parameterizedSetType, "add");
-      case SET_VALUES:
-        return methodParameterType(MoreTypes.asDeclared(leftHandSide), "addAll");
-      case MAP:
-        DeclaredType parameterizedMapType =
-            types.getDeclaredType(mapElement(), unboundedWildcard(), leftHandSide);
-        return methodParameterTypes(parameterizedMapType, "put").get(1);
-    }
-    throw new AssertionError("Unknown contribution type: " + contributionType);
+    return types.isAssignable(rightHandSide, leftHandSide);
   }
 
   private List<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {

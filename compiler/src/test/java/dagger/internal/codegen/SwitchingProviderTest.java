@@ -484,63 +484,6 @@ class SwitchingProviderTest {
   }
 
   @Test
-  void emptyMultibindings_avoidSwitchProviders() {
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.TestModule",
-            "package test;",
-            "",
-            "import dagger.multibindings.Multibinds;",
-            "import dagger.Module;",
-            "import java.util.Map;",
-            "import java.util.Set;",
-            "",
-            "@Module",
-            "interface TestModule {",
-            "  @Multibinds Set<String> set();",
-            "  @Multibinds Map<String, String> map();",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import java.util.Map;",
-            "import java.util.Set;",
-            "import jakarta.inject.Provider;",
-            "",
-            "@Component(modules = TestModule.class)",
-            "interface TestComponent {",
-            "  Provider<Set<String>> setProvider();",
-            "  Provider<Map<String, String>> mapProvider();",
-            "}");
-
-    Compilation compilation = compilerWithAndroidMode().compile(module, component);
-    assertThat(compilation).succeeded();
-    List<String> generatedComponent = new ArrayList<>();
-    Collections.addAll(generatedComponent,
-        "package test;");
-    Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(generatedComponent,
-        "final class DaggerTestComponent implements TestComponent {",
-        "  @Override",
-        "  public Provider<Set<String>> setProvider() {",
-        "    return SetFactory.<String>empty();",
-        "  }",
-        "",
-        "  @Override",
-        "  public Provider<Map<String, String>> mapProvider() {",
-        "    return MapFactory.<String, String>emptyMapProvider();",
-        "  }",
-        "}");
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
-  }
-
-  @Test
   void memberInjectors() {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(

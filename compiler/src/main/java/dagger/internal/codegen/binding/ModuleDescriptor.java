@@ -41,7 +41,6 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
-import dagger.multibindings.Multibinds;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
@@ -61,7 +60,6 @@ public final class ModuleDescriptor {
   private final TypeElement moduleElement;
   private final Set<TypeElement> includedModules;
   private final Set<ContributionBinding> bindings;
-  private final Set<MultibindingDeclaration> multibindingDeclarations;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final Set<DelegateDeclaration> delegateDeclarations;
   private final Set<OptionalBindingDeclaration> optionalDeclarations;
@@ -71,7 +69,6 @@ public final class ModuleDescriptor {
       TypeElement moduleElement,
       Set<TypeElement> includedModules,
       Set<ContributionBinding> bindings,
-      Set<MultibindingDeclaration> multibindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<DelegateDeclaration> delegateDeclarations,
       Set<OptionalBindingDeclaration> optionalDeclarations,
@@ -79,7 +76,6 @@ public final class ModuleDescriptor {
     this.moduleElement = requireNonNull(moduleElement);
     this.includedModules = requireNonNull(includedModules);
     this.bindings = requireNonNull(bindings);
-    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.delegateDeclarations = requireNonNull(delegateDeclarations);
     this.optionalDeclarations = requireNonNull(optionalDeclarations);
@@ -96,11 +92,6 @@ public final class ModuleDescriptor {
 
   public Set<ContributionBinding> bindings() {
     return bindings;
-  }
-
-  /** The multibinding declarations contained in this module. */
-  Set<MultibindingDeclaration> multibindingDeclarations() {
-    return multibindingDeclarations;
   }
 
   /** The {@link Module#subcomponents() subcomponent declarations} contained in this module. */
@@ -127,7 +118,6 @@ public final class ModuleDescriptor {
     Set<BindingDeclaration> result = new LinkedHashSet<>();
     result.addAll(bindings());
     result.addAll(delegateDeclarations());
-    result.addAll(multibindingDeclarations());
     result.addAll(optionalDeclarations());
     result.addAll(subcomponentDeclarations());
     return result;
@@ -151,7 +141,6 @@ public final class ModuleDescriptor {
     return moduleElement.equals(that.moduleElement)
         && includedModules.equals(that.includedModules)
         && bindings.equals(that.bindings)
-        && multibindingDeclarations.equals(that.multibindingDeclarations)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations)
         && delegateDeclarations.equals(that.delegateDeclarations)
         && optionalDeclarations.equals(that.optionalDeclarations)
@@ -163,7 +152,6 @@ public final class ModuleDescriptor {
     return Objects.hash(moduleElement,
         includedModules,
         bindings,
-        multibindingDeclarations,
         subcomponentDeclarations,
         delegateDeclarations,
         optionalDeclarations,
@@ -175,7 +163,6 @@ public final class ModuleDescriptor {
   public static final class Factory implements ClearableCache {
     private final DaggerElements elements;
     private final BindingFactory bindingFactory;
-    private final MultibindingDeclaration.Factory multibindingDeclarationFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
     private final SubcomponentDeclaration.Factory subcomponentDeclarationFactory;
     private final OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory;
@@ -185,13 +172,11 @@ public final class ModuleDescriptor {
     Factory(
         DaggerElements elements,
         BindingFactory bindingFactory,
-        MultibindingDeclaration.Factory multibindingDeclarationFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
         SubcomponentDeclaration.Factory subcomponentDeclarationFactory,
         OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory) {
       this.elements = elements;
       this.bindingFactory = bindingFactory;
-      this.multibindingDeclarationFactory = multibindingDeclarationFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
       this.subcomponentDeclarationFactory = subcomponentDeclarationFactory;
       this.optionalBindingDeclarationFactory = optionalBindingDeclarationFactory;
@@ -204,8 +189,6 @@ public final class ModuleDescriptor {
     public ModuleDescriptor createUncached(TypeElement moduleElement) {
       Set<ContributionBinding> bindings = new LinkedHashSet<>();
       Set<DelegateDeclaration> delegates = new LinkedHashSet<>();
-      Set<MultibindingDeclaration> multibindingDeclarations =
-          new LinkedHashSet<>();
       Set<OptionalBindingDeclaration> optionalDeclarations =
           new LinkedHashSet<>();
 
@@ -215,10 +198,6 @@ public final class ModuleDescriptor {
         }
         if (isAnnotationPresent(moduleMethod, Binds.class)) {
           delegates.add(bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
-        }
-        if (isAnnotationPresent(moduleMethod, Multibinds.class)) {
-          multibindingDeclarations.add(
-              multibindingDeclarationFactory.forMultibindsMethod(moduleMethod, moduleElement));
         }
         if (isAnnotationPresent(moduleMethod, BindsOptionalOf.class)) {
           optionalDeclarations.add(
@@ -230,11 +209,10 @@ public final class ModuleDescriptor {
           moduleElement,
           collectIncludedModules(new LinkedHashSet<>(), moduleElement),
           bindings,
-          multibindingDeclarations,
           subcomponentDeclarationFactory.forModule(moduleElement),
           delegates,
           optionalDeclarations,
-          ModuleKind.forAnnotatedElement(moduleElement).get());
+          ModuleKind.forAnnotatedElement(moduleElement).orElseThrow());
     }
 
     /** Returns all the modules transitively included by given modules, including the arguments. */

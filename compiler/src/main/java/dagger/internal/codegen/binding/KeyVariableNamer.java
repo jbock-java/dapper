@@ -89,11 +89,6 @@ public final class KeyVariableNamer {
   }
 
   public static String name(Key key) {
-    if (key.multibindingContributionIdentifier().isPresent()) {
-      @SuppressWarnings("deprecation")
-      String bindingElement = key.multibindingContributionIdentifier().get().bindingElement();
-      return bindingElement;
-    }
 
     StringBuilder builder = new StringBuilder();
 

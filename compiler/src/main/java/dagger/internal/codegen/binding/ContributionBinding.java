@@ -107,21 +107,11 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   }
 
   /**
-   * The {@link TypeMirror type} for the {@code Factory<T>} or {@code Producer<T>} which is created
-   * for this binding. Uses the binding's key, V in the case of {@code Map<K, FrameworkClass<V>>>},
-   * and E {@code Set<E>} for {@link dagger.multibindings.IntoSet @IntoSet} methods.
+   * The {@link TypeMirror type} for the {@code Factory<T>} which is created
+   * for this binding.
    */
   public final TypeMirror contributedType() {
-    switch (contributionType()) {
-      case MAP:
-        return MapType.from(key()).unwrappedFrameworkValueType();
-      case SET:
-        return SetType.from(key()).elementType();
-      case SET_VALUES:
-      case UNIQUE:
-        return key().type();
-    }
-    throw new AssertionError();
+    return key().type();
   }
 
   /**

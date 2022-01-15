@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
@@ -44,18 +43,15 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 public final class Key {
   private final Optional<Wrapper<AnnotationMirror>> wrappedQualifier;
   private final Wrapper<TypeMirror> wrappedType;
-  private final Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier;
 
   private final int hashCode;
 
   private Key(
       Optional<Wrapper<AnnotationMirror>> wrappedQualifier,
-      Wrapper<TypeMirror> wrappedType,
-      Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier) {
+      Wrapper<TypeMirror> wrappedType) {
     this.wrappedQualifier = requireNonNull(wrappedQualifier);
     this.wrappedType = requireNonNull(wrappedType);
-    this.multibindingContributionIdentifier = requireNonNull(multibindingContributionIdentifier);
-    this.hashCode = Objects.hash(wrappedQualifier, wrappedType, multibindingContributionIdentifier);
+    this.hashCode = Objects.hash(wrappedQualifier, wrappedType);
   }
 
   /**
@@ -105,7 +101,7 @@ public final class Key {
    * <p>Absent except for multibinding contributions.
    */
   public Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier() {
-    return multibindingContributionIdentifier;
+    return Optional.empty();
   }
 
   /** Returns a {@link Builder} that inherits the properties of this key. */
@@ -134,9 +130,7 @@ public final class Key {
       return false;
     }
     return Objects.equals(this.wrappedQualifier, that.wrappedQualifier())
-        && Objects.equals(this.wrappedType, that.wrappedType())
-        && Objects.equals(this.multibindingContributionIdentifier,
-        that.multibindingContributionIdentifier());
+        && Objects.equals(this.wrappedType, that.wrappedType());
   }
 
   /**
@@ -220,7 +214,6 @@ public final class Key {
 
     private Optional<Wrapper<AnnotationMirror>> wrappedQualifier = Optional.empty();
     private Wrapper<TypeMirror> wrappedType;
-    private Optional<Key.MultibindingContributionIdentifier> multibindingContributionIdentifier = Optional.empty();
 
     private Builder() {
     }
@@ -228,7 +221,6 @@ public final class Key {
     private Builder(Key source) {
       this.wrappedQualifier = source.wrappedQualifier();
       this.wrappedType = source.wrappedType();
-      this.multibindingContributionIdentifier = source.multibindingContributionIdentifier();
     }
 
     public Builder type(TypeMirror type) {
@@ -246,21 +238,10 @@ public final class Key {
       return this;
     }
 
-    public Builder multibindingContributionIdentifier(Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier) {
-      this.multibindingContributionIdentifier = multibindingContributionIdentifier;
-      return this;
-    }
-
-    public Builder multibindingContributionIdentifier(MultibindingContributionIdentifier multibindingContributionIdentifier) {
-      this.multibindingContributionIdentifier = Optional.of(multibindingContributionIdentifier);
-      return this;
-    }
-
     public Key build() {
       return new Key(
           this.wrappedQualifier,
-          this.wrappedType,
-          this.multibindingContributionIdentifier);
+          this.wrappedType);
     }
   }
 
@@ -271,70 +252,5 @@ public final class Key {
    * @see #multibindingContributionIdentifier()
    */
   public static final class MultibindingContributionIdentifier {
-    private final String module;
-    private final String bindingElement;
-
-    /**
-     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
-     * It is not part of a specified API and may change at any point.
-     */
-    @Deprecated
-    public MultibindingContributionIdentifier(
-        // TODO(ronshapiro): reverse the order of these parameters
-        ExecutableElement bindingMethod, TypeElement contributingModule) {
-      this(
-          bindingMethod.getSimpleName().toString(),
-          contributingModule.getQualifiedName().toString());
-    }
-
-    // TODO(ronshapiro,dpb): create KeyProxies so that these constructors don't need to be public.
-    @Deprecated
-    public MultibindingContributionIdentifier(String bindingElement, String module) {
-      this.module = module;
-      this.bindingElement = bindingElement;
-    }
-
-    /**
-     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
-     * It is not part of a specified API and may change at any point.
-     */
-    @Deprecated
-    public String module() {
-      return module;
-    }
-
-    /**
-     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
-     * It is not part of a specified API and may change at any point.
-     */
-    @Deprecated
-    public String bindingElement() {
-      return bindingElement;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The returned string is human-readable and distinguishes the keys in the same way as the
-     * whole object.
-     */
-    @Override
-    public String toString() {
-      return String.format("%s#%s", module, bindingElement);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof MultibindingContributionIdentifier) {
-        MultibindingContributionIdentifier other = (MultibindingContributionIdentifier) obj;
-        return module.equals(other.module) && bindingElement.equals(other.bindingElement);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(module, bindingElement);
-    }
   }
 }
