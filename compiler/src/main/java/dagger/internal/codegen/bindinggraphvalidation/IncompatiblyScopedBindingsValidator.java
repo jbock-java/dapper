@@ -72,7 +72,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
           .ifPresent(
               scope -> {
                 ComponentNode componentNode =
-                    bindingGraph.componentNode(binding.componentPath()).get();
+                    bindingGraph.componentNode(binding.componentPath()).orElseThrow();
                 if (!componentNode.scopes().contains(scope)) {
                   // @Inject bindings in module or subcomponent binding graphs will appear at the
                   // properly scoped ancestor component, so ignore them here.
@@ -126,15 +126,15 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
         case PROVISION:
           message.append(
               methodSignatureFormatter.format(
-                  MoreElements.asExecutable(binding.bindingElement().get())));
+                  MoreElements.asExecutable(binding.bindingElement().orElseThrow())));
           break;
 
         case INJECTION:
           message
-              .append(getReadableSource(binding.scope().get()))
+              .append(getReadableSource(binding.scope().orElseThrow()))
               .append(" class ")
               .append(
-                  closestEnclosingTypeElement(binding.bindingElement().get()).getQualifiedName());
+                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow()).getQualifiedName());
           break;
 
         default:

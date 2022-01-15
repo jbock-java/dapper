@@ -19,20 +19,15 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.binding.SourceFiles.setFactoryClassName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeVariableName;
-import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
@@ -85,12 +80,6 @@ abstract class MemberSelect {
     if (contributionBinding.factoryCreationStrategy().equals(SINGLETON_INSTANCE)
         && contributionBinding.scope().isEmpty()) {
       switch (contributionBinding.kind()) {
-        case MULTIBOUND_MAP:
-          return Optional.of(emptyMapFactory(contributionBinding));
-
-        case MULTIBOUND_SET:
-          return Optional.of(emptySetFactory(contributionBinding));
-
         case INJECTION:
         case PROVISION:
           TypeMirror keyType = contributionBinding.key().type();
@@ -141,27 +130,6 @@ abstract class MemberSelect {
           ? methodCodeBlock
           : CodeBlock.of("$T.$L", owningClass(), methodCodeBlock);
     }
-  }
-
-  /** A {@link MemberSelect} for a factory of an empty map. */
-  private static MemberSelect emptyMapFactory(ContributionBinding contributionBinding) {
-    List<TypeMirror> typeParameters =
-        List.copyOf(
-            MoreTypes.asDeclared(contributionBinding.key().type()).getTypeArguments());
-    return new ParameterizedStaticMethod(
-        MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
-  }
-
-  /**
-   * A static member select for an empty set factory. Calls {@link
-   * dagger.internal.SetFactory#empty()}.
-   */
-  private static MemberSelect emptySetFactory(ContributionBinding binding) {
-    return new ParameterizedStaticMethod(
-        setFactoryClassName(binding),
-        List.of(SetType.from(binding.key()).elementType()),
-        CodeBlock.of("empty()"),
-        FACTORY);
   }
 
   private static final class ParameterizedStaticMethod extends MemberSelect {

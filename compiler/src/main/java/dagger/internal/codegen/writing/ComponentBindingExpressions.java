@@ -25,8 +25,6 @@ import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFr
 import static dagger.internal.codegen.writing.DelegateBindingExpression.isBindsScopeStrongerThanDependencyScope;
 import static dagger.internal.codegen.writing.MemberSelect.staticFactoryCreation;
 import static dagger.model.BindingKind.DELEGATE;
-import static dagger.model.BindingKind.MULTIBOUND_MAP;
-import static dagger.model.BindingKind.MULTIBOUND_SET;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreTypes;
@@ -269,7 +267,7 @@ public final class ComponentBindingExpressions {
   private BindingExpression frameworkInstanceBindingExpression(ContributionBinding binding) {
     // TODO(bcorso): Consider merging the static factory creation logic into CreationExpressions?
     Optional<MemberSelect> staticMethod =
-        useStaticFactoryCreation(binding) ? staticFactoryCreation(binding) : Optional.empty();
+        useStaticFactoryCreation() ? staticFactoryCreation(binding) : Optional.empty();
     FrameworkInstanceSupplier frameworkInstanceSupplier =
         staticMethod.isPresent()
             ? staticMethod::get
@@ -378,10 +376,8 @@ public final class ComponentBindingExpressions {
    * however, we allow static factories that can reused across multiple bindings, e.g. {@code
    * MapFactory} or {@code SetFactory}.
    */
-  private boolean useStaticFactoryCreation(ContributionBinding binding) {
-    return !isFastInit()
-        || binding.kind().equals(MULTIBOUND_MAP)
-        || binding.kind().equals(MULTIBOUND_SET);
+  private boolean useStaticFactoryCreation() {
+    return !isFastInit();
   }
 
   /**

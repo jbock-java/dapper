@@ -38,8 +38,6 @@ public interface BindingGraphValidationModule {
       IncompatiblyScopedBindingsValidator validation4,
       InjectBindingValidator validation5,
       MissingBindingValidator validation7,
-      NullableBindingValidator validation8,
-      SetMultibindingValidator validation10,
       SubcomponentFactoryMethodValidator validation11) {
     Set<BindingGraphPlugin> plugins = Set.of(
         validation1,
@@ -47,8 +45,6 @@ public interface BindingGraphValidationModule {
         validation4,
         validation5,
         validation7,
-        validation8,
-        validation10,
         validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       return Set.of(factory.create(plugins, "Dagger/Validation"));

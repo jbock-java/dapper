@@ -79,8 +79,6 @@ public abstract class ContributionBinding extends Binding implements HasContribu
             ? SINGLETON_INSTANCE
             : CLASS_CONSTRUCTOR;
       case INJECTION:
-      case MULTIBOUND_SET:
-      case MULTIBOUND_MAP:
         return dependencies().isEmpty() ? SINGLETON_INSTANCE : CLASS_CONSTRUCTOR;
       default:
         return CLASS_CONSTRUCTOR;

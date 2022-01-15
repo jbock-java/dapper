@@ -128,7 +128,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     if (bindingGraph.isFullBindingGraph()) {
       diagnosticReporter.reportComponent(
           ERROR,
-          bindingGraph.componentNode(cycle.nodes().iterator().next().componentPath()).get(),
+          bindingGraph.componentNode(cycle.nodes().iterator().next().componentPath()).orElseThrow(),
           errorMessage(cycle, bindingGraph));
       return;
     }
@@ -146,7 +146,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
       Cycle<Node> cycle, BindingGraph bindingGraph) {
     Node someCycleNode = cycle.nodes().iterator().next();
     ComponentNode componentContainingCycle =
-        bindingGraph.componentNode(someCycleNode.componentPath()).get();
+        bindingGraph.componentNode(someCycleNode.componentPath()).orElseThrow();
     List<Node> pathToCycle =
         shortestPath(bindingGraph.network(), componentContainingCycle, someCycleNode);
     return subpathToCycle(pathToCycle, cycle);
@@ -191,7 +191,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         .flatMap(instancesOf(DependencyEdge.class))
         .filter(edge -> !breaksCycle(edge, graph))
         .findFirst()
-        .get();
+        .orElseThrow();
   }
 
   private boolean breaksCycle(DependencyEdge edge, BindingGraph graph) {
@@ -239,7 +239,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     return bindingGraph.network().edgesConnecting(source, target).stream()
         .flatMap(instancesOf(DependencyEdge.class))
         .findFirst()
-        .get();
+        .orElseThrow();
   }
 
   /** Returns the subgraph containing only {@link DependencyEdge}s that would not break a cycle. */

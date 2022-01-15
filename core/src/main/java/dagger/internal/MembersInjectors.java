@@ -36,7 +36,7 @@ public final class MembersInjectors {
     return (MembersInjector<T>) NoOpMembersInjector.INSTANCE;
   }
 
-  private static enum NoOpMembersInjector implements MembersInjector<Object> {
+  private enum NoOpMembersInjector implements MembersInjector<Object> {
     INSTANCE;
 
     @Override public void injectMembers(Object instance) {

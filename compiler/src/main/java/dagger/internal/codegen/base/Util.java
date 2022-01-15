@@ -52,7 +52,9 @@ public final class Util {
 
   public static <E> Set<E> setOf(Iterable<? extends E> elements) {
     if (elements instanceof Set) {
-      return (Set) elements;
+      @SuppressWarnings("unchecked")
+      Set<E> result = (Set<E>) elements;
+      return result;
     }
     LinkedHashSet<E> result = new LinkedHashSet<>();
     for (E element : elements) {
@@ -63,7 +65,9 @@ public final class Util {
 
   public static <E> List<E> listOf(Iterable<? extends E> elements) {
     if (elements instanceof List) {
-      return (List) elements;
+      @SuppressWarnings("unchecked")
+      List<E> result = (List<E>) elements;
+      return result;
     }
     ArrayList<E> result = new ArrayList<>();
     for (E element : elements) {

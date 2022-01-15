@@ -36,11 +36,6 @@ public final class TypeNames {
   public static final ClassName COMPONENT = ClassName.get("dagger", "Component");
   public static final ClassName COMPONENT_BUILDER = COMPONENT.nestedClass("Builder");
   public static final ClassName COMPONENT_FACTORY = COMPONENT.nestedClass("Factory");
-  public static final ClassName ELEMENTS_INTO_SET =
-      ClassName.get("dagger.multibindings", "ElementsIntoSet");
-  public static final ClassName INTO_MAP = ClassName.get("dagger.multibindings", "IntoMap");
-  public static final ClassName INTO_SET = ClassName.get("dagger.multibindings", "IntoSet");
-  public static final ClassName MAP_KEY = ClassName.get("dagger", "MapKey");
   public static final ClassName MODULE = ClassName.get("dagger", "Module");
   public static final ClassName MULTIBINDS = ClassName.get("dagger.multibindings", "Multibinds");
   public static final ClassName PROVIDES = ClassName.get("dagger", "Provides");
@@ -56,16 +51,12 @@ public final class TypeNames {
       ClassName.get("dagger.internal", "InjectedFieldSignature");
   public static final ClassName INSTANCE_FACTORY =
       ClassName.get("dagger.internal", "InstanceFactory");
-  public static final ClassName MAP_FACTORY = ClassName.get("dagger.internal", "MapFactory");
-  public static final ClassName MAP_PROVIDER_FACTORY =
-      ClassName.get("dagger.internal", "MapProviderFactory");
   public static final ClassName MEMBERS_INJECTOR = ClassName.get("dagger", "MembersInjector");
   public static final ClassName MEMBERS_INJECTORS =
       ClassName.get("dagger.internal", "MembersInjectors");
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName PROVIDER_OF_LAZY =
       ClassName.get("dagger.internal", "ProviderOfLazy");
-  public static final ClassName SET_FACTORY = ClassName.get("dagger.internal", "SetFactory");
   public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal", "SingleCheck");
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 

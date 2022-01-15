@@ -18,14 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
-import static dagger.internal.codegen.javapoet.TypeNames.MAP_PROVIDER_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
-import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.MULTIBOUND_MAP;
-import static dagger.model.BindingKind.MULTIBOUND_SET;
 import static javax.lang.model.SourceVersion.isName;
 
 import com.google.auto.common.MoreElements;
@@ -35,13 +30,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
-import dagger.internal.SetFactory;
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
-import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -185,28 +177,6 @@ public class SourceFiles {
   private static ClassName siblingClassName(TypeElement typeElement, String suffix) {
     ClassName className = ClassName.get(typeElement);
     return className.topLevelClassName().peerClass(classFileName(className) + suffix);
-  }
-
-  /**
-   * The {@link java.util.Set} factory class name appropriate for set bindings.
-   *
-   * <ul>
-   *   <li>{@link SetFactory} for provision bindings.
-   * </ul>
-   */
-  public static ClassName setFactoryClassName(ContributionBinding binding) {
-    Preconditions.checkArgument(binding.kind().equals(MULTIBOUND_SET));
-    return SET_FACTORY;
-  }
-
-  /** The {@link java.util.Map} factory class name appropriate for map bindings. */
-  public static ClassName mapFactoryClassName(ContributionBinding binding) {
-    Preconditions.checkState(binding.kind().equals(MULTIBOUND_MAP), binding.kind());
-    MapType mapType = MapType.from(binding.key());
-    if (binding.bindingType() != BindingType.PROVISION) {
-      throw new IllegalArgumentException(binding.bindingType().toString());
-    }
-    return mapType.valuesAreTypeOf(Provider.class) ? MAP_PROVIDER_FACTORY : MAP_FACTORY;
   }
 
   public static List<TypeVariableName> bindingTypeElementTypeVariableNames(

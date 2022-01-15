@@ -25,7 +25,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Formatter;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
@@ -36,7 +35,6 @@ import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
-import dagger.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
@@ -161,9 +159,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
         .flatMap(Set::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
     Binding oneBinding = bindings.iterator().next();
-    String message = bindings.stream().anyMatch(binding -> binding.kind().isMultibinding())
-        ? incompatibleBindingsMessage(oneBinding, bindings, bindingGraph)
-        : duplicateBindingMessage(oneBinding, bindings, bindingGraph);
+    String message = duplicateBindingMessage(oneBinding, bindings, bindingGraph);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       diagnosticReporter.reportComponent(
           ERROR,
@@ -227,38 +223,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
       Binding oneBinding, Set<Binding> duplicateBindings, BindingGraph graph) {
     StringBuilder message =
         new StringBuilder().append(oneBinding.key()).append(" is bound multiple times:");
-    formatDeclarations(message, 1, declarations(graph, duplicateBindings));
-    if (compilerOptions.experimentalDaggerErrorMessages()) {
-      message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
-    }
-    return message.toString();
-  }
-
-  private String incompatibleBindingsMessage(
-      Binding oneBinding, Set<Binding> duplicateBindings, BindingGraph graph) {
-    Key key = oneBinding.key();
-    Set<Binding> multibindings =
-        duplicateBindings.stream()
-            .filter(binding -> binding.kind().isMultibinding())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    Preconditions.checkState(
-        multibindings.size() == 1, "expected only one multibinding for %s: %s", key, multibindings);
-    StringBuilder message = new StringBuilder();
-    java.util.Formatter messageFormatter = new java.util.Formatter(message);
-    messageFormatter.format("%s has incompatible bindings or declarations:\n", key);
-    message.append(INDENT);
-    Binding multibinding = Util.getOnlyElement(multibindings);
-    messageFormatter.format("%s bindings and declarations:", multibindingTypeString(multibinding));
-    formatDeclarations(message, 2, declarations(graph, multibindings));
-
-    Set<Binding> uniqueBindings =
-        duplicateBindings.stream().filter(binding -> !binding.equals(multibinding))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    message.append('\n').append(INDENT).append("Unique bindings and declarations:");
-    formatDeclarations(
-        message,
-        2,
-        new LinkedHashSet<>(declarations(graph, uniqueBindings)));
+    formatDeclarations(message, declarations(graph, duplicateBindings));
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
     }
@@ -267,10 +232,9 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
 
   private void formatDeclarations(
       StringBuilder builder,
-      int indentLevel,
       Collection<? extends BindingDeclaration> bindingDeclarations) {
     bindingDeclarationFormatter.formatIndentedList(
-        builder, List.copyOf(bindingDeclarations), indentLevel);
+        builder, List.copyOf(bindingDeclarations), 1);
   }
 
   private Set<BindingDeclaration> declarations(
@@ -293,17 +257,6 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
           .forEach(declarations::add);
     }
     return declarations;
-  }
-
-  private String multibindingTypeString(Binding multibinding) {
-    switch (multibinding.kind()) {
-      case MULTIBOUND_MAP:
-        return "Map";
-      case MULTIBOUND_SET:
-        return "Set";
-      default:
-        throw new AssertionError(multibinding);
-    }
   }
 
   private static <E> Set<Set<E>> valueSetsForEachKey(Map<?, Set<E>> multimap) {
