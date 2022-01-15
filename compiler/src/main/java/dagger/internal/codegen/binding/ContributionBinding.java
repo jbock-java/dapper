@@ -16,28 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.unwrapOptionalEquivalence;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.CLASS_CONSTRUCTOR;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 
-import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
-import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.SetType;
-import dagger.model.BindingKind;
-import dagger.model.DependencyRequest;
 import dagger.model.Key;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
@@ -49,12 +36,6 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
   /** Returns the type that specifies this' nullability, absent if not nullable. */
   public abstract Optional<DeclaredType> nullableType();
-
-  public abstract Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation();
-
-  public final Optional<AnnotationMirror> mapKeyAnnotation() {
-    return unwrapOptionalEquivalence(wrappedMapKeyAnnotation());
-  }
 
   /** If {@link #bindingElement()} is a method that returns a primitive type, returns that type. */
   public final Optional<TypeMirror> contributedPrimitiveType() {
@@ -112,62 +93,5 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    */
   public final TypeMirror contributedType() {
     return key().type();
-  }
-
-  /**
-   * Returns {@link BindingKind#MULTIBOUND_SET} or {@link
-   * BindingKind#MULTIBOUND_MAP} if the key is a set or map.
-   *
-   * @throws IllegalArgumentException if {@code key} is neither a set nor a map
-   */
-  static BindingKind bindingKindForMultibindingKey(Key key) {
-    if (SetType.isSet(key)) {
-      return BindingKind.MULTIBOUND_SET;
-    } else if (MapType.isMap(key)) {
-      return BindingKind.MULTIBOUND_MAP;
-    } else {
-      throw new IllegalArgumentException(String.format("key is not for a set or map: %s", key));
-    }
-  }
-
-  public abstract Builder<?, ?> toBuilder();
-
-  /**
-   * Base builder for subclasses of {@link
-   * ContributionBinding}.
-   */
-  public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {
-    public abstract B dependencies(Set<DependencyRequest> dependencies);
-
-    public B dependencies(DependencyRequest... dependencies) {
-      return dependencies(new LinkedHashSet<>(List.of(dependencies)));
-    }
-
-    public abstract B unresolved(C unresolved);
-
-    public abstract B bindingElement(Element bindingElement);
-
-    abstract B bindingElement(Optional<Element> bindingElement);
-
-    public final B clearBindingElement() {
-      return bindingElement(Optional.empty());
-    }
-
-    abstract B contributingModule(TypeElement contributingModule);
-
-    public abstract B key(Key key);
-
-    public abstract B nullableType(Optional<DeclaredType> nullableType);
-
-    abstract B wrappedMapKeyAnnotation(
-        Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation);
-
-    public abstract B kind(BindingKind kind);
-
-    abstract C autoBuild();
-
-    public C build() {
-      return autoBuild();
-    }
   }
 }

@@ -257,7 +257,7 @@ public final class ComponentRequirement {
     return forBoundInstance(
         binding.key(),
         binding.nullableType().isPresent(),
-        binding.bindingElement().get().getSimpleName().toString());
+        binding.bindingElement().orElseThrow().getSimpleName().toString());
   }
 
   /**

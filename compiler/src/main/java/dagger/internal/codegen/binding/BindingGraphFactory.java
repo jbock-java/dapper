@@ -127,11 +127,11 @@ public final class BindingGraphFactory implements ClearableCache {
       // times assuming it is the exact same method. We do this by tracking a set of bindings
       // we've already added with the binding element removed since that is the only thing
       // allowed to differ.
-      Map<String, Set<ContributionBinding>> dedupeBindings = new HashMap<>();
+      Map<String, Set<ProvisionBinding>> dedupeBindings = new HashMap<>();
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(elements, method)) {
-          ContributionBinding binding = bindingFactory.componentDependencyMethodBinding(
+          ProvisionBinding binding = bindingFactory.componentDependencyMethodBinding(
               method);
           int previousSize = dedupeBindings.getOrDefault(method.getSimpleName().toString(), Set.of()).size();
           if (dedupeBindings.merge(

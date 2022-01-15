@@ -124,7 +124,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   interface ProcessingStepsModule {
     @Provides
     static List<Step> processingSteps(
-        MapKeyProcessingStep mapKeyProcessingStep,
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
@@ -134,7 +133,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         ComponentProcessingStep componentProcessingStep,
         BindingMethodProcessingStep bindingMethodProcessingStep) {
       return List.of(
-          mapKeyProcessingStep,
           injectProcessingStep,
           assistedInjectProcessingStep,
           assistedFactoryProcessingStep,

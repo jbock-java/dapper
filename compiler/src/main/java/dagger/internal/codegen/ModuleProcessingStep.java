@@ -27,14 +27,11 @@ import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.binding.DelegateDeclaration;
-import dagger.internal.codegen.binding.DelegateDeclaration.Factory;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.ModuleValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
@@ -56,8 +53,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
   private final SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator;
-  private final InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator;
-  private final DelegateDeclaration.Factory delegateDeclarationFactory;
   private final Set<TypeElement> processedModuleElements = new LinkedHashSet<>();
 
   @Inject
@@ -66,17 +61,13 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      @ModuleGenerator SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator,
-      InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator,
-      Factory delegateDeclarationFactory) {
+      @ModuleGenerator SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator) {
     super(MoreElements::asType);
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;
     this.factoryGenerator = factoryGenerator;
     this.moduleConstructorProxyGenerator = moduleConstructorProxyGenerator;
-    this.inaccessibleMapKeyProxyGenerator = inaccessibleMapKeyProxyGenerator;
-    this.delegateDeclarationFactory = delegateDeclarationFactory;
   }
 
   @Override
@@ -110,8 +101,6 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
     for (ExecutableElement method : methodsIn(module.getEnclosedElements())) {
       if (isAnnotationPresent(method, TypeNames.PROVIDES)) {
         generate(factoryGenerator, bindingFactory.providesMethodBinding(method, module));
-      } else if (isAnnotationPresent(method, TypeNames.BINDS)) {
-        inaccessibleMapKeyProxyGenerator.generate(bindsMethodBinding(module, method), messager);
       }
     }
     moduleConstructorProxyGenerator.generate(module, messager);
@@ -120,11 +109,5 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   private <B extends ContributionBinding> void generate(
       SourceFileGenerator<B> generator, B binding) {
     generator.generate(binding, messager);
-    inaccessibleMapKeyProxyGenerator.generate(binding, messager);
-  }
-
-  private ContributionBinding bindsMethodBinding(TypeElement module, ExecutableElement method) {
-    return bindingFactory.unresolvedDelegateBinding(
-        delegateDeclarationFactory.create(method, module));
   }
 }

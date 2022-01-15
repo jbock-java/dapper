@@ -222,7 +222,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
 
     @Override
     public Element originatingElement(ProvisionBinding binding) {
-      return binding.bindingElement().get();
+      return binding.bindingElement().orElseThrow();
     }
 
     // For each @AssistedFactory-annotated type, we generates a class named "*_Impl" that implements
@@ -259,7 +259,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
     // }
     @Override
     public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
-      TypeElement factory = asType(binding.bindingElement().get());
+      TypeElement factory = asType(binding.bindingElement().orElseThrow());
 
       ClassName name = generatedClassNameForBinding(binding);
       TypeSpec.Builder builder =

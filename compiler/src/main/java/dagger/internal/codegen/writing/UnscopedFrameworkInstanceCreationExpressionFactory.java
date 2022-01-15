@@ -42,12 +42,10 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
       injectionOrProvisionProviderCreationExpressionFactory;
-  private final MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory;
   private final MembersInjectorProviderCreationExpression.Factory
       membersInjectorProviderCreationExpressionFactory;
   private final OptionalFactoryInstanceCreationExpression.Factory
       optionalFactoryInstanceCreationExpressionFactory;
-  private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
   @Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
@@ -60,12 +58,10 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
           injectionOrProvisionProviderCreationExpressionFactory,
-      MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory,
       MembersInjectorProviderCreationExpression.Factory
           membersInjectorProviderCreationExpressionFactory,
       OptionalFactoryInstanceCreationExpression.Factory
-          optionalFactoryInstanceCreationExpressionFactory,
-      SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory) {
+          optionalFactoryInstanceCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.anonymousProviderCreationExpressionFactory = anonymousProviderCreationExpressionFactory;
@@ -75,12 +71,10 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
         injectionOrProvisionProviderCreationExpressionFactory;
-    this.mapFactoryCreationExpressionFactory = mapFactoryCreationExpressionFactory;
     this.membersInjectorProviderCreationExpressionFactory =
         membersInjectorProviderCreationExpressionFactory;
     this.optionalFactoryInstanceCreationExpressionFactory =
         optionalFactoryInstanceCreationExpressionFactory;
-    this.setFactoryCreationExpressionFactory = setFactoryCreationExpressionFactory;
   }
 
   /**
@@ -116,12 +110,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       case INJECTION:
       case PROVISION:
         return injectionOrProvisionProviderCreationExpressionFactory.create(binding);
-
-      case MULTIBOUND_SET:
-        return setFactoryCreationExpressionFactory.create(binding);
-
-      case MULTIBOUND_MAP:
-        return mapFactoryCreationExpressionFactory.create(binding);
 
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);

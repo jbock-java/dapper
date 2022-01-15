@@ -41,24 +41,19 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   private final ComponentRequirementBindingExpression.Factory
       componentRequirementBindingExpressionFactory;
   private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
-  private final MapBindingExpression.Factory mapBindingExpressionFactory;
   private final OptionalBindingExpression.Factory optionalBindingExpressionFactory;
-  private final SetBindingExpression.Factory setBindingExpressionFactory;
   private final SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory;
   private final SubcomponentCreatorBindingExpression.Factory
       subcomponentCreatorBindingExpressionFactory;
 
   @Inject
   UnscopedDirectInstanceBindingExpressionFactory(
-      ComponentImplementation componentImplementation,
       AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory,
       ComponentInstanceBindingExpression.Factory componentInstanceBindingExpressionFactory,
       ComponentProvisionBindingExpression.Factory componentProvisionBindingExpressionFactory,
       ComponentRequirementBindingExpression.Factory componentRequirementBindingExpressionFactory,
       DelegateBindingExpression.Factory delegateBindingExpressionFactory,
-      MapBindingExpression.Factory mapBindingExpressionFactory,
       OptionalBindingExpression.Factory optionalBindingExpressionFactory,
-      SetBindingExpression.Factory setBindingExpressionFactory,
       SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory,
       SubcomponentCreatorBindingExpression.Factory subcomponentCreatorBindingExpressionFactory) {
     this.assistedFactoryBindingExpressionFactory = assistedFactoryBindingExpressionFactory;
@@ -67,9 +62,7 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
     this.componentRequirementBindingExpressionFactory =
         componentRequirementBindingExpressionFactory;
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
-    this.mapBindingExpressionFactory = mapBindingExpressionFactory;
     this.optionalBindingExpressionFactory = optionalBindingExpressionFactory;
-    this.setBindingExpressionFactory = setBindingExpressionFactory;
     this.simpleMethodBindingExpressionFactory = simpleMethodBindingExpressionFactory;
     this.subcomponentCreatorBindingExpressionFactory = subcomponentCreatorBindingExpressionFactory;
   }
@@ -94,12 +87,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
 
       case SUBCOMPONENT_CREATOR:
         return Optional.of(subcomponentCreatorBindingExpressionFactory.create(binding));
-
-      case MULTIBOUND_SET:
-        return Optional.of(setBindingExpressionFactory.create((ProvisionBinding) binding));
-
-      case MULTIBOUND_MAP:
-        return Optional.of(mapBindingExpressionFactory.create((ProvisionBinding) binding));
 
       case OPTIONAL:
         return Optional.of(optionalBindingExpressionFactory.create((ProvisionBinding) binding));

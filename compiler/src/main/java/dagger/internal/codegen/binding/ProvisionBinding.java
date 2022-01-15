@@ -21,7 +21,6 @@ import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.Equivalence;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
@@ -42,7 +41,6 @@ import java.util.SortedSet;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -55,7 +53,6 @@ public final class ProvisionBinding extends ContributionBinding {
   private final Optional<TypeElement> contributingModule;
   private final BindingKind kind;
   private final Optional<DeclaredType> nullableType;
-  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation;
   private final Set<DependencyRequest> provisionDependencies;
   private final SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
   private final Optional<ProvisionBinding> unresolved;
@@ -64,7 +61,7 @@ public final class ProvisionBinding extends ContributionBinding {
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(key(), bindingElement(),
           contributingModule(), kind(), nullableType(),
-          wrappedMapKeyAnnotation(), provisionDependencies(),
+          provisionDependencies(),
           injectionSites(), unresolved(), scope()));
 
   private final Supplier<Set<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
@@ -85,7 +82,6 @@ public final class ProvisionBinding extends ContributionBinding {
       Optional<TypeElement> contributingModule,
       BindingKind kind,
       Optional<DeclaredType> nullableType,
-      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation,
       Set<DependencyRequest> provisionDependencies,
       SortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
       Optional<ProvisionBinding> unresolved,
@@ -95,7 +91,6 @@ public final class ProvisionBinding extends ContributionBinding {
     this.contributingModule = requireNonNull(contributingModule);
     this.kind = requireNonNull(kind);
     this.nullableType = requireNonNull(nullableType);
-    this.wrappedMapKeyAnnotation = requireNonNull(wrappedMapKeyAnnotation);
     this.provisionDependencies = requireNonNull(provisionDependencies);
     this.injectionSites = requireNonNull(injectionSites);
     this.unresolved = requireNonNull(unresolved);
@@ -135,11 +130,6 @@ public final class ProvisionBinding extends ContributionBinding {
   @Override
   public Optional<DeclaredType> nullableType() {
     return nullableType;
-  }
-
-  @Override
-  public Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation() {
-    return wrappedMapKeyAnnotation;
   }
 
   /**
@@ -184,8 +174,7 @@ public final class ProvisionBinding extends ContributionBinding {
         .injectionSites(Collections.emptySortedSet());
   }
 
-  @Override
-  public ProvisionBinding.Builder toBuilder() {
+  public Builder toBuilder() {
     return new Builder(this);
   }
 
@@ -218,7 +207,6 @@ public final class ProvisionBinding extends ContributionBinding {
         && contributingModule.equals(that.contributingModule)
         && kind == that.kind
         && nullableType.equals(that.nullableType)
-        && wrappedMapKeyAnnotation.equals(that.wrappedMapKeyAnnotation)
         && provisionDependencies.equals(that.provisionDependencies)
         && injectionSites.equals(that.injectionSites)
         && unresolved.equals(that.unresolved)
@@ -231,13 +219,12 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   /** A {@link ProvisionBinding} builder. */
-  static class Builder extends ContributionBinding.Builder<ProvisionBinding, Builder> {
+  static class Builder {
     private Key key;
     private Optional<Element> bindingElement = Optional.empty();
     private Optional<TypeElement> contributingModule = Optional.empty();
     private BindingKind kind;
     private Optional<DeclaredType> nullableType = Optional.empty();
-    private Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation = Optional.empty();
     private Set<DependencyRequest> provisionDependencies;
     private SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
@@ -252,57 +239,51 @@ public final class ProvisionBinding extends ContributionBinding {
       this.contributingModule = source.contributingModule();
       this.kind = source.kind();
       this.nullableType = source.nullableType();
-      this.wrappedMapKeyAnnotation = source.wrappedMapKeyAnnotation();
       this.provisionDependencies = source.provisionDependencies();
       this.injectionSites = source.injectionSites();
       this.unresolved = source.unresolved();
       this.scope = source.scope();
     }
 
-    @Override
     public Builder dependencies(Set<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
     }
 
-    @Override
+    public final Builder dependencies(DependencyRequest... dependencies) {
+      return dependencies(new LinkedHashSet<>(List.of(dependencies)));
+    }
+
+    public final Builder clearBindingElement() {
+      return bindingElement(Optional.empty());
+    }
+
     public Builder key(Key key) {
       this.key = key;
       return this;
     }
 
-    @Override
     public Builder bindingElement(Element bindingElement) {
       this.bindingElement = Optional.of(bindingElement);
       return this;
     }
 
-    @Override
     Builder bindingElement(Optional<Element> bindingElement) {
       this.bindingElement = bindingElement;
       return this;
     }
 
-    @Override
     Builder contributingModule(TypeElement contributingModule) {
       this.contributingModule = Optional.of(contributingModule);
       return this;
     }
 
-    @Override
     public Builder kind(BindingKind kind) {
       this.kind = kind;
       return this;
     }
 
-    @Override
     public Builder nullableType(Optional<DeclaredType> nullableType) {
       this.nullableType = nullableType;
-      return this;
-    }
-
-    @Override
-    Builder wrappedMapKeyAnnotation(Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation) {
-      this.wrappedMapKeyAnnotation = wrappedMapKeyAnnotation;
       return this;
     }
 
@@ -316,7 +297,6 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    @Override
     public Builder unresolved(ProvisionBinding unresolved) {
       this.unresolved = Optional.of(unresolved);
       return this;
@@ -327,15 +307,13 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    @Override
-    ProvisionBinding autoBuild() {
+    public ProvisionBinding build() {
       return new ProvisionBinding(
           this.key,
           this.bindingElement,
           this.contributingModule,
           this.kind,
           this.nullableType,
-          this.wrappedMapKeyAnnotation,
           this.provisionDependencies,
           this.injectionSites,
           this.unresolved,

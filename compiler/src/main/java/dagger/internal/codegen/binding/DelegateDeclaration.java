@@ -16,11 +16,8 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
-import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.Equivalence;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.Binds;
@@ -36,7 +33,6 @@ import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -50,26 +46,22 @@ public final class DelegateDeclaration extends BindingDeclaration
   private final Optional<Element> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final DependencyRequest delegateRequest;
-  private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(
           key(),
           bindingElement(),
           contributingModule(),
-          delegateRequest(),
-          wrappedMapKey()));
+          delegateRequest()));
 
   DelegateDeclaration(
       Key key,
       Optional<Element> bindingElement,
       Optional<TypeElement> contributingModule,
-      DependencyRequest delegateRequest,
-      Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey) {
+      DependencyRequest delegateRequest) {
     this.key = requireNonNull(key);
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
     this.delegateRequest = requireNonNull(delegateRequest);
-    this.wrappedMapKey = requireNonNull(wrappedMapKey);
   }
 
   @Override
@@ -96,10 +88,6 @@ public final class DelegateDeclaration extends BindingDeclaration
     return delegateRequest;
   }
 
-  Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey() {
-    return wrappedMapKey;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -109,8 +97,7 @@ public final class DelegateDeclaration extends BindingDeclaration
         && key.equals(that.key)
         && bindingElement.equals(that.bindingElement)
         && contributingModule.equals(that.contributingModule)
-        && delegateRequest.equals(that.delegateRequest)
-        && wrappedMapKey.equals(that.wrappedMapKey);
+        && delegateRequest.equals(that.delegateRequest);
   }
 
   @Override
@@ -148,8 +135,7 @@ public final class DelegateDeclaration extends BindingDeclaration
           keyFactory.forBindsMethod(bindsMethod, contributingModule),
           Optional.of(bindsMethod),
           Optional.of(contributingModule),
-          delegateRequest,
-          wrapOptionalInEquivalence(getMapKey(bindsMethod)));
+          delegateRequest);
     }
   }
 }

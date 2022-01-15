@@ -18,12 +18,10 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
-import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
@@ -210,13 +208,12 @@ public final class BindingFactory {
         .build();
   }
 
-  private <C extends ContributionBinding, B extends ContributionBinding.Builder<C, B>>
-  B setMethodBindingProperties(
-      B builder,
+  private ProvisionBinding.Builder setMethodBindingProperties(
+      ProvisionBinding.Builder builder,
       ExecutableElement method,
       TypeElement contributedBy,
       Key key,
-      BiFunction<ExecutableElement, TypeElement, C> create) {
+      BiFunction<ExecutableElement, TypeElement, ProvisionBinding> create) {
     Preconditions.checkArgument(method.getKind().equals(METHOD));
     ExecutableType methodType =
         MoreTypes.asExecutable(
@@ -230,8 +227,7 @@ public final class BindingFactory {
         .key(key)
         .dependencies(
             dependencyRequestFactory.forRequiredResolvedVariables(
-                method.getParameters(), methodType.getParameterTypes()))
-        .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
+                method.getParameters(), methodType.getParameterTypes()));
   }
 
   /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
@@ -261,11 +257,11 @@ public final class BindingFactory {
    * Returns a {@link dagger.model.BindingKind#COMPONENT_PROVISION}
    * binding for a method on a component's dependency.
    */
-  public ContributionBinding componentDependencyMethodBinding(
+  public ProvisionBinding componentDependencyMethodBinding(
       ExecutableElement dependencyMethod) {
     Preconditions.checkArgument(dependencyMethod.getKind().equals(METHOD));
     Preconditions.checkArgument(dependencyMethod.getParameters().isEmpty());
-    ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder()
+    ProvisionBinding.Builder builder = ProvisionBinding.builder()
         .key(keyFactory.forComponentMethod(dependencyMethod))
         .nullableType(getNullableType(dependencyMethod))
         .kind(COMPONENT_PROVISION)
@@ -363,14 +359,13 @@ public final class BindingFactory {
   }
 
   private ContributionBinding buildDelegateBinding(
-      ContributionBinding.Builder<?, ?> builder,
+      ProvisionBinding.Builder builder,
       DelegateDeclaration delegateDeclaration) {
     return builder
         .bindingElement(delegateDeclaration.bindingElement().orElseThrow())
         .contributingModule(delegateDeclaration.contributingModule().orElseThrow())
         .key(delegateDeclaration.key())
         .dependencies(delegateDeclaration.delegateRequest())
-        .wrappedMapKeyAnnotation(delegateDeclaration.wrappedMapKey())
         .kind(DELEGATE)
         .build();
   }
