@@ -46,14 +46,13 @@ import javax.lang.model.type.ExecutableType;
 public final class DelegateDeclaration extends BindingDeclaration
     implements HasContributionType {
 
-  private final ContributionType contributionType;
   private final Key key;
   private final Optional<Element> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final DependencyRequest delegateRequest;
   private final Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(contributionType(),
+      Objects.hash(
           key(),
           bindingElement(),
           contributingModule(),
@@ -61,13 +60,11 @@ public final class DelegateDeclaration extends BindingDeclaration
           wrappedMapKey()));
 
   DelegateDeclaration(
-      ContributionType contributionType,
       Key key,
       Optional<Element> bindingElement,
       Optional<TypeElement> contributingModule,
       DependencyRequest delegateRequest,
       Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey) {
-    this.contributionType = requireNonNull(contributionType);
     this.key = requireNonNull(key);
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
@@ -77,7 +74,7 @@ public final class DelegateDeclaration extends BindingDeclaration
 
   @Override
   public ContributionType contributionType() {
-    return contributionType;
+    return ContributionType.UNIQUE;
   }
 
   @Override
@@ -109,7 +106,6 @@ public final class DelegateDeclaration extends BindingDeclaration
     if (o == null || getClass() != o.getClass()) return false;
     DelegateDeclaration that = (DelegateDeclaration) o;
     return hashCode() == that.hashCode()
-        && contributionType == that.contributionType
         && key.equals(that.key)
         && bindingElement.equals(that.bindingElement)
         && contributingModule.equals(that.contributingModule)
@@ -149,7 +145,6 @@ public final class DelegateDeclaration extends BindingDeclaration
               Util.getOnlyElement(bindsMethod.getParameters()),
               Util.getOnlyElement(resolvedMethod.getParameterTypes()));
       return new DelegateDeclaration(
-          ContributionType.fromBindingElement(bindsMethod),
           keyFactory.forBindsMethod(bindsMethod, contributingModule),
           Optional.of(bindsMethod),
           Optional.of(contributingModule),

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.ALLOWS_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.ALLOWS_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_CONCRETE;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.RUNTIME_EXCEPTION;
@@ -46,7 +45,6 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
         dependencyRequestValidator,
         MUST_BE_CONCRETE,
         RUNTIME_EXCEPTION,
-        ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
         injectionAnnotations);
   }

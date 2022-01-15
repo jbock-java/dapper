@@ -17,7 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.FrameworkTypes.isFrameworkType;
-import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.NO_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.NO_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
@@ -52,7 +51,6 @@ class MultibindsMethodValidator extends BindingMethodValidator {
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
-        NO_MULTIBINDINGS,
         NO_SCOPING,
         injectionAnnotations);
   }

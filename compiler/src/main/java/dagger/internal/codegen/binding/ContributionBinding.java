@@ -145,8 +145,6 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public abstract B unresolved(C unresolved);
 
-    public abstract B contributionType(ContributionType contributionType);
-
     public abstract B bindingElement(Element bindingElement);
 
     abstract B bindingElement(Optional<Element> bindingElement);

@@ -36,13 +36,10 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import com.google.auto.common.MoreTypes;
 import dagger.MembersInjector;
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Keys;
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
@@ -52,7 +49,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -79,7 +75,6 @@ public final class BindingGraphFactory implements ClearableCache {
   private final BindingFactory bindingFactory;
   private final BindingGraphConverter bindingGraphConverter;
   private final Map<Key, Set<Key>> keysMatchingRequestCache = new HashMap<>();
-  private final CompilerOptions compilerOptions;
 
   @Inject
   BindingGraphFactory(
@@ -87,14 +82,12 @@ public final class BindingGraphFactory implements ClearableCache {
       InjectBindingRegistry injectBindingRegistry,
       KeyFactory keyFactory,
       BindingFactory bindingFactory,
-      BindingGraphConverter bindingGraphConverter,
-      CompilerOptions compilerOptions) {
+      BindingGraphConverter bindingGraphConverter) {
     this.elements = elements;
     this.injectBindingRegistry = injectBindingRegistry;
     this.keyFactory = keyFactory;
     this.bindingFactory = bindingFactory;
     this.bindingGraphConverter = bindingGraphConverter;
-    this.compilerOptions = compilerOptions;
   }
 
   /**
@@ -387,8 +380,8 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       Resolver owningResolver = getOwningResolver(binding).orElse(this);
-      ComponentDescriptor owningComponent = owningResolver.componentDescriptor;
-      return owningComponent.scopes().contains(binding.scope().orElseThrow());
+      return owningResolver.componentDescriptor // owning component
+          .scopes().contains(binding.scope().orElseThrow());
     }
 
     private ComponentDescriptor rootComponent() {
@@ -442,10 +435,7 @@ public final class BindingGraphFactory implements ClearableCache {
     }
 
     private Set<Key> keysMatchingRequestUncached(Key requestKey) {
-      Set<Key> keys = new LinkedHashSet<>();
-      keys.add(requestKey);
-      keys.addAll(keyFactory.implicitFrameworkMapKeys(requestKey));
-      return keys;
+      return Set.of(requestKey);
     }
 
     private Set<ContributionBinding> createDelegateBindings(
@@ -584,10 +574,6 @@ public final class BindingGraphFactory implements ClearableCache {
       // TODO(erichang): See if we can standardize the way map keys are used in these data
       // structures, either always wrapped or unwrapped to be consistent and less errorprone.
       Key bindingKey = binding.key();
-      if (compilerOptions.strictMultibindingValidation()
-          && binding.contributionType().equals(ContributionType.MAP)) {
-        bindingKey = keyFactory.unwrapMapValueType(bindingKey);
-      }
 
       return delegateDeclarations.getOrDefault(bindingKey, Set.of()).stream()
           .anyMatch(
@@ -620,16 +606,7 @@ public final class BindingGraphFactory implements ClearableCache {
           // value type if it's a Map<K, Provider/Producer<V>> before looking in
           // delegateDeclarations. createDelegateBindings() will create bindings with the properly
           // wrapped key type.
-          createDelegateBindings(delegateDeclarations.getOrDefault(keyFactory.unwrapMapValueType(key), Set.of())));
-    }
-
-    /**
-     * Returns the explicit multibinding contributions that contribute to the map or set requested
-     * by {@code key} from this resolver.
-     */
-    private Set<ContributionBinding> getLocalExplicitMultibindings(Key key) {
-      Set<ContributionBinding> multibindings = new LinkedHashSet<>();
-      return multibindings;
+          createDelegateBindings(delegateDeclarations.getOrDefault(key, Set.of())));
     }
 
     /**

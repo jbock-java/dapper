@@ -18,7 +18,6 @@ package dagger.internal.codegen;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
-import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
@@ -195,13 +194,6 @@ final class ModuleValidationTest {
         .hadErrorContaining("int is not a valid subcomponent type")
         .inFile(module)
         .onLine(5);
-  }
-
-  @Test
-  void tooManyAnnotations() {
-    assertThatModuleMethod(
-        "@BindsOptionalOf @Multibinds abstract Set<Object> tooManyAnnotations();")
-        .hasError("is annotated with more than one of");
   }
 
   @Test

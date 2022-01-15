@@ -74,8 +74,6 @@ final class DaggerModuleMethodSubject extends Subject {
           // explicitly import Module so it's not ambiguous with java.lang.Module
           "import dagger.Module;",
           "import dagger.*;",
-          "import dagger.multibindings.*;",
-          "import dagger.producers.*;",
           "import java.util.*;",
           "import jakarta.inject.*;"));
   private String declaration;

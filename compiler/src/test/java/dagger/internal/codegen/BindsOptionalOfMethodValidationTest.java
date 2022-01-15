@@ -81,18 +81,6 @@ class BindsOptionalOfMethodValidationTest {
         .hasError("more than one @Qualifier");
   }
 
-  @Test
-  void intoSet() {
-    assertThatMethod("@BindsOptionalOf @IntoSet abstract String intoSet();")
-        .hasError("cannot have multibinding annotations");
-  }
-
-  @Test
-  void elementsIntoSet() {
-    assertThatMethod("@BindsOptionalOf @ElementsIntoSet abstract Set<String> elementsIntoSet();")
-        .hasError("cannot have multibinding annotations");
-  }
-
   /** An injectable value object. */
   public static final class Thing {
     @Inject

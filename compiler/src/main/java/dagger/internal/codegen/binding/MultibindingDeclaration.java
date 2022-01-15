@@ -44,7 +44,7 @@ public final class MultibindingDeclaration extends BindingDeclaration
   private final Key key;
   private final ContributionType contributionType;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(bindingElement(), contributingModule(), key(), contributionType()));
+      Objects.hash(bindingElement(), contributingModule(), key()));
 
   MultibindingDeclaration(
       Optional<Element> bindingElement,

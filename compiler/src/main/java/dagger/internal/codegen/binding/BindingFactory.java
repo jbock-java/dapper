@@ -23,7 +23,6 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
-import static dagger.internal.codegen.binding.ContributionBinding.bindingKindForMultibindingKey;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
@@ -46,7 +45,6 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.Module;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -55,7 +53,6 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -109,7 +106,7 @@ public final class BindingFactory {
     Preconditions.checkArgument(
         isAnnotationPresent(constructorElement, Inject.class)
             || isAnnotationPresent(constructorElement, AssistedInject.class));
-    Preconditions.checkArgument(!injectionAnnotations.getQualifier(constructorElement).isPresent());
+    Preconditions.checkArgument(injectionAnnotations.getQualifier(constructorElement).isEmpty());
 
     ExecutableType constructorType = MoreTypes.asExecutable(constructorElement.asType());
     DeclaredType constructedType =
@@ -142,7 +139,6 @@ public final class BindingFactory {
     Key key = keyFactory.forInjectConstructorWithResolvedType(constructedType);
     ProvisionBinding.Builder builder =
         ProvisionBinding.builder()
-            .contributionType(ContributionType.UNIQUE)
             .bindingElement(constructorElement)
             .key(key)
             .provisionDependencies(provisionDependencies)
@@ -182,7 +178,6 @@ public final class BindingFactory {
     ExecutableType factoryMethodType =
         MoreTypes.asExecutable(types.asMemberOf(factoryType, factoryMethod));
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .key(Key.builder(factoryType).build())
         .bindingElement(factory)
         .provisionDependencies(
@@ -230,7 +225,6 @@ public final class BindingFactory {
       builder.unresolved(create.apply(method, MoreElements.asType(method.getEnclosingElement())));
     }
     return builder
-        .contributionType(ContributionType.fromBindingElement(method))
         .bindingElement(method)
         .contributingModule(contributedBy)
         .key(key)
@@ -240,30 +234,10 @@ public final class BindingFactory {
         .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
   }
 
-  /**
-   * Returns a {@link dagger.model.BindingKind#MULTIBOUND_MAP} or {@link
-   * dagger.model.BindingKind#MULTIBOUND_SET} binding given a set of multibinding contribution
-   * bindings.
-   *
-   * @param key a key that may be satisfied by a multibinding
-   */
-  public ContributionBinding syntheticMultibinding(
-      Key key, Iterable<ContributionBinding> multibindingContributions) {
-    ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder();
-    return builder
-        .contributionType(ContributionType.UNIQUE)
-        .key(key)
-        .dependencies(
-            dependencyRequestFactory.forMultibindingContributions(key, multibindingContributions))
-        .kind(bindingKindForMultibindingKey(key))
-        .build();
-  }
-
   /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
   public ProvisionBinding componentBinding(TypeElement componentDefinitionType) {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .bindingElement(componentDefinitionType)
         .key(keyFactory.forType(componentDefinitionType.asType()))
         .kind(COMPONENT)
@@ -277,7 +251,6 @@ public final class BindingFactory {
   public ProvisionBinding componentDependencyBinding(ComponentRequirement dependency) {
     requireNonNull(dependency);
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .bindingElement(dependency.typeElement())
         .key(keyFactory.forType(dependency.type()))
         .kind(COMPONENT_DEPENDENCY)
@@ -298,7 +271,6 @@ public final class BindingFactory {
         .kind(COMPONENT_PROVISION)
         .scope(uniqueScopeOf(dependencyMethod));
     return builder
-        .contributionType(ContributionType.UNIQUE)
         .bindingElement(dependencyMethod)
         .build();
   }
@@ -314,9 +286,8 @@ public final class BindingFactory {
             ? MoreElements.asVariable(element)
             : getOnlyElement(MoreElements.asExecutable(element).getParameters());
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .bindingElement(element)
-        .key(requirement.key().get())
+        .key(requirement.key().orElseThrow())
         .nullableType(getNullableType(parameterElement))
         .kind(BOUND_INSTANCE)
         .build();
@@ -338,7 +309,6 @@ public final class BindingFactory {
         keyFactory.forSubcomponentCreatorMethod(
             subcomponentCreatorMethod, asDeclared(component.asType()));
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .bindingElement(subcomponentCreatorMethod)
         .key(key)
         .kind(SUBCOMPONENT_CREATOR)
@@ -353,7 +323,6 @@ public final class BindingFactory {
       Set<SubcomponentDeclaration> subcomponentDeclarations) {
     SubcomponentDeclaration subcomponentDeclaration = subcomponentDeclarations.iterator().next();
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .key(subcomponentDeclaration.key())
         .kind(SUBCOMPONENT_CREATOR)
         .build();
@@ -372,10 +341,10 @@ public final class BindingFactory {
       case PROVISION:
         return buildDelegateBinding(
             ProvisionBinding.builder()
-                .scope(uniqueScopeOf(delegateDeclaration.bindingElement().get()))
+                .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow()))
                 .nullableType(actualBinding.nullableType()),
-            delegateDeclaration,
-            Provider.class);
+            delegateDeclaration
+        );
 
       case MEMBERS_INJECTION: // fall-through to throw
     }
@@ -388,20 +357,18 @@ public final class BindingFactory {
    */
   public ContributionBinding unresolvedDelegateBinding(DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
-        ProvisionBinding.builder().scope(uniqueScopeOf(delegateDeclaration.bindingElement().get())),
-        delegateDeclaration,
-        Provider.class);
+        ProvisionBinding.builder().scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow())),
+        delegateDeclaration
+    );
   }
 
   private ContributionBinding buildDelegateBinding(
       ContributionBinding.Builder<?, ?> builder,
-      DelegateDeclaration delegateDeclaration,
-      Class<?> frameworkType) {
+      DelegateDeclaration delegateDeclaration) {
     return builder
-        .contributionType(delegateDeclaration.contributionType())
-        .bindingElement(delegateDeclaration.bindingElement().get())
-        .contributingModule(delegateDeclaration.contributingModule().get())
-        .key(keyFactory.forDelegateBinding(delegateDeclaration, frameworkType))
+        .bindingElement(delegateDeclaration.bindingElement().orElseThrow())
+        .contributingModule(delegateDeclaration.contributingModule().orElseThrow())
+        .key(delegateDeclaration.key())
         .dependencies(delegateDeclaration.delegateRequest())
         .wrappedMapKeyAnnotation(delegateDeclaration.wrappedMapKey())
         .kind(DELEGATE)
@@ -421,14 +388,12 @@ public final class BindingFactory {
       Collection<? extends Binding> underlyingKeyBindings) {
     if (underlyingKeyBindings.isEmpty()) {
       return ProvisionBinding.builder()
-          .contributionType(ContributionType.UNIQUE)
           .key(key)
           .kind(OPTIONAL)
           .build();
     }
 
     return ProvisionBinding.builder()
-        .contributionType(ContributionType.UNIQUE)
         .key(key)
         .kind(OPTIONAL)
         .dependencies(dependencyRequestFactory.forSyntheticPresentOptionalBinding(key, requestKind))
@@ -440,7 +405,6 @@ public final class BindingFactory {
       Key key, MembersInjectionBinding membersInjectionBinding) {
     return ProvisionBinding.builder()
         .key(key)
-        .contributionType(ContributionType.UNIQUE)
         .kind(MEMBERS_INJECTOR)
         .bindingElement(MoreTypes.asTypeElement(membersInjectionBinding.key().type()))
         .provisionDependencies(membersInjectionBinding.dependencies())

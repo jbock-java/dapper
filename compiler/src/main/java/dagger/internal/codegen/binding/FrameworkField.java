@@ -27,7 +27,6 @@ import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementKindVisitor8;
 
 /**
@@ -79,14 +78,8 @@ public final class FrameworkField {
         frameworkClass.orElse(
             ClassName.get(
                 FrameworkType.forBindingType(binding.bindingType()).frameworkClass())),
-        TypeName.get(fieldValueType(binding)),
+        TypeName.get(binding.key().type()),
         frameworkFieldName(binding));
-  }
-
-  private static TypeMirror fieldValueType(ContributionBinding binding) {
-    return binding.contributionType().isMultibinding()
-        ? binding.contributedType()
-        : binding.key().type();
   }
 
   private static String frameworkFieldName(ContributionBinding binding) {

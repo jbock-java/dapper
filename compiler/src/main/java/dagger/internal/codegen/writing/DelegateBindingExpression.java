@@ -33,7 +33,6 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import javax.lang.model.type.TypeMirror;
@@ -51,13 +50,12 @@ final class DelegateBindingExpression extends BindingExpression {
       @Assisted ContributionBinding binding,
       @Assisted RequestKind requestKind,
       ComponentBindingExpressions componentBindingExpressions,
-      DaggerTypes types,
-      DaggerElements elements) {
+      DaggerTypes types) {
     this.binding = requireNonNull(binding);
     this.requestKind = requireNonNull(requestKind);
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;
-    this.bindsTypeChecker = new BindsTypeChecker(types, elements);
+    this.bindsTypeChecker = new BindsTypeChecker(types);
   }
 
   /**
@@ -97,7 +95,7 @@ final class DelegateBindingExpression extends BindingExpression {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
     return !bindsTypeChecker.isAssignable(
-        delegateExpression.type(), binding.contributedType(), binding.contributionType())
+        delegateExpression.type(), binding.contributedType())
         && isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName());
   }
 
@@ -136,7 +134,7 @@ final class DelegateBindingExpression extends BindingExpression {
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     DelegateBindingExpression create(ContributionBinding binding, RequestKind requestKind);
   }
 }

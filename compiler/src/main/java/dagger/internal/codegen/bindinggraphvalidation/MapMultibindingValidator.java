@@ -104,7 +104,7 @@ final class MapMultibindingValidator implements BindingGraphPlugin {
     // Multibindings for Map<K, Provider<V>> where Map<K, V> isn't in plainValueMapMultibindings
     Map<Key, Set<Binding>> providerValueMapMultibindings =
         mapMultibindings.entrySet().stream().filter(e -> MapType.from(e.getKey()).valuesAreTypeOf(Provider.class)
-                && !plainValueMapMultibindings.containsKey(keyFactory.unwrapMapValueType(e.getKey())))
+                && !plainValueMapMultibindings.containsKey(e.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Util::mutableUnion, LinkedHashMap::new));
 
     LinkedHashSet<Binding> result = new LinkedHashSet<>();

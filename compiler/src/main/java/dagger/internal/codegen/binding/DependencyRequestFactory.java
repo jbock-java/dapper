@@ -17,17 +17,14 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.base.RequestKinds.frameworkClass;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.model.RequestKind.INSTANCE;
 import static dagger.model.RequestKind.MEMBERS_INJECTION;
-import static dagger.model.RequestKind.PROVIDER;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.model.DependencyRequest;
@@ -70,57 +67,6 @@ public final class DependencyRequestFactory {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
     }
     return builder;
-  }
-
-  /**
-   * Creates synthetic dependency requests for each individual multibinding contribution in {@code
-   * multibindingContributions}.
-   */
-  Set<DependencyRequest> forMultibindingContributions(
-      Key multibindingKey, Iterable<ContributionBinding> multibindingContributions) {
-    Set<DependencyRequest> requests = new LinkedHashSet<>();
-    for (ContributionBinding multibindingContribution : multibindingContributions) {
-      requests.add(forMultibindingContribution(multibindingKey, multibindingContribution));
-    }
-    return requests;
-  }
-
-  /** Creates a synthetic dependency request for one individual {@code multibindingContribution}. */
-  private DependencyRequest forMultibindingContribution(
-      Key multibindingKey, ContributionBinding multibindingContribution) {
-    Preconditions.checkArgument(
-        multibindingContribution.key().multibindingContributionIdentifier().isPresent(),
-        "multibindingContribution's key must have a multibinding contribution identifier: %s",
-        multibindingContribution);
-    return DependencyRequest.builder()
-        .kind(multibindingContributionRequestKind(multibindingKey, multibindingContribution))
-        .key(multibindingContribution.key())
-        .build();
-  }
-
-  // TODO(b/28555349): support PROVIDER_OF_LAZY here too
-  private static final Set<RequestKind> WRAPPING_MAP_VALUE_FRAMEWORK_TYPES =
-      Set.of(PROVIDER);
-
-  private RequestKind multibindingContributionRequestKind(
-      Key multibindingKey, ContributionBinding multibindingContribution) {
-    switch (multibindingContribution.contributionType()) {
-      case MAP:
-        MapType mapType = MapType.from(multibindingKey);
-        for (RequestKind kind : WRAPPING_MAP_VALUE_FRAMEWORK_TYPES) {
-          if (mapType.valuesAreTypeOf(frameworkClass(kind))) {
-            return kind;
-          }
-        }
-        // fall through
-      case SET:
-      case SET_VALUES:
-        return INSTANCE;
-      case UNIQUE:
-        throw new IllegalArgumentException(
-            "multibindingContribution must be a multibinding: " + multibindingContribution);
-    }
-    throw new AssertionError(multibindingContribution.toString());
   }
 
   DependencyRequest forRequiredResolvedVariable(

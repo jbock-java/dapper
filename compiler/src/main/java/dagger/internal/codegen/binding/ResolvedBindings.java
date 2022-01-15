@@ -51,7 +51,6 @@ final class ResolvedBindings {
   private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(key(),
       allContributionBindings(),
       allMembersInjectionBindings(),
-      multibindingDeclarations(),
       subcomponentDeclarations(),
       optionalBindingDeclarations()));
 
@@ -94,11 +93,6 @@ final class ResolvedBindings {
    */
   Map<TypeElement, MembersInjectionBinding> allMembersInjectionBindings() {
     return allMembersInjectionBindings;
-  }
-
-  /** The multibinding declarations for {@link #key()}. */
-  Set<MultibindingDeclaration> multibindingDeclarations() {
-    return Set.of();
   }
 
   /** The subcomponent declarations for {@link #key()}. */
@@ -144,13 +138,12 @@ final class ResolvedBindings {
   }
 
   /**
-   * {@code true} if there are no {@link #bindings()}, {@link #multibindingDeclarations()}, {@link
+   * {@code true} if there are no {@link #bindings()}, {@link
    * #optionalBindingDeclarations()}, or {@link #subcomponentDeclarations()}.
    */
   boolean isEmpty() {
     return allMembersInjectionBindings().isEmpty()
         && allContributionBindings().isEmpty()
-        && multibindingDeclarations().isEmpty()
         && optionalBindingDeclarations().isEmpty()
         && subcomponentDeclarations().isEmpty();
   }

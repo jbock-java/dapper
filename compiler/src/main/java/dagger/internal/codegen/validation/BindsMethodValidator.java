@@ -16,15 +16,12 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.ALLOWS_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.ALLOWS_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
 import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
 
 import com.google.auto.common.MoreTypes;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -56,7 +53,6 @@ final class BindsMethodValidator extends BindingMethodValidator {
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
-        ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
         injectionAnnotations);
     this.types = types;
@@ -89,13 +85,8 @@ final class BindsMethodValidator extends BindingMethodValidator {
       super.checkParameter(parameter);
       TypeMirror leftHandSide = boxIfNecessary(element.getReturnType());
       TypeMirror rightHandSide = parameter.asType();
-      ContributionType contributionType = ContributionType.fromBindingElement(element);
-      if (contributionType.equals(ContributionType.SET_VALUES) && !SetType.isSet(leftHandSide)) {
-        report.addError(
-            "@Binds @ElementsIntoSet methods must return a Set and take a Set parameter");
-      }
 
-      if (!bindsTypeChecker.isAssignable(rightHandSide, leftHandSide, contributionType)) {
+      if (!bindsTypeChecker.isAssignable(rightHandSide, leftHandSide)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.
         // If one of the types isn't valid it means we need to delay validation to the next round.
         // Note: BasicAnnotationProcessor only performs superficial validation on the referenced

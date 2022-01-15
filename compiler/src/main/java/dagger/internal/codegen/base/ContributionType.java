@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.base;
 
-import javax.lang.model.element.Element;
-
 /** Whether a binding or declaration is for a unique contribution or a map or set multibinding. */
 public enum ContributionType {
   /** Represents map bindings. */
@@ -35,21 +33,5 @@ public enum ContributionType {
 
     /** The contribution type of this object. */
     ContributionType contributionType();
-  }
-
-  /** {@code true} if this is for a multibinding. */
-  public boolean isMultibinding() {
-    return !this.equals(UNIQUE);
-  }
-
-  /**
-   * The contribution type from a binding element's annotations. Presumes a well-formed binding
-   * element (at most one of @IntoSet, @IntoMap, @ElementsIntoSet and @Provides.type). {@code
-   * dagger.internal.codegen.validation.BindingMethodValidator} and {@link
-   * dagger.internal.codegen.validation.BindsInstanceProcessingStep} validate correctness on their
-   * own.
-   */
-  public static ContributionType fromBindingElement(Element element) {
-    return ContributionType.UNIQUE;
   }
 }

@@ -50,7 +50,6 @@ import javax.lang.model.type.DeclaredType;
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
 public final class ProvisionBinding extends ContributionBinding {
 
-  private final ContributionType contributionType;
   private final Key key;
   private final Optional<Element> bindingElement;
   private final Optional<TypeElement> contributingModule;
@@ -63,7 +62,7 @@ public final class ProvisionBinding extends ContributionBinding {
   private final Optional<Scope> scope;
 
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(contributionType(), key(), bindingElement(),
+      Objects.hash(key(), bindingElement(),
           contributingModule(), kind(), nullableType(),
           wrappedMapKeyAnnotation(), provisionDependencies(),
           injectionSites(), unresolved(), scope()));
@@ -81,7 +80,6 @@ public final class ProvisionBinding extends ContributionBinding {
   private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
 
   ProvisionBinding(
-      ContributionType contributionType,
       Key key,
       Optional<Element> bindingElement,
       Optional<TypeElement> contributingModule,
@@ -92,7 +90,6 @@ public final class ProvisionBinding extends ContributionBinding {
       SortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
       Optional<ProvisionBinding> unresolved,
       Optional<Scope> scope) {
-    this.contributionType = requireNonNull(contributionType);
     this.key = requireNonNull(key);
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
@@ -112,7 +109,7 @@ public final class ProvisionBinding extends ContributionBinding {
 
   @Override
   public ContributionType contributionType() {
-    return contributionType;
+    return ContributionType.UNIQUE;
   }
 
   @Override
@@ -216,7 +213,6 @@ public final class ProvisionBinding extends ContributionBinding {
     if (o == null || getClass() != o.getClass()) return false;
     ProvisionBinding that = (ProvisionBinding) o;
     return hashCode() == that.hashCode()
-        && contributionType == that.contributionType
         && key.equals(that.key)
         && bindingElement.equals(that.bindingElement)
         && contributingModule.equals(that.contributingModule)
@@ -236,7 +232,6 @@ public final class ProvisionBinding extends ContributionBinding {
 
   /** A {@link ProvisionBinding} builder. */
   static class Builder extends ContributionBinding.Builder<ProvisionBinding, Builder> {
-    private ContributionType contributionType;
     private Key key;
     private Optional<Element> bindingElement = Optional.empty();
     private Optional<TypeElement> contributingModule = Optional.empty();
@@ -252,7 +247,6 @@ public final class ProvisionBinding extends ContributionBinding {
     }
 
     private Builder(ProvisionBinding source) {
-      this.contributionType = source.contributionType();
       this.key = source.key();
       this.bindingElement = source.bindingElement();
       this.contributingModule = source.contributingModule();
@@ -268,12 +262,6 @@ public final class ProvisionBinding extends ContributionBinding {
     @Override
     public Builder dependencies(Set<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
-    }
-
-    @Override
-    public Builder contributionType(ContributionType contributionType) {
-      this.contributionType = contributionType;
-      return this;
     }
 
     @Override
@@ -342,7 +330,6 @@ public final class ProvisionBinding extends ContributionBinding {
     @Override
     ProvisionBinding autoBuild() {
       return new ProvisionBinding(
-          this.contributionType,
           this.key,
           this.bindingElement,
           this.contributingModule,

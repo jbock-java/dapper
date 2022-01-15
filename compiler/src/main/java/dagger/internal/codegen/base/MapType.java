@@ -97,19 +97,6 @@ public final class MapType {
   }
 
   /**
-   * {@code V} if {@link #valueType()} is a framework type like {@code Provider<V>} or {@code
-   * Producer<V>}.
-   *
-   * @throws IllegalStateException if {@link #isRawType()} is true or {@link #valueType()} is not a
-   *     framework type
-   */
-  public TypeMirror unwrappedFrameworkValueType() {
-    Preconditions.checkState(
-        valuesAreFrameworkType(), "called unwrappedFrameworkValueType() on %s", declaredMapType());
-    return uncheckedUnwrappedValueType();
-  }
-
-  /**
    * {@code V} if {@link #valueType()} is a {@code WrappingClass<V>}.
    *
    * @throws IllegalStateException if {@link #isRawType()} is true or {@link #valueType()} is not a

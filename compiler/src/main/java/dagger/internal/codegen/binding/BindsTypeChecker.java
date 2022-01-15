@@ -16,20 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
-
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -41,13 +31,11 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class BindsTypeChecker {
   private final DaggerTypes types;
-  private final DaggerElements elements;
 
   // TODO(bcorso): Make this pkg-private. Used by DelegateBindingExpression.
   @Inject
-  public BindsTypeChecker(DaggerTypes types, DaggerElements elements) {
+  public BindsTypeChecker(DaggerTypes types) {
     this.types = types;
-    this.elements = elements;
   }
 
   /**
@@ -55,39 +43,7 @@ public final class BindsTypeChecker {
    * ContributionType} context.
    */
   public boolean isAssignable(
-      TypeMirror rightHandSide, TypeMirror leftHandSide, ContributionType contributionType) {
+      TypeMirror rightHandSide, TypeMirror leftHandSide) {
     return types.isAssignable(rightHandSide, leftHandSide);
-  }
-
-  private List<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
-    List<ExecutableElement> methodsForName = new ArrayList<>();
-    for (ExecutableElement method :
-      // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
-      // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
-      // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
-      // getLocalAndInheritedMethods ensures that the method will always be present.
-        elements.getLocalAndInheritedMethods(MoreTypes.asTypeElement(type))) {
-      if (method.getSimpleName().contentEquals(methodName)) {
-        methodsForName.add(method);
-      }
-    }
-    ExecutableElement method = getOnlyElement(methodsForName);
-    return List.copyOf(MoreTypes.asExecutable(types.asMemberOf(type, method)).getParameterTypes());
-  }
-
-  private TypeMirror methodParameterType(DeclaredType type, String methodName) {
-    return getOnlyElement(methodParameterTypes(type, methodName));
-  }
-
-  private TypeElement setElement() {
-    return elements.getTypeElement(Set.class);
-  }
-
-  private TypeElement mapElement() {
-    return elements.getTypeElement(Map.class);
-  }
-
-  private TypeMirror unboundedWildcard() {
-    return types.getWildcardType(null, null);
   }
 }

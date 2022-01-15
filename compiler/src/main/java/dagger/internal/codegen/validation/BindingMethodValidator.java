@@ -58,10 +58,9 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
       DependencyRequestValidator dependencyRequestValidator,
       Abstractness abstractness,
       ExceptionSuperclass exceptionSuperclass,
-      AllowsMultibindings allowsMultibindings,
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
-    super(methodAnnotation, allowsMultibindings, allowsScoping, injectionAnnotations);
+    super(allowsScoping, injectionAnnotations);
     this.elements = elements;
     this.types = types;
     this.methodAnnotation = methodAnnotation;

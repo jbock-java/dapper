@@ -25,7 +25,6 @@ import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
-import dagger.multibindings.Multibinds;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,14 +45,12 @@ public final class BindingNode implements dagger.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
-      Set<MultibindingDeclaration> multibindingDeclarations,
       Set<OptionalBindingDeclaration> optionalBindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     return new BindingNode(
         component,
         delegate,
-        multibindingDeclarations,
         optionalBindingDeclarations,
         subcomponentDeclarations,
         bindingDeclarationFormatter);
@@ -61,7 +58,6 @@ public final class BindingNode implements dagger.model.Binding {
 
   private final ComponentPath componentPath;
   private final dagger.internal.codegen.binding.Binding delegate;
-  private final Set<MultibindingDeclaration> multibindingDeclarations;
   private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
@@ -69,13 +65,11 @@ public final class BindingNode implements dagger.model.Binding {
   private BindingNode(
       ComponentPath componentPath,
       dagger.internal.codegen.binding.Binding delegate,
-      Set<MultibindingDeclaration> multibindingDeclarations,
       Set<OptionalBindingDeclaration> optionalBindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.componentPath = requireNonNull(componentPath);
     this.delegate = requireNonNull(delegate);
-    this.multibindingDeclarations = requireNonNull(multibindingDeclarations);
     this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.bindingDeclarationFormatter = requireNonNull(bindingDeclarationFormatter);
@@ -88,10 +82,6 @@ public final class BindingNode implements dagger.model.Binding {
 
   public dagger.internal.codegen.binding.Binding delegate() {
     return delegate;
-  }
-
-  public Set<MultibindingDeclaration> multibindingDeclarations() {
-    return multibindingDeclarations;
   }
 
   public Set<OptionalBindingDeclaration> optionalBindingDeclarations() {
@@ -109,14 +99,13 @@ public final class BindingNode implements dagger.model.Binding {
     BindingNode that = (BindingNode) o;
     return componentPath.equals(that.componentPath)
         && delegate.equals(that.delegate)
-        && multibindingDeclarations.equals(that.multibindingDeclarations)
         && optionalBindingDeclarations.equals(that.optionalBindingDeclarations)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(componentPath, delegate, multibindingDeclarations,
+    return Objects.hash(componentPath, delegate,
         optionalBindingDeclarations, subcomponentDeclarations);
   }
 
@@ -127,11 +116,10 @@ public final class BindingNode implements dagger.model.Binding {
    * <ul>
    *   <li>{@linkplain BindsOptionalOf optional binding} declarations
    *   <li>{@linkplain Module#subcomponents() module subcomponent} declarations
-   *   <li>{@linkplain Multibinds multibinding} declarations
    * </ul>
    */
   public List<BindingDeclaration> associatedDeclarations() {
-    return Stream.of(multibindingDeclarations(), optionalBindingDeclarations(), subcomponentDeclarations())
+    return Stream.of(optionalBindingDeclarations(), subcomponentDeclarations())
         .flatMap(Set::stream)
         .collect(Collectors.toList());
   }

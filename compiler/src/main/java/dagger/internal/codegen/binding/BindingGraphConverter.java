@@ -384,7 +384,6 @@ final class BindingGraphConverter {
       return BindingNode.create(
           pathFromRootToAncestor(owningComponent),
           binding,
-          resolvedBindings.multibindingDeclarations(),
           resolvedBindings.optionalBindingDeclarations(),
           resolvedBindings.subcomponentDeclarations(),
           bindingDeclarationFormatter);

@@ -19,7 +19,6 @@ package dagger.internal.codegen.validation;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
-import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.NO_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.NO_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
@@ -53,7 +52,6 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
-        NO_MULTIBINDINGS,
         NO_SCOPING,
         injectionAnnotations);
     this.types = types;

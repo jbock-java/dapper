@@ -19,30 +19,18 @@ package dagger.internal.codegen.binding;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.binding.MapKeys.getMapKey;
-import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import com.google.auto.common.MoreTypes;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.FrameworkTypes;
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -54,34 +42,17 @@ import javax.lang.model.type.TypeMirror;
 /** A factory for {@link Key}s. */
 public final class KeyFactory {
   private final DaggerTypes types;
-  private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
   @Inject
   KeyFactory(
-      DaggerTypes types, DaggerElements elements, InjectionAnnotations injectionAnnotations) {
+      DaggerTypes types, InjectionAnnotations injectionAnnotations) {
     this.types = requireNonNull(types);
-    this.elements = requireNonNull(elements);
     this.injectionAnnotations = injectionAnnotations;
   }
 
   private TypeMirror boxPrimitives(TypeMirror type) {
     return type.getKind().isPrimitive() ? types.boxedClass((PrimitiveType) type).asType() : type;
-  }
-
-  private DeclaredType setOf(TypeMirror elementType) {
-    return types.getDeclaredType(elements.getTypeElement(Set.class), boxPrimitives(elementType));
-  }
-
-  private DeclaredType mapOf(TypeMirror keyType, TypeMirror valueType) {
-    return types.getDeclaredType(
-        elements.getTypeElement(Map.class), boxPrimitives(keyType), boxPrimitives(valueType));
-  }
-
-  /** Returns {@code Map<KeyType, FrameworkType<ValueType>>}. */
-  private TypeMirror mapOfFrameworkType(
-      TypeMirror keyType, TypeElement frameworkType, TypeMirror valueType) {
-    return mapOf(keyType, types.getDeclaredType(frameworkType, boxPrimitives(valueType)));
   }
 
   Key forComponentMethod(ExecutableElement componentMethod) {
@@ -103,69 +74,29 @@ public final class KeyFactory {
 
   public Key forProvidesMethod(ExecutableElement method, TypeElement contributingModule) {
     return forBindingMethod(
-        method, contributingModule, Optional.of(elements.getTypeElement(Provider.class)));
+        method, contributingModule);
   }
 
   /** Returns the key bound by a {@link Binds} method. */
   Key forBindsMethod(ExecutableElement method, TypeElement contributingModule) {
     Preconditions.checkArgument(isAnnotationPresent(method, Binds.class));
-    return forBindingMethod(method, contributingModule, Optional.empty());
+    return forBindingMethod(method, contributingModule);
   }
 
   /** Returns the base key bound by a {@link BindsOptionalOf} method. */
   Key forBindsOptionalOfMethod(ExecutableElement method, TypeElement contributingModule) {
     Preconditions.checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
-    return forBindingMethod(method, contributingModule, Optional.empty());
+    return forBindingMethod(method, contributingModule);
   }
 
   private Key forBindingMethod(
       ExecutableElement method,
-      TypeElement contributingModule,
-      Optional<TypeElement> frameworkType) {
+      TypeElement contributingModule) {
     Preconditions.checkArgument(method.getKind().equals(METHOD));
     ExecutableType methodType =
         MoreTypes.asExecutable(
             types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), method));
-    ContributionType contributionType = ContributionType.fromBindingElement(method);
-    TypeMirror returnType = methodType.getReturnType();
-    TypeMirror keyType = bindingMethodKeyType(returnType, method, contributionType, frameworkType);
-    return forMethod(method, keyType);
-  }
-
-  private TypeMirror bindingMethodKeyType(
-      TypeMirror returnType,
-      ExecutableElement method,
-      ContributionType contributionType,
-      Optional<TypeElement> frameworkType) {
-    switch (contributionType) {
-      case UNIQUE:
-        return returnType;
-      case SET:
-        return setOf(returnType);
-      case MAP:
-        TypeMirror mapKeyType = mapKeyType(getMapKey(method).orElseThrow(), types);
-        return frameworkType.isPresent()
-            ? mapOfFrameworkType(mapKeyType, frameworkType.orElseThrow(), returnType)
-            : mapOf(mapKeyType, returnType);
-      case SET_VALUES:
-        // TODO(gak): do we want to allow people to use "covariant return" here?
-        Preconditions.checkArgument(SetType.isSet(returnType));
-        return returnType;
-    }
-    throw new AssertionError();
-  }
-
-  /**
-   * Returns the key for a binding associated with a {@link DelegateDeclaration}.
-   *
-   * <p>If {@code delegateDeclaration} is {@code @IntoMap}, transforms the {@code Map<K, V>} key
-   * from {@link DelegateDeclaration#key()} to {@code Map<K, FrameworkType<V>>}. If {@code
-   * delegateDeclaration} is not a map contribution, its key is returned.
-   */
-  Key forDelegateBinding(DelegateDeclaration delegateDeclaration, Class<?> frameworkType) {
-    return delegateDeclaration.contributionType().equals(ContributionType.MAP)
-        ? wrapMapValue(delegateDeclaration.key(), frameworkType)
-        : delegateDeclaration.key();
+    return forMethod(method, methodType.getReturnType());
   }
 
   private Key forMethod(ExecutableElement method, TypeMirror keyType) {
@@ -187,82 +118,6 @@ public final class KeyFactory {
 
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
     return Key.builder(boxPrimitives(type)).qualifier(qualifier).build();
-  }
-
-  /**
-   * If {@code requestKey} is for a {@code Map<K, V>} or {@code Map<K, Produced<V>>}, returns keys
-   * for {@code Map<K, Provider<V>>} and {@code Map<K, Producer<V>>} (if Dagger-Producers is on
-   * the classpath).
-   */
-  Set<Key> implicitFrameworkMapKeys(Key requestKey) {
-    return Stream.of(implicitMapProviderKeyFrom(requestKey))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(toImmutableSet());
-  }
-
-  /**
-   * Optionally extract a {@link Key} for the underlying provision binding(s) if such a valid key
-   * can be inferred from the given key. Specifically, if the key represents a {@link Map}{@code
-   * <K, V>} or {@code Map<K, Producer<V>>}, a key of {@code Map<K, Provider<V>>} will be
-   * returned.
-   */
-  Optional<Key> implicitMapProviderKeyFrom(Key possibleMapKey) {
-    return wrapMapKey(possibleMapKey, Provider.class);
-  }
-
-  /**
-   * If {@code key}'s type is {@code Map<K, Provider<V>>}, returns a key with the same qualifier and {@link
-   * Key#multibindingContributionIdentifier()} whose type is simply {@code Map<K, V>}.
-   *
-   * <p>Otherwise, returns {@code key}.
-   */
-  public Key unwrapMapValueType(Key key) {
-    if (MapType.isMap(key)) {
-      MapType mapType = MapType.from(key);
-      if (!mapType.isRawType()) {
-        if (mapType.valuesAreTypeOf(Provider.class)) {
-          return key.toBuilder()
-              .type(mapOf(mapType.keyType(), mapType.unwrappedValueType(Provider.class)))
-              .build();
-        }
-      }
-    }
-    return key;
-  }
-
-  /**
-   * Converts a {@link Key} of type {@code Map<K, V>} to {@code Map<K, Provider<V>>}.
-   */
-  private Key wrapMapValue(Key key, Class<?> newWrappingClass) {
-    Preconditions.checkArgument(
-        FrameworkTypes.isFrameworkType(elements.getTypeElement(newWrappingClass).asType()));
-    return wrapMapKey(key, newWrappingClass).orElseThrow();
-  }
-
-  /**
-   * If {@code key}'s type is {@code Map<K, Foo>} and {@code Foo} is not {@code WrappingClass
-   * <Bar>}, returns a key with type {@code Map<K, WrappingClass<Foo>>} with the same qualifier.
-   * Otherwise returns {@link Optional#empty()}.
-   *
-   * <p>Returns {@link Optional#empty()} if {@code WrappingClass} is not in the classpath.
-   */
-  private Optional<Key> wrapMapKey(Key possibleMapKey, Class<?> wrappingClass) {
-    if (MapType.isMap(possibleMapKey)) {
-      MapType mapType = MapType.from(possibleMapKey);
-      if (!mapType.isRawType() && !mapType.valuesAreTypeOf(wrappingClass)) {
-        TypeElement wrappingElement = elements.getTypeElement(wrappingClass);
-        if (wrappingElement == null) {
-          // This target might not be compiled with Producers, so wrappingClass might not have an
-          // associated element.
-          return Optional.empty();
-        }
-        DeclaredType wrappedValueType = types.getDeclaredType(wrappingElement, mapType.valueType());
-        return Optional.of(
-            possibleMapKey.toBuilder().type(mapOf(mapType.keyType(), wrappedValueType)).build());
-      }
-    }
-    return Optional.empty();
   }
 
   /**
