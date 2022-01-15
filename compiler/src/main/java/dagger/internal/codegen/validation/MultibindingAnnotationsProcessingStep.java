@@ -29,7 +29,7 @@ import javax.lang.model.element.ExecutableElement;
 
 /**
  * Processing step that verifies that {@link dagger.multibindings.IntoSet}, {@link
- * dagger.multibindings.ElementsIntoSet} and {@link dagger.multibindings.IntoMap} are not present on
+ * dagger.multibindings.ElementsIntoSet} and {@code dagger.multibindings.IntoMap} are not present on
  * non-binding methods.
  */
 public final class MultibindingAnnotationsProcessingStep

@@ -114,20 +114,6 @@ class BindsMethodValidationTest {
         .hasError("cannot return a raw Set");
   }
 
-  @Test
-  void intoMap_noMapKey() {
-    assertThatMethod("@Binds @IntoMap abstract Object bindNoMapKey(String string);")
-        .hasError("methods of type map must declare a map key");
-  }
-
-  @Test
-  void intoMap_multipleMapKeys() {
-    assertThatMethod(
-        "@Binds @IntoMap @IntKey(1) @LongKey(2L) abstract Object manyMapKeys(String string);")
-        .importing(IntKey.class, LongKey.class)
-        .hasError("may not have more than one map key");
-  }
-
   private DaggerModuleMethodSubject assertThatMethod(String method) {
     return assertThatModuleMethod(method).withDeclaration(moduleDeclaration);
   }

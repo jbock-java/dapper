@@ -53,7 +53,6 @@ import java.lang.annotation.Target;
  *             java.util.Set#addAll} when viewed as a member of the return type — if the return type
  *             is {@code Set<E>}, the parameter must be assignable to {@code Collection<? extends
  *             E>}.
- *         <dt>{@link dagger.multibindings.IntoMap}
  *         <dd>The parameter must be assignable to the {@code value} parameter of {@link
  *             java.util.Map#put} when viewed as a member of a {@link java.util.Map} in which {@code
  *             V} is bound to the return type — the parameter must be assignable to the return type

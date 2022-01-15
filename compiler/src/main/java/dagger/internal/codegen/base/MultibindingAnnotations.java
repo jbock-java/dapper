@@ -26,7 +26,7 @@ import javax.lang.model.element.Element;
 
 /**
  * Utility methods related to processing {@link dagger.multibindings.IntoSet}, {@link
- * dagger.multibindings.ElementsIntoSet}, and {@link dagger.multibindings.IntoMap}.
+ * dagger.multibindings.ElementsIntoSet}.
  */
 public final class MultibindingAnnotations {
   public static Set<AnnotationMirror> forElement(Element method) {

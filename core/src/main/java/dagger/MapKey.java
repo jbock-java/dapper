@@ -25,7 +25,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Identifies annotation types that are used to associate keys with values returned by {@linkplain
- * Provides provider methods} in order to compose a {@linkplain dagger.multibindings.IntoMap map}.
+ * Provides provider methods} in order to compose a {@code dagger.multibindings.IntoMap map}.
  *
  * <p>Every provider method annotated with {@code @Provides} and {@code @IntoMap} must also have an
  * annotation that identifies the key for that map entry. That annotation's type must be annotated

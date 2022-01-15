@@ -137,7 +137,7 @@ public final class MapKeys {
    * (i.e. it has a package-private {@code enum} from a different package), this will return an
    * invocation of a proxy-method giving it access.
    *
-   * @throws IllegalStateException if {@code binding} is not a {@link dagger.multibindings.IntoMap
+   * @throws IllegalStateException if {@code binding} is not a {@code dagger.multibindings.IntoMap
    *     map} contribution.
    */
   public static CodeBlock getMapKeyExpression(

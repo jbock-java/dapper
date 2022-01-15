@@ -65,7 +65,7 @@ public class DependencyCycleValidationTest {
           "}");
 
   @Test
-  public void cyclicDependency() {
+  void cyclicDependency() {
     Compilation compilation = daggerCompiler().compile(SIMPLE_CYCLIC_DEPENDENCY);
     assertThat(compilation).failed();
 
@@ -88,7 +88,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void cyclicDependencyWithModuleBindingValidation() {
+  void cyclicDependencyWithModuleBindingValidation() {
     // Cycle errors should not show a dependency trace to an entry point when doing full binding
     // graph validation. So ensure that the message doesn't end with "test.Outer.C is requested at
     // test.Outer.CComponent.getC()", as the previous test's message does.
@@ -128,7 +128,8 @@ public class DependencyCycleValidationTest {
     assertThat(compilation).hadErrorCount(2);
   }
 
-  @Test public void cyclicDependencyNotIncludingEntryPoint() {
+  @Test
+  void cyclicDependencyNotIncludingEntryPoint() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -183,70 +184,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void cyclicDependencyNotBrokenByMapBinding() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.Outer",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import dagger.multibindings.IntoMap;",
-            "import dagger.multibindings.StringKey;",
-            "import java.util.Map;",
-            "import jakarta.inject.Inject;",
-            "",
-            "final class Outer {",
-            "  static class A {",
-            "    @Inject A(Map<String, C> cMap) {}",
-            "  }",
-            "",
-            "  static class B {",
-            "    @Inject B(A aParam) {}",
-            "  }",
-            "",
-            "  static class C {",
-            "    @Inject C(B bParam) {}",
-            "  }",
-            "",
-            "  @Component(modules = CModule.class)",
-            "  interface CComponent {",
-            "    C getC();",
-            "  }",
-            "",
-            "  @Module",
-            "  static class CModule {",
-            "    @Provides @IntoMap",
-            "    @StringKey(\"C\")",
-            "    static C c(C c) {",
-            "      return c;",
-            "    }",
-            "  }",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            message(
-                "Found a dependency cycle:",
-                "    Outer.C is injected at",
-                "        Outer.CModule.c(c)",
-                "    Map<String,Outer.C> is injected at",
-                "        Outer.A(cMap)",
-                "    Outer.A is injected at",
-                "        Outer.B(aParam)",
-                "    Outer.B is injected at",
-                "        Outer.C(bParam)",
-                "    Outer.C is requested at",
-                "        Outer.CComponent.getC()"))
-        .inFile(component)
-        .onLineContaining("interface CComponent");
-  }
-
-  @Test
-  public void cyclicDependencyWithSetBinding() {
+  void cyclicDependencyWithSetBinding() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -307,7 +245,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void falsePositiveCyclicDependencyIndirectionDetected() {
+  void falsePositiveCyclicDependencyIndirectionDetected() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
             "test.Outer",
@@ -363,7 +301,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void cyclicDependencyInSubcomponents() {
+  void cyclicDependencyInSubcomponents() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -443,7 +381,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void cyclicDependencyInSubcomponentsWithChildren() {
+  void cyclicDependencyInSubcomponentsWithChildren() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",
@@ -525,7 +463,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void circularBindsMethods() {
+  void circularBindsMethods() {
     JavaFileObject qualifier =
         JavaFileObjects.forSourceLines(
             "test.SomeQualifier",
@@ -576,7 +514,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void selfReferentialBinds() {
+  void selfReferentialBinds() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -616,7 +554,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void cycleFromMembersInjectionMethod_WithSameKeyAsMembersInjectionMethod() {
+  void cycleFromMembersInjectionMethod_WithSameKeyAsMembersInjectionMethod() {
     JavaFileObject a =
         JavaFileObjects.forSourceLines(
             "test.A",
@@ -670,7 +608,7 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  public void longCycleMaskedByShortBrokenCycles() {
+  void longCycleMaskedByShortBrokenCycles() {
     JavaFileObject cycles =
         JavaFileObjects.forSourceLines(
             "test.Cycles",

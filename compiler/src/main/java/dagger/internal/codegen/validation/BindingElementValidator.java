@@ -270,8 +270,8 @@ public abstract class BindingElementValidator<E extends Element> {
     }
 
     /**
-     * Adds an error if an {@link dagger.multibindings.IntoMap @IntoMap} element doesn't have
-     * exactly one {@link dagger.MapKey @MapKey} annotation, or if an element that is {@link
+     * Adds an error if an {@code dagger.multibindings.IntoMap @IntoMap} element doesn't have
+     * exactly one {@link dagger.MapKey @MapKey} annotation, or if an element that is {@code
      * dagger.multibindings.IntoMap @IntoMap} has any.
      */
     private void checkMapKeys() {
