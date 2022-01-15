@@ -38,8 +38,8 @@ import jakarta.inject.Singleton;
  * <h2>Component methods</h2>
  *
  * <p>Every type annotated with {@code @Component} must contain at least one abstract component
- * method. Component methods may have any name, but must have signatures that conform to either
- * {@linkplain Provider provision} or {@linkplain MembersInjector members-injection} contracts.
+ * method. Component methods may have any name, but must have signatures that conform to the
+ * provision contract.
  *
  * <h3>Provision methods</h3>
  *
@@ -64,48 +64,6 @@ import jakarta.inject.Singleton;
  *   SomeType getSomeType();
  *   {@literal Provider<SomeType>} getSomeTypeProvider();
  *   {@literal Lazy<SomeType>} getLazySomeType();
- * </code></pre>
- *
- * <h3>Members-injection methods</h3>
- *
- * <p>Members-injection methods have a single parameter and inject dependencies into each of the
- * {@link Inject}-annotated fields and methods of the passed instance. A members-injection method
- * may be void or return its single parameter as a convenience for chaining. The following are all
- * valid members-injection method declarations:
- *
- * <pre><code>
- *   void injectSomeType(SomeType someType);
- *   SomeType injectAndReturnSomeType(SomeType someType);
- * </code></pre>
- *
- * <p>A method with no parameters that returns a {@link MembersInjector} is equivalent to a members
- * injection method. Calling {@link MembersInjector#injectMembers} on the returned object will
- * perform the same work as a members injection method. For example:
- *
- * <pre><code>
- *   {@literal MembersInjector<SomeType>} getSomeTypeMembersInjector();
- * </code></pre>
- *
- * <h4>A note about covariance</h4>
- *
- * <p>While a members-injection method for a type will accept instances of its subtypes, only {@link
- * Inject}-annotated members of the parameter type and its supertypes will be injected; members of
- * subtypes will not. For example, given the following types, only {@code a} and {@code b} will be
- * injected into an instance of {@code Child} when it is passed to the members-injection method
- * {@code injectSelf(Self instance)}:
- *
- * <pre><code>
- *   class Parent {
- *     {@literal @}Inject A a;
- *   }
- *
- *   class Self extends Parent {
- *     {@literal @}Inject B b;
- *   }
- *
- *   class Child extends Self {
- *     {@literal @}Inject C c;
- *   }
  * </code></pre>
  *
  * <h2>Instantiation</h2>
@@ -231,7 +189,7 @@ public @interface Component {
   /**
    * A list of classes annotated with {@link Module} whose bindings are used to generate the
    * component implementation. Note that through the use of {@link Module#includes} the full set of
-   * modules used to implement the component may include more modules that just those listed here.
+   * modules used to implement the component may include more modules than just those listed here.
    */
   Class<?>[] modules() default {};
 
