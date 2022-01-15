@@ -184,67 +184,6 @@ public class DependencyCycleValidationTest {
   }
 
   @Test
-  void cyclicDependencyWithSetBinding() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.Outer",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "import dagger.multibindings.IntoSet;",
-            "import java.util.Set;",
-            "import jakarta.inject.Inject;",
-            "",
-            "final class Outer {",
-            "  static class A {",
-            "    @Inject A(Set<C> cSet) {}",
-            "  }",
-            "",
-            "  static class B {",
-            "    @Inject B(A aParam) {}",
-            "  }",
-            "",
-            "  static class C {",
-            "    @Inject C(B bParam) {}",
-            "  }",
-            "",
-            "  @Component(modules = CModule.class)",
-            "  interface CComponent {",
-            "    C getC();",
-            "  }",
-            "",
-            "  @Module",
-            "  static class CModule {",
-            "    @Provides @IntoSet",
-            "    static C c(C c) {",
-            "      return c;",
-            "    }",
-            "  }",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            message(
-                "Found a dependency cycle:",
-                "    Outer.C is injected at",
-                "        Outer.CModule.c(c)",
-                "    Set<Outer.C> is injected at",
-                "        Outer.A(cSet)",
-                "    Outer.A is injected at",
-                "        Outer.B(aParam)",
-                "    Outer.B is injected at",
-                "        Outer.C(bParam)",
-                "    Outer.C is requested at",
-                "        Outer.CComponent.getC()"))
-        .inFile(component)
-        .onLineContaining("interface CComponent");
-  }
-
-  @Test
   void falsePositiveCyclicDependencyIndirectionDetected() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(

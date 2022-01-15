@@ -100,37 +100,4 @@ public class BindsMissingDelegateValidationTest {
         .inFile(component)
         .onLineContaining("interface C");
   }
-
-  @Test
-  public void bindsMissingDelegate_setBinding() {
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.C",
-            "package test;",
-            "",
-            "import dagger.Binds;",
-            "import dagger.Component;",
-            "import dagger.Module;",
-            "import dagger.multibindings.IntoSet;",
-            "import java.util.Set;",
-            "",
-            "@Component(modules = C.TestModule.class)",
-            "interface C {",
-            "  Set<Object> objects();",
-            "",
-            "  static class NotBound {}",
-            "",
-            "  @Module",
-            "  abstract static class TestModule {",
-            "    @Binds @IntoSet abstract Object bindObject(NotBound notBound);",
-            "  }",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("test.C.NotBound cannot be provided")
-        .inFile(component)
-        .onLineContaining("interface C");
-  }
 }
