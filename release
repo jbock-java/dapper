@@ -6,31 +6,18 @@ die () {
     exit 1
 }
 
-usage="Usage: release [core|compiler] <version>"
-
 if [[ `git status --porcelain` ]]; then
   die "dirty workspace"
 fi
 
-MODULE="$1"
-VERSION="$2"
+VERSION="$1"
 
 if [[ -z "$VERSION" ]]; then
-  die "$usage"
-fi
-
-if [[ "compiler" == "$MODULE" ]]; then
- greppy=$(./gradlew compiler:dependencies --configuration compileClasspath | fgrep "dapper:$VERSION")
- test -z "$greppy" && die "compiler should depend on dapper:$VERSION"
+  die "Usage: release <version>"
 fi
 
 git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew clean -Pversion=${VERSION} ${MODULE}:publish
-
-if [[ "compiler" != "$MODULE" ]]; then
-  echo "Upload successful."
-  exit
-fi
+./gradlew clean -Pversion=${VERSION} publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
