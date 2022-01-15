@@ -245,7 +245,7 @@ public final class ComponentCreatorDescriptor {
           dependencyRequestFactory.forRequiredResolvedVariable(parameter, type);
       String variableName = elementForVariableName.getSimpleName().toString();
       return ComponentRequirement.forBoundInstance(
-          request.key(), request.isNullable(), variableName);
+          request.key(), variableName);
     }
 
     return moduleAnnotation(asTypeElement(type)).isPresent()

@@ -45,19 +45,16 @@ public final class ComponentRequirement {
 
   private final ComponentRequirement.Kind kind;
   private final Equivalence.Wrapper<TypeMirror> wrappedType;
-  private final Optional<ComponentRequirement.NullPolicy> overrideNullPolicy;
   private final Optional<Key> key;
   private final String variableName;
 
   ComponentRequirement(
       ComponentRequirement.Kind kind,
       Equivalence.Wrapper<TypeMirror> wrappedType,
-      Optional<ComponentRequirement.NullPolicy> overrideNullPolicy,
       Optional<Key> key,
       String variableName) {
     this.kind = requireNonNull(kind);
     this.wrappedType = requireNonNull(wrappedType);
-    this.overrideNullPolicy = requireNonNull(overrideNullPolicy);
     this.key = requireNonNull(key);
     this.variableName = requireNonNull(variableName);
   }
@@ -133,7 +130,7 @@ public final class ComponentRequirement {
    * instances), but others' require Elements which must wait until {@link #nullPolicy} is called.
    */
   Optional<ComponentRequirement.NullPolicy> overrideNullPolicy() {
-    return overrideNullPolicy;
+    return Optional.empty();
   }
 
   /** The requirement's null policy. */
@@ -215,21 +212,19 @@ public final class ComponentRequirement {
     ComponentRequirement that = (ComponentRequirement) o;
     return kind == that.kind
         && wrappedType.equals(that.wrappedType)
-        && overrideNullPolicy.equals(that.overrideNullPolicy)
         && key.equals(that.key)
         && variableName.equals(that.variableName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(kind, wrappedType, overrideNullPolicy, key, variableName);
+    return Objects.hash(kind, wrappedType, key, variableName);
   }
 
   public static ComponentRequirement forDependency(TypeMirror type) {
     return new ComponentRequirement(
         Kind.DEPENDENCY,
         MoreTypes.equivalence().wrap(requireNonNull(type)),
-        Optional.empty(),
         Optional.empty(),
         simpleVariableName(MoreTypes.asTypeElement(type)));
   }
@@ -239,15 +234,13 @@ public final class ComponentRequirement {
         Kind.MODULE,
         MoreTypes.equivalence().wrap(requireNonNull(type)),
         Optional.empty(),
-        Optional.empty(),
         simpleVariableName(MoreTypes.asTypeElement(type)));
   }
 
-  static ComponentRequirement forBoundInstance(Key key, boolean nullable, String variableName) {
+  static ComponentRequirement forBoundInstance(Key key, String variableName) {
     return new ComponentRequirement(
         Kind.BOUND_INSTANCE,
         MoreTypes.equivalence().wrap(key.type()),
-        nullable ? Optional.of(NullPolicy.ALLOW) : Optional.empty(),
         Optional.of(key),
         variableName);
   }
@@ -256,7 +249,6 @@ public final class ComponentRequirement {
     Preconditions.checkArgument(binding.kind().equals(BindingKind.BOUND_INSTANCE));
     return forBoundInstance(
         binding.key(),
-        binding.nullableType().isPresent(),
         binding.bindingElement().orElseThrow().getSimpleName().toString());
   }
 
