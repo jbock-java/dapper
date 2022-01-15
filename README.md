@@ -12,6 +12,7 @@ with some modifications:
 * remove guava special-casing
 * remove guava dependency
 * remove the `experimental_turbine_hjar` option
+* no generating `@CanIgnoreReturnValue`
 
 Dapper was forked from dagger version `2.37`, which is the last dagger
 version that did not depend on the [xprocessing](https://github.com/google/dagger/issues/2926) kotlin library.
