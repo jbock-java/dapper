@@ -168,63 +168,6 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void fieldAndMethodGenerics() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class GenericClass<A, B> {",
-        "  @Inject A a;",
-        "",
-        "  @Inject GenericClass() {}",
-        "",
-        " @Inject void register(B b) {}",
-        "}");
-    List<String> expected = new ArrayList<>();
-    Collections.addAll(expected,
-        "package test;");
-    Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
-            "import dagger.internal.Factory;",
-            "import jakarta.inject.Provider;"));
-    Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(expected,
-        "public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A, B>> {",
-        "  private final Provider<A> aProvider;",
-        "  private final Provider<B> bProvider;",
-        "",
-        "  public GenericClass_Factory(Provider<A> aProvider, Provider<B> bProvider) {",
-        "    this.aProvider = aProvider;",
-        "    this.bProvider = bProvider;",
-        "  }",
-        "",
-        "  @Override",
-        "  public GenericClass<A, B> get() {",
-        "    GenericClass<A, B> instance = newInstance();",
-        "    GenericClass_MembersInjector.injectA(instance, aProvider.get());",
-        "    GenericClass_MembersInjector.injectRegister(instance, bProvider.get());",
-        "    return instance;",
-        "  }",
-        "",
-        "  public static <A, B> GenericClass_Factory<A, B> create(Provider<A> aProvider,",
-        "      Provider<B> bProvider) {",
-        "    return new GenericClass_Factory<A, B>(aProvider, bProvider);",
-        "  }",
-        "",
-        "  public static <A, B> GenericClass<A, B> newInstance() {",
-        "    return new GenericClass<A, B>();",
-        "  }",
-        "}");
-    assertAbout(javaSource()).that(file)
-        .processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.GenericClass_Factory", expected);
-  }
-
-  @Test
   public void genericClassWithNoDependencies() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
@@ -685,42 +628,6 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void finalInjectField() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.FinalInjectField",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class FinalInjectField {",
-        "  @Inject final String s;",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("@Inject fields may not be final")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
-  public void privateInjectFieldError() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectField",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class PrivateInjectField {",
-        "  @Inject private String s;",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Dagger does not support injection into private fields")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
   public void privateInjectFieldWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectField",
         "package test;",
@@ -736,99 +643,6 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void staticInjectFieldError() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectField",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class StaticInjectField {",
-        "  @Inject static String s;",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Dagger does not support injection into static fields")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
-  public void staticInjectFieldWarning() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectField",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class StaticInjectField {",
-        "  @Inject static String s;",
-        "}");
-    Compilation compilation =
-        compilerWithOptions("-Adagger.staticMemberValidation=WARNING").compile(file);
-    assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
-  }
-
-  @Test
-  public void multipleQualifiersOnField() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierInjectField",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class MultipleQualifierInjectField {",
-        "  @Inject @QualifierA @QualifierB String s;",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file, QUALIFIER_A, QUALIFIER_B);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("A single dependency request may not use more than one @Qualifier")
-        .inFile(file)
-        .onLine(6)
-        .atColumn(11);
-    assertThat(compilation)
-        .hadErrorContaining("A single dependency request may not use more than one @Qualifier")
-        .inFile(file)
-        .onLine(6)
-        .atColumn(23);
-  }
-
-  @Test
-  public void abstractInjectMethod() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.AbstractInjectMethod",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "abstract class AbstractInjectMethod {",
-        "  @Inject abstract void method();",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Methods with @Inject may not be abstract")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
-  public void privateInjectMethodError() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectMethod",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class PrivateInjectMethod {",
-        "  @Inject private void method(){}",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Dagger does not support injection into private methods")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
   public void privateInjectMethodWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectMethod",
         "package test;",
@@ -841,75 +655,6 @@ public final class InjectConstructorFactoryGeneratorTest {
     Compilation compilation =
         compilerWithOptions("-Adagger.privateMemberValidation=WARNING").compile(file);
     assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
-  }
-
-  @Test
-  public void staticInjectMethodError() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectMethod",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class StaticInjectMethod {",
-        "  @Inject static void method(){}",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Dagger does not support injection into static methods")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
-  public void staticInjectMethodWarning() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.StaticInjectMethod",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class StaticInjectMethod {",
-        "  @Inject static void method(){}",
-        "}");
-    Compilation compilation =
-        compilerWithOptions("-Adagger.staticMemberValidation=WARNING").compile(file);
-    assertThat(compilation).succeeded(); // TODO: Verify warning message when supported
-  }
-
-  @Test
-  public void genericInjectMethod() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericInjectMethod",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class AbstractInjectMethod {",
-        "  @Inject <T> void method();",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("Methods with @Inject may not declare type parameters")
-        .inFile(file)
-        .onLine(6);
-  }
-
-  @Test
-  public void multipleQualifiersOnInjectMethodParameter() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierMethodParam",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class MultipleQualifierMethodParam {",
-        "  @Inject void method(@QualifierA @QualifierB String s) {}",
-        "}");
-    Compilation compilation = daggerCompiler().compile(file, QUALIFIER_A, QUALIFIER_B);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining("A single dependency request may not use more than one @Qualifier")
-        .inFile(file)
-        .onLine(6);
   }
 
   @Test
@@ -956,63 +701,6 @@ public final class InjectConstructorFactoryGeneratorTest {
         .compilesWithoutError()
         .and()
         .containsLines("test.InjectConstructor_Factory", expected);
-  }
-
-  @Test
-  public void injectConstructorAndMembersInjection() {
-    JavaFileObject file = JavaFileObjects.forSourceLines("test.AllInjections",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "class AllInjections {",
-        "  @Inject String s;",
-        "  @Inject AllInjections(String s) {}",
-        "  @Inject void s(String s) {}",
-        "}");
-    List<String> expectedFactory = new ArrayList<>();
-    Collections.addAll(expectedFactory,
-        "package test;");
-    Collections.addAll(expectedFactory,
-        GeneratedLines.generatedImportsIndividual(
-            "import dagger.internal.Factory;",
-            "import jakarta.inject.Provider;"));
-    Collections.addAll(expectedFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
-    Collections.addAll(expectedFactory,
-        "public final class AllInjections_Factory implements Factory<AllInjections> {",
-        "  private final Provider<String> sProvider;",
-        "  private final Provider<String> sProvider2;",
-        "  private final Provider<String> sProvider3;",
-        "",
-        "  public AllInjections_Factory(Provider<String> sProvider, Provider<String> sProvider2,",
-        "      Provider<String> sProvider3) {",
-        "    this.sProvider = sProvider;",
-        "    this.sProvider2 = sProvider2;",
-        "    this.sProvider3 = sProvider3;",
-        "  }",
-        "",
-        "  @Override",
-        "  public AllInjections get() {",
-        "    AllInjections instance = newInstance(sProvider.get());",
-        "    AllInjections_MembersInjector.injectS(instance, sProvider2.get());",
-        "    AllInjections_MembersInjector.injectS2(instance, sProvider3.get());",
-        "    return instance;",
-        "  }",
-        "",
-        "  public static AllInjections_Factory create(Provider<String> sProvider,",
-        "      Provider<String> sProvider2, Provider<String> sProvider3) {",
-        "    return new AllInjections_Factory(sProvider, sProvider2, sProvider3);",
-        "  }",
-        "",
-        "  public static AllInjections newInstance(String s) {",
-        "    return new AllInjections(s);",
-        "  }",
-        "}");
-    assertAbout(javaSource()).that(file).processedWith(new ComponentProcessor())
-        .compilesWithoutError()
-        .and()
-        .containsLines("test.AllInjections_Factory", expectedFactory);
   }
 
   @Test
@@ -1290,7 +978,7 @@ public final class InjectConstructorFactoryGeneratorTest {
         "    @Inject A() {}",
         "  }",
         "  static class B {",
-        "    @Inject A a;",
+        "    @Inject B(A a) {}",
         "  }",
         "}");
     List<String> aFactory = new ArrayList<>();

@@ -63,36 +63,6 @@ public class MultipleRequestTest {
   }
 
   @Test
-  public void multipleRequests_field() {
-    Compilation compilation =
-        daggerCompiler()
-            .compile(
-                DEP_FILE,
-                JavaFileObjects.forSourceLines(
-                    "test.FieldInjectsMultiple",
-                    "package test;",
-                    "",
-                    "import jakarta.inject.Inject;",
-                    "",
-                    "class FieldInjectsMultiple {",
-                    "  @Inject Dep d1;",
-                    "  @Inject Dep d2;",
-                    "  @Inject FieldInjectsMultiple() {}",
-                    "}"),
-                JavaFileObjects.forSourceLines(
-                    "test.SimpleComponent",
-                    "package test;",
-                    "",
-                    "import dagger.Component;",
-                    "",
-                    "@Component",
-                    "interface SimpleComponent {",
-                    "  FieldInjectsMultiple get();",
-                    "}"));
-    assertThat(compilation).succeeded();
-  }
-
-  @Test
   public void multipleRequests_providesMethod() {
     Compilation compilation =
         daggerCompiler()

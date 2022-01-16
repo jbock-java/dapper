@@ -982,66 +982,6 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void membersInjectionInsideProvision(CompilerMode compilerMode) {
-    JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class SomeInjectableType {",
-        "  @Inject SomeInjectableType() {}",
-        "}");
-    JavaFileObject injectedTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectedType",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class SomeInjectedType {",
-        "  @Inject SomeInjectableType injectedField;",
-        "  @Inject SomeInjectedType() {}",
-        "}");
-    JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.SimpleComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "",
-        "@Component",
-        "interface SimpleComponent {",
-        "  SomeInjectedType createAndInject();",
-        "}");
-
-    String[] generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerSimpleComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
-            .addLines(
-                "final class DaggerSimpleComponent implements SimpleComponent {",
-                "  @Override",
-                "  public SomeInjectedType createAndInject() {",
-                "    return injectSomeInjectedType(SomeInjectedType_Factory.newInstance());",
-                "  }",
-                "",
-                "  private SomeInjectedType injectSomeInjectedType(SomeInjectedType instance) {",
-                "    SomeInjectedType_MembersInjector.injectInjectedField(instance, new SomeInjectableType());",
-                "    return instance;",
-                "  }",
-                "}")
-            .lines();
-
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
-            .compile(injectableTypeFile, injectedTypeFile, componentFile);
-    assertThat(compilation).succeeded();
-
-    assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(List.of(generatedComponent));
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
   void componentDependency(CompilerMode compilerMode) {
     JavaFileObject aFile = JavaFileObjects.forSourceLines("test.A",
         "package test;",

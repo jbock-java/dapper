@@ -29,30 +29,6 @@ import org.junit.jupiter.api.Test;
  * dagger.MembersInjector} dependency requests.
  */
 class MembersInjectionValidationTest {
-  @Test
-  void membersInjectDependsOnUnboundedType() {
-    JavaFileObject injectsUnboundedType =
-        JavaFileObjects.forSourceLines(
-            "test.InjectsUnboundedType",
-            "package test;",
-            "",
-            "import dagger.MembersInjector;",
-            "import java.util.ArrayList;",
-            "import jakarta.inject.Inject;",
-            "",
-            "class InjectsUnboundedType {",
-            "  @Inject MembersInjector<ArrayList<?>> listInjector;",
-            "}");
-
-    Compilation compilation = daggerCompiler().compile(injectsUnboundedType);
-    assertThat(compilation).failed();
-    assertThat(compilation)
-        .hadErrorContaining(
-            "Cannot inject members into types with unbounded type arguments: "
-                + "java.util.ArrayList<?>")
-        .inFile(injectsUnboundedType)
-        .onLineContaining("@Inject MembersInjector<ArrayList<?>> listInjector;");
-  }
 
   @Test
   void membersInjectorOfArray() {
@@ -97,33 +73,5 @@ class MembersInjectionValidationTest {
         .hadErrorContaining("Cannot inject members into qualified types")
         .inFile(component)
         .onLineContaining("objectInjector();");
-  }
-
-  @Test
-  void staticFieldInjection() {
-    JavaFileObject injected =
-        JavaFileObjects.forSourceLines(
-            "test.Injected",
-            "package test;",
-            "",
-            "import jakarta.inject.Inject;",
-            "",
-            "final class Injected {",
-            "  @Inject static Object object;",
-            "}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  void inject(Injected injected);",
-            "}");
-    Compilation compilation = daggerCompiler().compile(injected, component);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorContaining("static fields").inFile(injected).onLine(6);
   }
 }

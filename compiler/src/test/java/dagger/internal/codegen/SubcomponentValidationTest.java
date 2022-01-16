@@ -416,7 +416,6 @@ class SubcomponentValidationTest {
             "",
             "final class A {",
             "  @Inject public A(NeedsDep1 a, Dep1 b, Dep2 c) { }",
-            "  @Inject void methodA() { }",
             "}");
     JavaFileObject needsDep1File =
         JavaFileObjects.forSourceLines(
@@ -439,7 +438,6 @@ class SubcomponentValidationTest {
             "@Singleton",
             "final class Dep1 {",
             "  @Inject public Dep1() { }",
-            "  @Inject void dep1Method() { }",
             "}");
     JavaFileObject dep2File =
         JavaFileObjects.forSourceLines(
@@ -452,7 +450,6 @@ class SubcomponentValidationTest {
             "@Singleton",
             "final class Dep2 {",
             "  @Inject public Dep2() { }",
-            "  @Inject void dep2Method() { }",
             "}");
 
     String[] generatedComponent =
@@ -472,7 +469,7 @@ class SubcomponentValidationTest {
                 "  }",
                 "")
             .addLines(
-                "  @Override", //
+                "  @Override",
                 "  public Dep1 dep1() {")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -481,17 +478,17 @@ class SubcomponentValidationTest {
                 "      synchronized (local) {",
                 "        local = dep1;",
                 "        if (local instanceof MemoizedSentinel) {",
-                "          local = injectDep1(Dep1_Factory.newInstance());",
+                "          local = new Dep1();",
                 "          dep1 = DoubleCheck.reentrantCheck(dep1, local);",
                 "        }",
                 "      }",
                 "    }",
                 "    return (Dep1) local;")
             .addLinesIn(
-                DEFAULT_MODE, //
+                DEFAULT_MODE,
                 "    return dep1Provider.get();")
             .addLines(
-                "  }", //
+                "  }",
                 "",
                 "  @Override",
                 "  public Dep2 dep2() {")
@@ -502,14 +499,14 @@ class SubcomponentValidationTest {
                 "      synchronized (local) {",
                 "        local = dep2;",
                 "        if (local instanceof MemoizedSentinel) {",
-                "          local = injectDep2(Dep2_Factory.newInstance());",
+                "          local = new Dep2();",
                 "          dep2 = DoubleCheck.reentrantCheck(dep2, local);",
                 "        }",
                 "      }",
                 "    }",
                 "    return (Dep2) local;")
             .addLinesIn(
-                DEFAULT_MODE, //
+                DEFAULT_MODE,
                 "    return dep2Provider.get();")
             .addLines(
                 "  }",
@@ -519,17 +516,6 @@ class SubcomponentValidationTest {
                 "    return new ChildComponentImpl(parentComponent);",
                 "  }",
                 "")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "  private Dep1 injectDep1(Dep1 instance) {",
-                "    Dep1_MembersInjector.injectDep1Method(instance);",
-                "    return instance;",
-                "  }",
-                "",
-                "  private Dep2 injectDep2(Dep2 instance) {",
-                "    Dep2_MembersInjector.injectDep2Method(instance);",
-                "    return instance;",
-                "  }")
             .addLines(
                 "",
                 "  private static final class ChildComponentImpl implements ChildComponent {",
@@ -557,22 +543,18 @@ class SubcomponentValidationTest {
             .addLinesIn(
                 DEFAULT_MODE,
                 "    private A a() {",
-                "      return injectA(A_Factory.newInstance(needsDep1(), parentComponent.dep1Provider.get(), parentComponent.dep2Provider.get()));",
+                "      return new A(needsDep1(), parentComponent.dep1Provider.get(), parentComponent.dep2Provider.get());",
                 "    }")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "    private A a() {",
-                "      return injectA(A_Factory.newInstance(needsDep1(), parentComponent.dep1(), parentComponent.dep2()));", "    }")
+                "      return new A(needsDep1(), parentComponent.dep1(), parentComponent.dep2());",
+                "    }")
             .addLines(
                 "",
                 "    @Override",
                 "    public Object object() {",
                 "      return ChildModule_ProvideObjectFactory.provideObject(childModule, a());",
-                "    }",
-                "",
-                "    private A injectA(A instance) {",
-                "      A_MembersInjector.injectMethodA(instance);",
-                "      return instance;",
                 "    }",
                 "  }",
                 "}")

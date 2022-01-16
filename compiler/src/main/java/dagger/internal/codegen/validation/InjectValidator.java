@@ -23,7 +23,6 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.DECLARED;
@@ -236,64 +235,19 @@ public final class InjectValidator implements ClearableCache {
 
   private ValidationReport<VariableElement> validateField(VariableElement fieldElement) {
     ValidationReport.Builder<VariableElement> builder = ValidationReport.about(fieldElement);
-    Set<Modifier> modifiers = fieldElement.getModifiers();
-    if (modifiers.contains(FINAL)) {
-      builder.addError("@Inject fields may not be final", fieldElement);
-    }
-
-    if (modifiers.contains(PRIVATE)) {
-      builder.addItem(
-          "Dagger does not support injection into private fields",
-          privateMemberDiagnosticKind(),
-          fieldElement);
-    }
-
-    if (modifiers.contains(STATIC)) {
-      builder.addItem(
-          "Dagger does not support injection into static fields",
-          staticMemberDiagnosticKind(),
-          fieldElement);
-    }
-
-    validateDependencyRequest(builder, fieldElement);
-
+    builder.addItem(
+        "Field injection has been disabled",
+        privateMemberDiagnosticKind(),
+        fieldElement);
     return builder.build();
   }
 
   private ValidationReport<ExecutableElement> validateMethod(ExecutableElement methodElement) {
     ValidationReport.Builder<ExecutableElement> builder = ValidationReport.about(methodElement);
-    Set<Modifier> modifiers = methodElement.getModifiers();
-    if (modifiers.contains(ABSTRACT)) {
-      builder.addError("Methods with @Inject may not be abstract", methodElement);
-    }
-
-    if (modifiers.contains(PRIVATE)) {
-      builder.addItem(
-          "Dagger does not support injection into private methods",
-          privateMemberDiagnosticKind(),
-          methodElement);
-    }
-
-    if (modifiers.contains(STATIC)) {
-      builder.addItem(
-          "Dagger does not support injection into static methods",
-          staticMemberDiagnosticKind(),
-          methodElement);
-    }
-
-    if (!methodElement.getTypeParameters().isEmpty()) {
-      builder.addError("Methods with @Inject may not declare type parameters", methodElement);
-    }
-
-    if (!methodElement.getThrownTypes().isEmpty()) {
-      builder.addError("Methods with @Inject may not throw checked exceptions. "
-          + "Please wrap your exceptions in a RuntimeException instead.", methodElement);
-    }
-
-    for (VariableElement parameter : methodElement.getParameters()) {
-      validateDependencyRequest(builder, parameter);
-    }
-
+    builder.addItem(
+            "Method injection has been disabled",
+            privateMemberDiagnosticKind(),
+            methodElement);
     return builder.build();
   }
 
@@ -306,28 +260,17 @@ public final class InjectValidator implements ClearableCache {
     // TODO(beder): This element might not be currently compiled, so this error message could be
     // left in limbo. Find an appropriate way to display the error message in that case.
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(typeElement);
-    boolean hasInjectedMembers = false;
     for (VariableElement element : ElementFilter.fieldsIn(typeElement.getEnclosedElements())) {
       if (MoreElements.isAnnotationPresent(element, Inject.class)) {
-        hasInjectedMembers = true;
         ValidationReport<VariableElement> report = validateField(element);
-        if (!report.isClean()) {
-          builder.addSubreport(report);
-        }
+        builder.addSubreport(report);
       }
     }
     for (ExecutableElement element : ElementFilter.methodsIn(typeElement.getEnclosedElements())) {
       if (MoreElements.isAnnotationPresent(element, Inject.class)) {
-        hasInjectedMembers = true;
         ValidationReport<ExecutableElement> report = validateMethod(element);
-        if (!report.isClean()) {
-          builder.addSubreport(report);
-        }
+        builder.addSubreport(report);
       }
-    }
-
-    if (hasInjectedMembers) {
-      checkInjectIntoPrivateClass(typeElement, builder);
     }
     TypeMirror superclass = typeElement.getSuperclass();
     if (!superclass.getKind().equals(TypeKind.NONE)) {
@@ -393,10 +336,5 @@ public final class InjectValidator implements ClearableCache {
   private Diagnostic.Kind privateMemberDiagnosticKind() {
     return privateAndStaticInjectionDiagnosticKind.orElse(
         compilerOptions.privateMemberValidationKind());
-  }
-
-  private Diagnostic.Kind staticMemberDiagnosticKind() {
-    return privateAndStaticInjectionDiagnosticKind.orElse(
-        compilerOptions.staticMemberValidationKind());
   }
 }

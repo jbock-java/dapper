@@ -36,10 +36,6 @@ import org.junit.jupiter.api.Test;
 
 class ModuleFactoryGeneratorTest {
 
-  private static final JavaFileObject NULLABLE =
-      JavaFileObjects.forSourceLines(
-          "test.Nullable", "package test;", "public @interface Nullable {}");
-
   // TODO(gak): add tests for invalid combinations of scope and qualifier annotations like we have
   // for @Inject
 
@@ -293,7 +289,7 @@ class ModuleFactoryGeneratorTest {
         "import jakarta.inject.Inject;",
         "",
         "class X {",
-        "  @Inject public String s;",
+        "  @Inject X(String s) {}",
         "}");
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
@@ -29,7 +28,6 @@ import com.google.common.graph.Graphs;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.NetworkBuilder;
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
@@ -43,7 +41,6 @@ import dagger.model.RequestKind;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -200,7 +197,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     if (edge.dependencyRequest().key().multibindingContributionIdentifier().isPresent()) {
       return false;
     }
-    if (breaksCycle(edge.dependencyRequest().key().type(), edge.dependencyRequest().kind())) {
+    if (breaksCycle(edge.dependencyRequest().kind())) {
       return true;
     }
     Node target = graph.network().incidentNodes(edge).target();
@@ -210,12 +207,12 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
        * breaks the cycle, so does the optional binding. */
       TypeMirror optionalValueType = OptionalType.from(edge.dependencyRequest().key()).valueType();
       RequestKind requestKind = getRequestKind(optionalValueType);
-      return breaksCycle(extractKeyType(optionalValueType), requestKind);
+      return breaksCycle(requestKind);
     }
     return false;
   }
 
-  private boolean breaksCycle(TypeMirror requestedType, RequestKind requestKind) {
+  private boolean breaksCycle(RequestKind requestKind) {
     switch (requestKind) {
       case PROVIDER:
       case LAZY:
@@ -223,10 +220,6 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         return true;
 
       case INSTANCE:
-        if (MapType.isMap(requestedType)) {
-          MapType mapType = MapType.from(requestedType);
-          return !mapType.isRawType() && mapType.valuesAreTypeOf(Provider.class);
-        }
         // fall through
 
       default:

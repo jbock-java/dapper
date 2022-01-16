@@ -151,43 +151,6 @@ class MissingBindingValidationTest {
   }
 
   @Test
-  void membersInjectWithoutProvision() {
-    JavaFileObject component = JavaFileObjects.forSourceLines("test.TestClass",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "import dagger.Module;",
-        "import dagger.Provides;",
-        "import jakarta.inject.Inject;",
-        "",
-        "final class TestClass {",
-        "  static class A {",
-        "    @Inject A() {}",
-        "  }",
-        "",
-        "  static class B {",
-        "    @Inject A a;",
-        "  }",
-        "",
-        "  @Component()",
-        "  interface AComponent {",
-        "    B getB();",
-        "  }",
-        "}");
-
-    Compilation compilation = daggerCompiler().compile(component);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorCount(1);
-    assertThat(compilation)
-        .hadErrorContaining(
-            "TestClass.B cannot be provided without an @Inject constructor or a "
-                + "@Provides-annotated method. This type supports members injection but cannot be "
-                + "implicitly provided.")
-        .inFile(component)
-        .onLineContaining("interface AComponent");
-  }
-
-  @Test
   void genericInjectClassWithWildcardDependencies() {
     JavaFileObject component =
         JavaFileObjects.forSourceLines(
@@ -334,8 +297,7 @@ class MissingBindingValidationTest {
         "import jakarta.inject.Provider;",
         "",
         "final class Generic<T> {",
-        "  @Inject T t;",
-        "  @Inject Generic() {}",
+        "  @Inject Generic(T t) {}",
         "}");
     JavaFileObject testClass = JavaFileObjects.forSourceLines("test.TestClass",
         "package test;",
@@ -374,7 +336,7 @@ class MissingBindingValidationTest {
                 "    List is injected at",
                 "        TestClass(list)",
                 "    TestClass is injected at",
-                "        Generic.t",
+                "        Generic(t)",
                 "    Generic<TestClass> is injected at",
                 "        UsesTest(genericTestClass)",
                 "    UsesTest is requested at",
