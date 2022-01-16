@@ -327,13 +327,6 @@ public final class BindingGraphFactory implements ClearableCache {
         addSubcomponentToOwningResolver(binding);
       }
 
-      // Add members injector binding
-      if (isType(requestKey.type()) && isTypeOf(MembersInjector.class, requestKey.type())) {
-        injectBindingRegistry
-            .getOrFindMembersInjectorProvisionBinding(requestKey)
-            .ifPresent(bindings::add);
-      }
-
       // Add Assisted Factory binding
       if (isType(requestKey.type())
           && requestKey.type().getKind() == TypeKind.DECLARED

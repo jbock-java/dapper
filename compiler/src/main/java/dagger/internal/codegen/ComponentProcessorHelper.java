@@ -78,7 +78,7 @@ public class ComponentProcessorHelper {
     if (!roundEnv.processingOver()) {
       try {
         injectBindingRegistry.generateSourcesForRequiredBindings(
-            factoryGenerator, membersInjectorGenerator);
+            factoryGenerator);
       } catch (SourceFileGenerationException e) {
         e.printMessageTo(messager);
       }

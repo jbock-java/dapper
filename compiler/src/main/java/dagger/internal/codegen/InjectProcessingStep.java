@@ -20,6 +20,7 @@ import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;

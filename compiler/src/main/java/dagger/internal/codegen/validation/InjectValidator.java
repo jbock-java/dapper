@@ -284,11 +284,6 @@ public final class InjectValidator implements ClearableCache {
 
   public ValidationReport<TypeElement> validateType(TypeElement typeElement) {
     ValidationReport.Builder<TypeElement> builder = ValidationReport.about(typeElement);
-    ValidationReport<TypeElement> membersInjectionReport =
-        validateMembersInjectionType(typeElement);
-    if (!membersInjectionReport.isClean()) {
-      builder.addSubreport(membersInjectionReport);
-    }
     for (ExecutableElement element :
         ElementFilter.constructorsIn(typeElement.getEnclosedElements())) {
       if (isAnnotationPresent(element, Inject.class)

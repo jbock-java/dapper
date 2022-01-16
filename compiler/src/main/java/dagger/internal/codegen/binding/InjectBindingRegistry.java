@@ -44,15 +44,9 @@ public interface InjectBindingRegistry {
    */
   Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key);
 
-  /**
-   * Returns a {@link ProvisionBinding} for a {@link dagger.MembersInjector} of {@code key}. If none
-   * has been registered yet, registers one.
-   */
-  Optional<ProvisionBinding> getOrFindMembersInjectorProvisionBinding(Key key);
-
   Optional<ProvisionBinding> tryRegisterConstructor(ExecutableElement constructorElement);
 
-  Optional<MembersInjectionBinding> tryRegisterMembersInjectedType(TypeElement typeElement);
+  void tryRegisterMembersInjectedType(TypeElement typeElement);
 
   /**
    * This method ensures that sources for all registered {@link Binding bindings} (either explicitly
@@ -60,7 +54,6 @@ public interface InjectBindingRegistry {
    * #getOrFindProvisionBinding}) are generated.
    */
   void generateSourcesForRequiredBindings(
-      SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator)
+      SourceFileGenerator<ProvisionBinding> factoryGenerator)
       throws SourceFileGenerationException;
 }

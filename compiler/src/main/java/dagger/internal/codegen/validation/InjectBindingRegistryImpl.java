@@ -27,7 +27,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.Component;
-import dagger.MembersInjector;
 import dagger.Provides;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerationException;
@@ -61,8 +60,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 /**
- * Maintains the collection of provision bindings from {@code Inject} constructors and members
- * injection bindings from {@code Inject} fields and methods known to the annotation processor.
+ * Maintains the collection of provision bindings from {@code Inject} constructors known to the annotation processor.
  * Note that this registry <b>does not</b> handle any explicit bindings (those from {@link Provides}
  * methods, {@link Component} dependencies, etc.).
  */
@@ -162,8 +160,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   private final BindingsCollection<ProvisionBinding> provisionBindings =
       new BindingsCollection<>(Provider.class);
-  private final BindingsCollection<MembersInjectionBinding> membersInjectionBindings =
-      new BindingsCollection<>(MembersInjector.class);
 
   @Inject
   InjectBindingRegistryImpl(
@@ -188,11 +184,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   // TODO(dpb): make the SourceFileGenerators fields so they don't have to be passed in
   @Override
   public void generateSourcesForRequiredBindings(
-      SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator)
+      SourceFileGenerator<ProvisionBinding> factoryGenerator)
       throws SourceFileGenerationException {
     provisionBindings.generateBindings(factoryGenerator);
-    membersInjectionBindings.generateBindings(membersInjectorGenerator);
   }
 
   /**
@@ -201,33 +195,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
    */
   private void registerBinding(ProvisionBinding binding, boolean warnIfNotAlreadyGenerated) {
     provisionBindings.tryRegisterBinding(binding, warnIfNotAlreadyGenerated);
-  }
-
-  /**
-   * Registers the binding for generation and later lookup. If the binding is resolved, we also
-   * attempt to register an unresolved version of it.
-   */
-  private void registerBinding(MembersInjectionBinding binding, boolean warnIfNotAlreadyGenerated) {
-    /*
-     * We generate MembersInjector classes for types with @Inject constructors only if they have any
-     * injection sites.
-     *
-     * We generate MembersInjector classes for types without @Inject constructors only if they have
-     * local (non-inherited) injection sites.
-     *
-     * Warn only when registering bindings post-hoc for those types.
-     */
-    if (warnIfNotAlreadyGenerated) {
-      boolean hasInjectConstructor =
-          !(injectedConstructors(binding.membersInjectedType()).isEmpty()
-              && assistedInjectedConstructors(binding.membersInjectedType()).isEmpty());
-      warnIfNotAlreadyGenerated =
-          hasInjectConstructor
-              ? !binding.injectionSites().isEmpty()
-              : binding.hasLocalInjectionSites();
-    }
-
-    membersInjectionBindings.tryRegisterBinding(binding, warnIfNotAlreadyGenerated);
   }
 
   @Override
@@ -259,18 +226,10 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   }
 
   @Override
-  public Optional<MembersInjectionBinding> tryRegisterMembersInjectedType(TypeElement typeElement) {
-    return tryRegisterMembersInjectedType(typeElement, Optional.empty(), false);
-  }
-
-  private Optional<MembersInjectionBinding> tryRegisterMembersInjectedType(
-      TypeElement typeElement,
-      Optional<TypeMirror> resolvedType,
-      boolean warnIfNotAlreadyGenerated) {
+  public void tryRegisterMembersInjectedType(TypeElement typeElement) {
     ValidationReport<TypeElement> report =
         injectValidator.validateMembersInjectionType(typeElement);
     report.printMessagesTo(messager);
-    return Optional.empty();
   }
 
   @Override
@@ -304,26 +263,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Override
   public Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key) {
-    requireNonNull(key);
-    // TODO(gak): is checking the kind enough?
-    Preconditions.checkArgument(isValidMembersInjectionKey(key));
-    MembersInjectionBinding binding = membersInjectionBindings.getBinding(key);
-    if (binding != null) {
-      return Optional.of(binding);
-    }
-    Optional<MembersInjectionBinding> newBinding =
-        tryRegisterMembersInjectedType(
-            MoreTypes.asTypeElement(key.type()), Optional.of(key.type()), true);
     return Optional.empty();
-  }
-
-  @Override
-  public Optional<ProvisionBinding> getOrFindMembersInjectorProvisionBinding(Key key) {
-    if (!isValidMembersInjectionKey(key)) {
-      return Optional.empty();
-    }
-    Key membersInjectionKey = keyFactory.forMembersInjectedType(unwrapType(key.type()));
-    return getOrFindMembersInjectionBinding(membersInjectionKey)
-        .map(binding -> bindingFactory.membersInjectorBinding(key, binding));
   }
 }
