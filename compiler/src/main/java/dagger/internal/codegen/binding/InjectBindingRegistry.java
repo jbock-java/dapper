@@ -38,20 +38,13 @@ public interface InjectBindingRegistry {
    */
   Optional<ProvisionBinding> getOrFindProvisionBinding(Key key);
 
-  /**
-   * Returns a {@link MembersInjectionBinding} for {@code key}. If none has been registered yet,
-   * registers one, along with all necessary members injection bindings for superclasses.
-   */
-  Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key);
-
   Optional<ProvisionBinding> tryRegisterConstructor(ExecutableElement constructorElement);
 
   void tryRegisterMembersInjectedType(TypeElement typeElement);
 
   /**
    * This method ensures that sources for all registered {@link Binding bindings} (either explicitly
-   * or implicitly via {@link #getOrFindMembersInjectionBinding} or {@link
-   * #getOrFindProvisionBinding}) are generated.
+   * or implicitly via {@link #getOrFindProvisionBinding}) are generated.
    */
   void generateSourcesForRequiredBindings(
       SourceFileGenerator<ProvisionBinding> factoryGenerator)

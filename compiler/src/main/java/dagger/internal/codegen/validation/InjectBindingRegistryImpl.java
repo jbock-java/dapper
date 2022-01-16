@@ -260,9 +260,4 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
             + injectConstructors);
     }
   }
-
-  @Override
-  public Optional<MembersInjectionBinding> getOrFindMembersInjectionBinding(Key key) {
-    return Optional.empty();
-  }
 }

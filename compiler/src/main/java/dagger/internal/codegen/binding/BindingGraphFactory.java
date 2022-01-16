@@ -375,17 +375,6 @@ public final class BindingGraphFactory implements ClearableCache {
       return parentResolver.map(Resolver::rootComponent).orElse(componentDescriptor);
     }
 
-    /** Returns the resolved members injection bindings for the given {@link Key}. */
-    ResolvedBindings lookUpMembersInjectionBinding(Key requestKey) {
-      // no explicit deps for members injection, so just look it up
-      Optional<MembersInjectionBinding> binding =
-          injectBindingRegistry.getOrFindMembersInjectionBinding(requestKey);
-      return binding.isPresent()
-          ? ResolvedBindings.forMembersInjectionBinding(
-          requestKey, componentDescriptor, binding.orElseThrow())
-          : ResolvedBindings.noBindings(requestKey);
-    }
-
     /**
      * When a binding is resolved for a {@link SubcomponentDeclaration}, adds corresponding {@link
      * ComponentDescriptor subcomponent} to a queue in the owning component's resolver. The queue
@@ -627,12 +616,6 @@ public final class BindingGraphFactory implements ClearableCache {
       } else {
         return Optional.empty();
       }
-    }
-
-    private void resolveMembersInjection(Key key) {
-      ResolvedBindings bindings = lookUpMembersInjectionBinding(key);
-      resolveDependencies(bindings);
-      resolvedMembersInjectionBindings.put(key, bindings);
     }
 
     void resolve(Key key) {

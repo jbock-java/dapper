@@ -17,7 +17,6 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
-import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -35,13 +34,10 @@ import javax.lang.model.type.TypeKind;
 final class MissingBindingValidator implements BindingGraphPlugin {
 
   private final DaggerTypes types;
-  private final InjectBindingRegistry injectBindingRegistry;
 
   @Inject
-  MissingBindingValidator(
-      DaggerTypes types, InjectBindingRegistry injectBindingRegistry) {
+  MissingBindingValidator(DaggerTypes types) {
     this.types = types;
-    this.injectBindingRegistry = injectBindingRegistry;
   }
 
   @Override
@@ -79,10 +75,6 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     }
     errorMessage.append("a @Provides-");
     errorMessage.append("annotated method.");
-    if (isValidMembersInjectionKey(key) && typeHasInjectionSites(key)) {
-      errorMessage.append(
-          " This type supports members injection but cannot be implicitly provided.");
-    }
     graph.bindings(key).stream()
         .map(binding -> binding.componentPath().currentComponent())
         .distinct()
@@ -92,12 +84,5 @@ final class MissingBindingValidator implements BindingGraphPlugin {
                     .append("\nA binding with matching key exists in component: ")
                     .append(component.getQualifiedName()));
     return errorMessage.toString();
-  }
-
-  private boolean typeHasInjectionSites(Key key) {
-    return injectBindingRegistry
-        .getOrFindMembersInjectionBinding(key)
-        .map(binding -> !binding.injectionSites().isEmpty())
-        .orElse(false);
   }
 }
