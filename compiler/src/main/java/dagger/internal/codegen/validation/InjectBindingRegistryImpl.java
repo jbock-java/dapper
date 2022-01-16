@@ -255,9 +255,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
     ProvisionBinding binding = bindingFactory.injectionBinding(constructorElement, resolvedType);
     registerBinding(binding, warnIfNotAlreadyGenerated);
-    if (!binding.injectionSites().isEmpty()) {
-      tryRegisterMembersInjectedType(typeElement, resolvedType, warnIfNotAlreadyGenerated);
-    }
     return Optional.of(binding);
   }
 
@@ -270,13 +267,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       TypeElement typeElement,
       Optional<TypeMirror> resolvedType,
       boolean warnIfNotAlreadyGenerated) {
-    DeclaredType type = MoreTypes.asDeclared(typeElement.asType());
-    Key key = keyFactory.forInjectConstructorWithResolvedType(type);
-    MembersInjectionBinding cachedBinding = membersInjectionBindings.getBinding(key);
-    if (cachedBinding != null) {
-      return Optional.of(cachedBinding);
-    }
-
     ValidationReport<TypeElement> report =
         injectValidator.validateMembersInjectionType(typeElement);
     report.printMessagesTo(messager);
@@ -324,7 +314,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     Optional<MembersInjectionBinding> newBinding =
         tryRegisterMembersInjectedType(
             MoreTypes.asTypeElement(key.type()), Optional.of(key.type()), true);
-    return newBinding;
+    return Optional.empty();
   }
 
   @Override

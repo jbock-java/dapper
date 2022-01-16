@@ -193,13 +193,7 @@ public final class BindingGraphFactory implements ClearableCache {
     componentDescriptor.entryPointMethods().stream()
         .map(method -> method.dependencyRequest().orElseThrow())
         .forEach(
-            entryPoint -> {
-              if (entryPoint.kind().equals(MEMBERS_INJECTION)) {
-                requestResolver.resolveMembersInjection(entryPoint.key());
-              } else {
-                requestResolver.resolve(entryPoint.key());
-              }
-            });
+            entryPoint -> requestResolver.resolve(entryPoint.key()));
 
     if (createFullBindingGraph) {
       // Resolve the keys for all bindings in all modules, stripping any multibinding contribution

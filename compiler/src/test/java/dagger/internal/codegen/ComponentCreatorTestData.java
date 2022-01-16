@@ -28,6 +28,7 @@ import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ErrorMessages;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.tools.JavaFileObject;
@@ -35,8 +36,8 @@ import javax.tools.JavaFileObject;
 final class ComponentCreatorTestData {
 
   final CompilerMode compilerMode;
-
   final ComponentCreatorKind creatorKind;
+
   final ErrorMessages.ComponentCreatorMessages messages;
 
   ComponentCreatorTestData(
@@ -98,5 +99,13 @@ final class ComponentCreatorTestData {
   /** Compiles the given files with the set compiler mode's javacopts. */
   Compilation compile(JavaFileObject... files) {
     return compilerWithOptions(compilerMode.javacopts()).compile(files);
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", "[", "]")
+        .add(compilerMode.toString())
+        .add(creatorKind.toString())
+        .toString();
   }
 }
