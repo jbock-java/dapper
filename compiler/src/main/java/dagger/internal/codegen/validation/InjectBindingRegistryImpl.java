@@ -280,18 +280,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     ValidationReport<TypeElement> report =
         injectValidator.validateMembersInjectionType(typeElement);
     report.printMessagesTo(messager);
-    if (!report.isClean()) {
-      return Optional.empty();
-    }
-
-    MembersInjectionBinding binding = bindingFactory.membersInjectionBinding(type, resolvedType);
-    registerBinding(binding, warnIfNotAlreadyGenerated);
-    for (Optional<DeclaredType> supertype = types.nonObjectSuperclass(type);
-         supertype.isPresent();
-         supertype = types.nonObjectSuperclass(supertype.get())) {
-      getOrFindMembersInjectionBinding(keyFactory.forMembersInjectedType(supertype.get()));
-    }
-    return Optional.of(binding);
+    return Optional.empty();
   }
 
   @Override

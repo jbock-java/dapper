@@ -22,7 +22,6 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.BOUND_INSTANCE;
@@ -44,7 +43,6 @@ import com.google.auto.common.MoreTypes;
 import dagger.Module;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
@@ -55,7 +53,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.BiFunction;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -405,45 +402,5 @@ public final class BindingFactory {
         .provisionDependencies(membersInjectionBinding.dependencies())
         .injectionSites(membersInjectionBinding.injectionSites())
         .build();
-  }
-
-  /**
-   * Returns a {@link dagger.model.BindingKind#MEMBERS_INJECTION} binding.
-   *
-   * @param resolvedType if {@code declaredType} is a generic class and {@code resolvedType} is a
-   *     parameterization of that type, the returned binding will be for the resolved type
-   */
-  // TODO(dpb): See if we can just pass one nongeneric/parameterized type.
-  public MembersInjectionBinding membersInjectionBinding(
-      DeclaredType declaredType, Optional<TypeMirror> resolvedType) {
-    // If the class this is injecting has some type arguments, resolve everything.
-    if (!declaredType.getTypeArguments().isEmpty() && resolvedType.isPresent()) {
-      DeclaredType resolved = asDeclared(resolvedType.get());
-      // Validate that we're resolving from the correct type.
-      Preconditions.checkState(
-          types.isSameType(types.erasure(resolved), types.erasure(declaredType)),
-          "erased expected type: %s, erased actual type: %s",
-          types.erasure(resolved),
-          types.erasure(declaredType));
-      declaredType = resolved;
-    }
-    SortedSet<InjectionSite> injectionSites =
-        injectionSiteFactory.getInjectionSites(declaredType);
-    Set<DependencyRequest> dependencies =
-        injectionSites.stream()
-            .flatMap(injectionSite -> injectionSite.dependencies().stream())
-            .collect(toImmutableSet());
-
-    Key key = keyFactory.forMembersInjectedType(declaredType);
-    TypeElement typeElement = MoreElements.asType(declaredType.asElement());
-    return new MembersInjectionBinding(
-        key,
-        dependencies,
-        typeElement,
-        hasNonDefaultTypeParameters(typeElement, key.type(), types)
-            ? Optional.of(
-            membersInjectionBinding(asDeclared(typeElement.asType()), Optional.empty()))
-            : Optional.empty(),
-        injectionSites);
   }
 }

@@ -484,54 +484,6 @@ class SwitchingProviderTest {
   }
 
   @Test
-  void memberInjectors() {
-    JavaFileObject foo =
-        JavaFileObjects.forSourceLines(
-            "test.Foo",
-            "package test;",
-            "",
-            "class Foo {}");
-    JavaFileObject component =
-        JavaFileObjects.forSourceLines(
-            "test.TestComponent",
-            "package test;",
-            "",
-            "import dagger.Component;",
-            "import dagger.MembersInjector;",
-            "import jakarta.inject.Provider;",
-            "",
-            "@Component",
-            "interface TestComponent {",
-            "  Provider<MembersInjector<Foo>> providerOfMembersInjector();",
-            "}");
-
-    Compilation compilation = compilerWithAndroidMode().compile(foo, component);
-    assertThat(compilation).succeeded();
-    List<String> generatedComponent = new ArrayList<>();
-    Collections.addAll(generatedComponent,
-        "package test;");
-    Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual());
-    Collections.addAll(generatedComponent,
-        "final class DaggerTestComponent implements TestComponent {",
-        "  private Provider<MembersInjector<Foo>> fooMembersInjectorProvider;",
-        "",
-        "  @SuppressWarnings(\"unchecked\")",
-        "  private void initialize() {",
-        "    this.fooMembersInjectorProvider = InstanceFactory.create(MembersInjectors.<Foo>noOp());",
-        "  }",
-        "",
-        "  @Override",
-        "  public Provider<MembersInjector<Foo>> providerOfMembersInjector() {",
-        "    return fooMembersInjectorProvider;",
-        "  }",
-        "}");
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
-  }
-
-  @Test
   void optionals() {
     JavaFileObject present =
         JavaFileObjects.forSourceLines(
