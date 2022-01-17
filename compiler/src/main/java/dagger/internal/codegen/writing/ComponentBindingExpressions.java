@@ -40,7 +40,6 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -247,9 +246,6 @@ public final class ComponentBindingExpressions {
   /** Creates a binding expression. */
   private BindingExpression createBindingExpression(Binding binding, BindingRequest request) {
     switch (binding.bindingType()) {
-      case MEMBERS_INJECTION:
-        Preconditions.checkArgument(request.isRequestKind(RequestKind.MEMBERS_INJECTION));
-        return membersInjectionBindingExpressionFactory.create((MembersInjectionBinding) binding);
 
       case PROVISION:
         return provisionBindingExpression((ContributionBinding) binding, request);

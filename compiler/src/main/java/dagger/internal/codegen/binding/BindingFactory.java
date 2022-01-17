@@ -337,8 +337,6 @@ public final class BindingFactory {
                 .nullableType(actualBinding.nullableType()),
             delegateDeclaration
         );
-
-      case MEMBERS_INJECTION: // fall-through to throw
     }
     throw new AssertionError("bindingType: " + actualBinding);
   }

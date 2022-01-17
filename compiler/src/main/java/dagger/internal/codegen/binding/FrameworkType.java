@@ -48,7 +48,6 @@ public enum FrameworkType {
     switch (bindingType) {
       case PROVISION:
         return PROVIDER;
-      case MEMBERS_INJECTION:
     }
     throw new AssertionError(bindingType);
   }
