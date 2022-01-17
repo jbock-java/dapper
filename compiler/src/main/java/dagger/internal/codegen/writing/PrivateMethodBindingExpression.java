@@ -49,7 +49,6 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
   PrivateMethodBindingExpression(
       @Assisted BindingRequest request,
       @Assisted ContributionBinding binding,
-      @Assisted MethodImplementationStrategy methodImplementationStrategy,
       @Assisted BindingExpression wrappedBindingExpression,
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
@@ -57,7 +56,6 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
         componentImplementation.shardImplementation(binding),
         request,
         binding,
-        methodImplementationStrategy,
         wrappedBindingExpression,
         types);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
@@ -99,7 +97,6 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
     PrivateMethodBindingExpression create(
         BindingRequest request,
         ContributionBinding binding,
-        MethodImplementationStrategy methodImplementationStrategy,
         BindingExpression wrappedBindingExpression);
   }
 }

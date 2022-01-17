@@ -459,7 +459,9 @@ class SubcomponentValidationTest {
                 "package test;",
                 "")
             .addLines(GeneratedLines.generatedAnnotations())
-            .addLines("final class DaggerParentComponent implements ParentComponent {")
+            .addLines("final class DaggerParentComponent implements ParentComponent {",
+                "  private Provider<Dep1> dep1Provider;",
+                "  private Provider<Dep2> dep2Provider;")
             .addLinesIn(
                 DEFAULT_MODE,
                 "  @SuppressWarnings(\"unchecked\")",
@@ -468,93 +470,56 @@ class SubcomponentValidationTest {
                 "    this.dep2Provider = DoubleCheck.provider(Dep2_Factory.create());",
                 "  }",
                 "")
-            .addLines(
-                "  @Override",
-                "  public Dep1 dep1() {")
             .addLinesIn(
                 FAST_INIT_MODE,
-                "    Object local = dep1;",
-                "    if (local instanceof MemoizedSentinel) {",
-                "      synchronized (local) {",
-                "        local = dep1;",
-                "        if (local instanceof MemoizedSentinel) {",
-                "          local = new Dep1();",
-                "          dep1 = DoubleCheck.reentrantCheck(dep1, local);",
-                "        }",
-                "      }",
-                "    }",
-                "    return (Dep1) local;")
-            .addLinesIn(
-                DEFAULT_MODE,
-                "    return dep1Provider.get();")
+                "  @SuppressWarnings(\"unchecked\")",
+                "  private void initialize() {",
+                "    this.dep1Provider = DoubleCheck.provider(new SwitchingProvider<Dep1>(parentComponent, 0));",
+                "    this.dep2Provider = DoubleCheck.provider(new SwitchingProvider<Dep2>(parentComponent, 1));",
+                "  }")
             .addLines(
+                "  @Override",
+                "  public Dep1 dep1() {",
+                "    return dep1Provider.get();",
                 "  }",
                 "",
                 "  @Override",
-                "  public Dep2 dep2() {")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "    Object local = dep2;",
-                "    if (local instanceof MemoizedSentinel) {",
-                "      synchronized (local) {",
-                "        local = dep2;",
-                "        if (local instanceof MemoizedSentinel) {",
-                "          local = new Dep2();",
-                "          dep2 = DoubleCheck.reentrantCheck(dep2, local);",
-                "        }",
-                "      }",
-                "    }",
-                "    return (Dep2) local;")
-            .addLinesIn(
-                DEFAULT_MODE,
-                "    return dep2Provider.get();")
-            .addLines(
+                "  public Dep2 dep2() {",
+                "    return dep2Provider.get();",
                 "  }",
                 "",
                 "  @Override",
                 "  public ChildComponent childComponent() {",
                 "    return new ChildComponentImpl(parentComponent);",
                 "  }",
-                "")
-            .addLines(
                 "",
                 "  private static final class ChildComponentImpl implements ChildComponent {",
-                "    private final ChildModule childModule;",
-                "",
-                "    private final DaggerParentComponent parentComponent;",
-                "",
-                "    private final ChildComponentImpl childComponentImpl = this;",
-                "",
-                "    private ChildComponentImpl(DaggerParentComponent parentComponent) {",
-                "      this.parentComponent = parentComponent;",
-                "      this.childModule = new ChildModule();",
-                "    }",
-                "")
-            .addLinesIn(
-                DEFAULT_MODE,
                 "    private NeedsDep1 needsDep1() {",
                 "      return new NeedsDep1(parentComponent.dep1Provider.get());",
-                "    }")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "    private NeedsDep1 needsDep1() {",
-                "      return new NeedsDep1(parentComponent.dep1());",
-                "    }")
-            .addLinesIn(
-                DEFAULT_MODE,
+                "    }",
+                "",
                 "    private A a() {",
                 "      return new A(needsDep1(), parentComponent.dep1Provider.get(), parentComponent.dep2Provider.get());",
-                "    }")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "    private A a() {",
-                "      return new A(needsDep1(), parentComponent.dep1(), parentComponent.dep2());",
-                "    }")
-            .addLines(
+                "    }",
                 "",
                 "    @Override",
                 "    public Object object() {",
                 "      return ChildModule_ProvideObjectFactory.provideObject(childModule, a());",
+                "    }",
+                "  }")
+            .addLinesIn(
+                FAST_INIT_MODE,
+                "  private static final class SwitchingProvider<T> implements Provider<T> {",
+                "    @SuppressWarnings(\"unchecked\")",
+                "    @Override",
+                "    public T get() {",
+                "      switch (id) {",
+                "        case 0: // test.Dep1 ",
+                "        return (T) new Dep1();",
+                "        case 1: // test.Dep2 ",
+                "        return (T) new Dep2();",
+                "        default: throw new AssertionError(id);",
+                "      }",
                 "    }",
                 "  }",
                 "}")

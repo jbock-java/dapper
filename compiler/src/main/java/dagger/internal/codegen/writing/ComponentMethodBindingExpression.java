@@ -43,7 +43,6 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
   ComponentMethodBindingExpression(
       @Assisted BindingRequest request,
       @Assisted ContributionBinding binding,
-      @Assisted MethodImplementationStrategy methodImplementationStrategy,
       @Assisted BindingExpression wrappedBindingExpression,
       @Assisted ComponentMethodDescriptor componentMethod,
       ComponentImplementation componentImplementation,
@@ -52,7 +51,6 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
         componentImplementation.getComponentShard(),
         request,
         binding,
-        methodImplementationStrategy,
         wrappedBindingExpression,
         types);
     this.componentMethod = requireNonNull(componentMethod);
@@ -96,11 +94,10 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     ComponentMethodBindingExpression create(
         BindingRequest request,
         ContributionBinding binding,
-        MethodImplementationStrategy methodImplementationStrategy,
         BindingExpression wrappedBindingExpression,
         ComponentMethodDescriptor componentMethod);
   }

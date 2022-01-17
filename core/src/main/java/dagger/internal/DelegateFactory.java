@@ -36,13 +36,6 @@ public final class DelegateFactory<T> implements Factory<T> {
     return delegate.get();
   }
 
-  // TODO(ronshapiro): remove this once we can reasonably expect generated code is no longer using
-  // this method
-  @Deprecated
-  public void setDelegatedProvider(Provider<T> delegate) {
-    setDelegate(this, delegate);
-  }
-
   /**
    * Sets {@code delegateFactory}'s delegate provider to {@code delegate}.
    *

@@ -103,15 +103,6 @@ public final class ComponentImplementation {
     /** A field required by the component, e.g. module instances. */
     COMPONENT_REQUIREMENT_FIELD,
 
-    /**
-     * A field for the lock and cached value for {@linkplain PrivateMethodBindingExpression
-     * private-method scoped bindings}.
-     */
-    PRIVATE_METHOD_SCOPED_FIELD,
-
-    /** A field for the cached provider of a {@link PrivateMethodBindingExpression}. */
-    PRIVATE_METHOD_CACHED_PROVIDER_FIELD,
-
     /** A framework field for type T, e.g. {@code Provider<T>}. */
     FRAMEWORK_FIELD,
 

@@ -19,7 +19,6 @@ package dagger.internal.codegen.writing;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
-import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
@@ -40,19 +39,16 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.Key;
-import dagger.model.RequestKind;
-import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Keeps track of all provider expression requests for a component.
@@ -82,31 +78,26 @@ final class SwitchingProviders {
       new LinkedHashMap<>();
 
   private final ShardImplementation shardImplementation;
-  private final ComponentBindingExpressions componentBindingExpressions;
   private final DaggerTypes types;
   private final UniqueNameSet switchingProviderNames = new UniqueNameSet();
 
   SwitchingProviders(
       ComponentImplementation componentImplementation,
-      ComponentBindingExpressions componentBindingExpressions,
       DaggerTypes types) {
     // Currently, the SwitchingProviders types are only added to the componentShard.
     this.shardImplementation = requireNonNull(componentImplementation).getComponentShard();
-    this.componentBindingExpressions = requireNonNull(componentBindingExpressions);
     this.types = requireNonNull(types);
   }
 
-  /**
-   * Returns the binding expression for a binding that satisfies a {@code Provider} requests with a
-   * inner {@code SwitchingProvider} class.
-   */
-  BindingExpression newBindingExpression(ContributionBinding binding) {
-    return new BindingExpression() {
+  /** Returns the framework instance creation expression for an inner switching provider class. */
+  FrameworkInstanceCreationExpression newFrameworkInstanceCreationExpression(
+      ContributionBinding binding, BindingExpression unscopedInstanceBindingExpression) {
+    return new FrameworkInstanceCreationExpression() {
       @Override
-      Expression getDependencyExpression(ClassName requestingClass) {
+      public CodeBlock creationExpression() {
         return switchingProviderBuilders
             .computeIfAbsent(binding.key(), key -> getSwitchingProviderBuilder())
-            .getProviderExpression(binding, requestingClass);
+            .getNewInstanceCodeBlock(binding, unscopedInstanceBindingExpression);
       }
     };
   }
@@ -119,7 +110,7 @@ final class SwitchingProviders {
       shardImplementation.addTypeSupplier(switchingProviderBuilder::build);
       return switchingProviderBuilder;
     }
-    ArrayList<SwitchingProviderBuilder> values = new ArrayList<>(this.switchingProviderBuilders.values());
+    List<SwitchingProviderBuilder> values = List.copyOf(this.switchingProviderBuilders.values());
     return values.get(values.size() - 1);
   }
 
@@ -135,30 +126,39 @@ final class SwitchingProviders {
       this.switchingProviderType = requireNonNull(switchingProviderType);
     }
 
-    Expression getProviderExpression(ContributionBinding binding, ClassName requestingClass) {
+    private CodeBlock getNewInstanceCodeBlock(
+        ContributionBinding binding, BindingExpression unscopedInstanceBindingExpression) {
       Key key = binding.key();
       if (!switchIds.containsKey(key)) {
         int switchId = switchIds.size();
         switchIds.put(key, switchId);
-        switchCases.put(switchId, createSwitchCaseCodeBlock(key));
+        switchCases.put(
+            switchId, createSwitchCaseCodeBlock(key, unscopedInstanceBindingExpression));
       }
-      TypeMirror instanceType = types.accessibleType(binding.contributedType(), requestingClass);
-      return Expression.create(
-          types.wrapType(instanceType, Provider.class),
-          CodeBlock.of(
-              "new $T<>($L, $L)",
-              switchingProviderType,
-              shardImplementation.componentFieldsByImplementation().values().stream()
-                  .map(field -> CodeBlock.of("$N", field))
-                  .collect(CodeBlocks.toParametersCodeBlock()),
-              switchIds.get(key)));
+      return CodeBlock.of(
+          "new $T<$L>($L, $L)",
+          switchingProviderType,
+          // Add the type parameter explicitly when the binding is scoped because Java can't resolve
+          // the type when wrapped. For example, the following will error:
+          //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
+          binding.scope().isPresent()
+              ? CodeBlock.of(
+                  "$T", types.accessibleType(binding.contributedType(), switchingProviderType))
+              : "",
+          shardImplementation.componentFieldsByImplementation().values().stream()
+              .map(field -> CodeBlock.of("$N", field))
+              .collect(CodeBlocks.toParametersCodeBlock()),
+          switchIds.get(key));
     }
 
-    private CodeBlock createSwitchCaseCodeBlock(Key key) {
+    private CodeBlock createSwitchCaseCodeBlock(
+        Key key, BindingExpression unscopedInstanceBindingExpression) {
+      // TODO(bcorso): Try to delay calling getDependencyExpression() until we are writing out the
+      // SwitchingProvider because calling it here makes FrameworkFieldInitializer think there's a
+      // cycle when initializing SwitchingProviders which adds an uncessary DelegateFactory.
       CodeBlock instanceCodeBlock =
-          componentBindingExpressions
-              .getDependencyExpression(
-                  bindingRequest(key, RequestKind.INSTANCE), switchingProviderType)
+          unscopedInstanceBindingExpression
+              .getDependencyExpression(switchingProviderType)
               .box(types)
               .codeBlock();
 
