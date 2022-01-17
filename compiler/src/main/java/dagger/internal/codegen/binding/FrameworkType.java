@@ -45,11 +45,7 @@ public enum FrameworkType {
 
   /** Returns the framework type appropriate for fields for a given binding type. */
   public static FrameworkType forBindingType(BindingType bindingType) {
-    switch (bindingType) {
-      case PROVISION:
-        return PROVIDER;
-    }
-    throw new AssertionError(bindingType);
+    return PROVIDER;
   }
 
   /** Returns the framework type that exactly matches the given request kind, if one exists. */

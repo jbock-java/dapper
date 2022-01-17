@@ -20,7 +20,6 @@ import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.BindingKind;
@@ -80,11 +79,6 @@ public final class ProvisionBinding extends ContributionBinding {
   @Override
   public Set<DependencyRequest> explicitDependencies() {
     return provisionDependencies();
-  }
-
-  @Override
-  public ContributionType contributionType() {
-    return ContributionType.UNIQUE;
   }
 
   @Override

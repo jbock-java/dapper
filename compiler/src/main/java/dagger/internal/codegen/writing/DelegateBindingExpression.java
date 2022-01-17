@@ -30,7 +30,6 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
-import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -43,7 +42,6 @@ final class DelegateBindingExpression extends BindingExpression {
   private final RequestKind requestKind;
   private final ComponentBindingExpressions componentBindingExpressions;
   private final DaggerTypes types;
-  private final BindsTypeChecker bindsTypeChecker;
 
   @AssistedInject
   DelegateBindingExpression(
@@ -55,7 +53,6 @@ final class DelegateBindingExpression extends BindingExpression {
     this.requestKind = requireNonNull(requestKind);
     this.componentBindingExpressions = componentBindingExpressions;
     this.types = types;
-    this.bindsTypeChecker = new BindsTypeChecker(types);
   }
 
   /**
@@ -94,7 +91,7 @@ final class DelegateBindingExpression extends BindingExpression {
   private boolean instanceRequiresCast(Expression delegateExpression, ClassName requestingClass) {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
-    return !bindsTypeChecker.isAssignable(
+    return !types.isAssignable(
         delegateExpression.type(), binding.contributedType())
         && isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName());
   }

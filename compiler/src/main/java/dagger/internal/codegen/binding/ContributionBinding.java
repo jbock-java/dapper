@@ -21,7 +21,6 @@ import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreatio
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 
 import com.google.auto.common.MoreElements;
-import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.model.Key;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
@@ -32,7 +31,7 @@ import javax.lang.model.type.TypeMirror;
  * An abstract class for a value object representing the mechanism by which a {@link Key} can be
  * contributed to a dependency graph.
  */
-public abstract class ContributionBinding extends Binding implements HasContributionType {
+public abstract class ContributionBinding extends Binding {
 
   /** Returns the type that specifies this' nullability, absent if not nullable. */
   public abstract Optional<DeclaredType> nullableType();

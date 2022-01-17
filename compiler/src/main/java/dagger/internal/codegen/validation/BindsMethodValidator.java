@@ -22,7 +22,6 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
 
 import com.google.auto.common.MoreTypes;
-import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -36,13 +35,11 @@ import javax.lang.model.type.TypeMirror;
 /** A validator for {@link dagger.Binds} methods. */
 final class BindsMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
-  private final BindsTypeChecker bindsTypeChecker;
 
   @Inject
   BindsMethodValidator(
       DaggerElements elements,
       DaggerTypes types,
-      BindsTypeChecker bindsTypeChecker,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
@@ -56,7 +53,6 @@ final class BindsMethodValidator extends BindingMethodValidator {
         ALLOWS_SCOPING,
         injectionAnnotations);
     this.types = types;
-    this.bindsTypeChecker = bindsTypeChecker;
   }
 
   @Override
@@ -86,7 +82,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
       TypeMirror leftHandSide = boxIfNecessary(element.getReturnType());
       TypeMirror rightHandSide = parameter.asType();
 
-      if (!bindsTypeChecker.isAssignable(rightHandSide, leftHandSide)) {
+      if (!types.isAssignable(rightHandSide, leftHandSide)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.
         // If one of the types isn't valid it means we need to delay validation to the next round.
         // Note: BasicAnnotationProcessor only performs superficial validation on the referenced

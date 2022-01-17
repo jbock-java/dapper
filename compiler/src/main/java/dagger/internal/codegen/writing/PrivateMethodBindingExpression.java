@@ -28,7 +28,6 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
@@ -43,7 +42,6 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
   private final ShardImplementation shardImplementation;
   private final ContributionBinding binding;
   private final BindingRequest request;
-  private final CompilerOptions compilerOptions;
   private final DaggerTypes types;
   private String methodName;
 
@@ -54,8 +52,7 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
       @Assisted MethodImplementationStrategy methodImplementationStrategy,
       @Assisted BindingExpression wrappedBindingExpression,
       ComponentImplementation componentImplementation,
-      DaggerTypes types,
-      CompilerOptions compilerOptions) {
+      DaggerTypes types) {
     super(
         componentImplementation.shardImplementation(binding),
         request,
@@ -66,7 +63,6 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.binding = binding;
     this.request = request;
-    this.compilerOptions = compilerOptions;
     this.types = types;
   }
 

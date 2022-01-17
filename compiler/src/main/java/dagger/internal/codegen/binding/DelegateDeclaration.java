@@ -21,8 +21,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import dagger.Binds;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
@@ -39,8 +37,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 
 /** The declaration for a delegate binding established by a {@link Binds} method. */
-public final class DelegateDeclaration extends BindingDeclaration
-    implements HasContributionType {
+public final class DelegateDeclaration extends BindingDeclaration {
 
   private final Key key;
   private final Optional<Element> bindingElement;
@@ -62,11 +59,6 @@ public final class DelegateDeclaration extends BindingDeclaration
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
     this.delegateRequest = requireNonNull(delegateRequest);
-  }
-
-  @Override
-  public ContributionType contributionType() {
-    return ContributionType.UNIQUE;
   }
 
   @Override

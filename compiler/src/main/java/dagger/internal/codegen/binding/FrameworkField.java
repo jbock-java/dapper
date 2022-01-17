@@ -16,9 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.binding.FrameworkType.PROVIDER;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import dagger.internal.codegen.javapoet.TypeNames;
+import jakarta.inject.Provider;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -73,9 +77,7 @@ public final class FrameworkField {
   public static FrameworkField forBinding(
       ContributionBinding binding, Optional<ClassName> frameworkClass) {
     return create(
-        frameworkClass.orElse(
-            ClassName.get(
-                FrameworkType.forBindingType(binding.bindingType()).frameworkClass())),
+        frameworkClass.orElse(TypeNames.PROVIDER),
         TypeName.get(binding.key().type()),
         frameworkFieldName(binding));
   }
