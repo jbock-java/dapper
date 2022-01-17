@@ -23,10 +23,8 @@ import static dagger.model.RequestKind.INSTANCE;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
-import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
@@ -87,21 +85,6 @@ public final class DependencyRequestFactory {
         provisionMethod);
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(provisionMethod);
     return newDependencyRequest(provisionMethod, provisionMethodType.getReturnType(), qualifier);
-  }
-
-  /**
-   * Returns a synthetic request for the present value of an optional binding generated from a
-   * {@link dagger.BindsOptionalOf} declaration.
-   */
-  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
-    Optional<Key> key = keyFactory.unwrapOptional(requestKey);
-    Preconditions.checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
-    return DependencyRequest.builder()
-        .kind(kind)
-        .key(key.get())
-        .isNullable(
-            allowsNull(getRequestKind(OptionalType.from(requestKey).valueType()), Optional.empty()))
-        .build();
   }
 
   private DependencyRequest newDependencyRequest(

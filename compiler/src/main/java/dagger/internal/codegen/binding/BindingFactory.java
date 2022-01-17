@@ -30,7 +30,6 @@ import static dagger.model.BindingKind.COMPONENT_DEPENDENCY;
 import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static java.util.Objects.requireNonNull;
@@ -48,7 +47,6 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -324,17 +322,11 @@ public final class BindingFactory {
    */
   ContributionBinding delegateBinding(
       DelegateDeclaration delegateDeclaration, ContributionBinding actualBinding) {
-    switch (actualBinding.bindingType()) {
-
-      case PROVISION:
-        return buildDelegateBinding(
-            ProvisionBinding.builder()
-                .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow()))
-                .nullableType(actualBinding.nullableType()),
-            delegateDeclaration
-        );
-    }
-    throw new AssertionError("bindingType: " + actualBinding);
+    return buildDelegateBinding(
+        ProvisionBinding.builder()
+            .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow()))
+            .nullableType(actualBinding.nullableType()),
+        delegateDeclaration);
   }
 
   /**
@@ -357,31 +349,6 @@ public final class BindingFactory {
         .key(delegateDeclaration.key())
         .dependencies(delegateDeclaration.delegateRequest())
         .kind(DELEGATE)
-        .build();
-  }
-
-  /**
-   * Returns an {@link dagger.model.BindingKind#OPTIONAL} binding for {@code key}.
-   *
-   * @param requestKind the kind of request for the optional binding
-   * @param underlyingKeyBindings the possibly empty set of bindings that exist in the component for
-   *     the underlying (non-optional) key
-   */
-  ContributionBinding syntheticOptionalBinding(
-      Key key,
-      RequestKind requestKind,
-      Collection<? extends Binding> underlyingKeyBindings) {
-    if (underlyingKeyBindings.isEmpty()) {
-      return ProvisionBinding.builder()
-          .key(key)
-          .kind(OPTIONAL)
-          .build();
-    }
-
-    return ProvisionBinding.builder()
-        .key(key)
-        .kind(OPTIONAL)
-        .dependencies(dependencyRequestFactory.forSyntheticPresentOptionalBinding(key, requestKind))
         .build();
   }
 }

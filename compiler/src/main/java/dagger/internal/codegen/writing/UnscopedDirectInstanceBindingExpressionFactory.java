@@ -41,7 +41,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   private final ComponentRequirementBindingExpression.Factory
       componentRequirementBindingExpressionFactory;
   private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
-  private final OptionalBindingExpression.Factory optionalBindingExpressionFactory;
   private final SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory;
   private final SubcomponentCreatorBindingExpression.Factory
       subcomponentCreatorBindingExpressionFactory;
@@ -53,7 +52,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
       ComponentProvisionBindingExpression.Factory componentProvisionBindingExpressionFactory,
       ComponentRequirementBindingExpression.Factory componentRequirementBindingExpressionFactory,
       DelegateBindingExpression.Factory delegateBindingExpressionFactory,
-      OptionalBindingExpression.Factory optionalBindingExpressionFactory,
       SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory,
       SubcomponentCreatorBindingExpression.Factory subcomponentCreatorBindingExpressionFactory) {
     this.assistedFactoryBindingExpressionFactory = assistedFactoryBindingExpressionFactory;
@@ -62,7 +60,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
     this.componentRequirementBindingExpressionFactory =
         componentRequirementBindingExpressionFactory;
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
-    this.optionalBindingExpressionFactory = optionalBindingExpressionFactory;
     this.simpleMethodBindingExpressionFactory = simpleMethodBindingExpressionFactory;
     this.subcomponentCreatorBindingExpressionFactory = subcomponentCreatorBindingExpressionFactory;
   }
@@ -87,9 +84,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
 
       case SUBCOMPONENT_CREATOR:
         return Optional.of(subcomponentCreatorBindingExpressionFactory.create(binding));
-
-      case OPTIONAL:
-        return Optional.of(optionalBindingExpressionFactory.create((ProvisionBinding) binding));
 
       case BOUND_INSTANCE:
         return Optional.of(

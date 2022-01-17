@@ -41,8 +41,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
       injectionOrProvisionProviderCreationExpressionFactory;
-  private final OptionalFactoryInstanceCreationExpression.Factory
-      optionalFactoryInstanceCreationExpressionFactory;
 
   @Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
@@ -54,9 +52,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       DependencyMethodProviderCreationExpression.Factory
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
-          injectionOrProvisionProviderCreationExpressionFactory,
-      OptionalFactoryInstanceCreationExpression.Factory
-          optionalFactoryInstanceCreationExpressionFactory) {
+          injectionOrProvisionProviderCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.anonymousProviderCreationExpressionFactory = anonymousProviderCreationExpressionFactory;
@@ -66,8 +62,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
         injectionOrProvisionProviderCreationExpressionFactory;
-    this.optionalFactoryInstanceCreationExpressionFactory =
-        optionalFactoryInstanceCreationExpressionFactory;
   }
 
   /**
@@ -106,9 +100,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);
-
-      case OPTIONAL:
-        return optionalFactoryInstanceCreationExpressionFactory.create(binding);
 
       default:
         throw new AssertionError(binding);

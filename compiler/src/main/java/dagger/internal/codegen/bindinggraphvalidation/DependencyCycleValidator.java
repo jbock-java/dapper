@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.extension.DaggerGraphs.shortestPath;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
@@ -28,14 +27,12 @@ import com.google.common.graph.Graphs;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.NetworkBuilder;
-import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.Node;
-import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import dagger.spi.BindingGraphPlugin;
@@ -49,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.lang.model.type.TypeMirror;
 
 /** Reports errors for dependency cycles. */
 final class DependencyCycleValidator implements BindingGraphPlugin {
@@ -199,15 +195,6 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     }
     if (breaksCycle(edge.dependencyRequest().kind())) {
       return true;
-    }
-    Node target = graph.network().incidentNodes(edge).target();
-    if (target instanceof dagger.model.Binding
-        && ((dagger.model.Binding) target).kind().equals(BindingKind.OPTIONAL)) {
-      /* For @BindsOptionalOf bindings, unwrap the type inside the Optional. If the unwrapped type
-       * breaks the cycle, so does the optional binding. */
-      TypeMirror optionalValueType = OptionalType.from(edge.dependencyRequest().key()).valueType();
-      RequestKind requestKind = getRequestKind(optionalValueType);
-      return breaksCycle(requestKind);
     }
     return false;
   }
