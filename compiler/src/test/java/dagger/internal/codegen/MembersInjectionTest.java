@@ -64,7 +64,7 @@ class MembersInjectionTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  @Override",

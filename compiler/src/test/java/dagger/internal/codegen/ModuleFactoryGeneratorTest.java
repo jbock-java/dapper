@@ -198,11 +198,11 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(factoryFile,
         "package test;");
     Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;"));
     Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(factoryFile,
         "public final class TestModule_ProvideStringFactory implements Factory<String> {",
         "  private final TestModule module;",
@@ -249,9 +249,9 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(factoryFile,
         "package test;");
     Collections.addAll(factoryFile,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+        GeneratedLines.generatedImports("import dagger.internal.Factory;"));
     Collections.addAll(factoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(factoryFile,
         "public final class TestModule_ProvideStringFactory implements Factory<String> {",
         "  private final TestModule module;",
@@ -319,14 +319,14 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(listFactoryFile,
         "package test;");
     Collections.addAll(listFactoryFile,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.MembersInjector;",
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;",
             "import java.util.List;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(listFactoryFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(listFactoryFile,
         "public final class TestModule_ProvideObjectsFactory implements Factory<List<Object>> {",
         "  private final TestModule module;",
@@ -613,12 +613,12 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(provideMapStringNumberFactory,
         "package test;");
     Collections.addAll(provideMapStringNumberFactory,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;",
             "import java.util.Map;"));
     Collections.addAll(provideMapStringNumberFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(provideMapStringNumberFactory,
         "public final class ParameterizedModule_ProvideMapStringNumberFactory implements Factory<Map<String, Number>> {",
         "  @Override",
@@ -643,11 +643,11 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(provideNonGenericTypeFactory,
         "package test;");
     Collections.addAll(provideNonGenericTypeFactory,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;"));
     Collections.addAll(provideNonGenericTypeFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(provideNonGenericTypeFactory,
         "public final class ParameterizedModule_ProvideNonGenericTypeFactory implements Factory<Object> {",
         "  @Override",
@@ -672,12 +672,12 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(provideNonGenericTypeWithDepsFactory,
         "package test;");
     Collections.addAll(provideNonGenericTypeWithDepsFactory,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(provideNonGenericTypeWithDepsFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(provideNonGenericTypeWithDepsFactory,
         "public final class ParameterizedModule_ProvideNonGenericTypeWithDepsFactory implements Factory<String> {",
         "  private final Provider<Object> oProvider;",
@@ -870,7 +870,7 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(generatedGetFactory,
         "package test;");
     Collections.addAll(generatedGetFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedGetFactory,
         "public final class TestModule_GetFactory implements Factory<Integer> {",
         "  @Override",
@@ -894,7 +894,7 @@ class ModuleFactoryGeneratorTest {
     Collections.addAll(generatedCreateFactory,
         "package test;");
     Collections.addAll(generatedCreateFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedCreateFactory,
         "public final class TestModule_CreateFactory implements Factory<Boolean> {",
         "  @Override",

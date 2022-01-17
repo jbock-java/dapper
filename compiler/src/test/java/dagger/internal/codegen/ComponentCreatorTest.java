@@ -83,7 +83,7 @@ class ComponentCreatorTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerSimpleComponent implements SimpleComponent {",
         "  private static final class Builder implements SimpleComponent.Builder {",
@@ -136,9 +136,9 @@ class ComponentCreatorTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private final TestModule testModule;",
@@ -342,9 +342,9 @@ class ComponentCreatorTest {
             .addLines(
                 "package test;")
             .addLines(
-                GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+                GeneratedLines.generatedImports("import dagger.internal.Preconditions;"))
             .addLines(
-                GeneratedLines.generatedAnnotationsIndividual())
+                GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final Object object;",
@@ -445,9 +445,9 @@ class ComponentCreatorTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"));
+        GeneratedLines.generatedImports("import dagger.internal.Preconditions;"));
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerSimpleComponent implements SimpleComponent {",
         "  private final Integer i;",

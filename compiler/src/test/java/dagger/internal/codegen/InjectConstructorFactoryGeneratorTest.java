@@ -134,11 +134,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class GenericClass_Factory<T> implements Factory<GenericClass<T>> {",
         "  private final Provider<T> tProvider;",
@@ -181,9 +181,9 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+        GeneratedLines.generatedImports("import dagger.internal.Factory;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class GenericClass_Factory<T> implements Factory<GenericClass<T>> {",
         "  @Override",
@@ -226,11 +226,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A, B>> {",
         "  private final Provider<A> aProvider;",
@@ -279,12 +279,12 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import java.util.List;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class GenericClass_Factory<A extends Number & Comparable<A>, B extends List<? extends String>, C extends List<? super String>> implements Factory<GenericClass<A, B, C>> {",
         "  private final Provider<A> aProvider;",
@@ -338,13 +338,13 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.Lazy;",
             "import dagger.internal.DoubleCheck;",
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A, B>> {",
         "  private final Provider<A> aProvider;",
@@ -671,11 +671,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class InjectConstructor_Factory implements Factory<InjectConstructor> {",
         "  private final Provider<String> sProvider;",
@@ -718,12 +718,12 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import java.util.List;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class InjectConstructor_Factory implements Factory<InjectConstructor> {",
         "  private final Provider<List<?>> objectsProvider;",
@@ -770,11 +770,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class InjectConstructor_Factory implements Factory<InjectConstructor> {",
         "  private final Provider<other.pkg.Factory> factoryProvider;",
@@ -824,12 +824,12 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;",
             "import other.pkg.Outer;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class InjectConstructor_Factory implements Factory<InjectConstructor> {",
         "  private final Provider<Outer.Factory> factoryProvider;",
@@ -881,11 +881,11 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(expected,
         "package test;");
     Collections.addAll(expected,
-        GeneratedLines.generatedImportsIndividual(
+        GeneratedLines.generatedImports(
             "import dagger.internal.Factory;",
             "import jakarta.inject.Provider;"));
     Collections.addAll(expected,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(expected,
         "public final class InjectConstructor_Factory implements Factory<InjectConstructor> {",
         "  private final Provider<other.pkg.CommonName> otherPackageProvider;",
@@ -935,9 +935,9 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(factory,
         "package test;");
     Collections.addAll(factory,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+        GeneratedLines.generatedImports("import dagger.internal.Factory;"));
     Collections.addAll(factory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(factory,
         "public final class SimpleType_Factory implements Factory<SimpleType> {",
         "  @Override",
@@ -985,9 +985,9 @@ public final class InjectConstructorFactoryGeneratorTest {
     Collections.addAll(aFactory,
         "package test;");
     Collections.addAll(aFactory,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Factory;"));
+        GeneratedLines.generatedImports("import dagger.internal.Factory;"));
     Collections.addAll(aFactory,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(aFactory,
         "public final class OuterType_A_Factory implements Factory<OuterType.A> {",
         "  @Override",

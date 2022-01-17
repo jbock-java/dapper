@@ -24,7 +24,6 @@ import static java.util.Objects.requireNonNull;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import dagger.internal.DaggerGenerated;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
@@ -85,7 +84,6 @@ public abstract class SourceFileGenerator<T> {
 
   private JavaFile buildJavaFile(T input, TypeSpec.Builder typeSpecBuilder) {
     typeSpecBuilder.addOriginatingElement(originatingElement(input));
-    typeSpecBuilder.addAnnotation(DaggerGenerated.class);
     AnnotationSpec generatedAnnotation =
         AnnotationSpec.builder(TypeNames.GENERATED)
             .addMember("value", "$S", "dagger.internal.codegen.ComponentProcessor")

@@ -62,7 +62,7 @@ class MapBindingComponentProcessorTest {
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines(
                 "package test;")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private final MapModule mapModule;",

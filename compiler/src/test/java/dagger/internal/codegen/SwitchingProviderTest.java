@@ -67,7 +67,7 @@ class SwitchingProviderTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -346,7 +346,7 @@ class SwitchingProviderTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private volatile Provider<String> sProvider;",
@@ -431,7 +431,7 @@ class SwitchingProviderTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private volatile Object charSequence = new MemoizedSentinel();",
@@ -534,7 +534,7 @@ class SwitchingProviderTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  @SuppressWarnings(\"rawtypes\")",

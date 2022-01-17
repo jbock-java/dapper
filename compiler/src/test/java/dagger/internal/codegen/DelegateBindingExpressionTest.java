@@ -129,7 +129,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
@@ -205,7 +205,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
@@ -279,7 +279,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,
@@ -379,7 +379,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
@@ -488,7 +488,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
@@ -579,7 +579,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
@@ -681,7 +681,7 @@ class DelegateBindingExpressionTest {
                 .addLines(
                     "package test;",
                     "")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     DEFAULT_MODE,
@@ -785,7 +785,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerRequestsSubtypeAsProvider")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerRequestsSubtypeAsProvider implements RequestsSubtypeAsProvider {")
                 .addLinesIn(
@@ -878,7 +878,7 @@ class DelegateBindingExpressionTest {
                 .javaFileBuilder("test.DaggerTestComponent")
                 .addLines(
                     "package test;")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(

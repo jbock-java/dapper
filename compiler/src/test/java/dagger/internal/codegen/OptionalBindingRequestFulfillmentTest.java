@@ -95,7 +95,7 @@ class OptionalBindingRequestFulfillmentTest {
         "package test;",
         "import java.util.Optional;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {");
     if (compilerMode == FAST_INIT_MODE) {

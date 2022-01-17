@@ -83,7 +83,7 @@ class AssistedFactoryTest {
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines("package test;")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLinesIn(
                 FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",
@@ -182,7 +182,7 @@ class AssistedFactoryTest {
         compilerMode
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines("package test;")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLinesIn(
                 FAST_INIT_MODE,
                 "final class DaggerTestComponent implements TestComponent {",

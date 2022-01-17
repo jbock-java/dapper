@@ -95,7 +95,7 @@ class ComponentShardTest {
                 .addLines(
                     "package dagger.internal.codegen;",
                     "")
-                .addLines(GeneratedLines.generatedAnnotationsIndividual())
+                .addLines(GeneratedLines.generatedAnnotations())
                 .addLines("final class DaggerTestComponent implements TestComponent {")
                 .addLinesIn(
                     FAST_INIT_MODE,

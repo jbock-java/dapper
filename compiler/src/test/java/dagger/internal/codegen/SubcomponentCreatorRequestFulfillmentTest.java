@@ -85,9 +85,9 @@ class SubcomponentCreatorRequestFulfillmentTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerC implements C {",
         "  @Override",

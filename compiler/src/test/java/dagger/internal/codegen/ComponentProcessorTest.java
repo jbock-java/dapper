@@ -157,12 +157,12 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedImportsIndividual(
+            .addLines(GeneratedLines.generatedImports(
                 "import dagger.Lazy;",
                 "import dagger.internal.DoubleCheck;",
                 "import jakarta.inject.Provider;"))
             .addLines("")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final DaggerSimpleComponent simpleComponent = this;")
@@ -297,7 +297,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines("final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final DaggerSimpleComponent simpleComponent = this;")
             .addLinesIn(
@@ -437,10 +437,10 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedImportsIndividual(
+            .addLines(GeneratedLines.generatedImports(
                 "import dagger.internal.Preconditions;"))
             .addLines("")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private final TestModule testModule;",
@@ -545,7 +545,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private B b() {",
@@ -643,9 +643,9 @@ class ComponentProcessorTest {
         .addLines(
             "package test;",
             "")
-        .addLines(GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+        .addLines(GeneratedLines.generatedImports("import dagger.internal.Preconditions;"))
         .addLines("")
-        .addLines(GeneratedLines.generatedAnnotationsIndividual())
+        .addLines(GeneratedLines.generatedAnnotations())
         .addLines(
             "final class DaggerTestComponent implements TestComponent {",
             "  static final class Builder {",
@@ -831,11 +831,11 @@ class ComponentProcessorTest {
         "package test;",
         "");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"));
+        GeneratedLines.generatedImports("import dagger.internal.Preconditions;"));
     Collections.addAll(generatedComponent,
         "");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerParent implements Parent {",
         "  private final DaggerParent parent = this;",
@@ -948,7 +948,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerSimpleComponent implements SimpleComponent {",
                 "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -1024,7 +1024,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines("final class DaggerBComponent implements BComponent {")
             .addLinesIn(DEFAULT_MODE, "  private Provider<A> aProvider;")
             .addLinesIn(
@@ -1160,7 +1160,7 @@ class ComponentProcessorTest {
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines("package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private final TestModule testModule;",
@@ -1284,9 +1284,9 @@ class ComponentProcessorTest {
             .javaFileBuilder("test.DaggerTestComponent")
             .addLines("package test;",
                 "")
-            .addLines(GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"))
+            .addLines(GeneratedLines.generatedImports("import dagger.internal.Preconditions;"))
             .addLines("")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerBComponent implements BComponent {",
                 "  private final AComponent aComponent;",
@@ -1365,7 +1365,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines("final class DaggerTestComponent implements TestComponent {",
                 "  private B b() {",
                 "    return new B(new C());",
@@ -1445,11 +1445,11 @@ class ComponentProcessorTest {
         "package test;",
         "");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(generatedComponent,
         "");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerSimpleComponent implements SimpleComponent {",
         "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -1529,7 +1529,7 @@ class ComponentProcessorTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines("final class DaggerSimpleComponent implements SimpleComponent {",
                 "  @Override",
                 "  public SomeInjectableType someInjectableType() {",
@@ -1781,11 +1781,11 @@ class ComponentProcessorTest {
         "package test;",
         "");
     Collections.addAll(generated,
-        GeneratedLines.generatedImportsIndividual("import dagger.internal.Preconditions;"));
+        GeneratedLines.generatedImports("import dagger.internal.Preconditions;"));
     Collections.addAll(generated,
         "");
     Collections.addAll(generated,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generated,
         "final class DaggerParent implements Parent {",
         "  private final DaggerParent parent = this;",
@@ -1942,7 +1942,7 @@ class ComponentProcessorTest {
         compilerMode.javaFileBuilder("test.DaggerParent")
             .addLines(
                 "package test;")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerParent implements Parent {",
                 "  private String string() {",
@@ -2014,7 +2014,7 @@ class ComponentProcessorTest {
     String[] expectedPattern =
         compilerMode.javaFileBuilder("test.DaggerParent")
             .addLines("package test;")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines(
                 "final class DaggerParent implements Parent {",
                 "  private static final class ChildImpl implements Child {",
@@ -2085,7 +2085,7 @@ class ComponentProcessorTest {
     Collections.addAll(generatedComponent,
         "package test;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  @Override",
@@ -2123,11 +2123,11 @@ class ComponentProcessorTest {
         "package test;",
         "");
     Collections.addAll(daggerPublicComponent,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(daggerPublicComponent,
         "");
     Collections.addAll(daggerPublicComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(daggerPublicComponent,
         "public final class DaggerPublicComponent implements PublicComponent {",
         "  private final DaggerPublicComponent publicComponent = this;",

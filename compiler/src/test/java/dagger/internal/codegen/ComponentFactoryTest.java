@@ -75,7 +75,7 @@ class ComponentFactoryTest {
         "",
         "import dagger.internal.Preconditions;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private static final class Factory implements TestComponent.Factory {",

@@ -67,9 +67,9 @@ class ElidedFactoriesTest {
             "}");
     List<String> generatedComponent = new ArrayList<>();
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerSimpleComponent implements SimpleComponent {",
         "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -167,12 +167,12 @@ class ElidedFactoriesTest {
       Collections.addAll(generatedComponent,
           "package test;");
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedImportsIndividual(
+          GeneratedLines.generatedImports(
               "import dagger.internal.DoubleCheck;",
               "import dagger.internal.MemoizedSentinel;",
               "import jakarta.inject.Provider;"));
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedAnnotationsIndividual());
+          GeneratedLines.generatedAnnotations());
       Collections.addAll(generatedComponent,
           "final class DaggerSimpleComponent implements SimpleComponent {",
           "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -259,11 +259,11 @@ class ElidedFactoriesTest {
       Collections.addAll(generatedComponent,
           "package test;");
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedImportsIndividual(
+          GeneratedLines.generatedImports(
               "import dagger.internal.DoubleCheck;",
               "import jakarta.inject.Provider;"));
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedAnnotationsIndividual());
+          GeneratedLines.generatedAnnotations());
       Collections.addAll(generatedComponent,
           "final class DaggerSimpleComponent implements SimpleComponent {",
           "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -371,11 +371,11 @@ class ElidedFactoriesTest {
       Collections.addAll(generatedComponent,
           "package test;");
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedImportsIndividual(
+          GeneratedLines.generatedImports(
               "import dagger.internal.DoubleCheck;",
               "import dagger.internal.MemoizedSentinel;"));
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedAnnotationsIndividual());
+          GeneratedLines.generatedAnnotations());
       Collections.addAll(generatedComponent,
           "final class DaggerSimpleComponent implements SimpleComponent {",
           "  private final DaggerSimpleComponent simpleComponent = this;",
@@ -441,11 +441,11 @@ class ElidedFactoriesTest {
       Collections.addAll(generatedComponent,
           "package test;");
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedImportsIndividual(
+          GeneratedLines.generatedImports(
               "import dagger.internal.DoubleCheck;",
               "import jakarta.inject.Provider;"));
       Collections.addAll(generatedComponent,
-          GeneratedLines.generatedAnnotationsIndividual());
+          GeneratedLines.generatedAnnotations());
       Collections.addAll(generatedComponent,
           "final class DaggerSimpleComponent implements SimpleComponent {",
           "  private final DaggerSimpleComponent simpleComponent = this;",

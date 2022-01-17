@@ -458,7 +458,7 @@ class SubcomponentValidationTest {
             .addLines(
                 "package test;",
                 "")
-            .addLines(GeneratedLines.generatedAnnotationsIndividual())
+            .addLines(GeneratedLines.generatedAnnotations())
             .addLines("final class DaggerParentComponent implements ParentComponent {")
             .addLinesIn(
                 DEFAULT_MODE,
@@ -638,7 +638,7 @@ class SubcomponentValidationTest {
         "",
         "import test.subpackage.Sub;");
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerParentComponent implements ParentComponent {",
         "  @Override",
@@ -723,7 +723,7 @@ class SubcomponentValidationTest {
     Collections.addAll(componentGeneratedFile,
         "package test;");
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerParentComponent implements ParentComponent {",
         "  @Override",
@@ -790,7 +790,7 @@ class SubcomponentValidationTest {
 
     List<String> componentGeneratedFile = new ArrayList<>();
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerParentComponent implements ParentComponent {",
         "  @Override",
@@ -872,7 +872,7 @@ class SubcomponentValidationTest {
         "",
         "import top1.a.b.c.d.E;");
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerParentComponent implements ParentComponent {",
         "  @Override",
@@ -935,7 +935,7 @@ class SubcomponentValidationTest {
         "package test;",
         "");
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerC implements C {",
         "  @Override",
@@ -996,9 +996,9 @@ class SubcomponentValidationTest {
     Collections.addAll(componentGeneratedFile,
         "package test;");
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedImportsIndividual());
+        GeneratedLines.generatedImports());
     Collections.addAll(componentGeneratedFile,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(componentGeneratedFile,
         "final class DaggerC implements C {",
         "  @Override",

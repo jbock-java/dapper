@@ -76,7 +76,7 @@ class ComponentBuilderTest {
     Collections.addAll(generatedComponent,
         "import dagger.internal.Preconditions;");
     Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotationsIndividual());
+        GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
         "final class DaggerTestComponent implements TestComponent {",
         "  private static final class Builder implements TestComponent.Builder {",
