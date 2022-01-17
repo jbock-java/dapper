@@ -17,70 +17,15 @@
 package dagger.internal.codegen;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
-import static dagger.internal.codegen.Compilers.compilerWithOptions;
 
-import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 class MembersInjectionTest {
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void parentClass_noInjectedMembers(CompilerMode compilerMode) {
-    JavaFileObject childFile = JavaFileObjects.forSourceLines("test.Child",
-        "package test;",
-        "",
-        "import jakarta.inject.Inject;",
-        "",
-        "public final class Child extends Parent {",
-        "  @Inject Child() {}",
-        "}");
-    JavaFileObject parentFile = JavaFileObjects.forSourceLines("test.Parent",
-        "package test;",
-        "",
-        "public abstract class Parent {}");
-
-    JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.TestComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "",
-        "@Component",
-        "interface TestComponent {",
-        "  Child child();",
-        "}");
-
-    List<String> generatedComponent = new ArrayList<>();
-    Collections.addAll(generatedComponent,
-        "package test;");
-    Collections.addAll(generatedComponent,
-        GeneratedLines.generatedAnnotations());
-    Collections.addAll(generatedComponent,
-        "final class DaggerTestComponent implements TestComponent {",
-        "  @Override",
-        "  public Child child() {",
-        "    return new Child();",
-        "  }",
-        "}");
-    Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
-            .compile(childFile, parentFile, componentFile);
-
-    assertThat(compilation).succeeded();
-    assertThat(compilation)
-        .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
-  }
 
   @Test
   void parentClass_injectedMembersInSupertype() {
