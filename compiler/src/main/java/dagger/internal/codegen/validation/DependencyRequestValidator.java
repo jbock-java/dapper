@@ -23,8 +23,6 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAss
 import static javax.lang.model.type.TypeKind.WILDCARD;
 
 import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import dagger.MembersInjector;
 import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -34,20 +32,16 @@ import java.util.Collection;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 /** Validation for dependency requests. */
 final class DependencyRequestValidator {
-  private final MembersInjectionValidator membersInjectionValidator;
   private final InjectionAnnotations injectionAnnotations;
 
   @Inject
   DependencyRequestValidator(
-      MembersInjectionValidator membersInjectionValidator,
       InjectionAnnotations injectionAnnotations) {
-    this.membersInjectionValidator = membersInjectionValidator;
     this.injectionAnnotations = injectionAnnotations;
   }
 
@@ -125,16 +119,6 @@ final class DependencyRequestValidator {
                 + "or Produced<T> when T is a wildcard type such as "
                 + keyType,
             requestElement);
-      }
-      if (MoreTypes.isType(keyType) && MoreTypes.isTypeOf(MembersInjector.class, keyType)) {
-        DeclaredType membersInjectorType = MoreTypes.asDeclared(keyType);
-        if (membersInjectorType.getTypeArguments().isEmpty()) {
-          report.addError("Cannot inject a raw MembersInjector", requestElement);
-        } else {
-          report.addSubreport(
-              membersInjectionValidator.validateMembersInjectionRequest(
-                  requestElement, membersInjectorType.getTypeArguments().get(0)));
-        }
       }
     }
   }

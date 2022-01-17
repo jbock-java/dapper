@@ -72,7 +72,6 @@ public final class ComponentBindingExpressions {
   private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
   private final DerivedFromFrameworkInstanceBindingExpression.Factory
       derivedFromFrameworkInstanceBindingExpressionFactory;
-  private final MembersInjectionBindingExpression.Factory membersInjectionBindingExpressionFactory;
   private final PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory;
   private final ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory;
   private final UnscopedDirectInstanceBindingExpressionFactory
@@ -94,7 +93,6 @@ public final class ComponentBindingExpressions {
       DelegateBindingExpression.Factory delegateBindingExpressionFactory,
       DerivedFromFrameworkInstanceBindingExpression.Factory
           derivedFromFrameworkInstanceBindingExpressionFactory,
-      MembersInjectionBindingExpression.Factory membersInjectionBindingExpressionFactory,
       PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory,
       ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory,
       UnscopedDirectInstanceBindingExpressionFactory unscopedDirectInstanceBindingExpressionFactory,
@@ -110,7 +108,6 @@ public final class ComponentBindingExpressions {
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
     this.derivedFromFrameworkInstanceBindingExpressionFactory =
         derivedFromFrameworkInstanceBindingExpressionFactory;
-    this.membersInjectionBindingExpressionFactory = membersInjectionBindingExpressionFactory;
     this.privateMethodBindingExpressionFactory = privateMethodBindingExpressionFactory;
     this.providerInstanceBindingExpressionFactory = providerInstanceBindingExpressionFactory;
     this.unscopedDirectInstanceBindingExpressionFactory =

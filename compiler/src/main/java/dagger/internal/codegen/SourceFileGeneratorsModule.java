@@ -19,10 +19,8 @@ package dagger.internal.codegen;
 import dagger.Binds;
 import dagger.Module;
 import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FactoryGenerator;
-import dagger.internal.codegen.writing.MembersInjectorGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.writing.ModuleProxies.ModuleConstructorProxyGenerator;
 import javax.lang.model.element.TypeElement;
@@ -32,9 +30,6 @@ interface SourceFileGeneratorsModule {
 
   @Binds
   SourceFileGenerator<ProvisionBinding> factoryGenerator(FactoryGenerator generator);
-
-  @Binds
-  SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator(MembersInjectorGenerator generator);
 
   @Binds
   @ModuleGenerator

@@ -22,7 +22,6 @@ import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.BindingGraphPlugins;
@@ -39,7 +38,6 @@ public class ComponentProcessorHelper {
 
   private final InjectBindingRegistry injectBindingRegistry;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  private final SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
   private final List<BasicAnnotationProcessor.Step> processingSteps;
   private final BindingGraphPlugins bindingGraphPlugins;
   private final Set<ClearableCache> clearableCaches;
@@ -49,14 +47,12 @@ public class ComponentProcessorHelper {
   ComponentProcessorHelper(
       InjectBindingRegistry injectBindingRegistry,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator,
       List<BasicAnnotationProcessor.Step> processingSteps,
       BindingGraphPlugins bindingGraphPlugins,
       Set<ClearableCache> clearableCaches,
       Messager messager) {
     this.injectBindingRegistry = injectBindingRegistry;
     this.factoryGenerator = factoryGenerator;
-    this.membersInjectorGenerator = membersInjectorGenerator;
     this.processingSteps = processingSteps;
     this.bindingGraphPlugins = bindingGraphPlugins;
     this.clearableCaches = clearableCaches;

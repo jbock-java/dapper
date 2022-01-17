@@ -50,13 +50,11 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private final CompilerOptions compilerOptions;
   private final ProvisionBinding provisionBinding;
   private final ComponentBindingExpressions componentBindingExpressions;
-  private final MembersInjectionMethods membersInjectionMethods;
   private final ComponentRequirementExpressions componentRequirementExpressions;
 
   @AssistedInject
   SimpleMethodBindingExpression(
       @Assisted ProvisionBinding binding,
-      MembersInjectionMethods membersInjectionMethods,
       CompilerOptions compilerOptions,
       ComponentBindingExpressions componentBindingExpressions,
       ComponentRequirementExpressions componentRequirementExpressions) {
@@ -65,7 +63,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
     this.provisionBinding = binding;
     Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
     this.componentBindingExpressions = componentBindingExpressions;
-    this.membersInjectionMethods = membersInjectionMethods;
     this.componentRequirementExpressions = componentRequirementExpressions;
   }
 
@@ -133,10 +130,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   }
 
   private Expression injectMembers(CodeBlock instance) {
-    if (provisionBinding.injectionSites().isEmpty()) {
-      return Expression.create(simpleMethodReturnType(), instance);
-    }
-    return membersInjectionMethods.getInjectExpression(provisionBinding.key(), instance);
+    return Expression.create(simpleMethodReturnType(), instance);
   }
 
   private Optional<CodeBlock> moduleReference(ClassName requestingClass) {

@@ -17,11 +17,9 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
-import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.common.MoreElements;
@@ -36,7 +34,6 @@ import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.KeyFactory;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;

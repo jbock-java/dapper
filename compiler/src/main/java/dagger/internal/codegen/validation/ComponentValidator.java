@@ -89,7 +89,6 @@ public final class ComponentValidator implements ClearableCache {
   private final ModuleValidator moduleValidator;
   private final ComponentCreatorValidator creatorValidator;
   private final DependencyRequestValidator dependencyRequestValidator;
-  private final MembersInjectionValidator membersInjectionValidator;
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final DependencyRequestFactory dependencyRequestFactory;
   private final Map<TypeElement, ValidationReport<TypeElement>> reports = new HashMap<>();
@@ -101,7 +100,6 @@ public final class ComponentValidator implements ClearableCache {
       ModuleValidator moduleValidator,
       ComponentCreatorValidator creatorValidator,
       DependencyRequestValidator dependencyRequestValidator,
-      MembersInjectionValidator membersInjectionValidator,
       MethodSignatureFormatter methodSignatureFormatter,
       DependencyRequestFactory dependencyRequestFactory) {
     this.elements = elements;
@@ -109,7 +107,6 @@ public final class ComponentValidator implements ClearableCache {
     this.moduleValidator = moduleValidator;
     this.creatorValidator = creatorValidator;
     this.dependencyRequestValidator = dependencyRequestValidator;
-    this.membersInjectionValidator = membersInjectionValidator;
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.dependencyRequestFactory = dependencyRequestFactory;
   }
