@@ -30,7 +30,6 @@ import static dagger.model.BindingKind.COMPONENT_DEPENDENCY;
 import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.MEMBERS_INJECTOR;
 import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
@@ -389,18 +388,6 @@ public final class BindingFactory {
         .key(key)
         .kind(OPTIONAL)
         .dependencies(dependencyRequestFactory.forSyntheticPresentOptionalBinding(key, requestKind))
-        .build();
-  }
-
-  /** Returns a {@link dagger.model.BindingKind#MEMBERS_INJECTOR} binding. */
-  public ProvisionBinding membersInjectorBinding(
-      Key key, MembersInjectionBinding membersInjectionBinding) {
-    return ProvisionBinding.builder()
-        .key(key)
-        .kind(MEMBERS_INJECTOR)
-        .bindingElement(MoreTypes.asTypeElement(membersInjectionBinding.key().type()))
-        .provisionDependencies(membersInjectionBinding.dependencies())
-        .injectionSites(membersInjectionBinding.injectionSites())
         .build();
   }
 }

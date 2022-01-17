@@ -61,9 +61,6 @@ public enum RequestKind {
       case PROVIDER_OF_LAZY:
         return String.format("Provider<Lazy<%s>>", key);
 
-      case MEMBERS_INJECTION:
-        return String.format("injectMembers(%s)", key);
-
       default:
         return String.format("%s<%s>", upperCamelName, key);
     }

@@ -233,34 +233,17 @@ public final class ComponentDescriptorFactory {
       }
     }
 
-    switch (componentMethod.getParameters().size()) {
-      case 0:
-        Preconditions.checkArgument(
-            !returnType.getKind().equals(VOID),
-            "component method cannot be void: %s",
-            componentMethod);
-        descriptor.dependencyRequest(
-            dependencyRequestFactory.forComponentProvisionMethod(
-                componentMethod, resolvedComponentMethod));
-        break;
-
-      case 1:
-        Preconditions.checkArgument(
-            returnType.getKind().equals(VOID)
-                || MoreTypes.equivalence()
-                .equivalent(returnType, resolvedComponentMethod.getParameterTypes().get(0)),
-            "members injection method must return void or parameter type: %s",
-            componentMethod);
-        descriptor.dependencyRequest(
-            dependencyRequestFactory.forComponentMembersInjectionMethod(
-                componentMethod, resolvedComponentMethod));
-        break;
-
-      default:
-        throw new IllegalArgumentException(
-            "component method has too many parameters: " + componentMethod);
+    if (componentMethod.getParameters().size() != 0) {
+      throw new IllegalArgumentException(
+          "component method has too many parameters: " + componentMethod);
     }
-
-    return descriptor.build();
+    Preconditions.checkArgument(
+        !returnType.getKind().equals(VOID),
+        "component method cannot be void: %s",
+        componentMethod);
+    return descriptor.dependencyRequest(
+            dependencyRequestFactory.forComponentProvisionMethod(
+                componentMethod, resolvedComponentMethod))
+        .build();
   }
 }

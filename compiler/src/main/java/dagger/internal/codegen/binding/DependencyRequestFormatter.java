@@ -80,15 +80,13 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
   }
 
   private final ElementVisitor<String, DependencyRequest> formatVisitor =
-      new ElementKindVisitor8<String, DependencyRequest>() {
+      new ElementKindVisitor8<>() {
 
         @Override
         public String visitExecutableAsMethod(ExecutableElement method, DependencyRequest request) {
           return INDENT
               + request.key()
-              + " is "
-              + componentMethodRequestVerb(request)
-              + " at\n"
+              + " is requested at\n"
               + DOUBLE_INDENT
               + elementToString(method);
         }
@@ -118,23 +116,5 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
 
   private String formatQualifier(Optional<AnnotationMirror> maybeQualifier) {
     return maybeQualifier.map(qualifier -> qualifier + " ").orElse("");
-  }
-
-  /**
-   * Returns the verb for a component method dependency request. Returns "produced", "provided", or
-   * "injected", depending on the kind of request.
-   */
-  private String componentMethodRequestVerb(DependencyRequest request) {
-    switch (request.kind()) {
-      case INSTANCE:
-      case LAZY:
-      case PROVIDER:
-      case PROVIDER_OF_LAZY:
-        return "requested";
-
-      case MEMBERS_INJECTION:
-        return "injected";
-    }
-    throw new AssertionError("illegal request kind for method: " + request);
   }
 }

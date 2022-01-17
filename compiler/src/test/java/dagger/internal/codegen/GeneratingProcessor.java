@@ -35,7 +35,6 @@ final class GeneratingProcessor extends AbstractProcessor {
   GeneratingProcessor(String generatedClassName, String... source) {
     this.generatedClassName = generatedClassName;
     this.generatedSource = String.join("\n", Arrays.asList(source));
-    ;
   }
 
   @Override

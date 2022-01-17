@@ -232,10 +232,7 @@ public final class ComponentBindingExpressions {
       return expressions.get(request);
     }
 
-    Optional<Binding> localBinding =
-        request.isRequestKind(RequestKind.MEMBERS_INJECTION)
-            ? graph.localMembersInjectionBinding(request.key())
-            : graph.localContributionBinding(request.key());
+    Optional<Binding> localBinding = graph.localContributionBinding(request.key());
 
     if (localBinding.isPresent()) {
       BindingExpression expression = createBindingExpression(localBinding.get(), request);
@@ -310,9 +307,6 @@ public final class ComponentBindingExpressions {
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceBindingExpressionFactory.create(
             request);
-
-      case MEMBERS_INJECTION:
-        throw new IllegalArgumentException();
     }
 
     throw new AssertionError();

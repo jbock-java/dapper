@@ -18,10 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.model.RequestKind.INSTANCE;
-import static dagger.model.RequestKind.MEMBERS_INJECTION;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Lazy;
@@ -89,21 +87,6 @@ public final class DependencyRequestFactory {
         provisionMethod);
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(provisionMethod);
     return newDependencyRequest(provisionMethod, provisionMethodType.getReturnType(), qualifier);
-  }
-
-  DependencyRequest forComponentMembersInjectionMethod(
-      ExecutableElement membersInjectionMethod, ExecutableType membersInjectionMethodType) {
-    requireNonNull(membersInjectionMethod);
-    requireNonNull(membersInjectionMethodType);
-    Optional<AnnotationMirror> qualifier =
-        injectionAnnotations.getQualifier(membersInjectionMethod);
-    Preconditions.checkArgument(qualifier.isEmpty());
-    TypeMirror membersInjectedType = getOnlyElement(membersInjectionMethodType.getParameterTypes());
-    return DependencyRequest.builder()
-        .kind(MEMBERS_INJECTION)
-        .key(keyFactory.forMembersInjectedType(membersInjectedType))
-        .requestElement(membersInjectionMethod)
-        .build();
   }
 
   /**
