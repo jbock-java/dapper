@@ -246,7 +246,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private Set<BindingDeclaration> declarations(
       BindingGraph graph, Binding binding) {
     BindingNode bindingNode = (BindingNode) binding;
-    Set<BindingDeclaration> declarations = new LinkedHashSet<>(bindingNode.associatedDeclarations());
+    Set<BindingDeclaration> declarations = bindingNode.associatedDeclarations();
     if (bindingDeclarationFormatter.canFormat(bindingNode.delegate())) {
       declarations.add(bindingNode.delegate());
     } else {

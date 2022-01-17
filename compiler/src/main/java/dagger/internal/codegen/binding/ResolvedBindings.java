@@ -45,23 +45,19 @@ final class ResolvedBindings {
 
   private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(key(),
       allContributionBindings(),
-      subcomponentDeclarations(),
-      optionalBindingDeclarations()));
+      subcomponentDeclarations()));
 
   private final Key key;
   private final Map<TypeElement, Set<ContributionBinding>> allContributionBindings;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
-  private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
 
   ResolvedBindings(
       Key key,
       Map<TypeElement, Set<ContributionBinding>> allContributionBindings,
-      Set<SubcomponentDeclaration> subcomponentDeclarations,
-      Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
+      Set<SubcomponentDeclaration> subcomponentDeclarations) {
     this.key = requireNonNull(key);
     this.allContributionBindings = requireNonNull(allContributionBindings);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
-    this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
   }
 
 
@@ -83,11 +79,6 @@ final class ResolvedBindings {
     return subcomponentDeclarations;
   }
 
-  /** The optional binding declarations for {@link #key()}. */
-  Set<OptionalBindingDeclaration> optionalBindingDeclarations() {
-    return optionalBindingDeclarations;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -95,8 +86,7 @@ final class ResolvedBindings {
     ResolvedBindings that = (ResolvedBindings) o;
     return key.equals(that.key)
         && allContributionBindings.equals(that.allContributionBindings)
-        && subcomponentDeclarations.equals(that.subcomponentDeclarations)
-        && optionalBindingDeclarations.equals(that.optionalBindingDeclarations);
+        && subcomponentDeclarations.equals(that.subcomponentDeclarations);
   }
 
   @Override
@@ -117,12 +107,10 @@ final class ResolvedBindings {
   }
 
   /**
-   * {@code true} if there are no {@link #bindings()}, {@link
-   * #optionalBindingDeclarations()}, or {@link #subcomponentDeclarations()}.
+   * {@code true} if there are no {@link #bindings()} or {@link #subcomponentDeclarations()}.
    */
   boolean isEmpty() {
     return allContributionBindings().isEmpty()
-        && optionalBindingDeclarations().isEmpty()
         && subcomponentDeclarations().isEmpty();
   }
 
@@ -160,12 +148,10 @@ final class ResolvedBindings {
   static ResolvedBindings forContributionBindings(
       Key key,
       Map<TypeElement, List<ContributionBinding>> contributionBindings,
-      Set<SubcomponentDeclaration> subcomponentDeclarations,
-      Set<OptionalBindingDeclaration> optionalBindingDeclarations) {
+      Set<SubcomponentDeclaration> subcomponentDeclarations) {
     return new ResolvedBindings(
         key,
         Util.transformValues(contributionBindings, LinkedHashSet::new),
-        subcomponentDeclarations,
-        optionalBindingDeclarations);
+        subcomponentDeclarations);
   }
 }

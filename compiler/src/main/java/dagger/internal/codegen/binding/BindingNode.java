@@ -25,12 +25,10 @@ import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -45,32 +43,27 @@ public final class BindingNode implements dagger.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
-      Set<OptionalBindingDeclaration> optionalBindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     return new BindingNode(
         component,
         delegate,
-        optionalBindingDeclarations,
         subcomponentDeclarations,
         bindingDeclarationFormatter);
   }
 
   private final ComponentPath componentPath;
   private final dagger.internal.codegen.binding.Binding delegate;
-  private final Set<OptionalBindingDeclaration> optionalBindingDeclarations;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
   private BindingNode(
       ComponentPath componentPath,
       dagger.internal.codegen.binding.Binding delegate,
-      Set<OptionalBindingDeclaration> optionalBindingDeclarations,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.componentPath = requireNonNull(componentPath);
     this.delegate = requireNonNull(delegate);
-    this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.bindingDeclarationFormatter = requireNonNull(bindingDeclarationFormatter);
   }
@@ -84,10 +77,6 @@ public final class BindingNode implements dagger.model.Binding {
     return delegate;
   }
 
-  public Set<OptionalBindingDeclaration> optionalBindingDeclarations() {
-    return optionalBindingDeclarations;
-  }
-
   public Set<SubcomponentDeclaration> subcomponentDeclarations() {
     return subcomponentDeclarations;
   }
@@ -99,14 +88,12 @@ public final class BindingNode implements dagger.model.Binding {
     BindingNode that = (BindingNode) o;
     return componentPath.equals(that.componentPath)
         && delegate.equals(that.delegate)
-        && optionalBindingDeclarations.equals(that.optionalBindingDeclarations)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(componentPath, delegate,
-        optionalBindingDeclarations, subcomponentDeclarations);
+    return Objects.hash(componentPath, delegate, subcomponentDeclarations);
   }
 
   /**
@@ -118,10 +105,8 @@ public final class BindingNode implements dagger.model.Binding {
    *   <li>{@linkplain Module#subcomponents() module subcomponent} declarations
    * </ul>
    */
-  public List<BindingDeclaration> associatedDeclarations() {
-    return Stream.of(optionalBindingDeclarations(), subcomponentDeclarations())
-        .flatMap(Set::stream)
-        .collect(Collectors.toList());
+  public Set<BindingDeclaration> associatedDeclarations() {
+    return new LinkedHashSet<>(subcomponentDeclarations());
   }
 
   @Override

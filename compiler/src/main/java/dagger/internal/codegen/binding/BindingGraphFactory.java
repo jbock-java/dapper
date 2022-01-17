@@ -102,7 +102,6 @@ public final class BindingGraphFactory implements ClearableCache {
       boolean createFullBindingGraph) {
     Set<ContributionBinding> explicitBindingsBuilder = new LinkedHashSet<>();
     Set<DelegateDeclaration> delegatesBuilder = new LinkedHashSet<>();
-    Set<OptionalBindingDeclaration> optionalsBuilder = new LinkedHashSet<>();
 
     if (componentDescriptor.isRealComponent()) {
       // binding for the component itself
@@ -278,7 +277,6 @@ public final class BindingGraphFactory implements ClearableCache {
      */
     ResolvedBindings lookUpBindings(Key requestKey) {
       Set<ContributionBinding> bindings = new LinkedHashSet<>();
-      Set<OptionalBindingDeclaration> optionalBindingDeclarations = new LinkedHashSet<>();
       Set<SubcomponentDeclaration> subcomponentDeclarations = new LinkedHashSet<>();
 
       // Gather all bindings, multibindings, optional, and subcomponent declarations/contributions.
@@ -320,8 +318,7 @@ public final class BindingGraphFactory implements ClearableCache {
       return ResolvedBindings.forContributionBindings(
           requestKey,
           bindings.stream().collect(Collectors.groupingBy((ContributionBinding binding) -> getOwningComponent(requestKey, binding))),
-          subcomponentDeclarations,
-          optionalBindingDeclarations);
+          subcomponentDeclarations);
     }
 
     /**
