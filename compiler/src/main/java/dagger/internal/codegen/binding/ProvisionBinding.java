@@ -54,7 +54,6 @@ public final class ProvisionBinding extends ContributionBinding {
   private final BindingKind kind;
   private final Optional<DeclaredType> nullableType;
   private final Set<DependencyRequest> provisionDependencies;
-  private final SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
   private final Optional<ProvisionBinding> unresolved;
   private final Optional<Scope> scope;
 
@@ -83,7 +82,6 @@ public final class ProvisionBinding extends ContributionBinding {
       BindingKind kind,
       Optional<DeclaredType> nullableType,
       Set<DependencyRequest> provisionDependencies,
-      SortedSet<MembersInjectionBinding.InjectionSite> injectionSites,
       Optional<ProvisionBinding> unresolved,
       Optional<Scope> scope) {
     this.key = requireNonNull(key);
@@ -92,7 +90,6 @@ public final class ProvisionBinding extends ContributionBinding {
     this.kind = requireNonNull(kind);
     this.nullableType = requireNonNull(nullableType);
     this.provisionDependencies = requireNonNull(provisionDependencies);
-    this.injectionSites = requireNonNull(injectionSites);
     this.unresolved = requireNonNull(unresolved);
     this.scope = requireNonNull(scope);
   }
@@ -148,7 +145,7 @@ public final class ProvisionBinding extends ContributionBinding {
    * BindingKind#INJECTION}, otherwise empty.
    */
   public SortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
-    return injectionSites;
+    return Collections.emptySortedSet();
   }
 
   @Override
@@ -170,8 +167,7 @@ public final class ProvisionBinding extends ContributionBinding {
 
   public static Builder builder() {
     return new Builder()
-        .provisionDependencies(Set.of())
-        .injectionSites(Collections.emptySortedSet());
+        .provisionDependencies(Set.of());
   }
 
   public Builder toBuilder() {
@@ -208,7 +204,6 @@ public final class ProvisionBinding extends ContributionBinding {
         && kind == that.kind
         && nullableType.equals(that.nullableType)
         && provisionDependencies.equals(that.provisionDependencies)
-        && injectionSites.equals(that.injectionSites)
         && unresolved.equals(that.unresolved)
         && scope.equals(that.scope);
   }
@@ -226,7 +221,6 @@ public final class ProvisionBinding extends ContributionBinding {
     private BindingKind kind;
     private Optional<DeclaredType> nullableType = Optional.empty();
     private Set<DependencyRequest> provisionDependencies;
-    private SortedSet<MembersInjectionBinding.InjectionSite> injectionSites;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
     private Optional<Scope> scope = Optional.empty();
 
@@ -240,7 +234,6 @@ public final class ProvisionBinding extends ContributionBinding {
       this.kind = source.kind();
       this.nullableType = source.nullableType();
       this.provisionDependencies = source.provisionDependencies();
-      this.injectionSites = source.injectionSites();
       this.unresolved = source.unresolved();
       this.scope = source.scope();
     }
@@ -292,11 +285,6 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    public Builder injectionSites(SortedSet<InjectionSite> injectionSites) {
-      this.injectionSites = injectionSites;
-      return this;
-    }
-
     public Builder unresolved(ProvisionBinding unresolved) {
       this.unresolved = Optional.of(unresolved);
       return this;
@@ -315,7 +303,6 @@ public final class ProvisionBinding extends ContributionBinding {
           this.kind,
           this.nullableType,
           this.provisionDependencies,
-          this.injectionSites,
           this.unresolved,
           this.scope);
     }

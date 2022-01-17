@@ -66,7 +66,6 @@ public final class BindingFactory {
   private final DaggerTypes types;
   private final KeyFactory keyFactory;
   private final DependencyRequestFactory dependencyRequestFactory;
-  private final InjectionSiteFactory injectionSiteFactory;
   private final DaggerElements elements;
   private final InjectionAnnotations injectionAnnotations;
 
@@ -76,13 +75,11 @@ public final class BindingFactory {
       DaggerElements elements,
       KeyFactory keyFactory,
       DependencyRequestFactory dependencyRequestFactory,
-      InjectionSiteFactory injectionSiteFactory,
       InjectionAnnotations injectionAnnotations) {
     this.types = types;
     this.elements = elements;
     this.keyFactory = keyFactory;
     this.dependencyRequestFactory = dependencyRequestFactory;
-    this.injectionSiteFactory = injectionSiteFactory;
     this.injectionAnnotations = injectionAnnotations;
   }
 
@@ -136,7 +133,6 @@ public final class BindingFactory {
             .bindingElement(constructorElement)
             .key(key)
             .provisionDependencies(provisionDependencies)
-            .injectionSites(injectionSiteFactory.getInjectionSites(constructedType))
             .kind(
                 isAnnotationPresent(constructorElement, AssistedInject.class)
                     ? ASSISTED_INJECTION

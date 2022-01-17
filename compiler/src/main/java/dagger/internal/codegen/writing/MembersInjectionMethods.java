@@ -23,7 +23,6 @@ import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpec
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -34,7 +33,6 @@ import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
@@ -45,7 +43,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** Manages the member injection methods for a component. */
