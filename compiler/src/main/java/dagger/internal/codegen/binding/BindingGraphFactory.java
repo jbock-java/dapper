@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isType;
-import static com.google.auto.common.MoreTypes.isTypeOf;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
@@ -28,13 +27,11 @@ import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static dagger.model.RequestKind.MEMBERS_INJECTION;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.isEqual;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
-import dagger.MembersInjector;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Keys;
 import dagger.internal.codegen.base.OptionalType;
@@ -222,7 +219,6 @@ public final class BindingGraphFactory implements ClearableCache {
     return new LegacyBindingGraph(
         componentDescriptor,
         new LinkedHashMap<>(requestResolver.getResolvedContributionBindings()),
-        new LinkedHashMap<>(requestResolver.getResolvedMembersInjectionBindings()),
         List.copyOf(subgraphs));
   }
 
@@ -249,7 +245,6 @@ public final class BindingGraphFactory implements ClearableCache {
     final Map<Key, Set<DelegateDeclaration>> delegateDeclarations;
     final Map<Key, Set<OptionalBindingDeclaration>> optionalBindingDeclarations;
     final Map<Key, ResolvedBindings> resolvedContributionBindings = new LinkedHashMap<>();
-    final Map<Key, ResolvedBindings> resolvedMembersInjectionBindings = new LinkedHashMap<>();
     final Deque<Key> cycleStack = new ArrayDeque<>();
     final Map<Key, Boolean> keyDependsOnLocalBindingsCache = new HashMap<>();
     final Map<Binding, Boolean> bindingDependsOnLocalBindingsCache = new HashMap<>();
@@ -603,8 +598,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
     /**
      * Returns the {@link ResolvedBindings} for {@code key} that was resolved in this resolver or an
-     * ancestor resolver. Only checks for {@link ContributionBinding}s as {@link
-     * MembersInjectionBinding}s are not inherited.
+     * ancestor resolver.
      */
     private Optional<ResolvedBindings> getPreviouslyResolvedBindings(Key key) {
       Optional<ResolvedBindings> result =
@@ -685,14 +679,6 @@ public final class BindingGraphFactory implements ClearableCache {
       parentResolver.ifPresent(parent -> bindings.putAll(parent.getResolvedContributionBindings()));
       bindings.putAll(resolvedContributionBindings);
       return bindings;
-    }
-
-    /**
-     * Returns all of the {@link ResolvedBindings} for {@link MembersInjectionBinding} from this
-     * resolvers, indexed by {@link ResolvedBindings#key()}.
-     */
-    Map<Key, ResolvedBindings> getResolvedMembersInjectionBindings() {
-      return resolvedMembersInjectionBindings;
     }
 
     private final class LocalDependencyChecker {

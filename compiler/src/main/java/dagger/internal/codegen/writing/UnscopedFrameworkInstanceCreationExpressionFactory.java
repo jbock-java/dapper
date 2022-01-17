@@ -19,7 +19,6 @@ package dagger.internal.codegen.writing;
 import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import jakarta.inject.Inject;
 
@@ -42,8 +41,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
       injectionOrProvisionProviderCreationExpressionFactory;
-  private final MembersInjectorProviderCreationExpression.Factory
-      membersInjectorProviderCreationExpressionFactory;
   private final OptionalFactoryInstanceCreationExpression.Factory
       optionalFactoryInstanceCreationExpressionFactory;
 
@@ -58,8 +55,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
           injectionOrProvisionProviderCreationExpressionFactory,
-      MembersInjectorProviderCreationExpression.Factory
-          membersInjectorProviderCreationExpressionFactory,
       OptionalFactoryInstanceCreationExpression.Factory
           optionalFactoryInstanceCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
@@ -71,8 +66,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
         injectionOrProvisionProviderCreationExpressionFactory;
-    this.membersInjectorProviderCreationExpressionFactory =
-        membersInjectorProviderCreationExpressionFactory;
     this.optionalFactoryInstanceCreationExpressionFactory =
         optionalFactoryInstanceCreationExpressionFactory;
   }
@@ -116,9 +109,6 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case OPTIONAL:
         return optionalFactoryInstanceCreationExpressionFactory.create(binding);
-
-      case MEMBERS_INJECTOR:
-        return membersInjectorProviderCreationExpressionFactory.create((ProvisionBinding) binding);
 
       default:
         throw new AssertionError(binding);

@@ -22,7 +22,4 @@ import dagger.MembersInjector;
 public enum BindingType {
   /** A binding with this type is a {@link ProvisionBinding}. */
   PROVISION,
-
-  /** A binding with this type is a {@link MembersInjectionBinding}. */
-  MEMBERS_INJECTION,
 }

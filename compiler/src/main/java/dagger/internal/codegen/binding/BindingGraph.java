@@ -17,6 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Suppliers.memoize;
+import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
@@ -246,7 +247,6 @@ public final class BindingGraph {
     // contains the key) we would use the top-level network to find the DependencyEdges for a
     // particular BindingNode.
     Map<Key, BindingNode> contributionBindings = new LinkedHashMap<>();
-    Map<Key, BindingNode> membersInjectionBindings = new LinkedHashMap<>();
 
     // Construct the maps of the ContributionBindings and MembersInjectionBindings by iterating
     // bindings from this component and then from each successive parent. If a binding exists in
@@ -256,32 +256,22 @@ public final class BindingGraph {
         .limit(componentNode.componentPath().components().size())
         .flatMap(path -> topLevelBindingGraph.bindingsByComponent().getOrDefault(path, List.of()).stream())
         .forEach(
-            bindingNode -> {
-              if (bindingNode.delegate() instanceof ContributionBinding) {
-                contributionBindings.putIfAbsent(bindingNode.key(), bindingNode);
-              } else if (bindingNode.delegate() instanceof MembersInjectionBinding) {
-                membersInjectionBindings.putIfAbsent(bindingNode.key(), bindingNode);
-              } else {
-                throw new AssertionError("Unexpected binding node type: " + bindingNode.delegate());
-              }
-            });
+            bindingNode -> contributionBindings.putIfAbsent(bindingNode.key(), bindingNode));
 
     BindingGraph bindingGraph = new BindingGraph(componentNode, topLevelBindingGraph);
 
     Set<ModuleDescriptor> modules =
         ((ComponentNodeImpl) componentNode).componentDescriptor().modules();
 
-    Set<ModuleDescriptor> inheritedModules =
-        parent.isPresent()
-            ? Util.union(parent.get().ownedModules, parent.get().inheritedModules)
-            : Set.of();
+    Set<ModuleDescriptor> inheritedModules = parent.map(graph ->
+            union(graph.ownedModules, graph.inheritedModules))
+        .orElse(Set.of());
 
     // Set these fields directly on the instance rather than passing these in as input to the
     // AutoValue to prevent exposing this data outside of the class.
     bindingGraph.inheritedModules = inheritedModules;
     bindingGraph.ownedModules = Util.difference(modules, inheritedModules);
     bindingGraph.contributionBindings = Map.copyOf(contributionBindings);
-    bindingGraph.membersInjectionBindings = Map.copyOf(membersInjectionBindings);
     bindingGraph.bindingModules =
         contributionBindings.values().stream()
             .map(BindingNode::contributingModule)
@@ -292,7 +282,6 @@ public final class BindingGraph {
   }
 
   private Map<Key, BindingNode> contributionBindings;
-  private Map<Key, BindingNode> membersInjectionBindings;
   private Set<ModuleDescriptor> inheritedModules;
   private Set<ModuleDescriptor> ownedModules;
   private Set<TypeElement> bindingModules;
@@ -329,31 +318,9 @@ public final class BindingGraph {
         : Optional.empty();
   }
 
-  /**
-   * Returns the {@link MembersInjectionBinding} for the given {@link Key} in this component or
-   * {@link Optional#empty()} if one doesn't exist.
-   */
-  public Optional<Binding> localMembersInjectionBinding(Key key) {
-    return membersInjectionBindings.containsKey(key)
-        ? Optional.of(membersInjectionBindings.get(key))
-        .filter(bindingNode -> bindingNode.componentPath().equals(componentPath()))
-        .map(BindingNode::delegate)
-        : Optional.empty();
-  }
-
   /** Returns the {@link ContributionBinding} for the given {@link Key}. */
   public ContributionBinding contributionBinding(Key key) {
     return (ContributionBinding) contributionBindings.get(key).delegate();
-  }
-
-  /**
-   * Returns the {@link MembersInjectionBinding} for the given {@link Key} or {@link
-   * Optional#empty()} if one does not exist.
-   */
-  public Optional<MembersInjectionBinding> membersInjectionBinding(Key key) {
-    return membersInjectionBindings.containsKey(key)
-        ? Optional.of((MembersInjectionBinding) membersInjectionBindings.get(key).delegate())
-        : Optional.empty();
   }
 
   /** Returns the {@link TypeElement} for the component this graph represents. */
@@ -378,7 +345,7 @@ public final class BindingGraph {
    *
    * <p>This factory method is the one defined in the parent component's interface.
    *
-   * <p>In the example below, the {@link BindingGraph#factoryMethod} for {@code ChildComponent}
+   * <p>In the example below, the {@code factoryMethod} for {@code ChildComponent}
    * would return the {@link ExecutableElement}: {@code childComponent(ChildModule1)} .
    *
    * <pre><code>
@@ -403,7 +370,7 @@ public final class BindingGraph {
    */
   // TODO(dpb): Consider disallowing modules if none of their bindings are used.
   public Map<ComponentRequirement, VariableElement> factoryMethodParameters() {
-    return factoryMethod().get().getParameters().stream()
+    return factoryMethod().orElseThrow().getParameters().stream()
         .collect(
             toImmutableMap(
                 parameter -> ComponentRequirement.forModule(parameter.asType()),

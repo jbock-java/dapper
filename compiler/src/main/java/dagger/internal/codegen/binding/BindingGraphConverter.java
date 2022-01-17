@@ -177,7 +177,7 @@ final class BindingGraphConverter {
      *       ExecutableElement)}.
      *   <li>For each entry point in the component, calls {@link #visitEntryPoint(ComponentNode,
      *       DependencyRequest)}.
-     *   <li>For each child component, calls {@link #visitComponent(LegacyBindingGraph,
+     *   <li>For each child component, calls {@code visitComponent(LegacyBindingGraph,
      *       ComponentNode)}, updating the traversal state.
      * </ol>
      *
@@ -199,7 +199,7 @@ final class BindingGraphConverter {
 
       for (ComponentMethodDescriptor entryPointMethod :
           graph.componentDescriptor().entryPointMethods()) {
-        visitEntryPoint(currentComponent, entryPointMethod.dependencyRequest().get());
+        visitEntryPoint(currentComponent, entryPointMethod.dependencyRequest().orElseThrow());
       }
 
       for (ResolvedBindings resolvedBindings : graph.resolvedBindings()) {

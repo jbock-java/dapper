@@ -23,7 +23,6 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assis
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
-import static dagger.internal.codegen.binding.SourceFiles.frameworkFieldUsages;
 import static dagger.internal.codegen.binding.SourceFiles.frameworkTypeUsageStatement;
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
@@ -57,7 +56,6 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
@@ -248,20 +246,6 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
           .nullableType()
           .ifPresent(nullableType -> CodeBlocks.addAnnotation(getMethod, nullableType));
       getMethod.addStatement("return $L", invokeNewInstance);
-    } else if (!binding.injectionSites().isEmpty()) {
-      CodeBlock instance = CodeBlock.of("instance");
-      getMethod
-          .addStatement("$T $L = $L", providedTypeName, instance, invokeNewInstance)
-          .addCode(
-              InjectionSiteMethod.invokeAll(
-                  binding.injectionSites(),
-                  generatedClassNameForBinding(binding),
-                  instance,
-                  binding.key().type(),
-                  frameworkFieldUsages(binding.dependencies(), frameworkFields)::get,
-                  types
-              ))
-          .addStatement("return $L", instance);
     } else {
       getMethod.addStatement("return $L", invokeNewInstance);
     }

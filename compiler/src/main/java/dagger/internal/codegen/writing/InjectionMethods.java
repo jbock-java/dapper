@@ -18,24 +18,20 @@ package dagger.internal.codegen.writing;
 
 import static com.google.auto.common.MoreElements.asExecutable;
 import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreElements.asVariable;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
-import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
-import static dagger.internal.codegen.javapoet.CodeBlocks.toConcatenatedCodeBlock;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypePubliclyAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
@@ -51,13 +47,10 @@ import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.extension.DaggerCollectors;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import java.util.ArrayList;
@@ -200,8 +193,7 @@ final class InjectionMethods {
     static boolean requiresInjectionMethod(
         ProvisionBinding binding, CompilerOptions compilerOptions, ClassName requestingClass) {
       ExecutableElement method = MoreElements.asExecutable(binding.bindingElement().orElseThrow());
-      return !binding.injectionSites().isEmpty()
-          || binding.shouldCheckForNull(compilerOptions)
+      return binding.shouldCheckForNull(compilerOptions)
           || !isElementAccessibleFrom(method, requestingClass.packageName())
           // This check should be removable once we drop support for -source 7
           || method.getParameters().stream()
@@ -210,9 +202,7 @@ final class InjectionMethods {
     }
 
     /**
-     * Returns the name of the {@code static} method that wraps {@code method}. For methods that are
-     * associated with {@code @Inject} constructors, the method will also inject all {@link
-     * InjectionSite}s.
+     * Returns the name of the {@code static} method that wraps {@code method}.
      */
     private static String methodName(ExecutableElement method) {
       switch (method.getKind()) {
@@ -226,141 +216,6 @@ final class InjectionMethods {
         default:
           throw new AssertionError(method);
       }
-    }
-  }
-
-  /**
-   * A static method that injects one member of an instance of a type. Its first parameter is an
-   * instance of the type to be injected. The remaining parameters match the dependency requests for
-   * the injection site.
-   *
-   * <p>Example:
-   *
-   * <pre><code>
-   * class Foo {
-   *   {@literal @Inject} Bar bar;
-   *   {@literal @Inject} void setThings(Baz baz, Qux qux) {}
-   * }
-   *
-   * public static injectBar(Foo instance, Bar bar) { … }
-   * public static injectSetThings(Foo instance, Baz baz, Qux qux) { … }
-   * </code></pre>
-   */
-  static final class InjectionSiteMethod {
-    /**
-     * When a type has an inaccessible member from a supertype (e.g. an @Inject field in a parent
-     * that's in a different package), a method in the supertype's package must be generated to give
-     * the subclass's members injector a way to inject it. Each potentially inaccessible member
-     * receives its own method, as the subclass may need to inject them in a different order from
-     * the parent class.
-     */
-    static MethodSpec create(InjectionSite injectionSite) {
-      String methodName = methodName(injectionSite);
-      switch (injectionSite.kind()) {
-        case METHOD:
-          return methodProxy(
-              asExecutable(injectionSite.element()),
-              methodName,
-              InstanceCastPolicy.CAST_IF_NOT_PUBLIC,
-              CheckNotNullPolicy.IGNORE
-          );
-        case FIELD:
-          Optional<AnnotationMirror> qualifier =
-              injectionSite.dependencies().stream()
-                  // methods for fields have a single dependency request
-                  .collect(DaggerCollectors.onlyElement())
-                  .key()
-                  .qualifier();
-          return fieldProxy(asVariable(injectionSite.element()), methodName, qualifier);
-      }
-      throw new AssertionError(injectionSite);
-    }
-
-    /**
-     * Invokes each of the injection methods for {@code injectionSites}, with the dependencies
-     * transformed using the {@code dependencyUsage} function.
-     *
-     * @param instanceType the type of the {@code instance} parameter
-     */
-    static CodeBlock invokeAll(
-        Set<InjectionSite> injectionSites,
-        ClassName generatedTypeName,
-        CodeBlock instanceCodeBlock,
-        TypeMirror instanceType,
-        Function<DependencyRequest, CodeBlock> dependencyUsage,
-        DaggerTypes types) {
-      return injectionSites.stream()
-          .map(
-              injectionSite -> {
-                TypeMirror injectSiteType =
-                    types.erasure(injectionSite.element().getEnclosingElement().asType());
-
-                // If instance has been declared as Object because it is not accessible from the
-                // component, but the injectionSite is in a supertype of instanceType that is
-                // publicly accessible, the InjectionSiteMethod will request the actual type and not
-                // Object as the first parameter. If so, cast to the supertype which is accessible
-                // from within generatedTypeName
-                CodeBlock maybeCastedInstance =
-                    !types.isSubtype(instanceType, injectSiteType)
-                        && isTypeAccessibleFrom(injectSiteType, generatedTypeName.packageName())
-                        ? CodeBlock.of("($T) $L", injectSiteType, instanceCodeBlock)
-                        : instanceCodeBlock;
-                return CodeBlock.of(
-                    "$L;",
-                    invoke(
-                        injectionSite,
-                        generatedTypeName,
-                        maybeCastedInstance,
-                        dependencyUsage
-                    ));
-              })
-          .collect(toConcatenatedCodeBlock());
-    }
-
-    /**
-     * Invokes the injection method for {@code injectionSite}, with the dependencies transformed
-     * using the {@code dependencyUsage} function.
-     */
-    private static CodeBlock invoke(
-        InjectionSite injectionSite,
-        ClassName generatedTypeName,
-        CodeBlock instanceCodeBlock,
-        Function<DependencyRequest, CodeBlock> dependencyUsage) {
-      List<CodeBlock> arguments = new ArrayList<>();
-      arguments.add(instanceCodeBlock);
-      if (!injectionSite.dependencies().isEmpty()) {
-        arguments.addAll(
-            injectionSite.dependencies().stream().map(dependencyUsage).collect(toList()));
-      }
-
-      ClassName enclosingClass =
-          membersInjectorNameForType(asType(injectionSite.element().getEnclosingElement()));
-      MethodSpec methodSpec = create(injectionSite);
-      return invokeMethod(methodSpec, arguments, enclosingClass, generatedTypeName);
-    }
-
-    /*
-     * TODO(ronshapiro): this isn't perfect, as collisions could still exist. Some examples:
-     *
-     *  - @Inject void members() {} will generate a method that conflicts with the instance
-     *    method `injectMembers(T)`
-     *  - Adding the index could conflict with another member:
-     *      @Inject void a(Object o) {}
-     *      @Inject void a(String s) {}
-     *      @Inject void a1(String s) {}
-     *
-     *    Here, Method a(String) will add the suffix "1", which will conflict with the method
-     *    generated for a1(String)
-     *  - Members named "members" or "methods" could also conflict with the {@code static} injection
-     *    method.
-     */
-    private static String methodName(InjectionSite injectionSite) {
-      int index = injectionSite.indexAmongAtInjectMembersWithSameSimpleName();
-      String indexString = index == 0 ? "" : String.valueOf(index + 1);
-      String simpleName = injectionSite.element().getSimpleName().toString();
-      return "inject"
-          + Character.toUpperCase(simpleName.charAt(0)) + simpleName.substring(1)
-          + indexString;
     }
   }
 

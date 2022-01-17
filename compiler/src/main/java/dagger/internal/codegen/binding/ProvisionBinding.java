@@ -16,31 +16,24 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.Scope;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -61,17 +54,7 @@ public final class ProvisionBinding extends ContributionBinding {
       Objects.hash(key(), bindingElement(),
           contributingModule(), kind(), nullableType(),
           provisionDependencies(),
-          injectionSites(), unresolved(), scope()));
-
-  private final Supplier<Set<DependencyRequest>> explicitDependencies = Suppliers.memoize(() ->
-      Stream.of(provisionDependencies(), membersInjectionDependencies())
-          .flatMap(Collection::stream)
-          .collect(DaggerStreams.toImmutableSet()));
-
-  private final Supplier<Set<DependencyRequest>> membersInjectionDependencies = Suppliers.memoize(() -> injectionSites()
-      .stream()
-      .flatMap(i -> i.dependencies().stream())
-      .collect(toImmutableSet()));
+          unresolved(), scope()));
 
   private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
 
@@ -96,7 +79,7 @@ public final class ProvisionBinding extends ContributionBinding {
 
   @Override
   public Set<DependencyRequest> explicitDependencies() {
-    return explicitDependencies.get();
+    return provisionDependencies();
   }
 
   @Override
@@ -134,18 +117,6 @@ public final class ProvisionBinding extends ContributionBinding {
    */
   public Set<DependencyRequest> provisionDependencies() {
     return provisionDependencies;
-  }
-
-  Set<DependencyRequest> membersInjectionDependencies() {
-    return membersInjectionDependencies.get();
-  }
-
-  /**
-   * {@link InjectionSite}s for all {@code @Inject} members if {@link #kind()} is {@link
-   * BindingKind#INJECTION}, otherwise empty.
-   */
-  public SortedSet<MembersInjectionBinding.InjectionSite> injectionSites() {
-    return Collections.emptySortedSet();
   }
 
   @Override
