@@ -37,7 +37,6 @@ public final class TypeNames {
   public static final ClassName COMPONENT_BUILDER = COMPONENT.nestedClass("Builder");
   public static final ClassName COMPONENT_FACTORY = COMPONENT.nestedClass("Factory");
   public static final ClassName MODULE = ClassName.get("dagger", "Module");
-  public static final ClassName MULTIBINDS = ClassName.get("dagger.multibindings", "Multibinds");
   public static final ClassName PROVIDES = ClassName.get("dagger", "Provides");
   public static final ClassName REUSABLE = ClassName.get("dagger", "Reusable");
   public static final ClassName SUBCOMPONENT = ClassName.get("dagger", "Subcomponent");

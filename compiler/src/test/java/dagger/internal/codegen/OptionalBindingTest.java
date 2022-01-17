@@ -74,13 +74,14 @@ public class OptionalBindingTest {
             "test.ChildModule",
             "package test;",
             "",
-            "import dagger.BindsOptionalOf;",
             "import dagger.Module;",
+            "import dagger.Provides;",
+            "import java.util.Optional;",
             "",
             "@Module",
-            "interface ChildModule {",
-            "  @BindsOptionalOf",
-            "  String optionalString();",
+            "class ChildModule {",
+            "  @Provides",
+            "  Optional<String> optionalString() { return null; }",
             "}");
 
     Compilation compilation = daggerCompiler().compile(parent, parentModule, child, childModule);

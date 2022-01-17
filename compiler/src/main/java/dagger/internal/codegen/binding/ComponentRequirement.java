@@ -176,9 +176,7 @@ public final class ComponentRequirement {
         List.of(TypeNames.PROVIDES,
             // TODO(ronshapiro): it would be cool to have internal meta-annotations that could describe
             // these, like @AbstractBindingMethod
-            TypeNames.BINDS,
-            TypeNames.MULTIBINDS,
-            TypeNames.BINDS_OPTIONAL_OF));
+            TypeNames.BINDS));
   }
 
   /** The key for this requirement, if one is available. */

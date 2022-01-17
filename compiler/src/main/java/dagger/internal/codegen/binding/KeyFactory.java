@@ -24,7 +24,6 @@ import static javax.lang.model.element.ElementKind.METHOD;
 
 import com.google.auto.common.MoreTypes;
 import dagger.Binds;
-import dagger.BindsOptionalOf;
 import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -80,12 +79,6 @@ public final class KeyFactory {
   /** Returns the key bound by a {@link Binds} method. */
   Key forBindsMethod(ExecutableElement method, TypeElement contributingModule) {
     Preconditions.checkArgument(isAnnotationPresent(method, Binds.class));
-    return forBindingMethod(method, contributingModule);
-  }
-
-  /** Returns the base key bound by a {@link BindsOptionalOf} method. */
-  Key forBindsOptionalOfMethod(ExecutableElement method, TypeElement contributingModule) {
-    Preconditions.checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
     return forBindingMethod(method, contributingModule);
   }
 

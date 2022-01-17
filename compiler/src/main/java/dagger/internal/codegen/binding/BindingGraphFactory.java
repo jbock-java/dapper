@@ -18,23 +18,19 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isType;
-import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.OPTIONAL;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static java.util.Objects.requireNonNull;
-import static java.util.function.Predicate.isEqual;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Keys;
-import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
@@ -175,7 +171,6 @@ public final class BindingGraphFactory implements ClearableCache {
       explicitBindingsBuilder.addAll(moduleDescriptor.bindings());
       subcomponentDeclarations.addAll(moduleDescriptor.subcomponentDeclarations());
       delegatesBuilder.addAll(moduleDescriptor.delegateDeclarations());
-      optionalsBuilder.addAll(moduleDescriptor.optionalDeclarations());
     }
 
     final Resolver requestResolver =
@@ -184,8 +179,7 @@ public final class BindingGraphFactory implements ClearableCache {
             componentDescriptor,
             indexBindingDeclarationsByKey(explicitBindingsBuilder),
             indexBindingDeclarationsByKey(subcomponentDeclarations),
-            indexBindingDeclarationsByKey(delegatesBuilder),
-            indexBindingDeclarationsByKey(optionalsBuilder));
+            indexBindingDeclarationsByKey(delegatesBuilder));
 
     componentDescriptor.entryPointMethods().stream()
         .map(method -> method.dependencyRequest().orElseThrow())
@@ -243,7 +237,6 @@ public final class BindingGraphFactory implements ClearableCache {
     final Set<ContributionBinding> explicitBindingsSet;
     final Map<Key, Set<SubcomponentDeclaration>> subcomponentDeclarations;
     final Map<Key, Set<DelegateDeclaration>> delegateDeclarations;
-    final Map<Key, Set<OptionalBindingDeclaration>> optionalBindingDeclarations;
     final Map<Key, ResolvedBindings> resolvedContributionBindings = new LinkedHashMap<>();
     final Deque<Key> cycleStack = new ArrayDeque<>();
     final Map<Key, Boolean> keyDependsOnLocalBindingsCache = new HashMap<>();
@@ -255,15 +248,13 @@ public final class BindingGraphFactory implements ClearableCache {
         ComponentDescriptor componentDescriptor,
         Map<Key, Set<ContributionBinding>> explicitBindings,
         Map<Key, Set<SubcomponentDeclaration>> subcomponentDeclarations,
-        Map<Key, Set<DelegateDeclaration>> delegateDeclarations,
-        Map<Key, Set<OptionalBindingDeclaration>> optionalBindingDeclarations) {
+        Map<Key, Set<DelegateDeclaration>> delegateDeclarations) {
       this.parentResolver = parentResolver;
       this.componentDescriptor = requireNonNull(componentDescriptor);
       this.explicitBindings = requireNonNull(explicitBindings);
       this.explicitBindingsSet = explicitBindings.values().stream().flatMap(Set::stream).collect(Collectors.toCollection(LinkedHashSet::new));
       this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
       this.delegateDeclarations = requireNonNull(delegateDeclarations);
-      this.optionalBindingDeclarations = requireNonNull(optionalBindingDeclarations);
       subcomponentsToResolve.addAll(
           componentDescriptor.childComponentsDeclaredByFactoryMethods().values());
       subcomponentsToResolve.addAll(
@@ -297,20 +288,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
         for (Key key : keysMatchingRequest) {
           subcomponentDeclarations.addAll(resolver.subcomponentDeclarations.getOrDefault(key, Set.of()));
-          // The optional binding declarations are keyed by the unwrapped type.
-          keyFactory.unwrapOptional(key)
-              .map(k -> resolver.optionalBindingDeclarations.getOrDefault(k, Set.of()))
-              .ifPresent(optionalBindingDeclarations::addAll);
         }
-      }
-
-      // Add synthetic optional binding
-      if (!optionalBindingDeclarations.isEmpty()) {
-        bindings.add(
-            bindingFactory.syntheticOptionalBinding(
-                requestKey,
-                getRequestKind(OptionalType.from(requestKey).valueType()),
-                lookUpBindings(keyFactory.unwrapOptional(requestKey).orElseThrow()).bindings()));
       }
 
       // Add subcomponent creator binding
@@ -581,22 +559,6 @@ public final class BindingGraphFactory implements ClearableCache {
     }
 
     /**
-     * Returns the {@link OptionalBindingDeclaration}s that match the {@code key} from this and all
-     * ancestor resolvers.
-     */
-    private Set<OptionalBindingDeclaration> getOptionalBindingDeclarations(Key key) {
-      Optional<Key> unwrapped = keyFactory.unwrapOptional(key);
-      if (unwrapped.isEmpty()) {
-        return Set.of();
-      }
-      Set<OptionalBindingDeclaration> declarations = new LinkedHashSet<>();
-      for (Resolver resolver : getResolverLineage()) {
-        declarations.addAll(resolver.optionalBindingDeclarations.getOrDefault(unwrapped.orElseThrow(), Set.of()));
-      }
-      return declarations;
-    }
-
-    /**
      * Returns the {@link ResolvedBindings} for {@code key} that was resolved in this resolver or an
      * ancestor resolver.
      */
@@ -729,9 +691,6 @@ public final class BindingGraphFactory implements ClearableCache {
             Resolver.this,
             key);
         ResolvedBindings previouslyResolvedBindings = getPreviouslyResolvedBindings(key).orElseThrow();
-        if (hasLocalOptionalBindingContribution(previouslyResolvedBindings)) {
-          return true;
-        }
 
         for (Binding binding : previouslyResolvedBindings.bindings()) {
           if (dependsOnLocalBindings(binding)) {
@@ -750,26 +709,6 @@ public final class BindingGraphFactory implements ClearableCache {
           }
         }
         return false;
-      }
-
-      /**
-       * Returns {@code true} if there is a contribution in this component for an {@code
-       * Optional<Foo>} key that has not been contributed in a parent.
-       */
-      private boolean hasLocalOptionalBindingContribution(ResolvedBindings resolvedBindings) {
-        if (resolvedBindings
-            .contributionBindings()
-            .stream()
-            .map(ContributionBinding::kind)
-            .anyMatch(isEqual(OPTIONAL))) {
-          return !getLocalExplicitBindings(keyFactory.unwrapOptional(resolvedBindings.key()).orElseThrow())
-              .isEmpty();
-        } else {
-          // If a parent contributes a @Provides Optional<Foo> binding and a child has a
-          // @BindsOptionalOf Foo method, the two should conflict, even if there is no binding for
-          // Foo on its own
-          return !getOptionalBindingDeclarations(resolvedBindings.key()).isEmpty();
-        }
       }
     }
   }

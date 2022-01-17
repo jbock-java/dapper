@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import dagger.internal.Beta;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.inject.Qualifier;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -63,19 +62,7 @@ import java.lang.annotation.Target;
  *   <li>{@code Optional<Provider<Lazy<Foo>>>}
  * </ul>
  *
- * <p>If there is a binding for {@code Foo}, and that binding is {@code @Nullable}, then it is a
- * compile-time error to inject {@code Optional<Foo>}, because {@code Optional} cannot contain
- * {@code null}. You can always inject the other forms, because {@link Provider} and {@link Lazy}
- * can always return {@code null} from their {@code get()} methods.
- *
  * <p>Explicit bindings for any of the above will conflict with a {@code @BindsOptionalOf} binding.
- *
- * <p>If the binding for {@code Foo} is a {@code @Produces} binding, then another {@code @Produces}
- * binding can depend on any of:
- *
- * <ul>
- *   <li>{@code Optional<Foo>}
- * </ul>
  */
 @Documented
 @Beta

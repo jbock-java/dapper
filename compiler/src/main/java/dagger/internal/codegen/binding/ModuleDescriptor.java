@@ -33,7 +33,6 @@ import com.google.auto.common.MoreTypes;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
 import dagger.Binds;
-import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
@@ -62,7 +61,6 @@ public final class ModuleDescriptor {
   private final Set<ContributionBinding> bindings;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final Set<DelegateDeclaration> delegateDeclarations;
-  private final Set<OptionalBindingDeclaration> optionalDeclarations;
   private final ModuleKind kind;
 
   ModuleDescriptor(
@@ -71,14 +69,12 @@ public final class ModuleDescriptor {
       Set<ContributionBinding> bindings,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<DelegateDeclaration> delegateDeclarations,
-      Set<OptionalBindingDeclaration> optionalDeclarations,
       ModuleKind kind) {
     this.moduleElement = requireNonNull(moduleElement);
     this.includedModules = requireNonNull(includedModules);
     this.bindings = requireNonNull(bindings);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.delegateDeclarations = requireNonNull(delegateDeclarations);
-    this.optionalDeclarations = requireNonNull(optionalDeclarations);
     this.kind = requireNonNull(kind);
   }
 
@@ -104,11 +100,6 @@ public final class ModuleDescriptor {
     return delegateDeclarations;
   }
 
-  /** The {@link BindsOptionalOf} method declarations that define optional bindings. */
-  Set<OptionalBindingDeclaration> optionalDeclarations() {
-    return optionalDeclarations;
-  }
-
   /** The kind of the module. */
   public ModuleKind kind() {
     return kind;
@@ -118,7 +109,6 @@ public final class ModuleDescriptor {
     Set<BindingDeclaration> result = new LinkedHashSet<>();
     result.addAll(bindings());
     result.addAll(delegateDeclarations());
-    result.addAll(optionalDeclarations());
     result.addAll(subcomponentDeclarations());
     return result;
   });
@@ -143,7 +133,6 @@ public final class ModuleDescriptor {
         && bindings.equals(that.bindings)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations)
         && delegateDeclarations.equals(that.delegateDeclarations)
-        && optionalDeclarations.equals(that.optionalDeclarations)
         && kind == that.kind;
   }
 
@@ -154,7 +143,6 @@ public final class ModuleDescriptor {
         bindings,
         subcomponentDeclarations,
         delegateDeclarations,
-        optionalDeclarations,
         kind);
   }
 
@@ -165,7 +153,6 @@ public final class ModuleDescriptor {
     private final BindingFactory bindingFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
     private final SubcomponentDeclaration.Factory subcomponentDeclarationFactory;
-    private final OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory;
     private final Map<TypeElement, ModuleDescriptor> cache = new HashMap<>();
 
     @Inject
@@ -173,13 +160,11 @@ public final class ModuleDescriptor {
         DaggerElements elements,
         BindingFactory bindingFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
-        SubcomponentDeclaration.Factory subcomponentDeclarationFactory,
-        OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory) {
+        SubcomponentDeclaration.Factory subcomponentDeclarationFactory) {
       this.elements = elements;
       this.bindingFactory = bindingFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
       this.subcomponentDeclarationFactory = subcomponentDeclarationFactory;
-      this.optionalBindingDeclarationFactory = optionalBindingDeclarationFactory;
     }
 
     public ModuleDescriptor create(TypeElement moduleElement) {
@@ -189,8 +174,6 @@ public final class ModuleDescriptor {
     public ModuleDescriptor createUncached(TypeElement moduleElement) {
       Set<ContributionBinding> bindings = new LinkedHashSet<>();
       Set<DelegateDeclaration> delegates = new LinkedHashSet<>();
-      Set<OptionalBindingDeclaration> optionalDeclarations =
-          new LinkedHashSet<>();
 
       for (ExecutableElement moduleMethod : methodsIn(elements.getAllMembers(moduleElement))) {
         if (isAnnotationPresent(moduleMethod, Provides.class)) {
@@ -198,10 +181,6 @@ public final class ModuleDescriptor {
         }
         if (isAnnotationPresent(moduleMethod, Binds.class)) {
           delegates.add(bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
-        }
-        if (isAnnotationPresent(moduleMethod, BindsOptionalOf.class)) {
-          optionalDeclarations.add(
-              optionalBindingDeclarationFactory.forMethod(moduleMethod, moduleElement));
         }
       }
 
@@ -211,7 +190,6 @@ public final class ModuleDescriptor {
           bindings,
           subcomponentDeclarationFactory.forModule(moduleElement),
           delegates,
-          optionalDeclarations,
           ModuleKind.forAnnotatedElement(moduleElement).orElseThrow());
     }
 

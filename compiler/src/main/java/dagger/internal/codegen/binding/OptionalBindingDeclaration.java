@@ -16,19 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 
 import dagger.BindsOptionalOf;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.model.Key;
-import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 /** A {@link BindsOptionalOf} declaration. */
@@ -84,22 +80,5 @@ final class OptionalBindingDeclaration extends BindingDeclaration {
   @Override
   public int hashCode() {
     return hash.getAsInt();
-  }
-
-  static class Factory {
-    private final KeyFactory keyFactory;
-
-    @Inject
-    Factory(KeyFactory keyFactory) {
-      this.keyFactory = keyFactory;
-    }
-
-    OptionalBindingDeclaration forMethod(ExecutableElement method, TypeElement contributingModule) {
-      Preconditions.checkArgument(isAnnotationPresent(method, BindsOptionalOf.class));
-      return new OptionalBindingDeclaration(
-          Optional.of(method),
-          Optional.of(contributingModule),
-          keyFactory.forBindsOptionalOfMethod(method, contributingModule));
-    }
   }
 }
