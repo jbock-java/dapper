@@ -19,7 +19,6 @@ package dagger.internal.codegen.bindinggraphvalidation;
 import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.MEMBERS_INJECTION;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -111,7 +110,6 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
   private static Set<Set<Binding>> groupBindingsByKey(BindingGraph bindingGraph) {
     return valueSetsForEachKey(
         bindingGraph.bindings().stream()
-            .filter(binding -> !binding.kind().equals(MEMBERS_INJECTION))
             .collect(toImmutableSetMultimap(Binding::key, binding -> binding)));
   }
 

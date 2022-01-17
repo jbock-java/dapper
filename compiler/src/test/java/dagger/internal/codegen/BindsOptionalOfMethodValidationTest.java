@@ -68,12 +68,6 @@ class BindsOptionalOfMethodValidationTest {
   }
 
   @Test
-  void returnsMembersInjector() {
-    assertThatMethod("@BindsOptionalOf abstract MembersInjector<Object> returnsMembersInjector();")
-        .hasError("framework");
-  }
-
-  @Test
   void tooManyQualifiers() {
     assertThatMethod(
         "@BindsOptionalOf @Qualifier1 @Qualifier2 abstract String tooManyQualifiers();")

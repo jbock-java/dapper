@@ -17,9 +17,7 @@
 package dagger.internal.codegen;
 
 import static com.google.common.truth.Truth.assertThat;
-import static dagger.internal.codegen.javapoet.TypeNames.MEMBERS_INJECTOR;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
-import static dagger.internal.codegen.javapoet.TypeNames.membersInjectorOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 
 import com.google.testing.compile.CompilationExtension;
@@ -49,8 +47,6 @@ public class FrameworkFieldTest {
   public void frameworkType() {
     assertThat(FrameworkField.create(PROVIDER, xTypeName, "test").type())
         .isEqualTo(providerOf(xTypeName));
-    assertThat(FrameworkField.create(MEMBERS_INJECTOR, xTypeName, "test").type())
-        .isEqualTo(membersInjectorOf(xTypeName));
   }
 
   @Test

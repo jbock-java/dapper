@@ -51,9 +51,6 @@ public final class TypeNames {
       ClassName.get("dagger.internal", "InjectedFieldSignature");
   public static final ClassName INSTANCE_FACTORY =
       ClassName.get("dagger.internal", "InstanceFactory");
-  public static final ClassName MEMBERS_INJECTOR = ClassName.get("dagger", "MembersInjector");
-  public static final ClassName MEMBERS_INJECTORS =
-      ClassName.get("dagger.internal", "MembersInjectors");
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName PROVIDER_OF_LAZY =
       ClassName.get("dagger.internal", "ProviderOfLazy");
@@ -70,10 +67,6 @@ public final class TypeNames {
 
   public static ParameterizedTypeName lazyOf(TypeName typeName) {
     return ParameterizedTypeName.get(LAZY, typeName);
-  }
-
-  public static ParameterizedTypeName membersInjectorOf(TypeName membersInjectorType) {
-    return ParameterizedTypeName.get(MEMBERS_INJECTOR, membersInjectorType);
   }
 
   public static ParameterizedTypeName providerOf(TypeName typeName) {

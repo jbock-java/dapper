@@ -50,9 +50,6 @@ public enum BindingKind {
    */
   COMPONENT_DEPENDENCY,
 
-  /** A binding for a {@link dagger.MembersInjector} of a type. */
-  MEMBERS_INJECTOR,
-
   /**
    * A binding for a subcomponent creator (a {@linkplain dagger.Subcomponent.Builder builder} or
    * {@linkplain dagger.Subcomponent.Factory factory}).
@@ -78,7 +75,4 @@ public enum BindingKind {
   // TODO(dpb,ronshapiro): This name is confusing and could use work. Not all usages of @Binds
   // bindings are simple delegations and we should have a name that better reflects that
   DELEGATE,
-
-  /** A binding for a members injection method on a component. */
-  MEMBERS_INJECTION,
 }

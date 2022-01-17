@@ -138,9 +138,6 @@ public final class ComponentImplementation {
     /** An implementation of a component interface method. */
     COMPONENT_METHOD,
 
-    /** A private method that encapsulates members injection logic for a binding. */
-    MEMBERS_INJECTION_METHOD,
-
     /** A static method that always returns an absent {@code Optional} value for the binding. */
     ABSENT_OPTIONAL_METHOD,
 

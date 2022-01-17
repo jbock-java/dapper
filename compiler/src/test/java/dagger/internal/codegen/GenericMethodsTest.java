@@ -39,7 +39,6 @@ public class GenericMethodsTest {
             "@Component",
             "interface TestComponent {",
             "  <T1> void injectTypeVariable(T1 type);",
-            "  <T2> MembersInjector<T2> membersInjector();",
             "  <T3> Set<T3> setOfT();",
             "  <UNUSED> TestComponent unused();",
             "}");
@@ -49,10 +48,6 @@ public class GenericMethodsTest {
         .hadErrorContaining("cannot have type variables")
         .inFile(component)
         .onLineContaining("<T1>");
-    assertThat(compilation)
-        .hadErrorContaining("cannot have type variables")
-        .inFile(component)
-        .onLineContaining("<T2>");
     assertThat(compilation)
         .hadErrorContaining("cannot have type variables")
         .inFile(component)

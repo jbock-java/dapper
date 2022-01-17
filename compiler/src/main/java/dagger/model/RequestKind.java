@@ -37,13 +37,6 @@ public enum RequestKind {
 
   /** A request for a {@code Provider} of a {@link Lazy}. E.g.: {@code Provider<Lazy<FooType>>} */
   PROVIDER_OF_LAZY("ProviderOfLazy"),
-
-  /**
-   * A request for a members injection. E.g. {@code void injectMembers(FooType);}. Can only be
-   * requested by component interfaces.
-   */
-  MEMBERS_INJECTION("MembersInjection"),
-
   ;
 
   private final String upperCamelName;

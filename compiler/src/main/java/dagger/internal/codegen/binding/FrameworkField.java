@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.model.BindingKind.MEMBERS_INJECTOR;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -84,8 +82,7 @@ public final class FrameworkField {
 
   private static String frameworkFieldName(ContributionBinding binding) {
     if (binding.bindingElement().isPresent()) {
-      String name = BINDING_ELEMENT_NAME.visit(binding.bindingElement().get(), binding);
-      return binding.kind().equals(MEMBERS_INJECTOR) ? name + "MembersInjector" : name;
+      return BINDING_ELEMENT_NAME.visit(binding.bindingElement().get(), binding);
     }
     return KeyVariableNamer.name(binding.key());
   }

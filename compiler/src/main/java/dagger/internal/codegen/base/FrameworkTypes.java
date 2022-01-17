@@ -20,11 +20,8 @@ import static com.google.auto.common.MoreTypes.isType;
 
 import com.google.auto.common.MoreTypes;
 import dagger.Lazy;
-import dagger.MembersInjector;
 import jakarta.inject.Provider;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -32,17 +29,15 @@ import javax.lang.model.type.TypeMirror;
  * type that the framework itself defines.
  */
 public final class FrameworkTypes {
-  private static final Set<Class<?>> PROVISION_TYPES =
-      new LinkedHashSet<>(List.of(Provider.class, Lazy.class, MembersInjector.class));
+  private static final List<Class<?>> PROVISION_TYPES =
+      List.of(Provider.class, Lazy.class);
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(TypeMirror type) {
-    return isType(type)
-        && typeIsOneOf(PROVISION_TYPES, type);
-  }
-
-  private static boolean typeIsOneOf(Set<Class<?>> classes, TypeMirror type) {
-    for (Class<?> clazz : classes) {
+    if (!isType(type)) {
+      return false;
+    }
+    for (Class<?> clazz : FrameworkTypes.PROVISION_TYPES) {
       if (MoreTypes.isTypeOf(clazz, type)) {
         return true;
       }

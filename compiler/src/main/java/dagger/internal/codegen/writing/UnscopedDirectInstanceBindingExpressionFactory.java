@@ -104,12 +104,6 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
       case INJECTION:
       case PROVISION:
         return Optional.of(simpleMethodBindingExpressionFactory.create((ProvisionBinding) binding));
-
-      case MEMBERS_INJECTOR:
-        return Optional.empty();
-
-      case MEMBERS_INJECTION:
-        // Fall through
     }
     throw new AssertionError("Unexpected binding kind: " + binding.kind());
   }

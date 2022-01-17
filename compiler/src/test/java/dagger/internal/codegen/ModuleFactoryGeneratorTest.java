@@ -76,12 +76,6 @@ class ModuleFactoryGeneratorTest {
   }
 
   @Test
-  void providesMethodReturnsMembersInjector() {
-    assertThatModuleMethod("@Provides MembersInjector<String> provideMembersInjector() {}")
-        .hasError("@Provides methods must not return framework types");
-  }
-
-  @Test
   void providesMethodWithTypeParameter() {
     assertThatModuleMethod("@Provides <T> String typeParameter() { return null; }")
         .hasError("@Provides methods may not have type parameters");
@@ -294,7 +288,6 @@ class ModuleFactoryGeneratorTest {
     JavaFileObject moduleFile = JavaFileObjects.forSourceLines("test.TestModule",
         "package test;",
         "",
-        "import dagger.MembersInjector;",
         "import dagger.Module;",
         "import dagger.Provides;",
         "import java.util.Arrays;",
@@ -303,7 +296,7 @@ class ModuleFactoryGeneratorTest {
         "@Module",
         "final class TestModule {",
         "  @Provides List<Object> provideObjects(",
-        "      @QualifierA Object a, @QualifierB Object b, MembersInjector<X> xInjector) {",
+        "      @QualifierA Object a, @QualifierB Object b) {",
         "    return Arrays.asList(a, b);",
         "  }",
         "",
@@ -320,7 +313,6 @@ class ModuleFactoryGeneratorTest {
         "package test;");
     Collections.addAll(listFactoryFile,
         GeneratedLines.generatedImports(
-            "import dagger.MembersInjector;",
             "import dagger.internal.Factory;",
             "import dagger.internal.Preconditions;",
             "import java.util.List;",
@@ -332,30 +324,26 @@ class ModuleFactoryGeneratorTest {
         "  private final TestModule module;",
         "  private final Provider<Object> aProvider;",
         "  private final Provider<Object> bProvider;",
-        "  private final Provider<MembersInjector<X>> xInjectorProvider;",
         "",
         "  public TestModule_ProvideObjectsFactory(TestModule module, Provider<Object> aProvider,",
-        "      Provider<Object> bProvider, Provider<MembersInjector<X>> xInjectorProvider) {",
+        "      Provider<Object> bProvider) {",
         "    this.module = module;",
         "    this.aProvider = aProvider;",
         "    this.bProvider = bProvider;",
-        "    this.xInjectorProvider = xInjectorProvider;",
         "  }",
         "",
         "  @Override",
         "  public List<Object> get() {",
-        "    return provideObjects(module, aProvider.get(), bProvider.get(), xInjectorProvider.get());",
+        "    return provideObjects(module, aProvider.get(), bProvider.get());",
         "  }",
         "",
         "  public static TestModule_ProvideObjectsFactory create(TestModule module,",
-        "      Provider<Object> aProvider, Provider<Object> bProvider,",
-        "      Provider<MembersInjector<X>> xInjectorProvider) {",
-        "    return new TestModule_ProvideObjectsFactory(module, aProvider, bProvider, xInjectorProvider);",
+        "      Provider<Object> aProvider, Provider<Object> bProvider) {",
+        "    return new TestModule_ProvideObjectsFactory(module, aProvider, bProvider);",
         "  }",
         "",
-        "  public static List<Object> provideObjects(TestModule instance, Object a, Object b,",
-        "      MembersInjector<X> xInjector) {",
-        "    return Preconditions.checkNotNullFromProvides(instance.provideObjects(a, b, xInjector));",
+        "  public static List<Object> provideObjects(TestModule instance, Object a, Object b) {",
+        "    return Preconditions.checkNotNullFromProvides(instance.provideObjects(a, b));",
         "  }",
         "}");
     assertAbout(javaSources()).that(
@@ -981,7 +969,7 @@ class ModuleFactoryGeneratorTest {
         "import java.util.Set;",
         "",
         "@Module abstract class TestModule {"));
-            Collections.addAll(moduleLines, methodLines);
+    Collections.addAll(moduleLines, methodLines);
     moduleLines.add("}");
 
     JavaFileObject bindsMethodAndInstanceProvidesMethodModuleFile =
