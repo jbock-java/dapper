@@ -72,7 +72,7 @@ final class AssistedFactoryRequestRepresentation extends SimpleInvocationRequest
     DependencyRequest assistedInjectionRequest = getOnlyElement(binding.provisionDependencies());
     Expression assistedInjectionExpression =
         ((AssistedPrivateMethodRequestRepresentation)
-            componentRequestRepresentations.getBindingExpression(
+            componentRequestRepresentations.getRequestRepresentation(
                 BindingRequest.bindingRequest(
                     assistedInjectionRequest.key(), RequestKind.INSTANCE)))
             .getAssistedDependencyExpression(requestingClass.peerClass(""));
