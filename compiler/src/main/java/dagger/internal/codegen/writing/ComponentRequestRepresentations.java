@@ -67,6 +67,7 @@ public final class ComponentRequestRepresentations {
   private final BindingGraph graph;
   private final ComponentImplementation componentImplementation;
   private final ComponentRequirementExpressions componentRequirementExpressions;
+  private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
   private final ComponentMethodRequestRepresentation.Factory componentMethodBindingExpressionFactory;
   private final DelegateRequestRepresentation.Factory delegateBindingExpressionFactory;
   private final DerivedFromFrameworkInstanceRequestRepresentation.Factory
@@ -83,6 +84,7 @@ public final class ComponentRequestRepresentations {
   private final CompilerOptions compilerOptions;
   private final SwitchingProviders switchingProviders;
   private final Map<BindingRequest, RequestRepresentation> expressions = new HashMap<>();
+  private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
 
   @Inject
   ComponentRequestRepresentations(
@@ -90,6 +92,7 @@ public final class ComponentRequestRepresentations {
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,
+      ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory,
       ComponentMethodRequestRepresentation.Factory componentMethodBindingExpressionFactory,
       DelegateRequestRepresentation.Factory delegateBindingExpressionFactory,
       DerivedFromFrameworkInstanceRequestRepresentation.Factory
@@ -106,6 +109,7 @@ public final class ComponentRequestRepresentations {
     this.graph = graph;
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = requireNonNull(componentRequirementExpressions);
+    this.provisionBindingRepresentationFactory = provisionBindingRepresentationFactory;
     this.componentMethodBindingExpressionFactory = componentMethodBindingExpressionFactory;
     this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
     this.derivedFromFrameworkInstanceBindingExpressionFactory =
@@ -235,7 +239,7 @@ public final class ComponentRequestRepresentations {
     Optional<Binding> localBinding = graph.localContributionBinding(request.key());
 
     if (localBinding.isPresent()) {
-      RequestRepresentation expression = createBindingExpression(localBinding.get(), request);
+      RequestRepresentation expression = getBindingRepresentation(localBinding.get()).getRequestRepresentation(request);
       expressions.put(request, expression);
       return expression;
     }
@@ -244,15 +248,14 @@ public final class ComponentRequestRepresentations {
     return parent.get().getBindingExpression(request);
   }
 
-  /** Creates a binding expression. */
-  private RequestRepresentation createBindingExpression(Binding binding, BindingRequest request) {
-    switch (binding.bindingType()) {
-
-      case PROVISION:
-        return provisionBindingExpression((ContributionBinding) binding, request);
-
+  BindingRepresentation getBindingRepresentation(Binding binding) {
+    if (representations.containsKey(binding)) {
+      return representations.get(binding);
     }
-    throw new AssertionError(binding);
+    BindingRepresentation representation =
+        provisionBindingRepresentationFactory.create(isFastInit(), binding, switchingProviders);
+    representations.put(binding, representation);
+    return representation;
   }
 
   /**
