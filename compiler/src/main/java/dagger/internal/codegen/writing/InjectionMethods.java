@@ -130,12 +130,13 @@ final class InjectionMethods {
     static CodeBlock invoke(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
+        Function<VariableElement, String> uniqueAssistedParameterName,
         ClassName requestingClass,
         Optional<CodeBlock> moduleReference,
         CompilerOptions compilerOptions) {
       List<CodeBlock> arguments = new ArrayList<>();
       moduleReference.ifPresent(arguments::add);
-      arguments.addAll(invokeArguments(binding, dependencyUsage, requestingClass));
+      arguments.addAll(invokeArguments(binding, dependencyUsage, uniqueAssistedParameterName, requestingClass));
 
       ClassName enclosingClass = generatedClassNameForBinding(binding);
       MethodSpec methodSpec = create(binding, compilerOptions);
@@ -145,6 +146,7 @@ final class InjectionMethods {
     static List<CodeBlock> invokeArguments(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
+        Function<VariableElement, String> uniqueAssistedParameterName,
         ClassName requestingClass) {
       Map<VariableElement, DependencyRequest> dependencyRequestMap =
           binding.provisionDependencies().stream()
@@ -154,10 +156,10 @@ final class InjectionMethods {
                       request -> request));
 
       List<CodeBlock> arguments = new ArrayList<>();
-      for (VariableElement parameter :
-          asExecutable(binding.bindingElement().orElseThrow()).getParameters()) {
+      ExecutableElement method = asExecutable(binding.bindingElement().orElseThrow());
+      for (VariableElement parameter : method.getParameters()) {
         if (AssistedInjectionAnnotations.isAssistedParameter(parameter)) {
-          arguments.add(CodeBlock.of("$L", parameter.getSimpleName()));
+          arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(parameter)));
         } else if (dependencyRequestMap.containsKey(parameter)) {
           DependencyRequest request = dependencyRequestMap.get(parameter);
           arguments.add(

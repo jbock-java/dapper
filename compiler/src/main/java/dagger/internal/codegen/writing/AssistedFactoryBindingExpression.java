@@ -71,14 +71,11 @@ final class AssistedFactoryBindingExpression extends SimpleInvocationBindingExpr
     // An assisted factory binding should have a single request for an assisted injection type.
     DependencyRequest assistedInjectionRequest = getOnlyElement(binding.provisionDependencies());
     Expression assistedInjectionExpression =
-        componentBindingExpressions.getDependencyExpression(
-            BindingRequest.bindingRequest(assistedInjectionRequest.key(), RequestKind.INSTANCE),
-            // This is kind of gross because the anonymous class doesn't really have a name we can
-            // reference. The requesting class name is really only needed to determine if we need to
-            // append "OwningClass.this." to the method call or not.
-            // TODO(bcorso): We should probably use a non-anonymous class here instead so that we
-            // actually have a proper class name.
-            requestingClass.peerClass(""));
+        ((AssistedPrivateMethodBindingExpression)
+            componentBindingExpressions.getBindingExpression(
+                BindingRequest.bindingRequest(
+                    assistedInjectionRequest.key(), RequestKind.INSTANCE)))
+            .getAssistedDependencyExpression(requestingClass.peerClass(""));
     return Expression.create(
         assistedInjectionExpression.type(),
         CodeBlock.of("$L", anonymousfactoryImpl(assistedInjectionExpression)));

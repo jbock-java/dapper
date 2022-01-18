@@ -51,19 +51,22 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   private final ProvisionBinding provisionBinding;
   private final ComponentBindingExpressions componentBindingExpressions;
   private final ComponentRequirementExpressions componentRequirementExpressions;
+  private final ComponentImplementation.ShardImplementation shardImplementation;
 
   @AssistedInject
   SimpleMethodBindingExpression(
       @Assisted ProvisionBinding binding,
       CompilerOptions compilerOptions,
       ComponentBindingExpressions componentBindingExpressions,
-      ComponentRequirementExpressions componentRequirementExpressions) {
+      ComponentRequirementExpressions componentRequirementExpressions,
+      ComponentImplementation componentImplementation) {
     super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
     Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
     this.componentBindingExpressions = componentBindingExpressions;
     this.componentRequirementExpressions = componentRequirementExpressions;
+    this.shardImplementation = componentImplementation.shardImplementation(binding);
   }
 
   @Override
@@ -80,6 +83,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
             ProvisionMethod.invokeArguments(
                 provisionBinding,
                 request -> dependencyArgument(request, requestingClass).codeBlock(),
+                shardImplementation::getUniqueFieldNameForAssistedParam,
                 requestingClass));
     ExecutableElement method = asExecutable(provisionBinding.bindingElement().get());
     CodeBlock invocation;
@@ -119,6 +123,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
         ProvisionMethod.invoke(
             provisionBinding,
             request -> dependencyArgument(request, requestingClass).codeBlock(),
+            shardImplementation::getUniqueFieldNameForAssistedParam,
             requestingClass,
             moduleReference(requestingClass),
             compilerOptions

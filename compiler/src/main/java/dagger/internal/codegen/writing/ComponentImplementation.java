@@ -83,6 +83,7 @@ import java.util.function.Supplier;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
@@ -417,6 +418,7 @@ public final class ComponentImplementation {
     private final UniqueNameSet componentFieldNames = new UniqueNameSet();
     private final UniqueNameSet componentMethodNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
+    private final Map<VariableElement, String> uniqueAssistedName = new LinkedHashMap<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
     private final Map<ComponentRequirement, ParameterSpec> constructorParameters;
     private final Map<FieldSpecKind, List<FieldSpec>> fieldSpecsMap = new EnumMap<>(FieldSpecKind.class);
@@ -550,6 +552,15 @@ public final class ComponentImplementation {
     /** Returns a new, unique field name for the component based on the given name. */
     String getUniqueFieldName(String name) {
       return componentFieldNames.getUniqueName(name);
+    }
+
+    public String getUniqueFieldNameForAssistedParam(VariableElement element) {
+      if (uniqueAssistedName.containsKey(element)) {
+        return uniqueAssistedName.get(element);
+      }
+      String name = getUniqueFieldName(element.getSimpleName().toString());
+      uniqueAssistedName.put(element, name);
+      return name;
     }
 
     /** Returns a new, unique method name for the component based on the given name. */

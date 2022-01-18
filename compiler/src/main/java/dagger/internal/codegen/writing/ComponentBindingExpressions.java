@@ -72,6 +72,8 @@ public final class ComponentBindingExpressions {
   private final DerivedFromFrameworkInstanceBindingExpression.Factory
       derivedFromFrameworkInstanceBindingExpressionFactory;
   private final PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory;
+  private final AssistedPrivateMethodBindingExpression.Factory
+      assistedPrivateMethodBindingExpressionFactory;
   private final ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory;
   private final UnscopedDirectInstanceBindingExpressionFactory
       unscopedDirectInstanceBindingExpressionFactory;
@@ -93,6 +95,7 @@ public final class ComponentBindingExpressions {
       DerivedFromFrameworkInstanceBindingExpression.Factory
           derivedFromFrameworkInstanceBindingExpressionFactory,
       PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory,
+      AssistedPrivateMethodBindingExpression.Factory assistedPrivateMethodBindingExpressionFactory,
       ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory,
       UnscopedDirectInstanceBindingExpressionFactory unscopedDirectInstanceBindingExpressionFactory,
       UnscopedFrameworkInstanceCreationExpressionFactory
@@ -116,6 +119,8 @@ public final class ComponentBindingExpressions {
     this.types = types;
     this.compilerOptions = compilerOptions;
     this.switchingProviders = new SwitchingProviders(componentImplementation, types);
+    this.assistedPrivateMethodBindingExpressionFactory =
+        assistedPrivateMethodBindingExpressionFactory;
   }
 
   /**
@@ -360,6 +365,12 @@ public final class ComponentBindingExpressions {
     Optional<BindingExpression> maybeDirectInstanceExpression =
         unscopedDirectInstanceBindingExpressionFactory.create(binding);
     if (maybeDirectInstanceExpression.isPresent()) {
+      BindingExpression directInstanceExpression = maybeDirectInstanceExpression.orElseThrow();
+      if (binding.kind() == BindingKind.ASSISTED_INJECTION) {
+        BindingRequest request = bindingRequest(binding.key(), RequestKind.INSTANCE);
+        return assistedPrivateMethodBindingExpressionFactory.create(
+            request, binding, directInstanceExpression);
+      }
       boolean isDefaultModeAssistedFactory =
           binding.kind() == BindingKind.ASSISTED_FACTORY && !isFastInit();
 
@@ -371,7 +382,6 @@ public final class ComponentBindingExpressions {
       // using a field in the component similar to Provider requests. This should also be the case
       // in FastInit, but it hasn't been implemented yet.
       if (!needsCaching(binding) && !isDefaultModeAssistedFactory) {
-        BindingExpression directInstanceExpression = maybeDirectInstanceExpression.get();
         return directInstanceExpression.requiresMethodEncapsulation()
             ? wrapInMethod(binding, RequestKind.INSTANCE, directInstanceExpression)
             : directInstanceExpression;

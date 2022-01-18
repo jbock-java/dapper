@@ -53,6 +53,7 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -67,23 +68,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.VariableElement;
 
 /**
  * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@code
  * Inject} constructors.
  */
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
-  private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
 
   @Inject
   FactoryGenerator(
       Filer filer,
-      DaggerTypes types,
       DaggerElements elements,
       CompilerOptions compilerOptions) {
     super(filer, elements);
-    this.types = types;
     this.compilerOptions = compilerOptions;
   }
 
@@ -214,28 +213,37 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   }
 
   private MethodSpec getMethod(ProvisionBinding binding) {
+    UniqueNameSet uniqueFieldNames = new UniqueNameSet();
+    Map<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
+    frameworkFields.values().forEach(field -> uniqueFieldNames.claim(field.name));
+    Map<VariableElement, ParameterSpec> assistedParameters =
+        assistedParameters(binding).stream()
+            .collect(
+                DaggerStreams.toImmutableMap(
+                    element -> element,
+                    element ->
+                        ParameterSpec.builder(
+                                TypeName.get(element.asType()),
+                                uniqueFieldNames.getUniqueName(element.getSimpleName()))
+                            .build()));
     TypeName providedTypeName = providedTypeName(binding);
     MethodSpec.Builder getMethod =
         methodBuilder("get")
             .addModifiers(PUBLIC)
             .returns(providedTypeName)
-            .addParameters(
-                // The 'get' method for an assisted injection type takes in the assisted parameters.
-                assistedParameters(binding).stream()
-                    .map(ParameterSpec::get)
-                    .collect(toImmutableList()));
+            .addParameters(assistedParameters.values());
 
     if (factoryTypeName(binding).isPresent()) {
       getMethod.addAnnotation(Override.class);
     }
 
-    Map<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
     CodeBlock invokeNewInstance =
         ProvisionMethod.invoke(
             binding,
             request ->
                 frameworkTypeUsageStatement(
                     CodeBlock.of("$N", frameworkFields.get(request)), request.kind()),
+            param -> assistedParameters.get(param).name,
             generatedClassNameForBinding(binding),
             moduleParameter(binding).map(module -> CodeBlock.of("$N", module)),
             compilerOptions
