@@ -66,7 +66,6 @@ final class DerivedFromFrameworkInstanceBindingExpression extends BindingExpress
 
   @AssistedFactory
   interface Factory {
-    DerivedFromFrameworkInstanceBindingExpression create(
-        BindingRequest request);
+    DerivedFromFrameworkInstanceBindingExpression create(BindingRequest request);
   }
 }
