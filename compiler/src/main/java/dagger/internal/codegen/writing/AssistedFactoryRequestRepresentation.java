@@ -44,24 +44,24 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 /**
- * A {@link dagger.internal.codegen.writing.BindingExpression} for {@link
+ * A {@link RequestRepresentation} for {@link
  * dagger.assisted.AssistedFactory} methods.
  */
-final class AssistedFactoryBindingExpression extends SimpleInvocationBindingExpression {
+final class AssistedFactoryRequestRepresentation extends SimpleInvocationRequestRepresentation {
   private final ProvisionBinding binding;
-  private final ComponentBindingExpressions componentBindingExpressions;
+  private final ComponentRequestRepresentations componentRequestRepresentations;
   private final DaggerElements elements;
   private final DaggerTypes types;
 
   @AssistedInject
-  AssistedFactoryBindingExpression(
+  AssistedFactoryRequestRepresentation(
       @Assisted ProvisionBinding binding,
-      ComponentBindingExpressions componentBindingExpressions,
+      ComponentRequestRepresentations componentRequestRepresentations,
       DaggerTypes types,
       DaggerElements elements) {
     super(binding);
     this.binding = requireNonNull(binding);
-    this.componentBindingExpressions = componentBindingExpressions;
+    this.componentRequestRepresentations = componentRequestRepresentations;
     this.elements = elements;
     this.types = types;
   }
@@ -71,8 +71,8 @@ final class AssistedFactoryBindingExpression extends SimpleInvocationBindingExpr
     // An assisted factory binding should have a single request for an assisted injection type.
     DependencyRequest assistedInjectionRequest = getOnlyElement(binding.provisionDependencies());
     Expression assistedInjectionExpression =
-        ((AssistedPrivateMethodBindingExpression)
-            componentBindingExpressions.getBindingExpression(
+        ((AssistedPrivateMethodRequestRepresentation)
+            componentRequestRepresentations.getBindingExpression(
                 BindingRequest.bindingRequest(
                     assistedInjectionRequest.key(), RequestKind.INSTANCE)))
             .getAssistedDependencyExpression(requestingClass.peerClass(""));
@@ -112,6 +112,6 @@ final class AssistedFactoryBindingExpression extends SimpleInvocationBindingExpr
 
   @AssistedFactory
   static interface Factory {
-    AssistedFactoryBindingExpression create(ProvisionBinding binding);
+    AssistedFactoryRequestRepresentation create(ProvisionBinding binding);
   }
 }

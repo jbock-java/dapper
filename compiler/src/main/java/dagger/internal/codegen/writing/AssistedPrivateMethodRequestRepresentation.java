@@ -42,31 +42,28 @@ import dagger.model.RequestKind;
 import javax.lang.model.type.TypeMirror;
 
 /** A binding expression that wraps private method call for assisted fatory creation. */
-final class AssistedPrivateMethodBindingExpression extends MethodBindingExpression {
+final class AssistedPrivateMethodRequestRepresentation extends MethodRequestRepresentation {
   private final ShardImplementation shardImplementation;
   private final ContributionBinding binding;
   private final BindingRequest request;
-  private final BindingExpression wrappedBindingExpression;
-  private final CompilerOptions compilerOptions;
+  private final RequestRepresentation wrappedRequestRepresentation;
   private final DaggerTypes types;
   private String methodName;
 
   @AssistedInject
-  AssistedPrivateMethodBindingExpression(
+  AssistedPrivateMethodRequestRepresentation(
       @Assisted BindingRequest request,
       @Assisted ContributionBinding binding,
-      @Assisted BindingExpression wrappedBindingExpression,
+      @Assisted RequestRepresentation wrappedRequestRepresentation,
       ComponentImplementation componentImplementation,
-      DaggerTypes types,
-      CompilerOptions compilerOptions) {
+      DaggerTypes types) {
     super(componentImplementation.shardImplementation(binding));
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
     Preconditions.checkArgument(request.requestKind() == RequestKind.INSTANCE);
     this.binding = requireNonNull(binding);
     this.request = requireNonNull(request);
-    this.wrappedBindingExpression = requireNonNull(wrappedBindingExpression);
+    this.wrappedRequestRepresentation = requireNonNull(wrappedRequestRepresentation);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
-    this.compilerOptions = compilerOptions;
     this.types = types;
   }
 
@@ -107,7 +104,7 @@ final class AssistedPrivateMethodBindingExpression extends MethodBindingExpressi
               .returns(TypeName.get(returnType()))
               .addStatement(
                   "return $L",
-                  wrappedBindingExpression
+                  wrappedRequestRepresentation
                       .getDependencyExpression(shardImplementation.name())
                       .codeBlock())
               .build());
@@ -117,9 +114,9 @@ final class AssistedPrivateMethodBindingExpression extends MethodBindingExpressi
 
   @AssistedFactory
   interface Factory {
-    AssistedPrivateMethodBindingExpression create(
+    AssistedPrivateMethodRequestRepresentation create(
         BindingRequest request,
         ContributionBinding binding,
-        BindingExpression wrappedBindingExpression);
+        RequestRepresentation wrappedRequestRepresentation);
   }
 }

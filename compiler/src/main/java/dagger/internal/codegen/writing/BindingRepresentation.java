@@ -20,5 +20,5 @@ import dagger.internal.codegen.binding.BindingRequest;
 
 /** A factory of code expressions to satisfy all kinds of requests for a binding in a component. */
 interface BindingRepresentation {
-  BindingExpression getBindingExpression(BindingRequest request);
+  RequestRepresentation getBindingExpression(BindingRequest request);
 }

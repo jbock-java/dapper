@@ -30,12 +30,12 @@ import dagger.internal.codegen.javapoet.Expression;
  * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of
  * {@linkplain dagger.Component#dependencies() component} dependencies.
  */
-final class ComponentRequirementBindingExpression extends SimpleInvocationBindingExpression {
+final class ComponentRequirementRequestRepresentation extends SimpleInvocationRequestRepresentation {
   private final ComponentRequirement componentRequirement;
   private final ComponentRequirementExpressions componentRequirementExpressions;
 
   @AssistedInject
-  ComponentRequirementBindingExpression(
+  ComponentRequirementRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted ComponentRequirement componentRequirement,
       ComponentRequirementExpressions componentRequirementExpressions) {
@@ -53,7 +53,7 @@ final class ComponentRequirementBindingExpression extends SimpleInvocationBindin
 
   @AssistedFactory
   static interface Factory {
-    ComponentRequirementBindingExpression create(
+    ComponentRequirementRequestRepresentation create(
         ContributionBinding binding, ComponentRequirement componentRequirement);
   }
 }

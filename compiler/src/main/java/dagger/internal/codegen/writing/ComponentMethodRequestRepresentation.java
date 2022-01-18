@@ -31,20 +31,20 @@ import javax.lang.model.type.TypeMirror;
  *
  * <p>Dependents of this binding expression will just call the component method.
  */
-final class ComponentMethodBindingExpression extends MethodBindingExpression {
-  private final BindingExpression wrappedBindingExpression;
+final class ComponentMethodRequestRepresentation extends MethodRequestRepresentation {
+  private final RequestRepresentation wrappedRequestRepresentation;
   private final ComponentImplementation componentImplementation;
   private final ComponentMethodDescriptor componentMethod;
   private final DaggerTypes types;
 
   @AssistedInject
-  ComponentMethodBindingExpression(
-      @Assisted BindingExpression wrappedBindingExpression,
+  ComponentMethodRequestRepresentation(
+      @Assisted RequestRepresentation wrappedRequestRepresentation,
       @Assisted ComponentMethodDescriptor componentMethod,
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
     super(componentImplementation.getComponentShard());
-    this.wrappedBindingExpression = requireNonNull(wrappedBindingExpression);
+    this.wrappedRequestRepresentation = requireNonNull(wrappedRequestRepresentation);
     this.componentMethod = requireNonNull(componentMethod);
     this.componentImplementation = componentImplementation;
     this.types = types;
@@ -64,7 +64,7 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
     return componentMethod.equals(this.componentMethod) && component.equals(componentImplementation)
         ? CodeBlock.of(
         "return $L;",
-        wrappedBindingExpression
+        wrappedRequestRepresentation
             .getDependencyExpressionForComponentMethod(componentMethod, componentImplementation)
             .codeBlock())
         : super.getComponentMethodImplementation(componentMethod, component);
@@ -82,8 +82,8 @@ final class ComponentMethodBindingExpression extends MethodBindingExpression {
 
   @AssistedFactory
   interface Factory {
-    ComponentMethodBindingExpression create(
-        BindingExpression wrappedBindingExpression,
+    ComponentMethodRequestRepresentation create(
+        RequestRepresentation wrappedRequestRepresentation,
         ComponentMethodDescriptor componentMethod);
   }
 }

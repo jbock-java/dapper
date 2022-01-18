@@ -29,14 +29,14 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 
 /** A binding expression for component provision methods. */
-final class ComponentProvisionBindingExpression extends SimpleInvocationBindingExpression {
+final class ComponentProvisionRequestRepresentation extends SimpleInvocationRequestRepresentation {
   private final ProvisionBinding binding;
   private final BindingGraph bindingGraph;
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final CompilerOptions compilerOptions;
 
   @AssistedInject
-  ComponentProvisionBindingExpression(
+  ComponentProvisionRequestRepresentation(
       @Assisted ProvisionBinding binding,
       BindingGraph bindingGraph,
       ComponentRequirementExpressions componentRequirementExpressions,
@@ -75,6 +75,6 @@ final class ComponentProvisionBindingExpression extends SimpleInvocationBindingE
 
   @AssistedFactory
   static interface Factory {
-    ComponentProvisionBindingExpression create(ProvisionBinding binding);
+    ComponentProvisionRequestRepresentation create(ProvisionBinding binding);
   }
 }

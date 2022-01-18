@@ -21,10 +21,10 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.binding.ContributionBinding;
 
 /** A simple binding expression for instance requests. Does not scope. */
-abstract class SimpleInvocationBindingExpression extends BindingExpression {
+abstract class SimpleInvocationRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
 
-  SimpleInvocationBindingExpression(ContributionBinding binding) {
+  SimpleInvocationRequestRepresentation(ContributionBinding binding) {
     this.binding = requireNonNull(binding);
   }
 

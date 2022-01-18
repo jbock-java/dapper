@@ -25,10 +25,10 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 
 /** Binding expression for provider instances. */
-final class ProviderInstanceBindingExpression extends FrameworkInstanceBindingExpression {
+final class ProviderInstanceRequestRepresentation extends FrameworkInstanceRequestRepresentation {
 
   @AssistedInject
-  ProviderInstanceBindingExpression(
+  ProviderInstanceRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted FrameworkInstanceSupplier frameworkInstanceSupplier,
       DaggerTypes types,
@@ -43,7 +43,7 @@ final class ProviderInstanceBindingExpression extends FrameworkInstanceBindingEx
 
   @AssistedFactory
   static interface Factory {
-    ProviderInstanceBindingExpression create(
+    ProviderInstanceRequestRepresentation create(
         ContributionBinding binding, FrameworkInstanceSupplier frameworkInstanceSupplier);
   }
 }

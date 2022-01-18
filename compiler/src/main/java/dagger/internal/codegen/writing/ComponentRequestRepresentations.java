@@ -22,7 +22,7 @@ import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.writing.DelegateBindingExpression.isBindsScopeStrongerThanDependencyScope;
+import static dagger.internal.codegen.writing.DelegateRequestRepresentation.isBindsScopeStrongerThanDependencyScope;
 import static dagger.internal.codegen.writing.MemberSelect.staticFactoryCreation;
 import static dagger.model.BindingKind.DELEGATE;
 import static java.util.Objects.requireNonNull;
@@ -58,46 +58,46 @@ import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
 @PerComponentImplementation
-public final class ComponentBindingExpressions {
+public final class ComponentRequestRepresentations {
   // TODO(dpb,ronshapiro): refactor this and ComponentRequirementExpressions into a
   // HierarchicalComponentMap<K, V>, or perhaps this use a flattened ImmutableMap, built from its
   // parents? If so, maybe make BindingExpression.Factory create it.
 
-  private final Optional<ComponentBindingExpressions> parent;
+  private final Optional<ComponentRequestRepresentations> parent;
   private final BindingGraph graph;
   private final ComponentImplementation componentImplementation;
   private final ComponentRequirementExpressions componentRequirementExpressions;
-  private final ComponentMethodBindingExpression.Factory componentMethodBindingExpressionFactory;
-  private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
-  private final DerivedFromFrameworkInstanceBindingExpression.Factory
+  private final ComponentMethodRequestRepresentation.Factory componentMethodBindingExpressionFactory;
+  private final DelegateRequestRepresentation.Factory delegateBindingExpressionFactory;
+  private final DerivedFromFrameworkInstanceRequestRepresentation.Factory
       derivedFromFrameworkInstanceBindingExpressionFactory;
-  private final PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory;
-  private final AssistedPrivateMethodBindingExpression.Factory
+  private final PrivateMethodRequestRepresentation.Factory privateMethodBindingExpressionFactory;
+  private final AssistedPrivateMethodRequestRepresentation.Factory
       assistedPrivateMethodBindingExpressionFactory;
-  private final ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory;
-  private final UnscopedDirectInstanceBindingExpressionFactory
-      unscopedDirectInstanceBindingExpressionFactory;
+  private final ProviderInstanceRequestRepresentation.Factory providerInstanceBindingExpressionFactory;
+  private final UnscopedDirectInstanceRequestRepresentationFactory
+      unscopedDirectInstanceRequestRepresentationFactory;
   private final UnscopedFrameworkInstanceCreationExpressionFactory
       unscopedFrameworkInstanceCreationExpressionFactory;
   private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
   private final SwitchingProviders switchingProviders;
-  private final Map<BindingRequest, BindingExpression> expressions = new HashMap<>();
+  private final Map<BindingRequest, RequestRepresentation> expressions = new HashMap<>();
 
   @Inject
-  ComponentBindingExpressions(
-      @ParentComponent Optional<ComponentBindingExpressions> parent,
+  ComponentRequestRepresentations(
+      @ParentComponent Optional<ComponentRequestRepresentations> parent,
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,
-      ComponentMethodBindingExpression.Factory componentMethodBindingExpressionFactory,
-      DelegateBindingExpression.Factory delegateBindingExpressionFactory,
-      DerivedFromFrameworkInstanceBindingExpression.Factory
+      ComponentMethodRequestRepresentation.Factory componentMethodBindingExpressionFactory,
+      DelegateRequestRepresentation.Factory delegateBindingExpressionFactory,
+      DerivedFromFrameworkInstanceRequestRepresentation.Factory
           derivedFromFrameworkInstanceBindingExpressionFactory,
-      PrivateMethodBindingExpression.Factory privateMethodBindingExpressionFactory,
-      AssistedPrivateMethodBindingExpression.Factory assistedPrivateMethodBindingExpressionFactory,
-      ProviderInstanceBindingExpression.Factory providerInstanceBindingExpressionFactory,
-      UnscopedDirectInstanceBindingExpressionFactory unscopedDirectInstanceBindingExpressionFactory,
+      PrivateMethodRequestRepresentation.Factory privateMethodBindingExpressionFactory,
+      AssistedPrivateMethodRequestRepresentation.Factory assistedPrivateMethodBindingExpressionFactory,
+      ProviderInstanceRequestRepresentation.Factory providerInstanceBindingExpressionFactory,
+      UnscopedDirectInstanceRequestRepresentationFactory unscopedDirectInstanceRequestRepresentationFactory,
       UnscopedFrameworkInstanceCreationExpressionFactory
           unscopedFrameworkInstanceCreationExpressionFactory,
       DaggerTypes types,
@@ -112,8 +112,8 @@ public final class ComponentBindingExpressions {
         derivedFromFrameworkInstanceBindingExpressionFactory;
     this.privateMethodBindingExpressionFactory = privateMethodBindingExpressionFactory;
     this.providerInstanceBindingExpressionFactory = providerInstanceBindingExpressionFactory;
-    this.unscopedDirectInstanceBindingExpressionFactory =
-        unscopedDirectInstanceBindingExpressionFactory;
+    this.unscopedDirectInstanceRequestRepresentationFactory =
+        unscopedDirectInstanceRequestRepresentationFactory;
     this.unscopedFrameworkInstanceCreationExpressionFactory =
         unscopedFrameworkInstanceCreationExpressionFactory;
     this.types = types;
@@ -226,8 +226,8 @@ public final class ComponentBindingExpressions {
         .build();
   }
 
-  /** Returns the {@link BindingExpression} for the given {@link BindingRequest}. */
-  BindingExpression getBindingExpression(BindingRequest request) {
+  /** Returns the {@link RequestRepresentation} for the given {@link BindingRequest}. */
+  RequestRepresentation getBindingExpression(BindingRequest request) {
     if (expressions.containsKey(request)) {
       return expressions.get(request);
     }
@@ -235,7 +235,7 @@ public final class ComponentBindingExpressions {
     Optional<Binding> localBinding = graph.localContributionBinding(request.key());
 
     if (localBinding.isPresent()) {
-      BindingExpression expression = createBindingExpression(localBinding.get(), request);
+      RequestRepresentation expression = createBindingExpression(localBinding.get(), request);
       expressions.put(request, expression);
       return expression;
     }
@@ -245,7 +245,7 @@ public final class ComponentBindingExpressions {
   }
 
   /** Creates a binding expression. */
-  private BindingExpression createBindingExpression(Binding binding, BindingRequest request) {
+  private RequestRepresentation createBindingExpression(Binding binding, BindingRequest request) {
     switch (binding.bindingType()) {
 
       case PROVISION:
@@ -258,7 +258,7 @@ public final class ComponentBindingExpressions {
   /**
    * Returns a binding expression that uses a {@code Provider} for provision bindings.
    */
-  private BindingExpression frameworkInstanceBindingExpression(ContributionBinding binding) {
+  private RequestRepresentation frameworkInstanceBindingExpression(ContributionBinding binding) {
     FrameworkInstanceCreationExpression frameworkInstanceCreationExpression =
         unscopedFrameworkInstanceCreationExpressionFactory.create(binding);
 
@@ -271,13 +271,13 @@ public final class ComponentBindingExpressions {
       // cause a cycle. In such cases, we try to use the unscopedDirectInstanceBindingExpression
       // directly, or else fall back to default mode.
       BindingRequest instanceRequest = bindingRequest(binding.key(), RequestKind.INSTANCE);
-      BindingExpression instanceExpression = getBindingExpression(instanceRequest);
-      if (!(instanceExpression instanceof DerivedFromFrameworkInstanceBindingExpression)) {
+      RequestRepresentation instanceExpression = getBindingExpression(instanceRequest);
+      if (!(instanceExpression instanceof DerivedFromFrameworkInstanceRequestRepresentation)) {
         frameworkInstanceCreationExpression =
             switchingProviders.newFrameworkInstanceCreationExpression(binding, instanceExpression);
       } else {
-        Optional<BindingExpression> unscopedInstanceExpression =
-            unscopedDirectInstanceBindingExpressionFactory.create(binding);
+        Optional<RequestRepresentation> unscopedInstanceExpression =
+            unscopedDirectInstanceRequestRepresentationFactory.create(binding);
         if (unscopedInstanceExpression.isPresent()) {
           frameworkInstanceCreationExpression =
               switchingProviders.newFrameworkInstanceCreationExpression(
@@ -321,7 +321,7 @@ public final class ComponentBindingExpressions {
   }
 
   /** Returns a binding expression for a provision binding. */
-  private BindingExpression provisionBindingExpression(
+  private RequestRepresentation provisionBindingExpression(
       ContributionBinding binding, BindingRequest request) {
     switch (request.requestKind()) {
       case INSTANCE:
@@ -343,15 +343,15 @@ public final class ComponentBindingExpressions {
    * Returns a binding expression for {@link RequestKind#PROVIDER} requests.
    *
    * <p>{@code @Binds} bindings that don't {@linkplain #needsCaching(ContributionBinding) need to be
-   * cached} can use a {@link DelegateBindingExpression}.
+   * cached} can use a {@link DelegateRequestRepresentation}.
    *
    * <p>In fastInit mode, use an {@link SwitchingProviders inner switching provider} unless
    * that provider's case statement will simply call {@code get()} on another {@code Provider} (in
    * which case, just use that Provider directly).
    *
-   * <p>Otherwise, return a {@link FrameworkInstanceBindingExpression}.
+   * <p>Otherwise, return a {@link FrameworkInstanceRequestRepresentation}.
    */
-  private BindingExpression providerBindingExpression(ContributionBinding binding) {
+  private RequestRepresentation providerBindingExpression(ContributionBinding binding) {
     if (binding.kind().equals(DELEGATE) && !needsCaching(binding)) {
       return delegateBindingExpressionFactory.create(binding, RequestKind.PROVIDER);
     }
@@ -361,11 +361,11 @@ public final class ComponentBindingExpressions {
   /**
    * Returns a binding expression for {@link RequestKind#INSTANCE} requests.
    */
-  private BindingExpression instanceBindingExpression(ContributionBinding binding) {
-    Optional<BindingExpression> maybeDirectInstanceExpression =
-        unscopedDirectInstanceBindingExpressionFactory.create(binding);
+  private RequestRepresentation instanceBindingExpression(ContributionBinding binding) {
+    Optional<RequestRepresentation> maybeDirectInstanceExpression =
+        unscopedDirectInstanceRequestRepresentationFactory.create(binding);
     if (maybeDirectInstanceExpression.isPresent()) {
-      BindingExpression directInstanceExpression = maybeDirectInstanceExpression.orElseThrow();
+      RequestRepresentation directInstanceExpression = maybeDirectInstanceExpression.orElseThrow();
       if (binding.kind() == BindingKind.ASSISTED_INJECTION) {
         BindingRequest request = bindingRequest(binding.key(), RequestKind.INSTANCE);
         return assistedPrivateMethodBindingExpressionFactory.create(
@@ -410,11 +410,11 @@ public final class ComponentBindingExpressions {
    * binding method will be written. If the binding doesn't match a component method and is not
    * modifiable, then a new private method will be written.
    */
-  BindingExpression wrapInMethod(
-      ContributionBinding binding, RequestKind requestKind, BindingExpression bindingExpression) {
+  RequestRepresentation wrapInMethod(
+      ContributionBinding binding, RequestKind requestKind, RequestRepresentation requestRepresentation) {
     // If we've already wrapped the expression, then use the delegate.
-    if (bindingExpression instanceof MethodBindingExpression) {
-      return bindingExpression;
+    if (requestRepresentation instanceof MethodRequestRepresentation) {
+      return requestRepresentation;
     }
 
     BindingRequest request = bindingRequest(binding.key(), requestKind);
@@ -441,9 +441,9 @@ public final class ComponentBindingExpressions {
     if (matchingComponentMethod.isPresent() && shardImplementation.isComponentShard()) {
       ComponentMethodDescriptor componentMethod = matchingComponentMethod.get();
       return componentMethodBindingExpressionFactory.create(
-          bindingExpression, componentMethod);
+          requestRepresentation, componentMethod);
     } else {
-      return privateMethodBindingExpressionFactory.create(request, binding, bindingExpression);
+      return privateMethodBindingExpressionFactory.create(request, binding, requestRepresentation);
     }
   }
 

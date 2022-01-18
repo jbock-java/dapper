@@ -91,13 +91,13 @@ final class SwitchingProviders {
 
   /** Returns the framework instance creation expression for an inner switching provider class. */
   FrameworkInstanceCreationExpression newFrameworkInstanceCreationExpression(
-      ContributionBinding binding, BindingExpression unscopedInstanceBindingExpression) {
+      ContributionBinding binding, RequestRepresentation unscopedInstanceRequestRepresentation) {
     return new FrameworkInstanceCreationExpression() {
       @Override
       public CodeBlock creationExpression() {
         return switchingProviderBuilders
             .computeIfAbsent(binding.key(), key -> getSwitchingProviderBuilder())
-            .getNewInstanceCodeBlock(binding, unscopedInstanceBindingExpression);
+            .getNewInstanceCodeBlock(binding, unscopedInstanceRequestRepresentation);
       }
     };
   }
@@ -127,13 +127,13 @@ final class SwitchingProviders {
     }
 
     private CodeBlock getNewInstanceCodeBlock(
-        ContributionBinding binding, BindingExpression unscopedInstanceBindingExpression) {
+        ContributionBinding binding, RequestRepresentation unscopedInstanceRequestRepresentation) {
       Key key = binding.key();
       if (!switchIds.containsKey(key)) {
         int switchId = switchIds.size();
         switchIds.put(key, switchId);
         switchCases.put(
-            switchId, createSwitchCaseCodeBlock(key, unscopedInstanceBindingExpression));
+            switchId, createSwitchCaseCodeBlock(key, unscopedInstanceRequestRepresentation));
       }
       return CodeBlock.of(
           "new $T<$L>($L, $L)",
@@ -152,12 +152,12 @@ final class SwitchingProviders {
     }
 
     private CodeBlock createSwitchCaseCodeBlock(
-        Key key, BindingExpression unscopedInstanceBindingExpression) {
+        Key key, RequestRepresentation unscopedInstanceRequestRepresentation) {
       // TODO(bcorso): Try to delay calling getDependencyExpression() until we are writing out the
       // SwitchingProvider because calling it here makes FrameworkFieldInitializer think there's a
       // cycle when initializing SwitchingProviders which adds an uncessary DelegateFactory.
       CodeBlock instanceCodeBlock =
-          unscopedInstanceBindingExpression
+          unscopedInstanceRequestRepresentation
               .getDependencyExpression(switchingProviderType)
               .box(types)
               .codeBlock();

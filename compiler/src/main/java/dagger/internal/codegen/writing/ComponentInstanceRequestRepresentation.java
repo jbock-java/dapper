@@ -22,36 +22,32 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 
-/** A binding expression for a subcomponent creator that just invokes the constructor. */
-final class SubcomponentCreatorBindingExpression extends SimpleInvocationBindingExpression {
-  private final ShardImplementation shardImplementation;
+/** A binding expression for the instance of the component itself, i.e. {@code this}. */
+final class ComponentInstanceRequestRepresentation extends SimpleInvocationRequestRepresentation {
+  private final ComponentImplementation componentImplementation;
   private final ContributionBinding binding;
 
   @AssistedInject
-  SubcomponentCreatorBindingExpression(
+  ComponentInstanceRequestRepresentation(
       @Assisted ContributionBinding binding, ComponentImplementation componentImplementation) {
     super(binding);
+    this.componentImplementation = componentImplementation;
     this.binding = binding;
-    this.shardImplementation = componentImplementation.shardImplementation(binding);
   }
 
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
     return Expression.create(
         binding.key().type(),
-        "new $L($L)",
-        shardImplementation.getSubcomponentCreatorSimpleName(binding.key()),
-        shardImplementation.componentFieldsByImplementation().values().stream()
-            .map(field -> CodeBlock.of("$N", field))
-            .collect(CodeBlocks.toParametersCodeBlock()));
+        componentImplementation.name().equals(requestingClass)
+            ? CodeBlock.of("this")
+            : componentImplementation.componentFieldReference());
   }
 
   @AssistedFactory
   static interface Factory {
-    SubcomponentCreatorBindingExpression create(ContributionBinding binding);
+    ComponentInstanceRequestRepresentation create(ContributionBinding binding);
   }
 }

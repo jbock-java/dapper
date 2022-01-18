@@ -216,7 +216,7 @@ public final class ComponentImplementation {
   private final List<CodeBlock> shardInitializations = new ArrayList<>();
   private final Optional<ComponentImplementation> parent;
   private final ChildComponentImplementationFactory childComponentImplementationFactory;
-  private final Provider<ComponentBindingExpressions> bindingExpressionsProvider;
+  private final Provider<ComponentRequestRepresentations> bindingExpressionsProvider;
   private final Provider<ComponentCreatorImplementationFactory>
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
@@ -230,7 +230,7 @@ public final class ComponentImplementation {
       @ParentComponent Optional<ComponentImplementation> parent,
       ChildComponentImplementationFactory childComponentImplementationFactory,
       // Inject as Provider<> to prevent a cycle.
-      Provider<ComponentBindingExpressions> bindingExpressionsProvider,
+      Provider<ComponentRequestRepresentations> bindingExpressionsProvider,
       Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
       BindingGraph graph,
       ComponentNames componentNames,

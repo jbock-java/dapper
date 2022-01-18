@@ -29,31 +29,31 @@ import java.util.Optional;
  * <p>Note that these binding expressions are for getting "direct" instances -- i.e. instances that
  * are created via constructors or modules (e.g. {@code new Foo()} or {@code
  * FooModule.provideFoo()}) as opposed to an instance created from calling a getter on a framework
- * type (e.g. {@code fooProvider.get()}). See {@link FrameworkInstanceBindingExpression} for binding
+ * type (e.g. {@code fooProvider.get()}). See {@link FrameworkInstanceRequestRepresentation} for binding
  * expressions that are created from framework types.
  */
-final class UnscopedDirectInstanceBindingExpressionFactory {
-  private final AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory;
-  private final ComponentInstanceBindingExpression.Factory
+final class UnscopedDirectInstanceRequestRepresentationFactory {
+  private final AssistedFactoryRequestRepresentation.Factory assistedFactoryBindingExpressionFactory;
+  private final ComponentInstanceRequestRepresentation.Factory
       componentInstanceBindingExpressionFactory;
-  private final ComponentProvisionBindingExpression.Factory
+  private final ComponentProvisionRequestRepresentation.Factory
       componentProvisionBindingExpressionFactory;
-  private final ComponentRequirementBindingExpression.Factory
+  private final ComponentRequirementRequestRepresentation.Factory
       componentRequirementBindingExpressionFactory;
-  private final DelegateBindingExpression.Factory delegateBindingExpressionFactory;
-  private final SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory;
-  private final SubcomponentCreatorBindingExpression.Factory
+  private final DelegateRequestRepresentation.Factory delegateBindingExpressionFactory;
+  private final SimpleMethodRequestRepresentation.Factory simpleMethodBindingExpressionFactory;
+  private final SubcomponentCreatorRequestRepresentation.Factory
       subcomponentCreatorBindingExpressionFactory;
 
   @Inject
-  UnscopedDirectInstanceBindingExpressionFactory(
-      AssistedFactoryBindingExpression.Factory assistedFactoryBindingExpressionFactory,
-      ComponentInstanceBindingExpression.Factory componentInstanceBindingExpressionFactory,
-      ComponentProvisionBindingExpression.Factory componentProvisionBindingExpressionFactory,
-      ComponentRequirementBindingExpression.Factory componentRequirementBindingExpressionFactory,
-      DelegateBindingExpression.Factory delegateBindingExpressionFactory,
-      SimpleMethodBindingExpression.Factory simpleMethodBindingExpressionFactory,
-      SubcomponentCreatorBindingExpression.Factory subcomponentCreatorBindingExpressionFactory) {
+  UnscopedDirectInstanceRequestRepresentationFactory(
+      AssistedFactoryRequestRepresentation.Factory assistedFactoryBindingExpressionFactory,
+      ComponentInstanceRequestRepresentation.Factory componentInstanceBindingExpressionFactory,
+      ComponentProvisionRequestRepresentation.Factory componentProvisionBindingExpressionFactory,
+      ComponentRequirementRequestRepresentation.Factory componentRequirementBindingExpressionFactory,
+      DelegateRequestRepresentation.Factory delegateBindingExpressionFactory,
+      SimpleMethodRequestRepresentation.Factory simpleMethodBindingExpressionFactory,
+      SubcomponentCreatorRequestRepresentation.Factory subcomponentCreatorBindingExpressionFactory) {
     this.assistedFactoryBindingExpressionFactory = assistedFactoryBindingExpressionFactory;
     this.componentInstanceBindingExpressionFactory = componentInstanceBindingExpressionFactory;
     this.componentProvisionBindingExpressionFactory = componentProvisionBindingExpressionFactory;
@@ -65,7 +65,7 @@ final class UnscopedDirectInstanceBindingExpressionFactory {
   }
 
   /** Returns a direct, unscoped binding expression for a {@link RequestKind#INSTANCE} request. */
-  Optional<BindingExpression> create(ContributionBinding binding) {
+  Optional<RequestRepresentation> create(ContributionBinding binding) {
     switch (binding.kind()) {
       case DELEGATE:
         return Optional.of(delegateBindingExpressionFactory.create(binding, RequestKind.INSTANCE));

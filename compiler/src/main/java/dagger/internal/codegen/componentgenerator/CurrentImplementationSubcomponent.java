@@ -21,7 +21,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Subcomponent;
 import dagger.internal.codegen.binding.BindingGraph;
-import dagger.internal.codegen.writing.ComponentBindingExpressions;
+import dagger.internal.codegen.writing.ComponentRequestRepresentations;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import dagger.internal.codegen.writing.ComponentImplementation.ChildComponentImplementationFactory;
 import dagger.internal.codegen.writing.ComponentRequirementExpressions;
@@ -48,7 +48,7 @@ public interface CurrentImplementationSubcomponent {
     static ChildComponentImplementationFactory provideChildComponentImplementationFactory(
         CurrentImplementationSubcomponent.Builder currentImplementationSubcomponentBuilder,
         jakarta.inject.Provider<ComponentImplementation> componentImplementatation,
-        jakarta.inject.Provider<ComponentBindingExpressions> componentBindingExpressions,
+        jakarta.inject.Provider<ComponentRequestRepresentations> componentBindingExpressions,
         jakarta.inject.Provider<ComponentRequirementExpressions> componentRequirementExpressions) {
       return childGraph ->
           currentImplementationSubcomponentBuilder
@@ -73,7 +73,7 @@ public interface CurrentImplementationSubcomponent {
 
     @BindsInstance
     Builder parentBindingExpressions(
-        @ParentComponent Optional<ComponentBindingExpressions> parentBindingExpressions);
+        @ParentComponent Optional<ComponentRequestRepresentations> parentBindingExpressions);
 
     @BindsInstance
     Builder parentRequirementExpressions(

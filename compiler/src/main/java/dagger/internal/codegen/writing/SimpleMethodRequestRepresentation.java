@@ -46,25 +46,25 @@ import javax.lang.model.type.TypeMirror;
  * A binding expression that invokes methods or constructors directly (without attempting to scope)
  * {@link dagger.model.RequestKind#INSTANCE} requests.
  */
-final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpression {
+final class SimpleMethodRequestRepresentation extends SimpleInvocationRequestRepresentation {
   private final CompilerOptions compilerOptions;
   private final ProvisionBinding provisionBinding;
-  private final ComponentBindingExpressions componentBindingExpressions;
+  private final ComponentRequestRepresentations componentRequestRepresentations;
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final ComponentImplementation.ShardImplementation shardImplementation;
 
   @AssistedInject
-  SimpleMethodBindingExpression(
+  SimpleMethodRequestRepresentation(
       @Assisted ProvisionBinding binding,
       CompilerOptions compilerOptions,
-      ComponentBindingExpressions componentBindingExpressions,
+      ComponentRequestRepresentations componentRequestRepresentations,
       ComponentRequirementExpressions componentRequirementExpressions,
       ComponentImplementation componentImplementation) {
     super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
     Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
-    this.componentBindingExpressions = componentBindingExpressions;
+    this.componentRequestRepresentations = componentRequestRepresentations;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.shardImplementation = componentImplementation.shardImplementation(binding);
   }
@@ -131,7 +131,7 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
   }
 
   private Expression dependencyArgument(DependencyRequest dependency, ClassName requestingClass) {
-    return componentBindingExpressions.getDependencyArgumentExpression(dependency, requestingClass);
+    return componentRequestRepresentations.getDependencyArgumentExpression(dependency, requestingClass);
   }
 
   private Expression injectMembers(CodeBlock instance) {
@@ -154,6 +154,6 @@ final class SimpleMethodBindingExpression extends SimpleInvocationBindingExpress
 
   @AssistedFactory
   static interface Factory {
-    SimpleMethodBindingExpression create(ProvisionBinding binding);
+    SimpleMethodRequestRepresentation create(ProvisionBinding binding);
   }
 }

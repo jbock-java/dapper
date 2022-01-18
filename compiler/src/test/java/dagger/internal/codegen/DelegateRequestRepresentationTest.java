@@ -28,7 +28,7 @@ import javax.tools.JavaFileObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-class DelegateBindingExpressionTest {
+class DelegateRequestRepresentationTest {
 
   private static final JavaFileObject REGULAR_SCOPED =
       JavaFileObjects.forSourceLines(

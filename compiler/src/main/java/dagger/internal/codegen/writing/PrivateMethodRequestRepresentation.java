@@ -38,25 +38,25 @@ import javax.lang.model.type.TypeMirror;
  *
  * <p>Dependents of this binding expression will just call the no-arg private method.
  */
-final class PrivateMethodBindingExpression extends MethodBindingExpression {
+final class PrivateMethodRequestRepresentation extends MethodRequestRepresentation {
   private final ShardImplementation shardImplementation;
   private final ContributionBinding binding;
   private final BindingRequest request;
-  private final BindingExpression wrappedBindingExpression;
+  private final RequestRepresentation wrappedRequestRepresentation;
   private final DaggerTypes types;
   private String methodName;
 
   @AssistedInject
-  PrivateMethodBindingExpression(
+  PrivateMethodRequestRepresentation(
       @Assisted BindingRequest request,
       @Assisted ContributionBinding binding,
-      @Assisted BindingExpression wrappedBindingExpression,
+      @Assisted RequestRepresentation wrappedRequestRepresentation,
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
     super(componentImplementation.shardImplementation(binding));
     this.binding = requireNonNull(binding);
     this.request = requireNonNull(request);
-    this.wrappedBindingExpression = requireNonNull(wrappedBindingExpression);
+    this.wrappedRequestRepresentation = requireNonNull(wrappedRequestRepresentation);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.types = types;
   }
@@ -90,7 +90,7 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
               .returns(TypeName.get(returnType()))
               .addStatement(
                   "return $L",
-                  wrappedBindingExpression
+                  wrappedRequestRepresentation
                       .getDependencyExpression(shardImplementation.name())
                       .codeBlock())
               .build());
@@ -100,9 +100,9 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
 
   @AssistedFactory
   interface Factory {
-    PrivateMethodBindingExpression create(
+    PrivateMethodRequestRepresentation create(
         BindingRequest request,
         ContributionBinding binding,
-        BindingExpression wrappedBindingExpression);
+        RequestRepresentation wrappedRequestRepresentation);
   }
 }

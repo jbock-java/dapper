@@ -81,7 +81,7 @@ final class DependencyMethodProviderCreationExpression
     // using .class & String.format -- but that wouldn't be the whole story.
     // What should we do?
     CodeBlock invocation =
-        ComponentProvisionBindingExpression.maybeCheckForNull(
+        ComponentProvisionRequestRepresentation.maybeCheckForNull(
             (ProvisionBinding) binding,
             compilerOptions,
             CodeBlock.of(

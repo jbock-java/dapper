@@ -36,22 +36,22 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import javax.lang.model.type.TypeMirror;
 
-/** A {@link dagger.internal.codegen.writing.BindingExpression} for {@code @Binds} methods. */
-final class DelegateBindingExpression extends BindingExpression {
+/** A {@link RequestRepresentation} for {@code @Binds} methods. */
+final class DelegateRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
   private final RequestKind requestKind;
-  private final ComponentBindingExpressions componentBindingExpressions;
+  private final ComponentRequestRepresentations componentRequestRepresentations;
   private final DaggerTypes types;
 
   @AssistedInject
-  DelegateBindingExpression(
+  DelegateRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted RequestKind requestKind,
-      ComponentBindingExpressions componentBindingExpressions,
+      ComponentRequestRepresentations componentRequestRepresentations,
       DaggerTypes types) {
     this.binding = requireNonNull(binding);
     this.requestKind = requireNonNull(requestKind);
-    this.componentBindingExpressions = componentBindingExpressions;
+    this.componentRequestRepresentations = componentRequestRepresentations;
     this.types = types;
   }
 
@@ -72,7 +72,7 @@ final class DelegateBindingExpression extends BindingExpression {
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
     Expression delegateExpression =
-        componentBindingExpressions.getDependencyExpression(
+        componentRequestRepresentations.getDependencyExpression(
             bindingRequest(getOnlyElement(binding.dependencies()).key(), requestKind),
             requestingClass);
 
@@ -132,6 +132,6 @@ final class DelegateBindingExpression extends BindingExpression {
 
   @AssistedFactory
   interface Factory {
-    DelegateBindingExpression create(ContributionBinding binding, RequestKind requestKind);
+    DelegateRequestRepresentation create(ContributionBinding binding, RequestKind requestKind);
   }
 }

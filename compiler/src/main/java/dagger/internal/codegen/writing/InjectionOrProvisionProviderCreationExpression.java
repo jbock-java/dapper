@@ -40,16 +40,16 @@ final class InjectionOrProvisionProviderCreationExpression
 
   private final ContributionBinding binding;
   private final ShardImplementation shardImplementation;
-  private final ComponentBindingExpressions componentBindingExpressions;
+  private final ComponentRequestRepresentations componentRequestRepresentations;
 
   @AssistedInject
   InjectionOrProvisionProviderCreationExpression(
       @Assisted ContributionBinding binding,
       ComponentImplementation componentImplementation,
-      ComponentBindingExpressions componentBindingExpressions) {
+      ComponentRequestRepresentations componentRequestRepresentations) {
     this.binding = requireNonNull(binding);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
-    this.componentBindingExpressions = componentBindingExpressions;
+    this.componentRequestRepresentations = componentRequestRepresentations;
   }
 
   @Override
@@ -58,7 +58,7 @@ final class InjectionOrProvisionProviderCreationExpression
         CodeBlock.of(
             "$T.create($L)",
             generatedClassNameForBinding(binding),
-            componentBindingExpressions.getCreateMethodArgumentsCodeBlock(
+            componentRequestRepresentations.getCreateMethodArgumentsCodeBlock(
                 binding, shardImplementation.name()));
 
     // When scoping a parameterized factory for an @Inject class, Java 7 cannot always infer the

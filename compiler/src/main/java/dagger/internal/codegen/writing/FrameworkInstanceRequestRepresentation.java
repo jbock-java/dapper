@@ -29,13 +29,13 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /** A binding expression that uses a {@link FrameworkType} field. */
-abstract class FrameworkInstanceBindingExpression extends BindingExpression {
+abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
   private final FrameworkInstanceSupplier frameworkInstanceSupplier;
   private final DaggerTypes types;
   private final DaggerElements elements;
 
-  FrameworkInstanceBindingExpression(
+  FrameworkInstanceRequestRepresentation(
       ContributionBinding binding,
       FrameworkInstanceSupplier frameworkInstanceSupplier,
       DaggerTypes types,
