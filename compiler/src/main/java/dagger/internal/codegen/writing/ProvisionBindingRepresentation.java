@@ -44,7 +44,7 @@ import java.util.Optional;
  * A binding representation that wraps code generation methods that satisfy all kinds of request for
  * that binding.
  */
-final class LegacyBindingRepresentation implements BindingRepresentation {
+final class ProvisionBindingRepresentation implements BindingRepresentation {
   private final BindingGraph graph;
   private final boolean isFastInit;
   private final Binding binding;
@@ -64,7 +64,7 @@ final class LegacyBindingRepresentation implements BindingRepresentation {
   private final SwitchingProviders switchingProviders;
 
   @AssistedInject
-  LegacyBindingRepresentation(
+  ProvisionBindingRepresentation(
       @Assisted boolean isFastInit,
       @Assisted Binding binding,
       @Assisted SwitchingProviders switchingProviders,
@@ -101,7 +101,7 @@ final class LegacyBindingRepresentation implements BindingRepresentation {
   }
 
   @Override
-  public RequestRepresentation getBindingExpression(BindingRequest request) {
+  public RequestRepresentation getRequestRepresentation(BindingRequest request) {
     // must be BindingType.PROVISION
     return provisionBindingExpression((ContributionBinding) binding, request);
   }
@@ -122,7 +122,7 @@ final class LegacyBindingRepresentation implements BindingRepresentation {
       // cause a cycle. In such cases, we try to use the unscopedDirectInstanceBindingExpression
       // directly, or else fall back to default mode.
       BindingRequest instanceRequest = bindingRequest(binding.key(), RequestKind.INSTANCE);
-      RequestRepresentation instanceExpression = getBindingExpression(instanceRequest);
+      RequestRepresentation instanceExpression = getRequestRepresentation(instanceRequest);
       if (!(instanceExpression instanceof DerivedFromFrameworkInstanceRequestRepresentation)) {
         frameworkInstanceCreationExpression =
             switchingProviders.newFrameworkInstanceCreationExpression(binding, instanceExpression);
@@ -305,7 +305,7 @@ final class LegacyBindingRepresentation implements BindingRepresentation {
 
   @AssistedFactory
   static interface Factory {
-    LegacyBindingRepresentation create(
+    ProvisionBindingRepresentation create(
         boolean isFastInit, Binding binding, SwitchingProviders switchingProviders);
   }
 }
