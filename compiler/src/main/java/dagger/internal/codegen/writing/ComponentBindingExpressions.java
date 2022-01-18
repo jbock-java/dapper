@@ -35,7 +35,6 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
-import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -48,7 +47,6 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
@@ -56,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
@@ -434,7 +431,7 @@ public final class ComponentBindingExpressions {
     if (matchingComponentMethod.isPresent() && shardImplementation.isComponentShard()) {
       ComponentMethodDescriptor componentMethod = matchingComponentMethod.get();
       return componentMethodBindingExpressionFactory.create(
-          request, binding, bindingExpression, componentMethod);
+          bindingExpression, componentMethod);
     } else {
       return privateMethodBindingExpressionFactory.create(request, binding, bindingExpression);
     }
@@ -447,7 +444,7 @@ public final class ComponentBindingExpressions {
    * bindings whose scope is no stronger than their delegate's.
    */
   private boolean needsCaching(ContributionBinding binding) {
-    if (!binding.scope().isPresent()) {
+    if (binding.scope().isEmpty()) {
       return false;
     }
     if (binding.kind().equals(DELEGATE)) {

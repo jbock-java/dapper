@@ -18,20 +18,24 @@ package dagger.internal.codegen.writing;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameterSpecs;
+import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.PRIVATE_METHOD;
+import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
+import dagger.model.RequestKind;
 import java.util.List;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * A binding expression that wraps the dependency expressions in a private, no-arg method.
@@ -42,6 +46,7 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
   private final ShardImplementation shardImplementation;
   private final ContributionBinding binding;
   private final BindingRequest request;
+  private final BindingExpression wrappedBindingExpression;
   private final DaggerTypes types;
   private String methodName;
 
@@ -52,20 +57,35 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
       @Assisted BindingExpression wrappedBindingExpression,
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
-    super(
-        componentImplementation.shardImplementation(binding),
-        request,
-        binding,
-        wrappedBindingExpression,
-        types);
+    super(componentImplementation.shardImplementation(binding));
+    this.binding = requireNonNull(binding);
+    this.request = requireNonNull(request);
+    this.wrappedBindingExpression = requireNonNull(wrappedBindingExpression);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
-    this.binding = binding;
-    this.request = request;
     this.types = types;
   }
 
   @Override
-  protected void addMethod() {
+  protected CodeBlock methodCall() {
+    return binding.kind() == BindingKind.ASSISTED_INJECTION
+        // Private methods for assisted injection take assisted parameters as input.
+        ? CodeBlock.of(
+        "$N($L)", methodName(), parameterNames(assistedParameterSpecs(binding, types)))
+        : CodeBlock.of("$N()", methodName());
+  }
+
+  @Override
+  protected TypeMirror returnType() {
+    if (request.isRequestKind(RequestKind.INSTANCE)
+        && binding.contributedPrimitiveType().isPresent()) {
+      return binding.contributedPrimitiveType().orElseThrow();
+    }
+
+    TypeMirror requestedType = request.requestedType(binding.contributedType(), types);
+    return types.accessibleType(requestedType, shardImplementation.name());
+  }
+
+  private String methodName() {
     if (methodName == null) {
       // Have to set methodName field before implementing the method in order to handle recursion.
       methodName = shardImplementation.getUniqueMethodName(request);
@@ -81,14 +101,13 @@ final class PrivateMethodBindingExpression extends MethodBindingExpression {
                       ? assistedParameterSpecs(binding, types)
                       : List.of())
               .returns(TypeName.get(returnType()))
-              .addCode(methodBody())
+              .addStatement(
+                  "return $L",
+                  wrappedBindingExpression
+                      .getDependencyExpression(shardImplementation.name())
+                      .codeBlock())
               .build());
     }
-  }
-
-  @Override
-  protected String methodName() {
-    Preconditions.checkState(methodName != null, "addMethod() must be called before methodName()");
     return methodName;
   }
 
