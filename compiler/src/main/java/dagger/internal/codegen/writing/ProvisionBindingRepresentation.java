@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
@@ -107,7 +108,8 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
 
   @Override
   public RequestRepresentation getRequestRepresentation(BindingRequest request) {
-    return requestRepresentations.computeIfAbsent(request, this::getRequestRepresentationUncached);
+    return reentrantComputeIfAbsent(
+        requestRepresentations, request, this::getRequestRepresentationUncached);
   }
 
   private RequestRepresentation getRequestRepresentationUncached(BindingRequest request) {
@@ -302,7 +304,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
    * bindings whose scope is no stronger than their delegate's.
    */
   private boolean needsCaching(ContributionBinding binding) {
-    if (!binding.scope().isPresent()) {
+    if (binding.scope().isEmpty()) {
       return false;
     }
     if (binding.kind().equals(DELEGATE)) {

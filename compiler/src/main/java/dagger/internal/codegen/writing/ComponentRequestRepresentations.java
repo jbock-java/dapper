@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
@@ -194,7 +195,8 @@ public final class ComponentRequestRepresentations {
   }
 
   BindingRepresentation getBindingRepresentation(Binding binding) {
-    return representations.computeIfAbsent(binding, this::getBindingRepresentationUncached);
+    return reentrantComputeIfAbsent(
+        representations, binding, this::getBindingRepresentationUncached);
   }
 
   private BindingRepresentation getBindingRepresentationUncached(Binding binding) {
