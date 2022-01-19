@@ -38,6 +38,8 @@ import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstan
 import dagger.model.BindingKind;
 import dagger.model.Key;
 import dagger.model.RequestKind;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.lang.model.element.TypeElement;
 
@@ -63,6 +65,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
   private final UnscopedFrameworkInstanceCreationExpressionFactory
       unscopedFrameworkInstanceCreationExpressionFactory;
   private final SwitchingProviders switchingProviders;
+  private final Map<BindingRequest, RequestRepresentation> requestRepresentations = new HashMap<>();
 
   @AssistedInject
   ProvisionBindingRepresentation(
@@ -104,7 +107,10 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
 
   @Override
   public RequestRepresentation getRequestRepresentation(BindingRequest request) {
-    // must be BindingType.PROVISION
+    return requestRepresentations.computeIfAbsent(request, this::getRequestRepresentationUncached);
+  }
+
+  private RequestRepresentation getRequestRepresentationUncached(BindingRequest request) {
     return provisionRequestRepresentation((ContributionBinding) binding, request);
   }
 

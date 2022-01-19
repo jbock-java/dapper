@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 
@@ -61,7 +60,6 @@ public final class ComponentRequestRepresentations {
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
   private final DaggerTypes types;
-  private final Map<BindingRequest, RequestRepresentation> expressions = new HashMap<>();
   private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
 
   @Inject
@@ -185,16 +183,10 @@ public final class ComponentRequestRepresentations {
 
   /** Returns the {@link RequestRepresentation} for the given {@link BindingRequest}. */
   RequestRepresentation getRequestRepresentation(BindingRequest request) {
-    if (expressions.containsKey(request)) {
-      return expressions.get(request);
-    }
-
     Optional<Binding> localBinding = graph.localContributionBinding(request.key());
 
     if (localBinding.isPresent()) {
-      RequestRepresentation expression = getBindingRepresentation(localBinding.get()).getRequestRepresentation(request);
-      expressions.put(request, expression);
-      return expression;
+      return getBindingRepresentation(localBinding.get()).getRequestRepresentation(request);
     }
 
     Preconditions.checkArgument(parent.isPresent(), "no expression found for %s", request);
@@ -202,17 +194,10 @@ public final class ComponentRequestRepresentations {
   }
 
   BindingRepresentation getBindingRepresentation(Binding binding) {
-    if (representations.containsKey(binding)) {
-      return representations.get(binding);
-    }
-    BindingRepresentation representation = getBindingRepresentationUncached(binding);
-    Objects.requireNonNull(representation, () -> "Invalid binding type: " + binding.bindingType());
-    representations.put(binding, representation);
-    return representation;
+    return representations.computeIfAbsent(binding, this::getBindingRepresentationUncached);
   }
 
   private BindingRepresentation getBindingRepresentationUncached(Binding binding) {
-    return
-        provisionBindingRepresentationFactory.create(binding);
+    return provisionBindingRepresentationFactory.create(binding);
   }
 }
