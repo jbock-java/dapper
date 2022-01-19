@@ -35,7 +35,6 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 
@@ -205,9 +205,14 @@ public final class ComponentRequestRepresentations {
     if (representations.containsKey(binding)) {
       return representations.get(binding);
     }
-    BindingRepresentation representation =
-        provisionBindingRepresentationFactory.create(binding);
+    BindingRepresentation representation = getBindingRepresentationUncached(binding);
+    Objects.requireNonNull(representation, () -> "Invalid binding type: " + binding.bindingType());
     representations.put(binding, representation);
     return representation;
+  }
+
+  private BindingRepresentation getBindingRepresentationUncached(Binding binding) {
+    return
+        provisionBindingRepresentationFactory.create(binding);
   }
 }
