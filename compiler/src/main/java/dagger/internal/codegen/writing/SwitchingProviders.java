@@ -43,6 +43,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.Key;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -56,6 +57,7 @@ import java.util.TreeMap;
  * <p>The provider expression request will be satisfied by a single generated {@code Provider}
  * class that can provide instances for all types by switching on an id.
  */
+@PerComponentImplementation
 final class SwitchingProviders {
   /**
    * Each switch size is fixed at 100 cases each and put in its own method. This is to limit the
@@ -81,6 +83,7 @@ final class SwitchingProviders {
   private final DaggerTypes types;
   private final UniqueNameSet switchingProviderNames = new UniqueNameSet();
 
+  @Inject
   SwitchingProviders(
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
@@ -143,7 +146,7 @@ final class SwitchingProviders {
           //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
           binding.scope().isPresent()
               ? CodeBlock.of(
-                  "$T", types.accessibleType(binding.contributedType(), switchingProviderType))
+              "$T", types.accessibleType(binding.contributedType(), switchingProviderType))
               : "",
           shardImplementation.componentFieldsByImplementation().values().stream()
               .map(field -> CodeBlock.of("$N", field))

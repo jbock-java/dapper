@@ -61,8 +61,6 @@ public final class ComponentRequestRepresentations {
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
   private final DaggerTypes types;
-  private final CompilerOptions compilerOptions;
-  private final SwitchingProviders switchingProviders;
   private final Map<BindingRequest, RequestRepresentation> expressions = new HashMap<>();
   private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
 
@@ -73,16 +71,13 @@ public final class ComponentRequestRepresentations {
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,
       ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory,
-      DaggerTypes types,
-      CompilerOptions compilerOptions) {
+      DaggerTypes types) {
     this.parent = parent;
     this.graph = graph;
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = requireNonNull(componentRequirementExpressions);
     this.provisionBindingRepresentationFactory = provisionBindingRepresentationFactory;
     this.types = types;
-    this.compilerOptions = compilerOptions;
-    this.switchingProviders = new SwitchingProviders(componentImplementation, types);
   }
 
   /**
@@ -211,13 +206,8 @@ public final class ComponentRequestRepresentations {
       return representations.get(binding);
     }
     BindingRepresentation representation =
-        provisionBindingRepresentationFactory.create(isFastInit(), binding, switchingProviders);
+        provisionBindingRepresentationFactory.create(binding);
     representations.put(binding, representation);
     return representation;
-  }
-
-  private boolean isFastInit() {
-    return compilerOptions.fastInit(
-        parent.map(p -> p.graph).orElse(graph).componentDescriptor().typeElement());
   }
 }

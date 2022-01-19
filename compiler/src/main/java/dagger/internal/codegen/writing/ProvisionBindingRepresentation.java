@@ -32,6 +32,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
@@ -39,6 +40,7 @@ import dagger.model.BindingKind;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import java.util.Optional;
+import javax.lang.model.element.TypeElement;
 
 /**
  * A binding representation that wraps code generation methods that satisfy all kinds of request for
@@ -65,9 +67,8 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
 
   @AssistedInject
   ProvisionBindingRepresentation(
-      @Assisted boolean isFastInit,
       @Assisted Binding binding,
-      @Assisted SwitchingProviders switchingProviders,
+      SwitchingProviders switchingProviders,
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       ComponentMethodRequestRepresentation.Factory componentMethodBindingExpressionFactory,
@@ -80,8 +81,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       UnscopedDirectInstanceRequestRepresentationFactory unscopedDirectInstanceRequestRepresentationFactory,
       UnscopedFrameworkInstanceCreationExpressionFactory
           unscopedFrameworkInstanceCreationExpressionFactory,
-      DaggerTypes types) {
-    this.isFastInit = isFastInit;
+      CompilerOptions compilerOptions) {
     this.binding = binding;
     this.switchingProviders = switchingProviders;
     this.graph = graph;
@@ -98,6 +98,9 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
         unscopedFrameworkInstanceCreationExpressionFactory;
     this.assistedPrivateMethodBindingExpressionFactory =
         assistedPrivateMethodBindingExpressionFactory;
+    TypeElement rootComponent =
+        componentImplementation.rootComponentImplementation().componentDescriptor().typeElement();
+    this.isFastInit = compilerOptions.fastInit(rootComponent);
   }
 
   @Override
@@ -304,8 +307,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
   }
 
   @AssistedFactory
-  static interface Factory {
-    ProvisionBindingRepresentation create(
-        boolean isFastInit, Binding binding, SwitchingProviders switchingProviders);
+  interface Factory {
+    ProvisionBindingRepresentation create(Binding binding);
   }
 }
