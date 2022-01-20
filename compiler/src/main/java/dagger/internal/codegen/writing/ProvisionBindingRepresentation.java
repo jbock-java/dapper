@@ -17,6 +17,7 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.isBindsScopeStrongerThanDependencyScope;
+import static dagger.internal.codegen.writing.StaticFactoryInstanceSupplier.usesStaticFactoryCreation;
 import static dagger.model.BindingKind.DELEGATE;
 
 import dagger.assisted.Assisted;
@@ -38,7 +39,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
   private final boolean isFastInit;
   private final ProvisionBinding binding;
   private final DirectInstanceBindingRepresentation directInstanceBindingRepresentation;
-  private final FrameworkInstanceBindingRepresentation framworkInstanceBindingRepresentation;
+  private final FrameworkInstanceBindingRepresentation frameworkInstanceBindingRepresentation;
 
   @AssistedInject
   ProvisionBindingRepresentation(
@@ -46,7 +47,10 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       DirectInstanceBindingRepresentation.Factory directInstanceBindingRepresentationFactory,
-      FrameworkInstanceBindingRepresentation.Factory framworkInstanceBindingRepresentationFactory,
+      FrameworkInstanceBindingRepresentation.Factory frameworkInstanceBindingRepresentationFactory,
+      SwitchingProviderInstanceSupplier.Factory switchingProviderInstanceSupplierFactory,
+      ProviderInstanceSupplier.Factory providerInstanceSupplierFactory,
+      StaticFactoryInstanceSupplier.Factory staticFactoryInstanceSupplierFactory,
       CompilerOptions compilerOptions) {
     this.binding = binding;
     this.graph = graph;
@@ -55,20 +59,25 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     this.isFastInit = compilerOptions.fastInit(rootComponent);
     this.directInstanceBindingRepresentation =
         directInstanceBindingRepresentationFactory.create(binding);
-    this.framworkInstanceBindingRepresentation =
-        framworkInstanceBindingRepresentationFactory.create(
-            binding, directInstanceBindingRepresentation);
+    FrameworkInstanceSupplier frameworkInstanceSupplier;
+    if (usesSwitchingProvider()) {
+      frameworkInstanceSupplier =
+          switchingProviderInstanceSupplierFactory.create(
+              binding, directInstanceBindingRepresentation);
+    } else if (usesStaticFactoryCreation(binding, isFastInit)) {
+      frameworkInstanceSupplier = staticFactoryInstanceSupplierFactory.create(binding);
+    } else {
+      frameworkInstanceSupplier = providerInstanceSupplierFactory.create(binding);
+    }
+    this.frameworkInstanceBindingRepresentation =
+        frameworkInstanceBindingRepresentationFactory.create(binding, frameworkInstanceSupplier);
   }
 
   @Override
   public RequestRepresentation getRequestRepresentation(BindingRequest request) {
-    return getBindingRepresentation(request).getRequestRepresentation(request);
-  }
-
-  private BindingRepresentation getBindingRepresentation(BindingRequest request) {
     return usesDirectInstanceExpression(request.requestKind(), binding, graph, isFastInit)
-        ? directInstanceBindingRepresentation
-        : framworkInstanceBindingRepresentation;
+        ? directInstanceBindingRepresentation.getRequestRepresentation(request)
+        : frameworkInstanceBindingRepresentation.getRequestRepresentation(request);
   }
 
 
@@ -93,6 +102,29 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
         // exists, in which case even if it's not scoped we might as well call Provider#get().
         return !needsCaching(binding, graph);
     }
+  }
+
+  private boolean usesSwitchingProvider() {
+    if (!isFastInit) {
+      return false;
+    }
+    switch (binding.kind()) {
+      case BOUND_INSTANCE:
+      case COMPONENT:
+      case COMPONENT_DEPENDENCY:
+      case DELEGATE:
+        // These binding kinds avoid SwitchingProvider when the backing instance already exists,
+        // e.g. a component provider can use FactoryInstance.create(this).
+        return false;
+      case INJECTION:
+      case PROVISION:
+      case ASSISTED_INJECTION:
+      case ASSISTED_FACTORY:
+      case COMPONENT_PROVISION:
+      case SUBCOMPONENT_CREATOR:
+        return true;
+    }
+    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
   }
 
   static boolean requiresMethodEncapsulation(ProvisionBinding binding) {

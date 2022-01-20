@@ -33,11 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * A provision binding representation that returns expressions based on a direct instance
- * expression.
- */
-final class DirectInstanceBindingRepresentation implements BindingRepresentation {
+/** Returns request representation based on a direct instance expression. */
+final class DirectInstanceBindingRepresentation {
   private final ProvisionBinding binding;
   private final BindingGraph graph;
   private final ComponentImplementation componentImplementation;
@@ -73,8 +70,7 @@ final class DirectInstanceBindingRepresentation implements BindingRepresentation
         assistedPrivateMethodRequestRepresentationFactory;
   }
 
-  @Override
-  public RequestRepresentation getRequestRepresentation(BindingRequest request) {
+  RequestRepresentation getRequestRepresentation(BindingRequest request) {
     return reentrantComputeIfAbsent(
         requestRepresentations, request, this::getRequestRepresentationUncached);
   }
