@@ -65,39 +65,35 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
   }
 
   /** Returns a direct, unscoped binding expression for a {@link RequestKind#INSTANCE} request. */
-  Optional<RequestRepresentation> create(ContributionBinding binding) {
+  RequestRepresentation create(ContributionBinding binding) {
     switch (binding.kind()) {
       case DELEGATE:
-        return Optional.of(delegateBindingExpressionFactory.create(binding, RequestKind.INSTANCE));
+        return delegateBindingExpressionFactory.create(binding, RequestKind.INSTANCE);
 
       case COMPONENT:
-        return Optional.of(componentInstanceBindingExpressionFactory.create(binding));
+        return componentInstanceBindingExpressionFactory.create(binding);
 
       case COMPONENT_DEPENDENCY:
-        return Optional.of(
-            componentRequirementBindingExpressionFactory.create(
-                binding, ComponentRequirement.forDependency(binding.key().type())));
+        return componentRequirementBindingExpressionFactory.create(
+            binding, ComponentRequirement.forDependency(binding.key().type()));
 
       case COMPONENT_PROVISION:
-        return Optional.of(
-            componentProvisionBindingExpressionFactory.create((ProvisionBinding) binding));
+        return componentProvisionBindingExpressionFactory.create((ProvisionBinding) binding);
 
       case SUBCOMPONENT_CREATOR:
-        return Optional.of(subcomponentCreatorBindingExpressionFactory.create(binding));
+        return subcomponentCreatorBindingExpressionFactory.create(binding);
 
       case BOUND_INSTANCE:
-        return Optional.of(
-            componentRequirementBindingExpressionFactory.create(
-                binding, ComponentRequirement.forBoundInstance(binding)));
+        return componentRequirementBindingExpressionFactory.create(
+            binding, ComponentRequirement.forBoundInstance(binding));
 
       case ASSISTED_FACTORY:
-        return Optional.of(
-            assistedFactoryBindingExpressionFactory.create((ProvisionBinding) binding));
+        return assistedFactoryBindingExpressionFactory.create((ProvisionBinding) binding);
 
       case ASSISTED_INJECTION:
       case INJECTION:
       case PROVISION:
-        return Optional.of(simpleMethodBindingExpressionFactory.create((ProvisionBinding) binding));
+        return simpleMethodBindingExpressionFactory.create((ProvisionBinding) binding);
     }
     throw new AssertionError("Unexpected binding kind: " + binding.kind());
   }
