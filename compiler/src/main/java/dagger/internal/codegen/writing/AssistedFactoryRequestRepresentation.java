@@ -47,7 +47,7 @@ import javax.lang.model.type.DeclaredType;
  * A {@link RequestRepresentation} for {@link
  * dagger.assisted.AssistedFactory} methods.
  */
-final class AssistedFactoryRequestRepresentation extends SimpleInvocationRequestRepresentation {
+final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
   private final ProvisionBinding binding;
   private final ComponentRequestRepresentations componentRequestRepresentations;
   private final DaggerElements elements;
@@ -59,7 +59,6 @@ final class AssistedFactoryRequestRepresentation extends SimpleInvocationRequest
       ComponentRequestRepresentations componentRequestRepresentations,
       DaggerTypes types,
       DaggerElements elements) {
-    super(binding);
     this.binding = requireNonNull(binding);
     this.componentRequestRepresentations = componentRequestRepresentations;
     this.elements = elements;

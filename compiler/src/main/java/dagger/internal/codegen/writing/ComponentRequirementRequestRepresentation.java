@@ -30,7 +30,7 @@ import dagger.internal.codegen.javapoet.Expression;
  * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of
  * {@linkplain dagger.Component#dependencies() component} dependencies.
  */
-final class ComponentRequirementRequestRepresentation extends SimpleInvocationRequestRepresentation {
+final class ComponentRequirementRequestRepresentation extends RequestRepresentation {
   private final ComponentRequirement componentRequirement;
   private final ComponentRequirementExpressions componentRequirementExpressions;
 
@@ -39,7 +39,6 @@ final class ComponentRequirementRequestRepresentation extends SimpleInvocationRe
       @Assisted ContributionBinding binding,
       @Assisted ComponentRequirement componentRequirement,
       ComponentRequirementExpressions componentRequirementExpressions) {
-    super(binding);
     this.componentRequirement = requireNonNull(componentRequirement);
     this.componentRequirementExpressions = componentRequirementExpressions;
   }

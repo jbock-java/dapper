@@ -46,7 +46,7 @@ import javax.lang.model.type.TypeMirror;
  * A binding expression that invokes methods or constructors directly (without attempting to scope)
  * {@link dagger.model.RequestKind#INSTANCE} requests.
  */
-final class SimpleMethodRequestRepresentation extends SimpleInvocationRequestRepresentation {
+final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   private final CompilerOptions compilerOptions;
   private final ProvisionBinding provisionBinding;
   private final ComponentRequestRepresentations componentRequestRepresentations;
@@ -60,7 +60,6 @@ final class SimpleMethodRequestRepresentation extends SimpleInvocationRequestRep
       ComponentRequestRepresentations componentRequestRepresentations,
       ComponentRequirementExpressions componentRequirementExpressions,
       ComponentImplementation componentImplementation) {
-    super(binding);
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
     Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
@@ -85,20 +84,15 @@ final class SimpleMethodRequestRepresentation extends SimpleInvocationRequestRep
                 request -> dependencyArgument(request, requestingClass).codeBlock(),
                 shardImplementation::getUniqueFieldNameForAssistedParam,
                 requestingClass));
-    ExecutableElement method = asExecutable(provisionBinding.bindingElement().get());
+    ExecutableElement method = asExecutable(provisionBinding.bindingElement().orElseThrow());
     CodeBlock invocation;
     switch (method.getKind()) {
       case CONSTRUCTOR:
         invocation = CodeBlock.of("new $T($L)", constructorTypeName(requestingClass), arguments);
         break;
       case METHOD:
-        CodeBlock module;
-        Optional<CodeBlock> requiredModuleInstance = moduleReference(requestingClass);
-        if (requiredModuleInstance.isPresent()) {
-          module = requiredModuleInstance.get();
-        } else {
-          module = CodeBlock.of("$T", provisionBinding.bindingTypeElement().get());
-        }
+        CodeBlock module = moduleReference(requestingClass).orElseGet(() ->
+            CodeBlock.of("$T", provisionBinding.bindingTypeElement().orElseThrow()));
         invocation = CodeBlock.of("$L.$L($L)", module, method.getSimpleName(), arguments);
         break;
       default:
@@ -153,7 +147,7 @@ final class SimpleMethodRequestRepresentation extends SimpleInvocationRequestRep
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     SimpleMethodRequestRepresentation create(ProvisionBinding binding);
   }
 }

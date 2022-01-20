@@ -133,9 +133,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     FrameworkInstanceCreationExpression frameworkInstanceCreationExpression =
         unscopedFrameworkInstanceCreationExpressionFactory.create(binding);
 
-    if (isFastInit
-        // Some creation expressions can opt out of using switching providers.
-        && frameworkInstanceCreationExpression.useSwitchingProvider()) {
+    if (useSwitchingProvider()) {
       // First try to get the instance expression via getComponentRepresentation(). However, if that
       // expression is a DerivedFromFrameworkInstanceComponentRepresentation (e.g. fooProvider.get()),
       // then we can't use it to create an instance within the SwitchingProvider since that would
@@ -152,7 +150,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
         frameworkInstanceCreationExpression =
             switchingProviders.newFrameworkInstanceCreationExpression(
                 binding,
-                unscopedInstanceExpression.requiresMethodEncapsulation()
+                requiresMethodEncapsulation()
                     ? privateMethodRequestRepresentationFactory.create(
                     instanceRequest, binding, unscopedInstanceExpression)
                     : unscopedInstanceExpression);
@@ -225,6 +223,52 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     }
   }
 
+  private boolean useSwitchingProvider() {
+    if (!isFastInit) {
+      return false;
+    }
+    switch (binding.kind()) {
+      case BOUND_INSTANCE:
+      case COMPONENT:
+      case COMPONENT_DEPENDENCY:
+      case DELEGATE:
+        // These binding kinds avoid SwitchingProvider when the backing instance already exists,
+        // e.g. a component provider can use FactoryInstance.create(this).
+        return false;
+      case INJECTION:
+      case PROVISION:
+      case ASSISTED_INJECTION:
+      case ASSISTED_FACTORY:
+      case COMPONENT_PROVISION:
+      case SUBCOMPONENT_CREATOR:
+        return true;
+    }
+    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
+  }
+
+  private boolean requiresMethodEncapsulation() {
+    switch (binding.kind()) {
+      case COMPONENT:
+      case COMPONENT_PROVISION:
+      case SUBCOMPONENT_CREATOR:
+      case COMPONENT_DEPENDENCY:
+      case BOUND_INSTANCE:
+      case ASSISTED_FACTORY:
+      case ASSISTED_INJECTION:
+      case INJECTION:
+      case PROVISION:
+        // These binding kinds satify a binding request with a component method or a private
+        // method when the requested binding has dependencies. The method will wrap the logic of
+        // creating the binding instance. Without the encapsulation, we might see many level of
+        // nested instance creation code in a single statement to satisfy all dependencies of a
+        // binding request.
+        return !binding.dependencies().isEmpty();
+      case DELEGATE:
+        return false;
+    }
+    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
+  }
+
   private RequestRepresentation directInstanceExpression() {
     RequestRepresentation directInstanceExpression =
         unscopedDirectInstanceRequestRepresentationFactory.create(binding);
@@ -233,7 +277,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       return assistedPrivateMethodRequestRepresentationFactory.create(
           request, binding, directInstanceExpression);
     }
-    return directInstanceExpression.requiresMethodEncapsulation()
+    return requiresMethodEncapsulation()
         ? wrapInMethod(RequestKind.INSTANCE, directInstanceExpression)
         : directInstanceExpression;
   }
