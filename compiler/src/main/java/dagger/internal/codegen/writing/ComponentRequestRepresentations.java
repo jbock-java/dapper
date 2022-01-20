@@ -36,6 +36,7 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
+import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
@@ -200,6 +201,6 @@ public final class ComponentRequestRepresentations {
   }
 
   private BindingRepresentation getBindingRepresentationUncached(Binding binding) {
-    return provisionBindingRepresentationFactory.create(binding);
+    return provisionBindingRepresentationFactory.create((ProvisionBinding) binding);
   }
 }
