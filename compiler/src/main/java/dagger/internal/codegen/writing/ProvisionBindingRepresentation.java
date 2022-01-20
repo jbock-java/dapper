@@ -18,20 +18,16 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
-import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
-import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
+import static dagger.internal.codegen.writing.BindingRepresentations.scope;
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.isBindsScopeStrongerThanDependencyScope;
-import static dagger.internal.codegen.writing.MemberSelect.staticFactoryCreation;
 import static dagger.model.BindingKind.DELEGATE;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
-import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
@@ -130,6 +126,16 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
    * Returns a binding expression that uses a {@link jakarta.inject.Provider} for provision bindings.
    */
   private RequestRepresentation frameworkInstanceRequestRepresentation() {
+    // In default mode, we always use the static factory creation strategy. In fastInit mode, we
+    // prefer to use a SwitchingProvider instead of static factories in order to reduce class
+    // loading; however, we allow static factories that can reused across multiple bindings, e.g.
+    // {@code MapFactory} or {@code SetFactory}.
+    // TODO(bcorso): Consider merging the static factory creation logic into CreationExpressions?
+    Optional<MemberSelect> staticMethod = staticFactoryCreation();
+    if (staticMethod.isPresent()) {
+      return providerInstanceRequestRepresentationFactory.create(binding, staticMethod::get);
+    }
+
     FrameworkInstanceCreationExpression frameworkInstanceCreationExpression =
         unscopedFrameworkInstanceCreationExpressionFactory.create(binding);
 
@@ -157,29 +163,42 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       }
     }
 
-    // TODO(bcorso): Consider merging the static factory creation logic into CreationExpressions?
-    Optional<MemberSelect> staticMethod =
-        useStaticFactoryCreation() ? staticFactoryCreation(binding) : Optional.empty();
-    FrameworkInstanceSupplier frameworkInstanceSupplier =
-        staticMethod.isPresent()
-            ? staticMethod::get
-            : new FrameworkFieldInitializer(
+    return providerInstanceRequestRepresentationFactory.create(
+        binding,
+        new FrameworkFieldInitializer(
             componentImplementation,
             binding,
             binding.scope().isPresent()
-                ? scope(frameworkInstanceCreationExpression)
-                : frameworkInstanceCreationExpression);
-
-    // must be BindingType.PROVISION
-    return providerInstanceRequestRepresentationFactory.create(binding, frameworkInstanceSupplier);
+                ? scope(binding, frameworkInstanceCreationExpression)
+                : frameworkInstanceCreationExpression));
   }
 
-  private FrameworkInstanceCreationExpression scope(FrameworkInstanceCreationExpression unscoped) {
-    return () ->
-        CodeBlock.of(
-            "$T.provider($L)",
-            binding.scope().orElseThrow().isReusable() ? SINGLE_CHECK : DOUBLE_CHECK,
-            unscoped.creationExpression());
+  /**
+   * If {@code resolvedBindings} is an unscoped provision binding with no factory arguments, then we
+   * don't need a field to hold its factory. In that case, this method returns the static member
+   * select that returns the factory.
+   */
+  // TODO(wanyingd): no-op members injector is currently handled in
+  // `MembersInjectorProviderCreationExpression`, we should inline the logic here so we won't create
+  // an extra field for it.
+  private Optional<MemberSelect> staticFactoryCreation() {
+    if (binding.dependencies().isEmpty() && binding.scope().isEmpty()) {
+      switch (binding.kind()) {
+        case PROVISION:
+          if (!isFastInit && !binding.requiresModuleInstance()) {
+            return Optional.of(StaticMemberSelects.factoryCreateNoArgumentMethod(binding));
+          }
+          break;
+        case INJECTION:
+          if (!isFastInit) {
+            return Optional.of(StaticMemberSelects.factoryCreateNoArgumentMethod(binding));
+          }
+          break;
+        default:
+          return Optional.empty();
+      }
+    }
+    return Optional.empty();
   }
 
   /**
@@ -280,18 +299,6 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     return requiresMethodEncapsulation()
         ? wrapInMethod(RequestKind.INSTANCE, directInstanceExpression)
         : directInstanceExpression;
-  }
-
-  /**
-   * Returns {@code true} if the binding should use the static factory creation strategy.
-   *
-   * <p>In default mode, we always use the static factory creation strategy. In fastInit mode, we
-   * prefer to use a SwitchingProvider instead of static factories in order to reduce class loading;
-   * however, we allow static factories that can reused across multiple bindings, e.g. {@code
-   * MapFactory} or {@code SetFactory}.
-   */
-  private boolean useStaticFactoryCreation() {
-    return !isFastInit;
   }
 
   /**
