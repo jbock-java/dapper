@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -34,7 +33,6 @@ import dagger.internal.codegen.binding.FrameworkField;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
-import java.util.Optional;
 
 /**
  * An object that can initialize a framework-type component field for a binding. An instance should
@@ -49,15 +47,6 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
   interface FrameworkInstanceCreationExpression {
     /** Returns the expression to use to assign to the component field for the binding. */
     CodeBlock creationExpression();
-
-    /**
-     * Returns the framework class to use for the field, if different from the one implied by the
-     * binding. This implementation returns {@link Optional#empty()}.
-     */
-    default Optional<ClassName> alternativeFrameworkClass() {
-      return Optional.empty();
-    }
-
   }
 
   private final ShardImplementation shardImplementation;
@@ -129,8 +118,7 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
     }
     boolean useRawType = !shardImplementation.isTypeAccessible(binding.key().type());
     FrameworkField contributionBindingField =
-        FrameworkField.forBinding(
-            binding, frameworkInstanceCreationExpression.alternativeFrameworkClass());
+        FrameworkField.forBinding(binding);
 
     TypeName fieldType =
         useRawType ? contributionBindingField.type().rawType : contributionBindingField.type();

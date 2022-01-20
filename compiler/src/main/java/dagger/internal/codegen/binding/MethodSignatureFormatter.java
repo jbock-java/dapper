@@ -51,7 +51,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
    * method, but the method's resolved type as a member of {@code declaredType} for the key.
    */
   public Formatter<ExecutableElement> typedFormatter(DeclaredType declaredType) {
-    return new Formatter<ExecutableElement>() {
+    return new Formatter<>() {
       @Override
       public String format(ExecutableElement method) {
         return MethodSignatureFormatter.this.format(

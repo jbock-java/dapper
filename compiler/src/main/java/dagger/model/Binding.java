@@ -68,14 +68,6 @@ public interface Binding extends MaybeBinding {
   /** The scope of this binding if it has one. */
   Optional<Scope> scope();
 
-  /**
-   * Returns {@code true} if this binding may provide {@code null} instead of an instance of {@link
-   * #key()}. Nullable bindings cannot be requested from {@linkplain DependencyRequest#isNullable()
-   * non-nullable dependency requests}.
-   */
-  boolean isNullable();
-
   /** The kind of binding this instance represents. */
   BindingKind kind();
-
 }

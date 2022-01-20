@@ -138,11 +138,6 @@ public final class BindingNode implements dagger.model.Binding {
   }
 
   @Override
-  public boolean isNullable() {
-    return delegate().isNullable();
-  }
-
-  @Override
   public BindingKind kind() {
     return delegate().kind();
   }

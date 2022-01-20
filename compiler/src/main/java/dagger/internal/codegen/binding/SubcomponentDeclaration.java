@@ -117,7 +117,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
 
     Set<SubcomponentDeclaration> forModule(TypeElement module) {
       Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
-      ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).get();
+      ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).orElseThrow();
       Element subcomponentAttribute =
           getAnnotationElementAndValue(moduleAnnotation.annotation(), "subcomponents").getKey();
       for (TypeElement subcomponent : moduleAnnotation.subcomponents()) {
@@ -126,7 +126,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
                 Optional.of(subcomponentAttribute),
                 Optional.of(module),
                 keyFactory.forSubcomponentCreator(
-                    getSubcomponentCreator(subcomponent).get().asType()),
+                    getSubcomponentCreator(subcomponent).orElseThrow().asType()),
                 subcomponent,
                 moduleAnnotation));
       }

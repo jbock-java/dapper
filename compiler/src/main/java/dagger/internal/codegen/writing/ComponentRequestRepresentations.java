@@ -138,8 +138,8 @@ public final class ComponentRequestRepresentations {
       ContributionBinding binding, DependencyRequest dependency) {
     // TODO(bcorso): See if we can get rid of FrameworkTypeMatcher
     FrameworkType frameworkType =
-        FrameworkTypeMapper.forBindingType(binding.bindingType())
-            .getFrameworkType(dependency.kind());
+        FrameworkTypeMapper.forBindingType()
+            .getFrameworkType();
     return BindingRequest.bindingRequest(dependency.key(), frameworkType);
   }
 

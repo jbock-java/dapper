@@ -24,7 +24,6 @@ import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import dagger.model.RequestKind;
 import java.util.Objects;
-import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -35,15 +34,12 @@ import javax.lang.model.type.TypeMirror;
 public final class BindingRequest {
   private final Key key;
   private final RequestKind requestKind;
-  private final Optional<FrameworkType> frameworkType;
 
   private BindingRequest(
       Key key,
-      RequestKind requestKind,
-      Optional<FrameworkType> frameworkType) {
+      RequestKind requestKind) {
     this.key = requireNonNull(key);
     this.requestKind = requireNonNull(requestKind);
-    this.frameworkType = requireNonNull(frameworkType);
   }
 
   /** Creates a {@link BindingRequest} for the given {@link DependencyRequest}. */
@@ -64,8 +60,7 @@ public final class BindingRequest {
     // BindingExpression for the RequestKind that simply delegates to the BindingExpression for the
     // FrameworkType. Then there are separate BindingExpressions, but we don't end up doing weird
     // things like creating two fields when there should only be one.
-    return new BindingRequest(
-        key, requestKind, FrameworkType.forRequestKind(requestKind));
+    return new BindingRequest(key, requestKind);
   }
 
   /**
@@ -73,8 +68,7 @@ public final class BindingRequest {
    * Key} with the given {@link FrameworkType}.
    */
   public static BindingRequest bindingRequest(Key key, FrameworkType frameworkType) {
-    return new BindingRequest(
-        key, frameworkType.requestKind(), Optional.of(frameworkType));
+    return new BindingRequest(key, frameworkType.requestKind());
   }
 
   /** Returns the {@link Key} for the requested binding. */
@@ -87,24 +81,18 @@ public final class BindingRequest {
     return requestKind;
   }
 
-  /** Returns the framework type associated with this request, if any. */
-  public Optional<FrameworkType> frameworkType() {
-    return frameworkType;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     BindingRequest that = (BindingRequest) o;
     return key.equals(that.key)
-        && requestKind == that.requestKind
-        && frameworkType.equals(that.frameworkType);
+        && requestKind == that.requestKind;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(key, requestKind, frameworkType);
+    return Objects.hash(key, requestKind);
   }
 
   /** Returns whether this request is of the given kind. */

@@ -58,13 +58,6 @@ public abstract class Binding extends BindingDeclaration {
     return !modifiers.contains(ABSTRACT) && !modifiers.contains(STATIC);
   }
 
-  /**
-   * Returns {@code true} if this binding may provide {@code null} instead of an instance of {@link
-   * #key()}. Nullable bindings cannot be requested from {@linkplain DependencyRequest#isNullable()
-   * non-nullable dependency requests}.
-   */
-  public abstract boolean isNullable();
-
   /** The kind of binding this instance represents. */
   public abstract BindingKind kind();
 

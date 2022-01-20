@@ -78,6 +78,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 /**
  * A {@linkplain ValidationReport validator} for {@link dagger.Module}s.
@@ -365,7 +366,7 @@ public final class ModuleValidator {
     for (AnnotationValue includedModule : getModules(annotation)) {
       asType(includedModule)
           .accept(
-              new SimpleTypeVisitor8<Void, Void>() {
+              new SimpleTypeVisitor9<Void, Void>() {
                 @Override
                 protected Void defaultAction(TypeMirror mirror, Void p) {
                   reportError("%s is not a valid module type.", mirror);

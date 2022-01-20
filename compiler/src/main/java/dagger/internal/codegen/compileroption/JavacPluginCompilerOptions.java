@@ -46,11 +46,6 @@ public final class JavacPluginCompilerOptions extends CompilerOptions {
   }
 
   @Override
-  public Diagnostic.Kind staticMemberValidationKind() {
-    return NOTE;
-  }
-
-  @Override
   public boolean ignorePrivateAndStaticInjectionForComponent() {
     return false;
   }
@@ -92,11 +87,6 @@ public final class JavacPluginCompilerOptions extends CompilerOptions {
 
   @Override
   public boolean experimentalDaggerErrorMessages() {
-    return false;
-  }
-
-  @Override
-  public boolean strictMultibindingValidation() {
     return false;
   }
 }

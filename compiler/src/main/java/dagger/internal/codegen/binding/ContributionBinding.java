@@ -41,11 +41,6 @@ public abstract class ContributionBinding extends Binding {
         .filter(type -> type.getKind().isPrimitive());
   }
 
-  @Override
-  public final boolean isNullable() {
-    return false;
-  }
-
   /** The strategy for getting an instance of a factory for a {@link ContributionBinding}. */
   public enum FactoryCreationStrategy {
     /** The factory class is a single instance. */

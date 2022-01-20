@@ -21,7 +21,6 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
-import java.util.Optional;
 
 /**
  * A factory for creating a binding expression for an unscoped instance.

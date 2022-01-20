@@ -25,7 +25,6 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FLOATING_BINDS_METHODS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.PLUGINS_VISIT_FULL_BINDING_GRAPHS;
-import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_MULTIBINDING_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.KeyOnlyOption.USE_GRADLE_INCREMENTAL_PROCESSING;
@@ -96,11 +95,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
-  public Diagnostic.Kind staticMemberValidationKind() {
-    return diagnosticKind(STATIC_MEMBER_VALIDATION);
-  }
-
-  @Override
   public boolean ignorePrivateAndStaticInjectionForComponent() {
     return isEnabled(IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT);
   }
@@ -143,11 +137,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   @Override
   public boolean experimentalDaggerErrorMessages() {
     return isEnabled(EXPERIMENTAL_DAGGER_ERROR_MESSAGES);
-  }
-
-  @Override
-  public boolean strictMultibindingValidation() {
-    return isEnabled(STRICT_MULTIBINDING_VALIDATION);
   }
 
   @Override

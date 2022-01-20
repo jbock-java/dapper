@@ -177,26 +177,23 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
 
   /**
    * Returns one of the edges between two nodes that doesn't {@linkplain
-   * #breaksCycle(DependencyEdge, BindingGraph) break} a cycle.
+   * #breaksCycle(DependencyEdge) break} a cycle.
    */
   private DependencyEdge nonCycleBreakingEdge(EndpointPair<Node> endpointPair, BindingGraph graph) {
     return graph.network().edgesConnecting(endpointPair.source(), endpointPair.target()).stream()
         .flatMap(instancesOf(DependencyEdge.class))
-        .filter(edge -> !breaksCycle(edge, graph))
+        .filter(edge -> !breaksCycle(edge))
         .findFirst()
         .orElseThrow();
   }
 
-  private boolean breaksCycle(DependencyEdge edge, BindingGraph graph) {
+  private boolean breaksCycle(DependencyEdge edge) {
     // Map<K, V> multibindings depend on Map<K, Provider<V>> entries, but those don't break any
     // cycles, so ignore them.
     if (edge.dependencyRequest().key().multibindingContributionIdentifier().isPresent()) {
       return false;
     }
-    if (breaksCycle(edge.dependencyRequest().kind())) {
-      return true;
-    }
-    return false;
+    return breaksCycle(edge.dependencyRequest().kind());
   }
 
   private boolean breaksCycle(RequestKind requestKind) {
@@ -232,7 +229,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
             .expectedEdgeCount(bindingGraph.dependencyEdges().size())
             .build();
     bindingGraph.dependencyEdges().stream()
-        .filter(edge -> !breaksCycle(edge, bindingGraph))
+        .filter(edge -> !breaksCycle(edge))
         .forEach(
             edge -> {
               EndpointPair<Node> endpoints = bindingGraph.network().incidentNodes(edge);

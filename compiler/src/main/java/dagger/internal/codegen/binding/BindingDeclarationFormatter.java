@@ -120,6 +120,6 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
         "@%s(subcomponents = %s) for %s",
         subcomponentDeclaration.moduleAnnotation().annotationName(),
         annotationValue,
-        subcomponentDeclaration.contributingModule().get());
+        subcomponentDeclaration.contributingModule().orElseThrow());
   }
 }

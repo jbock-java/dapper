@@ -168,7 +168,7 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   /** A {@link ProvisionBinding} builder. */
-  static class Builder {
+  static final class Builder {
     private Key key;
     private Optional<Element> bindingElement = Optional.empty();
     private Optional<TypeElement> contributingModule = Optional.empty();
@@ -177,7 +177,7 @@ public final class ProvisionBinding extends ContributionBinding {
     private Optional<ProvisionBinding> unresolved = Optional.empty();
     private Optional<Scope> scope = Optional.empty();
 
-    Builder() {
+    private Builder() {
     }
 
     private Builder(ProvisionBinding source) {
@@ -190,24 +190,24 @@ public final class ProvisionBinding extends ContributionBinding {
       this.scope = source.scope();
     }
 
-    public Builder dependencies(Set<DependencyRequest> dependencies) {
+    Builder dependencies(Set<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
     }
 
-    public final Builder dependencies(DependencyRequest... dependencies) {
+    Builder dependencies(DependencyRequest... dependencies) {
       return dependencies(new LinkedHashSet<>(List.of(dependencies)));
     }
 
-    public final Builder clearBindingElement() {
+    Builder clearBindingElement() {
       return bindingElement(Optional.empty());
     }
 
-    public Builder key(Key key) {
+    Builder key(Key key) {
       this.key = key;
       return this;
     }
 
-    public Builder bindingElement(Element bindingElement) {
+    Builder bindingElement(Element bindingElement) {
       this.bindingElement = Optional.of(bindingElement);
       return this;
     }
@@ -222,7 +222,7 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    public Builder kind(BindingKind kind) {
+    Builder kind(BindingKind kind) {
       this.kind = kind;
       return this;
     }
@@ -232,17 +232,17 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    public Builder unresolved(ProvisionBinding unresolved) {
+    Builder unresolved(ProvisionBinding unresolved) {
       this.unresolved = Optional.of(unresolved);
       return this;
     }
 
-    public Builder scope(Optional<Scope> scope) {
+    Builder scope(Optional<Scope> scope) {
       this.scope = scope;
       return this;
     }
 
-    public ProvisionBinding build() {
+    ProvisionBinding build() {
       return new ProvisionBinding(
           this.key,
           this.bindingElement,

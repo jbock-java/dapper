@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.MissingBinding;

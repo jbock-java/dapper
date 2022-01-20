@@ -39,8 +39,6 @@ public abstract class CompilerOptions {
 
   public abstract Diagnostic.Kind privateMemberValidationKind();
 
-  public abstract Diagnostic.Kind staticMemberValidationKind();
-
   /**
    * If {@code true}, Dagger will generate factories and components even if some members-injected
    * types have {@code private} or {@code static} {@code @Inject}-annotated members.
@@ -87,11 +85,4 @@ public abstract class CompilerOptions {
   public int keysPerComponentShard(TypeElement component) {
     return 3500;
   }
-
-  /**
-   * This option enables a fix to an issue where Dagger previously would erroneously allow
-   * multibinding contributions in a component to have dependencies on child components. This will
-   * eventually become the default and enforced.
-   */
-  public abstract boolean strictMultibindingValidation();
 }

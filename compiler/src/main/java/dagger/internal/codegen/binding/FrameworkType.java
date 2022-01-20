@@ -16,10 +16,7 @@
 
 package dagger.internal.codegen.binding;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
 import dagger.internal.ProviderOfLazy;
 import dagger.internal.codegen.base.RequestKinds;
@@ -28,7 +25,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import jakarta.inject.Provider;
-import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 
 /** One of the core types initialized as fields in a generated component. */
@@ -43,29 +39,9 @@ public enum FrameworkType {
     this.stringRepresentation = stringRepresentation;
   }
 
-  /** Returns the framework type appropriate for fields for a given binding type. */
-  public static FrameworkType forBindingType(BindingType bindingType) {
-    return PROVIDER;
-  }
-
-  /** Returns the framework type that exactly matches the given request kind, if one exists. */
-  public static Optional<FrameworkType> forRequestKind(RequestKind requestKind) {
-    switch (requestKind) {
-      case PROVIDER:
-        return Optional.of(FrameworkType.PROVIDER);
-      default:
-        return Optional.empty();
-    }
-  }
-
   /** The class of fields of this type. */
   public Class<?> frameworkClass() {
     return Provider.class;
-  }
-
-  /** Returns the {@link #frameworkClass()} parameterized with a type. */
-  public ParameterizedTypeName frameworkClassOf(TypeName valueType) {
-    return ParameterizedTypeName.get(ClassName.get(frameworkClass()), valueType);
   }
 
   /** The request kind that an instance of this framework type can satisfy directly, if any. */

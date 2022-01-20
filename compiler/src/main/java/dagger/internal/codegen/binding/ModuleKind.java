@@ -87,10 +87,6 @@ public enum ModuleKind {
 
   /** Returns the kinds of modules that a module of this kind is allowed to include. */
   public Set<ModuleKind> legalIncludedModuleKinds() {
-    switch (this) {
-      case MODULE:
-        return EnumSet.of(MODULE);
-    }
-    throw new AssertionError(this);
+    return EnumSet.of(MODULE);
   }
 }

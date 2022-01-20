@@ -104,11 +104,6 @@ public final class Key {
     return Optional.empty();
   }
 
-  /** Returns a {@link Builder} that inherits the properties of this key. */
-  public Builder toBuilder() {
-    return new Builder(this);
-  }
-
   // The main hashCode/equality bottleneck is in MoreTypes.equivalence(). It's possible that we can
   // avoid this by tuning that method. Perhaps we can also avoid the issue entirely by interning all
   // Keys
@@ -216,11 +211,6 @@ public final class Key {
     private Wrapper<TypeMirror> wrappedType;
 
     private Builder() {
-    }
-
-    private Builder(Key source) {
-      this.wrappedQualifier = source.wrappedQualifier();
-      this.wrappedType = source.wrappedType();
     }
 
     public Builder type(TypeMirror type) {

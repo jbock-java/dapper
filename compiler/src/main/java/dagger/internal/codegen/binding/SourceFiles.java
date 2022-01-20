@@ -26,7 +26,6 @@ import static javax.lang.model.SourceVersion.isName;
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
@@ -36,13 +35,11 @@ import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
 
 /** Utilities for generating files. */
 public class SourceFiles {
@@ -64,14 +61,14 @@ public class SourceFiles {
     Preconditions.checkArgument(binding.unresolved().isEmpty(), "binding must be unresolved: %s", binding);
 
     FrameworkTypeMapper frameworkTypeMapper =
-        FrameworkTypeMapper.forBindingType(binding.bindingType());
+        FrameworkTypeMapper.forBindingType();
 
     return Util.toMap(
         binding.dependencies(),
         dependency ->
             FrameworkField.create(
                 ClassName.get(
-                    frameworkTypeMapper.getFrameworkType(dependency.kind()).frameworkClass()),
+                    frameworkTypeMapper.getFrameworkType().frameworkClass()),
                 TypeName.get(dependency.key().type()),
                 DependencyVariableNamer.name(dependency)));
   }
@@ -92,38 +89,22 @@ public class SourceFiles {
     }
   }
 
-  /**
-   * Returns a mapping of {@link DependencyRequest}s to {@link CodeBlock}s that {@linkplain
-   * #frameworkTypeUsageStatement(CodeBlock, RequestKind) use them}.
-   */
-  public static Map<DependencyRequest, CodeBlock> frameworkFieldUsages(
-      Set<DependencyRequest> dependencies,
-      Map<DependencyRequest, FieldSpec> fields) {
-    return Util.toMap(
-        dependencies,
-        dep -> frameworkTypeUsageStatement(CodeBlock.of("$N", fields.get(dep)), dep.kind()));
-  }
-
   /** Returns the generated factory or members injector name for a binding. */
   public static ClassName generatedClassNameForBinding(Binding binding) {
-    switch (binding.bindingType()) {
+    ContributionBinding contribution = (ContributionBinding) binding;
+    switch (contribution.kind()) {
+      case ASSISTED_INJECTION:
+      case INJECTION:
       case PROVISION:
-        ContributionBinding contribution = (ContributionBinding) binding;
-        switch (contribution.kind()) {
-          case ASSISTED_INJECTION:
-          case INJECTION:
-          case PROVISION:
-            return elementBasedClassName(
-                MoreElements.asExecutable(binding.bindingElement().get()), "Factory");
+        return elementBasedClassName(
+            MoreElements.asExecutable(binding.bindingElement().orElseThrow()), "Factory");
 
-          case ASSISTED_FACTORY:
-            return siblingClassName(MoreElements.asType(binding.bindingElement().get()), "_Impl");
+      case ASSISTED_FACTORY:
+        return siblingClassName(MoreElements.asType(binding.bindingElement().orElseThrow()), "_Impl");
 
-          default:
-            throw new AssertionError();
-        }
+      default:
+        throw new AssertionError();
     }
-    throw new AssertionError();
   }
 
   /**
@@ -154,16 +135,6 @@ public class SourceFiles {
         : ParameterizedTypeName.get(className, typeParameters.toArray(new TypeName[0]));
   }
 
-  public static ClassName membersInjectorNameForType(TypeElement typeElement) {
-    return siblingClassName(typeElement, "_MembersInjector");
-  }
-
-  public static String memberInjectedFieldSignatureForVariable(VariableElement variableElement) {
-    return MoreElements.asType(variableElement.getEnclosingElement()).getQualifiedName()
-        + "."
-        + variableElement.getSimpleName();
-  }
-
   public static String classFileName(ClassName className) {
     return String.join("_", className.simpleNames());
   }
@@ -186,7 +157,7 @@ public class SourceFiles {
       }
     }
     List<? extends TypeParameterElement> typeParameters =
-        binding.bindingTypeElement().get().getTypeParameters();
+        binding.bindingTypeElement().orElseThrow().getTypeParameters();
     return typeParameters.stream().map(TypeVariableName::get).collect(toImmutableList());
   }
 

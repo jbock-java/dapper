@@ -25,22 +25,14 @@ import dagger.model.RequestKind;
 public enum FrameworkTypeMapper {
   FOR_PROVIDER() {
     @Override
-    public FrameworkType getFrameworkType(RequestKind requestKind) {
-      switch (requestKind) {
-        case INSTANCE:
-        case PROVIDER:
-        case PROVIDER_OF_LAZY:
-        case LAZY:
-          return FrameworkType.PROVIDER;
-        default:
-          throw new AssertionError(requestKind);
-      }
+    public FrameworkType getFrameworkType() {
+      return FrameworkType.PROVIDER;
     }
   };
 
-  public static FrameworkTypeMapper forBindingType(BindingType bindingType) {
+  public static FrameworkTypeMapper forBindingType() {
     return FOR_PROVIDER;
   }
 
-  public abstract FrameworkType getFrameworkType(RequestKind requestKind);
+  public abstract FrameworkType getFrameworkType();
 }

@@ -19,7 +19,6 @@ package dagger.internal.codegen.binding;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
@@ -264,10 +263,6 @@ public final class BindingFactory {
    */
   ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, Element element) {
     Preconditions.checkArgument(element instanceof VariableElement || element instanceof ExecutableElement);
-    VariableElement parameterElement =
-        element instanceof VariableElement
-            ? MoreElements.asVariable(element)
-            : getOnlyElement(MoreElements.asExecutable(element).getParameters());
     return ProvisionBinding.builder()
         .bindingElement(element)
         .key(requirement.key().orElseThrow())
