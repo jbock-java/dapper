@@ -35,7 +35,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
 public final class ProvisionBinding extends ContributionBinding {
@@ -44,14 +43,13 @@ public final class ProvisionBinding extends ContributionBinding {
   private final Optional<Element> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final BindingKind kind;
-  private final Optional<DeclaredType> nullableType;
   private final Set<DependencyRequest> provisionDependencies;
   private final Optional<ProvisionBinding> unresolved;
   private final Optional<Scope> scope;
 
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(key(), bindingElement(),
-          contributingModule(), kind(), nullableType(),
+          contributingModule(), kind(),
           provisionDependencies(),
           unresolved(), scope()));
 
@@ -62,7 +60,6 @@ public final class ProvisionBinding extends ContributionBinding {
       Optional<Element> bindingElement,
       Optional<TypeElement> contributingModule,
       BindingKind kind,
-      Optional<DeclaredType> nullableType,
       Set<DependencyRequest> provisionDependencies,
       Optional<ProvisionBinding> unresolved,
       Optional<Scope> scope) {
@@ -70,7 +67,6 @@ public final class ProvisionBinding extends ContributionBinding {
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
     this.kind = requireNonNull(kind);
-    this.nullableType = requireNonNull(nullableType);
     this.provisionDependencies = requireNonNull(provisionDependencies);
     this.unresolved = requireNonNull(unresolved);
     this.scope = requireNonNull(scope);
@@ -99,11 +95,6 @@ public final class ProvisionBinding extends ContributionBinding {
   @Override
   public BindingKind kind() {
     return kind;
-  }
-
-  @Override
-  public Optional<DeclaredType> nullableType() {
-    return nullableType;
   }
 
   /**
@@ -145,7 +136,6 @@ public final class ProvisionBinding extends ContributionBinding {
   public boolean shouldCheckForNull(CompilerOptions compilerOptions) {
     return KINDS_TO_CHECK_FOR_NULL.contains(kind())
         && contributedPrimitiveType().isEmpty()
-        && nullableType().isEmpty()
         && compilerOptions.doCheckForNulls();
   }
 
@@ -167,7 +157,6 @@ public final class ProvisionBinding extends ContributionBinding {
         && bindingElement.equals(that.bindingElement)
         && contributingModule.equals(that.contributingModule)
         && kind == that.kind
-        && nullableType.equals(that.nullableType)
         && provisionDependencies.equals(that.provisionDependencies)
         && unresolved.equals(that.unresolved)
         && scope.equals(that.scope);
@@ -184,7 +173,6 @@ public final class ProvisionBinding extends ContributionBinding {
     private Optional<Element> bindingElement = Optional.empty();
     private Optional<TypeElement> contributingModule = Optional.empty();
     private BindingKind kind;
-    private Optional<DeclaredType> nullableType = Optional.empty();
     private Set<DependencyRequest> provisionDependencies;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
     private Optional<Scope> scope = Optional.empty();
@@ -197,7 +185,6 @@ public final class ProvisionBinding extends ContributionBinding {
       this.bindingElement = source.bindingElement();
       this.contributingModule = source.contributingModule();
       this.kind = source.kind();
-      this.nullableType = source.nullableType();
       this.provisionDependencies = source.provisionDependencies();
       this.unresolved = source.unresolved();
       this.scope = source.scope();
@@ -240,11 +227,6 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    public Builder nullableType(Optional<DeclaredType> nullableType) {
-      this.nullableType = nullableType;
-      return this;
-    }
-
     Builder provisionDependencies(Set<DependencyRequest> provisionDependencies) {
       this.provisionDependencies = provisionDependencies;
       return this;
@@ -266,7 +248,6 @@ public final class ProvisionBinding extends ContributionBinding {
           this.bindingElement,
           this.contributingModule,
           this.kind,
-          this.nullableType,
           this.provisionDependencies,
           this.unresolved,
           this.scope);

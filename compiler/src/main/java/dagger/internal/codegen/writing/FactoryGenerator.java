@@ -27,13 +27,11 @@ import static dagger.internal.codegen.binding.SourceFiles.frameworkTypeUsageStat
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.parameterizedGeneratedTypeNameForBinding;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
-import static dagger.model.BindingKind.PROVISION;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -54,9 +52,7 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
-import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
@@ -249,14 +245,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             compilerOptions
         );
 
-    if (binding.kind().equals(PROVISION)) {
-      binding
-          .nullableType()
-          .ifPresent(nullableType -> CodeBlocks.addAnnotation(getMethod, nullableType));
-      getMethod.addStatement("return $L", invokeNewInstance);
-    } else {
-      getMethod.addStatement("return $L", invokeNewInstance);
-    }
+    getMethod.addStatement("return $L", invokeNewInstance);
     return getMethod.build();
   }
 

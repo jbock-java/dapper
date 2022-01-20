@@ -18,11 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
-import static dagger.model.RequestKind.INSTANCE;
 import static java.util.Objects.requireNonNull;
 
-import dagger.Lazy;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
@@ -35,7 +32,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
@@ -94,17 +90,6 @@ public final class DependencyRequestFactory {
         .kind(requestKind)
         .key(keyFactory.forQualifiedType(qualifier, extractKeyType(type)))
         .requestElement(requestElement)
-        .isNullable(allowsNull(requestKind, getNullableType(requestElement)))
         .build();
-  }
-
-  /**
-   * Returns {@code true} if a given request element allows null values. {@link
-   * RequestKind#INSTANCE} requests must be annotated with {@code @Nullable} in order to allow null
-   * values. All other request kinds implicitly allow null values because they are are wrapped
-   * inside {@code Provider}, {@link Lazy}, etc.
-   */
-  private boolean allowsNull(RequestKind kind, Optional<DeclaredType> nullableType) {
-    return nullableType.isPresent() || !kind.equals(INSTANCE);
   }
 }

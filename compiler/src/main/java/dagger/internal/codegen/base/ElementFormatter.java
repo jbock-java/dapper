@@ -25,7 +25,7 @@ import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.ElementKindVisitor8;
+import javax.lang.model.util.ElementKindVisitor9;
 
 /**
  * Formats elements into a useful string representation.
@@ -56,7 +56,7 @@ public final class ElementFormatter extends Formatter<Element> {
   }
 
   private static final ElementVisitor<String, Void> ELEMENT_TO_STRING =
-      new ElementKindVisitor8<String, Void>() {
+      new ElementKindVisitor9<>() {
         @Override
         public String visitExecutable(ExecutableElement executableElement, Void aVoid) {
           return enclosingTypeAndMemberName(executableElement)

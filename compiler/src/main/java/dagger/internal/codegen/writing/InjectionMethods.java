@@ -20,9 +20,7 @@ import static com.google.auto.common.MoreElements.asExecutable;
 import static com.google.auto.common.MoreElements.asType;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
-import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
@@ -37,7 +35,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
 
 import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -49,8 +46,6 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import java.util.ArrayList;
@@ -60,7 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Parameterizable;
 import javax.lang.model.element.TypeElement;
@@ -310,34 +304,10 @@ final class InjectionMethods {
     if (method.getReturnType().getKind().equals(VOID)) {
       return builder.addStatement("$L", invocation).build();
     } else {
-      getNullableType(method)
-          .ifPresent(annotation -> CodeBlocks.addAnnotation(builder, annotation));
       return builder
           .returns(TypeName.get(method.getReturnType()))
           .addStatement("return $L", invocation).build();
     }
-  }
-
-  private static MethodSpec fieldProxy(
-      VariableElement field, String methodName, Optional<AnnotationMirror> qualifierAnnotation) {
-    MethodSpec.Builder builder =
-        methodBuilder(methodName)
-            .addModifiers(PUBLIC, STATIC)
-            .addAnnotation(
-                AnnotationSpec.builder(TypeNames.INJECTED_FIELD_SIGNATURE)
-                    .addMember("value", "$S", memberInjectedFieldSignatureForVariable(field))
-                    .build());
-
-    qualifierAnnotation.map(AnnotationSpec::get).ifPresent(builder::addAnnotation);
-
-    TypeElement enclosingType = asType(field.getEnclosingElement());
-    copyTypeParameters(builder, enclosingType);
-
-    boolean useObject = !isRawTypePubliclyAccessible(enclosingType.asType());
-    UniqueNameSet parameterNameSet = new UniqueNameSet();
-    CodeBlock instance = copyInstance(builder, parameterNameSet, enclosingType.asType(), useObject);
-    CodeBlock argument = copyParameters(builder, parameterNameSet, List.of(field));
-    return builder.addStatement("$L.$L = $L", instance, field.getSimpleName(), argument).build();
   }
 
   private static CodeBlock invokeMethod(

@@ -18,13 +18,11 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
-import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import com.google.auto.common.MoreTypes;
 import dagger.Binds;
-import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Key;
@@ -105,25 +103,7 @@ public final class KeyFactory {
     return Key.builder(type).build();
   }
 
-  public Key forMembersInjectedType(TypeMirror type) {
-    return Key.builder(type).build();
-  }
-
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
     return Key.builder(boxPrimitives(type)).qualifier(qualifier).build();
-  }
-
-  /**
-   * If {@code key}'s type is {@code Optional<T>} for some {@code T}, returns a key with the same
-   * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, TypeMirror)}
-   * extracted} from {@code T}.
-   */
-  Optional<Key> unwrapOptional(Key key) {
-    if (!OptionalType.isOptional(key)) {
-      return Optional.empty();
-    }
-
-    TypeMirror optionalValueType = OptionalType.from(key).valueType();
-    return Optional.of(key.toBuilder().type(extractKeyType(optionalValueType)).build());
   }
 }

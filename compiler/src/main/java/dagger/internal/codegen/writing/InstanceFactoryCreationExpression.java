@@ -29,24 +29,17 @@ import java.util.function.Supplier;
  */
 final class InstanceFactoryCreationExpression implements FrameworkInstanceCreationExpression {
 
-  private final boolean nullable;
   private final Supplier<CodeBlock> instanceExpression;
 
   InstanceFactoryCreationExpression(Supplier<CodeBlock> instanceExpression) {
-    this(false, instanceExpression);
-  }
-
-  InstanceFactoryCreationExpression(boolean nullable, Supplier<CodeBlock> instanceExpression) {
-    this.nullable = nullable;
     this.instanceExpression = requireNonNull(instanceExpression);
   }
 
   @Override
   public CodeBlock creationExpression() {
     return CodeBlock.of(
-        "$T.$L($L)",
+        "$T.create($L)",
         InstanceFactory.class,
-        nullable ? "createNullable" : "create",
         instanceExpression.get());
   }
 }

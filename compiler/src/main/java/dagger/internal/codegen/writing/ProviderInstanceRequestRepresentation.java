@@ -42,7 +42,7 @@ final class ProviderInstanceRequestRepresentation extends FrameworkInstanceReque
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     ProviderInstanceRequestRepresentation create(
         ContributionBinding binding, FrameworkInstanceSupplier frameworkInstanceSupplier);
   }

@@ -27,7 +27,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -94,9 +93,6 @@ final class DependencyMethodProviderCreationExpression
             .addModifiers(PUBLIC)
             .returns(keyType)
             .addStatement("return $L", invocation);
-    if (binding.nullableType().isPresent()) {
-      getMethod.addAnnotation(ClassName.get(MoreTypes.asTypeElement(binding.nullableType().get())));
-    }
 
     // We need to use the componentShard here since the generated type is static and shards are
     // not static classes so it can't be nested inside the shard.

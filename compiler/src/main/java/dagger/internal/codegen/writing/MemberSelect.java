@@ -16,25 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
-import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
-import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
-import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
-import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.type.TypeKind.DECLARED;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeVariableName;
-import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import java.util.List;
-import java.util.Optional;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
@@ -67,103 +53,6 @@ abstract class MemberSelect {
       return owningClass().equals(usingClass)
           ? CodeBlock.of("$N", fieldName)
           : CodeBlock.of("$L.$N", owningShard.shardFieldReference(), fieldName);
-    }
-  }
-
-  /**
-   * If {@code resolvedBindings} is an unscoped provision binding with no factory arguments or a
-   * no-op members injection binding, then we don't need a field to hold its factory. In that case,
-   * this method returns the static member select that returns the factory or no-op members
-   * injector.
-   */
-  static Optional<MemberSelect> staticFactoryCreation(ContributionBinding contributionBinding) {
-    if (contributionBinding.factoryCreationStrategy().equals(SINGLETON_INSTANCE)
-        && contributionBinding.scope().isEmpty()) {
-      switch (contributionBinding.kind()) {
-        case INJECTION:
-        case PROVISION:
-          TypeMirror keyType = contributionBinding.key().type();
-          if (keyType.getKind().equals(DECLARED)) {
-            List<TypeVariableName> typeVariables =
-                bindingTypeElementTypeVariableNames(contributionBinding);
-            if (!typeVariables.isEmpty()) {
-              List<? extends TypeMirror> typeArguments =
-                  ((DeclaredType) keyType).getTypeArguments();
-              return Optional.of(
-                  MemberSelect.parameterizedFactoryCreateMethod(
-                      generatedClassNameForBinding(contributionBinding), typeArguments));
-            }
-          }
-          // fall through
-
-        default:
-          return Optional.of(
-              new StaticMethod(
-                  generatedClassNameForBinding(contributionBinding), CodeBlock.of("create()")));
-      }
-    }
-
-    return Optional.empty();
-  }
-
-  /**
-   * Returns a {@link MemberSelect} for the instance of a {@code create()} method on a factory. This
-   * only applies for factories that do not have any dependencies.
-   */
-  private static MemberSelect parameterizedFactoryCreateMethod(
-      ClassName owningClass, List<? extends TypeMirror> parameters) {
-    return new ParameterizedStaticMethod(
-        owningClass, List.copyOf(parameters), CodeBlock.of("create()"), FACTORY);
-  }
-
-  private static final class StaticMethod extends MemberSelect {
-    final CodeBlock methodCodeBlock;
-
-    StaticMethod(ClassName owningClass, CodeBlock methodCodeBlock) {
-      super(owningClass, true);
-      this.methodCodeBlock = requireNonNull(methodCodeBlock);
-    }
-
-    @Override
-    CodeBlock getExpressionFor(ClassName usingClass) {
-      return owningClass().equals(usingClass)
-          ? methodCodeBlock
-          : CodeBlock.of("$T.$L", owningClass(), methodCodeBlock);
-    }
-  }
-
-  private static final class ParameterizedStaticMethod extends MemberSelect {
-    final List<TypeMirror> typeParameters;
-    final CodeBlock methodCodeBlock;
-    final ClassName rawReturnType;
-
-    ParameterizedStaticMethod(
-        ClassName owningClass,
-        List<TypeMirror> typeParameters,
-        CodeBlock methodCodeBlock,
-        ClassName rawReturnType) {
-      super(owningClass, true);
-      this.typeParameters = typeParameters;
-      this.methodCodeBlock = methodCodeBlock;
-      this.rawReturnType = rawReturnType;
-    }
-
-    @Override
-    CodeBlock getExpressionFor(ClassName usingClass) {
-      boolean accessible = true;
-      for (TypeMirror typeParameter : typeParameters) {
-        accessible &= isTypeAccessibleFrom(typeParameter, usingClass.packageName());
-      }
-
-      if (accessible) {
-        return CodeBlock.of(
-            "$T.<$L>$L",
-            owningClass(),
-            typeParameters.stream().map(CodeBlocks::type).collect(toParametersCodeBlock()),
-            methodCodeBlock);
-      } else {
-        return CodeBlock.of("(($T) $T.$L)", rawReturnType, owningClass(), methodCodeBlock);
-      }
     }
   }
 

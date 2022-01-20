@@ -33,9 +33,6 @@ import javax.lang.model.type.TypeMirror;
  */
 public abstract class ContributionBinding extends Binding {
 
-  /** Returns the type that specifies this' nullability, absent if not nullable. */
-  public abstract Optional<DeclaredType> nullableType();
-
   /** If {@link #bindingElement()} is a method that returns a primitive type, returns that type. */
   public final Optional<TypeMirror> contributedPrimitiveType() {
     return bindingElement()
@@ -46,7 +43,7 @@ public abstract class ContributionBinding extends Binding {
 
   @Override
   public final boolean isNullable() {
-    return nullableType().isPresent();
+    return false;
   }
 
   /** The strategy for getting an instance of a factory for a {@link ContributionBinding}. */

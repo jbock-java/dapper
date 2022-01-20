@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -62,11 +61,6 @@ public final class ConfigurationAnnotations {
 
   static boolean isSubcomponentCreator(Element element) {
     return DaggerElements.isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
-  }
-
-  /** Returns the first type that specifies this' nullability, or empty if none. */
-  public static Optional<DeclaredType> getNullableType(Element element) {
-    return Optional.empty();
   }
 
   /**

@@ -68,9 +68,7 @@ public abstract class Formatter<T> implements Function<T, String> {
   }
 
   private void appendIndent(StringBuilder builder, int indentLevel) {
-    for (int i = 0; i < indentLevel; i++) {
-      builder.append(INDENT);
-    }
+    builder.append(INDENT.repeat(Math.max(0, indentLevel)));
   }
 
   public static String formatArgumentInList(int index, int size, CharSequence name) {
@@ -78,11 +76,11 @@ public abstract class Formatter<T> implements Function<T, String> {
     Preconditions.checkArgument(index < size);
     StringBuilder builder = new StringBuilder();
     if (index > 0) {
-      builder.append("…, ");
+      builder.append("\u2026, ");
     }
     builder.append(name);
     if (index < size - 1) {
-      builder.append(", …");
+      builder.append(", \u2026");
     }
     return builder.toString();
   }

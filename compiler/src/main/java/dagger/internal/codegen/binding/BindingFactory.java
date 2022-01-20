@@ -21,7 +21,6 @@ import static com.google.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
-import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.BOUND_INSTANCE;
@@ -194,7 +193,6 @@ public final class BindingFactory {
         this::providesMethodBinding)
         .kind(PROVISION)
         .scope(uniqueScopeOf(providesMethod))
-        .nullableType(getNullableType(providesMethod))
         .build();
   }
 
@@ -253,7 +251,6 @@ public final class BindingFactory {
     Preconditions.checkArgument(dependencyMethod.getParameters().isEmpty());
     ProvisionBinding.Builder builder = ProvisionBinding.builder()
         .key(keyFactory.forComponentMethod(dependencyMethod))
-        .nullableType(getNullableType(dependencyMethod))
         .kind(COMPONENT_PROVISION)
         .scope(uniqueScopeOf(dependencyMethod));
     return builder
@@ -274,7 +271,6 @@ public final class BindingFactory {
     return ProvisionBinding.builder()
         .bindingElement(element)
         .key(requirement.key().orElseThrow())
-        .nullableType(getNullableType(parameterElement))
         .kind(BOUND_INSTANCE)
         .build();
   }
@@ -318,14 +314,12 @@ public final class BindingFactory {
    * Returns a {@link dagger.model.BindingKind#DELEGATE} binding.
    *
    * @param delegateDeclaration the {@code @Binds}-annotated declaration
-   * @param actualBinding the binding that satisfies the {@code @Binds} declaration
    */
   ContributionBinding delegateBinding(
-      DelegateDeclaration delegateDeclaration, ContributionBinding actualBinding) {
+      DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
         ProvisionBinding.builder()
-            .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow()))
-            .nullableType(actualBinding.nullableType()),
+            .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow())),
         delegateDeclaration);
   }
 

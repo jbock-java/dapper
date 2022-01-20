@@ -64,7 +64,6 @@ public final class BindingGraphFactory implements ClearableCache {
 
   private final DaggerElements elements;
   private final InjectBindingRegistry injectBindingRegistry;
-  private final KeyFactory keyFactory;
   private final BindingFactory bindingFactory;
   private final BindingGraphConverter bindingGraphConverter;
   private final Map<Key, Set<Key>> keysMatchingRequestCache = new HashMap<>();
@@ -73,12 +72,10 @@ public final class BindingGraphFactory implements ClearableCache {
   BindingGraphFactory(
       DaggerElements elements,
       InjectBindingRegistry injectBindingRegistry,
-      KeyFactory keyFactory,
       BindingFactory bindingFactory,
       BindingGraphConverter bindingGraphConverter) {
     this.elements = elements;
     this.injectBindingRegistry = injectBindingRegistry;
-    this.keyFactory = keyFactory;
     this.bindingFactory = bindingFactory;
     this.bindingGraphConverter = bindingGraphConverter;
   }
@@ -427,7 +424,7 @@ public final class BindingGraphFactory implements ClearableCache {
       // duplicate binding error.
       ContributionBinding explicitDelegate =
           resolvedDelegate.contributionBindings().iterator().next();
-      return bindingFactory.delegateBinding(delegateDeclaration, explicitDelegate);
+      return bindingFactory.delegateBinding(delegateDeclaration);
     }
 
     /**

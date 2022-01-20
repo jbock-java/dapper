@@ -32,15 +32,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 /** Utility methods related to {@link Key}s. */
 public final class Keys {
-  public static boolean isValidMembersInjectionKey(Key key) {
-    return !key.qualifier().isPresent()
-        && !key.multibindingContributionIdentifier().isPresent()
-        && key.type().getKind().equals(TypeKind.DECLARED);
-  }
 
   /**
    * Returns {@code true} if this is valid as an implicit key (that is, if it's valid for a
@@ -63,7 +58,7 @@ public final class Keys {
     }
 
     return type.accept(
-        new SimpleTypeVisitor6<Boolean, Void>(false) {
+        new SimpleTypeVisitor9<Boolean, Void>(false) {
           @Override
           public Boolean visitDeclared(DeclaredType type, Void ignored) {
             // Non-classes or abstract classes aren't allowed.
@@ -98,7 +93,7 @@ public final class Keys {
    * component/subcomponent.
    */
   public static boolean isComponentOrCreator(Key key) {
-    return !key.qualifier().isPresent()
+    return key.qualifier().isEmpty()
         && key.type().getKind() == TypeKind.DECLARED
         && DaggerElements.isAnyAnnotationPresent(asTypeElement(key.type()), allComponentAndCreatorAnnotations());
   }

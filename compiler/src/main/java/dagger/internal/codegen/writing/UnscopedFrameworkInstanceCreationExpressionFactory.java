@@ -80,11 +80,11 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case BOUND_INSTANCE:
         return instanceFactoryCreationExpression(
-            binding, ComponentRequirement.forBoundInstance(binding));
+            ComponentRequirement.forBoundInstance(binding));
 
       case COMPONENT_DEPENDENCY:
         return instanceFactoryCreationExpression(
-            binding, ComponentRequirement.forDependency(binding.key().type()));
+            ComponentRequirement.forDependency(binding.key().type()));
 
       case COMPONENT_PROVISION:
         return dependencyMethodProviderCreationExpressionFactory.create(binding);
@@ -107,9 +107,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   }
 
   private InstanceFactoryCreationExpression instanceFactoryCreationExpression(
-      ContributionBinding binding, ComponentRequirement componentRequirement) {
+      ComponentRequirement componentRequirement) {
     return new InstanceFactoryCreationExpression(
-        binding.nullableType().isPresent(),
         () ->
             componentRequirementExpressions.getExpressionDuringInitialization(
                 componentRequirement, componentImplementation.name()));

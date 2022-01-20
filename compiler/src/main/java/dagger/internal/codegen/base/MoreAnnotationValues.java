@@ -17,15 +17,14 @@
 package dagger.internal.codegen.base;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
-import static com.google.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
 
 import java.util.List;
-import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
+import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 
 /** Utility methods for working with {@link AnnotationValue} instances. */
 public final class MoreAnnotationValues {
@@ -63,7 +62,7 @@ public final class MoreAnnotationValues {
   }
 
   private static final AnnotationValueVisitor<TypeMirror, Void> AS_TYPE =
-      new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {
+      new SimpleAnnotationValueVisitor9<>() {
         @Override
         public TypeMirror visitType(TypeMirror t, Void p) {
           return t;
@@ -75,49 +74,9 @@ public final class MoreAnnotationValues {
         }
       };
 
-  /** Returns the int value of an annotation */
-  public static int getIntValue(AnnotationMirror annotation, String valueName) {
-    return (int) getAnnotationValue(annotation, valueName).getValue();
-  }
-
-  /** Returns an optional int value of an annotation if the value name is present */
-  public static Optional<Integer> getOptionalIntValue(
-      AnnotationMirror annotation, String valueName) {
-    return isValuePresent(annotation, valueName)
-        ? Optional.of(getIntValue(annotation, valueName))
-        : Optional.empty();
-  }
-
   /** Returns the String value of an annotation */
   public static String getStringValue(AnnotationMirror annotation, String valueName) {
     return (String) getAnnotationValue(annotation, valueName).getValue();
-  }
-
-  /** Returns an optional String value of an annotation if the value name is present */
-  public static Optional<String> getOptionalStringValue(
-      AnnotationMirror annotation, String valueName) {
-    return isValuePresent(annotation, valueName)
-        ? Optional.of(getStringValue(annotation, valueName))
-        : Optional.empty();
-  }
-
-  /** Returns the int array value of an annotation */
-  public static int[] getIntArrayValue(AnnotationMirror annotation, String valueName) {
-    return asAnnotationValues(getAnnotationValue(annotation, valueName)).stream()
-        .mapToInt(it -> (int) it.getValue())
-        .toArray();
-  }
-
-  /** Returns the String array value of an annotation */
-  public static String[] getStringArrayValue(AnnotationMirror annotation, String valueName) {
-    return asAnnotationValues(getAnnotationValue(annotation, valueName)).stream()
-        .map(it -> (String) it.getValue())
-        .toArray(String[]::new);
-  }
-
-  private static boolean isValuePresent(AnnotationMirror annotation, String valueName) {
-    return getAnnotationValuesWithDefaults(annotation).keySet().stream()
-        .anyMatch(member -> member.getSimpleName().contentEquals(valueName));
   }
 
   private MoreAnnotationValues() {
