@@ -32,7 +32,6 @@ public final class TypeNames {
       ClassName.get("dagger.assisted", "AssistedInject");
   public static final ClassName BINDS = ClassName.get("dagger", "Binds");
   public static final ClassName BINDS_INSTANCE = ClassName.get("dagger", "BindsInstance");
-  public static final ClassName BINDS_OPTIONAL_OF = ClassName.get("dagger", "BindsOptionalOf");
   public static final ClassName COMPONENT = ClassName.get("dagger", "Component");
   public static final ClassName COMPONENT_BUILDER = COMPONENT.nestedClass("Builder");
   public static final ClassName COMPONENT_FACTORY = COMPONENT.nestedClass("Factory");
@@ -46,8 +45,6 @@ public final class TypeNames {
   // Dagger Internal classnames
   public static final ClassName DOUBLE_CHECK = ClassName.get("dagger.internal", "DoubleCheck");
   public static final ClassName FACTORY = ClassName.get("dagger.internal", "Factory");
-  public static final ClassName INJECTED_FIELD_SIGNATURE =
-      ClassName.get("dagger.internal", "InjectedFieldSignature");
   public static final ClassName INSTANCE_FACTORY =
       ClassName.get("dagger.internal", "InstanceFactory");
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");

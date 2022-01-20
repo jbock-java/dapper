@@ -28,7 +28,6 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.graph.Traverser;
 import com.squareup.javapoet.ClassName;
-import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.extension.DaggerStreams;
 import java.io.Writer;
@@ -71,7 +70,6 @@ import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.Types;
 
 /** Extension of {@link Elements} that adds Dagger-specific methods. */
-@Reusable
 public final class DaggerElements implements Elements, ClearableCache {
   private final Map<TypeElement, Set<ExecutableElement>> getLocalAndInheritedMethodsCache =
       new HashMap<>();

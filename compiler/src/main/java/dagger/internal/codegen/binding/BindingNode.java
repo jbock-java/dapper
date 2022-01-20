@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static java.util.Objects.requireNonNull;
 
-import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
@@ -101,7 +100,6 @@ public final class BindingNode implements dagger.model.Binding {
    * with the binding.
    *
    * <ul>
-   *   <li>{@linkplain BindsOptionalOf optional binding} declarations
    *   <li>{@linkplain Module#subcomponents() module subcomponent} declarations
    * </ul>
    */

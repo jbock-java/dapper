@@ -58,10 +58,6 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  * preferable for {@code javac}.
  */
 public final class Accessibility {
-  /** Returns true if the given type can be referenced from any package. */
-  public static boolean isTypePubliclyAccessible(TypeMirror type) {
-    return type.accept(new TypeAccessibilityVisitor(), null);
-  }
 
   /** Returns true if the given type can be referenced from code in the given package. */
   public static boolean isTypeAccessibleFrom(TypeMirror type, String packageName) {
@@ -74,10 +70,6 @@ public final class Accessibility {
 
   private static final class TypeAccessibilityVisitor extends SimpleTypeVisitor8<Boolean, Void> {
     final Optional<String> packageName;
-
-    TypeAccessibilityVisitor() {
-      this(Optional.empty());
-    }
 
     TypeAccessibilityVisitor(String packageName) {
       this(Optional.of(packageName));

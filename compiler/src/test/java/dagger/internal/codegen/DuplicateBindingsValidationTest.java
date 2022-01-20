@@ -603,9 +603,9 @@ class DuplicateBindingsValidationTest {
             "",
             "@Module",
             "interface ParentModule {",
-            "  @Provides static String one(Optional<Object> optional) { return \"one\"; }",
+            "  @Provides static String one(Object optional) { return \"one\"; }",
             "  @Provides static String two() { return \"two\"; }",
-            "  @BindsOptionalOf Object optional();",
+            "  @Provides static Object optional() { return \"none\"; }",
             "}");
     JavaFileObject child =
         JavaFileObjects.forSourceLines(
@@ -642,7 +642,7 @@ class DuplicateBindingsValidationTest {
         .hadErrorContaining("String is bound multiple times")
         .inFile(parent)
         .onLineContaining("interface Parent");
-    assertThat(compilation).hadErrorCount(1);
+    assertThat(compilation).hadErrorCount(2);
   }
 
   private String fullBindingGraphValidationOption(boolean fullBindingGraphValidation) {

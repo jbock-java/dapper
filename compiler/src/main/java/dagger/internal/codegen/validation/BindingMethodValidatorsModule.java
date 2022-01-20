@@ -16,15 +16,11 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
-import static java.util.stream.Collectors.collectingAndThen;
-
 import com.squareup.javapoet.ClassName;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.base.Util;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -37,11 +33,10 @@ public interface BindingMethodValidatorsModule {
   @Provides
   static Map<ClassName, BindingMethodValidator> indexValidators(
       ProvidesMethodValidator providesMethodValidator,
-      BindsMethodValidator bindsMethodValidator,
-      BindsOptionalOfMethodValidator bindsOptionalOfMethodValidator) {
-    return Stream.of(providesMethodValidator, bindsMethodValidator, bindsOptionalOfMethodValidator)
-        .collect(collectingAndThen(
-            toImmutableSetMultimap(BindingMethodValidator::methodAnnotation, Function.identity()),
-            map -> Util.transformValues(map, Util::getOnlyElement)));
+      BindsMethodValidator bindsMethodValidator) {
+    Map<ClassName, BindingMethodValidator> result = new LinkedHashMap<>();
+    Stream.of(providesMethodValidator, bindsMethodValidator).forEach(v ->
+        result.put(v.methodAnnotation(), v));
+    return result;
   }
 }

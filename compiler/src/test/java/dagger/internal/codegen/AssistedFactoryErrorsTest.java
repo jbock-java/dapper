@@ -570,57 +570,6 @@ class AssistedFactoryErrorsTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void testProvidesAssistedBindingsAsOptional(CompilerMode compilerMode) {
-    JavaFileObject foo =
-        JavaFileObjects.forSourceLines(
-            "test.Foo",
-            "package test;",
-            "",
-            "import dagger.assisted.Assisted;",
-            "import dagger.assisted.AssistedInject;",
-            "import dagger.assisted.AssistedFactory;",
-            "",
-            "class Foo {",
-            "  @AssistedInject Foo() {}",
-            "",
-            "  @AssistedFactory",
-            "  interface Factory {",
-            "    Foo create();",
-            "  }",
-            "}");
-
-    JavaFileObject module =
-        JavaFileObjects.forSourceLines(
-            "test.FooModule",
-            "package test;",
-            "",
-            "import dagger.BindsOptionalOf;",
-            "import dagger.Module;",
-            "import dagger.Provides;",
-            "",
-            "@Module",
-            "interface FooModule {",
-            "  @BindsOptionalOf Foo optionalFoo();",
-            "",
-            "  @BindsOptionalOf Foo.Factory optionalFooFactory();",
-            "}");
-
-    Compilation compilation = compilerWithOptions(compilerMode.javacopts()).compile(foo, module);
-    assertThat(compilation).failed();
-    assertThat(compilation).hadErrorCount(2);
-    assertThat(compilation)
-        .hadErrorContaining("[test.Foo] Dagger does not support providing @AssistedInject types.")
-        .inFile(module)
-        .onLine(9);
-    assertThat(compilation)
-        .hadErrorContaining(
-            "[test.Foo.Factory] Dagger does not support providing @AssistedFactory types.")
-        .inFile(module)
-        .onLine(11);
-  }
-
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
   void testInjectsLazyOfAssistedFactory(CompilerMode compilerMode) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(

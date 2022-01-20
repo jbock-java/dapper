@@ -26,42 +26,34 @@ import com.squareup.javapoet.CodeBlock;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Tests for {@link CodeBlocks}. */
 @ExtendWith(CompilationExtension.class)
-public final class CodeBlocksTest {
+final class CodeBlocksTest {
   private static final CodeBlock objectO = CodeBlock.of("$T o", Object.class);
   private static final CodeBlock stringS = CodeBlock.of("$T s", String.class);
   private static final CodeBlock intI = CodeBlock.of("$T i", int.class);
 
-  private Elements elements;
-
-  @BeforeEach
-  public void setUp(Elements elements) {
-    this.elements = elements;
-  }
-
   @Test
-  public void testToParametersCodeBlock() {
+  void testToParametersCodeBlock() {
     assertThat(Stream.of(objectO, stringS, intI).collect(toParametersCodeBlock()))
         .isEqualTo(CodeBlock.of("$T o, $T s, $T i", Object.class, String.class, int.class));
   }
 
   @Test
-  public void testToParametersCodeBlock_empty() {
+  void testToParametersCodeBlock_empty() {
     assertThat(Stream.<CodeBlock>of().collect(toParametersCodeBlock())).isEqualTo(CodeBlock.of(""));
   }
 
   @Test
-  public void testToParametersCodeBlock_oneElement() {
+  void testToParametersCodeBlock_oneElement() {
     assertThat(Stream.of(objectO).collect(toParametersCodeBlock())).isEqualTo(objectO);
   }
 
   @Test
-  public void testJavadocLinkTo() {
+  void testJavadocLinkTo(Elements elements) {
     ExecutableElement equals =
         elements
             .getTypeElement(Object.class.getCanonicalName())
@@ -71,7 +63,7 @@ public final class CodeBlocksTest {
             .map(ExecutableElement.class::cast)
             .filter(method -> method.getSimpleName().contentEquals("equals"))
             .findFirst()
-            .get();
+            .orElseThrow();
     assertThat(javadocLinkTo(equals))
         .isEqualTo(CodeBlock.of("{@link $T#equals($T)}", Object.class, Object.class));
   }

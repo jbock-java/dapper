@@ -27,15 +27,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(CompilationExtension.class)
-public class ExpressionTest {
-
-  private DaggerElements elements;
-  private DaggerTypes types;
+class ExpressionTest {
 
   interface Supertype {
   }
@@ -43,16 +39,11 @@ public class ExpressionTest {
   interface Subtype extends Supertype {
   }
 
-  @BeforeEach
-  public void setUp(Elements elements, Types types) {
-    this.elements = new DaggerElements(elements, types);
-    this.types = new DaggerTypes(types, this.elements);
-  }
-
   @Test
-  public void castTo() {
-    TypeMirror subtype = type(Subtype.class);
-    TypeMirror supertype = type(Supertype.class);
+  void castTo(Elements elements, Types types) {
+    DaggerElements daggerElements = new DaggerElements(elements, types);
+    TypeMirror subtype = type(daggerElements, Subtype.class);
+    TypeMirror supertype = type(daggerElements, Supertype.class);
     Expression expression = Expression.create(subtype, "new $T() {}", subtype);
 
     Expression castTo = expression.castTo(supertype);
@@ -65,18 +56,20 @@ public class ExpressionTest {
   }
 
   @Test
-  public void box() {
+  void box(Elements elements, Types types) {
     PrimitiveType primitiveInt = types.getPrimitiveType(TypeKind.INT);
 
     Expression primitiveExpression = Expression.create(primitiveInt, "5");
-    Expression boxedExpression = primitiveExpression.box(types);
+    DaggerElements daggerElements = new DaggerElements(elements, types);
+    DaggerTypes daggerTypes = new DaggerTypes(types, daggerElements);
+    Expression boxedExpression = primitiveExpression.box(daggerTypes);
 
     assertThat(boxedExpression.codeBlock().toString()).isEqualTo("(java.lang.Integer) 5");
-    assertThat(MoreTypes.equivalence().equivalent(boxedExpression.type(), type(Integer.class)))
+    assertThat(MoreTypes.equivalence().equivalent(boxedExpression.type(), type(daggerElements, Integer.class)))
         .isTrue();
   }
 
-  private TypeMirror type(Class<?> clazz) {
+  private TypeMirror type(DaggerElements elements, Class<?> clazz) {
     return elements.getTypeElement(clazz).asType();
   }
 }
