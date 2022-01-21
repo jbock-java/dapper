@@ -65,6 +65,12 @@ public final class BindingGraph {
           .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
           .collect(toImmutableList()));
 
+  private final Supplier<Map<ComponentPath, ComponentDescriptor>> componentDescriptorsByPath = memoize(() ->
+      topLevelBindingGraph().componentNodes().stream()
+          .map(ComponentNodeImpl.class::cast)
+          .collect(
+              toImmutableMap(ComponentNode::componentPath, ComponentNodeImpl::componentDescriptor)));
+
   private final ComponentNode componentNode;
   private final dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph;
 
@@ -390,11 +396,12 @@ public final class BindingGraph {
     return componentRequirements.get();
   }
 
-  /** Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph}. */
-  public Set<ComponentDescriptor> componentDescriptors() {
-    return topLevelBindingGraph().componentNodes().stream()
-        .map(componentNode -> ((ComponentNodeImpl) componentNode).componentDescriptor())
-        .collect(toImmutableSet());
+  /**
+   * Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph} mapped by the
+   * component path.
+   */
+  public Map<ComponentPath, ComponentDescriptor> componentDescriptorsByPath() {
+    return componentDescriptorsByPath.get();
   }
 
   public List<BindingGraph> subgraphs() {

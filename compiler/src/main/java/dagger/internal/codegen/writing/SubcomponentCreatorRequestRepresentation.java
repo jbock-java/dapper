@@ -42,7 +42,7 @@ final class SubcomponentCreatorRequestRepresentation extends RequestRepresentati
   Expression getDependencyExpression(ClassName requestingClass) {
     return Expression.create(
         binding.key().type(),
-        "new $L($L)",
+        "new $T($L)",
         shardImplementation.getSubcomponentCreatorSimpleName(binding.key()),
         shardImplementation.componentFieldsByImplementation().values().stream()
             .map(field -> CodeBlock.of("$N", field))
@@ -50,7 +50,7 @@ final class SubcomponentCreatorRequestRepresentation extends RequestRepresentati
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     SubcomponentCreatorRequestRepresentation create(ContributionBinding binding);
   }
 }

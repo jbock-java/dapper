@@ -248,7 +248,7 @@ public final class ComponentImplementation {
     this.types = types;
 
     // The first group of keys belong to the component itself. We call this the componentShard.
-    this.componentShard = new ShardImplementation(getComponentName(graph, parent, componentNames));
+    this.componentShard = new ShardImplementation(componentNames.get(graph.componentPath()));
 
     // Claim the method names for all local and inherited methods on the component type.
     elements
@@ -360,46 +360,11 @@ public final class ComponentImplementation {
   }
 
   /**
-   * Returns the kind of this component's creator.
-   *
-   * @throws IllegalStateException if the component has no creator
-   */
-  private ComponentCreatorKind creatorKind() {
-    Preconditions.checkState(componentDescriptor().hasCreator());
-    return componentDescriptor()
-        .creatorDescriptor()
-        .map(ComponentCreatorDescriptor::kind)
-        .orElse(BUILDER);
-  }
-
-  /**
    * Returns the name of the creator class for this component. It will be a sibling of this
    * generated class unless this is a top-level component, in which case it will be nested.
    */
   public ClassName getCreatorName() {
-    return isNested()
-        ? name().peerClass(componentNames.getCreatorName(componentDescriptor()))
-        : name().nestedClass(creatorKind().typeName());
-  }
-
-  /** Returns the name of the component implementation class for a component/subcomponent. */
-  private static ClassName getComponentName(
-      BindingGraph graph, Optional<ComponentImplementation> parent, ComponentNames componentNames) {
-    if (parent.isEmpty()) {
-      return ComponentNames.getRootComponentClassName(graph.componentDescriptor());
-    }
-    ComponentDescriptor parentDescriptor = parent.get().graph.componentDescriptor();
-    ComponentDescriptor childDescriptor = graph.componentDescriptor();
-    Preconditions.checkArgument(
-        parentDescriptor.childComponents().contains(childDescriptor),
-        "%s is not a child component of %s",
-        childDescriptor.typeElement(),
-        parentDescriptor.typeElement());
-
-    // TODO(erichang): Hacky fix to shorten the suffix if we're too deeply
-    // nested to save on file name length. 2 chosen arbitrarily.
-    String suffix = parent.get().name().simpleNames().size() > 2 ? "I" : "Impl";
-    return parent.get().name().nestedClass(componentNames.get(childDescriptor) + suffix);
+    return componentNames.getCreatorName(graph.componentPath());
   }
 
   /** Generates the component and returns the resulting {@link TypeSpec}. */
@@ -512,11 +477,11 @@ public final class ComponentImplementation {
     }
 
     /**
-     * Returns the simple name of the creator implementation class for the given subcomponent
-     * creator {@link Key}.
+     * Returns the name of the creator implementation class for the given subcomponent creator
+     * {@link Key}.
      */
-    String getSubcomponentCreatorSimpleName(Key key) {
-      return componentNames.getCreatorName(key);
+    ClassName getSubcomponentCreatorSimpleName(Key creatorKey) {
+      return componentNames.getSubcomponentCreatorName(graph.componentPath(), creatorKey);
     }
 
     /** Returns {@code true} if {@code type} is accessible from the generated component. */
@@ -648,14 +613,10 @@ public final class ComponentImplementation {
           .create()
           .map(ComponentCreatorImplementation::spec)
           .ifPresent(
-              creator -> {
-                if (parent.isPresent()) {
-                  // In an inner implementation of a subcomponent the creator is a peer class.
-                  parent.get().componentShard.addType(TypeSpecKind.SUBCOMPONENT, creator);
-                } else {
-                  addType(TypeSpecKind.COMPONENT_CREATOR, creator);
-                }
-              });
+              creator ->
+                  rootComponentImplementation()
+                      .getComponentShard()
+                      .addType(TypeSpecKind.COMPONENT_CREATOR, creator));
     }
 
     private void addFactoryMethods() {
@@ -754,9 +715,11 @@ public final class ComponentImplementation {
 
     private void addChildComponents() {
       for (BindingGraph subgraph : graph.subgraphs()) {
-        addType(
-            TypeSpecKind.SUBCOMPONENT,
-            childComponentImplementationFactory.create(subgraph).generate());
+        rootComponentImplementation()
+            .getComponentShard()
+            .addType(
+                TypeSpecKind.SUBCOMPONENT,
+                childComponentImplementationFactory.create(subgraph).generate());
       }
     }
 
