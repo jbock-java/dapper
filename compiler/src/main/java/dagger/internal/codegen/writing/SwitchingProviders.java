@@ -42,6 +42,7 @@ import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import dagger.model.BindingKind;
 import dagger.model.Key;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
@@ -144,7 +145,7 @@ final class SwitchingProviders {
           // Add the type parameter explicitly when the binding is scoped because Java can't resolve
           // the type when wrapped. For example, the following will error:
           //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
-          binding.scope().isPresent()
+          (binding.scope().isPresent() || binding.kind().equals(BindingKind.ASSISTED_FACTORY))
               ? CodeBlock.of(
               "$T", types.accessibleType(binding.contributedType(), switchingProviderType))
               : "",
