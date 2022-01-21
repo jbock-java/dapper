@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
@@ -25,8 +23,10 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Inject;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.processing.Filer;
 
 /** Initializes {@link BindingGraphPlugin}s. */
@@ -56,7 +56,7 @@ public final class BindingGraphPlugins {
   public Set<String> allSupportedOptions() {
     return plugins.stream()
         .flatMap(plugin -> plugin.supportedOptions().stream())
-        .collect(toImmutableSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   /** Initializes the plugins. */

@@ -50,7 +50,7 @@ public abstract class BindingDeclaration {
                   : declaration.bindingTypeElement(),
           emptiesLast(comparing((TypeElement type) -> type.getQualifiedName().toString())))
           .thenComparing(
-              (BindingDeclaration declaration) -> declaration.bindingElement(),
+              BindingDeclaration::bindingElement,
               emptiesLast(
                   comparing((Element element) -> element.getSimpleName().toString())
                       .thenComparing((Element element) -> element.asType().toString())));

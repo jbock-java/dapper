@@ -94,7 +94,7 @@ final class DirectInstanceBindingRepresentation {
       return assistedPrivateMethodRequestRepresentationFactory.create(
           request, binding, directInstanceExpression);
     }
-    return ProvisionBindingRepresentation.requiresMethodEncapsulation(binding)
+    return requiresMethodEncapsulation(binding)
         ? wrapInMethod(RequestKind.INSTANCE, directInstanceExpression)
         : directInstanceExpression;
   }
@@ -141,6 +141,29 @@ final class DirectInstanceBindingRepresentation {
     } else {
       return privateMethodRequestRepresentationFactory.create(request, binding, bindingExpression);
     }
+  }
+
+  private static boolean requiresMethodEncapsulation(ProvisionBinding binding) {
+    switch (binding.kind()) {
+      case COMPONENT:
+      case COMPONENT_PROVISION:
+      case SUBCOMPONENT_CREATOR:
+      case COMPONENT_DEPENDENCY:
+      case BOUND_INSTANCE:
+      case ASSISTED_FACTORY:
+      case ASSISTED_INJECTION:
+      case INJECTION:
+      case PROVISION:
+        // These binding kinds satify a binding request with a component method or a private
+        // method when the requested binding has dependencies. The method will wrap the logic of
+        // creating the binding instance. Without the encapsulation, we might see many levels of
+        // nested instance creation code in a single statement to satisfy all dependencies of a
+        // binding request.
+        return !binding.dependencies().isEmpty();
+      case DELEGATE:
+        return false;
+    }
+    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
   }
 
   @AssistedFactory
