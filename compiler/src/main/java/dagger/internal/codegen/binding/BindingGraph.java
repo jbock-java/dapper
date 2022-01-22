@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
+import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
@@ -37,10 +38,13 @@ import dagger.internal.codegen.base.Util;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.Node;
+import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
+import dagger.model.DependencyRequest;
 import dagger.model.Key;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -129,6 +133,7 @@ public final class BindingGraph {
     private final boolean isFullBindingGraph;
     private final Map<ComponentPath, ComponentNode> mComponentNodes;
     private final Map<ComponentNode, Set<ComponentNode>> mSubcomponentNodes;
+    private final Set<Binding> frameworkTypeBindings;
 
     TopLevelBindingGraph(
         ImmutableNetwork<Node, Edge> network,
@@ -137,11 +142,13 @@ public final class BindingGraph {
         Set<ComponentNode> componentNodes,
         boolean isFullBindingGraph,
         Map<ComponentPath, ComponentNode> mComponentNodes,
-        Map<ComponentNode, Set<ComponentNode>> mSubcomponentNodes) {
+        Map<ComponentNode, Set<ComponentNode>> mSubcomponentNodes,
+        Set<Binding> frameworkTypeBindings) {
       super(network, bindings, missingBindings, componentNodes);
       this.isFullBindingGraph = isFullBindingGraph;
       this.mComponentNodes = mComponentNodes;
       this.mSubcomponentNodes = mSubcomponentNodes;
+      this.frameworkTypeBindings = frameworkTypeBindings;
     }
 
     @Override
@@ -167,9 +174,11 @@ public final class BindingGraph {
                 ComponentNode key = mComponentNodes.get(componentNode.componentPath().parent());
                 subcomponentNodesBuilder.merge(key, Set.of(componentNode), Util::mutableUnion);
               });
+      Set<Binding> frameworkTypeBindings = frameworkRequestBindingSet(network, nodesByClass.bindings);
       return new TopLevelBindingGraph(network,
           nodesByClass.bindings, nodesByClass.missingBindings, nodesByClass.componentNodes,
-          isFullBindingGraph, mComponentNodes, subcomponentNodesBuilder);
+          isFullBindingGraph, mComponentNodes, subcomponentNodesBuilder,
+          frameworkTypeBindings);
     }
 
     // This overrides dagger.model.BindingGraph with a more efficient implementation.
@@ -201,6 +210,59 @@ public final class BindingGraph {
     /** Returns the set of strongly connected nodes in this graph in reverse topological order. */
     public Set<Set<Node>> stronglyConnectedNodes() {
       return stronglyConnectedNodes.get();
+    }
+
+    public boolean hasframeworkRequest(Binding binding) {
+      return frameworkTypeBindings.contains(binding);
+    }
+
+    private static Set<Binding> frameworkRequestBindingSet(
+        ImmutableNetwork<Node, Edge> network, Set<dagger.model.Binding> bindings) {
+      Set<Binding> frameworkRequestBindings = new HashSet<>();
+      for (dagger.model.Binding binding : bindings) {
+        // When a delegator binding received an instance request, it will manually create an
+        // instance request for its delegated binding in direct instance binding representation. It
+        // is possible a provider.get() expression will be returned to satisfy the request for the
+        // delegated binding. In this case, the returned expression should have a type cast, because
+        // the returned expression's type can be Object. The type cast is handled by
+        // DelegateRequestRepresentation. If we change to use framework instance binding
+        // representation to handle the delegate bindings, then we will be missing the type cast.
+        // Because in this case, when requesting an instance for the delegator binding, framework
+        // instance binding representation will manually create a provider request for delegated
+        // binding first, then use DerivedFromFrameworkInstanceRequestRepresentaion to wrap that
+        // provider expression. Then we will still have a provider.get(), but it is generated with
+        // two different request representation, so the type cast step is skipped. As the result, we
+        // can't directly switch the delegation binding to always use the framework instance if a
+        // framework request already exists. So I'm adding an temporary exemption for delegate
+        // binding here to make it still use the old generation logic. We might be able to remove
+        // the exemption when we handle the type cast differently.
+        // TODO(wanyingd): fix the type cast problem and remove the exemption for delegate binding.
+        if (binding.kind().equals(BindingKind.DELEGATE)
+            // In fast init mode, for Assisted injection binding, since we manually create a direct
+            // instance when the request type is a Provider, then there can't really be any
+            // framework requests for the binding.
+            // TODO(wanyingd): inline assisted injection binding expression in assisted factory.
+            || binding.kind().equals(BindingKind.ASSISTED_INJECTION)) {
+          continue;
+        }
+        List<DependencyEdge> edges =
+            network.inEdges(binding).stream()
+                .flatMap(instancesOf(DependencyEdge.class))
+                .collect(Collectors.toList());
+        for (DependencyEdge edge : edges) {
+          DependencyRequest request = edge.dependencyRequest();
+          switch (request.kind()) {
+            case INSTANCE:
+              continue;
+            case PROVIDER_OF_LAZY:
+            case LAZY:
+            case PROVIDER:
+              frameworkRequestBindings.add(((BindingNode) binding).delegate());
+              break;
+          }
+        }
+      }
+      return frameworkRequestBindings;
     }
   }
 

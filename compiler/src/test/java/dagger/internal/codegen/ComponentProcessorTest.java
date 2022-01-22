@@ -175,7 +175,7 @@ class ComponentProcessorTest {
                 "",
                 "  @Override",
                 "  public SomeInjectableType someInjectableType() {",
-                "    return new SomeInjectableType();",
+                "    return someInjectableTypeProvider.get();",
                 "  }",
                 "",
                 "  @Override",
@@ -872,10 +872,9 @@ class ComponentProcessorTest {
         "  SomeInjectableType someInjectableType();",
         "  Provider<SimpleComponent> selfProvider();",
         "}");
-    String[] generatedComponent =
+    JavaFileObject generatedComponent =
         compilerMode
-            .javaFileBuilder(
-                "test.DaggerSimpleComponent")
+            .javaFileBuilder("test.DaggerSimpleComponent")
             .addLines(
                 "package test;",
                 "")
@@ -890,25 +889,33 @@ class ComponentProcessorTest {
                 "  private void initialize() {",
                 "    this.simpleComponentProvider = InstanceFactory.create((SimpleComponent) simpleComponent);",
                 "  }",
-                "",
+                "")
+            .addLinesIn(
+                DEFAULT_MODE,
                 "  @Override",
                 "  public SomeInjectableType someInjectableType() {",
                 "    return new SomeInjectableType(this);",
-                "  }",
-                "",
+                "  }")
+            .addLinesIn(
+                FAST_INIT_MODE,
+                "  @Override",
+                "  public SomeInjectableType someInjectableType() {",
+                "    return new SomeInjectableType(simpleComponentProvider.get());",
+                "  }")
+            .addLines(
                 "  @Override",
                 "  public Provider<SimpleComponent> selfProvider() {",
                 "    return simpleComponentProvider;",
                 "  }",
                 "}")
-            .lines();
+            .build();
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts())
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
 
     assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(List.of(generatedComponent));
+        .containsLines(generatedComponent);
   }
 
   @EnumSource(CompilerMode.class)
@@ -2163,7 +2170,7 @@ class ComponentProcessorTest {
                     "",
                     "  @Override",
                     "  public SomeEntryPoint someEntryPoint() {",
-                    "    return new SomeEntryPoint(foo(), fooProvider);",
+                    "    return new SomeEntryPoint(fooProvider.get(), fooProvider);",
                     "  }",
                     "",
                     "  private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -2172,7 +2179,7 @@ class ComponentProcessorTest {
                     "    public T get() {",
                     "      switch (id) {",
                     "        case 0: // test.Foo ",
-                    "        return (T) testComponent.foo();",
+                    "        return (T) new Foo(new Bar());",
                     "        default: throw new AssertionError(id);",
                     "      }",
                     "    }",
