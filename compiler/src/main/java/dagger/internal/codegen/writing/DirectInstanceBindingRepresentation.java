@@ -27,7 +27,6 @@ import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.model.BindingKind;
 import dagger.model.RequestKind;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +41,6 @@ final class DirectInstanceBindingRepresentation {
       componentMethodRequestRepresentationFactory;
   private final PrivateMethodRequestRepresentation.Factory
       privateMethodRequestRepresentationFactory;
-  private final AssistedPrivateMethodRequestRepresentation.Factory
-      assistedPrivateMethodRequestRepresentationFactory;
   private final UnscopedDirectInstanceRequestRepresentationFactory
       unscopedDirectInstanceRequestRepresentationFactory;
   private final Map<BindingRequest, RequestRepresentation> requestRepresentations = new HashMap<>();
@@ -55,8 +52,6 @@ final class DirectInstanceBindingRepresentation {
       ComponentImplementation componentImplementation,
       ComponentMethodRequestRepresentation.Factory componentMethodRequestRepresentationFactory,
       PrivateMethodRequestRepresentation.Factory privateMethodRequestRepresentationFactory,
-      AssistedPrivateMethodRequestRepresentation.Factory
-          assistedPrivateMethodRequestRepresentationFactory,
       UnscopedDirectInstanceRequestRepresentationFactory
           unscopedDirectInstanceRequestRepresentationFactory) {
     this.binding = binding;
@@ -66,8 +61,6 @@ final class DirectInstanceBindingRepresentation {
     this.privateMethodRequestRepresentationFactory = privateMethodRequestRepresentationFactory;
     this.unscopedDirectInstanceRequestRepresentationFactory =
         unscopedDirectInstanceRequestRepresentationFactory;
-    this.assistedPrivateMethodRequestRepresentationFactory =
-        assistedPrivateMethodRequestRepresentationFactory;
   }
 
   RequestRepresentation getRequestRepresentation(BindingRequest request) {
@@ -76,27 +69,9 @@ final class DirectInstanceBindingRepresentation {
   }
 
   private RequestRepresentation getRequestRepresentationUncached(BindingRequest request) {
-    switch (request.requestKind()) {
-      case INSTANCE:
-        return instanceRequestRepresentation();
-
-      default:
-        throw new AssertionError(
-            String.format("Invalid binding request kind: %s", request.requestKind()));
-    }
-  }
-
-  private RequestRepresentation instanceRequestRepresentation() {
-    RequestRepresentation directInstanceExpression =
-        unscopedDirectInstanceRequestRepresentationFactory.create(binding);
-    if (binding.kind() == BindingKind.ASSISTED_INJECTION) {
-      BindingRequest request = bindingRequest(binding.key(), RequestKind.INSTANCE);
-      return assistedPrivateMethodRequestRepresentationFactory.create(
-          request, binding, directInstanceExpression);
-    }
     return requiresMethodEncapsulation(binding)
-        ? wrapInMethod(RequestKind.INSTANCE, directInstanceExpression)
-        : directInstanceExpression;
+        ? wrapInMethod(unscopedDirectInstanceRequestRepresentationFactory.create(binding))
+        : unscopedDirectInstanceRequestRepresentationFactory.create(binding);
   }
 
   /**
@@ -106,14 +81,13 @@ final class DirectInstanceBindingRepresentation {
    * binding method will be written. If the binding doesn't match a component method and is not
    * modifiable, then a new private method will be written.
    */
-  RequestRepresentation wrapInMethod(
-      RequestKind requestKind, RequestRepresentation bindingExpression) {
+  RequestRepresentation wrapInMethod(RequestRepresentation bindingExpression) {
     // If we've already wrapped the expression, then use the delegate.
     if (bindingExpression instanceof MethodRequestRepresentation) {
       return bindingExpression;
     }
 
-    BindingRequest request = bindingRequest(binding.key(), requestKind);
+    BindingRequest request = bindingRequest(binding.key(), RequestKind.INSTANCE);
     Optional<ComponentMethodDescriptor> matchingComponentMethod =
         graph.componentDescriptor().firstMatchingComponentMethod(request);
 

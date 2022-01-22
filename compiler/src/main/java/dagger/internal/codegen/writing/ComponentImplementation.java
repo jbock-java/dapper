@@ -391,6 +391,7 @@ public final class ComponentImplementation {
     private final UniqueNameSet componentFieldNames = new UniqueNameSet();
     private final UniqueNameSet componentMethodNames = new UniqueNameSet();
     private final UniqueNameSet componentClassNames = new UniqueNameSet();
+    private final UniqueNameSet assistedParamNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
     private final Map<VariableElement, String> uniqueAssistedName = new LinkedHashMap<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
@@ -399,6 +400,7 @@ public final class ComponentImplementation {
     private final Map<MethodSpecKind, List<MethodSpec>> methodSpecsMap = new EnumMap<>(MethodSpecKind.class);
     private final Map<TypeSpecKind, List<TypeSpec>> typeSpecsMap = new EnumMap<>(TypeSpecKind.class);
     private final List<Supplier<TypeSpec>> typeSuppliers = new ArrayList<>();
+    private boolean initialized = false; // This is used for initializing assistedParamNames.
 
     private ShardImplementation(ClassName name) {
       this.name = name;
@@ -528,11 +530,26 @@ public final class ComponentImplementation {
       return componentFieldNames.getUniqueName(name);
     }
 
+    String getUniqueAssistedParamName(String name) {
+      if (!initialized) {
+        // Assisted params will be used in switching provider, so they can't conflict with component
+        // field names in switching provider. {@link UniqueNameSet#getUniqueName} will add the
+        // component field names to the unique set if it does not exists. If the name already exists
+        // in the set, then a dedupe will be performed automatically on the passed in name, and the
+        // newly created unique name will then be added to the set.
+        componentFieldsByImplementation()
+            .values()
+            .forEach(fieldSpec -> assistedParamNames.getUniqueName(fieldSpec.name));
+        initialized = true;
+      }
+      return assistedParamNames.getUniqueName(name);
+    }
+
     public String getUniqueFieldNameForAssistedParam(VariableElement element) {
       if (uniqueAssistedName.containsKey(element)) {
         return uniqueAssistedName.get(element);
       }
-      String name = getUniqueFieldName(element.getSimpleName().toString());
+      String name = getUniqueAssistedParamName(element.getSimpleName().toString());
       uniqueAssistedName.put(element, name);
       return name;
     }
