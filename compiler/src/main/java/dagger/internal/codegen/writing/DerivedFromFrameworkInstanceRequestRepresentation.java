@@ -16,42 +16,39 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.model.RequestKind;
 
 /** A binding expression that depends on a framework instance. */
 final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRepresentation {
-  private final BindingRequest bindingRequest;
-  private final BindingRequest frameworkRequest;
-  private final ComponentRequestRepresentations componentRequestRepresentations;
+  private final RequestRepresentation frameworkRequestRepresentation;
+  private final RequestKind requestKind;
   private final DaggerTypes types;
 
   @AssistedInject
   DerivedFromFrameworkInstanceRequestRepresentation(
-      @Assisted BindingRequest bindingRequest,
-      ComponentRequestRepresentations componentRequestRepresentations,
+      @Assisted RequestRepresentation frameworkRequestRepresentation,
+      @Assisted RequestKind requestKind,
       DaggerTypes types) {
-    this.bindingRequest = requireNonNull(bindingRequest);
-    this.frameworkRequest = bindingRequest(bindingRequest.key(), FrameworkType.PROVIDER);
-    this.componentRequestRepresentations = componentRequestRepresentations;
+    this.frameworkRequestRepresentation = requireNonNull(frameworkRequestRepresentation);
+    this.requestKind = requestKind;
     this.types = types;
   }
 
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
     return FrameworkType.to(
-        bindingRequest.requestKind(),
-        componentRequestRepresentations.getDependencyExpression(frameworkRequest, requestingClass),
+        requestKind,
+        frameworkRequestRepresentation.getDependencyExpression(requestingClass),
         types);
   }
 
@@ -59,13 +56,15 @@ final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRep
   Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     Expression frameworkInstance =
-        componentRequestRepresentations.getDependencyExpressionForComponentMethod(
-            frameworkRequest, componentMethod, component);
-    return FrameworkType.to(bindingRequest.requestKind(), frameworkInstance, types);
+        frameworkRequestRepresentation.getDependencyExpressionForComponentMethod(
+            componentMethod, component);
+    return FrameworkType.to(requestKind, frameworkInstance, types);
   }
 
   @AssistedFactory
   interface Factory {
-    DerivedFromFrameworkInstanceRequestRepresentation create(BindingRequest request);
+    DerivedFromFrameworkInstanceRequestRepresentation create(
+        RequestRepresentation frameworkRequestRepresentation,
+        RequestKind requestKind);
   }
 }

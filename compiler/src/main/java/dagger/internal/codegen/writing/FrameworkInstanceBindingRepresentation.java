@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.writing.ProvisionBindingRepresentation.needsCaching;
 import static dagger.model.BindingKind.DELEGATE;
 
@@ -33,7 +32,6 @@ import java.util.Map;
 
 /** Returns request representation that wraps a framework instance expression */
 final class FrameworkInstanceBindingRepresentation {
-  private final ProvisionBinding binding;
   private final DerivedFromFrameworkInstanceRequestRepresentation.Factory
       derivedFromFrameworkInstanceRequestRepresentationFactory;
   private final Map<BindingRequest, RequestRepresentation> requestRepresentations = new HashMap<>();
@@ -48,7 +46,6 @@ final class FrameworkInstanceBindingRepresentation {
       DerivedFromFrameworkInstanceRequestRepresentation.Factory
           derivedFromFrameworkInstanceRequestRepresentationFactory,
       ProviderInstanceRequestRepresentation.Factory providerInstanceRequestRepresentationFactory) {
-    this.binding = binding;
     this.derivedFromFrameworkInstanceRequestRepresentationFactory =
         derivedFromFrameworkInstanceRequestRepresentationFactory;
     this.providerRequestRepresentation =
@@ -65,17 +62,12 @@ final class FrameworkInstanceBindingRepresentation {
   private RequestRepresentation getRequestRepresentationUncached(BindingRequest request) {
     switch (request.requestKind()) {
       case INSTANCE:
-        return derivedFromFrameworkInstanceRequestRepresentationFactory.create(
-            bindingRequest(binding.key(), RequestKind.INSTANCE));
-
-      case PROVIDER:
-        return providerRequestRepresentation;
-
       case LAZY:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceRequestRepresentationFactory.create(
-            request);
-
+            providerRequestRepresentation, request.requestKind());
+      case PROVIDER:
+        return providerRequestRepresentation;
       default:
         throw new AssertionError(
             String.format("Invalid binding request kind: %s", request.requestKind()));
