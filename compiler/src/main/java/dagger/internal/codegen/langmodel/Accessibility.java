@@ -17,7 +17,9 @@
 package dagger.internal.codegen.langmodel;
 
 import static com.google.auto.common.MoreElements.getPackage;
+import static com.google.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import com.google.auto.common.MoreElements;
@@ -35,6 +37,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.NoType;
 import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
@@ -66,6 +69,30 @@ public final class Accessibility {
 
   private static boolean isTypeAccessibleFrom(TypeMirror type, Optional<String> packageName) {
     return type.accept(new TypeAccessibilityVisitor(packageName), null);
+  }
+
+  /**
+   * Returns true if the given type is protected and can be referenced from the given requesting
+   * element.
+   */
+  public static boolean isProtectedMemberOf(DeclaredType type, TypeElement requestingElement) {
+    return isProtectedAccessibleFromElement(type.asElement(), requestingElement);
+  }
+
+  private static Boolean isProtectedAccessibleFromElement(
+      Element element, TypeElement requestingElement) {
+    if (!element.getModifiers().contains(PROTECTED)) {
+      return false;
+    }
+    if (element.getEnclosingElement().equals(requestingElement)) {
+      return true;
+    }
+    // Check if the element is protected member of the requesting element's super class.
+    if (requestingElement.getSuperclass().getKind() != TypeKind.NONE) {
+      return isProtectedAccessibleFromElement(
+          element, asTypeElement(requestingElement.getSuperclass()));
+    }
+    return false;
   }
 
   private static final class TypeAccessibilityVisitor extends SimpleTypeVisitor8<Boolean, Void> {
