@@ -19,7 +19,6 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.binding.ComponentCreatorKind.FACTORY;
 import static dagger.internal.codegen.binding.ErrorMessages.creatorMessagesFor;
-import static java.util.stream.Collectors.joining;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
@@ -58,16 +57,7 @@ final class ComponentCreatorTestData {
    * creator kind is {@code FACTORY}.
    */
   String process(String... lines) {
-    Stream<String> stream = Arrays.stream(lines);
-    if (creatorKind.equals(FACTORY)) {
-      stream =
-          stream.map(
-              line ->
-                  line.replace("Builder", "Factory")
-                      .replace("builder", "factory")
-                      .replace("build", "create"));
-    }
-    return stream.collect(joining("\n"));
+    return String.join("\n", processLines(Arrays.asList(lines)));
   }
 
   List<String> processLines(List<String> lines) {
@@ -78,7 +68,7 @@ final class ComponentCreatorTestData {
               line ->
                   line.replace("Builder", "Factory")
                       .replace("builder", "factory")
-                      .replace("build", "create"));
+                      .replace("build", "createComponent"));
     }
     return stream.collect(Collectors.toList());
   }

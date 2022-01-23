@@ -48,17 +48,19 @@ class SubcomponentCreatorValidationTest {
   @MethodSource("dataSource")
   @ParameterizedTest
   void testRefSubcomponentAndSubCreatorFails(ComponentCreatorTestData data) {
-    JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "import jakarta.inject.Provider;",
-        "",
-        "@Component",
-        "interface ParentComponent {",
-        "  ChildComponent child();",
-        "  ChildComponent.Builder builder();",
-        "}");
+    JavaFileObject componentFile =
+        data.preprocessedJavaFile(
+            "test.ParentComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "import jakarta.inject.Provider;",
+            "",
+            "@Component",
+            "interface ParentComponent {",
+            "  ChildComponent child();",
+            "  ChildComponent.Builder childComponentBuilder();",
+            "}");
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -78,7 +80,7 @@ class SubcomponentCreatorValidationTest {
             String.format(
                 moreThanOneRefToSubcomponent(),
                 "test.ChildComponent",
-                data.process("[child(), builder()]")))
+                data.process("[child(), childComponentBuilder()]")))
         .inFile(componentFile);
   }
 
@@ -246,16 +248,18 @@ class SubcomponentCreatorValidationTest {
   @MethodSource("dataSource")
   @ParameterizedTest
   void testCreatorMissingFactoryMethodFails(ComponentCreatorTestData data) {
-    JavaFileObject componentFile = data.preprocessedJavaFile("test.ParentComponent",
-        "package test;",
-        "",
-        "import dagger.Component;",
-        "import jakarta.inject.Provider;",
-        "",
-        "@Component",
-        "interface ParentComponent {",
-        "  ChildComponent.Builder builder();",
-        "}");
+    JavaFileObject componentFile =
+        data.preprocessedJavaFile(
+            "test.ParentComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "import jakarta.inject.Provider;",
+            "",
+            "@Component",
+            "interface ParentComponent {",
+            "  ChildComponent.Builder childComponentBuilder();",
+            "}");
     JavaFileObject childComponentFile = data.preprocessedJavaFile("test.ChildComponent",
         "package test;",
         "",
@@ -548,8 +552,7 @@ class SubcomponentCreatorValidationTest {
                 "  interface Factory {",
                 "    ChildComponent create(TestModule m1, TestModule m2);",
                 "  }")
-            .addLines( //
-                "}")
+            .addLines("}")
             .build();
     Compilation compilation = data.compile(moduleFile, componentFile, childComponentFile);
     assertThat(compilation).failed();
@@ -623,8 +626,7 @@ class SubcomponentCreatorValidationTest {
                 "",
                 "  @Subcomponent.Factory",
                 "  interface Factory extends Parent<ChildComponent, TestModule> {}")
-            .addLines( //
-                "}")
+            .addLines("}")
             .build();
     Compilation compilation = data.compile(moduleFile, componentFile, childComponentFile);
     assertThat(compilation).failed();
@@ -682,8 +684,7 @@ class SubcomponentCreatorValidationTest {
                 "    ChildComponent create(",
                 "        @BindsInstance String s1, @BindsInstance String s2);",
                 "  }")
-            .addLines( //
-                "}")
+            .addLines("}")
             .build();
 
     Compilation compilation = data.compile(componentFile, childComponentFile);
@@ -742,8 +743,7 @@ class SubcomponentCreatorValidationTest {
                 "  interface Factory {",
                 "    ChildComponent create(String s, Integer i);",
                 "  }")
-            .addLines( //
-                "}")
+            .addLines("}")
             .build();
     Compilation compilation = data.compile(componentFile, childComponentFile);
     assertThat(compilation).failed();

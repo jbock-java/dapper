@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 
 public final class ComponentValidationTest {
   @Test
-  public void componentOnConcreteClass() {
+  void componentOnConcreteClass() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -41,7 +41,120 @@ public final class ComponentValidationTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void componentOnEnum() {
+  @Test
+  public void componentOnOverridingBuilder_failsWhenMethodNameConflictsWithStaticCreatorName() {
+    JavaFileObject componentFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "",
+            "@Component(modules=TestModule.class)",
+            "interface TestComponent {",
+            "  String builder();",
+            "}");
+    JavaFileObject moduleFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestModule",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "interface TestModule {",
+            "  @Provides",
+            "  static String provideString() { return \"test\"; }",
+            "}");
+
+    Compilation compilation = daggerCompiler().compile(componentFile, moduleFile);
+    assertThat(compilation).failed();
+    assertThat(compilation)
+        .hadErrorContaining("Cannot override generated method: TestComponent.builder()");
+  }
+
+  @Test
+  public void componentOnOverridingCreate_failsWhenGeneratedCreateMethod() {
+    JavaFileObject componentFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "",
+            "@Component(modules=TestModule.class)",
+            "interface TestComponent {",
+            "  String create();",
+            "}");
+    JavaFileObject moduleFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestModule",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "interface TestModule {",
+            "  @Provides",
+            "  static String provideString() { return \"test\"; }",
+            "}");
+
+    Compilation compilation = daggerCompiler().compile(componentFile, moduleFile);
+    assertThat(compilation).failed();
+    assertThat(compilation)
+        .hadErrorContaining("Cannot override generated method: TestComponent.create()");
+  }
+
+  @Test
+  public void subcomponentMethodNameBuilder_succeeds() {
+    JavaFileObject componentFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "",
+            "@Component",
+            "interface TestComponent {",
+            "  TestSubcomponent.Builder subcomponent();",
+            "}");
+    JavaFileObject subcomponentFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestSubcomponent",
+            "package test;",
+            "",
+            "import dagger.Subcomponent;",
+            "",
+            "@Subcomponent(modules=TestModule.class)",
+            "interface TestSubcomponent {",
+            "  String builder();",
+            "  @Subcomponent.Builder",
+            "  interface Builder {",
+            "    TestSubcomponent build();",
+            "  }",
+            "}");
+    JavaFileObject moduleFile =
+        JavaFileObjects.forSourceLines(
+            "test.TestModule",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "interface TestModule {",
+            "  @Provides",
+            "  static String provideString() { return \"test\"; }",
+            "}");
+
+    Compilation compilation = daggerCompiler().compile(componentFile, subcomponentFile, moduleFile);
+    assertThat(compilation).succeeded();
+  }
+
+  @Test
+  void componentOnEnum() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -56,7 +169,8 @@ public final class ComponentValidationTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void componentOnAnnotation() {
+  @Test
+  void componentOnAnnotation() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -69,7 +183,8 @@ public final class ComponentValidationTest {
     assertThat(compilation).hadErrorContaining("interface");
   }
 
-  @Test public void nonModuleModule() {
+  @Test
+  void nonModuleModule() {
     JavaFileObject componentFile = JavaFileObjects.forSourceLines("test.NotAComponent",
         "package test;",
         "",
@@ -83,7 +198,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void componentWithInvalidModule() {
+  void componentWithInvalidModule() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.BadModule",
@@ -115,7 +230,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void attemptToInjectWildcardGenerics() {
+  void attemptToInjectWildcardGenerics() {
     JavaFileObject testComponent =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -137,7 +252,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void invalidComponentDependencies() {
+  void invalidComponentDependencies() {
     JavaFileObject testComponent =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -153,7 +268,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void invalidComponentModules() {
+  void invalidComponentModules() {
     JavaFileObject testComponent =
         JavaFileObjects.forSourceLines(
             "test.TestComponent",
@@ -169,7 +284,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void moduleInDependencies() {
+  void moduleInDependencies() {
     JavaFileObject testModule =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -198,7 +313,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void componentDependencyMustNotCycle_Direct() {
+  void componentDependencyMustNotCycle_Direct() {
     JavaFileObject shortLifetime =
         JavaFileObjects.forSourceLines(
             "test.ComponentShort",
@@ -231,7 +346,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void componentDependencyMustNotCycle_Indirect() {
+  void componentDependencyMustNotCycle_Indirect() {
     JavaFileObject longLifetime =
         JavaFileObjects.forSourceLines(
             "test.ComponentLong",
@@ -300,7 +415,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void abstractModuleWithInstanceMethod() {
+  void abstractModuleWithInstanceMethod() {
     JavaFileObject module =
         JavaFileObjects.forSourceLines(
             "test.TestModule",
@@ -333,7 +448,7 @@ public final class ComponentValidationTest {
   }
 
   @Test
-  public void abstractModuleWithInstanceMethod_subclassedIsAllowed() {
+  void abstractModuleWithInstanceMethod_subclassedIsAllowed() {
     JavaFileObject abstractModule =
         JavaFileObjects.forSourceLines(
             "test.AbstractModule",

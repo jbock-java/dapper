@@ -34,7 +34,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static javax.tools.Diagnostic.Kind.ERROR;
 
+import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -80,6 +82,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -225,6 +228,7 @@ public final class ComponentImplementation {
   private final DaggerTypes types;
   private final Map<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
   private final boolean isFastInit;
+  private final Messager messager;
 
   @Inject
   ComponentImplementation(
@@ -237,7 +241,8 @@ public final class ComponentImplementation {
       ComponentNames componentNames,
       CompilerOptions compilerOptions,
       DaggerElements elements,
-      DaggerTypes types) {
+      DaggerTypes types,
+      Messager messager) {
     this.parent = parent;
     this.childComponentImplementationFactory = childComponentImplementationFactory;
     this.bindingExpressionsProvider = bindingExpressionsProvider;
@@ -246,6 +251,7 @@ public final class ComponentImplementation {
     this.componentNames = componentNames;
     this.elements = elements;
     this.types = types;
+    this.messager = messager;
 
     // The first group of keys belong to the component itself. We call this the componentShard.
     this.componentShard = new ShardImplementation(componentNames.get(graph.componentPath()));
@@ -672,6 +678,7 @@ public final class ComponentImplementation {
         noArgFactoryMethod = true;
       }
 
+      validateMethodNameDoesNotOverrideGeneratedCreator(creatorKind.methodName());
       MethodSpec creatorFactoryMethod =
           methodBuilder(creatorKind.methodName())
               .addModifiers(PUBLIC, STATIC)
@@ -680,6 +687,7 @@ public final class ComponentImplementation {
               .build();
       addMethod(MethodSpecKind.BUILDER_METHOD, creatorFactoryMethod);
       if (noArgFactoryMethod && canInstantiateAllRequirements()) {
+        validateMethodNameDoesNotOverrideGeneratedCreator("create");
         addMethod(
             MethodSpecKind.BUILDER_METHOD,
             methodBuilder("create")
@@ -688,6 +696,21 @@ public final class ComponentImplementation {
                 .addStatement("return new $L().$L()", creatorKind.typeName(), factoryMethodName)
                 .build());
       }
+    }
+
+    private void validateMethodNameDoesNotOverrideGeneratedCreator(String creatorName) {
+      // Check if there is any client added method has the same signature as generated creatorName.
+      MoreElements.getAllMethods(graph.componentTypeElement(), types, elements).stream()
+          .filter(method -> method.getSimpleName().contentEquals(creatorName))
+          .filter(method -> method.getParameters().isEmpty())
+          .filter(method -> !method.getModifiers().contains(Modifier.STATIC))
+          .forEach(
+              (ExecutableElement method) ->
+                  messager.printMessage(
+                      ERROR,
+                      String.format(
+                          "Cannot override generated method: %s.%s()",
+                          method.getEnclosingElement().getSimpleName(), method.getSimpleName())));
     }
 
     /** {@code true} if all of the graph's required dependencies can be automatically constructed */
