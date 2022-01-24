@@ -39,17 +39,21 @@ shadowJar {
 
 dependencies {
     def dapper = project(':dapper')
-    shadow('io.github.jbock-java:javapoet:1.14')
-    shadow('io.github.jbock-java:auto-common:1.2.1')
-    shadow('io.github.jbock-java:guava-graph:1.0.1')
+    def javapoet = 'io.github.jbock-java:javapoet:1.14'
+    def ac =  'io.github.jbock-java:auto-common:1.2.1'
+    def graph = 'io.github.jbock-java:guava-graph:1.0.1'
+    shadow(javapoet)
+    shadow(ac)
+    shadow(graph)
     shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     testImplementation(dapper)
-    testImplementation('io.github.jbock-java:auto-common:1.2.1')
+    testImplementation(ac)
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.2')
-    testImplementation('io.github.jbock-java:javapoet:1.14')
+    testImplementation(graph)
+    testImplementation(javapoet)
 }
 
 jar {
