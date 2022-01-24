@@ -101,6 +101,17 @@ public final class ComponentImplementation {
     ComponentImplementation create(BindingGraph childGraph);
   }
 
+  /** Compiler Modes. */
+  // TODO(wanyingd): add experimental merged mode.
+  public enum CompilerMode {
+    DEFAULT,
+    FAST_INIT;
+
+    public boolean isFastInit() {
+      return this == CompilerMode.FAST_INIT;
+    }
+  }
+
   /** A type of field that this component can contain. */
   public enum FieldSpecKind {
     /** A field for a component shard. */
@@ -229,8 +240,8 @@ public final class ComponentImplementation {
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final Map<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
-  private final boolean isFastInit;
   private final Messager messager;
+  private final CompilerMode compilerMode;
 
   @Inject
   ComponentImplementation(
@@ -269,8 +280,10 @@ public final class ComponentImplementation {
     // Create and claim the fields for this and all ancestor components stored as fields.
     this.componentFieldsByImplementation =
         createComponentFieldsByImplementation(this);
-    this.isFastInit =
-        compilerOptions.fastInit(rootComponentImplementation().componentDescriptor().typeElement());
+    this.compilerMode =
+        compilerOptions.fastInit(rootComponentImplementation().componentDescriptor().typeElement())
+            ? CompilerMode.FAST_INIT
+            : CompilerMode.DEFAULT;
   }
 
   /**
@@ -358,8 +371,8 @@ public final class ComponentImplementation {
   }
 
   /** Returns if the current compile mode is fast init. */
-  public boolean isFastInit() {
-    return isFastInit;
+  public CompilerMode compilerMode() {
+    return compilerMode;
   }
 
   /** Returns whether or not the implementation is nested within another class. */

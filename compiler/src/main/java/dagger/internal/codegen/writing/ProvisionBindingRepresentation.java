@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.isBindsScopeStrongerThanDependencyScope;
-import static dagger.internal.codegen.writing.StaticFactoryInstanceSupplier.usesStaticFactoryCreation;
 import static dagger.model.BindingKind.DELEGATE;
 
 import dagger.assisted.Assisted;
@@ -27,7 +26,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.model.BindingKind;
+import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.model.RequestKind;
 
 /**
@@ -36,7 +35,7 @@ import dagger.model.RequestKind;
  */
 final class ProvisionBindingRepresentation implements BindingRepresentation {
   private final BindingGraph graph;
-  private final boolean isFastInit;
+  private final CompilerMode compilerMode;
   private final ProvisionBinding binding;
   private final DirectInstanceBindingRepresentation directInstanceBindingRepresentation;
   private final FrameworkInstanceBindingRepresentation frameworkInstanceBindingRepresentation;
@@ -53,16 +52,22 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       StaticFactoryInstanceSupplier.Factory staticFactoryInstanceSupplierFactory) {
     this.binding = binding;
     this.graph = graph;
-    this.isFastInit = componentImplementation.isFastInit();
+    this.compilerMode = componentImplementation.compilerMode();
     this.directInstanceBindingRepresentation =
         directInstanceBindingRepresentationFactory.create(binding);
     FrameworkInstanceSupplier frameworkInstanceSupplier;
-    if (usesSwitchingProvider(binding, isFastInit)) {
-      frameworkInstanceSupplier = switchingProviderInstanceSupplierFactory.create(binding);
-    } else if (usesStaticFactoryCreation(binding, isFastInit)) {
-      frameworkInstanceSupplier = staticFactoryInstanceSupplierFactory.create(binding);
-    } else {
-      frameworkInstanceSupplier = providerInstanceSupplierFactory.create(binding);
+    switch (FrameworkInstanceKind.from(binding, compilerMode)) {
+      case SWITCHING_PROVIDER:
+        frameworkInstanceSupplier = switchingProviderInstanceSupplierFactory.create(binding);
+        break;
+      case STATIC_FACTORY:
+        frameworkInstanceSupplier = staticFactoryInstanceSupplierFactory.create(binding);
+        break;
+      case PROVIDER_FIELD:
+        frameworkInstanceSupplier = providerInstanceSupplierFactory.create(binding);
+        break;
+      default:
+        throw new AssertionError("all cases handled");
     }
     this.frameworkInstanceBindingRepresentation =
         frameworkInstanceBindingRepresentationFactory.create(binding, frameworkInstanceSupplier);
@@ -87,15 +92,15 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     // form a loop. There are also difficulties introduced by manually created framework requests.
     // TODO(wanyingd): refactor framework instance so that we don't need to generate both direct
     // instance and framework instance representation for the same binding.
-    if (isFastInit && graph.topLevelBindingGraph().hasFrameworkRequest(binding)) {
+    if (compilerMode.isFastInit() && graph.topLevelBindingGraph().hasFrameworkRequest(binding)) {
       return false;
     }
 
     switch (binding.kind()) {
       case ASSISTED_FACTORY:
-      // Assisted factory binding can be requested with framework request, and it is essentially a
-      // provider for assisted injection binding. So we will always return framework instance for
-      // assisted factory bindings.
+        // Assisted factory binding can be requested with framework request, and it is essentially a
+        // provider for assisted injection binding. So we will always return framework instance for
+        // assisted factory bindings.
         return false;
       case ASSISTED_INJECTION:
         throw new IllegalStateException(

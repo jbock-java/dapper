@@ -19,6 +19,7 @@ package dagger.internal.codegen.writing;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 
 /** An object that returns static factory to satisfy framework instance request. */
@@ -27,7 +28,7 @@ final class StaticFactoryInstanceSupplier implements FrameworkInstanceSupplier {
 
   @AssistedInject
   StaticFactoryInstanceSupplier(
-      @Assisted ProvisionBinding binding,
+      @Assisted ContributionBinding binding,
       FrameworkInstanceBindingRepresentation.Factory
           frameworkInstanceBindingRepresentationFactory) {
     this.frameworkInstanceSupplier = () -> staticFactoryCreation(binding);
@@ -46,7 +47,7 @@ final class StaticFactoryInstanceSupplier implements FrameworkInstanceSupplier {
   // TODO(wanyingd): no-op members injector is currently handled in
   // `MembersInjectorProviderCreationExpression`, we should inline the logic here so we won't create
   // an extra field for it.
-  private MemberSelect staticFactoryCreation(ProvisionBinding binding) {
+  private MemberSelect staticFactoryCreation(ContributionBinding binding) {
     switch (binding.kind()) {
       case PROVISION:
       case INJECTION:
@@ -72,6 +73,6 @@ final class StaticFactoryInstanceSupplier implements FrameworkInstanceSupplier {
 
   @AssistedFactory
   interface Factory {
-    StaticFactoryInstanceSupplier create(ProvisionBinding binding);
+    StaticFactoryInstanceSupplier create(ContributionBinding binding);
   }
 }
