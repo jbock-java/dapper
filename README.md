@@ -8,6 +8,7 @@ with some modifications:
 * full jpms support with module-name: `dagger`
 * removed the multibindings package including `@MapKey`, `@Multibinds`, `@IntoMap` and `@IntoSet`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
+* remove `@BindsOptional`
 * remove kotlin special-casing
 * remove gwt special-casing
 * remove guava special-casing
