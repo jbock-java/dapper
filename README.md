@@ -9,6 +9,7 @@ with some modifications:
 * removed the multibindings package including `@MapKey`, `@Multibinds`, `@IntoMap` and `@IntoSet`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove `@BindsOptional`
+* disable members injection and method injection, remove `MembersInjector`
 * remove kotlin special-casing
 * remove gwt special-casing
 * remove guava special-casing
