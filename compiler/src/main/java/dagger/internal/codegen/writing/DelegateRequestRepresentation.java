@@ -24,6 +24,7 @@ import static dagger.model.BindingKind.DELEGATE;
 import static java.util.Objects.requireNonNull;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -79,7 +80,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
     TypeMirror contributedType = binding.contributedType();
     switch (requestKind) {
       case INSTANCE:
-        return instanceRequiresCast(delegateExpression, requestingClass)
+        return instanceRequiresCast(binding, delegateExpression, requestingClass, types)
             ? delegateExpression.castTo(contributedType)
             : delegateExpression;
       default:
@@ -88,7 +89,11 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
     }
   }
 
-  private boolean instanceRequiresCast(Expression delegateExpression, ClassName requestingClass) {
+  static boolean instanceRequiresCast(
+      ContributionBinding binding,
+      Expression delegateExpression,
+      ClassName requestingClass,
+      DaggerTypes types) {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
     return !types.isAssignable(
@@ -109,7 +114,13 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
     if (types.isAssignable(delegateExpression.type(), desiredType)) {
       return delegateExpression;
     }
-    return delegateExpression.castTo(types.erasure(desiredType));
+    Expression castedExpression = delegateExpression.castTo(types.erasure(desiredType));
+    // Casted raw type provider expression has to be wrapped parentheses, otherwise there
+    // will be an error when DerivedFromFrameworkInstanceRequestRepresentation appends a `get()` to
+    // it.
+    // TODO(wanyingd): change the logic to only add parenthesis when necessary.
+    return Expression.create(
+        castedExpression.type(), CodeBlock.of("($L)", castedExpression.codeBlock()));
   }
 
   private enum ScopeKind {

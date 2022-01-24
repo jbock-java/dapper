@@ -32,6 +32,7 @@ import java.util.Map;
 
 /** Returns request representation that wraps a framework instance expression */
 final class FrameworkInstanceBindingRepresentation {
+  private final ProvisionBinding binding;
   private final DerivedFromFrameworkInstanceRequestRepresentation.Factory
       derivedFromFrameworkInstanceRequestRepresentationFactory;
   private final Map<BindingRequest, RequestRepresentation> requestRepresentations = new HashMap<>();
@@ -46,6 +47,7 @@ final class FrameworkInstanceBindingRepresentation {
       DerivedFromFrameworkInstanceRequestRepresentation.Factory
           derivedFromFrameworkInstanceRequestRepresentationFactory,
       ProviderInstanceRequestRepresentation.Factory providerInstanceRequestRepresentationFactory) {
+    this.binding = binding;
     this.derivedFromFrameworkInstanceRequestRepresentationFactory =
         derivedFromFrameworkInstanceRequestRepresentationFactory;
     this.providerRequestRepresentation =
@@ -65,7 +67,7 @@ final class FrameworkInstanceBindingRepresentation {
       case LAZY:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceRequestRepresentationFactory.create(
-            providerRequestRepresentation, request.requestKind());
+            binding, providerRequestRepresentation, request.requestKind());
       case PROVIDER:
         return providerRequestRepresentation;
       default:
