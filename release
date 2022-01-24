@@ -5,7 +5,7 @@ die () {
     exit 1
 }
 
-usage="Usage: release [core|compiler] <version>"
+usage="Usage: release [dagger|compiler] <version>"
 
 if [[ `git status --porcelain` ]]; then
   die "dirty workspace"
