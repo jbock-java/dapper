@@ -46,7 +46,7 @@ dependencies {
     shadow(ac)
     shadow(graph)
     shadow(dapper)
-    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
     testImplementation(dapper)
     testImplementation(ac)
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
