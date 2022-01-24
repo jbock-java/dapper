@@ -18,7 +18,7 @@ if [[ -z "$VERSION" ]]; then
 fi
 
 git pull origin $(git rev-parse --abbrev-ref HEAD) || die "pull failed"
-./gradlew clean -Pversion=${VERSION} dagger:publish || die "build failed"
+./gradlew clean -Pversion=${VERSION} dapper:publish || die "build failed"
 ./gradlew clean -Pversion=${VERSION} compiler:publish || die "build failed"
 
 read -e -p "Upload successful. Also tag? [y/N]"
