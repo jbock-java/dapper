@@ -1,5 +1,6 @@
 plugins {
     id('java')
+    id('com.github.johnrengelman.shadow') version('7.1.2')
     id('maven-publish')
     id('signing')
 }
@@ -31,18 +32,24 @@ tasks.withType(GenerateModuleMetadata) {
     enabled = true
 }
 
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
+}
+
 dependencies {
-    def core = project(':core')
-    implementation('io.github.jbock-java:javapoet:1.14')
-    implementation('io.github.jbock-java:auto-common:1.2.1')
-    implementation('io.github.jbock-java:guava-graph:1.0.1')
-    implementation(core)
+    def dapper = project(':dapper')
+    shadow('io.github.jbock-java:javapoet:1.14')
+    shadow('io.github.jbock-java:auto-common:1.2.1')
+    shadow('io.github.jbock-java:guava-graph:1.0.1')
+    shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
-    testImplementation(core)
+    testImplementation(dapper)
     testImplementation('io.github.jbock-java:auto-common:1.2.1')
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.2')
+    testImplementation('io.github.jbock-java:javapoet:1.14')
 }
 
 jar {
@@ -78,6 +85,7 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) { publication ->
+            project.shadow.component(publication)
             artifactId = 'dapper-compiler'
 
             artifact sourcesJar

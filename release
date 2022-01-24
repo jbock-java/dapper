@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 die () {
     echo "$*"
@@ -19,13 +18,8 @@ if [[ -z "$VERSION" ]]; then
   die "$usage"
 fi
 
-if [[ "compiler" == "$MODULE" ]]; then
- greppy=$(./gradlew compiler:dependencies --configuration compileClasspath | fgrep "dapper:$VERSION")
- test -z "$greppy" && die "compiler should depend on dapper:$VERSION"
-fi
-
-git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew clean -Pversion=${VERSION} ${MODULE}:publish
+git pull origin $(git rev-parse --abbrev-ref HEAD) || die "pull failed"
+./gradlew clean -Pversion=${VERSION} ${MODULE}:publish || die "build failed"
 
 if [[ "compiler" != "$MODULE" ]]; then
   echo "Upload successful."
