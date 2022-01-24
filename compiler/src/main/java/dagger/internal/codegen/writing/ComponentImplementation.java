@@ -643,6 +643,11 @@ public final class ComponentImplementation {
       return constructorParameters.get(requirement).name;
     }
 
+    /** Claims a new method name for the component. Does nothing if method name already exists. */
+    public void claimMethodName(CharSequence name) {
+      componentMethodNames.claim(name);
+    }
+
     /** Generates the component and returns the resulting {@link TypeSpec.Builder}. */
     private TypeSpec generate() {
       TypeSpec.Builder builder = classBuilder(name);
@@ -728,6 +733,7 @@ public final class ComponentImplementation {
       }
 
       validateMethodNameDoesNotOverrideGeneratedCreator(creatorKind.methodName());
+      claimMethodName(creatorKind.methodName());
       MethodSpec creatorFactoryMethod =
           methodBuilder(creatorKind.methodName())
               .addModifiers(PUBLIC, STATIC)
@@ -737,6 +743,7 @@ public final class ComponentImplementation {
       addMethod(MethodSpecKind.BUILDER_METHOD, creatorFactoryMethod);
       if (noArgFactoryMethod && canInstantiateAllRequirements()) {
         validateMethodNameDoesNotOverrideGeneratedCreator("create");
+        claimMethodName("create");
         addMethod(
             MethodSpecKind.BUILDER_METHOD,
             methodBuilder("create")
