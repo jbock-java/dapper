@@ -37,10 +37,7 @@ implementation('io.github.jbock-java:dapper:1.2.1')
 annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
 ````
 
-For maven users, there is the [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) sample project.
+See also:
 
-Some of the integration tests from the [javatests](https://github.com/google/dagger/tree/master/javatests) directory could not
-be run as part of the regular build. Their compilation requires the result of the actual annotation processing.
-I could only make this work with a released artifact, not with a gradle inter-module dependency.
-This is why [dagger-javatests](https://github.com/jbock-java/dapper-javatests) was created.
-A new release should be tested there first, via staging repo.
+* [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) (maven sample)
+* [javatests](https://github.com/google/dagger/tree/master/javatests) (integration tests)
