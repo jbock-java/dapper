@@ -40,4 +40,4 @@ annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
 See also:
 
 * [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) (maven sample)
-* [javatests](https://github.com/google/dagger/tree/master/javatests) (integration tests)
+* [javatests](https://github.com/jbock-java/dapper-javatests) (integration tests)
