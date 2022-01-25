@@ -24,17 +24,17 @@ version that did not depend on the [xprocessing](https://github.com/google/dagge
 In order to be modular, dapper uses `jakarta.inject` annotations, instead of `javax.inject`.
 It also requires Java Version 11 or higher.
 
-Add to `module-info.java`:
+For modular applications, add this to `module-info.java`:
 
 ````java
 requires dagger;
 ````
 
-Gradle users add this to `build.gradle`:
+For gradle build, add this to `build.gradle`:
 
 ````groovy
-implementation('io.github.jbock-java:dapper:1.2')
-annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
+implementation('io.github.jbock-java:dapper:1.2.1')
+annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
 ````
 
 For maven users, there is the [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) sample project.
