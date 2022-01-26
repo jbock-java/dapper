@@ -34,7 +34,6 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.MODULE_HAS_DIFFERENT_SCOPES_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.NULLABLE_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.PRIVATE_MEMBER_VALIDATION;
-import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.STATIC_MEMBER_VALIDATION;
 import static dagger.internal.codegen.compileroption.ValidationType.ERROR;
 import static dagger.internal.codegen.compileroption.ValidationType.NONE;
 import static dagger.internal.codegen.compileroption.ValidationType.WARNING;
@@ -80,13 +79,35 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
-  public boolean experimentalMergedMode() {
-    return false;
+  public boolean experimentalMergedMode(TypeElement component) {
+    boolean isExperimental = experimentalMergedModeInternal();
+    if (isExperimental) {
+      Preconditions.checkState(
+          !fastInitInternal(component),
+          "Both fast init and experimental merged mode were turned on, please specify exactly one"
+              + " compilation mode.");
+    }
+    return isExperimental;
   }
 
   @Override
   public boolean fastInit(TypeElement component) {
+    boolean isFastInit = fastInitInternal(component);
+    if (isFastInit) {
+      Preconditions.checkState(
+          !experimentalMergedModeInternal(),
+          "Both fast init and experimental merged mode were turned on, please specify exactly one"
+              + " compilation mode.");
+    }
+    return isFastInit;
+  }
+
+  private boolean fastInitInternal(TypeElement component) {
     return isEnabled(FAST_INIT);
+  }
+
+  private boolean experimentalMergedModeInternal() {
+    return false;
   }
 
   @Override
