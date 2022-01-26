@@ -21,6 +21,17 @@ import javax.tools.Diagnostic;
 
 /** A collection of options that dictate how the compiler will run. */
 public abstract class CompilerOptions {
+
+  /**
+   * Returns true if the experimental Android mode is enabled.
+   *
+   * <p><b>Warning: Do Not use! This flag is for internal, experimental use only!</b>
+   *
+   * <p>Issues related to this flag will not be supported. This flag could break your build, cause
+   * memory leaks in your app, or cause other unknown issues at runtime.
+   */
+  public abstract boolean experimentalMergedMode();
+
   /**
    * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
    *

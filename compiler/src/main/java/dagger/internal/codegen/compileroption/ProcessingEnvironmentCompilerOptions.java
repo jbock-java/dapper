@@ -80,6 +80,11 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
+  public boolean experimentalMergedMode() {
+    return false;
+  }
+
+  @Override
   public boolean fastInit(TypeElement component) {
     return isEnabled(FAST_INIT);
   }
