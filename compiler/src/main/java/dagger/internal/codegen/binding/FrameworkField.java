@@ -71,7 +71,7 @@ public final class FrameworkField {
       ContributionBinding binding) {
     return create(
         TypeNames.PROVIDER,
-        TypeName.get(binding.key().type()),
+        TypeName.get(binding.key().type().java()),
         frameworkFieldName(binding));
   }
 

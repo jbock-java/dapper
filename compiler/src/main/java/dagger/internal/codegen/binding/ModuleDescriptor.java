@@ -39,7 +39,7 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;

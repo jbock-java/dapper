@@ -30,7 +30,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -224,7 +224,7 @@ public final class ComponentRequirement {
   static ComponentRequirement forBoundInstance(Key key, String variableName) {
     return new ComponentRequirement(
         Kind.BOUND_INSTANCE,
-        MoreTypes.equivalence().wrap(key.type()),
+        MoreTypes.equivalence().wrap(key.type().java()),
         Optional.of(key),
         variableName);
   }

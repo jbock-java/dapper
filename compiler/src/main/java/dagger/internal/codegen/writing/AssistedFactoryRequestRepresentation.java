@@ -34,13 +34,11 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
-import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.model.RequestKind;
 import java.util.Optional;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -95,8 +93,8 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
 
   private TypeSpec anonymousfactoryImpl(
       Binding assistedBinding, Expression assistedInjectionExpression) {
-    TypeElement factory = asType(binding.bindingElement().get());
-    DeclaredType factoryType = asDeclared(binding.key().type());
+    TypeElement factory = asType(binding.bindingElement().orElseThrow());
+    DeclaredType factoryType = asDeclared(binding.key().type().java());
     ExecutableElement factoryMethod = assistedFactoryMethod(factory, elements);
 
     // We can't use MethodSpec.overriding directly because we need to control the parameter names.
@@ -129,7 +127,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     AssistedFactoryRequestRepresentation create(ProvisionBinding binding);
   }
 }

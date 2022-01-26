@@ -86,7 +86,7 @@ final class DependencyMethodProviderCreationExpression
             CodeBlock.of(
                 "$N.$N()", dependency().variableName(), provisionMethod().getSimpleName()));
     ClassName dependencyClassName = ClassName.get(dependency().typeElement());
-    TypeName keyType = TypeName.get(binding.key().type());
+    TypeName keyType = TypeName.get(binding.key().type().java());
     MethodSpec.Builder getMethod =
         methodBuilder("get")
             .addAnnotation(Override.class)

@@ -22,7 +22,7 @@ import dagger.Module;
 import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import dagger.model.Scope;
 import java.util.LinkedHashSet;
 import java.util.Objects;

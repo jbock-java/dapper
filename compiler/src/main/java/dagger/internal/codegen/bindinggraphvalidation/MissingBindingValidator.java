@@ -23,7 +23,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.MissingBinding;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
@@ -66,7 +66,10 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     Key key = missingBinding.key();
     StringBuilder errorMessage = new StringBuilder();
     // Wildcards should have already been checked by DependencyRequestValidator.
-    Preconditions.checkState(!key.type().getKind().equals(TypeKind.WILDCARD), "unexpected wildcard request: %s", key);
+    Preconditions.checkState(
+        !key.type().java().getKind().equals(TypeKind.WILDCARD),
+        "unexpected wildcard request: %s",
+        key);
     // TODO(ronshapiro): replace "provided" with "satisfied"?
     errorMessage.append(key).append(" cannot be provided without ");
     if (isValidImplicitProvisionKey(key, types)) {

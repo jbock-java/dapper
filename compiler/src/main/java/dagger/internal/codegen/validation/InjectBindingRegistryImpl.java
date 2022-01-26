@@ -38,7 +38,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
@@ -87,7 +87,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
            binding != null;
            binding = bindingsRequiringGeneration.poll()) {
         Preconditions.checkState(binding.unresolved().isEmpty());
-        if (injectValidatorWhenGeneratingCode.isValidType(binding.key().type())) {
+        if (injectValidatorWhenGeneratingCode.isValidType(binding.key().type().java())) {
           generator.generate(binding);
         }
         materializedBindingKeys.add(binding.key());
@@ -127,7 +127,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
                   "Generating a %s for %s. "
                       + "Prefer to run the dagger processor over that class instead.",
                   factoryClass.getSimpleName(),
-                  types.erasure(binding.key().type()))); // erasure to strip <T> from msgs.
+                  types.erasure(binding.key().type().java()))); // erasure to strip <T> from msgs.
         }
       }
     }
@@ -241,7 +241,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     }
 
     // ok, let's see if we can find an @Inject constructor
-    TypeElement element = MoreElements.asType(types.asElement(key.type()));
+    TypeElement element = MoreElements.asType(types.asElement(key.type().java()));
     Set<ExecutableElement> injectConstructors = new LinkedHashSet<>();
     injectConstructors.addAll(injectedConstructors(element));
     injectConstructors.addAll(assistedInjectedConstructors(element));
@@ -251,7 +251,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
         return Optional.empty();
       case 1:
         return tryRegisterConstructor(
-            Util.getOnlyElement(injectConstructors), Optional.of(key.type()), true);
+            Util.getOnlyElement(injectConstructors), Optional.of(key.type().java()), true);
       default:
         throw new IllegalStateException("Found multiple @Inject constructors: "
             + injectConstructors);

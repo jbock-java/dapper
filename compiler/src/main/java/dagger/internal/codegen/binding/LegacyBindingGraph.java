@@ -18,7 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static java.util.stream.Collectors.groupingBy;
 
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;

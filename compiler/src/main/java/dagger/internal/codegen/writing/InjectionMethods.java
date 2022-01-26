@@ -217,7 +217,7 @@ final class InjectionMethods {
 
   private static CodeBlock injectionMethodArgument(
       DependencyRequest dependency, CodeBlock argument, ClassName generatedTypeName) {
-    TypeMirror keyType = dependency.key().type();
+    TypeMirror keyType = dependency.key().type().java();
     CodeBlock.Builder codeBlock = CodeBlock.builder();
     if (!isRawTypeAccessible(keyType, generatedTypeName.packageName())
         && isTypeAccessibleFrom(keyType, generatedTypeName.packageName())) {
@@ -236,7 +236,8 @@ final class InjectionMethods {
    * {@link Object}.
    */
   private static TypeName accessibleType(DependencyRequest dependency) {
-    TypeName typeName = requestTypeName(dependency.kind(), accessibleType(dependency.key().type()));
+    TypeName typeName =
+        requestTypeName(dependency.kind(), accessibleType(dependency.key().type().java()));
     return dependency
         .requestElement()
         .map(element -> element.asType().getKind().isPrimitive())

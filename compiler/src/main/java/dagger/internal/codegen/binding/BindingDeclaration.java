@@ -21,7 +21,7 @@ import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.Comparator;
 import java.util.Optional;
 import javax.lang.model.element.Element;

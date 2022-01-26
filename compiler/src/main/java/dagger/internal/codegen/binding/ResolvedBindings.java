@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;

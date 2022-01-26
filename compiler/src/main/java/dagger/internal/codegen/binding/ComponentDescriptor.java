@@ -386,7 +386,7 @@ public final class ComponentDescriptor {
         return returnType;
       }
       return BindingRequest.bindingRequest(dependencyRequest().get())
-          .requestedType(dependencyRequest().get().key().type(), types);
+          .requestedType(dependencyRequest().get().key().type().java(), types);
     }
 
     @Override

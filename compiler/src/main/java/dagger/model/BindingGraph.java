@@ -31,6 +31,7 @@ import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
 import dagger.Module;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.spi.model.Key;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;

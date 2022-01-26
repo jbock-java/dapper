@@ -39,7 +39,7 @@ import dagger.model.BindingGraph.MissingBinding;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -214,7 +214,7 @@ final class BindingGraphConverter {
               && binding.componentPath().equals(currentComponent.componentPath())) {
             network.addEdge(
                 binding,
-                subcomponentNode(binding.key().type(), graph),
+                subcomponentNode(binding.key().type().java(), graph),
                 new SubcomponentCreatorBindingEdgeImpl(
                     resolvedBindings.subcomponentDeclarations()));
           }

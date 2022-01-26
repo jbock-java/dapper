@@ -20,7 +20,7 @@ import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords
 
 import com.google.auto.common.MoreTypes;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.Iterator;
 import java.util.Set;
 import javax.lang.model.element.TypeElement;
@@ -94,10 +94,10 @@ public final class KeyVariableNamer {
 
     if (key.qualifier().isPresent()) {
       // TODO(gak): Use a better name for fields with qualifiers with members.
-      builder.append(key.qualifier().get().getAnnotationType().asElement().getSimpleName());
+      builder.append(key.qualifier().get().java().getAnnotationType().asElement().getSimpleName());
     }
 
-    key.type().accept(TYPE_NAMER, builder);
+    key.type().java().accept(TYPE_NAMER, builder);
 
     return protectAgainstKeywords(Character.toLowerCase(builder.charAt(0)) + builder.substring(1));
   }

@@ -53,7 +53,7 @@ final class StaticMemberSelects {
         binding);
 
     ClassName factoryName = generatedClassNameForBinding(binding);
-    TypeMirror keyType = binding.key().type();
+    TypeMirror keyType = binding.key().type().java();
     if (keyType.getKind().equals(DECLARED)) {
       List<TypeVariableName> typeVariables = bindingTypeElementTypeVariableNames(binding);
       if (!typeVariables.isEmpty()) {

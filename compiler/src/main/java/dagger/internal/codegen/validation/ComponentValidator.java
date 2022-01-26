@@ -56,7 +56,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;

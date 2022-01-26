@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asExecutable;
+import static dagger.spi.model.DaggerType.fromJava;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
@@ -25,7 +26,9 @@ import com.google.auto.common.MoreTypes;
 import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.Key;
+import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.DaggerType;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -62,11 +65,11 @@ public final class KeyFactory {
     Preconditions.checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
     ExecutableType resolvedMethod =
         asExecutable(types.asMemberOf(declaredContainer, subcomponentCreatorMethod));
-    return Key.builder(resolvedMethod.getReturnType()).build();
+    return Key.builder(fromJava(resolvedMethod.getReturnType())).build();
   }
 
   public Key forSubcomponentCreator(TypeMirror creatorType) {
-    return Key.builder(creatorType).build();
+    return Key.builder(fromJava(creatorType)).build();
   }
 
   public Key forProvidesMethod(ExecutableElement method, TypeElement contributingModule) {
@@ -95,15 +98,17 @@ public final class KeyFactory {
   }
 
   public Key forInjectConstructorWithResolvedType(TypeMirror type) {
-    return Key.builder(type).build();
+    return Key.builder(fromJava(type)).build();
   }
 
   // TODO(ronshapiro): Remove these conveniences which are simple wrappers around Key.Builder
   Key forType(TypeMirror type) {
-    return Key.builder(type).build();
+    return Key.builder(fromJava(type)).build();
   }
 
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
-    return Key.builder(boxPrimitives(type)).qualifier(qualifier).build();
+    return Key.builder(fromJava(boxPrimitives(type)))
+        .qualifier(qualifier.map(DaggerAnnotation::fromJava))
+        .build();
   }
 }

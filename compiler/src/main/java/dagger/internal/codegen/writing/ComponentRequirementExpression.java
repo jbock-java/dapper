@@ -19,11 +19,12 @@ package dagger.internal.codegen.writing;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.ComponentRequirement;
+import dagger.spi.model.Key;
 
 /**
  * A factory for expressions of {@link ComponentRequirement}s in the generated component. This is
  * <em>not</em> a {@link RequestRepresentation}, since {@link ComponentRequirement}s do not have a
- * {@link dagger.model.Key}. See {@link ComponentRequirementRequestRepresentation} for binding
+ * {@link Key}. See {@link ComponentRequirementRequestRepresentation} for binding
  * expressions that are themselves a component requirement.
  */
 interface ComponentRequirementExpression {

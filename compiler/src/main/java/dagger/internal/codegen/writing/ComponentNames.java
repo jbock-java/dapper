@@ -31,7 +31,7 @@ import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.model.ComponentPath;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.Collection;

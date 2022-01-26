@@ -99,7 +99,7 @@ public final class AssistedInjectionAnnotations {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
     ExecutableElement constructor = asExecutable(binding.bindingElement().orElseThrow());
     ExecutableType constructorType =
-        asExecutable(types.asMemberOf(asDeclared(binding.key().type()), constructor));
+        asExecutable(types.asMemberOf(asDeclared(binding.key().type().java()), constructor));
     return assistedParameterSpecs(constructor.getParameters(), constructorType.getParameterTypes());
   }
 
@@ -132,7 +132,7 @@ public final class AssistedInjectionAnnotations {
     AssistedFactoryMetadata metadata =
         AssistedFactoryMetadata.create(binding.bindingElement().orElseThrow().asType(), elements, types);
     ExecutableType factoryMethodType =
-        asExecutable(types.asMemberOf(asDeclared(binding.key().type()), metadata.factoryMethod()));
+        asExecutable(types.asMemberOf(asDeclared(binding.key().type().java()), metadata.factoryMethod()));
     return assistedParameterSpecs(
         // Use the order of the parameters from the @AssistedFactory method but use the parameter
         // names of the @AssistedInject constructor.

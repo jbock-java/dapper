@@ -26,7 +26,7 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;

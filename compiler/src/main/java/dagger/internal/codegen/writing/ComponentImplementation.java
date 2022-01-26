@@ -66,7 +66,7 @@ import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph.Node;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import dagger.model.RequestKind;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;

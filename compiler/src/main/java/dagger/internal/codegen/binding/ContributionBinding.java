@@ -21,10 +21,9 @@ import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreatio
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 
 import com.google.auto.common.MoreElements;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -81,6 +80,6 @@ public abstract class ContributionBinding extends Binding {
    * for this binding.
    */
   public final TypeMirror contributedType() {
-    return key().type();
+    return key().type().java();
   }
 }

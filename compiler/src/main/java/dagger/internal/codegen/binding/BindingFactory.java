@@ -30,6 +30,7 @@ import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.PROVISION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static dagger.spi.model.DaggerType.fromJava;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
@@ -42,8 +43,8 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
 import dagger.model.RequestKind;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -136,7 +137,7 @@ public final class BindingFactory {
             .scope(uniqueScopeOf(constructorElement.getEnclosingElement()));
 
     TypeElement bindingTypeElement = MoreElements.asType(constructorElement.getEnclosingElement());
-    if (hasNonDefaultTypeParameters(bindingTypeElement, key.type(), types)) {
+    if (hasNonDefaultTypeParameters(bindingTypeElement, key.type().java(), types)) {
       builder.unresolved(injectionBinding(constructorElement, Optional.empty()));
     }
     return builder.build();
@@ -164,12 +165,12 @@ public final class BindingFactory {
     ExecutableType factoryMethodType =
         MoreTypes.asExecutable(types.asMemberOf(factoryType, factoryMethod));
     return ProvisionBinding.builder()
-        .key(Key.builder(factoryType).build())
+        .key(Key.builder(fromJava(factoryType)).build())
         .bindingElement(factory)
         .provisionDependencies(
             Set.of(
                 DependencyRequest.builder()
-                    .key(Key.builder(factoryMethodType.getReturnType()).build())
+                    .key(Key.builder(fromJava(factoryMethodType.getReturnType())).build())
                     .kind(RequestKind.PROVIDER)
                     .build()))
         .kind(ASSISTED_FACTORY)

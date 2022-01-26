@@ -40,7 +40,7 @@ import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;

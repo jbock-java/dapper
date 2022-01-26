@@ -18,12 +18,13 @@ package dagger.internal.codegen.base;
 
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAndCreatorAnnotations;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.Key;
+import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.Key;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
@@ -42,7 +43,8 @@ public final class Keys {
    * just-in-time binding by discovering an {@code @Inject} constructor).
    */
   public static boolean isValidImplicitProvisionKey(Key key, DaggerTypes types) {
-    return isValidImplicitProvisionKey(key.qualifier(), key.type(), types);
+    return isValidImplicitProvisionKey(
+        key.qualifier().map(DaggerAnnotation::java), key.type().java(), types);
   }
 
   /**
@@ -94,7 +96,7 @@ public final class Keys {
    */
   public static boolean isComponentOrCreator(Key key) {
     return key.qualifier().isEmpty()
-        && key.type().getKind() == TypeKind.DECLARED
-        && DaggerElements.isAnyAnnotationPresent(asTypeElement(key.type()), allComponentAndCreatorAnnotations());
-  }
+        && key.type().java().getKind() == TypeKind.DECLARED
+        && isAnyAnnotationPresent(
+        asTypeElement(key.type().java()), allComponentAndCreatorAnnotations());  }
 }

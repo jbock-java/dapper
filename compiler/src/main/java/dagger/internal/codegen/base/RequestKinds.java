@@ -31,6 +31,7 @@ import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
+import dagger.spi.model.Key;
 import jakarta.inject.Provider;
 import java.util.Map;
 import javax.lang.model.type.TypeMirror;
@@ -126,7 +127,7 @@ public final class RequestKinds {
 
   /**
    * A dagger- or {@code javax.inject}-defined class for {@code requestKind} that that can wrap
-   * another type but share the same {@link dagger.model.Key}.
+   * another type but share the same {@link Key}.
    *
    * <p>For example, {@code Provider<String>} and {@code Lazy<String>} can both be requested if a
    * key exists for {@code String}; they all share the same key.

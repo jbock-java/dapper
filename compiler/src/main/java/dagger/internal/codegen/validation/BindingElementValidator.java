@@ -29,7 +29,7 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import dagger.model.Scope;
 import java.util.Collection;
 import java.util.Formatter;

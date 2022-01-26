@@ -17,6 +17,7 @@
 package dagger.model;
 
 import dagger.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.Key;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;

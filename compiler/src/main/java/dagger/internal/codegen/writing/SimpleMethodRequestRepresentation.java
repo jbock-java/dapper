@@ -103,7 +103,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   }
 
   private TypeName constructorTypeName(ClassName requestingClass) {
-    DeclaredType type = MoreTypes.asDeclared(provisionBinding.key().type());
+    DeclaredType type = MoreTypes.asDeclared(provisionBinding.key().type().java());
     TypeName typeName = TypeName.get(type);
     if (type.getTypeArguments().stream()
         .allMatch(t -> isTypeAccessibleFrom(t, requestingClass.packageName()))) {
@@ -143,7 +143,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   }
 
   private TypeMirror simpleMethodReturnType() {
-    return provisionBinding.contributedPrimitiveType().orElse(provisionBinding.key().type());
+    return provisionBinding.contributedPrimitiveType().orElse(provisionBinding.key().type().java());
   }
 
   @AssistedFactory

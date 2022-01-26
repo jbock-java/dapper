@@ -53,16 +53,16 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
         CodeBlock.of(
             "$L.$L()",
             componentRequirementExpressions.getExpression(componentRequirement(), requestingClass),
-            binding.bindingElement().get().getSimpleName());
+            binding.bindingElement().orElseThrow().getSimpleName());
     return Expression.create(
-        binding.contributedPrimitiveType().orElse(binding.key().type()),
+        binding.contributedPrimitiveType().orElse(binding.key().type().java()),
         maybeCheckForNull(binding, compilerOptions, invocation));
   }
 
   private ComponentRequirement componentRequirement() {
     return bindingGraph
         .componentDescriptor()
-        .getDependencyThatDefinesMethod(binding.bindingElement().get());
+        .getDependencyThatDefinesMethod(binding.bindingElement().orElseThrow());
   }
 
   static CodeBlock maybeCheckForNull(
@@ -73,7 +73,7 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
   }
 
   @AssistedFactory
-  static interface Factory {
+  interface Factory {
     ComponentProvisionRequestRepresentation create(ProvisionBinding binding);
   }
 }

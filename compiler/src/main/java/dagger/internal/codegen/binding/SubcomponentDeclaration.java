@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Suppliers;
-import dagger.model.Key;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Objects;

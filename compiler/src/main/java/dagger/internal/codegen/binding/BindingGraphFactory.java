@@ -36,8 +36,8 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
-import dagger.model.Key;
 import dagger.model.Scope;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
@@ -296,12 +296,12 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       // Add Assisted Factory binding
-      if (isType(requestKey.type())
-          && requestKey.type().getKind() == TypeKind.DECLARED
-          && isAssistedFactoryType(asTypeElement(requestKey.type()))) {
+      if (isType(requestKey.type().java())
+          && requestKey.type().java().getKind() == TypeKind.DECLARED
+          && isAssistedFactoryType(asTypeElement(requestKey.type().java()))) {
         bindings.add(
             bindingFactory.assistedFactoryBinding(
-                asTypeElement(requestKey.type()), Optional.of(requestKey.type())));
+                asTypeElement(requestKey.type().java()), Optional.of(requestKey.type().java())));
       }
 
       // If there are no bindings, add the implicit @Inject-constructed binding if there is one.
@@ -351,7 +351,7 @@ public final class BindingGraphFactory implements ClearableCache {
       Preconditions.checkArgument(subcomponentCreatorBinding.kind().equals(SUBCOMPONENT_CREATOR));
       Resolver owningResolver = getOwningResolver(subcomponentCreatorBinding).orElseThrow();
 
-      TypeElement builderType = MoreTypes.asTypeElement(subcomponentCreatorBinding.key().type());
+      TypeElement builderType = MoreTypes.asTypeElement(subcomponentCreatorBinding.key().type().java());
       owningResolver.subcomponentsToResolve.add(
           owningResolver.componentDescriptor.getChildComponentWithBuilderType(builderType));
     }
