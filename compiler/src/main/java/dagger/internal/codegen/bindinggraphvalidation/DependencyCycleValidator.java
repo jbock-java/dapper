@@ -27,6 +27,7 @@ import com.google.common.graph.Graphs;
 import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.NetworkBuilder;
+import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.model.BindingGraph;
@@ -132,7 +133,11 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     DependencyEdge dependencyToReport =
         chooseDependencyEdgeConnecting(previousNode, cycleStartNode, bindingGraph);
     diagnosticReporter.reportDependency(
-        ERROR, dependencyToReport, errorMessage(cycle.shift(cycleStartNode), bindingGraph));
+        ERROR,
+        dependencyToReport,
+        errorMessage(cycle.shift(cycleStartNode), bindingGraph)
+            // The actual dependency trace is included from the reportDependency call.
+            + "\n\nThe cycle is requested via:");
   }
 
   private List<Node> shortestPathToCycleFromAnEntryPoint(
@@ -172,6 +177,10 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     ArrayList<DependencyRequest> reversed = new ArrayList<>(cycleRequests);
     Collections.reverse(reversed);
     dependencyRequestFormatter.formatIndentedList(message, reversed, 0);
+    message.append("\n")
+        .append(dependencyRequestFormatter.format(reversed.get(0)))
+        .append("\n")
+        .append(Formatter.INDENT).append("...");
     return message.toString();
   }
 
