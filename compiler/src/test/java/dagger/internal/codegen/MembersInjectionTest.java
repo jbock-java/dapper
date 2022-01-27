@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
-import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static io.jbock.common.truth.Truth.assertAbout;
+import static io.jbock.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static io.jbock.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
-import com.google.testing.compile.JavaFileObjects;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;

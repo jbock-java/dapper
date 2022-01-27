@@ -20,11 +20,11 @@ import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.binding.ComponentCreatorKind.FACTORY;
 import static dagger.internal.codegen.binding.ErrorMessages.creatorMessagesFor;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ErrorMessages;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;

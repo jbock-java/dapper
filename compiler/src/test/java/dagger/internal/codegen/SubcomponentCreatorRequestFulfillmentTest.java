@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_FACTORY;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import com.google.testing.compile.Compilation;
+import io.jbock.testing.compile.Compilation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

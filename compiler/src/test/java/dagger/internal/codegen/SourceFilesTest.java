@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
+import static io.jbock.common.truth.Truth.assertThat;
 
-import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.binding.SourceFiles;
+import io.jbock.testing.compile.CompilationExtension;
 import java.util.List;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;

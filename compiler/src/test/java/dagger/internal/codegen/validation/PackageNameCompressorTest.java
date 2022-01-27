@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_FOOTER;
 import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_HEADER;
+import static io.jbock.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
 

@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.Compiler.javac;
+import static io.jbock.testing.compile.Compiler.javac;
 import static java.util.stream.Collectors.toList;
 
-import com.google.testing.compile.Compiler;
 import dagger.internal.codegen.base.Util;
+import io.jbock.testing.compile.Compiler;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;

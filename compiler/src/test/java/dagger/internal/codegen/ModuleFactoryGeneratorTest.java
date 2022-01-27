@@ -17,16 +17,16 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
-import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
+import static io.jbock.common.truth.Truth.assertAbout;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
+import static io.jbock.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static io.jbock.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

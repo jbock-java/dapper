@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen;
 
-import com.google.testing.compile.JavaFileObjects;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;

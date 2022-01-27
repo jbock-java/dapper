@@ -16,16 +16,16 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
+import static io.jbock.common.truth.Truth.assertAbout;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import com.google.common.truth.FailureMetadata;
-import com.google.common.truth.Subject;
-import com.google.common.truth.Truth;
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
 import dagger.Module;
+import io.jbock.common.truth.FailureMetadata;
+import io.jbock.common.truth.Subject;
+import io.jbock.common.truth.Truth;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;

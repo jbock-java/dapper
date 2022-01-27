@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
 import dagger.Module;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.lang.annotation.Annotation;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Disabled;

@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
+import static io.jbock.common.truth.Truth.assertThat;
 
-import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.binding.FrameworkField;
 import io.jbock.javapoet.ClassName;
+import io.jbock.testing.compile.CompilationExtension;
 import jakarta.inject.Inject;
 import javax.lang.model.util.Elements;
 import org.junit.jupiter.api.BeforeEach;

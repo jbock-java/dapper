@@ -16,17 +16,17 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.Compiler.javac;
 import static dagger.internal.codegen.TestUtils.endsWithMessage;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
+import static io.jbock.testing.compile.Compiler.javac;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.Compiler;
-import com.google.testing.compile.JavaFileObjects;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.Compiler;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.regex.Pattern;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;

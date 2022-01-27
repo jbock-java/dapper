@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.TestUtils.message;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
@@ -26,9 +25,10 @@ import static dagger.internal.codegen.binding.ComponentCreatorKind.FACTORY;
 import static dagger.internal.codegen.binding.ComponentKind.SUBCOMPONENT;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.moreThanOneRefToSubcomponent;
 import static dagger.internal.codegen.binding.ErrorMessages.componentMessagesFor;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
 import java.util.ArrayList;
 import java.util.List;
 import javax.tools.JavaFileObject;

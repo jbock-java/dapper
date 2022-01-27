@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.jbock.common.truth.Truth.assertThat;
 
-import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.testing.compile.CompilationExtension;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

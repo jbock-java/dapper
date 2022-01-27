@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static com.google.common.truth.Truth.assertThat;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static io.jbock.common.truth.Truth.assertThat;
 
-import com.google.testing.compile.CompilationExtension;
+import io.jbock.testing.compile.CompilationExtension;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;

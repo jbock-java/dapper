@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.jbock.common.truth.Truth.assertThat;
 
 import dagger.internal.codegen.base.DiagnosticFormatting;
 import org.junit.jupiter.api.Test;

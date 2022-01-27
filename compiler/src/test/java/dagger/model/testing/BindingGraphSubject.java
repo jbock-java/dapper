@@ -16,14 +16,14 @@
 
 package dagger.model.testing;
 
-import static com.google.common.truth.Truth.assertAbout;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.common.truth.Truth.assertAbout;
 
-import com.google.common.truth.FailureMetadata;
-import com.google.common.truth.Subject;
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
+import io.jbock.common.truth.FailureMetadata;
+import io.jbock.common.truth.Subject;
 import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
