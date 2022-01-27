@@ -17,11 +17,13 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
+import dagger.spi.model.DaggerAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Singleton;
@@ -41,8 +43,11 @@ public final class Scopes {
    * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
   private static Scope scope(
-      DaggerElements elements, ClassName scopeAnnotationClass) {
-    return Scope.scope(SimpleAnnotationMirror.of(elements.getTypeElement(scopeAnnotationClass)));
+      DaggerElements elements, ClassName scopeAnnotationClassName) {
+    return Scope.scope(
+        DaggerAnnotation.fromJava(
+            SimpleAnnotationMirror.of(
+                elements.getTypeElement(scopeAnnotationClassName.canonicalName()))));
   }
 
   /**
@@ -50,14 +55,7 @@ public final class Scopes {
    * exception if there are more than one.
    */
   public static Optional<Scope> uniqueScopeOf(Element element) {
-    Set<Scope> scopes = scopesOf(element);
-    if (scopes.isEmpty()) {
-      return Optional.empty();
-    }
-    if (scopes.size() >= 2) {
-      throw new IllegalArgumentException("Expecting at most one scope but found: " + scopes);
-    }
-    return Optional.of(scopes.iterator().next());
+    return scopesOf(element).stream().collect(toOptional());
   }
 
   /**
@@ -72,8 +70,10 @@ public final class Scopes {
 
   /** Returns all of the associated scopes for a source code element. */
   public static Set<Scope> scopesOf(Element element) {
+    // TODO(bcorso): Replace Scope class reference with class name once auto-common is updated.
     return AnnotationMirrors.getAnnotatedAnnotations(element, jakarta.inject.Scope.class)
         .stream()
+        .map(DaggerAnnotation::fromJava)
         .map(Scope::scope)
         .collect(toImmutableSet());
   }

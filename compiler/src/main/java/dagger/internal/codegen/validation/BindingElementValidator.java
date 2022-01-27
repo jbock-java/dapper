@@ -208,7 +208,7 @@ public abstract class BindingElementValidator<E extends Element> {
       }
       requireNonNull(error);
       for (Scope scope : scopes) {
-        report.addError(error, element, scope.scopeAnnotation());
+        report.addError(error, element, scope.scopeAnnotation().java());
       }
     }
 

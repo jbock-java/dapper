@@ -18,6 +18,8 @@ package dagger.spi.model;
 
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 
@@ -33,6 +35,15 @@ public final class DaggerAnnotation {
   public static DaggerAnnotation fromJava(AnnotationMirror annotationMirror) {
     return new DaggerAnnotation(
         AnnotationMirrors.equivalence().wrap(Objects.requireNonNull(annotationMirror)));
+  }
+
+  public DaggerTypeElement annotationTypeElement() {
+    return DaggerTypeElement.fromJava(
+        MoreTypes.asTypeElement(annotationMirror().get().getAnnotationType()));
+  }
+
+  public ClassName className() {
+    return annotationTypeElement().className();
   }
 
   public Equivalence.Wrapper<AnnotationMirror> annotationMirror() {

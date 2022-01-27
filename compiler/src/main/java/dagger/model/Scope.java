@@ -17,72 +17,69 @@
 package dagger.model;
 
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
-import io.jbock.auto.common.AnnotationMirrors;
-import io.jbock.auto.common.Equivalence;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.DaggerTypeElement;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Singleton;
-import java.lang.annotation.Annotation;
-import java.util.Objects;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
 
 /** A representation of a {@link jakarta.inject.Scope}. */
 // TODO(ronshapiro): point to SimpleAnnotationMirror
 public final class Scope {
 
-  private final Equivalence.Wrapper<AnnotationMirror> wrappedScopeAnnotation;
+  private final DaggerAnnotation scopeAnnotation;
 
-  private Scope(Equivalence.Wrapper<AnnotationMirror> wrappedScopeAnnotation) {
-    this.wrappedScopeAnnotation = Objects.requireNonNull(wrappedScopeAnnotation);
-  }
-
-  /** The {@link AnnotationMirror} that represents the scope annotation. */
-  public AnnotationMirror scopeAnnotation() {
-    return wrappedScopeAnnotation.get();
-  }
-
-  /** The scope annotation element. */
-  public TypeElement scopeAnnotationElement() {
-    return MoreTypes.asTypeElement(scopeAnnotation().getAnnotationType());
+  private Scope(DaggerAnnotation scopeAnnotation) {
+    this.scopeAnnotation = requireNonNull(scopeAnnotation);
   }
 
   /**
    * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
    */
-  public static Scope scope(AnnotationMirror scopeAnnotation) {
+  public static Scope scope(DaggerAnnotation scopeAnnotation) {
     Preconditions.checkArgument(isScope(scopeAnnotation));
-    return new Scope(AnnotationMirrors.equivalence().wrap(scopeAnnotation));
+    return new Scope(scopeAnnotation);
   }
 
   /**
    * Returns {@code true} if {@link #scopeAnnotation()} is a {@link jakarta.inject.Scope} annotation.
    */
-  public static boolean isScope(AnnotationMirror scopeAnnotation) {
-    return isScope(MoreElements.asType(scopeAnnotation.getAnnotationType().asElement()));
+  public static boolean isScope(DaggerAnnotation scopeAnnotation) {
+    return isScope(scopeAnnotation.annotationTypeElement());
   }
 
   /**
    * Returns {@code true} if {@code scopeAnnotationType} is a {@link jakarta.inject.Scope} annotation.
    */
-  public static boolean isScope(TypeElement scopeAnnotationType) {
-    return isAnnotationPresent(scopeAnnotationType, jakarta.inject.Scope.class);
+  public static boolean isScope(DaggerTypeElement scopeAnnotationType) {
+    // TODO(bcorso): Replace Scope class reference with class name once auto-common is updated.
+    return isAnnotationPresent(scopeAnnotationType.java(), jakarta.inject.Scope.class);
+  }
+
+  /** The {@link DaggerAnnotation} that represents the scope annotation. */
+  public DaggerAnnotation scopeAnnotation() {
+    return scopeAnnotation;
+  }
+
+  public ClassName className() {
+    return scopeAnnotation().className();
   }
 
   /** Returns {@code true} if this scope is the {@link Singleton @Singleton} scope. */
   public boolean isSingleton() {
-    return isScope(Singleton.class);
+    return isScope(TypeNames.SINGLETON);
   }
 
   /** Returns {@code true} if this scope is the {@code @Reusable} scope. */
   public boolean isReusable() {
-    return isScope(dagger.Reusable.class);
+    return isScope(TypeNames.REUSABLE);
   }
 
-  private boolean isScope(Class<? extends Annotation> annotation) {
-    return scopeAnnotationElement().getQualifiedName().contentEquals(annotation.getCanonicalName());
+  private boolean isScope(ClassName annotation) {
+    return scopeAnnotation().className().equals(annotation);
   }
 
   @Override
@@ -90,12 +87,12 @@ public final class Scope {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Scope scope = (Scope) o;
-    return wrappedScopeAnnotation.equals(scope.wrappedScopeAnnotation);
+    return scopeAnnotation.equals(scope.scopeAnnotation);
   }
 
   @Override
   public int hashCode() {
-    return wrappedScopeAnnotation.hashCode();
+    return scopeAnnotation.hashCode();
   }
 
   /** Returns a debug representation of the scope. */
