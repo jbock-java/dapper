@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-/** Utility methods for {@link com.google.common.graph} types. */
+/** Utility methods for {@link io.jbock.common.graph} types. */
 public final class DaggerGraphs {
   /**
    * Returns a shortest path from {@code nodeU} to {@code nodeV} in {@code graph} as a list of the
@@ -39,7 +39,7 @@ public final class DaggerGraphs {
    * be many possible shortest paths.)
    *
    * <p>If {@code nodeV} is not {@link
-   * com.google.common.graph.Graphs#reachableNodes(com.google.common.graph.Graph, Object) reachable}
+   * io.jbock.common.graph.Graphs#reachableNodes(io.jbock.common.graph.Graph, Object) reachable}
    * from {@code nodeU}, the list returned is empty.
    *
    * @throws IllegalArgumentException if {@code nodeU} or {@code nodeV} is not present in {@code

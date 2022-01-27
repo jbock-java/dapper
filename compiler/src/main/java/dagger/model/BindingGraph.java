@@ -293,9 +293,9 @@ public abstract class BindingGraph {
    * a subcomponent creator ({@linkplain dagger.Subcomponent.Builder builder} or {@linkplain
    * dagger.Subcomponent.Factory factory}) binding.
    *
-   * <p>The {@linkplain com.google.common.graph.EndpointPair#source() source node} of this edge is a
+   * <p>The {@linkplain io.jbock.common.graph.EndpointPair#source() source node} of this edge is a
    * {@link Binding} for the subcomponent creator {@link Key} and the {@linkplain
-   * com.google.common.graph.EndpointPair#target() target node} is a {@link ComponentNode} for the
+   * io.jbock.common.graph.EndpointPair#target() target node} is a {@link ComponentNode} for the
    * child subcomponent.
    */
   public interface SubcomponentCreatorBindingEdge extends Edge {
