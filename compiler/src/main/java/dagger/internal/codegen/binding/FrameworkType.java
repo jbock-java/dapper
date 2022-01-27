@@ -16,15 +16,14 @@
 
 package dagger.internal.codegen.binding;
 
-import dagger.Lazy;
-import dagger.internal.ProviderOfLazy;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 
 /** One of the core types initialized as fields in a generated component. */
@@ -40,8 +39,8 @@ public enum FrameworkType {
   }
 
   /** The class of fields of this type. */
-  public Class<?> frameworkClass() {
-    return Provider.class;
+  public ClassName frameworkClassName() {
+    return TypeNames.PROVIDER;
   }
 
   /** The request kind that an instance of this framework type can satisfy directly, if any. */
@@ -65,13 +64,13 @@ public enum FrameworkType {
         return CodeBlock.of("$L.get()", from);
 
       case LAZY:
-        return CodeBlock.of("$T.lazy($L)", dagger.internal.DoubleCheck.class, from);
+        return CodeBlock.of("$T.lazy($L)", TypeNames.DOUBLE_CHECK, from);
 
       case PROVIDER:
         return from;
 
       case PROVIDER_OF_LAZY:
-        return CodeBlock.of("$T.create($L)", ProviderOfLazy.class, from);
+        return CodeBlock.of("$T.create($L)", TypeNames.PROVIDER_OF_LAZY, from);
 
       default:
         throw new IllegalArgumentException(
@@ -99,8 +98,8 @@ public enum FrameworkType {
         return from;
 
       case PROVIDER_OF_LAZY:
-        TypeMirror lazyType = types.rewrapType(from.type(), Lazy.class);
-        return Expression.create(types.wrapType(lazyType, Provider.class), codeBlock);
+        TypeMirror lazyType = types.rewrapType(from.type(), TypeNames.LAZY);
+        return Expression.create(types.wrapType(lazyType, TypeNames.PROVIDER), codeBlock);
 
       default:
         return Expression.create(

@@ -31,6 +31,7 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -306,8 +307,8 @@ public final class InjectValidator implements ClearableCache {
 
   /** Returns true if the given method element declares a checked exception. */
   private boolean throwsCheckedExceptions(ExecutableElement methodElement) {
-    TypeMirror runtimeExceptionType = elements.getTypeElement(RuntimeException.class).asType();
-    TypeMirror errorType = elements.getTypeElement(Error.class).asType();
+    TypeMirror runtimeExceptionType = elements.getTypeElement(TypeNames.RUNTIME_EXCEPTION).asType();
+    TypeMirror errorType = elements.getTypeElement(TypeNames.ERROR).asType();
     for (TypeMirror thrownType : methodElement.getThrownTypes()) {
       if (!types.isSubtype(thrownType, runtimeExceptionType)
           && !types.isSubtype(thrownType, errorType)) {

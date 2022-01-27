@@ -19,20 +19,20 @@ package dagger.internal.codegen.base;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
+import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.model.RequestKind.LAZY;
 import static dagger.model.RequestKind.PROVIDER;
 import static dagger.model.RequestKind.PROVIDER_OF_LAZY;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static io.jbock.auto.common.MoreTypes.isType;
-import static io.jbock.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import dagger.Lazy;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
-import jakarta.inject.Provider;
 import java.util.Map;
 import javax.lang.model.type.TypeMirror;
 
@@ -47,7 +47,7 @@ public final class RequestKinds {
         return type;
 
       case PROVIDER_OF_LAZY:
-        return types.wrapType(requestType(LAZY, type, types), Provider.class);
+        return types.wrapType(requestType(LAZY, type, types), TypeNames.PROVIDER);
 
       default:
         return types.wrapType(type, frameworkClass(requestKind));
@@ -74,10 +74,10 @@ public final class RequestKinds {
     }
   }
 
-  private static final Map<RequestKind, Class<?>> FRAMEWORK_CLASSES =
+  private static final Map<RequestKind, ClassName> FRAMEWORK_CLASSES =
       Map.of(
-          PROVIDER, Provider.class,
-          LAZY, Lazy.class);
+          PROVIDER, TypeNames.PROVIDER,
+          LAZY, TypeNames.LAZY);
 
   /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(TypeMirror type) {
@@ -136,8 +136,8 @@ public final class RequestKinds {
    * that need it. For example, {@link RequestKind#PROVIDER_OF_LAZY} has <em>2</em> wrapping
    * classes.
    */
-  public static Class<?> frameworkClass(RequestKind requestKind) {
-    Class<?> result = FRAMEWORK_CLASSES.get(requestKind);
+  public static ClassName frameworkClass(RequestKind requestKind) {
+    ClassName result = FRAMEWORK_CLASSES.get(requestKind);
     Preconditions.checkArgument(result != null, "no framework class for %s", requestKind);
     return result;
   }

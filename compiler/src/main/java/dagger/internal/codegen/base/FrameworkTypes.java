@@ -18,9 +18,9 @@ package dagger.internal.codegen.base;
 
 import static io.jbock.auto.common.MoreTypes.isType;
 
-import dagger.Lazy;
-import io.jbock.auto.common.MoreTypes;
-import jakarta.inject.Provider;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.javapoet.ClassName;
 import java.util.List;
 import javax.lang.model.type.TypeMirror;
 
@@ -29,16 +29,16 @@ import javax.lang.model.type.TypeMirror;
  * type that the framework itself defines.
  */
 public final class FrameworkTypes {
-  private static final List<Class<?>> PROVISION_TYPES =
-      List.of(Provider.class, Lazy.class);
+  private static final List<ClassName> PROVISION_TYPES =
+      List.of(TypeNames.PROVIDER, TypeNames.LAZY);
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(TypeMirror type) {
     if (!isType(type)) {
       return false;
     }
-    for (Class<?> clazz : FrameworkTypes.PROVISION_TYPES) {
-      if (MoreTypes.isTypeOf(clazz, type)) {
+    for (ClassName clazz : FrameworkTypes.PROVISION_TYPES) {
+      if (DaggerTypes.isTypeOf(clazz, type)) {
         return true;
       }
     }

@@ -53,6 +53,7 @@ import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.auto.common.Visibility;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import jakarta.inject.Scope;
 import jakarta.inject.Singleton;
@@ -437,7 +438,7 @@ public final class ModuleValidator {
     // a binding method in Parent, and "c" because Child is defining a binding method that overrides
     // Parent.
     TypeElement currentClass = subject;
-    TypeMirror objectType = elements.getTypeElement(Object.class).asType();
+    TypeMirror objectType = elements.getTypeElement(TypeName.OBJECT).asType();
     // We keep track of methods that failed so we don't spam with multiple failures.
     Set<ExecutableElement> failedMethods = new HashSet<>();
     Map<Name, List<ExecutableElement>> allMethodsByName = new LinkedHashMap<>(moduleMethodsByName);

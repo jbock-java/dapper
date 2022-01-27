@@ -26,10 +26,12 @@ import dagger.internal.DelegateFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkField;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
@@ -160,8 +162,8 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
     return fieldSpec;
   }
 
-  private Class<?> delegateType() {
-    return DelegateFactory.class;
+  private ClassName delegateType() {
+    return TypeNames.DELEGATE_FACTORY;
   }
 
   /** Initialization state for a factory field. */

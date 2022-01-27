@@ -56,7 +56,7 @@ final class DelegatingFrameworkInstanceCreationExpression
                 bindingRequest(dependency.key(), binding.frameworkType()),
                 componentImplementation.shardImplementation(binding).name())
             .codeBlock(),
-        binding.frameworkType().frameworkClass());
+        binding.frameworkType().frameworkClassName());
   }
 
   @AssistedFactory

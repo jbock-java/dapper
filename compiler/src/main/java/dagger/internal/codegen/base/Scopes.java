@@ -47,7 +47,7 @@ public final class Scopes {
     return Scope.scope(
         DaggerAnnotation.fromJava(
             SimpleAnnotationMirror.of(
-                elements.getTypeElement(scopeAnnotationClassName.canonicalName()))));
+                elements.getTypeElement(scopeAnnotationClassName))));
   }
 
   /**

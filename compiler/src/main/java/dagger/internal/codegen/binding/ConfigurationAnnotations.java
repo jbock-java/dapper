@@ -30,6 +30,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -73,7 +74,7 @@ public final class ConfigurationAnnotations {
   @Deprecated
   public static Set<TypeElement> getTransitiveModules(
       DaggerTypes types, DaggerElements elements, Set<TypeElement> seedModules) {
-    TypeMirror objectType = elements.getTypeElement(Object.class).asType();
+    TypeMirror objectType = elements.getTypeElement(TypeName.OBJECT).asType();
     Queue<TypeElement> moduleQueue = new ArrayDeque<>(seedModules);
     Set<TypeElement> moduleElements = new LinkedHashSet<>();
     TypeElement moduleElement;

@@ -172,7 +172,7 @@ public final class DaggerTypes implements Types {
    *     type argument.
    */
   public TypeMirror unwrapTypeOrObject(TypeMirror type) {
-    return unwrapTypeOrDefault(type, elements.getTypeElement(Object.class).asType());
+    return unwrapTypeOrDefault(type, elements.getTypeElement(TypeName.OBJECT).asType());
   }
 
   private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
@@ -191,8 +191,8 @@ public final class DaggerTypes implements Types {
    * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
    * Set.class}, this will return {@code Set<List<Number>>}.
    */
-  public DeclaredType wrapType(TypeMirror type, Class<?> wrappingClass) {
-    return types.getDeclaredType(elements.getTypeElement(wrappingClass), type);
+  public DeclaredType wrapType(TypeMirror type, ClassName wrappingClassName) {
+    return types.getDeclaredType(elements.getTypeElement(wrappingClassName.canonicalName()), type);
   }
 
   /**
@@ -206,9 +206,9 @@ public final class DaggerTypes implements Types {
    *
    * @throws IllegalArgumentException if {@code} has more than one type argument.
    */
-  public DeclaredType rewrapType(TypeMirror type, Class<?> wrappingClass) {
+  public DeclaredType rewrapType(TypeMirror type, ClassName wrappingClassName) {
     List<? extends TypeMirror> typeArguments = MoreTypes.asDeclared(type).getTypeArguments();
-    TypeElement wrappingType = elements.getTypeElement(wrappingClass);
+    TypeElement wrappingType = elements.getTypeElement(wrappingClassName);
     switch (typeArguments.size()) {
       case 0:
         return getDeclaredType(wrappingType);
@@ -245,7 +245,7 @@ public final class DaggerTypes implements Types {
         && rawTypeAccessibilityPredicate.test(type)) {
       return getDeclaredType(MoreTypes.asTypeElement(type));
     } else {
-      return elements.getTypeElement(Object.class).asType();
+      return elements.getTypeElement(TypeName.OBJECT).asType();
     }
   }
 

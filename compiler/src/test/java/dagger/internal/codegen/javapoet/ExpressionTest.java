@@ -21,6 +21,7 @@ import static io.jbock.common.truth.Truth.assertThat;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import io.jbock.testing.compile.CompilationExtension;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -70,6 +71,6 @@ class ExpressionTest {
   }
 
   private TypeMirror type(DaggerElements elements, Class<?> clazz) {
-    return elements.getTypeElement(clazz).asType();
+    return elements.getTypeElement(ClassName.get(clazz)).asType();
   }
 }

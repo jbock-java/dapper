@@ -29,10 +29,12 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
+import io.jbock.javapoet.TypeName;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -120,7 +122,7 @@ public final class ComponentDescriptor {
   private final Supplier<Map<BindingRequest, ComponentMethodDescriptor>> firstMatchingComponentMethods = Suppliers.memoize(() -> {
     Map<BindingRequest, ComponentMethodDescriptor> methods = new LinkedHashMap<>();
     for (ComponentMethodDescriptor method : entryPointMethods()) {
-      methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
+      methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().orElseThrow()), method);
     }
     return methods;
   });
@@ -458,7 +460,7 @@ public final class ComponentDescriptor {
   static boolean isComponentContributionMethod(DaggerElements elements, ExecutableElement method) {
     return method.getParameters().isEmpty()
         && !method.getReturnType().getKind().equals(VOID)
-        && !elements.getTypeElement(Object.class).equals(method.getEnclosingElement())
+        && !elements.getTypeElement(TypeName.OBJECT).equals(method.getEnclosingElement())
         && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(method.getSimpleName().toString());
   }
 }

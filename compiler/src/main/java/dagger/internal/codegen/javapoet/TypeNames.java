@@ -43,6 +43,8 @@ public final class TypeNames {
   public static final ClassName SUBCOMPONENT_FACTORY = SUBCOMPONENT.nestedClass("Factory");
 
   // Dagger Internal classnames
+  public static final ClassName DELEGATE_FACTORY =
+      ClassName.get("dagger.internal", "DelegateFactory");
   public static final ClassName DOUBLE_CHECK = ClassName.get("dagger.internal", "DoubleCheck");
   public static final ClassName FACTORY = ClassName.get("dagger.internal", "Factory");
   public static final ClassName INSTANCE_FACTORY =
@@ -54,6 +56,11 @@ public final class TypeNames {
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 
   // Other classnames
+  public static final ClassName EXECUTOR = ClassName.get("java.util.concurrent", "Executor");
+  public static final ClassName ERROR = ClassName.get("java.lang", "Error");
+  public static final ClassName EXCEPTION = ClassName.get("java.lang", "Exception");
+  public static final ClassName RUNTIME_EXCEPTION = ClassName.get("java.lang", "RuntimeException");
+  public static final ClassName MAP = ClassName.get("java.util", "Map");
   public static final ClassName SINGLETON = ClassName.get("jakarta.inject", "Singleton");
   public static final ClassName SCOPE = ClassName.get("jakarta.inject", "Scope");
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");

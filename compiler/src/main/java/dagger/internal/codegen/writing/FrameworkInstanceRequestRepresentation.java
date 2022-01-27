@@ -56,7 +56,7 @@ abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentat
     TypeMirror expressionType =
         isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName())
             || isInlinedFactoryCreation(memberSelect)
-            ? types.wrapType(binding.contributedType(), frameworkType().frameworkClass())
+            ? types.wrapType(binding.contributedType(), frameworkType().frameworkClassName())
             : rawFrameworkType();
     return Expression.create(expressionType, memberSelect.getExpressionFor(requestingClass));
   }
@@ -80,6 +80,6 @@ abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentat
   }
 
   private DeclaredType rawFrameworkType() {
-    return types.getDeclaredType(elements.getTypeElement(frameworkType().frameworkClass()));
+    return types.getDeclaredType(elements.getTypeElement(frameworkType().frameworkClassName()));
   }
 }
