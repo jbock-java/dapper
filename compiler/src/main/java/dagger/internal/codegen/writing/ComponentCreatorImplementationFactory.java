@@ -16,25 +16,18 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
@@ -45,6 +38,13 @@ import dagger.internal.codegen.binding.ComponentRequirement.NullPolicy;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

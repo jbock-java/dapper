@@ -18,8 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
@@ -27,6 +25,8 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;

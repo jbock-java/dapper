@@ -18,11 +18,11 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Iterator;
 import java.util.List;

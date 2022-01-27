@@ -16,19 +16,19 @@
 
 package dagger.internal.codegen.javapoet;
 
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
 import java.util.Collection;
 import java.util.stream.Collector;
 import javax.lang.model.element.ExecutableElement;

@@ -40,8 +40,8 @@ import static dagger.internal.codegen.compileroption.ValidationType.WARNING;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.EnumSet;

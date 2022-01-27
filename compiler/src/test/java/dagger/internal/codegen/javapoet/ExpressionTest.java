@@ -18,10 +18,10 @@ package dagger.internal.codegen.javapoet;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.auto.common.MoreTypes;
 import com.google.testing.compile.CompilationExtension;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreTypes;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;

@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -28,6 +27,7 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.DependencyRequest;
+import io.jbock.javapoet.CodeBlock;
 
 /** A framework instance creation expression for a {@link dagger.Binds @Binds} binding. */
 final class DelegatingFrameworkInstanceCreationExpression

@@ -21,8 +21,8 @@ import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 
 import com.google.testing.compile.CompilationExtension;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.FrameworkField;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import javax.lang.model.util.Elements;
 import org.junit.jupiter.api.BeforeEach;

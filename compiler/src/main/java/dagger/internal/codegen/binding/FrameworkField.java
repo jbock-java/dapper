@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.ParameterizedTypeName;
+import io.jbock.javapoet.TypeName;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;

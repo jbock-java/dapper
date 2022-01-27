@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.auto.common.MoreTypes.asTypeElements;
 import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentRequirement.componentCanMakeNewInstances;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.asExecutable;
+import static io.jbock.auto.common.MoreTypes.asTypeElements;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Util;

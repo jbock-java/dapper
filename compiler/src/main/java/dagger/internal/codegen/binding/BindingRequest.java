@@ -21,8 +21,8 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
-import dagger.spi.model.Key;
 import dagger.model.RequestKind;
+import dagger.spi.model.Key;
 import java.util.Objects;
 import javax.lang.model.type.TypeMirror;
 

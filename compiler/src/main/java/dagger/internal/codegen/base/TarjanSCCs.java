@@ -18,7 +18,7 @@ package dagger.internal.codegen.base;
 
 import static java.lang.Math.min;
 
-import com.google.common.graph.SuccessorsFunction;
+import io.jbock.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;

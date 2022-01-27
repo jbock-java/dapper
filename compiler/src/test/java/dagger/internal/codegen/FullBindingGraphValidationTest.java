@@ -504,8 +504,8 @@ public final class FullBindingGraphValidationTest {
   public void bothAliasesDifferentValues() {
     Compilation compilation =
         compilerWithOptions(
-                "-Adagger.moduleBindingValidation=NONE",
-                "-Adagger.fullBindingGraphValidation=ERROR")
+            "-Adagger.moduleBindingValidation=NONE",
+            "-Adagger.fullBindingGraphValidation=ERROR")
             .compile(MODULE_WITH_ERRORS);
 
     assertThat(compilation).failed();
@@ -523,7 +523,7 @@ public final class FullBindingGraphValidationTest {
   public void bothAliasesSameValue() {
     Compilation compilation =
         compilerWithOptions(
-                "-Adagger.moduleBindingValidation=NONE", "-Adagger.fullBindingGraphValidation=NONE")
+            "-Adagger.moduleBindingValidation=NONE", "-Adagger.fullBindingGraphValidation=NONE")
             .compile(MODULE_WITH_ERRORS);
 
     assertThat(compilation).succeeded();

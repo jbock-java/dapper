@@ -15,8 +15,8 @@
 
 package dagger.spi.model;
 
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreTypes;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreTypes;
 import java.util.Objects;
 import javax.lang.model.type.TypeMirror;
 

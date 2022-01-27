@@ -23,7 +23,6 @@ import static dagger.model.BindingKind.INJECTION;
 import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
@@ -33,6 +32,7 @@ import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.Map;

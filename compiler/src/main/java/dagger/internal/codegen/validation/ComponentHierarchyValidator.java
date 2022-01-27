@@ -20,13 +20,13 @@ import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.Scope;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

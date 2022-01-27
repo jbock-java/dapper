@@ -18,10 +18,10 @@ package dagger.internal.codegen.writing;
 
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.binding.ComponentRequirement;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.TypeSpec;
 import java.util.Map;
 
 /** The implementation of a component creator type. */
@@ -39,6 +39,7 @@ public final class ComponentCreatorImplementation {
     this.name = requireNonNull(name);
     this.fields = requireNonNull(fields);
   }
+
   /** Creates a new {@link ComponentCreatorImplementation}. */
   public static ComponentCreatorImplementation create(
       TypeSpec spec, ClassName name, Map<ComponentRequirement, FieldSpec> fields) {

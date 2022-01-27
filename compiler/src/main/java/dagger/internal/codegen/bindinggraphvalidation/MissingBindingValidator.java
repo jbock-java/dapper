@@ -23,9 +23,9 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.MissingBinding;
-import dagger.spi.model.Key;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import javax.lang.model.type.TypeKind;
 

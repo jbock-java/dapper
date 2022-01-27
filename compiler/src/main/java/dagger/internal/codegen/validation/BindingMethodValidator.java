@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreElements.asType;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.javapoet.ClassName;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;

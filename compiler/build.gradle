@@ -21,6 +21,7 @@ javadoc {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1139' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -39,9 +40,9 @@ shadowJar {
 
 dependencies {
     def dapper = project(':dapper')
-    def javapoet = 'io.github.jbock-java:javapoet:1.14'
-    def ac =  'io.github.jbock-java:auto-common:1.2.1'
-    def graph = 'io.github.jbock-java:guava-graph:1.0.1'
+    def javapoet = 'io.github.jbock-java:javapoet:1.15'
+    def ac =  'io.github.jbock-java:auto-common:1.2.2'
+    def graph = 'io.github.jbock-java:guava-graph:1.0.2'
     shadow(javapoet)
     shadow(ac)
     shadow(graph)

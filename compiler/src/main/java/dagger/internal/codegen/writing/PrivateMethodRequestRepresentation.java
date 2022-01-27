@@ -16,13 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.PRIVATE_METHOD;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -31,6 +29,8 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.RequestKind;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;
 
 /**

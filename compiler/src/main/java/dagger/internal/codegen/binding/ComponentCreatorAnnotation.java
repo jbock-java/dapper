@@ -20,9 +20,9 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.mapping;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
+import io.jbock.javapoet.ClassName;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Locale;

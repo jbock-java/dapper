@@ -21,11 +21,11 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Abstract
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
 import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
 
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;

@@ -16,22 +16,22 @@
 
 package dagger.model;
 
-import static com.google.common.graph.Graphs.inducedSubgraph;
-import static com.google.common.graph.Graphs.reachableNodes;
-import static com.google.common.graph.Graphs.transpose;
 import static dagger.internal.codegen.base.Util.intersection;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.common.graph.Graphs.inducedSubgraph;
+import static io.jbock.common.graph.Graphs.reachableNodes;
+import static io.jbock.common.graph.Graphs.transpose;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.graph.EndpointPair;
-import com.google.common.graph.ImmutableNetwork;
-import com.google.common.graph.MutableNetwork;
-import com.google.common.graph.Network;
-import com.google.common.graph.NetworkBuilder;
 import dagger.Module;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.spi.model.Key;
+import io.jbock.common.graph.EndpointPair;
+import io.jbock.common.graph.ImmutableNetwork;
+import io.jbock.common.graph.MutableNetwork;
+import io.jbock.common.graph.Network;
+import io.jbock.common.graph.NetworkBuilder;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;

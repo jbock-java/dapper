@@ -16,14 +16,14 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static com.google.auto.common.MoreElements.getPackage;
-import static com.google.auto.common.MoreTypes.asTypeElement;
+import static io.jbock.auto.common.MoreElements.getPackage;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

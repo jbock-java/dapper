@@ -21,8 +21,8 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.Element;

@@ -22,7 +22,7 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import com.google.testing.compile.CompilationExtension;
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;

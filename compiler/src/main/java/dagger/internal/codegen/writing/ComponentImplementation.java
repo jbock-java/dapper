@@ -16,10 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.squareup.javapoet.MethodSpec.constructorBuilder;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.ComponentCreatorKind.BUILDER;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
@@ -31,21 +27,16 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.langmodel.Accessibility.isProtectedMemberOf;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.javapoet.MethodSpec.constructorBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
@@ -66,8 +57,17 @@ import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph.Node;
-import dagger.spi.model.Key;
 import dagger.model.RequestKind;
+import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
@@ -756,7 +756,7 @@ public final class ComponentImplementation {
 
     private void validateMethodNameDoesNotOverrideGeneratedCreator(String creatorName) {
       // Check if there is any client added method has the same signature as generated creatorName.
-      MoreElements.getAllMethods(graph.componentTypeElement(), types, elements).stream()
+      MoreElements.getAllMethods(graph.componentTypeElement(), types).stream()
           .filter(method -> method.getSimpleName().contentEquals(creatorName))
           .filter(method -> method.getParameters().isEmpty())
           .filter(method -> !method.getModifiers().contains(Modifier.STATIC))

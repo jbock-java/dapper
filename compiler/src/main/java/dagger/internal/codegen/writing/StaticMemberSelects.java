@@ -24,14 +24,14 @@ import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFr
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingType;
 import dagger.internal.codegen.javapoet.CodeBlocks;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeVariableName;
 import java.util.List;
 import javax.lang.model.type.TypeMirror;
 
@@ -116,5 +116,6 @@ final class StaticMemberSelects {
     }
   }
 
-  private StaticMemberSelects() {}
+  private StaticMemberSelects() {
+  }
 }

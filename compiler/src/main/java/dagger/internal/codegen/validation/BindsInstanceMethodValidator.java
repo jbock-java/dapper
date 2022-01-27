@@ -21,9 +21,9 @@ import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;

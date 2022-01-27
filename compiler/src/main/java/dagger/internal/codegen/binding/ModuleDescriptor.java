@@ -16,22 +16,18 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.getPackage;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreElements.getPackage;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.common.graph.Traverser;
-import com.squareup.javapoet.ClassName;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -40,6 +36,10 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.common.graph.Traverser;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;

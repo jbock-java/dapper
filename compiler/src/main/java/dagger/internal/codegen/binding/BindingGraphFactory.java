@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.auto.common.MoreTypes.isType;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
@@ -25,10 +23,11 @@ import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.DELEGATE;
 import static dagger.model.BindingKind.INJECTION;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static io.jbock.auto.common.MoreTypes.isType;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Keys;
 import dagger.internal.codegen.base.Preconditions;
@@ -38,6 +37,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;

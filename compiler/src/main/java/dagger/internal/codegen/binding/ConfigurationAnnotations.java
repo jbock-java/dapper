@@ -22,14 +22,14 @@ import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomp
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static javax.lang.model.util.ElementFilter.typesIn;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
 import dagger.Component;
 import dagger.Module;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

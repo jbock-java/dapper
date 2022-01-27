@@ -22,7 +22,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
-import com.google.common.graph.Traverser;
+import io.jbock.common.graph.Traverser;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;

@@ -20,7 +20,6 @@ import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForB
 import static dagger.model.BindingKind.INJECTION;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -28,6 +27,7 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Provider;
 
 /**

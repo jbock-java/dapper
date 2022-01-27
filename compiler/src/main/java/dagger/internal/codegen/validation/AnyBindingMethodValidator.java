@@ -21,10 +21,10 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;

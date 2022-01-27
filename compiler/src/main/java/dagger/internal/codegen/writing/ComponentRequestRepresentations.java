@@ -23,10 +23,6 @@ import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessibl
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
@@ -41,6 +37,10 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;

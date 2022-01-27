@@ -16,20 +16,20 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.auto.common.MoreElements.hasModifiers;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.hasModifiers;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.common.graph.Traverser;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.extension.DaggerStreams;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.common.graph.Traverser;
+import io.jbock.javapoet.ClassName;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;

@@ -19,9 +19,8 @@ package dagger.internal.codegen.base;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.validation.ValidationReport;
-import java.util.Objects;
+import io.jbock.javapoet.ClassName;
 import java.util.Optional;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;

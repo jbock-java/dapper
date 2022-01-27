@@ -18,7 +18,7 @@ package dagger.internal.codegen.base;
 
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreTypes;
+import io.jbock.auto.common.MoreTypes;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;

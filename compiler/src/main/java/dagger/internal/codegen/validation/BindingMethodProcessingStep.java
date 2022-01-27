@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.validation;
 
-import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;

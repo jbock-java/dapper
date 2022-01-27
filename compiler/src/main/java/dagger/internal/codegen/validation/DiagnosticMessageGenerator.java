@@ -27,8 +27,6 @@ import static java.util.Collections.min;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ElementFormatter;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
@@ -41,6 +39,8 @@ import dagger.model.BindingGraph.Edge;
 import dagger.model.BindingGraph.MaybeBinding;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;

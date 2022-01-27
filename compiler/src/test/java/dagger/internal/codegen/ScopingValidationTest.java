@@ -259,8 +259,8 @@ public class ScopingValidationTest {
   public void fullBindingGraphValidationDoesNotReportForOneScope() {
     Compilation compilation =
         compilerWithOptions(
-                "-Adagger.fullBindingGraphValidation=ERROR",
-                "-Adagger.moduleHasDifferentScopesValidation=ERROR")
+            "-Adagger.fullBindingGraphValidation=ERROR",
+            "-Adagger.moduleHasDifferentScopesValidation=ERROR")
             .compile(
                 JavaFileObjects.forSourceLines(
                     "test.TestModule",
@@ -283,8 +283,8 @@ public class ScopingValidationTest {
   public void fullBindingGraphValidationDoesNotReportInjectBindings() {
     Compilation compilation =
         compilerWithOptions(
-                "-Adagger.fullBindingGraphValidation=ERROR",
-                "-Adagger.moduleHasDifferentScopesValidation=ERROR")
+            "-Adagger.fullBindingGraphValidation=ERROR",
+            "-Adagger.moduleHasDifferentScopesValidation=ERROR")
             .compile(
                 JavaFileObjects.forSourceLines(
                     "test.UsedInRootRedScoped",
@@ -457,7 +457,6 @@ public class ScopingValidationTest {
                 type, simpleScope, simpleScoped, singletonScopedA, singletonScopedB, scopeless);
     assertThat(compilation).succeededWithoutWarnings();
   }
-
 
 
   // Tests the following component hierarchy:

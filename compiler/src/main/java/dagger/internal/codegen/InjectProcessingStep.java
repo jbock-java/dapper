@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen;
 
-import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.List;

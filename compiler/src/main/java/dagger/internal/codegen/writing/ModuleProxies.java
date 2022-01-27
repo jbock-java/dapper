@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.squareup.javapoet.MethodSpec.constructorBuilder;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static io.jbock.javapoet.MethodSpec.constructorBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -27,15 +27,15 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;

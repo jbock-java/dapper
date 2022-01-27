@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.javapoet;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeSpec;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeSpec;
 import javax.lang.model.element.TypeElement;
 
 /** Convenience methods for use with JavaPoet's {@link TypeSpec}. */

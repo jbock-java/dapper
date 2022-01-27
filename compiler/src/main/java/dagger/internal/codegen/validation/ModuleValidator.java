@@ -16,11 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
-import static com.google.auto.common.MoreTypes.asTypeElement;
-import static com.google.auto.common.Visibility.PRIVATE;
-import static com.google.auto.common.Visibility.PUBLIC;
-import static com.google.auto.common.Visibility.effectiveVisibilityOfElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.componentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
@@ -34,15 +29,16 @@ import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCrea
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static io.jbock.auto.common.Visibility.PRIVATE;
+import static io.jbock.auto.common.Visibility.PUBLIC;
+import static io.jbock.auto.common.Visibility.effectiveVisibilityOfElement;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.google.auto.common.Visibility;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
@@ -53,6 +49,10 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.auto.common.Visibility;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Scope;
 import jakarta.inject.Singleton;

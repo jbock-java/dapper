@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen;
 
-import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
@@ -30,6 +29,7 @@ import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
 import dagger.spi.BindingGraphPlugin;
+import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;

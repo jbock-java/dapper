@@ -16,18 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.writing.AssistedInjectionParameters.assistedFactoryParameterSpecs;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -39,6 +34,11 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
 import java.util.Optional;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;

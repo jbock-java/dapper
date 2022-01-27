@@ -23,8 +23,6 @@ import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFr
 import static dagger.model.BindingKind.DELEGATE;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -35,6 +33,8 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
 /** A {@link RequestRepresentation} for {@code @Binds} methods. */

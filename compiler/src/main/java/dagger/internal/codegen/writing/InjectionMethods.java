@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.auto.common.MoreElements.asType;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.base.RequestKinds.requestTypeName;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
@@ -30,17 +27,13 @@ import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibl
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypePubliclyAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
@@ -48,6 +41,13 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeVariableName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

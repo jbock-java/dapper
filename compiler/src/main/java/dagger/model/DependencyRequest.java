@@ -102,6 +102,7 @@ public final class DependencyRequest {
     private Key key;
     private Optional<Element> requestElement = Optional.empty();
     private boolean isNullable;
+
     private Builder() {
     }
 

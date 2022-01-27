@@ -22,9 +22,9 @@ import static javax.lang.model.element.ElementKind.PARAMETER;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.EXECUTABLE;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Formatter;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.EnumSet;
 import java.util.List;

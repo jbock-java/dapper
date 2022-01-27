@@ -16,19 +16,17 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -37,6 +35,8 @@ import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
@@ -245,9 +245,9 @@ public final class InjectValidator implements ClearableCache {
   private ValidationReport<ExecutableElement> validateMethod(ExecutableElement methodElement) {
     ValidationReport.Builder<ExecutableElement> builder = ValidationReport.about(methodElement);
     builder.addItem(
-            "Method injection has been disabled",
-            privateMemberDiagnosticKind(),
-            methodElement);
+        "Method injection has been disabled",
+        privateMemberDiagnosticKind(),
+        methodElement);
     return builder.build();
   }
 

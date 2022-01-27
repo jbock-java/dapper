@@ -25,7 +25,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreElements;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ErrorMessages;
@@ -33,6 +32,7 @@ import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayList;

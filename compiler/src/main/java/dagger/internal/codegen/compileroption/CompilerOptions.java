@@ -31,6 +31,7 @@ public abstract class CompilerOptions {
    * memory leaks in your app, or cause other unknown issues at runtime.
    */
   public abstract boolean experimentalMergedMode(TypeElement element);
+
   /**
    * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
    *

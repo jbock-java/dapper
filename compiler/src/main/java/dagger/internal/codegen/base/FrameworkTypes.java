@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.MoreTypes.isType;
+import static io.jbock.auto.common.MoreTypes.isType;
 
-import com.google.auto.common.MoreTypes;
 import dagger.Lazy;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Provider;
 import java.util.List;
 import javax.lang.model.type.TypeMirror;

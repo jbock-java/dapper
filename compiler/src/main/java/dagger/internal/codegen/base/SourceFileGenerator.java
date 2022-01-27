@@ -21,14 +21,14 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTY
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.javapoet.AnnotationSpec;
+import io.jbock.javapoet.JavaFile;
+import io.jbock.javapoet.TypeSpec;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

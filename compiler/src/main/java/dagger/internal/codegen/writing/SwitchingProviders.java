@@ -16,25 +16,19 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ContributionBinding;
@@ -44,6 +38,12 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.BindingKind;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
+import io.jbock.javapoet.TypeVariableName;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;

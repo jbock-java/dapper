@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.writing;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 
 /**
  * A factory for expressions of {@link ComponentRequirement}s in the generated component. This is

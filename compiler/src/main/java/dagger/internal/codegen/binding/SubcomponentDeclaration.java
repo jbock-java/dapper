@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotationElementAndValue;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationElementAndValue;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;

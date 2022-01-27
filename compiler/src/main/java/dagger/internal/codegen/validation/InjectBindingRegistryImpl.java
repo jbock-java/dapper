@@ -22,8 +22,6 @@ import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConst
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.Component;
 import dagger.Provides;
 import dagger.internal.codegen.base.Preconditions;
@@ -39,6 +37,8 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;

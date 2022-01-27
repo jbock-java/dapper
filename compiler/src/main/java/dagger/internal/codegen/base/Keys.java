@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAndCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
@@ -98,5 +98,6 @@ public final class Keys {
     return key.qualifier().isEmpty()
         && key.type().java().getKind() == TypeKind.DECLARED
         && isAnyAnnotationPresent(
-        asTypeElement(key.type().java()), allComponentAndCreatorAnnotations());  }
+        asTypeElement(key.type().java()), allComponentAndCreatorAnnotations());
+  }
 }

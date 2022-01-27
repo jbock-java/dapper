@@ -94,9 +94,9 @@ public class BindsMissingDelegateValidationTest {
         .hadErrorContainingMatch(
             "\\Qtest.C.NotBound cannot be provided\\E|"
                 + message(
-                    "\\QObject is bound multiple times:",
-                    "    @Binds Object test.C.TestModule.bindObject(test.C.NotBound)",
-                    "    @Provides Object test.C.TestModule.provideObject()\\E"))
+                "\\QObject is bound multiple times:",
+                "    @Binds Object test.C.TestModule.bindObject(test.C.NotBound)",
+                "    @Provides Object test.C.TestModule.provideObject()\\E"))
         .inFile(component)
         .onLineContaining("interface C");
   }

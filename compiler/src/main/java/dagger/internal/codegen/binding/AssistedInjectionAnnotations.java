@@ -16,25 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.asExecutable;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -43,6 +38,11 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

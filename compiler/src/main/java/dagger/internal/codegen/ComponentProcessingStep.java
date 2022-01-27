@@ -16,17 +16,14 @@
 
 package dagger.internal.codegen;
 
-import static com.google.auto.common.MoreElements.asType;
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
 import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.allCreatorAnnotations;
+import static io.jbock.auto.common.MoreElements.asType;
 import static java.util.Collections.disjoint;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingGraphFactory;
@@ -38,6 +35,9 @@ import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import io.jbock.auto.common.BasicAnnotationProcessor;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;

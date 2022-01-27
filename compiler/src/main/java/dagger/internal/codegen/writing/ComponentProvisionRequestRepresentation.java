@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -27,6 +25,8 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 
 /** A binding expression for component provision methods. */
 final class ComponentProvisionRequestRepresentation extends RequestRepresentation {

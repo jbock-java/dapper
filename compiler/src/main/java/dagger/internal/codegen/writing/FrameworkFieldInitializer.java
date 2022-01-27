@@ -22,11 +22,6 @@ import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecK
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import dagger.internal.DelegateFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkField;
@@ -34,6 +29,11 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.ParameterizedTypeName;
+import io.jbock.javapoet.TypeName;
 
 /**
  * An object that can initialize a framework-type component field for a binding. An instance should

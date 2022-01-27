@@ -16,8 +16,8 @@
 
 package dagger.spi.model;
 
-import com.google.auto.common.AnnotationMirrors;
-import com.google.auto.common.Equivalence;
+import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.Equivalence;
 import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 

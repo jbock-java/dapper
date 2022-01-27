@@ -16,13 +16,13 @@
 
 package dagger.model;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 
-import com.google.auto.common.AnnotationMirrors;
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Objects;

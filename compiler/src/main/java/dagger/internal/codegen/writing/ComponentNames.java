@@ -21,7 +21,6 @@ import static dagger.internal.codegen.extension.DaggerCollectors.onlyElement;
 import static java.lang.Character.isUpperCase;
 import static java.lang.String.format;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
@@ -32,6 +31,7 @@ import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.model.ComponentPath;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.Collection;

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.Lazy;
 import dagger.internal.ProviderOfLazy;
 import dagger.internal.codegen.base.RequestKinds;
@@ -24,6 +23,7 @@ import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Provider;
 import javax.lang.model.type.TypeMirror;
 

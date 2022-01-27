@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.javapoet;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
 /**

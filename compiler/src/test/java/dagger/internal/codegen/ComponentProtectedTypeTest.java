@@ -81,14 +81,14 @@ final class ComponentProtectedTypeTest {
         "");
     Collections.addAll(generatedComponent, GeneratedLines.generatedAnnotations());
     Collections.addAll(generatedComponent,
-            "public final class DaggerTestComponent extends TestComponent {",
-            "  private Provider<TestComponentBase.ProtectedType> protectedTypeProvider;",
-            "",
-            "  @Override",
-            "  TestComponentBase.ProtectedType provideProtectedType() {",
-            "    return protectedTypeProvider.get();",
-            "  }",
-            "}");
+        "public final class DaggerTestComponent extends TestComponent {",
+        "  private Provider<TestComponentBase.ProtectedType> protectedTypeProvider;",
+        "",
+        "  @Override",
+        "  TestComponentBase.ProtectedType provideProtectedType() {",
+        "    return protectedTypeProvider.get();",
+        "  }",
+        "}");
 
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(baseSrc, componentSrc);

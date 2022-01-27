@@ -16,22 +16,22 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.auto.common.MoreTypes.isType;
-import static com.google.auto.common.MoreTypes.isTypeOf;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.model.RequestKind.LAZY;
 import static dagger.model.RequestKind.PROVIDER;
 import static dagger.model.RequestKind.PROVIDER_OF_LAZY;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.isType;
+import static io.jbock.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import com.squareup.javapoet.TypeName;
 import dagger.Lazy;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.RequestKind;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Provider;
 import java.util.Map;
 import javax.lang.model.type.TypeMirror;

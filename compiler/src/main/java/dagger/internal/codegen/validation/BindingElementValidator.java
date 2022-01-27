@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
@@ -29,8 +29,8 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.spi.model.Key;
 import dagger.model.Scope;
+import dagger.spi.model.Key;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;

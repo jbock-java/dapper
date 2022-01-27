@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
-import com.google.auto.common.AnnotationMirrors;
-import com.google.auto.common.SuperficialValidation;
 import dagger.internal.codegen.extension.DaggerStreams;
+import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.SuperficialValidation;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -16,10 +16,10 @@
 
 package dagger.spi.model;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
 import static java.util.stream.Collectors.joining;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,5 +100,6 @@ final class MoreAnnotationMirrors {
         null);
   }
 
-  private MoreAnnotationMirrors() {}
+  private MoreAnnotationMirrors() {
+  }
 }

@@ -20,8 +20,8 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
+import io.jbock.javapoet.ClassName;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;

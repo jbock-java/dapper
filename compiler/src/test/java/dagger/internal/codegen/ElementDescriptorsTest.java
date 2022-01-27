@@ -62,15 +62,18 @@ public class ElementDescriptorsTest {
   }
 
   static class TestClassB<T> {
-    void method1(boolean yesOrNo, int number) {}
+    void method1(boolean yesOrNo, int number) {
+    }
 
     byte method2(char letter) {
       return 0;
     }
 
-    void method3(double realNumber1, float realNummber2) {}
+    void method3(double realNumber1, float realNummber2) {
+    }
 
-    void method4(long bigNumber, short littlerNumber) {}
+    void method4(long bigNumber, short littlerNumber) {
+    }
   }
 
   @Test
@@ -80,7 +83,8 @@ public class ElementDescriptorsTest {
   }
 
   static class TestClassC<T> {
-    void method1(Object something) {}
+    void method1(Object something) {
+    }
 
     Object method2() {
       return null;
@@ -106,7 +110,8 @@ public class ElementDescriptorsTest {
   }
 
   static class TestClassD<T> {
-    void method1(TestDataClass data) {}
+    void method1(TestDataClass data) {
+    }
 
     TestDataClass method2() {
       return null;
@@ -122,15 +127,18 @@ public class ElementDescriptorsTest {
   }
 
   static class TestClassE<T> {
-    void method1(TestDataClass[] data) {}
+    void method1(TestDataClass[] data) {
+    }
 
     TestDataClass[] method2() {
       return null;
     }
 
-    void method3(int[] array) {}
+    void method3(int[] array) {
+    }
 
-    void method4(int... array) {}
+    void method4(int... array) {
+    }
   }
 
   @Test
@@ -144,11 +152,14 @@ public class ElementDescriptorsTest {
   }
 
   static class TestClassF<T> {
-    void method1(TestDataClass.MemberInnerData data) {}
+    void method1(TestDataClass.MemberInnerData data) {
+    }
 
-    void method2(TestDataClass.StaticInnerData data) {}
+    void method2(TestDataClass.StaticInnerData data) {
+    }
 
-    void method3(TestDataClass.EnumData enumData) {}
+    void method3(TestDataClass.EnumData enumData) {
+    }
 
     TestDataClass.StaticInnerData method4() {
       return null;
@@ -167,7 +178,8 @@ public class ElementDescriptorsTest {
 
   @SuppressWarnings("TypeParameterUnusedInFormals")
   static class TestClassG<T> {
-    void method1(T something) {}
+    void method1(T something) {
+    }
 
     T method2() {
       return null;
@@ -234,9 +246,11 @@ public class ElementDescriptorsTest {
 
 @SuppressWarnings("ClassCanBeStatic")
 class TestDataClass {
-  class MemberInnerData {}
+  class MemberInnerData {
+  }
 
-  static class StaticInnerData {}
+  static class StaticInnerData {
+  }
 
   enum EnumData {
     VALUE1,

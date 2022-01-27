@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 import static dagger.internal.codegen.base.Formatter.INDENT;
@@ -26,14 +25,12 @@ import static dagger.internal.codegen.base.Scopes.singletonScope;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.auto.common.Equivalence.Wrapper;
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
@@ -51,6 +48,9 @@ import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
+import io.jbock.auto.common.Equivalence.Wrapper;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
@@ -306,7 +306,7 @@ public final class ComponentDescriptorValidator {
       Set<ComponentRequirement> mustBePassed =
           componentModuleAndDependencyRequirements.stream()
               .filter(
-              input -> input.nullPolicy(elements).equals(NullPolicy.THROW))
+                  input -> input.nullPolicy(elements).equals(NullPolicy.THROW))
               .collect(Collectors.toCollection(LinkedHashSet::new));
       // Component requirements that the creator must be able to set, but can't
       Set<ComponentRequirement> missingRequirements =

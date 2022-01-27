@@ -47,12 +47,12 @@ class ComponentShardTest {
     javaFileObjects
         // Shard 2: Bindings (1)
         .add(createBinding("Binding1", "Binding2 binding2"));
-        // Shard 1: Bindings (2, 3, 4, 5). Contains more than 2 bindings due to cycle.
+    // Shard 1: Bindings (2, 3, 4, 5). Contains more than 2 bindings due to cycle.
     javaFileObjects.add(createBinding("Binding2", "Binding3 binding3"));
     javaFileObjects.add(createBinding("Binding3", "Binding4 binding4"));
     javaFileObjects.add(createBinding("Binding4", "Binding5 binding5, Provider<Binding2> binding2Provider"));
     javaFileObjects.add(createBinding("Binding5", "Binding6 binding6"));
-        // Component shard: Bindings (6, 7)
+    // Component shard: Bindings (6, 7)
     javaFileObjects.add(createBinding("Binding6", "Binding7 binding7"));
     javaFileObjects.add(createBinding("Binding7"));
 

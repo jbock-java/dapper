@@ -20,8 +20,8 @@ import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreatio
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 
-import com.google.auto.common.MoreElements;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;

@@ -19,9 +19,9 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import io.jbock.javapoet.CodeBlock;
 
 /** Holds common methods for BindingRepresentations. */
 final class BindingRepresentations {
@@ -34,5 +34,6 @@ final class BindingRepresentations {
             unscoped.creationExpression());
   }
 
-  private BindingRepresentations() {}
+  private BindingRepresentations() {
+  }
 }

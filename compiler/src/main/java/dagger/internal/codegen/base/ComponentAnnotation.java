@@ -16,16 +16,16 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
-import static com.google.auto.common.MoreTypes.asTypeElements;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
+import static io.jbock.auto.common.MoreTypes.asTypeElements;
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.javapoet.ClassName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;

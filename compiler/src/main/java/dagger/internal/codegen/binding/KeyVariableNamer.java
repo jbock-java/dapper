@@ -18,9 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 
-import com.google.auto.common.MoreTypes;
 import dagger.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreTypes;
 import java.util.Iterator;
 import java.util.Set;
 import javax.lang.model.element.TypeElement;

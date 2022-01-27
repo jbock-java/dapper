@@ -19,10 +19,10 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreTypes;
 import java.util.List;
 import java.util.Objects;
 import javax.lang.model.type.DeclaredType;

@@ -17,9 +17,9 @@
 package dagger.internal.codegen.javapoet;
 
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.ParameterizedTypeName;
+import io.jbock.javapoet.TypeName;
 
 /** Common names and convenience methods for JavaPoet {@link TypeName} usage. */
 public final class TypeNames {
@@ -54,6 +54,8 @@ public final class TypeNames {
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
 
   // Other classnames
+  public static final ClassName SINGLETON = ClassName.get("jakarta.inject", "Singleton");
+  public static final ClassName SCOPE = ClassName.get("jakarta.inject", "Scope");
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName GENERATED = ClassName.get("javax.annotation.processing", "Generated");
 

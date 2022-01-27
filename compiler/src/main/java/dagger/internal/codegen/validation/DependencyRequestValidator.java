@@ -16,17 +16,17 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.type.TypeKind.WILDCARD;
 
-import com.google.auto.common.MoreElements;
 import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.model.RequestKind;
+import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Collection;
 import javax.lang.model.element.AnnotationMirror;

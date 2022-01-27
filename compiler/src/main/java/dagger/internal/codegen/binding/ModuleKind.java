@@ -20,9 +20,9 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
+import io.jbock.javapoet.ClassName;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;

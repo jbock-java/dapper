@@ -16,16 +16,12 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreElements.asExecutable;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod.requiresInjectionMethod;
+import static io.jbock.auto.common.MoreElements.asExecutable;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -36,6 +32,10 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.DependencyRequest;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;

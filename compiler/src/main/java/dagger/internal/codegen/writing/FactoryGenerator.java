@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.squareup.javapoet.MethodSpec.constructorBuilder;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameters;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
@@ -32,18 +29,14 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
+import static io.jbock.javapoet.MethodSpec.constructorBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import dagger.internal.Factory;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -56,6 +49,13 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;

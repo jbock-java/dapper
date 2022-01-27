@@ -16,8 +16,8 @@
 
 package dagger.internal.codegen.javapoet;
 
-import com.squareup.javapoet.AnnotationSpec;
 import dagger.internal.codegen.base.Preconditions;
+import io.jbock.javapoet.AnnotationSpec;
 import java.util.EnumSet;
 import java.util.Set;
 

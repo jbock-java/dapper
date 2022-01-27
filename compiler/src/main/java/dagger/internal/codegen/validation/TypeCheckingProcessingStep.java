@@ -23,10 +23,10 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import com.google.auto.common.BasicAnnotationProcessor.Step;
-import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
+import io.jbock.auto.common.BasicAnnotationProcessor.Step;
+import io.jbock.javapoet.ClassName;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedHashSet;
 import java.util.Map;

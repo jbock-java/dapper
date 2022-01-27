@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.validation;
 
-import com.squareup.javapoet.ClassName;
 import dagger.Module;
 import dagger.Provides;
+import io.jbock.javapoet.ClassName;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;

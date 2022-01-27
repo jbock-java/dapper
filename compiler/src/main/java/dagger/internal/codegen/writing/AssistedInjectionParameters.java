@@ -16,12 +16,10 @@
 
 package dagger.internal.codegen.writing;
 
-import static com.google.auto.common.MoreElements.asExecutable;
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.auto.common.MoreTypes.asExecutable;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.asExecutable;
 
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedFactoryMetadata;
@@ -30,6 +28,8 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.model.BindingKind;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,5 +104,6 @@ final class AssistedInjectionParameters {
     return assistedParameterSpecs;
   }
 
-  private AssistedInjectionParameters() {}
+  private AssistedInjectionParameters() {
+  }
 }

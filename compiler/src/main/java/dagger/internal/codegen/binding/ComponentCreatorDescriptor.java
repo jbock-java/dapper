@@ -16,15 +16,14 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.common.MoreTypes;
 import dagger.BindsInstance;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
@@ -32,6 +31,7 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
+import io.jbock.auto.common.MoreTypes;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

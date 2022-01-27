@@ -18,13 +18,13 @@ package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.model.BindingKind.INJECTION;
 
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Item;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import javax.lang.model.element.TypeElement;
 

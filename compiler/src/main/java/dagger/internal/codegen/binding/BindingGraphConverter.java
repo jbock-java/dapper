@@ -16,17 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.graph.ImmutableNetwork;
-import com.google.common.graph.MutableNetwork;
-import com.google.common.graph.Network;
-import com.google.common.graph.NetworkBuilder;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
@@ -40,6 +36,10 @@ import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.common.graph.ImmutableNetwork;
+import io.jbock.common.graph.MutableNetwork;
+import io.jbock.common.graph.Network;
+import io.jbock.common.graph.NetworkBuilder;
 import jakarta.inject.Inject;
 import java.util.ArrayDeque;
 import java.util.Deque;

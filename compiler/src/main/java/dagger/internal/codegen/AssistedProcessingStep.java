@@ -16,11 +16,9 @@
 
 package dagger.internal.codegen;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 
-import com.google.auto.common.MoreElements;
-import com.squareup.javapoet.ClassName;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -28,6 +26,8 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;

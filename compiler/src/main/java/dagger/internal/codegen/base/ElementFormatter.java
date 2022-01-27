@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.asExecutable;
 import static java.util.stream.Collectors.joining;
 
 import jakarta.inject.Inject;

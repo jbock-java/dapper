@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.extension;
 
-import static com.google.common.graph.Graphs.reachableNodes;
 import static dagger.internal.codegen.base.Util.difference;
+import static io.jbock.common.graph.Graphs.reachableNodes;
 
-import com.google.common.graph.Graph;
-import com.google.common.graph.SuccessorsFunction;
 import dagger.internal.codegen.base.Util;
+import io.jbock.common.graph.Graph;
+import io.jbock.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;

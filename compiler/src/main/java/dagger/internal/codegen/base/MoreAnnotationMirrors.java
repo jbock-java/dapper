@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.base;
 
-import com.google.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.AnnotationMirrors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Name;
 

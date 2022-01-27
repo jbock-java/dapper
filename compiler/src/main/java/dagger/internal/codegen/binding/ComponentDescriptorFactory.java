@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
@@ -26,11 +24,12 @@ import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentCon
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.VOID;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Preconditions;
@@ -38,6 +37,7 @@ import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescri
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.Scope;
+import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

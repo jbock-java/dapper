@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.base;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
 
 import java.util.List;
 import javax.lang.model.element.AnnotationMirror;

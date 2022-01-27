@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.validation;
 
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreTypes;
-import com.google.auto.common.SuperficialValidation;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.auto.common.SuperficialValidation;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;

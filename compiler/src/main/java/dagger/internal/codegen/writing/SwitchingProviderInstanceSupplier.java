@@ -19,7 +19,6 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
 
-import com.squareup.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -27,6 +26,7 @@ import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.model.BindingKind;
+import io.jbock.javapoet.CodeBlock;
 
 /**
  * An object that initializes a framework-type component field for a binding using instances created
@@ -44,7 +44,8 @@ final class SwitchingProviderInstanceSupplier implements FrameworkInstanceSuppli
           unscopedDirectInstanceRequestRepresentationFactory) {
     FrameworkInstanceCreationExpression frameworkInstanceCreationExpression =
         switchingProviders.newFrameworkInstanceCreationExpression(
-            binding, unscopedDirectInstanceRequestRepresentationFactory.create(binding));;
+            binding, unscopedDirectInstanceRequestRepresentationFactory.create(binding));
+    ;
     this.frameworkInstanceSupplier =
         new FrameworkFieldInitializer(
             componentImplementation, binding, scope(binding, frameworkInstanceCreationExpression));

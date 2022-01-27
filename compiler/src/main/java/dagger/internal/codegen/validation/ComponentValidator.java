@@ -16,10 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreTypes.asDeclared;
-import static com.google.auto.common.MoreTypes.asExecutable;
-import static com.google.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.anyComponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
@@ -33,6 +29,10 @@ import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMess
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.asExecutable;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Comparator.comparing;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.ElementKind.INTERFACE;
@@ -40,8 +40,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
 import dagger.Component;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ComponentAnnotation;
@@ -57,6 +55,8 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;

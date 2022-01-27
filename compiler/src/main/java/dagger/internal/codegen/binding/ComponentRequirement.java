@@ -23,14 +23,14 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.google.auto.common.Equivalence;
-import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.BindingKind;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

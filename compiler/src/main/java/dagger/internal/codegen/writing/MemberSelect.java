@@ -18,9 +18,9 @@ package dagger.internal.codegen.writing;
 
 import static java.util.Objects.requireNonNull;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 
 /**
  * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.

@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen;
 
-import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -25,6 +24,7 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.BindingGraphPlugins;
+import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Set;
