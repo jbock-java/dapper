@@ -8,7 +8,7 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   private final ProcessingEnvironment delegate;
 
-  JavacProcessingEnv(ProcessingEnvironment delegate) {
+  public JavacProcessingEnv(ProcessingEnvironment delegate) {
     this.delegate = delegate;
   }
 
@@ -18,5 +18,15 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   public Types typeUtils() {
     return delegate.getTypeUtils();
+  }
+
+  @Override
+  public XMessager getMessager() {
+    return new XMessager(delegate.getMessager());
+  }
+
+  @Override
+  public ProcessingEnvironment toJavac() {
+    return delegate;
   }
 }

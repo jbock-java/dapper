@@ -7,4 +7,8 @@ public abstract class XProcessingEnv {
   public static XProcessingEnv create(ProcessingEnvironment processingEnv) {
     return new JavacProcessingEnv(processingEnv);
   }
+
+  public abstract XMessager getMessager();
+
+  public abstract ProcessingEnvironment toJavac();
 }
