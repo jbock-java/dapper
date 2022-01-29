@@ -1,7 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
 import java.util.List;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 public class XTypeElement extends XElement {
