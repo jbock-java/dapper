@@ -81,10 +81,6 @@ public final class DaggerElements implements Elements, ClearableCache {
     this.types = requireNonNull(types);
   }
 
-  public DaggerElements(ProcessingEnvironment processingEnv) {
-    this(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
-  }
-
   /**
    * Returns {@code true} if {@code encloser} is equal to {@code enclosed} or recursively encloses
    * it.

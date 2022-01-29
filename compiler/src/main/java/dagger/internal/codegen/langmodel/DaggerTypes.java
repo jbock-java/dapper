@@ -51,7 +51,6 @@ public final class DaggerTypes implements Types {
   private final Types types;
   private final DaggerElements elements;
 
-  @Inject
   public DaggerTypes(Types types, DaggerElements elements) {
     this.types = requireNonNull(types);
     this.elements = requireNonNull(elements);

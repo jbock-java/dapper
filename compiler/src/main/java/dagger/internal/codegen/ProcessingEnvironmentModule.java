@@ -25,6 +25,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Map;
@@ -60,11 +61,6 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  static Types types(ProcessingEnvironment processingEnvironment) {
-    return processingEnvironment.getTypeUtils();
-  }
-
-  @Provides
   static SourceVersion sourceVersion(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getSourceVersion();
   }
@@ -72,7 +68,16 @@ interface ProcessingEnvironmentModule {
   @Provides
   @Singleton
   static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
-    return new DaggerElements(processingEnvironment);
+    return new DaggerElements(
+        processingEnvironment.getElementUtils(),
+        processingEnvironment.getTypeUtils());
+  }
+
+  @Provides
+  @Singleton
+  static DaggerTypes daggerTypes(
+      ProcessingEnvironment processingEnvironment, DaggerElements elements) {
+    return new DaggerTypes(processingEnvironment.getTypeUtils(), elements);
   }
 
   @Provides
