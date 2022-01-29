@@ -105,10 +105,15 @@ public final class ComponentImplementation {
   // TODO(wanyingd): add experimental merged mode.
   public enum CompilerMode {
     DEFAULT,
-    FAST_INIT;
+    FAST_INIT,
+    EXPERIMENTAL_MERGED_MODE;
 
     public boolean isFastInit() {
       return this == CompilerMode.FAST_INIT;
+    }
+
+    public boolean isExperimentalMergedMode() {
+      return this == CompilerMode.EXPERIMENTAL_MERGED_MODE;
     }
   }
 
@@ -280,10 +285,13 @@ public final class ComponentImplementation {
     // Create and claim the fields for this and all ancestor components stored as fields.
     this.componentFieldsByImplementation =
         createComponentFieldsByImplementation(this);
+    TypeElement typeElement = rootComponentImplementation().componentDescriptor().typeElement();
     this.compilerMode =
-        compilerOptions.fastInit(rootComponentImplementation().componentDescriptor().typeElement())
+        compilerOptions.fastInit(typeElement)
             ? CompilerMode.FAST_INIT
-            : CompilerMode.DEFAULT;
+            : (compilerOptions.experimentalMergedMode(typeElement)
+            ? CompilerMode.EXPERIMENTAL_MERGED_MODE
+            : CompilerMode.DEFAULT);
   }
 
   /**
