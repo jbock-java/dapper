@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen;
 
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
@@ -28,16 +30,22 @@ import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.spi.BindingGraphPlugin;
 import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 
 /**
  * The annotation processor responsible for generating the classes that drive the Dagger 2.0
@@ -122,6 +130,13 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
 
   @Module
   interface ProcessingStepsModule {
+
+    @Singleton
+    @Provides
+    static XProcessingEnv provideXProcessingEnv(ProcessingEnvironment processingEnv) {
+      return XProcessingEnv.create(processingEnv);
+    }
+
     @Provides
     static List<Step> processingSteps(
         InjectProcessingStep injectProcessingStep,
@@ -147,5 +162,40 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   @Override
   protected void postRound(RoundEnvironment roundEnv) {
     helper.postRound(roundEnv);
+  }
+
+  private static final class DelegatingStep implements Step {
+    static Step create(XProcessingEnv xProcessingEnv, XProcessingStep xProcessingStep) {
+      return new DelegatingStep(xProcessingEnv, xProcessingStep);
+    }
+
+    private final XProcessingEnv xProcessingEnv;
+    private final XProcessingStep delegate;
+
+    DelegatingStep(XProcessingEnv xProcessingEnv, XProcessingStep delegate) {
+      this.xProcessingEnv = xProcessingEnv;
+      this.delegate = delegate;
+    }
+
+    @Override
+    public Set<String> annotations() {
+      return delegate.annotations();
+    }
+
+    @Override
+    public Set<? extends Element> process(
+        Map<String, Set<Element>> elementsByAnnotation) {
+      return delegate.process(
+              xProcessingEnv,
+              Util.transformValues(
+                  elementsByAnnotation,
+                  javacElements ->
+                      javacElements.stream()
+                          .map(element -> XConverters.toXProcessing(element, xProcessingEnv))
+                          .collect(toImmutableSet())))
+          .stream()
+          .map(XElement::toJavac)
+          .collect(toImmutableSet());
+    }
   }
 }

@@ -77,6 +77,9 @@ public final class Util {
   }
 
   public static <E> Set<E> difference(Set<E> set1, Set<E> set2) {
+    if (set1.containsAll(set2)) {
+      return Set.of();
+    }
     return set1.stream()
         .filter(e -> !set2.contains(e))
         .collect(Collectors.toCollection(LinkedHashSet::new));
