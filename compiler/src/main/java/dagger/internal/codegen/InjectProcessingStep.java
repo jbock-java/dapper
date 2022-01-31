@@ -19,6 +19,8 @@ package dagger.internal.codegen;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
+import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
@@ -36,13 +38,12 @@ import javax.lang.model.util.ElementKindVisitor8;
  * annotation.
  */
 // TODO(gak): add some error handling for bad source files
-final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
+final class InjectProcessingStep extends XTypeCheckingProcessingStep<XElement> {
   private final ElementVisitor<Void, Void> visitor;
   private final Set<Element> processedElements = new LinkedHashSet<>();
 
   @Inject
   InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
-    super(e -> e);
     this.visitor =
         new ElementKindVisitor8<>() {
           @Override
@@ -74,7 +75,9 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   }
 
   @Override
-  protected void process(Element injectElement, Set<ClassName> annotations) {
+  protected void process(XElement xElement, Set<ClassName> annotations) {
+    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
+    Element injectElement = xElement.toJavac();
     // Only process an element once to avoid getting duplicate errors when an element is annotated
     // with multiple inject annotations.
     if (processedElements.contains(injectElement)) {

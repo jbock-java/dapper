@@ -24,9 +24,9 @@ import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.HashSet;
@@ -38,13 +38,12 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 
 /** An annotation processor for {@link dagger.assisted.AssistedInject}-annotated elements. */
-final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<ExecutableElement> {
+final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XExecutableElement> {
   private final DaggerTypes types;
   private final Messager messager;
 
   @Inject
   AssistedInjectProcessingStep(DaggerTypes types, Messager messager) {
-    super(MoreElements::asExecutable);
     this.types = types;
     this.messager = messager;
   }
@@ -56,7 +55,9 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
 
   @Override
   protected void process(
-      ExecutableElement assistedInjectElement, Set<ClassName> annotations) {
+      XExecutableElement xElement, Set<ClassName> annotations) {
+    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
+    ExecutableElement assistedInjectElement = xElement.toJavac();
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 

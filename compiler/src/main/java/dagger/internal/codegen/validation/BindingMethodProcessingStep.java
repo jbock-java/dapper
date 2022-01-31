@@ -17,7 +17,7 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.base.Preconditions;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -26,7 +26,7 @@ import javax.lang.model.element.ExecutableElement;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
 public final class BindingMethodProcessingStep
-    extends TypeCheckingProcessingStep<ExecutableElement> {
+    extends XTypeCheckingProcessingStep<XExecutableElement> {
 
   private final Messager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
@@ -34,7 +34,6 @@ public final class BindingMethodProcessingStep
   @Inject
   BindingMethodProcessingStep(
       Messager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
-    super(MoreElements::asExecutable);
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }
@@ -45,7 +44,8 @@ public final class BindingMethodProcessingStep
   }
 
   @Override
-  protected void process(ExecutableElement method, Set<ClassName> annotations) {
+  protected void process(XExecutableElement xElement, Set<ClassName> annotations) {
+    ExecutableElement method = xElement.toJavac();
     Preconditions.checkArgument(
         anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",

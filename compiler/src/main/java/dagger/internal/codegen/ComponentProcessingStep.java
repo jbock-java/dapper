@@ -33,8 +33,9 @@ import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.BasicAnnotationProcessor;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
@@ -48,7 +49,7 @@ import javax.lang.model.element.TypeElement;
  * A {@link BasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
  * as part of the {@link ComponentProcessor}.
  */
-final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeElement> {
+final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
   private final Messager messager;
   private final ComponentValidator componentValidator;
   private final ComponentCreatorValidator creatorValidator;
@@ -68,7 +69,6 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
       BindingGraphFactory bindingGraphFactory,
       SourceFileGenerator<BindingGraph> componentGenerator,
       BindingGraphValidator bindingGraphValidator) {
-    super(MoreElements::asType);
     this.messager = messager;
     this.componentValidator = componentValidator;
     this.creatorValidator = creatorValidator;
@@ -85,7 +85,9 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<TypeEleme
   }
 
   @Override
-  protected void process(TypeElement element, Set<ClassName> annotations) {
+  protected void process(XTypeElement xElement, Set<ClassName> annotations) {
+    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
+    TypeElement element = xElement.toJavac();
     if (!disjoint(annotations, rootComponentAnnotations())) {
       processRootComponent(element);
     }

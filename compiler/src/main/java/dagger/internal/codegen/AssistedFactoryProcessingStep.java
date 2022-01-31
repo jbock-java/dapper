@@ -43,9 +43,9 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
@@ -73,7 +73,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 /** An annotation processor for {@link dagger.assisted.AssistedFactory}-annotated types. */
-final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<TypeElement> {
+final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
   private final Messager messager;
   private final Filer filer;
   private final DaggerElements elements;
@@ -87,7 +87,6 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
       DaggerElements elements,
       DaggerTypes types,
       BindingFactory bindingFactory) {
-    super(MoreElements::asType);
     this.messager = messager;
     this.filer = filer;
     this.elements = elements;
@@ -101,7 +100,9 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<Typ
   }
 
   @Override
-  protected void process(TypeElement factory, Set<ClassName> annotations) {
+  protected void process(XTypeElement xElement, Set<ClassName> annotations) {
+    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
+    TypeElement factory = xElement.toJavac();
     ValidationReport<TypeElement> report = new AssistedFactoryValidator().validate(factory);
     report.printMessagesTo(messager);
     if (report.isClean()) {

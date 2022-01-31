@@ -17,6 +17,7 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
@@ -28,7 +29,7 @@ import javax.lang.model.element.Element;
  * Processing step that validates that the {@code BindsInstance} annotation is applied to the
  * correct elements.
  */
-public final class BindsInstanceProcessingStep extends TypeCheckingProcessingStep<Element> {
+public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingStep<XElement> {
   private final BindsInstanceMethodValidator methodValidator;
   private final BindsInstanceParameterValidator parameterValidator;
   private final Messager messager;
@@ -38,7 +39,6 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
       BindsInstanceMethodValidator methodValidator,
       BindsInstanceParameterValidator parameterValidator,
       Messager messager) {
-    super(element -> element);
     this.methodValidator = methodValidator;
     this.parameterValidator = parameterValidator;
     this.messager = messager;
@@ -50,7 +50,8 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   }
 
   @Override
-  protected void process(Element element, Set<ClassName> annotations) {
+  protected void process(XElement xElement, Set<ClassName> annotations) {
+    Element element = xElement.toJavac();
     switch (element.getKind()) {
       case PARAMETER:
         parameterValidator.validate(MoreElements.asVariable(element)).printMessagesTo(messager);

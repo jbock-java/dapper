@@ -24,9 +24,9 @@ import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -41,7 +41,7 @@ import javax.lang.model.element.VariableElement;
  *
  * <p>This processing step should run after {@link AssistedFactoryProcessingStep}.
  */
-final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableElement> {
+final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariableElement> {
   private final InjectionAnnotations injectionAnnotations;
   private final DaggerElements elements;
   private final Messager messager;
@@ -51,7 +51,6 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
       InjectionAnnotations injectionAnnotations,
       DaggerElements elements,
       Messager messager) {
-    super(MoreElements::asVariable);
     this.injectionAnnotations = injectionAnnotations;
     this.elements = elements;
     this.messager = messager;
@@ -63,7 +62,9 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   }
 
   @Override
-  protected void process(VariableElement assisted, Set<ClassName> annotations) {
+  protected void process(XVariableElement xElement, Set<ClassName> annotations) {
+    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
+    VariableElement assisted = xElement.toJavac();
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 
