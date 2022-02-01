@@ -20,35 +20,15 @@ import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypeP
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Scope;
 import dagger.spi.model.DaggerAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
-import io.jbock.javapoet.ClassName;
-import jakarta.inject.Singleton;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;
 
 /** Common names and convenience methods for {@link Scope}s. */
 public final class Scopes {
-
-  /** Returns a representation for {@link Singleton @Singleton} scope. */
-  public static Scope singletonScope(DaggerElements elements) {
-    return scope(elements, TypeNames.SINGLETON);
-  }
-
-  /**
-   * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
-   */
-  private static Scope scope(
-      DaggerElements elements, ClassName scopeAnnotationClassName) {
-    return Scope.scope(
-        DaggerAnnotation.fromJava(
-            SimpleAnnotationMirror.of(
-                elements.getTypeElement(scopeAnnotationClassName))));
-  }
 
   /**
    * Returns at most one associated scoped annotation from the source code element, throwing an
