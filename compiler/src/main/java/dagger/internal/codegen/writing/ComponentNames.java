@@ -51,7 +51,7 @@ public final class ComponentNames {
   /** Returns the class name for the root component. */
   public static ClassName getRootComponentClassName(ComponentDescriptor componentDescriptor) {
     Preconditions.checkState(!componentDescriptor.isSubcomponent());
-    ClassName componentName = ClassName.get(componentDescriptor.typeElement());
+    ClassName componentName = componentDescriptor.typeElement().getClassName();
     return ClassName.get(componentName.packageName(), "Dagger" + classFileName(componentName));
   }
 

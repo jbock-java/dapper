@@ -18,13 +18,13 @@ package dagger.internal.codegen.binding;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.lang.model.element.TypeElement;
 
 // TODO(bcorso): Remove the LegacyBindingGraph after we've migrated to the new BindingGraph.
 
@@ -64,7 +64,7 @@ final class LegacyBindingGraph {
 
   private static List<LegacyBindingGraph> checkForDuplicates(
       List<LegacyBindingGraph> graphs) {
-    Map<TypeElement, Collection<LegacyBindingGraph>> duplicateGraphs =
+    Map<XTypeElement, Collection<LegacyBindingGraph>> duplicateGraphs =
         graphs.stream()
             .collect(groupingBy(graph -> graph.componentDescriptor().typeElement(), LinkedHashMap::new, Collectors.toList()))
             .entrySet().stream()

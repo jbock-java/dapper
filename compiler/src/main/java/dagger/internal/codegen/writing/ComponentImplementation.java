@@ -285,7 +285,7 @@ public final class ComponentImplementation {
     // Create and claim the fields for this and all ancestor components stored as fields.
     this.componentFieldsByImplementation =
         createComponentFieldsByImplementation(this);
-    TypeElement typeElement = rootComponentImplementation().componentDescriptor().typeElement();
+    TypeElement typeElement = rootComponentImplementation().componentDescriptor().typeElement().toJavac();
     this.compilerMode =
         compilerOptions.fastInit(typeElement)
             ? CompilerMode.FAST_INIT
@@ -548,7 +548,7 @@ public final class ComponentImplementation {
       if (type instanceof DeclaredType
           && isProtectedMemberOf(
           MoreTypes.asDeclared(type),
-          getComponentImplementation().componentDescriptor().typeElement())) {
+          getComponentImplementation().componentDescriptor().typeElement().toJavac())) {
         return true;
       }
       return false;

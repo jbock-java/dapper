@@ -28,6 +28,7 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.DependencyEdge;
 import dagger.model.BindingGraph.Edge;
@@ -190,6 +191,7 @@ final class BindingGraphConverter {
               bindingGraphPath.stream()
                   .map(LegacyBindingGraph::componentDescriptor)
                   .map(ComponentDescriptor::typeElement)
+                  .map(XTypeElement::toJavac)
                   .collect(toImmutableList()));
       componentPaths.addLast(graphPath);
       ComponentNode currentComponent =
@@ -299,7 +301,7 @@ final class BindingGraphConverter {
      */
     private LegacyBindingGraph graphForAncestor(TypeElement ancestor) {
       for (LegacyBindingGraph graph : bindingGraphPath) {
-        if (graph.componentDescriptor().typeElement().equals(ancestor)) {
+        if (graph.componentDescriptor().typeElement().toJavac().equals(ancestor)) {
           return graph;
         }
       }
@@ -402,7 +404,7 @@ final class BindingGraphConverter {
       ComponentDescriptor subcomponent =
           graph.componentDescriptor().getChildComponentWithBuilderType(subcomponentBuilderElement);
       return ComponentNodeImpl.create(
-          componentPath().childPath(subcomponent.typeElement()), subcomponent);
+          componentPath().childPath(subcomponent.typeElement().toJavac()), subcomponent);
     }
   }
 

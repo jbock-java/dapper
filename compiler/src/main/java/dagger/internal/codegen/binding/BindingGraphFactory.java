@@ -156,7 +156,8 @@ public final class BindingGraphFactory implements ClearableCache {
                   .contains(childComponent)) {
                 explicitBindingsBuilder.add(
                     bindingFactory.subcomponentCreatorBinding(
-                        builderEntryPoint.methodElement(), componentDescriptor.typeElement()));
+                        builderEntryPoint.methodElement(),
+                        componentDescriptor.typeElement().toJavac()));
               }
             });
 
@@ -444,7 +445,7 @@ public final class BindingGraphFactory implements ClearableCache {
             parentResolver.orElseThrow().resolvedContributionBindings.get(requestKey);
         return parentResolvedBindings.owningComponent(binding);
       } else {
-        return componentDescriptor.typeElement();
+        return componentDescriptor.typeElement().toJavac();
       }
     }
 

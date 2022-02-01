@@ -24,7 +24,6 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
-import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.model.RequestKind;
@@ -111,29 +110,6 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
         // exists, in which case even if it's not scoped we might as well call Provider#get().
         return !needsCaching(binding, graph);
     }
-  }
-
-  public static boolean usesSwitchingProvider(ContributionBinding binding, boolean isFastInit) {
-    if (!isFastInit) {
-      return false;
-    }
-    switch (binding.kind()) {
-      case ASSISTED_INJECTION:
-      case BOUND_INSTANCE:
-      case COMPONENT:
-      case COMPONENT_DEPENDENCY:
-      case DELEGATE:
-        // These binding kinds avoid SwitchingProvider when the backing instance already exists,
-        // e.g. a component provider can use FactoryInstance.create(this).
-        return false;
-      case INJECTION:
-      case PROVISION:
-      case ASSISTED_FACTORY:
-      case COMPONENT_PROVISION:
-      case SUBCOMPONENT_CREATOR:
-        return true;
-    }
-    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
   }
 
   /**

@@ -29,9 +29,13 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import io.jbock.javapoet.TypeName;
@@ -61,11 +65,13 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class ComponentDescriptor {
 
+  // This is required temporarily during the XProcessing migration to use toXProcessing().
+  private final XProcessingEnv processingEnv;
   private final ComponentAnnotation annotation;
-  private final TypeElement typeElement;
+  private final XTypeElement typeElement;
   private final Set<ComponentRequirement> dependencies;
   private final Set<ModuleDescriptor> modules;
-  private final Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod;
+  private final Map<XMethodElement, ComponentRequirement> dependenciesByDependencyMethod;
   private final Set<Scope> scopes;
   private final Set<ComponentDescriptor> childComponentsDeclaredByModules;
   private final Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods;
@@ -74,17 +80,19 @@ public final class ComponentDescriptor {
   private final Optional<ComponentCreatorDescriptor> creatorDescriptor;
 
   ComponentDescriptor(
+      XProcessingEnv processingEnv,
       ComponentAnnotation annotation,
-      TypeElement typeElement,
+      XTypeElement typeElement,
       Set<ComponentRequirement> dependencies,
       Set<ModuleDescriptor> modules,
-      Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod,
+      Map<XMethodElement, ComponentRequirement> dependenciesByDependencyMethod,
       Set<Scope> scopes,
       Set<ComponentDescriptor> childComponentsDeclaredByModules,
-      Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods,
-      Map<ComponentDescriptor.ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
-      Set<ComponentDescriptor.ComponentMethodDescriptor> componentMethods,
+      Map<ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByFactoryMethods,
+      Map<ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
+      Set<ComponentMethodDescriptor> componentMethods,
       Optional<ComponentCreatorDescriptor> creatorDescriptor) {
+    this.processingEnv = processingEnv;
     this.annotation = requireNonNull(annotation);
     this.typeElement = requireNonNull(typeElement);
     this.dependencies = requireNonNull(dependencies);
@@ -149,7 +157,7 @@ public final class ComponentDescriptor {
    * The element that defines the component. This is the element to which the {@link #annotation()}
    * was applied.
    */
-  public TypeElement typeElement() {
+  public XTypeElement typeElement() {
     return typeElement;
   }
 
@@ -204,14 +212,15 @@ public final class ComponentDescriptor {
    * the enclosing type of the method; a method may be declared by a supertype of the actual
    * dependency.
    */
-  public Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod() {
+  public Map<XMethodElement, ComponentRequirement> dependenciesByDependencyMethod() {
     return dependenciesByDependencyMethod;
   }
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
-  public ComponentRequirement getDependencyThatDefinesMethod(Element method) {
+  public ComponentRequirement getDependencyThatDefinesMethod(Element javaMethod) {
+    XElement method = XConverters.toXProcessing(javaMethod, processingEnv);
     Preconditions.checkArgument(
-        method instanceof ExecutableElement, "method must be an executable element: %s", method);
+        method instanceof XMethodElement, "method must be an executable element: %s", method);
     return requireNonNull(
         dependenciesByDependencyMethod().get(method), () -> String.format("no dependency implements %s", method));
   }

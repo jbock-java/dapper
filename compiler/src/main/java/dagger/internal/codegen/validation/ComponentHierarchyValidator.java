@@ -49,11 +49,11 @@ final class ComponentHierarchyValidator {
 
   ValidationReport<TypeElement> validate(ComponentDescriptor componentDescriptor) {
     ValidationReport.Builder<TypeElement> report =
-        ValidationReport.about(componentDescriptor.typeElement());
+        ValidationReport.about(componentDescriptor.typeElement().toJavac());
     validateSubcomponentMethods(
         report,
         componentDescriptor,
-        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
+        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement().toJavac()));
     validateRepeatedScopedDeclarations(report, componentDescriptor, new LinkedHashMap<>());
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
@@ -84,7 +84,7 @@ final class ComponentHierarchyValidator {
               Map<TypeElement, TypeElement> newExistingModuleToOwners = new LinkedHashMap<>(Math.max(16, (int) (1.5 * (existingModuleToOwners.size() + difference.size()))));
               newExistingModuleToOwners.putAll(existingModuleToOwners);
               difference.forEach(module ->
-                  newExistingModuleToOwners.put(childComponent.typeElement(), module));
+                  newExistingModuleToOwners.put(childComponent.typeElement().toJavac(), module));
               validateSubcomponentMethods(
                   report,
                   childComponent,
@@ -149,7 +149,7 @@ final class ComponentHierarchyValidator {
       report.addItem(
           error.toString(),
           compilerOptions.scopeCycleValidationType().diagnosticKind().orElseThrow(),
-          subject.typeElement());
+          subject.typeElement().toJavac());
     }
   }
 

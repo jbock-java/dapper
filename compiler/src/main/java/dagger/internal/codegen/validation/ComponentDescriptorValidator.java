@@ -127,7 +127,7 @@ public final class ComponentDescriptorValidator {
     /** Returns a report that contains all validation messages found during traversal. */
     ValidationReport<TypeElement> buildReport() {
       ValidationReport.Builder<TypeElement> report =
-          ValidationReport.about(rootComponent.typeElement());
+          ValidationReport.about(rootComponent.typeElement().toJavac());
       reports.values().forEach(subreport -> report.addSubreport(subreport.build()));
       return report.build();
     }
@@ -135,13 +135,13 @@ public final class ComponentDescriptorValidator {
     /** Returns the report builder for a (sub)component. */
     private ValidationReport.Builder<TypeElement> report(ComponentDescriptor component) {
       return reentrantComputeIfAbsent(
-          reports, component, descriptor -> ValidationReport.about(descriptor.typeElement()));
+          reports, component, descriptor -> ValidationReport.about(descriptor.typeElement().toJavac()));
     }
 
     private void reportComponentItem(
         Diagnostic.Kind kind, ComponentDescriptor component, String message) {
       report(component)
-          .addItem(message, kind, component.typeElement(), component.annotation().annotation());
+          .addItem(message, kind, component.typeElement().toJavac(), component.annotation().annotation());
     }
 
     private void reportComponentError(ComponentDescriptor component, String error) {
@@ -158,7 +158,7 @@ public final class ComponentDescriptorValidator {
 
     /** Validates that component dependencies do not form a cycle. */
     private void validateComponentDependencyHierarchy(ComponentDescriptor component) {
-      validateComponentDependencyHierarchy(component, component.typeElement(), new ArrayDeque<>());
+      validateComponentDependencyHierarchy(component, component.typeElement().toJavac(), new ArrayDeque<>());
     }
 
     /** Recursive method to validate that component dependencies do not form a cycle. */
@@ -167,7 +167,7 @@ public final class ComponentDescriptorValidator {
       if (dependencyStack.contains(dependency)) {
         // Current component has already appeared in the component chain.
         StringBuilder message = new StringBuilder();
-        message.append(component.typeElement().getQualifiedName());
+        message.append(component.typeElement().toJavac().getQualifiedName());
         message.append(" contains a cycle in its component dependencies:\n");
         dependencyStack.push(dependency);
         appendIndentedComponentsList(message, dependencyStack);
@@ -229,14 +229,14 @@ public final class ComponentDescriptorValidator {
           // Dagger 1.x scope compatibility requires this be suppress-able.
           if (!compilerOptions.scopeCycleValidationType().equals(ValidationType.NONE)) {
             validateDependencyScopeHierarchy(
-                component, component.typeElement(), new ArrayDeque<>(), new ArrayDeque<>());
+                component, component.typeElement().toJavac(), new ArrayDeque<>(), new ArrayDeque<>());
           }
         }
       } else {
         // Scopeless components may not depend on scoped components.
         if (!scopedDependencies.isEmpty()) {
           StringBuilder message =
-              new StringBuilder(component.typeElement().getQualifiedName())
+              new StringBuilder(component.typeElement().toJavac().getQualifiedName())
                   .append(" (unscoped) cannot depend on scoped components:\n");
           appendIndentedComponentsList(message, scopedDependencies);
           reportComponentError(component, message.toString());

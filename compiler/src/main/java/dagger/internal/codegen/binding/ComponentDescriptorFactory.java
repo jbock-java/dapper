@@ -36,6 +36,9 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.model.Scope;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -53,6 +56,7 @@ import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link ComponentDescriptor}s. */
 public final class ComponentDescriptorFactory {
+  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final DependencyRequestFactory dependencyRequestFactory;
@@ -61,11 +65,13 @@ public final class ComponentDescriptorFactory {
 
   @Inject
   ComponentDescriptorFactory(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory,
       ModuleDescriptor.Factory moduleDescriptorFactory,
       InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.dependencyRequestFactory = dependencyRequestFactory;
@@ -121,14 +127,15 @@ public final class ComponentDescriptorFactory {
             .map(ComponentRequirement::forDependency)
             .collect(toImmutableSet());
 
-    Map<ExecutableElement, ComponentRequirement> dependenciesByDependencyMethod =
+    Map<XMethodElement, ComponentRequirement> dependenciesByDependencyMethod =
         new LinkedHashMap<>();
 
     for (ComponentRequirement componentDependency : componentDependencies) {
       for (ExecutableElement dependencyMethod :
           methodsIn(elements.getAllMembers(componentDependency.typeElement()))) {
         if (isComponentContributionMethod(elements, dependencyMethod)) {
-          dependenciesByDependencyMethod.put(dependencyMethod, componentDependency);
+          dependenciesByDependencyMethod.put(
+              (XMethodElement) XConverters.toXProcessing(dependencyMethod, processingEnv), componentDependency);
         }
       }
     }
@@ -196,8 +203,9 @@ public final class ComponentDescriptorFactory {
     Set<Scope> scopes = scopesOf(typeElement);
 
     return new ComponentDescriptor(
+        processingEnv,
         componentAnnotation,
-        typeElement,
+        XConverters.toXProcessing(typeElement, processingEnv),
         componentDependencies,
         transitiveModules,
         dependenciesByDependencyMethod,

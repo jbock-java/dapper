@@ -40,6 +40,7 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import dagger.spi.model.Key;
@@ -219,11 +220,11 @@ public final class BindingFactory {
   }
 
   /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
-  public ProvisionBinding componentBinding(TypeElement componentDefinitionType) {
+  public ProvisionBinding componentBinding(XTypeElement componentDefinitionType) {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
-        .bindingElement(componentDefinitionType)
-        .key(keyFactory.forType(componentDefinitionType.asType()))
+        .bindingElement(componentDefinitionType.toJavac())
+        .key(keyFactory.forType(componentDefinitionType.getType()))
         .kind(COMPONENT)
         .build();
   }

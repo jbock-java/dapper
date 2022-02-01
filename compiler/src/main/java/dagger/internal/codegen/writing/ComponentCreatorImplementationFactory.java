@@ -38,7 +38,6 @@ import dagger.internal.codegen.binding.ComponentRequirement.NullPolicy;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
@@ -280,7 +279,7 @@ final class ComponentCreatorImplementationFactory {
     MethodSpec factoryMethod() {
       MethodSpec.Builder factoryMethod = factoryMethodBuilder();
       factoryMethod
-          .returns(ClassName.get(componentDescriptor().typeElement()))
+          .returns(componentDescriptor().typeElement().getClassName())
           .addModifiers(PUBLIC);
 
       Map<ComponentRequirement, String> factoryMethodParameters =
@@ -474,11 +473,9 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected Optional<Modifier> visibility() {
-      return componentImplementation
-          .componentDescriptor()
-          .typeElement()
-          .getModifiers()
-          .contains(PUBLIC) ? Optional.of(PUBLIC) : Optional.empty();
+      return componentImplementation.componentDescriptor().typeElement().isPublic()
+          ? Optional.of(PUBLIC)
+          : Optional.empty();
     }
 
     @Override

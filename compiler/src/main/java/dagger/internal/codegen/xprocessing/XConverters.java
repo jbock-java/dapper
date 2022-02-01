@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -12,7 +13,11 @@ public class XConverters {
   }
 
   public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv processingEnv) {
-    return new XExecutableElement(executableElement, processingEnv);
+    if (executableElement.getKind() == ElementKind.CONSTRUCTOR) {
+      return new XConstructorElement(executableElement, processingEnv);
+    } else {
+      return new XMethodElement(executableElement, processingEnv);
+    }
   }
 
   public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv processingEnv) {

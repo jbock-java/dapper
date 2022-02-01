@@ -116,7 +116,7 @@ final class ResolvedBindings {
 
   /** All bindings for {@link #key()} that are owned by a component. */
   Set<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
-    return allBindings().getOrDefault(component.typeElement(), Set.of());
+    return allBindings().getOrDefault(component.typeElement().toJavac(), Set.of());
   }
 
   /**

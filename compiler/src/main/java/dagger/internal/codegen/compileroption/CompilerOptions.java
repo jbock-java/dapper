@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.compileroption;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
@@ -31,6 +32,18 @@ public abstract class CompilerOptions {
    * memory leaks in your app, or cause other unknown issues at runtime.
    */
   public abstract boolean experimentalMergedMode(TypeElement element);
+
+  /**
+   * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
+   *
+   * <p>If enabled, the generated code will attempt to optimize for fast component initialization.
+   * This is done by reducing the number of factory classes loaded during initialization and the
+   * number of eagerly initialized fields at the cost of potential memory leaks and higher
+   * per-provision instantiation time.
+   */
+  public final boolean fastInit(XTypeElement element) {
+    return fastInit(element.toJavac());
+  }
 
   /**
    * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
