@@ -23,7 +23,6 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.SpiModule.TestingPlugins;
-import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
@@ -37,7 +36,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.spi.BindingGraphPlugin;
 import io.jbock.auto.common.BasicAnnotationProcessor;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +44,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -100,7 +97,8 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
 
   @Override
   protected Iterable<? extends Step> steps() {
-    helper = ProcessorComponent.factory().create(processingEnv, testingPlugins).helper();
+    XProcessingEnv xProcessingEnv = XProcessingEnv.create(processingEnv);
+    helper = ProcessorComponent.factory().create(xProcessingEnv, testingPlugins).helper();
     return helper.steps();
   }
 
@@ -127,7 +125,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     @Component.Factory
     interface Factory {
       ProcessorComponent create(
-          @BindsInstance ProcessingEnvironment processingEnv,
+          @BindsInstance XProcessingEnv processingEnvironment,
           @BindsInstance @TestingPlugins Optional<Set<BindingGraphPlugin>> testingPlugins);
     }
   }
@@ -135,15 +133,9 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   @Module
   interface ProcessingStepsModule {
 
-    @Singleton
-    @Provides
-    static XProcessingEnv provideXProcessingEnv(ProcessingEnvironment processingEnv) {
-      return XProcessingEnv.create(processingEnv);
-    }
-
     @Provides
     static List<Step> processingSteps(
-        XProcessingEnvCache xProcessingEnvCache,
+        XProcessingEnv xProcessingEnv,
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
@@ -153,16 +145,16 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
         ComponentProcessingStep componentProcessingStep,
         BindingMethodProcessingStep bindingMethodProcessingStep) {
       return Stream.of(
-          injectProcessingStep,
-          assistedInjectProcessingStep,
-          assistedFactoryProcessingStep,
-          assistedProcessingStep,
-          bindsInstanceProcessingStep,
-          moduleProcessingStep,
-          componentProcessingStep,
-          bindingMethodProcessingStep)
+              injectProcessingStep,
+              assistedInjectProcessingStep,
+              assistedFactoryProcessingStep,
+              assistedProcessingStep,
+              bindsInstanceProcessingStep,
+              moduleProcessingStep,
+              componentProcessingStep,
+              bindingMethodProcessingStep)
           // TODO(bcorso): Remove DelegatingStep once we've migrated to XBasicAnnotationProcessor.
-          .map(step -> DelegatingStep.create(xProcessingEnvCache, step))
+          .map(step -> DelegatingStep.create(xProcessingEnv, step))
           .collect(Collectors.toList());
     }
   }
@@ -172,40 +164,16 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     helper.postRound(roundEnv);
   }
 
-  /** An {@link XProcessingEnv} cache that clears tha cache on each processing round. */
-  @Singleton
-  static final class XProcessingEnvCache implements ClearableCache {
-    private final ProcessingEnvironment processingEnv;
-    private XProcessingEnv xProcessingEnv;
-
-    @Inject
-    XProcessingEnvCache(ProcessingEnvironment processingEnv) {
-      this.processingEnv = processingEnv;
-    }
-
-    @Override
-    public void clearCache() {
-      xProcessingEnv = null;
-    }
-
-    public XProcessingEnv get() {
-      if (xProcessingEnv == null) {
-        xProcessingEnv = XProcessingEnv.create(processingEnv);
-      }
-      return xProcessingEnv;
-    }
-  }
-
   private static final class DelegatingStep implements Step {
-    static Step create(XProcessingEnvCache xProcessingEnvCache, XProcessingStep xProcessingStep) {
+    static Step create(XProcessingEnv xProcessingEnvCache, XProcessingStep xProcessingStep) {
       return new DelegatingStep(xProcessingEnvCache, xProcessingStep);
     }
 
-    private final XProcessingEnvCache xProcessingEnvCache;
+    private final XProcessingEnv xProcessingEnv;
     private final XProcessingStep delegate;
 
-    DelegatingStep(XProcessingEnvCache xProcessingEnvCache, XProcessingStep delegate) {
-      this.xProcessingEnvCache = xProcessingEnvCache;
+    DelegatingStep(XProcessingEnv xProcessingEnv, XProcessingStep delegate) {
+      this.xProcessingEnv = xProcessingEnv;
       this.delegate = delegate;
     }
 
@@ -217,7 +185,6 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
     @Override
     public Set<? extends Element> process(
         Map<String, Set<Element>> elementsByAnnotation) {
-      XProcessingEnv xProcessingEnv = xProcessingEnvCache.get();
       return delegate.process(
               xProcessingEnv,
               Util.transformValues(

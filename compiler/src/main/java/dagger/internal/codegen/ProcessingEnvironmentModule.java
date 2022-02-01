@@ -26,6 +26,8 @@ import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptio
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Map;
@@ -33,7 +35,6 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.util.Types;
 
 /** Bindings that depend on the {@link ProcessingEnvironment}. */
 @Module
@@ -46,43 +47,51 @@ interface ProcessingEnvironmentModule {
 
   @Provides
   @ProcessingOptions
-  static Map<String, String> processingOptions(ProcessingEnvironment processingEnvironment) {
-    return processingEnvironment.getOptions();
+  static Map<String, String> processingOptions(XProcessingEnv xProcessingEnv) {
+    return xProcessingEnv.toJavac().getOptions();
   }
 
   @Provides
-  static Messager messager(ProcessingEnvironment processingEnvironment) {
+  static XMessager xMessager(XProcessingEnv processingEnvironment) {
     return processingEnvironment.getMessager();
   }
 
+  // TODO(bcorso): Remove this once we've replaced all inject sites with XMessager.
   @Provides
-  static Filer filer(ProcessingEnvironment processingEnvironment) {
-    return processingEnvironment.getFiler();
+  static Messager messager(XMessager messager) {
+    return messager.toJavac();
+  }
+
+  // TODO(bcorso): Return XFiler. We'll likely need a XConverters.toXProcessing(Filer) so that we
+  // can convert our custom FormattingFiler into an XFiler.
+  @Provides
+  static Filer filer(CompilerOptions compilerOptions, XProcessingEnv xProcessingEnv) {
+    return xProcessingEnv.toJavac().getFiler();
   }
 
   @Provides
-  static SourceVersion sourceVersion(ProcessingEnvironment processingEnvironment) {
-    return processingEnvironment.getSourceVersion();
+  static SourceVersion sourceVersion(XProcessingEnv xProcessingEnv) {
+    return xProcessingEnv.toJavac().getSourceVersion();
   }
 
   @Provides
   @Singleton
-  static DaggerElements daggerElements(ProcessingEnvironment processingEnvironment) {
+  static DaggerElements daggerElements(XProcessingEnv xProcessingEnv) {
     return new DaggerElements(
-        processingEnvironment.getElementUtils(),
-        processingEnvironment.getTypeUtils());
+        xProcessingEnv.toJavac().getElementUtils(),
+        xProcessingEnv.toJavac().getTypeUtils());
   }
 
   @Provides
   @Singleton
   static DaggerTypes daggerTypes(
-      ProcessingEnvironment processingEnvironment, DaggerElements elements) {
-    return new DaggerTypes(processingEnvironment.getTypeUtils(), elements);
+      XProcessingEnv xProcessingEnv, DaggerElements elements) {
+    return new DaggerTypes(xProcessingEnv.toJavac().getTypeUtils(), elements);
   }
 
   @Provides
   @ProcessorClassLoader
-  static ClassLoader processorClassloader(ProcessingEnvironment processingEnvironment) {
+  static ClassLoader processorClassloader() {
     return BindingGraphPlugin.class.getClassLoader();
   }
 }
