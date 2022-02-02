@@ -108,7 +108,7 @@ public final class ComponentDescriptorValidator {
     this.componentHierarchyValidator = componentHierarchyValidator;
   }
 
-  public ValidationReport<TypeElement> validate(ComponentDescriptor component) {
+  public ValidationReport validate(ComponentDescriptor component) {
     ComponentValidation validation = new ComponentValidation(component);
     validation.visitComponent(component);
     validation.report(component).addSubreport(componentHierarchyValidator.validate(component));
@@ -117,7 +117,7 @@ public final class ComponentDescriptorValidator {
 
   private final class ComponentValidation {
     final ComponentDescriptor rootComponent;
-    final Map<ComponentDescriptor, ValidationReport.Builder<TypeElement>> reports =
+    final Map<ComponentDescriptor, ValidationReport.Builder> reports =
         new LinkedHashMap<>();
 
     ComponentValidation(ComponentDescriptor rootComponent) {
@@ -125,15 +125,15 @@ public final class ComponentDescriptorValidator {
     }
 
     /** Returns a report that contains all validation messages found during traversal. */
-    ValidationReport<TypeElement> buildReport() {
-      ValidationReport.Builder<TypeElement> report =
+    ValidationReport buildReport() {
+      ValidationReport.Builder report =
           ValidationReport.about(rootComponent.typeElement().toJavac());
       reports.values().forEach(subreport -> report.addSubreport(subreport.build()));
       return report.build();
     }
 
     /** Returns the report builder for a (sub)component. */
-    private ValidationReport.Builder<TypeElement> report(ComponentDescriptor component) {
+    private ValidationReport.Builder report(ComponentDescriptor component) {
       return reentrantComputeIfAbsent(
           reports, component, descriptor -> ValidationReport.about(descriptor.typeElement().toJavac()));
     }

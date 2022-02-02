@@ -62,9 +62,9 @@ final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XEx
   }
 
   private final class AssistedInjectValidator {
-    ValidationReport<ExecutableElement> validate(ExecutableElement constructor) {
+    ValidationReport validate(ExecutableElement constructor) {
       Preconditions.checkState(constructor.getKind() == ElementKind.CONSTRUCTOR);
-      ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(constructor);
+      ValidationReport.Builder report = ValidationReport.about(constructor);
 
       DeclaredType assistedInjectType =
           asDeclared(closestEnclosingTypeElement(constructor).asType());

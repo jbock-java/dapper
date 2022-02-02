@@ -69,8 +69,8 @@ final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariable
   }
 
   private final class AssistedValidator {
-    ValidationReport<VariableElement> validate(VariableElement assisted) {
-      ValidationReport.Builder<VariableElement> report = ValidationReport.about(assisted);
+    ValidationReport validate(VariableElement assisted) {
+      ValidationReport.Builder report = ValidationReport.about(assisted);
 
       Element enclosingElement = assisted.getEnclosingElement();
       if (!isAssistedInjectConstructor(enclosingElement)

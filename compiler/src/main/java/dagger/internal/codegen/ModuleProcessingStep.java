@@ -94,7 +94,7 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
     if (processedModuleElements.contains(module)) {
       return;
     }
-    ValidationReport<TypeElement> report = moduleValidator.validate(module);
+    ValidationReport report = moduleValidator.validate(module);
     report.printMessagesTo(messager);
     if (report.isClean()) {
       generateForMethodsIn(module);

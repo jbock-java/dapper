@@ -103,7 +103,7 @@ final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XT
   protected void process(XTypeElement xElement, Set<ClassName> annotations) {
     // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
     TypeElement factory = xElement.toJavac();
-    ValidationReport<TypeElement> report = new AssistedFactoryValidator().validate(factory);
+    ValidationReport report = new AssistedFactoryValidator().validate(factory);
     report.printMessagesTo(messager);
     if (report.isClean()) {
       try {
@@ -116,8 +116,8 @@ final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XT
   }
 
   private final class AssistedFactoryValidator {
-    ValidationReport<TypeElement> validate(TypeElement factory) {
-      ValidationReport.Builder<TypeElement> report = ValidationReport.about(factory);
+    ValidationReport validate(TypeElement factory) {
+      ValidationReport.Builder report = ValidationReport.about(factory);
 
       if (!factory.getModifiers().contains(ABSTRACT)) {
         return report

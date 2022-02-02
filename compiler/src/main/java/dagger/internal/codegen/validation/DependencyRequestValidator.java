@@ -50,7 +50,7 @@ final class DependencyRequestValidator {
    * non-instance request with a wildcard type.
    */
   void validateDependencyRequest(
-      ValidationReport.Builder<?> report, Element requestElement, TypeMirror requestType) {
+      ValidationReport.Builder report, Element requestElement, TypeMirror requestType) {
     if (MoreElements.isAnnotationPresent(requestElement, Assisted.class)) {
       // Don't validate assisted parameters. These are not dependency requests.
       return;
@@ -60,7 +60,7 @@ final class DependencyRequestValidator {
   }
 
   private final class Validator {
-    private final ValidationReport.Builder<?> report;
+    private final ValidationReport.Builder report;
     private final Element requestElement;
     private final TypeMirror requestType;
     private final TypeMirror keyType;
@@ -68,7 +68,7 @@ final class DependencyRequestValidator {
     private final Collection<? extends AnnotationMirror> qualifiers;
 
 
-    Validator(ValidationReport.Builder<?> report, Element requestElement, TypeMirror requestType) {
+    Validator(ValidationReport.Builder report, Element requestElement, TypeMirror requestType) {
       this.report = report;
       this.requestElement = requestElement;
       this.requestType = requestType;

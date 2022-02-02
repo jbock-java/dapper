@@ -100,7 +100,7 @@ public final class ModuleValidator {
   private final ComponentDescriptorFactory componentDescriptorFactory;
   private final BindingGraphFactory bindingGraphFactory;
   private final BindingGraphValidator bindingGraphValidator;
-  private final Map<TypeElement, ValidationReport<TypeElement>> cache = new HashMap<>();
+  private final Map<TypeElement, ValidationReport> cache = new HashMap<>();
   private final Set<TypeElement> knownModules = new HashSet<>();
 
   @Inject
@@ -136,11 +136,11 @@ public final class ModuleValidator {
   }
 
   /** Returns a validation report for a module type. */
-  public ValidationReport<TypeElement> validate(TypeElement module) {
+  public ValidationReport validate(TypeElement module) {
     return validate(module, new HashSet<>());
   }
 
-  private ValidationReport<TypeElement> validate(
+  private ValidationReport validate(
       TypeElement module, Set<TypeElement> visitedModules) {
     if (visitedModules.add(module)) {
       return reentrantComputeIfAbsent(cache, module, m -> validateUncached(module, visitedModules));
@@ -148,9 +148,9 @@ public final class ModuleValidator {
     return ValidationReport.about(module).build();
   }
 
-  private ValidationReport<TypeElement> validateUncached(
+  private ValidationReport validateUncached(
       TypeElement module, Set<TypeElement> visitedModules) {
-    ValidationReport.Builder<TypeElement> builder = ValidationReport.about(module);
+    ValidationReport.Builder builder = ValidationReport.about(module);
     ModuleKind moduleKind = ModuleKind.forAnnotatedElement(module).orElseThrow();
     List<ExecutableElement> moduleMethods = methodsIn(module.getEnclosedElements());
     List<ExecutableElement> bindingMethods = new ArrayList<>();
@@ -204,7 +204,7 @@ public final class ModuleValidator {
   private void validateReferencedSubcomponents(
       final TypeElement subject,
       ModuleKind moduleKind,
-      final ValidationReport.Builder<TypeElement> builder) {
+      final ValidationReport.Builder builder) {
     // TODO(ronshapiro): use validateTypesAreDeclared when it is checked in
     ModuleAnnotation moduleAnnotation = moduleAnnotation(moduleKind.getModuleAnnotation(subject));
     for (AnnotationValue subcomponentAttribute :
@@ -267,7 +267,7 @@ public final class ModuleValidator {
   private static void validateSubcomponentHasBuilder(
       TypeElement subcomponentAttribute,
       AnnotationMirror moduleAnnotation,
-      ValidationReport.Builder<TypeElement> builder) {
+      ValidationReport.Builder builder) {
     if (getSubcomponentCreator(subcomponentAttribute).isPresent()) {
       return;
     }
@@ -305,7 +305,7 @@ public final class ModuleValidator {
   }
 
   private void validateModifiers(
-      TypeElement subject, ValidationReport.Builder<TypeElement> builder) {
+      TypeElement subject, ValidationReport.Builder builder) {
     // This coupled with the check for abstract modules in ComponentValidator guarantees that
     // only modules without type parameters are referenced from @Component(modules={...}).
     if (!subject.getTypeParameters().isEmpty() && !subject.getModifiers().contains(ABSTRACT)) {
@@ -314,7 +314,7 @@ public final class ModuleValidator {
   }
 
   private void validateMethodsWithSameName(
-      ValidationReport.Builder<TypeElement> builder,
+      ValidationReport.Builder builder,
       Map<Name, List<ExecutableElement>> bindingMethodsByName) {
     for (Entry<Name, List<ExecutableElement>> entry :
         bindingMethodsByName.entrySet()) {
@@ -332,7 +332,7 @@ public final class ModuleValidator {
       TypeElement subject,
       ModuleKind moduleKind,
       Set<TypeElement> visitedModules,
-      ValidationReport.Builder<TypeElement> builder) {
+      ValidationReport.Builder builder) {
     // Validate that all the modules we include are valid for inclusion.
     AnnotationMirror mirror = moduleKind.getModuleAnnotation(subject);
     builder.addSubreport(
@@ -355,12 +355,12 @@ public final class ModuleValidator {
    *     {@code @Module}, or {@code @ProducerModule})
    * @param validModuleKinds the module kinds that the annotated type is permitted to include
    */
-  ValidationReport<TypeElement> validateReferencedModules(
+  ValidationReport validateReferencedModules(
       TypeElement annotatedType,
       AnnotationMirror annotation,
       Set<ModuleKind> validModuleKinds,
       Set<TypeElement> visitedModules) {
-    ValidationReport.Builder<TypeElement> subreport = ValidationReport.about(annotatedType);
+    ValidationReport.Builder subreport = ValidationReport.about(annotatedType);
     Set<ClassName> validModuleAnnotations =
         validModuleKinds.stream().map(ModuleKind::annotation).collect(Collectors.toSet());
 
@@ -419,7 +419,7 @@ public final class ModuleValidator {
 
   private void validateBindingMethodOverrides(
       TypeElement subject,
-      ValidationReport.Builder<TypeElement> builder,
+      ValidationReport.Builder builder,
       Map<Name, List<ExecutableElement>> moduleMethodsByName,
       Map<Name, List<ExecutableElement>> bindingMethodsByName) {
     // For every binding method, confirm it overrides nothing *and* nothing overrides it.
@@ -481,7 +481,7 @@ public final class ModuleValidator {
   private void validateModuleVisibility(
       final TypeElement moduleElement,
       ModuleKind moduleKind,
-      final ValidationReport.Builder<?> reportBuilder) {
+      final ValidationReport.Builder reportBuilder) {
     ModuleAnnotation moduleAnnotation =
         moduleAnnotation(getAnnotationMirror(moduleElement, moduleKind.annotation()).orElseThrow());
     Visibility moduleVisibility = Visibility.ofElement(moduleElement);
@@ -544,7 +544,7 @@ public final class ModuleValidator {
   }
 
   private void validateNoScopeAnnotationsOnModuleElement(
-      TypeElement module, ModuleKind moduleKind, ValidationReport.Builder<TypeElement> report) {
+      TypeElement module, ModuleKind moduleKind, ValidationReport.Builder report) {
     for (AnnotationMirror scope : getAnnotatedAnnotations(module, Scope.class)) {
       report.addError(
           String.format(
@@ -556,7 +556,7 @@ public final class ModuleValidator {
   }
 
   private void validateSelfCycles(
-      TypeElement module, ValidationReport.Builder<TypeElement> builder) {
+      TypeElement module, ValidationReport.Builder builder) {
     ModuleAnnotation moduleAnnotation = moduleAnnotation(module).orElseThrow();
     moduleAnnotation
         .includesAsAnnotationValues()
@@ -581,7 +581,7 @@ public final class ModuleValidator {
   }
 
   private void validateModuleBindings(
-      TypeElement module, ValidationReport.Builder<TypeElement> report) {
+      TypeElement module, ValidationReport.Builder report) {
     BindingGraph bindingGraph =
         bindingGraphFactory.create(
                 componentDescriptorFactory.moduleComponentDescriptor(module), true)

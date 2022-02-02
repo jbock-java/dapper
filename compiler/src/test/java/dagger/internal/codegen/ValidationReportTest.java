@@ -46,7 +46,7 @@ public class ValidationReportTest {
                 new SimpleTestProcessor() {
                   @Override
                   void test() {
-                    Builder<TypeElement> reportBuilder =
+                    Builder reportBuilder =
                         ValidationReport.about(getTypeElement("test.TestClass"));
                     reportBuilder.addError("simple error");
                     reportBuilder.build().printMessagesTo(processingEnv.getMessager());
@@ -65,7 +65,7 @@ public class ValidationReportTest {
                 new SimpleTestProcessor() {
                   @Override
                   void test() {
-                    Builder<TypeElement> reportBuilder =
+                    Builder reportBuilder =
                         ValidationReport.about(getTypeElement("test.TestClass"));
                     reportBuilder.addError("simple error", getTypeElement(String.class));
                     reportBuilder.build().printMessagesTo(processingEnv.getMessager());
@@ -87,10 +87,10 @@ public class ValidationReportTest {
                 new SimpleTestProcessor() {
                   @Override
                   void test() {
-                    Builder<TypeElement> reportBuilder =
+                    Builder reportBuilder =
                         ValidationReport.about(getTypeElement("test.TestClass"));
                     reportBuilder.addError("simple error");
-                    ValidationReport<TypeElement> parentReport =
+                    ValidationReport parentReport =
                         ValidationReport.about(getTypeElement(String.class))
                             .addSubreport(reportBuilder.build())
                             .build();

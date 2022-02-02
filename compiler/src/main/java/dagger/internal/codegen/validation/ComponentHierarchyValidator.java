@@ -47,8 +47,8 @@ final class ComponentHierarchyValidator {
     this.compilerOptions = compilerOptions;
   }
 
-  ValidationReport<TypeElement> validate(ComponentDescriptor componentDescriptor) {
-    ValidationReport.Builder<TypeElement> report =
+  ValidationReport validate(ComponentDescriptor componentDescriptor) {
+    ValidationReport.Builder report =
         ValidationReport.about(componentDescriptor.typeElement().toJavac());
     validateSubcomponentMethods(
         report,
@@ -64,7 +64,7 @@ final class ComponentHierarchyValidator {
   }
 
   private void validateSubcomponentMethods(
-      ValidationReport.Builder<?> report,
+      ValidationReport.Builder report,
       ComponentDescriptor componentDescriptor,
       Map<TypeElement, TypeElement> existingModuleToOwners) {
     componentDescriptor
@@ -93,7 +93,7 @@ final class ComponentHierarchyValidator {
   }
 
   private void validateFactoryMethodParameters(
-      ValidationReport.Builder<?> report,
+      ValidationReport.Builder report,
       ComponentMethodDescriptor subcomponentMethodDescriptor,
       Map<TypeElement, TypeElement> existingModuleToOwners) {
     for (VariableElement factoryMethodParameter :
@@ -117,7 +117,7 @@ final class ComponentHierarchyValidator {
    * Checks that components do not have any scopes that are also applied on any of their ancestors.
    */
   private void validateScopeHierarchy(
-      ValidationReport.Builder<TypeElement> report,
+      ValidationReport.Builder report,
       ComponentDescriptor subject,
       Map<ComponentDescriptor, Set<Scope>> scopesByComponent) {
     subject.scopes().forEach(scope ->
@@ -154,7 +154,7 @@ final class ComponentHierarchyValidator {
   }
 
   private void validateRepeatedScopedDeclarations(
-      ValidationReport.Builder<TypeElement> report,
+      ValidationReport.Builder report,
       ComponentDescriptor component,
       // TODO(ronshapiro): optimize ModuleDescriptor.hashCode()/equals. Otherwise this could be
       // quite costly

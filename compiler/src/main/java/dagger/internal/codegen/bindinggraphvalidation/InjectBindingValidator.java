@@ -26,7 +26,6 @@ import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
-import javax.lang.model.element.TypeElement;
 
 /** Validates bindings from {@code @Inject}-annotated constructors. */
 final class InjectBindingValidator implements BindingGraphPlugin {
@@ -52,7 +51,7 @@ final class InjectBindingValidator implements BindingGraphPlugin {
 
   private void validateInjectionBinding(
       dagger.model.Binding node, DiagnosticReporter diagnosticReporter) {
-    ValidationReport<TypeElement> typeReport =
+    ValidationReport typeReport =
         injectValidator.validateType(MoreTypes.asTypeElement(node.key().type().java()));
     for (Item item : typeReport.allItems()) {
       diagnosticReporter.reportBinding(item.kind(), node, item.message());
