@@ -25,6 +25,9 @@ import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
+import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -56,18 +59,18 @@ final class BindsMethodValidator extends BindingMethodValidator {
   }
 
   @Override
-  protected ElementValidator elementValidator(ExecutableElement element) {
-    return new Validator(element);
+  protected ElementValidator elementValidator(XExecutableElement xElement) {
+    return new Validator(xElement);
   }
 
   private class Validator extends MethodValidator {
-    Validator(ExecutableElement element) {
-      super(element);
+    Validator(XExecutableElement xElement) {
+      super(xElement);
     }
 
     @Override
     protected void checkParameters() {
-      if (element.getParameters().size() != 1) {
+      if (xElement.getParameters().size() != 1) {
         report.addError(
             bindingMethods(
                 "must have exactly one parameter, whose type is assignable to the return type"));
@@ -77,10 +80,10 @@ final class BindsMethodValidator extends BindingMethodValidator {
     }
 
     @Override
-    protected void checkParameter(VariableElement parameter) {
+    protected void checkParameter(XVariableElement parameter) {
       super.checkParameter(parameter);
-      TypeMirror leftHandSide = boxIfNecessary(element.getReturnType());
-      TypeMirror rightHandSide = parameter.asType();
+      TypeMirror leftHandSide = boxIfNecessary(MoreElements.asExecutable(element).getReturnType());
+      TypeMirror rightHandSide = parameter.getType();
 
       if (!types.isAssignable(rightHandSide, leftHandSide)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.

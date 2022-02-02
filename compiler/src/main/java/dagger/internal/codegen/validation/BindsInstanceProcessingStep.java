@@ -18,7 +18,8 @@ package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -54,13 +55,13 @@ public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingSt
     Element element = xElement.toJavac();
     switch (element.getKind()) {
       case PARAMETER:
-        parameterValidator.validate(MoreElements.asVariable(element)).printMessagesTo(messager);
+        parameterValidator.validate((XVariableElement) xElement).printMessagesTo(messager);
         break;
       case METHOD:
-        methodValidator.validate(MoreElements.asExecutable(element)).printMessagesTo(messager);
+        methodValidator.validate((XExecutableElement) xElement).printMessagesTo(messager);
         break;
       default:
-        throw new AssertionError(element);
+        throw new AssertionError(xElement);
     }
   }
 }

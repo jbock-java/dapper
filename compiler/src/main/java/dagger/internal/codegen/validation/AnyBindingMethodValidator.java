@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.joining;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -37,10 +39,14 @@ import javax.lang.model.element.ExecutableElement;
 public final class AnyBindingMethodValidator implements ClearableCache {
   private final Map<ClassName, BindingMethodValidator> validators;
   private final Map<ExecutableElement, ValidationReport> reports = new HashMap<>();
+  private final XProcessingEnv processingEnv;
 
   @Inject
-  AnyBindingMethodValidator(Map<ClassName, BindingMethodValidator> validators) {
+  AnyBindingMethodValidator(
+      Map<ClassName, BindingMethodValidator> validators,
+      XProcessingEnv processingEnv) {
     this.validators = validators;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -99,7 +105,8 @@ public final class AnyBindingMethodValidator implements ClearableCache {
 
       case 1:
         report.addSubreport(
-            validators.get(Util.getOnlyElement(bindingMethodAnnotations)).validate(method));
+            validators.get(Util.getOnlyElement(bindingMethodAnnotations)).validate(
+                XConverters.toXProcessing(method, processingEnv)));
         break;
 
       default:

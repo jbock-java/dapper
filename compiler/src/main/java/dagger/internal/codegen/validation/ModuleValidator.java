@@ -48,6 +48,8 @@ import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.model.BindingGraph;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -102,6 +104,7 @@ public final class ModuleValidator {
   private final BindingGraphValidator bindingGraphValidator;
   private final Map<TypeElement, ValidationReport> cache = new HashMap<>();
   private final Set<TypeElement> knownModules = new HashSet<>();
+  private final XProcessingEnv processingEnv;
 
   @Inject
   ModuleValidator(
@@ -111,7 +114,8 @@ public final class ModuleValidator {
       MethodSignatureFormatter methodSignatureFormatter,
       ComponentDescriptorFactory componentDescriptorFactory,
       BindingGraphFactory bindingGraphFactory,
-      BindingGraphValidator bindingGraphValidator) {
+      BindingGraphValidator bindingGraphValidator,
+      XProcessingEnv processingEnv) {
     this.types = types;
     this.elements = elements;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
@@ -119,6 +123,7 @@ public final class ModuleValidator {
     this.componentDescriptorFactory = componentDescriptorFactory;
     this.bindingGraphFactory = bindingGraphFactory;
     this.bindingGraphValidator = bindingGraphValidator;
+    this.processingEnv = processingEnv;
   }
 
   /**
@@ -194,7 +199,7 @@ public final class ModuleValidator {
     validateSelfCycles(module, builder);
 
     if (builder.build().isClean()
-        && bindingGraphValidator.shouldDoFullBindingGraphValidation(module)) {
+        && bindingGraphValidator.shouldDoFullBindingGraphValidation(XConverters.toXProcessing(module, processingEnv))) {
       validateModuleBindings(module, builder);
     }
 

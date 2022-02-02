@@ -29,6 +29,7 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.model.Scope;
 import dagger.spi.model.Key;
 import java.util.Collection;
@@ -44,7 +45,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 /** A validator for elements that represent binding declarations. */
-public abstract class BindingElementValidator<E extends Element> {
+public abstract class BindingElementValidator<E extends XElement> {
   private final AllowsScoping allowsScoping;
   private final Map<E, ValidationReport> cache = new HashMap<>();
   private final InjectionAnnotations injectionAnnotations;
@@ -98,12 +99,14 @@ public abstract class BindingElementValidator<E extends Element> {
 
   /** Validator for a single binding element. */
   protected abstract class ElementValidator {
-    protected final E element;
+    protected final E xElement;
+    protected final Element element;
     protected final ValidationReport.Builder report;
     private final Collection<? extends AnnotationMirror> qualifiers;
 
-    protected ElementValidator(E element) {
-      this.element = element;
+    protected ElementValidator(E xElement) {
+      this.xElement = xElement;
+      this.element = xElement.toJavac();
       this.report = ValidationReport.about(element);
       qualifiers = injectionAnnotations.getQualifiers(element);
     }

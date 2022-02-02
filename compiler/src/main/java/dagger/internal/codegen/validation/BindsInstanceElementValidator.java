@@ -17,9 +17,9 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import javax.lang.model.element.Element;
+import dagger.internal.codegen.xprocessing.XElement;
 
-abstract class BindsInstanceElementValidator<E extends Element> extends BindingElementValidator<E> {
+abstract class BindsInstanceElementValidator<E extends XElement> extends BindingElementValidator<E> {
   BindsInstanceElementValidator(InjectionAnnotations injectionAnnotations) {
     super(AllowsScoping.NO_SCOPING, injectionAnnotations);
   }

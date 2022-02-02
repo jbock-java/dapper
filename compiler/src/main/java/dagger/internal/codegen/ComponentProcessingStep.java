@@ -143,7 +143,7 @@ final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeEle
 
   private boolean validateFullBindingGraph(ComponentDescriptor componentDescriptor) {
     XTypeElement component = componentDescriptor.typeElement();
-    if (!bindingGraphValidator.shouldDoFullBindingGraphValidation(component.toJavac())) {
+    if (!bindingGraphValidator.shouldDoFullBindingGraphValidation(component)) {
       return true;
     }
     BindingGraph fullBindingGraph = bindingGraphFactory.create(componentDescriptor, true);

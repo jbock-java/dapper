@@ -22,6 +22,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Inject;
@@ -50,9 +51,9 @@ public final class BindingGraphValidator {
   }
 
   /** Returns {@code true} if validation or analysis is required on the full binding graph. */
-  public boolean shouldDoFullBindingGraphValidation(TypeElement component) {
+  public boolean shouldDoFullBindingGraphValidation(XTypeElement component) {
     return requiresFullBindingGraphValidation()
-        || compilerOptions.pluginsVisitFullBindingGraphs(component);
+        || compilerOptions.pluginsVisitFullBindingGraphs(component.toJavac());
   }
 
   private boolean requiresFullBindingGraphValidation() {

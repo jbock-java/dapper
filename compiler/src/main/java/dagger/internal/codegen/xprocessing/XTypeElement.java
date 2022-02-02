@@ -29,16 +29,17 @@ public class XTypeElement extends XElement {
     return typeElement;
   }
 
+  @Override
+  public List<XVariableElement> getParameters() {
+    return List.of();
+  }
+
   public Name getQualifiedName() {
     return typeElement.getQualifiedName();
   }
 
   public ClassName getClassName() {
     return ClassName.get(typeElement);
-  }
-
-  public boolean isPublic() {
-    return typeElement.getModifiers().contains(Modifier.PUBLIC);
   }
 
   public TypeMirror getType() {

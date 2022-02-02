@@ -22,6 +22,7 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Optional;
@@ -31,20 +32,20 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<VariableElement> {
+final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<XVariableElement> {
   @Inject
   BindsInstanceParameterValidator(InjectionAnnotations injectionAnnotations) {
     super(injectionAnnotations);
   }
 
   @Override
-  protected ElementValidator elementValidator(VariableElement element) {
-    return new Validator(element);
+  protected ElementValidator elementValidator(XVariableElement xElement) {
+    return new Validator(xElement);
   }
 
   private class Validator extends ElementValidator {
-    Validator(VariableElement element) {
-      super(element);
+    Validator(XVariableElement xElement) {
+      super(xElement);
     }
 
     @Override
