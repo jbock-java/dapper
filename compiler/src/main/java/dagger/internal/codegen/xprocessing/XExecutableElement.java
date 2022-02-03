@@ -19,7 +19,6 @@ public class XExecutableElement extends XElement {
     return executableElement;
   }
 
-  @Override
   public final List<XVariableElement> getParameters() {
     return executableElement.getParameters().stream()
         .map(p -> new XVariableElement(p, env()))

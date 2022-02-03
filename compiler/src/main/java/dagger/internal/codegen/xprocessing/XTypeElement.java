@@ -2,7 +2,6 @@ package dagger.internal.codegen.xprocessing;
 
 import io.jbock.javapoet.ClassName;
 import java.util.List;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -27,11 +26,6 @@ public class XTypeElement extends XElement {
   @Override
   public TypeElement toJavac() {
     return typeElement;
-  }
-
-  @Override
-  public List<XVariableElement> getParameters() {
-    return List.of();
   }
 
   public Name getQualifiedName() {

@@ -1,6 +1,5 @@
 package dagger.internal.codegen.xprocessing;
 
-import java.util.List;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -43,8 +42,6 @@ public abstract class XElement {
   public boolean isAbstract() {
     return element.getModifiers().contains(Modifier.ABSTRACT);
   }
-
-  public abstract List<XVariableElement> getParameters();
 
   final XProcessingEnv env() {
     return env;
