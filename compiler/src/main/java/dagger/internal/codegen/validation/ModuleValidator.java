@@ -160,7 +160,8 @@ public final class ModuleValidator {
     List<ExecutableElement> moduleMethods = methodsIn(module.getEnclosedElements());
     List<ExecutableElement> bindingMethods = new ArrayList<>();
     for (ExecutableElement moduleMethod : moduleMethods) {
-      if (anyBindingMethodValidator.isBindingMethod(moduleMethod)) {
+      if (anyBindingMethodValidator.isBindingMethod(
+          XConverters.toXProcessing(moduleMethod, processingEnv))) {
         builder.addSubreport(anyBindingMethodValidator.validate(moduleMethod));
         bindingMethods.add(moduleMethod);
       }
@@ -465,7 +466,8 @@ public final class ModuleValidator {
           }
         }
         // For each binding method in superclass, confirm our methods don't override it.
-        if (anyBindingMethodValidator.isBindingMethod(superclassMethod)) {
+        if (anyBindingMethodValidator.isBindingMethod(
+            XConverters.toXProcessing(superclassMethod, processingEnv))) {
           for (ExecutableElement method : allMethodsByName.getOrDefault(name, List.of())) {
             if (failedMethods.add(method)
                 && elements.overrides(method, superclassMethod, subject)) {
@@ -543,7 +545,10 @@ public final class ModuleValidator {
     // separate call to the validator since the supertype itself must be a @Module, we need to look
     // at all the binding methods in the module's type hierarchy here.
     return methodsIn(elements.getAllMembers(module)).stream()
-        .filter(anyBindingMethodValidator::isBindingMethod)
+        .filter(
+            method ->
+                anyBindingMethodValidator.isBindingMethod(
+                    XConverters.toXProcessing(method, processingEnv)))
         .map(ExecutableElement::getModifiers)
         .anyMatch(modifiers -> !modifiers.contains(ABSTRACT) && !modifiers.contains(STATIC));
   }

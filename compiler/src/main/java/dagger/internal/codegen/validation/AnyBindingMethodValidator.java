@@ -25,6 +25,7 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
@@ -63,8 +64,8 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * Returns {@code true} if {@code method} is annotated with at least one of {@link
    * #methodAnnotations()}.
    */
-  boolean isBindingMethod(ExecutableElement method) {
-    return DaggerElements.isAnyAnnotationPresent(method, methodAnnotations());
+  boolean isBindingMethod(XExecutableElement method) {
+    return DaggerElements.isAnyAnnotationPresent(method.toJavac(), methodAnnotations());
   }
 
   /**
@@ -88,8 +89,8 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * Returns {@code true} if {@code method} was already {@linkplain #validate(ExecutableElement)
    * validated}.
    */
-  boolean wasAlreadyValidated(ExecutableElement method) {
-    return reports.containsKey(method);
+  boolean wasAlreadyValidated(XExecutableElement method) {
+    return reports.containsKey(method.toJavac());
   }
 
   private ValidationReport validateUncached(ExecutableElement method) {

@@ -47,11 +47,11 @@ public final class BindingMethodProcessingStep
   protected void process(XExecutableElement xElement, Set<ClassName> annotations) {
     ExecutableElement method = xElement.toJavac();
     Preconditions.checkArgument(
-        anyBindingMethodValidator.isBindingMethod(method),
+        anyBindingMethodValidator.isBindingMethod(xElement),
         "%s is not annotated with any of %s",
         method,
         annotations());
-    if (!anyBindingMethodValidator.wasAlreadyValidated(method)) {
+    if (!anyBindingMethodValidator.wasAlreadyValidated(xElement)) {
       anyBindingMethodValidator.validate(method).printMessagesTo(messager);
     }
   }
