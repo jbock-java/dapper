@@ -49,6 +49,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.model.BindingGraph;
 import io.jbock.auto.common.MoreElements;
@@ -160,9 +161,9 @@ public final class ModuleValidator {
     List<ExecutableElement> moduleMethods = methodsIn(module.getEnclosedElements());
     List<ExecutableElement> bindingMethods = new ArrayList<>();
     for (ExecutableElement moduleMethod : moduleMethods) {
-      if (anyBindingMethodValidator.isBindingMethod(
-          XConverters.toXProcessing(moduleMethod, processingEnv))) {
-        builder.addSubreport(anyBindingMethodValidator.validate(moduleMethod));
+      XExecutableElement method = XConverters.toXProcessing(moduleMethod, processingEnv);
+      if (anyBindingMethodValidator.isBindingMethod(method)) {
+        builder.addSubreport(anyBindingMethodValidator.validate(method));
         bindingMethods.add(moduleMethod);
       }
     }

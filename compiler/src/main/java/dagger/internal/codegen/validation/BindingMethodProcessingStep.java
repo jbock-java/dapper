@@ -49,10 +49,10 @@ public final class BindingMethodProcessingStep
     Preconditions.checkArgument(
         anyBindingMethodValidator.isBindingMethod(xElement),
         "%s is not annotated with any of %s",
-        method,
+        xElement,
         annotations());
     if (!anyBindingMethodValidator.wasAlreadyValidated(xElement)) {
-      anyBindingMethodValidator.validate(method).printMessagesTo(messager);
+      anyBindingMethodValidator.validate(xElement).printMessagesTo(messager);
     }
   }
 }

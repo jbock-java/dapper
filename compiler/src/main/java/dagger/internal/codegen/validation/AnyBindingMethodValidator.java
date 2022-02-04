@@ -81,12 +81,12 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * @throws IllegalArgumentException if {@code method} is not annotated by any {@linkplain
    *     #methodAnnotations() binding method annotation}
    */
-  ValidationReport validate(ExecutableElement method) {
-    return reentrantComputeIfAbsent(reports, method, this::validateUncached);
+  ValidationReport validate(XExecutableElement method) {
+    return reentrantComputeIfAbsent(reports, method.toJavac(), this::validateUncached);
   }
 
   /**
-   * Returns {@code true} if {@code method} was already {@linkplain #validate(ExecutableElement)
+   * Returns {@code true} if {@code method} was already {@linkplain #validate(XExecutableElement)
    * validated}.
    */
   boolean wasAlreadyValidated(XExecutableElement method) {
