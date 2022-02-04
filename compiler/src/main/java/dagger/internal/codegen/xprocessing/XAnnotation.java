@@ -26,4 +26,8 @@ public class XAnnotation {
           return new XAnnotationValue(env, executableElement, annotationValue);
         }).collect(Collectors.toList());
   }
+
+  public AnnotationMirror toJavac() {
+    return mirror;
+  }
 }

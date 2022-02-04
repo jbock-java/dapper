@@ -31,11 +31,13 @@ public class XAnnotationValue {
 
   private final ExecutableElement method;
   private final Supplier<Object> valueProvider;
+  private final AnnotationValue annotationValue;
 
   XAnnotationValue(
       XProcessingEnv env,
       ExecutableElement method,
       AnnotationValue annotationValue) {
+    this.annotationValue = annotationValue;
     this.method = method;
     this.valueProvider = Suppliers.memoize(() ->
         UNWRAP_VISITOR.visit(annotationValue, new VisitorData(env, method)));
@@ -149,4 +151,8 @@ public class XAnnotationValue {
       }).collect(Collectors.toList());
     }
   };
+
+  public AnnotationValue toJavac() {
+    return annotationValue;
+  }
 }

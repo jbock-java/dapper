@@ -22,6 +22,8 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotationValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.common.graph.Traverser;
@@ -269,6 +271,22 @@ public final class ValidationReport {
       return addItem(message, ERROR, element, annotation, annotationValue);
     }
 
+    public Builder addError(String message, XElement element) {
+      return addItem(message, ERROR, element);
+    }
+
+    public Builder addError(String message, XElement element, XAnnotation annotation) {
+      return addItem(message, ERROR, element, annotation);
+    }
+
+    public Builder addError(
+        String message,
+        XElement element,
+        XAnnotation annotation,
+        XAnnotationValue annotationValue) {
+      return addItem(message, ERROR, element, annotation, annotationValue);
+    }
+
     Builder addWarning(String message) {
       return addWarning(message, subject);
     }
@@ -289,6 +307,22 @@ public final class ValidationReport {
       return addItem(message, WARNING, element, annotation, annotationValue);
     }
 
+    Builder addWarning(String message, XElement element) {
+      return addItem(message, WARNING, element);
+    }
+
+    Builder addWarning(String message, XElement element, XAnnotation annotation) {
+      return addItem(message, WARNING, element, annotation);
+    }
+
+    Builder addWarning(
+        String message,
+        XElement element,
+        XAnnotation annotation,
+        XAnnotationValue annotationValue) {
+      return addItem(message, WARNING, element, annotation, annotationValue);
+    }
+
     Builder addNote(String message) {
       return addNote(message, subject);
     }
@@ -306,6 +340,22 @@ public final class ValidationReport {
         Element element,
         AnnotationMirror annotation,
         AnnotationValue annotationValue) {
+      return addItem(message, NOTE, element, annotation, annotationValue);
+    }
+
+    Builder addNote(String message, XElement element) {
+      return addItem(message, NOTE, element);
+    }
+
+    Builder addNote(String message, XElement element, XAnnotation annotation) {
+      return addItem(message, NOTE, element, annotation);
+    }
+
+    Builder addNote(
+        String message,
+        XElement element,
+        XAnnotation annotation,
+        XAnnotationValue annotationValue) {
       return addItem(message, NOTE, element, annotation, annotationValue);
     }
 
@@ -334,6 +384,39 @@ public final class ValidationReport {
         Optional<AnnotationValue> annotationValue) {
       items.add(
           new Item(message, kind, element, annotation, annotationValue));
+      return this;
+    }
+
+    Builder addItem(String message, Kind kind, XElement element) {
+      return addItem(message, kind, element, Optional.empty(), Optional.empty());
+    }
+
+    Builder addItem(String message, Kind kind, XElement element, XAnnotation annotation) {
+      return addItem(message, kind, element, Optional.of(annotation), Optional.empty());
+    }
+
+    Builder addItem(
+        String message,
+        Kind kind,
+        XElement element,
+        XAnnotation annotation,
+        XAnnotationValue annotationValue) {
+      return addItem(message, kind, element, Optional.of(annotation), Optional.of(annotationValue));
+    }
+
+    private Builder addItem(
+        String message,
+        Kind kind,
+        XElement element,
+        Optional<XAnnotation> annotation,
+        Optional<XAnnotationValue> annotationValue) {
+      items.add(
+          new Item(
+              message,
+              kind,
+              element.toJavac(),
+              annotation.map(XAnnotation::toJavac),
+              annotationValue.map(XAnnotationValue::toJavac)));
       return this;
     }
 
