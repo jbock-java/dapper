@@ -1,5 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
+import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.javapoet.ClassName;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -41,6 +43,18 @@ public abstract class XElement {
 
   public boolean isAbstract() {
     return element.getModifiers().contains(Modifier.ABSTRACT);
+  }
+
+  public boolean hasAnyOf(Iterable<ClassName> classNames) {
+    return DaggerElements.isAnyAnnotationPresent(element, classNames);
+  }
+
+  public boolean hasAnnotation(ClassName className) {
+    return DaggerElements.isAnnotationPresent(element, className);
+  }
+
+  public String getSimpleName() {
+    return element.getSimpleName().toString();
   }
 
   final XProcessingEnv env() {
