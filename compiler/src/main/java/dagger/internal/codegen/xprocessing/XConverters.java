@@ -1,5 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -22,6 +23,10 @@ public class XConverters {
 
   public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv processingEnv) {
     return new XVariableElement(variableElement, processingEnv);
+  }
+
+  public static XAnnotation toXProcessing(AnnotationMirror mirror, XProcessingEnv processingEnv) {
+    return new XAnnotation(processingEnv, mirror);
   }
 
   public static XElement toXProcessing(Element element, XProcessingEnv processingEnv) {
