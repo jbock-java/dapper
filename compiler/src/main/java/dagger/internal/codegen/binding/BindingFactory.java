@@ -224,7 +224,7 @@ public final class BindingFactory {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
         .bindingElement(componentDefinitionType.toJavac())
-        .key(keyFactory.forType(componentDefinitionType.getType()))
+        .key(keyFactory.forType(componentDefinitionType.getType().toJavac()))
         .kind(COMPONENT)
         .build();
   }
