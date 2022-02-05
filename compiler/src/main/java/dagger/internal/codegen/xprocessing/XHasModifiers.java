@@ -7,4 +7,8 @@ public interface XHasModifiers {
   boolean isPrivate();
 
   boolean isPublic();
+
+  boolean isProtected();
+
+  boolean isStatic();
 }

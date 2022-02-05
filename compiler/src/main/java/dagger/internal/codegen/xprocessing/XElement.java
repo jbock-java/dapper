@@ -41,6 +41,16 @@ public abstract class XElement implements XAnnotated, XHasModifiers {
   }
 
   @Override
+  public final boolean isProtected() {
+    return element.getModifiers().contains(Modifier.PROTECTED);
+  }
+
+  @Override
+  public boolean isStatic() {
+    return element.getModifiers().contains(Modifier.STATIC);
+  }
+
+  @Override
   public final boolean isPrivate() {
     return element.getModifiers().contains(Modifier.PRIVATE);
   }
