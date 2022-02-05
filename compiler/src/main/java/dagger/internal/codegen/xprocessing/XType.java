@@ -1,17 +1,28 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.auto.common.MoreTypes;
 import javax.lang.model.type.TypeMirror;
 
-public class XType {
+public abstract class XType {
 
+  private final XProcessingEnv env;
   private final TypeMirror typeMirror;
 
-  XType(TypeMirror typeMirror) {
+  XType(XProcessingEnv env, TypeMirror typeMirror) {
+    this.env = env;
     this.typeMirror = typeMirror;
   }
 
   public TypeMirror toJavac() {
     return typeMirror;
+  }
+
+  public final XTypeElement getTypeElement() {
+    try {
+      return new XTypeElement(MoreTypes.asTypeElement(typeMirror), env);
+    } catch (IllegalArgumentException notAnElement) {
+      return null;
+    }
   }
 
   @Override

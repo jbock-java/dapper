@@ -27,6 +27,10 @@ public class XAnnotation {
         }).collect(Collectors.toList());
   }
 
+  public XType getType() {
+    return new JavacDeclaredType(env, mirror.getAnnotationType());
+  }
+
   public AnnotationMirror toJavac() {
     return mirror;
   }

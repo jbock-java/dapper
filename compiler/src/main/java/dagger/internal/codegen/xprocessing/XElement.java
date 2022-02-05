@@ -2,11 +2,13 @@ package dagger.internal.codegen.xprocessing;
 
 import dagger.internal.codegen.langmodel.DaggerElements;
 import io.jbock.javapoet.ClassName;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-public abstract class XElement {
+public abstract class XElement implements XAnnotated {
 
   private final XProcessingEnv env;
   private final Element element;
@@ -33,27 +35,41 @@ public abstract class XElement {
     return Objects.hash(element);
   }
 
-  public boolean isPublic() {
+  public final boolean isPublic() {
     return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
-  public boolean isPrivate() {
+  public final boolean isPrivate() {
     return element.getModifiers().contains(Modifier.PRIVATE);
   }
 
-  public boolean isAbstract() {
+  public final boolean isAbstract() {
     return element.getModifiers().contains(Modifier.ABSTRACT);
   }
 
-  public boolean hasAnyOf(Iterable<ClassName> classNames) {
+  public final boolean hasAnyOf(Iterable<ClassName> classNames) {
     return DaggerElements.isAnyAnnotationPresent(element, classNames);
   }
 
-  public boolean hasAnnotation(ClassName className) {
+  public final boolean hasAnnotation(ClassName className) {
     return DaggerElements.isAnnotationPresent(element, className);
   }
 
-  public String getSimpleName() {
+  @Override
+  public final List<XAnnotation> getAllAnnotations() {
+    return element.getAnnotationMirrors().stream()
+        .map(mirror -> new XAnnotation(env, mirror))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public final XAnnotation getAnnotation(ClassName className) {
+    return DaggerElements.getAnnotationMirror(element, className)
+        .map(annotationMirror -> new XAnnotation(env, annotationMirror))
+        .orElse(null);
+  }
+
+  public final String getSimpleName() {
     return element.getSimpleName().toString();
   }
 

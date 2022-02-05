@@ -116,11 +116,11 @@ public class XAnnotationValue {
     }
 
     @Override
-    public Object visitType(TypeMirror t, VisitorData visitorData) {
+    public Object visitType(TypeMirror t, VisitorData data) {
       if (t.getKind() == TypeKind.ERROR) {
         throw new TypeNotPresentException(t.toString(), null);
       }
-      return new XType(t);
+      return data.env.wrap(t);
     }
 
     @Override
