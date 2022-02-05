@@ -1,7 +1,9 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -38,5 +40,21 @@ public class XTypeElement extends XElement {
 
   public TypeMirror getType() {
     return typeElement.asType();
+  }
+
+  public XTypeElement getEnclosingTypeElement() {
+    try {
+      return new XTypeElement(MoreElements.asType(typeElement.getEnclosingElement()), env());
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  public boolean isClass() {
+    return typeElement.getKind() == ElementKind.CLASS;
+  }
+
+  public boolean isInterface() {
+    return typeElement.getKind() == ElementKind.INTERFACE;
   }
 }

@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.mapping;
 
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -100,6 +101,11 @@ public enum ComponentCreatorAnnotation {
                     .simpleName()
                     .equals(componentAnnotation.simpleName()))
         .collect(toAnnotationClasses());
+  }
+
+  /** Returns all creator annotations present on the given {@code type}. */
+  public static Set<ComponentCreatorAnnotation> getCreatorAnnotations(XTypeElement type) {
+    return getCreatorAnnotations(type.toJavac());
   }
 
   /** Returns all creator annotations present on the given {@code type}. */
