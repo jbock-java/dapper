@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreTypes;
+import java.util.List;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class XType {
@@ -23,6 +24,12 @@ public abstract class XType {
     } catch (IllegalArgumentException notAnElement) {
       return null;
     }
+  }
+
+  public abstract List<XType> getTypeArguments();
+
+  XProcessingEnv env() {
+    return env;
   }
 
   @Override

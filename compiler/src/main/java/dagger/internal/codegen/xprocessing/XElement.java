@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-public abstract class XElement implements XAnnotated {
+public abstract class XElement implements XAnnotated, XHasModifiers {
 
   private final XProcessingEnv env;
   private final Element element;
@@ -35,14 +35,17 @@ public abstract class XElement implements XAnnotated {
     return Objects.hash(element);
   }
 
+  @Override
   public final boolean isPublic() {
     return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
+  @Override
   public final boolean isPrivate() {
     return element.getModifiers().contains(Modifier.PRIVATE);
   }
 
+  @Override
   public final boolean isAbstract() {
     return element.getModifiers().contains(Modifier.ABSTRACT);
   }
