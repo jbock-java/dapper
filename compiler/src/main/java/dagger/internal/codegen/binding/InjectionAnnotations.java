@@ -16,16 +16,21 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
-import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.SuperficialValidation;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
+import jakarta.inject.Qualifier;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
@@ -57,16 +62,22 @@ public final class InjectionAnnotations {
     }
   }
 
+  public Set<XAnnotation> getQualifiers(XElement element, XProcessingEnv processingEnv) {
+    return getQualifiers(element.toJavac()).stream()
+        .map(qualifier -> XConverters.toXProcessing(qualifier, processingEnv))
+        .collect(toImmutableSet());
+  }
+
   public Collection<? extends AnnotationMirror> getQualifiers(Element element) {
     Set<? extends AnnotationMirror> qualifiers =
-        AnnotationMirrors.getAnnotatedAnnotations(element, jakarta.inject.Qualifier.class);
-    return new ArrayList<>(qualifiers);
+        AnnotationMirrors.getAnnotatedAnnotations(element, Qualifier.class);
+    return List.copyOf(qualifiers);
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
   public static Set<ExecutableElement> injectedConstructors(TypeElement type) {
     return constructorsIn(type.getEnclosedElements()).stream()
         .filter(constructor -> isAnnotationPresent(constructor, Inject.class))
-        .collect(DaggerStreams.toImmutableSet());
+        .collect(toImmutableSet());
   }
 }

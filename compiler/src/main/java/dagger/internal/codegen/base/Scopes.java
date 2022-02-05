@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypeP
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.model.Scope;
 import dagger.spi.model.DaggerAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
@@ -46,6 +47,11 @@ public final class Scopes {
    */
   public static String getReadableSource(Scope scope) {
     return stripCommonTypePrefixes(scope.toString());
+  }
+
+  /** Returns all of the associated scopes for a source code element. */
+  public static Set<Scope> scopesOf(XElement element) {
+    return scopesOf(element.toJavac());
   }
 
   /** Returns all of the associated scopes for a source code element. */
