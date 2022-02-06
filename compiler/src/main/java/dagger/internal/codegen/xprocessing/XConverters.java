@@ -9,35 +9,35 @@ import javax.lang.model.element.VariableElement;
 
 public class XConverters {
 
-  public static XTypeElement toXProcessing(TypeElement typeElement, XProcessingEnv processingEnv) {
-    return new XTypeElement(typeElement, processingEnv);
+  public static XTypeElement toXProcessing(TypeElement typeElement, XProcessingEnv env) {
+    return env.wrapTypeElement(typeElement);
   }
 
-  public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv processingEnv) {
+  public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv env) {
     if (executableElement.getKind() == ElementKind.CONSTRUCTOR) {
-      return new XConstructorElement(executableElement, processingEnv);
+      return new XConstructorElement(executableElement, env);
     } else {
-      return new XMethodElement(executableElement, processingEnv);
+      return new XMethodElement(executableElement, env);
     }
   }
 
-  public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv processingEnv) {
-    return new XVariableElement(variableElement, processingEnv);
+  public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv env) {
+    return new XVariableElement(variableElement, env);
   }
 
-  public static XAnnotation toXProcessing(AnnotationMirror mirror, XProcessingEnv processingEnv) {
-    return new XAnnotation(processingEnv, mirror);
+  public static XAnnotation toXProcessing(AnnotationMirror mirror, XProcessingEnv env) {
+    return new XAnnotation(env, mirror);
   }
 
-  public static XElement toXProcessing(Element element, XProcessingEnv processingEnv) {
+  public static XElement toXProcessing(Element element, XProcessingEnv env) {
     if (element instanceof TypeElement) {
-      return toXProcessing((TypeElement) element, processingEnv);
+      return toXProcessing((TypeElement) element, env);
     }
     if (element instanceof ExecutableElement) {
-      return toXProcessing((ExecutableElement) element, processingEnv);
+      return toXProcessing((ExecutableElement) element, env);
     }
     if (element instanceof VariableElement) {
-      return toXProcessing((VariableElement) element, processingEnv);
+      return toXProcessing((VariableElement) element, env);
     }
     throw new IllegalArgumentException("unexpected kind: " + element.getKind());
   }

@@ -41,7 +41,7 @@ shadowJar {
 dependencies {
     def dapper = project(':dapper')
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
-    def ac =  'io.github.jbock-java:auto-common:1.2.2'
+    def ac =  'io.github.jbock-java:auto-common:1.2.3'
     def graph = 'io.github.jbock-java:guava-graph:1.0.2'
     shadow(javapoet)
     shadow(ac)

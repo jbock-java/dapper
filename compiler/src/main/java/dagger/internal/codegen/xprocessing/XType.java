@@ -21,7 +21,7 @@ public abstract class XType {
 
   public final XTypeElement getTypeElement() {
     try {
-      return new XTypeElement(MoreTypes.asTypeElement(typeMirror), env);
+      return env.wrapTypeElement(MoreTypes.asTypeElement(typeMirror));
     } catch (IllegalArgumentException notAnElement) {
       return null;
     }

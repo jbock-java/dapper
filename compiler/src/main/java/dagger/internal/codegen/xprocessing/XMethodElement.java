@@ -14,7 +14,7 @@ public class XMethodElement extends XExecutableElement {
   private final XTypeElement containing;
 
   XMethodElement(ExecutableElement element, XProcessingEnv env) {
-    this(element, new XTypeElement(MoreElements.asType(element.getEnclosingElement()), env), env);
+    this(element, env.wrapTypeElement(MoreElements.asType(element.getEnclosingElement())), env);
   }
 
   XMethodElement(ExecutableElement element, XTypeElement containing, XProcessingEnv env) {

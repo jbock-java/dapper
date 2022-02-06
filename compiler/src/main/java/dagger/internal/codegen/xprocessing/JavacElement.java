@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-public class JavacElement implements XElement {
+class JavacElement implements XElement {
 
   private final XProcessingEnv env;
   private final Element element;

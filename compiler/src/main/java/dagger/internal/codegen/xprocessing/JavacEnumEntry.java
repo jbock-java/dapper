@@ -3,7 +3,7 @@ package dagger.internal.codegen.xprocessing;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 
-public class JavacEnumEntry extends JavacElement {
+class JavacEnumEntry extends JavacElement {
 
   private final XEnumTypeElement enumTypeElement;
   private final String name;
