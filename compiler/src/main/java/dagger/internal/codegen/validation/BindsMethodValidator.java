@@ -31,8 +31,6 @@ import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
 /** A validator for {@link dagger.Binds} methods. */
@@ -83,7 +81,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
     protected void checkParameter(XVariableElement parameter) {
       super.checkParameter(parameter);
       TypeMirror leftHandSide = boxIfNecessary(MoreElements.asExecutable(element).getReturnType());
-      TypeMirror rightHandSide = parameter.getType();
+      TypeMirror rightHandSide = parameter.getType().toJavac();
 
       if (!types.isAssignable(rightHandSide, leftHandSide)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.

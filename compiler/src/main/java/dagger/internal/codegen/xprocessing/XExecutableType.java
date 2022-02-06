@@ -10,5 +10,5 @@ import java.util.List;
 public interface XExecutableType {
 
   /** Parameter types of the method or constructor. */
-  List<XType> getParameterTypes();
+  public List<XType> getParameterTypes();
 }

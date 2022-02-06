@@ -18,11 +18,12 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
@@ -127,8 +129,16 @@ public final class ModuleAnnotation {
    * Returns an object representing the {@code @Module} or {@code @ProducerModule} annotation if one
    * annotates {@code typeElement}.
    */
-  public static Optional<ModuleAnnotation> moduleAnnotation(TypeElement typeElement) {
-    return DaggerElements.getAnyAnnotation(typeElement, List.of(TypeNames.MODULE))
+  public static Optional<ModuleAnnotation> moduleAnnotation(XElement element) {
+    return moduleAnnotation(element.toJavac());
+  }
+
+  /**
+   * Returns an object representing the {@code @Module} or {@code @ProducerModule} annotation if one
+   * annotates {@code typeElement}.
+   */
+  public static Optional<ModuleAnnotation> moduleAnnotation(Element typeElement) {
+    return getAnyAnnotation(typeElement, List.of(TypeNames.MODULE))
         .map(ModuleAnnotation::moduleAnnotation);
   }
 }

@@ -10,7 +10,7 @@ import javax.lang.model.type.ExecutableType;
  *
  * It is not an XType as it does not represent a class or primitive.
  */
-public class XMethodType {
+public class XMethodType implements XExecutableType {
 
   private final XProcessingEnv env;
   private final XMethodElement element;
@@ -28,16 +28,23 @@ public class XMethodType {
   /**
    * The return type of the method
    */
-  XType getReturnType() {
+  public XType getReturnType() {
     return env.wrap(executableType.getReturnType());
   }
 
   /**
-   * Returns the names of [TypeVariableName]s for this executable.
+   * Returns the names of {@code TypeVariableName}s for this executable.
    */
-  List<TypeVariableName> getTypeVariableNames() {
+  public List<TypeVariableName> getTypeVariableNames() {
     return executableType.getTypeVariables().stream()
         .map(TypeVariableName::get)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<XType> getParameterTypes() {
+    return executableType.getParameterTypes().stream()
+        .map(env::wrap)
         .collect(Collectors.toList());
   }
 }

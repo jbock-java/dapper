@@ -17,14 +17,14 @@
 package dagger.internal.codegen.binding;
 
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 /** The collection of error messages to be reported back to users. */
 public final class ErrorMessages {
@@ -189,11 +189,11 @@ public final class ErrorMessages {
     }
 
     public final String factoryMethodReturnsSupertypeWithMissingMethods(
-        TypeElement component,
-        TypeElement componentBuilder,
-        TypeMirror returnType,
-        ExecutableElement buildMethod,
-        Set<ExecutableElement> additionalMethods) {
+        XTypeElement component,
+        XTypeElement componentBuilder,
+        XType returnType,
+        XMethodElement buildMethod,
+        Set<XMethodElement> additionalMethods) {
       return String.format(
           "%1$s.%2$s() returns %3$s, but %4$s declares additional component method(s): %5$s. In "
               + "order to provide type-safe access to these methods, override %2$s() to return "
@@ -202,7 +202,7 @@ public final class ErrorMessages {
           buildMethod.getSimpleName(),
           returnType,
           component.getQualifiedName(),
-          additionalMethods.stream().map(ExecutableElement::toString).collect(Collectors.joining(", ")));
+          additionalMethods.stream().map(XMethodElement::toString).collect(Collectors.joining(", ")));
     }
 
     public final String bindsInstanceNotAllowedOnBothSetterMethodAndParameter() {

@@ -2086,6 +2086,71 @@ class ComponentProcessorTest {
             daggerPublicComponent);
   }
 
+  @Test
+  public void componentFactoryInterfaceTest() {
+    JavaFileObject parentInterface =
+        JavaFileObjects.forSourceLines(
+            "test.ParentInterface",
+            "package test;",
+            "",
+            "interface ParentInterface extends ChildInterface.Factory {}");
+
+    JavaFileObject childInterface =
+        JavaFileObjects.forSourceLines(
+            "test.ChildInterface",
+            "package test;",
+            "",
+            "interface ChildInterface {",
+            "  interface Factory {",
+            "    ChildInterface child(ChildModule childModule);",
+            "  }",
+            "}");
+
+    JavaFileObject parent =
+        JavaFileObjects.forSourceLines(
+            "test.Parent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "",
+            "@Component",
+            "interface Parent extends ParentInterface, Child.Factory {}");
+
+    JavaFileObject child =
+        JavaFileObjects.forSourceLines(
+            "test.Child",
+            "package test;",
+            "",
+            "import dagger.Subcomponent;",
+            "",
+            "@Subcomponent(modules = ChildModule.class)",
+            "interface Child extends ChildInterface {",
+            "  interface Factory extends ChildInterface.Factory {",
+            "    @Override Child child(ChildModule childModule);",
+            "  }",
+            "}");
+
+    JavaFileObject childModule =
+        JavaFileObjects.forSourceLines(
+            "test.ChildModule",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "class ChildModule {",
+            "  @Provides",
+            "  int provideInt() {",
+            "    return 0;",
+            "  }",
+            "}");
+
+    Compilation compilation =
+        daggerCompiler().compile(parentInterface, childInterface, parent, child, childModule);
+    assertThat(compilation).succeeded();
+  }
+
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void providerComponentType(CompilerMode compilerMode) {

@@ -20,6 +20,9 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
+import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -32,6 +35,12 @@ import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -54,14 +63,10 @@ import javax.lang.model.util.ElementFilter;
 @Singleton
 public final class ComponentCreatorValidator implements ClearableCache {
 
-  private final DaggerElements elements;
-  private final DaggerTypes types;
-  private final Map<TypeElement, ValidationReport> reports = new HashMap<>();
+  private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
 
   @Inject
-  ComponentCreatorValidator(DaggerElements elements, DaggerTypes types) {
-    this.elements = elements;
-    this.types = types;
+  ComponentCreatorValidator() {
   }
 
   @Override
@@ -70,11 +75,11 @@ public final class ComponentCreatorValidator implements ClearableCache {
   }
 
   /** Validates that the given {@code type} is potentially a valid component creator type. */
-  public ValidationReport validate(TypeElement type) {
+  public ValidationReport validate(XTypeElement type) {
     return reentrantComputeIfAbsent(reports, type, this::validateUncached);
   }
 
-  private ValidationReport validateUncached(TypeElement type) {
+  private ValidationReport validateUncached(XTypeElement type) {
     ValidationReport.Builder report = ValidationReport.about(type);
 
     Set<ComponentCreatorAnnotation> creatorAnnotations = getCreatorAnnotations(type);
@@ -108,22 +113,20 @@ public final class ComponentCreatorValidator implements ClearableCache {
   }
 
   /**
-   * Validator for a single {@link TypeElement} that is annotated with a {@code Builder} or {@code
+   * Validator for a single {@link XTypeElement} that is annotated with a {@code Builder} or {@code
    * Factory} annotation.
    */
   private final class ElementValidator {
-    private final TypeElement type;
-    private final Element component;
+    private final XTypeElement creator;
     private final ValidationReport.Builder report;
     private final ComponentCreatorAnnotation annotation;
     private final ComponentCreatorMessages messages;
 
     private ElementValidator(
-        TypeElement type,
+        XTypeElement creator,
         ValidationReport.Builder report,
         ComponentCreatorAnnotation annotation) {
-      this.type = type;
-      this.component = type.getEnclosingElement();
+      this.creator = creator;
       this.report = report;
       this.annotation = annotation;
       this.messages = ErrorMessages.creatorMessagesFor(annotation);
@@ -131,7 +134,8 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /** Validates the creator type. */
     ValidationReport validate() {
-      if (!isAnnotationPresent(component, annotation.componentAnnotation())) {
+      XTypeElement enclosingType = creator.getEnclosingTypeElement();
+      if (enclosingType == null || !enclosingType.hasAnnotation(annotation.componentAnnotation())) {
         report.addError(messages.mustBeInComponent());
       }
 
@@ -155,29 +159,26 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /** Validates that the type is a class or interface type and returns true if it is. */
     private boolean validateIsClassOrInterface() {
-      switch (type.getKind()) {
-        case CLASS:
-          validateConstructor();
-          return true;
-        case INTERFACE:
-          return true;
-        default:
-          report.addError(messages.mustBeClassOrInterface());
+      if (creator.isClass()) {
+        validateConstructor();
+        return true;
       }
+      if (creator.isInterface()) {
+        return true;
+      }
+      report.addError(messages.mustBeClassOrInterface());
       return false;
     }
 
     private void validateConstructor() {
-      List<? extends Element> allElements = type.getEnclosedElements();
-      List<ExecutableElement> constructors = ElementFilter.constructorsIn(allElements);
+      List<XConstructorElement> constructors = creator.getConstructors();
 
       boolean valid;
       if (constructors.size() != 1) {
         valid = false;
       } else {
-        ExecutableElement constructor = getOnlyElement(constructors);
-        valid =
-            constructor.getParameters().isEmpty() && !constructor.getModifiers().contains(PRIVATE);
+        XConstructorElement constructor = getOnlyElement(constructors);
+        valid = constructor.getParameters().isEmpty() && !constructor.isPrivate();
       }
 
       if (!valid) {
@@ -187,26 +188,25 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /** Validates basic requirements about the type that are common to both creator kinds. */
     private void validateTypeRequirements() {
-      if (!type.getTypeParameters().isEmpty()) {
+      if (XTypeElements.hasTypeParameters(creator)) {
         report.addError(messages.generics());
       }
 
-      Set<Modifier> modifiers = type.getModifiers();
-      if (modifiers.contains(PRIVATE)) {
+      if (creator.isPrivate()) {
         report.addError(messages.isPrivate());
       }
-      if (!modifiers.contains(STATIC)) {
+      if (!creator.isStatic()) {
         report.addError(messages.mustBeStatic());
       }
       // Note: Must be abstract, so no need to check for final.
-      if (!modifiers.contains(ABSTRACT)) {
+      if (!creator.isAbstract()) {
         report.addError(messages.mustBeAbstract());
       }
     }
 
     private void validateBuilder() {
-      ExecutableElement buildMethod = null;
-      for (ExecutableElement method : elements.getUnimplementedMethods(type)) {
+      XMethodElement buildMethod = null;
+      for (XMethodElement method : getAllUnimplementedMethods(creator)) {
         switch (method.getParameters().size()) {
           case 0: // If this is potentially a build() method, validate it returns the correct type.
             if (validateFactoryMethodReturnType(method)) {
@@ -243,9 +243,9 @@ public final class ComponentCreatorValidator implements ClearableCache {
       }
     }
 
-    private void validateSetterMethod(ExecutableElement method) {
-      TypeMirror returnType = types.resolveExecutableType(method, type.asType()).getReturnType();
-      if (returnType.getKind() != TypeKind.VOID && !types.isSubtype(type.asType(), returnType)) {
+    private void validateSetterMethod(XMethodElement method) {
+      XType returnType = method.asMemberOf(creator.getType()).getReturnType();
+      if (!returnType.isVoid() && !returnType.isAssignableFrom(creator.getType())) {
         error(
             method,
             messages.setterMethodsMustReturnVoidOrBuilder(),
@@ -254,10 +254,10 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
       validateNotGeneric(method);
 
-      VariableElement parameter = method.getParameters().get(0);
+      XExecutableParameterElement parameter = method.getParameters().get(0);
 
-      boolean methodIsBindsInstance = isAnnotationPresent(method, TypeNames.BINDS_INSTANCE);
-      boolean parameterIsBindsInstance = isAnnotationPresent(parameter, TypeNames.BINDS_INSTANCE);
+      boolean methodIsBindsInstance = method.hasAnnotation(TypeNames.BINDS_INSTANCE);
+      boolean parameterIsBindsInstance = parameter.hasAnnotation(TypeNames.BINDS_INSTANCE);
       boolean bindsInstance = methodIsBindsInstance || parameterIsBindsInstance;
 
       if (methodIsBindsInstance && parameterIsBindsInstance) {
@@ -267,7 +267,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
             messages.inheritedBindsInstanceNotAllowedOnBothSetterMethodAndParameter());
       }
 
-      if (!bindsInstance && parameter.asType().getKind().isPrimitive()) {
+      if (!bindsInstance && isPrimitive(parameter.getType())) {
         error(
             method,
             messages.nonBindsInstanceParametersMayNotBePrimitives(),
@@ -276,8 +276,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     private void validateFactory() {
-      List<ExecutableElement> abstractMethods =
-          new ArrayList<>(elements.getUnimplementedMethods(type));
+      List<XMethodElement> abstractMethods = getAllUnimplementedMethods(creator);
       switch (abstractMethods.size()) {
         case 0:
           report.addError(messages.missingFactoryMethod());
@@ -297,7 +296,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     /** Validates that the given {@code method} is a valid component factory method. */
-    private void validateFactoryMethod(ExecutableElement method) {
+    private void validateFactoryMethod(XMethodElement method) {
       validateNotGeneric(method);
 
       if (!validateFactoryMethodReturnType(method)) {
@@ -306,9 +305,9 @@ public final class ComponentCreatorValidator implements ClearableCache {
         return;
       }
 
-      for (VariableElement parameter : method.getParameters()) {
-        if (!isAnnotationPresent(parameter, TypeNames.BINDS_INSTANCE)
-            && parameter.asType().getKind().isPrimitive()) {
+      for (XExecutableParameterElement parameter : method.getParameters()) {
+        if (!parameter.hasAnnotation(TypeNames.BINDS_INSTANCE)
+            && isPrimitive(parameter.getType())) {
           error(
               method,
               messages.nonBindsInstanceParametersMayNotBePrimitives(),
@@ -321,10 +320,10 @@ public final class ComponentCreatorValidator implements ClearableCache {
      * Validates that the factory method that actually returns a new component instance. Returns
      * true if the return type was valid.
      */
-    private boolean validateFactoryMethodReturnType(ExecutableElement method) {
-      TypeMirror returnType = types.resolveExecutableType(method, type.asType()).getReturnType();
-
-      if (!types.isSubtype(component.asType(), returnType)) {
+    private boolean validateFactoryMethodReturnType(XMethodElement method) {
+      XTypeElement component = creator.getEnclosingTypeElement();
+      XType returnType = method.asMemberOf(creator.getType()).getReturnType();
+      if (!returnType.isAssignableFrom(component.getType())) {
         error(
             method,
             messages.factoryMethodMustReturnComponentType(),
@@ -332,7 +331,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
         return false;
       }
 
-      if (isAnnotationPresent(method, TypeNames.BINDS_INSTANCE)) {
+      if (method.hasAnnotation(TypeNames.BINDS_INSTANCE)) {
         error(
             method,
             messages.factoryMethodMayNotBeAnnotatedWithBindsInstance(),
@@ -340,14 +339,16 @@ public final class ComponentCreatorValidator implements ClearableCache {
         return false;
       }
 
-      TypeElement componentType = MoreElements.asType(component);
-      if (!types.isSameType(componentType.asType(), returnType)) {
-        Set<ExecutableElement> methodsOnlyInComponent =
-            methodsOnlyInComponent(componentType);
-        if (!methodsOnlyInComponent.isEmpty()) {
+      if (!returnType.isSameType(component.getType())) {
+        // TODO(ronshapiro): Ideally this shouldn't return methods which are redeclared from a
+        // supertype, but do not change the return type. We don't have a good/simple way of checking
+        // that, and it doesn't seem likely, so the warning won't be too bad.
+        Set<XMethodElement> declaredMethods =
+            new LinkedHashSet<>(component.getDeclaredMethods());
+        if (!declaredMethods.isEmpty()) {
           report.addWarning(
               messages.factoryMethodReturnsSupertypeWithMissingMethods(
-                  componentType, type, returnType, method, methodsOnlyInComponent),
+                  component, creator, returnType, method, declaredMethods),
               method);
         }
       }
@@ -373,11 +374,11 @@ public final class ComponentCreatorValidator implements ClearableCache {
      * class was included in this compile run.  But that's hard, and this is close enough.
      */
     private void error(
-        ExecutableElement method,
+        XMethodElement method,
         String enclosedError,
         String inheritedError,
         Object extraArg) {
-      if (method.getEnclosingElement().equals(type)) {
+      if (method.getEnclosingElement().equals(creator)) {
         report.addError(String.format(enclosedError, extraArg), method);
       } else {
         report.addError(String.format(inheritedError, extraArg, method));
@@ -385,10 +386,10 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     private void error(
-        ExecutableElement method,
+        XMethodElement method,
         String enclosedError,
         String inheritedError) {
-      if (method.getEnclosingElement().equals(type)) {
+      if (method.getEnclosingElement().equals(creator)) {
         report.addError(enclosedError, method);
       } else {
         report.addError(String.format(inheritedError, method));
@@ -396,8 +397,8 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     /** Validates that the given {@code method} is not generic. * */
-    private void validateNotGeneric(ExecutableElement method) {
-      if (!method.getTypeParameters().isEmpty()) {
+    private void validateNotGeneric(XMethodElement method) {
+      if (hasTypeParameters(method)) {
         error(
             method,
             messages.methodsMayNotHaveTypeParameters(),

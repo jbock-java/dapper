@@ -3,12 +3,12 @@ package dagger.internal.codegen.xprocessing;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
-public class XVariableElement extends XElement {
+public class XVariableElement extends JavacElement {
 
   private final VariableElement variableElement;
 
   public XVariableElement(VariableElement element, XProcessingEnv env) {
-    super(element, env);
+    super(env, element);
     this.variableElement = element;
   }
 
@@ -16,7 +16,7 @@ public class XVariableElement extends XElement {
     return variableElement;
   }
 
-  public TypeMirror getType() {
-    return variableElement.asType();
+  public XType getType() {
+    return env().wrap(variableElement.asType());
   }
 }

@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 
@@ -184,11 +185,11 @@ public final class ComponentCreatorDescriptor {
 
   /** Creates a new {@link ComponentCreatorDescriptor} for the given creator {@code type}. */
   public static ComponentCreatorDescriptor create(
-      DeclaredType type,
+      TypeElement typeElement,
       DaggerElements elements,
       DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory) {
-    TypeElement typeElement = asTypeElement(type);
+    DeclaredType type = asDeclared(typeElement.asType());
     TypeMirror componentType = typeElement.getEnclosingElement().asType();
 
     Map<ComponentRequirement, Set<ExecutableElement>> setterMethods =

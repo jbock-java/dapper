@@ -25,6 +25,8 @@ import static javax.lang.model.type.TypeKind.WILDCARD;
 import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
@@ -43,6 +45,15 @@ final class DependencyRequestValidator {
   DependencyRequestValidator(
       InjectionAnnotations injectionAnnotations) {
     this.injectionAnnotations = injectionAnnotations;
+  }
+
+  /**
+   * Adds an error if the given dependency request has more than one qualifier annotation or is a
+   * non-instance request with a wildcard type.
+   */
+  void validateDependencyRequest(
+      ValidationReport.Builder report, XElement requestElement, XType requestType) {
+    validateDependencyRequest(report, requestElement.toJavac(), requestType.toJavac());
   }
 
   /**

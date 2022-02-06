@@ -18,12 +18,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-public class XTypeElement extends XElement {
+public class XTypeElement extends JavacElement implements XMemberContainer {
 
   private final TypeElement typeElement;
 
   public XTypeElement(TypeElement element, XProcessingEnv env) {
-    super(element, env);
+    super(env, element);
     this.typeElement = element;
   }
 
@@ -53,7 +53,8 @@ public class XTypeElement extends XElement {
         // against subsequent methods.
         List<XMethodElement> methods = List.copyOf(methodSet);
         Set<XMethodElement> overridden = new LinkedHashSet<>();
-        forEachIndexed: for (int i = 0; i < methods.size(); i++) {
+        forEachIndexed:
+        for (int i = 0; i < methods.size(); i++) {
           XMethodElement methodOne = methods.get(i);
           for (int j = i + 1; j < methods.size(); j++) {
             XMethodElement methodTwo = methods.get(j);
@@ -69,7 +70,7 @@ public class XTypeElement extends XElement {
   }
 
   private static class MethodsByName {
-    private final Map<String, LinkedHashSet<XMethodElement>> methodsByName = new LinkedHashMap<>();
+    private final Map<String, Set<XMethodElement>> methodsByName = new LinkedHashMap<>();
     private final Set<XTypeElement> visitedInterfaces = new LinkedHashSet<>();
     private final XTypeElement xTypeElement;
 
@@ -84,34 +85,26 @@ public class XTypeElement extends XElement {
         if (visitedInterfaces.add(it)) {
           collectAllMethodsByName(it);
         }
-        // Next, visit all super class methods.
-        XType superType = type.superType();
-        if (superType != null) {
-          XTypeElement superTypeTypeElement = superType.getTypeElement();
-          if (superTypeTypeElement != null) {
-            collectAllMethodsByName(superTypeTypeElement);
-          }
+      }
+      // Next, visit all super class methods.
+      XType superType = type.superType();
+      if (superType != null) {
+        XTypeElement superTypeTypeElement = superType.getTypeElement();
+        if (superTypeTypeElement != null) {
+          collectAllMethodsByName(superTypeTypeElement);
         }
-        // Finally, visit all methods declared in this type.
-        if (type == xTypeElement) {
-          for (XMethodElement declaredMethod : type.getDeclaredMethods()) {
-            methodsByName.computeIfAbsent(declaredMethod.getSimpleName(), name -> {
-              LinkedHashSet<XMethodElement> v = new LinkedHashSet<>();
-              v.add(declaredMethod);
-              return v;
-            });
-          }
-        } else {
-          type.getDeclaredMethods().stream()
-              .filter(m -> m.isAccessibleFrom(type.getPackageName()))
-              .filter(m -> !m.isStaticInterfaceMethod())
-              .map(m -> m.copyTo(xTypeElement))
-              .forEach(m -> methodsByName.computeIfAbsent(m.getSimpleName(), name -> {
-                LinkedHashSet<XMethodElement> v = new LinkedHashSet<>();
-                v.add(m);
-                return v;
-              }));
+      }
+      // Finally, visit all methods declared in this type.
+      if (type == xTypeElement) {
+        for (XMethodElement declaredMethod : type.getDeclaredMethods()) {
+          methodsByName.merge(declaredMethod.getSimpleName(), Set.of(declaredMethod), Util::mutableUnion);
         }
+      } else {
+        type.getDeclaredMethods().stream()
+            .filter(m -> m.isAccessibleFrom(type.getPackageName()))
+            .filter(m -> !m.isStaticInterfaceMethod())
+            .map(m -> m.copyTo(xTypeElement))
+            .forEach(m -> methodsByName.merge(m.getSimpleName(), Set.of(m), Util::mutableUnion));
       }
     }
   }
@@ -169,7 +162,7 @@ public class XTypeElement extends XElement {
     return env().wrap(superclass);
   }
 
-  List<XMethodElement> getDeclaredMethods() {
+  public List<XMethodElement> getDeclaredMethods() {
     return ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
         .map(it -> new XMethodElement(it, env()))
         .collect(Collectors.toList());
@@ -177,5 +170,11 @@ public class XTypeElement extends XElement {
 
   String getPackageName() {
     return MoreElements.getPackage(toJavac()).getQualifiedName().toString();
+  }
+
+  public List<XTypeElement> getEnclosedTypeElements() {
+    return ElementFilter.typesIn(typeElement.getEnclosedElements())
+        .stream().map(it -> env().wrapTypeElement(it))
+        .collect(Collectors.toList());
   }
 }

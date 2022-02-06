@@ -19,4 +19,8 @@ class JavacDeclaredType extends XType {
         .map(typeMirror -> env().wrap(typeMirror))
         .collect(Collectors.toList());
   }
+
+  public DeclaredType toJavac() {
+    return declaredType;
+  }
 }

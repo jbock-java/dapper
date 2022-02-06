@@ -191,7 +191,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XExecutabl
      */
     protected void checkParameter(XVariableElement parameter) {
       dependencyRequestValidator.validateDependencyRequest(
-          report, parameter.toJavac(), parameter.getType());
+          report, parameter, parameter.getType());
     }
   }
 

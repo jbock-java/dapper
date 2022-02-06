@@ -39,6 +39,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.Scope;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -50,7 +51,6 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
@@ -80,6 +80,11 @@ public final class ComponentDescriptorFactory {
   }
 
   /** Returns a descriptor for a root component type. */
+  public ComponentDescriptor rootComponentDescriptor(XTypeElement xTypeElement) {
+    return rootComponentDescriptor(xTypeElement.toJavac());
+  }
+
+  /** Returns a descriptor for a root component type. */
   public ComponentDescriptor rootComponentDescriptor(TypeElement typeElement) {
     return create(
         typeElement,
@@ -89,8 +94,12 @@ public final class ComponentDescriptorFactory {
             "must have a component annotation"));
   }
 
+  public ComponentDescriptor subcomponentDescriptor(XTypeElement typeElement) {
+    return subcomponentDescriptor(typeElement.toJavac());
+  }
+
   /** Returns a descriptor for a subcomponent type. */
-  public ComponentDescriptor subcomponentDescriptor(TypeElement typeElement) {
+  private ComponentDescriptor subcomponentDescriptor(TypeElement typeElement) {
     return create(
         typeElement,
         checkAnnotation(
@@ -187,12 +196,9 @@ public final class ComponentDescriptorFactory {
     }
 
     // Validation should have ensured that this set will have at most one element.
-    Set<DeclaredType> enclosedCreators =
-        creatorAnnotationsFor(componentAnnotation).stream()
-            .flatMap(
-                creatorAnnotation ->
-                    enclosedAnnotatedTypes(typeElement, creatorAnnotation).stream())
-            .collect(toImmutableSet());
+    Set<TypeElement> enclosedCreators =
+        enclosedAnnotatedTypes(typeElement, creatorAnnotationsFor(componentAnnotation));
+
     Optional<ComponentCreatorDescriptor> creatorDescriptor =
         enclosedCreators.isEmpty()
             ? Optional.empty()

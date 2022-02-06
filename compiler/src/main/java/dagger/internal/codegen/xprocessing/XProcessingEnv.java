@@ -2,6 +2,7 @@ package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreTypes;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class XProcessingEnv {
@@ -21,6 +22,10 @@ public abstract class XProcessingEnv {
       default:
         return new DefaultJavacType(this, typeMirror);
     }
+  }
+
+  XTypeElement wrapTypeElement(TypeElement typeElement) {
+    return new XTypeElement(typeElement, this);
   }
 
   public abstract ProcessingEnvironment toJavac();

@@ -41,8 +41,11 @@ import javax.lang.model.element.TypeElement;
 /** Utilities relating to annotations defined in the {@code javax.inject} package. */
 public final class InjectionAnnotations {
 
+  private final XProcessingEnv processingEnv;
+
   @Inject
-  InjectionAnnotations() {
+  InjectionAnnotations(XProcessingEnv processingEnv) {
+    this.processingEnv = processingEnv;
   }
 
   public Optional<AnnotationMirror> getQualifier(Element e) {
@@ -62,7 +65,7 @@ public final class InjectionAnnotations {
     }
   }
 
-  public Set<XAnnotation> getQualifiers(XElement element, XProcessingEnv processingEnv) {
+  public Set<XAnnotation> getQualifiers(XElement element) {
     return getQualifiers(element.toJavac()).stream()
         .map(qualifier -> XConverters.toXProcessing(qualifier, processingEnv))
         .collect(toImmutableSet());

@@ -19,7 +19,10 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static javax.lang.model.util.ElementFilter.typesIn;
 
 import dagger.Component;
@@ -27,6 +30,7 @@ import dagger.Module;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
@@ -61,7 +65,7 @@ public final class ConfigurationAnnotations {
   }
 
   static boolean isSubcomponentCreator(Element element) {
-    return DaggerElements.isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
+    return isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
   }
 
   /**
@@ -103,17 +107,21 @@ public final class ConfigurationAnnotations {
   }
 
   /** Returns the enclosed types annotated with the given annotation. */
-  public static List<DeclaredType> enclosedAnnotatedTypes(
-      TypeElement typeElement, ClassName annotation) {
-    final List<DeclaredType> builders = new ArrayList<>();
-    for (TypeElement element : typesIn(typeElement.getEnclosedElements())) {
-      if (isAnnotationPresent(element, annotation)) {
-        builders.add(MoreTypes.asDeclared(element.asType()));
-      }
-    }
-    return builders;
+  public static Set<XTypeElement> enclosedAnnotatedTypes(
+      XTypeElement typeElement, Set<ClassName> annotations) {
+    return typeElement.getEnclosedTypeElements().stream()
+        .filter(enclosedType -> hasAnyAnnotation(enclosedType, annotations))
+        .collect(toImmutableSet());
   }
 
+  // TODO(bcorso): Migrate users to the XProcessing version above.
+  /** Returns the enclosed types annotated with the given annotation. */
+  public static Set<TypeElement> enclosedAnnotatedTypes(
+      TypeElement typeElement, Set<ClassName> annotations) {
+    return typesIn(typeElement.getEnclosedElements()).stream()
+        .filter(enclosedType -> isAnyAnnotationPresent(enclosedType, annotations))
+        .collect(toImmutableSet());
+  }
   /** Traverses includes from superclasses and adds them into the builder. */
   private static void addIncludesFromSuperclasses(
       DaggerTypes types,

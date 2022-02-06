@@ -22,13 +22,12 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<XExecutableElement> {
@@ -56,10 +55,10 @@ final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<X
         report.addError(
             "@BindsInstance methods should have exactly one parameter for the bound type");
       }
-      TypeElement enclosingType = MoreElements.asType(element.getEnclosingElement());
-      moduleAnnotation(enclosingType)
+      XElement enclosingElement = xElement.getEnclosingElement();
+      moduleAnnotation(enclosingElement)
           .ifPresent(moduleAnnotation -> report.addError(didYouMeanBinds(moduleAnnotation)));
-      anyComponentAnnotation(enclosingType)
+      anyComponentAnnotation(enclosingElement)
           .ifPresent(
               componentAnnotation ->
                   report.addError(
@@ -74,7 +73,7 @@ final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<X
       List<? extends XVariableElement> parameters =
           xElement.getParameters();
       return parameters.size() == 1
-          ? Optional.of(getOnlyElement(parameters).getType())
+          ? Optional.of(getOnlyElement(parameters).getType().toJavac())
           : Optional.empty();
     }
   }

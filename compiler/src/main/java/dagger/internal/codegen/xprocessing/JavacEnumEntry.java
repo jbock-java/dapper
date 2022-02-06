@@ -3,13 +3,13 @@ package dagger.internal.codegen.xprocessing;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 
-public class JavacEnumEntry extends XElement {
+public class JavacEnumEntry extends JavacElement {
 
   private final XEnumTypeElement enumTypeElement;
   private final String name;
 
   JavacEnumEntry(XProcessingEnv env, Element element, XEnumTypeElement enumTypeElement) {
-    super(element, env);
+    super(env, element);
     this.enumTypeElement = enumTypeElement;
     this.name = element.getSimpleName().toString();
   }
