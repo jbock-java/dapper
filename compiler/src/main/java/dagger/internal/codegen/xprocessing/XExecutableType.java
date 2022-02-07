@@ -1,5 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.javapoet.TypeVariableName;
 import java.util.List;
 
 /**
@@ -10,5 +11,10 @@ import java.util.List;
 public interface XExecutableType {
 
   /** Parameter types of the method or constructor. */
-  public List<XType> getParameterTypes();
+  List<XType> getParameterTypes();
+
+  /**
+   * Returns the names of {@code TypeVariableName}s for this executable.
+   */
+  List<TypeVariableName> getTypeVariableNames();
 }

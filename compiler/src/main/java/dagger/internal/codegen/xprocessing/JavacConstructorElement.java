@@ -1,9 +1,11 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeMirror;
 
 class JavacConstructorElement extends JavacExecutableElement implements XConstructorElement {
   JavacConstructorElement(ExecutableElement element, XProcessingEnv env) {
@@ -19,5 +21,12 @@ class JavacConstructorElement extends JavacExecutableElement implements XConstru
     return toJavac().getParameters().stream()
         .map(variable -> new JavacMethodParameter(env(), this, containing(), variable))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public XConstructorType getExecutableType() {
+    TypeMirror asMemberOf = env().toJavac().getTypeUtils()
+        .asMemberOf(MoreTypes.asDeclared(containing().toJavac().asType()), toJavac());
+    return new JavacConstructorType(env(), this, MoreTypes.asExecutable(asMemberOf));
   }
 }

@@ -25,7 +25,7 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
   public XMethodType getExecutableType() {
     TypeMirror asMemberOf = env().toJavac().getTypeUtils()
         .asMemberOf(MoreTypes.asDeclared(containing().toJavac().asType()), toJavac());
-    return new XMethodType(env(), this, MoreTypes.asExecutable(asMemberOf));
+    return new JavacMethodType(env(), this, MoreTypes.asExecutable(asMemberOf));
   }
 
   @Override
@@ -71,7 +71,7 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
       return getExecutableType();
     }
     TypeMirror asMemberOf = env().toJavac().getTypeUtils().asMemberOf(((JavacDeclaredType) other).toJavac(), toJavac());
-    return new XMethodType(env(), this, MoreTypes.asExecutable(asMemberOf));
+    return new JavacMethodType(env(), this, MoreTypes.asExecutable(asMemberOf));
   }
 
   @Override
