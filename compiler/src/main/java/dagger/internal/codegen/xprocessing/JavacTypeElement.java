@@ -154,7 +154,7 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   @Override
   public List<XConstructorElement> getConstructors() {
     return ElementFilter.constructorsIn(typeElement.getEnclosedElements()).stream()
-        .map(c -> new XConstructorElement(c, env()))
+        .map(c -> new JavacConstructorElement(c, env()))
         .collect(Collectors.toList());
   }
 
@@ -177,7 +177,7 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   @Override
   public List<XMethodElement> getDeclaredMethods() {
     return ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
-        .map(it -> new XMethodElement(it, env()))
+        .map(it -> new JavacMethodElement(it, env()))
         .collect(Collectors.toList());
   }
 

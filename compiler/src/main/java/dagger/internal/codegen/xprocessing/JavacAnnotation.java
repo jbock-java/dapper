@@ -19,7 +19,7 @@ class JavacAnnotation implements XAnnotation {
   public List<XAnnotationValue> getAnnotationValues() {
     return AnnotationMirrors.getAnnotationValuesWithDefaults(mirror)
         .entrySet().stream()
-        .map(e -> new XAnnotationValue(env, e.getKey(), e.getValue()))
+        .map(e -> JavacAnnotationValue.create(env, e.getKey(), e.getValue()))
         .collect(Collectors.toList());
   }
 

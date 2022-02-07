@@ -15,9 +15,9 @@ public class XConverters {
 
   public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv env) {
     if (executableElement.getKind() == ElementKind.CONSTRUCTOR) {
-      return new XConstructorElement(executableElement, env);
+      return new JavacConstructorElement(executableElement, env);
     } else {
-      return new XMethodElement(executableElement, env);
+      return new JavacMethodElement(executableElement, env);
     }
   }
 
