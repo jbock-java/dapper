@@ -3,6 +3,8 @@ package dagger.internal.codegen.xprocessing;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -70,5 +72,12 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
     }
     TypeMirror asMemberOf = env().toJavac().getTypeUtils().asMemberOf(((JavacDeclaredType) other).toJavac(), toJavac());
     return new XMethodType(env(), this, MoreTypes.asExecutable(asMemberOf));
+  }
+
+  @Override
+  public final List<XExecutableParameterElement> getParameters() {
+    return toJavac().getParameters().stream()
+        .map(variable -> new JavacMethodParameter(env(), this, containing(), variable))
+        .collect(Collectors.toList());
   }
 }

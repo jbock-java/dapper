@@ -2,7 +2,6 @@ package dagger.internal.codegen.xprocessing;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -14,15 +13,11 @@ public class XConverters {
   }
 
   public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv env) {
-    if (executableElement.getKind() == ElementKind.CONSTRUCTOR) {
-      return new JavacConstructorElement(executableElement, env);
-    } else {
-      return new JavacMethodElement(executableElement, env);
-    }
+    return env.wrapExecutableElement(executableElement);
   }
 
   public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv env) {
-    return new XVariableElement(variableElement, env);
+    return env.wrapVariableElement(variableElement);
   }
 
   public static XAnnotation toXProcessing(AnnotationMirror mirror, XProcessingEnv env) {
