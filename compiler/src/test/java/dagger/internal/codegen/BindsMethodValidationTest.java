@@ -93,19 +93,6 @@ class BindsMethodValidationTest {
     assertThatMethod("@Binds abstract Object noParameters();").hasError("one parameter");
   }
 
-  @Test
-  void setElementsNotAssignable() {
-    assertThatMethod(
-        "@Binds @ElementsIntoSet abstract Set<String> bindSetOfIntegers(Set<Integer> ints);")
-        .hasError("assignable");
-  }
-
-  @Test
-  void setElements_primitiveArgument() {
-    assertThatMethod("@Binds @ElementsIntoSet abstract Set<Number> bindInt(int integer);")
-        .hasError("assignable");
-  }
-
   private DaggerModuleMethodSubject assertThatMethod(String method) {
     return assertThatModuleMethod(method).withDeclaration(moduleDeclaration);
   }

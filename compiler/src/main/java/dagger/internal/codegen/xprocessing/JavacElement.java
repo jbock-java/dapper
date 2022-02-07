@@ -76,14 +76,14 @@ class JavacElement implements XElement {
   @Override
   public final List<XAnnotation> getAllAnnotations() {
     return element.getAnnotationMirrors().stream()
-        .map(mirror -> new XAnnotation(env, mirror))
+        .map(mirror -> new JavacAnnotation(env, mirror))
         .collect(Collectors.toList());
   }
 
   @Override
   public final XAnnotation getAnnotation(ClassName className) {
     return DaggerElements.getAnnotationMirror(element, className)
-        .map(annotationMirror -> new XAnnotation(env, annotationMirror))
+        .map(annotationMirror -> new JavacAnnotation(env, annotationMirror))
         .orElse(null);
   }
 

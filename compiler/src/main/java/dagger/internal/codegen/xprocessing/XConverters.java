@@ -26,7 +26,7 @@ public class XConverters {
   }
 
   public static XAnnotation toXProcessing(AnnotationMirror mirror, XProcessingEnv env) {
-    return new XAnnotation(env, mirror);
+    return new JavacAnnotation(env, mirror);
   }
 
   public static XElement toXProcessing(Element element, XProcessingEnv env) {

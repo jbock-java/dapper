@@ -138,7 +138,7 @@ public class XAnnotationValue {
 
     @Override
     public Object visitAnnotation(AnnotationMirror a, VisitorData data) {
-      return new XAnnotation(data.env, a);
+      return new JavacAnnotation(data.env, a);
     }
 
     @Override
