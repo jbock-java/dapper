@@ -117,7 +117,7 @@ class JavacAnnotationValue implements XAnnotationValue {
       return new JavacEnumEntry(
           data.env,
           c,
-          new XEnumTypeElement(data.env, enumTypeElement));
+          new JavacEnumTypeElement(data.env, enumTypeElement));
     }
 
     @Override

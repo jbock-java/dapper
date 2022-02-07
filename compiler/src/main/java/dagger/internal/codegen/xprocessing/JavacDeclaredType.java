@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.type.DeclaredType;
 
-class JavacDeclaredType extends XType {
+class JavacDeclaredType extends JavacType {
 
   private final DeclaredType declaredType;
 
