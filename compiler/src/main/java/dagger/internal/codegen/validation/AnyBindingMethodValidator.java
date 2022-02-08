@@ -19,6 +19,7 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.ClearableCache;
@@ -36,7 +37,7 @@ import java.util.Set;
 @Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
   private final Map<ClassName, BindingMethodValidator> validators;
-  private final Map<XExecutableElement, ValidationReport> reports = new HashMap<>();
+  private final Map<XMethodElement, ValidationReport> reports = new HashMap<>();
 
   @Inject
   AnyBindingMethodValidator(
@@ -59,7 +60,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * #methodAnnotations()}.
    */
   boolean isBindingMethod(XExecutableElement method) {
-    return method.hasAnyOf(methodAnnotations());
+    return hasAnyAnnotation(method, methodAnnotations());
   }
 
   /**
@@ -75,19 +76,19 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * @throws IllegalArgumentException if {@code method} is not annotated by any {@linkplain
    *     #methodAnnotations() binding method annotation}
    */
-  ValidationReport validate(XExecutableElement method) {
+  ValidationReport validate(XMethodElement method) {
     return reentrantComputeIfAbsent(reports, method, this::validateUncached);
   }
 
   /**
-   * Returns {@code true} if {@code method} was already {@linkplain #validate(XExecutableElement)
+   * Returns {@code true} if {@code method} was already {@linkplain #validate(XMethodElement)
    * validated}.
    */
-  boolean wasAlreadyValidated(XExecutableElement method) {
+  boolean wasAlreadyValidated(XMethodElement method) {
     return reports.containsKey(method);
   }
 
-  private ValidationReport validateUncached(XExecutableElement method) {
+  private ValidationReport validateUncached(XMethodElement method) {
     ValidationReport.Builder report = ValidationReport.about(method);
     Set<ClassName> bindingMethodAnnotations =
         methodAnnotations().stream().filter(method::hasAnnotation).collect(toImmutableSet());
@@ -102,14 +103,10 @@ public final class AnyBindingMethodValidator implements ClearableCache {
         break;
 
       default:
-        // This is a validator for binding methods, so the passed in element must be a method
-        // element.
-        Preconditions.checkArgument(
-            method instanceof XMethodElement, "%s must be instanceof XMethodElement.", method);
         report.addError(
             String.format(
                 "%s is annotated with more than one of (%s)",
-                ((XMethodElement) method).getName(),
+                method.getName(),
                 methodAnnotations().stream().map(ClassName::canonicalName).collect(joining(", "))),
             method);
         break;

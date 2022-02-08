@@ -26,6 +26,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -57,18 +58,21 @@ final class BindsMethodValidator extends BindingMethodValidator {
   }
 
   @Override
-  protected ElementValidator elementValidator(XExecutableElement xElement) {
-    return new Validator(xElement);
+  protected ElementValidator elementValidator(XMethodElement method) {
+    return new Validator(method);
   }
 
   private class Validator extends MethodValidator {
-    Validator(XExecutableElement xElement) {
-      super(xElement);
+    private final XMethodElement method;
+
+    Validator(XMethodElement method) {
+      super(method);
+      this.method = method;
     }
 
     @Override
     protected void checkParameters() {
-      if (xElement.getParameters().size() != 1) {
+      if (method.getParameters().size() != 1) {
         report.addError(
             bindingMethods(
                 "must have exactly one parameter, whose type is assignable to the return type"));
@@ -80,7 +84,7 @@ final class BindsMethodValidator extends BindingMethodValidator {
     @Override
     protected void checkParameter(XVariableElement parameter) {
       super.checkParameter(parameter);
-      TypeMirror leftHandSide = boxIfNecessary(MoreElements.asExecutable(element).getReturnType());
+      TypeMirror leftHandSide = boxIfNecessary(method.getReturnType().toJavac());
       TypeMirror rightHandSide = parameter.getType().toJavac();
 
       if (!types.isAssignable(rightHandSide, leftHandSide)) {

@@ -29,17 +29,15 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.model.Scope;
 import dagger.spi.model.Key;
-import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -53,6 +51,9 @@ public abstract class BindingElementValidator<E extends XElement> {
   /**
    * Creates a validator object.
    */
+  // TODO(bcorso): Consider reworking BindingElementValidator and all subclasses to use composition
+  // rather than inheritance. The web of inheritance makes it difficult to track what implementation
+  // of a method is actually being used.
   protected BindingElementValidator(
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
@@ -99,14 +100,12 @@ public abstract class BindingElementValidator<E extends XElement> {
 
   /** Validator for a single binding element. */
   protected abstract class ElementValidator {
-    protected final E xElement;
-    protected final Element element;
+    protected final E element;
     protected final ValidationReport.Builder report;
-    private final Collection<? extends AnnotationMirror> qualifiers;
+    private final Set<XAnnotation> qualifiers;
 
-    protected ElementValidator(E xElement) {
-      this.xElement = xElement;
-      this.element = xElement.toJavac();
+    protected ElementValidator(E element) {
+      this.element = element;
       this.report = ValidationReport.about(element);
       qualifiers = injectionAnnotations.getQualifiers(element);
     }
@@ -182,7 +181,7 @@ public abstract class BindingElementValidator<E extends XElement> {
      */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
-        for (AnnotationMirror qualifier : qualifiers) {
+        for (XAnnotation qualifier : qualifiers) {
           report.addError(
               bindingElements("may not use more than one @Qualifier"),
               element,
@@ -211,7 +210,7 @@ public abstract class BindingElementValidator<E extends XElement> {
       }
       requireNonNull(error);
       for (Scope scope : scopes) {
-        report.addError(error, element, scope.scopeAnnotation().java());
+        report.addError(error, element.toJavac(), scope.scopeAnnotation().java());
       }
     }
 

@@ -18,13 +18,12 @@ package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
-import dagger.internal.codegen.xprocessing.XVariableElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.Element;
 
 /**
  * Processing step that validates that the {@code BindsInstance} annotation is applied to the
@@ -51,17 +50,13 @@ public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingSt
   }
 
   @Override
-  protected void process(XElement xElement, Set<ClassName> annotations) {
-    Element element = xElement.toJavac();
-    switch (element.getKind()) {
-      case PARAMETER:
-        parameterValidator.validate((XVariableElement) xElement).printMessagesTo(messager);
-        break;
-      case METHOD:
-        methodValidator.validate((XExecutableElement) xElement).printMessagesTo(messager);
-        break;
-      default:
-        throw new AssertionError(xElement);
+  protected void process(XElement element, Set<ClassName> annotations) {
+    if (element.isMethod()) {
+      methodValidator.validate((XMethodElement) element).printMessagesTo(messager);
+    } else if (element.isMethodParameter()) {
+      parameterValidator.validate((XExecutableParameterElement) element).printMessagesTo(messager);
+    } else {
+      throw new AssertionError(element);
     }
   }
 }

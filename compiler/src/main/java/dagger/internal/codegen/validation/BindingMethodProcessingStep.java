@@ -17,16 +17,15 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.ExecutableElement;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
 public final class BindingMethodProcessingStep
-    extends XTypeCheckingProcessingStep<XExecutableElement> {
+    extends XTypeCheckingProcessingStep<XMethodElement> {
 
   private final Messager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
@@ -44,15 +43,14 @@ public final class BindingMethodProcessingStep
   }
 
   @Override
-  protected void process(XExecutableElement xElement, Set<ClassName> annotations) {
-    ExecutableElement method = xElement.toJavac();
+  protected void process(XMethodElement method, Set<ClassName> annotations) {
     Preconditions.checkArgument(
-        anyBindingMethodValidator.isBindingMethod(xElement),
+        anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",
-        xElement,
+        method,
         annotations());
-    if (!anyBindingMethodValidator.wasAlreadyValidated(xElement)) {
-      anyBindingMethodValidator.validate(xElement).printMessagesTo(messager);
+    if (!anyBindingMethodValidator.wasAlreadyValidated(method)) {
+      anyBindingMethodValidator.validate(method).printMessagesTo(messager);
     }
   }
 }

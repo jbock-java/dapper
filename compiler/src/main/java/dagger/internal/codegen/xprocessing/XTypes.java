@@ -17,12 +17,20 @@
 package dagger.internal.codegen.xprocessing;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
+
+import javax.lang.model.type.TypeKind;
+
 /** A utility class for {@link XType} helper methods. */
 public final class XTypes {
 
   /** Returns {@code true} if the given type is a primitive type. */
   public static boolean isDeclared(XType type) {
     return type.getTypeElement() != null;
+  }
+
+  /** Returns {@code true} if the given type is a type variable. */
+  public static boolean isTypeVariable(XType type) {
+    return type.toJavac().getKind() == TypeKind.TYPEVAR;
   }
 
   /** Returns {@code true} if the given type is a primitive type. */
@@ -35,5 +43,6 @@ public final class XTypes {
     return !type.getTypeArguments().isEmpty();
   }
 
-  private XTypes() {}
+  private XTypes() {
+  }
 }

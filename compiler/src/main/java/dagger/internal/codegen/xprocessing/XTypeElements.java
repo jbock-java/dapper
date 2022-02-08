@@ -26,7 +26,10 @@ public final class XTypeElements {
 
   /** Returns {@code true} if the given {@code type} has type parameters. */
   public static boolean hasTypeParameters(XTypeElement type) {
-    return XTypes.hasTypeParameters(type.getType());
+    // TODO(bcorso): Add support for XTypeElement#getTypeParameters() or at least
+    // XTypeElement#hasTypeParameters() in XProcessing. XTypes#getTypeArguments() isn't quite the
+    // same -- it tells you if the declared type has parameters rather than the element itself.
+    return !type.toJavac().getTypeParameters().isEmpty();
   }
 
   /** Returns all non-private, non-static, abstract methods in {@code type}. */

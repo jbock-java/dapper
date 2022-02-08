@@ -42,6 +42,16 @@ class JavacElement implements XElement {
   }
 
   @Override
+  public boolean isMethod() {
+    return this instanceof XMethodElement;
+  }
+
+  @Override
+  public boolean isMethodParameter() {
+    return this instanceof XExecutableParameterElement;
+  }
+
+  @Override
   public final boolean isPublic() {
     return element.getModifiers().contains(Modifier.PUBLIC);
   }
@@ -64,11 +74,6 @@ class JavacElement implements XElement {
   @Override
   public final boolean isAbstract() {
     return element.getModifiers().contains(Modifier.ABSTRACT);
-  }
-
-  @Override
-  public final boolean hasAnyOf(Iterable<ClassName> classNames) {
-    return DaggerElements.isAnyAnnotationPresent(element, classNames);
   }
 
   @Override

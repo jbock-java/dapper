@@ -16,54 +16,45 @@
 
 package dagger.internal.codegen.validation;
 
-import static javax.lang.model.element.ElementKind.METHOD;
-import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeVariable;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.xprocessing.XVariableElement;
-import io.jbock.auto.common.MoreElements;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<XVariableElement> {
+final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<XExecutableParameterElement> {
   @Inject
   BindsInstanceParameterValidator(InjectionAnnotations injectionAnnotations) {
     super(injectionAnnotations);
   }
 
   @Override
-  protected ElementValidator elementValidator(XVariableElement xElement) {
-    return new Validator(xElement);
+  protected ElementValidator elementValidator(XExecutableParameterElement parameter) {
+    return new Validator(parameter);
   }
 
   private class Validator extends ElementValidator {
-    Validator(XVariableElement xElement) {
-      super(xElement);
+    private final XExecutableParameterElement parameter;
+
+    Validator(XExecutableParameterElement parameter) {
+      super(parameter);
+      this.parameter = parameter;
     }
 
     @Override
     protected void checkAdditionalProperties() {
-      Element enclosing = element.getEnclosingElement();
-      if (!enclosing.getKind().equals(METHOD)) {
-        report.addError(
-            "@BindsInstance should only be applied to methods or parameters of methods");
-        return;
-      }
-
-      ExecutableElement method = MoreElements.asExecutable(enclosing);
-      if (!method.getModifiers().contains(ABSTRACT)) {
+      if (!parameter.getEnclosingMethodElement().isAbstract()) {
         report.addError("@BindsInstance parameters may only be used in abstract methods");
       }
 
-      TypeKind returnKind = method.getReturnType().getKind();
-      if (!(returnKind.equals(DECLARED) || returnKind.equals(TYPEVAR))) {
+      // The above check should rule out constructors since constructors cannot be abstract, so we
+      // know the XExecutableElement enclosing the parameter has to be an XMethodElement.
+      XMethodElement method = (XMethodElement) parameter.getEnclosingMethodElement();
+      if (!(isDeclared(method.getReturnType()) || isTypeVariable(method.getReturnType()))) {
         report.addError(
             "@BindsInstance parameters may not be used in methods with a void, array or primitive "
                 + "return type");
@@ -72,7 +63,7 @@ final class BindsInstanceParameterValidator extends BindsInstanceElementValidato
 
     @Override
     protected Optional<TypeMirror> bindingElementType() {
-      return Optional.of(element.asType());
+      return Optional.of(element.toJavac().asType());
     }
   }
 }

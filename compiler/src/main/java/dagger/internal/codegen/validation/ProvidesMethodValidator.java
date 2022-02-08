@@ -24,7 +24,7 @@ import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import jakarta.inject.Inject;
 import java.util.Set;
 
@@ -50,13 +50,14 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
   }
 
   @Override
-  protected ElementValidator elementValidator(XExecutableElement xElement) {
-    return new Validator(xElement);
+  protected ElementValidator elementValidator(XMethodElement method) {
+    return new Validator(method);
   }
 
   private class Validator extends MethodValidator {
-    Validator(XExecutableElement xElement) {
-      super(xElement);
+
+    Validator(XMethodElement method) {
+      super(method);
     }
 
     @Override
