@@ -394,7 +394,7 @@ class MissingBindingValidationTest {
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
         .hadErrorContainingMatch(
-            "(?s)\\QString cannot be provided\\E.*\\QChild.needsString()\\E")
+            "(?s)\\QString cannot be provided\\E.*\\Q[Child] Child.needsString()\\E")
         .inFile(parent)
         .onLineContaining("interface Parent");
   }

@@ -95,7 +95,7 @@ public class MissingBindingSuggestionsTest {
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
-        .hadErrorContaining("A binding with matching key exists in component: BarComponent");
+        .hadErrorContaining("A binding for Bar exists in BarComponent:");
   }
 
   @Test
@@ -157,7 +157,7 @@ public class MissingBindingSuggestionsTest {
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
-        .hadErrorContaining("A binding with matching key exists in component: BazComponent");
+        .hadErrorContaining("A binding for Baz exists in BazComponent:");
   }
 
   @Test
@@ -219,11 +219,11 @@ public class MissingBindingSuggestionsTest {
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m Baz cannot be provided without an "
                     + "@Inject constructor or a @Provides-annotated method.",
-                "A binding with matching key exists in component: Child",
+                "A binding for Baz exists in Child:",
                 "    Baz is injected at",
-                "        Bar(baz)",
+                "        [Parent] Bar(baz)",
                 "    Bar is requested at",
-                "        Parent.bar()",
+                "        [Parent] Parent.bar()",
                 "The following other entry points also depend on it:",
                 "    Parent.foo()",
                 "    Child.foo() [Parent \u2192 Child]"))
@@ -302,11 +302,11 @@ public class MissingBindingSuggestionsTest {
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m Baz cannot be provided without an "
                     + "@Inject constructor or a @Provides-annotated method.",
-                "A binding with matching key exists in component: Child2",
+                "A binding for Baz exists in Child2:",
                 "    Baz is injected at",
-                "        Bar(baz)",
+                "        [Parent] Bar(baz)",
                 "    Bar is requested at",
-                "        Parent.bar()",
+                "        [Parent] Parent.bar()",
                 "The following other entry points also depend on it:",
                 "    Parent.foo()",
                 "    Child1.foo() [Parent \u2192 Child1]",
