@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnot
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static javax.lang.model.util.ElementFilter.typesIn;
@@ -30,21 +29,18 @@ import dagger.Module;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -54,14 +50,24 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class ConfigurationAnnotations {
 
+  public static Optional<XTypeElement> getSubcomponentCreator(XTypeElement subcomponent) {
+    Preconditions.checkArgument(subcomponentAnnotation(subcomponent).isPresent());
+    return subcomponent.getEnclosedTypeElements().stream()
+        .filter(ConfigurationAnnotations::isSubcomponentCreator)
+        // TODO(bcorso): Consider doing toOptional() instead since there should be at most 1.
+        .findFirst();
+  }
+
   public static Optional<TypeElement> getSubcomponentCreator(TypeElement subcomponent) {
     Preconditions.checkArgument(subcomponentAnnotation(subcomponent).isPresent());
-    for (TypeElement nestedType : typesIn(subcomponent.getEnclosedElements())) {
-      if (isSubcomponentCreator(nestedType)) {
-        return Optional.of(nestedType);
-      }
-    }
-    return Optional.empty();
+    return typesIn(subcomponent.getEnclosedElements()).stream()
+        .filter(ConfigurationAnnotations::isSubcomponentCreator)
+        // TODO(bcorso): Consider doing toOptional() instead since there should be at most 1.
+        .findFirst();
+  }
+
+  static boolean isSubcomponentCreator(XElement element) {
+    return isSubcomponentCreator(element.toJavac());
   }
 
   static boolean isSubcomponentCreator(Element element) {
@@ -115,6 +121,7 @@ public final class ConfigurationAnnotations {
   }
 
   // TODO(bcorso): Migrate users to the XProcessing version above.
+
   /** Returns the enclosed types annotated with the given annotation. */
   public static Set<TypeElement> enclosedAnnotatedTypes(
       TypeElement typeElement, Set<ClassName> annotations) {
@@ -122,6 +129,7 @@ public final class ConfigurationAnnotations {
         .filter(enclosedType -> isAnyAnnotationPresent(enclosedType, annotations))
         .collect(toImmutableSet());
   }
+
   /** Traverses includes from superclasses and adds them into the builder. */
   private static void addIncludesFromSuperclasses(
       DaggerTypes types,

@@ -36,6 +36,7 @@ class JavacElement implements XElement {
     return Objects.hash(element);
   }
 
+  @Override
   public Element toJavac() {
     return element;
   }
@@ -65,10 +66,12 @@ class JavacElement implements XElement {
     return element.getModifiers().contains(Modifier.ABSTRACT);
   }
 
+  @Override
   public final boolean hasAnyOf(Iterable<ClassName> classNames) {
     return DaggerElements.isAnyAnnotationPresent(element, classNames);
   }
 
+  @Override
   public final boolean hasAnnotation(ClassName className) {
     return DaggerElements.isAnnotationPresent(element, className);
   }
@@ -85,10 +88,6 @@ class JavacElement implements XElement {
     return DaggerElements.getAnnotationMirror(element, className)
         .map(annotationMirror -> new JavacAnnotation(env, annotationMirror))
         .orElse(null);
-  }
-
-  public final String getSimpleName() {
-    return element.getSimpleName().toString();
   }
 
   final XProcessingEnv env() {

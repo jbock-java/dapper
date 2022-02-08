@@ -199,7 +199,7 @@ public final class ErrorMessages {
               + "order to provide type-safe access to these methods, override %2$s() to return "
               + "%4$s",
           componentBuilder.getQualifiedName(),
-          buildMethod.getSimpleName(),
+          buildMethod.getName(),
           returnType,
           component.getQualifiedName(),
           additionalMethods.stream().map(XMethodElement::toString).collect(Collectors.joining(", ")));

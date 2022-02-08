@@ -52,9 +52,11 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
@@ -91,6 +93,7 @@ public final class ComponentValidator implements ClearableCache {
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final DependencyRequestFactory dependencyRequestFactory;
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
+  private final XProcessingEnv processingEnv;
 
   @Inject
   ComponentValidator(
@@ -100,7 +103,8 @@ public final class ComponentValidator implements ClearableCache {
       ComponentCreatorValidator creatorValidator,
       DependencyRequestValidator dependencyRequestValidator,
       MethodSignatureFormatter methodSignatureFormatter,
-      DependencyRequestFactory dependencyRequestFactory) {
+      DependencyRequestFactory dependencyRequestFactory,
+      XProcessingEnv processingEnv) {
     this.elements = elements;
     this.types = types;
     this.moduleValidator = moduleValidator;
@@ -108,6 +112,7 @@ public final class ComponentValidator implements ClearableCache {
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.dependencyRequestFactory = dependencyRequestFactory;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -438,8 +443,8 @@ public final class ComponentValidator implements ClearableCache {
     private void validateReferencedModules() {
       report.addSubreport(
           moduleValidator.validateReferencedModules(
-              component.toJavac(),
-              componentAnnotation().annotation(),
+              component,
+              XConverters.toXProcessing(componentAnnotation().annotation(), processingEnv),
               componentKind().legalModuleKinds(),
               new HashSet<>()));
     }

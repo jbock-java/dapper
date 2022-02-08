@@ -8,6 +8,4 @@ public interface XElement extends XAnnotated, XHasModifiers {
   Element toJavac();
 
   boolean hasAnyOf(Iterable<ClassName> classNames);
-
-  String getSimpleName();
 }

@@ -40,6 +40,7 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
@@ -176,6 +177,17 @@ public final class BindingFactory {
                     .build()))
         .kind(ASSISTED_FACTORY)
         .build();
+  }
+
+  /**
+   * Returns a {@link dagger.model.BindingKind#PROVISION} binding for a
+   * {@code @Provides}-annotated method.
+   *
+   * @param contributedBy the installed module that declares or inherits the method
+   */
+  public ProvisionBinding providesMethodBinding(
+      XMethodElement providesMethod, XTypeElement contributedBy) {
+    return providesMethodBinding(providesMethod.toJavac(), contributedBy.toJavac());
   }
 
   /**

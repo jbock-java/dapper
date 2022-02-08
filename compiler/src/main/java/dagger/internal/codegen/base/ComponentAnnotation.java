@@ -27,6 +27,7 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,6 +148,15 @@ public abstract class ComponentAnnotation {
     return anyComponentAnnotation(typeElement, ROOT_COMPONENT_ANNOTATIONS);
   }
 
+
+  /**
+   * Returns an object representing a subcomponent annotation, if one is present on {@code
+   * typeElement}.
+   */
+  public static Optional<ComponentAnnotation> subcomponentAnnotation(XTypeElement typeElement) {
+    return subcomponentAnnotation(typeElement.toJavac());
+  }
+
   /**
    * Returns an object representing a subcomponent annotation, if one is present on {@code
    * typeElement}.
@@ -167,6 +177,13 @@ public abstract class ComponentAnnotation {
       Element element, Collection<ClassName> annotations) {
     return getAnyAnnotation(element, annotations).map(ComponentAnnotation::componentAnnotation);
   }
+
+
+  /** Returns {@code true} if the argument is a component annotation. */
+  public static boolean isComponentAnnotation(XAnnotation annotation) {
+    return isComponentAnnotation(annotation.toJavac());
+  }
+
 
   /** Returns {@code true} if the argument is a component annotation. */
   public static boolean isComponentAnnotation(AnnotationMirror annotation) {

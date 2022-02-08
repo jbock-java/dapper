@@ -48,7 +48,7 @@ dependencies {
     shadow(graph)
     shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
-    implementation('androidx.room:room-compiler-processing:2.4.1')
+    testImplementation('androidx.room:room-compiler-processing:2.4.1')
     testImplementation(dapper)
     testImplementation(ac)
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')

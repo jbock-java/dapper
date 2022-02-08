@@ -2,6 +2,8 @@ package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ArrayTypeName;
+import io.jbock.javapoet.TypeName;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -64,4 +66,22 @@ public abstract class XProcessingEnv {
   }
 
   public abstract ProcessingEnvironment toJavac();
+
+  /**
+   * Looks for the {@code XType} with the given qualified name and returns {@code null} if it does not exist.
+   */
+  public abstract XType findType(String qName);
+
+  public XType findType(TypeName typeName) {
+    if (typeName instanceof ArrayTypeName) {
+      throw new IllegalArgumentException("TODO");
+    }
+    return findType(typeName.toString());
+  }
+
+  /**
+   * Looks for the {@code XTypeElement} with the given qualified name and returns {@code null} if it does not
+   * exist.
+   */
+  public abstract XTypeElement findTypeElement(String qName);
 }

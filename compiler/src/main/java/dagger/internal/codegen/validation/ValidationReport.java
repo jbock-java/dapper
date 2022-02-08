@@ -242,10 +242,6 @@ public final class ValidationReport {
       this.subject = subject;
     }
 
-    Element getSubject() {
-      return subject;
-    }
-
     Builder addItems(Iterable<Item> newItems) {
       newItems.forEach(items::add);
       return this;

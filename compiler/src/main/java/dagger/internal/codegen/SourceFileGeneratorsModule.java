@@ -23,6 +23,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FactoryGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.writing.ModuleProxies.ModuleConstructorProxyGenerator;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import javax.lang.model.element.TypeElement;
 
 @Module
@@ -33,5 +34,5 @@ interface SourceFileGeneratorsModule {
 
   @Binds
   @ModuleGenerator
-  SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator(ModuleConstructorProxyGenerator generator);
+  SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator(ModuleConstructorProxyGenerator generator);
 }

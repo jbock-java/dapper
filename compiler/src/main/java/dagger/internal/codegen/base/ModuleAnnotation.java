@@ -23,6 +23,7 @@ import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
@@ -104,7 +105,12 @@ public final class ModuleAnnotation {
     return subcomponentsAsAnnotationValues.get();
   }
 
-  /** Returns {@code true} if the argument is a {@code @Module} or {@code @ProducerModule}. */
+  /** Returns {@code true} if the argument is a {@code @Module}. */
+  public static boolean isModuleAnnotation(XAnnotation annotation) {
+    return isModuleAnnotation(annotation.toJavac());
+  }
+
+  /** Returns {@code true} if the argument is a {@code @Module}. */
   public static boolean isModuleAnnotation(AnnotationMirror annotation) {
     return MODULE_ANNOTATIONS.stream()
         .map(ClassName::canonicalName)
@@ -112,7 +118,17 @@ public final class ModuleAnnotation {
   }
 
   /**
-   * Creates an object that represents a {@code @Module} or {@code @ProducerModule}.
+   * Creates an object that represents a {@code @Module}.
+   *
+   * @throws IllegalArgumentException if {@link #isModuleAnnotation(AnnotationMirror)} returns
+   *     {@code false}
+   */
+  public static ModuleAnnotation moduleAnnotation(XAnnotation annotation) {
+    return moduleAnnotation(annotation.toJavac());
+  }
+
+  /**
+   * Creates an object that represents a {@code @Module}.
    *
    * @throws IllegalArgumentException if {@link #isModuleAnnotation(AnnotationMirror)} returns
    *     {@code false}

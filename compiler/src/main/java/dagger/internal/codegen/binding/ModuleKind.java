@@ -17,16 +17,16 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 
 /** Enumeration of the kinds of modules. */
@@ -38,6 +38,17 @@ public enum ModuleKind {
   /** Returns the annotations for modules of the given kinds. */
   public static Set<ClassName> annotationsFor(Set<ModuleKind> kinds) {
     return kinds.stream().map(ModuleKind::annotation).collect(toImmutableSet());
+  }
+
+  /**
+   * Returns the kind of an annotated element if it is annotated with one of the module {@linkplain
+   * #annotation() annotations}.
+   *
+   * @throws IllegalArgumentException if the element is annotated with more than one of the module
+   *     annotations
+   */
+  public static Optional<ModuleKind> forAnnotatedElement(XTypeElement element) {
+    return forAnnotatedElement(element.toJavac());
   }
 
   /**
@@ -73,11 +84,13 @@ public enum ModuleKind {
    *
    * @throws IllegalArgumentException if the annotation is not present on the type
    */
-  public AnnotationMirror getModuleAnnotation(TypeElement element) {
-    Optional<AnnotationMirror> result = getAnnotationMirror(element, moduleAnnotation);
+  public XAnnotation getModuleAnnotation(XTypeElement element) {
     Preconditions.checkArgument(
-        result.isPresent(), "annotation %s is not present on type %s", moduleAnnotation, element);
-    return result.get();
+        element.hasAnnotation(moduleAnnotation),
+        "annotation %s is not present on type %s",
+        moduleAnnotation,
+        element);
+    return element.getAnnotation(moduleAnnotation);
   }
 
   /** Returns the annotation that marks a module of this kind. */

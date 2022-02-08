@@ -23,6 +23,8 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
@@ -111,6 +113,10 @@ public final class DelegateDeclaration extends BindingDeclaration {
       this.types = types;
       this.keyFactory = keyFactory;
       this.dependencyRequestFactory = dependencyRequestFactory;
+    }
+
+    public DelegateDeclaration create(XMethodElement bindsMethod, XTypeElement contributingModule) {
+      return create(bindsMethod.toJavac(), contributingModule.toJavac());
     }
 
     public DelegateDeclaration create(

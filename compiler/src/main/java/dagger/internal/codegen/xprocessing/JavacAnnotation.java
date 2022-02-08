@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.MoreTypes;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
@@ -31,5 +32,15 @@ class JavacAnnotation implements XAnnotation {
   @Override
   public AnnotationMirror toJavac() {
     return mirror;
+  }
+
+  @Override
+  public String getName() {
+    return mirror.getAnnotationType().asElement().getSimpleName().toString();
+  }
+
+  @Override
+  public String getQualifiedName() {
+    return MoreTypes.asTypeElement(mirror.getAnnotationType()).getQualifiedName().toString();
   }
 }

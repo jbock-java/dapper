@@ -159,13 +159,21 @@ class ModuleFactoryGeneratorTest {
 
   @Test
   void validatesIncludedModules() {
-    JavaFileObject module = JavaFileObjects.forSourceLines("test.Parent",
-        "package test;",
-        "",
-        "import dagger.Module;",
-        "",
-        "@Module(includes = Void.class)",
-        "class TestModule {}");
+    JavaFileObject module =
+        JavaFileObjects.forSourceLines(
+            "test.Parent",
+            "package test;",
+            "",
+            "import dagger.Module;",
+            "",
+            "@Module(",
+            "    includes = {",
+            "        Void.class,",
+            "        String.class,",
+            "    }",
+            ")",
+            "class TestModule {}");
+
 
     Compilation compilation = daggerCompiler().compile(module);
     assertThat(compilation).failed();

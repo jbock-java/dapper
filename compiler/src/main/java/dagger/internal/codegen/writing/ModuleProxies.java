@@ -33,6 +33,7 @@ import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeSpec;
@@ -58,7 +59,7 @@ public final class ModuleProxies {
   // TODO(dpb): See if this can become a SourceFileGenerator<ModuleDescriptor> instead. Doing so may
   // cause ModuleProcessingStep to defer elements multiple times.
   public static final class ModuleConstructorProxyGenerator
-      extends SourceFileGenerator<TypeElement> {
+      extends SourceFileGenerator<XTypeElement> {
 
     private final ModuleProxies moduleProxies;
 
@@ -72,12 +73,13 @@ public final class ModuleProxies {
     }
 
     @Override
-    public Element originatingElement(TypeElement moduleElement) {
-      return moduleElement;
+    public Element originatingElement(XTypeElement moduleElement) {
+      return moduleElement.toJavac();
     }
 
     @Override
-    public List<TypeSpec.Builder> topLevelTypes(TypeElement moduleElement) {
+    public List<TypeSpec.Builder> topLevelTypes(XTypeElement xModuleElement) {
+      TypeElement moduleElement = xModuleElement.toJavac();
       Preconditions.checkArgument(ModuleKind.forAnnotatedElement(moduleElement).isPresent());
       return moduleProxies.nonPublicNullaryConstructor(moduleElement).isPresent()
           ? List.of(buildProxy(moduleElement))

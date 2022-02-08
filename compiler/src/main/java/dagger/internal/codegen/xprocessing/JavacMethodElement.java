@@ -75,6 +75,12 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
   }
 
   @Override
+  public boolean overrides(XMethodElement other, XTypeElement owner) {
+    // Use auto-common's overrides, which provides consistency across javac and ejc (Eclipse).
+    return MoreElements.overrides(toJavac(), other.toJavac(), owner.toJavac(), env().toJavac().getTypeUtils());
+  }
+
+  @Override
   public final List<XExecutableParameterElement> getParameters() {
     return toJavac().getParameters().stream()
         .map(variable -> new JavacMethodParameter(env(), this, containing(), variable))

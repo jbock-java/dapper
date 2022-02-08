@@ -4,6 +4,7 @@ import dagger.internal.codegen.base.Util;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,14 +100,14 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
       // Finally, visit all methods declared in this type.
       if (type == xTypeElement) {
         for (XMethodElement declaredMethod : type.getDeclaredMethods()) {
-          methodsByName.merge(declaredMethod.getSimpleName(), Set.of(declaredMethod), Util::mutableUnion);
+          methodsByName.merge(declaredMethod.getName(), Set.of(declaredMethod), Util::mutableUnion);
         }
       } else {
         type.getDeclaredMethods().stream()
             .filter(m -> m.isAccessibleFrom(type.getPackageName()))
             .filter(m -> !m.isStaticInterfaceMethod())
             .map(m -> m.copyTo(xTypeElement))
-            .forEach(m -> methodsByName.merge(m.getSimpleName(), Set.of(m), Util::mutableUnion));
+            .forEach(m -> methodsByName.merge(m.getName(), Set.of(m), Util::mutableUnion));
       }
     }
   }
@@ -179,6 +180,43 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
     return ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
         .map(it -> new JavacMethodElement(it, env()))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<XFieldElement> getDeclaredFields() {
+    return ElementFilter.fieldsIn(typeElement.getEnclosedElements()).stream()
+        .filter(it -> it.getKind() != ElementKind.ENUM_CONSTANT)
+        .map(it ->
+            new JavacFieldElement(
+                env(),
+                this,
+                it
+            )).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<XElement> getEnclosedElements() {
+    List<XElement> result = new ArrayList<>();
+    result.addAll(getEnclosedTypeElements());
+    result.addAll(getDeclaredFields());
+    result.addAll(getConstructors());
+    result.addAll(getDeclaredMethods());
+    return result;
+  }
+
+  @Override
+  public XType getSuperType() {
+    // javac models non-existing types as TypeKind.NONE but we prefer to make it nullable.
+    // just makes more sense and safer as we don't need to check for none.
+
+    // The result value is a JavacType instead of JavacDeclaredType to gracefully handle
+    // cases where super is an error type.
+    TypeMirror superClass = typeElement.getSuperclass();
+    if (superClass.getKind() == TypeKind.NONE) {
+      return null;
+    } else {
+      return env().wrap(superClass);
+    }
   }
 
   @Override

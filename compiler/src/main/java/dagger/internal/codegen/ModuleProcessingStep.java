@@ -16,10 +16,8 @@
 
 package dagger.internal.codegen;
 
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingFactory;
@@ -31,17 +29,15 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 
 /**
  * A {@link Step} that validates module classes and generates factories for binding
@@ -52,8 +48,8 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
   private final ModuleValidator moduleValidator;
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  private final SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator;
-  private final Set<TypeElement> processedModuleElements = new LinkedHashSet<>();
+  private final SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator;
+  private final Set<XTypeElement> processedModuleElements = new LinkedHashSet<>();
 
   @Inject
   ModuleProcessingStep(
@@ -61,7 +57,7 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      @ModuleGenerator SourceFileGenerator<TypeElement> moduleConstructorProxyGenerator) {
+      @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator) {
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;
@@ -81,16 +77,14 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
     moduleValidator.addKnownModules(
         elementsByAnnotation.values().stream()
             .flatMap(Set::stream)
-            .map(XElement::toJavac)
-            .map(MoreElements::asType)
+            // This cast is safe because @Module has @Target(ElementType.TYPE)
+            .map(XTypeElement.class::cast)
             .collect(toList()));
     return super.process(env, elementsByAnnotation);
   }
 
   @Override
-  protected void process(XTypeElement xElement, Set<ClassName> annotations) {
-    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
-    TypeElement module = xElement.toJavac();
+  protected void process(XTypeElement module, Set<ClassName> annotations) {
     if (processedModuleElements.contains(module)) {
       return;
     }
@@ -102,9 +96,9 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
     processedModuleElements.add(module);
   }
 
-  private void generateForMethodsIn(TypeElement module) {
-    for (ExecutableElement method : methodsIn(module.getEnclosedElements())) {
-      if (isAnnotationPresent(method, TypeNames.PROVIDES)) {
+  private void generateForMethodsIn(XTypeElement module) {
+    for (XMethodElement method : module.getDeclaredMethods()) {
+      if (method.hasAnnotation(TypeNames.PROVIDES)) {
         generate(factoryGenerator, bindingFactory.providesMethodBinding(method, module));
       }
     }
