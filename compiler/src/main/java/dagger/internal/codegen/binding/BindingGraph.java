@@ -367,7 +367,7 @@ public final class BindingGraph {
 
   /** Returns the {@link TypeElement} for the component this graph represents. */
   public TypeElement componentTypeElement() {
-    return componentPath().currentComponent();
+    return componentPath().currentComponent().java();
   }
 
   /**

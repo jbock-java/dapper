@@ -84,7 +84,7 @@ final class MissingBindingValidator implements BindingGraphPlugin {
             component ->
                 errorMessage
                     .append("\nA binding with matching key exists in component: ")
-                    .append(component.getQualifiedName()));
+                    .append(component.java().getQualifiedName()));
     return errorMessage.toString();
   }
 }

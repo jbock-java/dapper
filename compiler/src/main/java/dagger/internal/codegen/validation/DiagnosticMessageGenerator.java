@@ -218,7 +218,7 @@ public final class DiagnosticMessageGenerator {
           // append the component path to make clear to the user which component it's in.
           ComponentPath componentPath = source(object).componentPath();
           if (!componentPath.atRoot()
-              || !requestElement.getEnclosingElement().equals(componentPath.rootComponent())) {
+              || !requestElement.getEnclosingElement().equals(componentPath.rootComponent().java())) {
             element.append(String.format(" [%s]", componentPath));
           }
           return element.toString();
@@ -340,7 +340,7 @@ public final class DiagnosticMessageGenerator {
   }
 
   TypeElement componentContainingEntryPoint(DependencyEdge entryPoint) {
-    return source(entryPoint).componentPath().currentComponent();
+    return source(entryPoint).componentPath().currentComponent().java();
   }
 
   TypeElement typeDeclaringEntryPoint(DependencyEdge entryPoint) {

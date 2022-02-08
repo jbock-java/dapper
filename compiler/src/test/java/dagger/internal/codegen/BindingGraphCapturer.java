@@ -38,6 +38,7 @@ final class BindingGraphCapturer implements BindingGraphPlugin {
             .rootComponentNode()
             .componentPath()
             .currentComponent()
+            .java()
             .getQualifiedName()
             .toString(),
         bindingGraph);

@@ -21,15 +21,16 @@ import static java.util.stream.Collectors.joining;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
+import dagger.spi.model.DaggerTypeElement;
+import io.jbock.javapoet.ClassName;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
-import javax.lang.model.element.TypeElement;
 
 /** A path containing a component and all of its ancestor components. */
 public final class ComponentPath {
 
-  private final List<TypeElement> components;
+  private final List<DaggerTypeElement> components;
 
   private final int hashCode;
   private final Supplier<ComponentPath> parent = Suppliers.memoize(() -> {
@@ -37,13 +38,13 @@ public final class ComponentPath {
     return create(components().subList(0, components().size() - 1));
   });
 
-  private ComponentPath(List<TypeElement> components) {
+  private ComponentPath(List<DaggerTypeElement> components) {
     this.components = Objects.requireNonNull(components);
     this.hashCode = components.hashCode();
   }
 
   /** Returns a new {@link ComponentPath} from {@code components}. */
-  public static ComponentPath create(Iterable<TypeElement> components) {
+  public static ComponentPath create(Iterable<DaggerTypeElement> components) {
     return new ComponentPath(Util.listOf(components));
   }
 
@@ -51,7 +52,7 @@ public final class ComponentPath {
    * Returns the component types, starting from the {@linkplain #rootComponent() root
    * component} and ending with the {@linkplain #currentComponent() current component}.
    */
-  public List<TypeElement> components() {
+  public List<DaggerTypeElement> components() {
     return components;
   }
 
@@ -59,13 +60,13 @@ public final class ComponentPath {
   /**
    * Returns the root {@link dagger.Component}-annotated type
    */
-  public TypeElement rootComponent() {
+  public DaggerTypeElement rootComponent() {
     return components().get(0);
   }
 
   /** Returns the component at the end of the path. */
-  public TypeElement currentComponent() {
-    List<TypeElement> components = components();
+  public DaggerTypeElement currentComponent() {
+    List<DaggerTypeElement> components = components();
     return components.get(components.size() - 1);
   }
 
@@ -74,10 +75,10 @@ public final class ComponentPath {
    *
    * @throws IllegalStateException if the current graph is the {@linkplain #atRoot() root component}
    */
-  public TypeElement parentComponent() {
+  public DaggerTypeElement parentComponent() {
     Preconditions.checkState(!atRoot());
-    List<TypeElement> components = components();
-    return components.get(components.size() - 2);
+    List<DaggerTypeElement> components = components();
+    return components.get(components.size() - 2); // components.reverse().get(1)
   }
 
   /**
@@ -90,7 +91,7 @@ public final class ComponentPath {
   }
 
   /** Returns the path from the root component to the {@code child} of the current component. */
-  public ComponentPath childPath(TypeElement child) {
+  public ComponentPath childPath(DaggerTypeElement child) {
     return create(Util.concat(components, List.of(child)));
   }
 
@@ -104,7 +105,10 @@ public final class ComponentPath {
 
   @Override
   public String toString() {
-    return components().stream().map(TypeElement::getQualifiedName).collect(joining(" → "));
+    return components().stream()
+        .map(DaggerTypeElement::className)
+        .map(ClassName::canonicalName)
+        .collect(joining(" → "));
   }
 
   @Override

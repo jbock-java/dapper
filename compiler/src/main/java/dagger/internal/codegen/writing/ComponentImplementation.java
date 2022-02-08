@@ -345,7 +345,8 @@ public final class ComponentImplementation {
             toImmutableMap(
                 componentImpl -> componentImpl,
                 componentImpl -> {
-                  TypeElement component = componentImpl.graph.componentPath().currentComponent();
+                  ClassName component =
+                      componentImpl.graph.componentPath().currentComponent().className();
                   ClassName fieldType = componentImpl.name();
                   String fieldName =
                       componentImpl.isNested()

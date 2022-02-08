@@ -18,7 +18,6 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerCollectors.onlyElement;
-import static java.lang.Character.isUpperCase;
 import static java.lang.String.format;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -40,8 +39,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
 
 /**
  * Holds the unique simple names for all components, keyed by their {@link ComponentPath} and
@@ -174,22 +171,19 @@ public final class ComponentNames {
   }
 
   private static String simpleName(ComponentPath componentPath) {
-    return componentPath.currentComponent().getSimpleName().toString();
+    return componentPath.currentComponent().className().simpleName();
   }
 
   /** Returns a prefix that could make the component's simple name more unique. */
   private static String uniquingPrefix(ComponentPath componentPath) {
-    TypeElement typeElement = componentPath.currentComponent();
-    String containerName = typeElement.getEnclosingElement().getSimpleName().toString();
+    ClassName component = componentPath.currentComponent().className();
 
-    // If parent element looks like a class, use its initials as a prefix.
-    if (!containerName.isEmpty() && isUpperCase(containerName.charAt(0))) {
-      return containerName.replaceAll("[a-z]", "");
+    if (component.enclosingClassName() != null) {
+      return component.enclosingClassName().simpleName().replaceAll("[a-z]", "");
     }
 
     // Not in a normally named class. Prefix with the initials of the elements leading here.
-    Name qualifiedName = typeElement.getQualifiedName();
-    Iterator<String> pieces = Arrays.asList(qualifiedName.toString().split("[.]", -1)).iterator();
+    Iterator<String> pieces = Arrays.asList(component.canonicalName().split("[.]", -1)).iterator();
     StringBuilder b = new StringBuilder();
 
     while (pieces.hasNext()) {
