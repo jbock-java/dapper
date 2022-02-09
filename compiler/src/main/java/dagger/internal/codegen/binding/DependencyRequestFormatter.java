@@ -62,7 +62,7 @@ public final class DependencyRequestFormatter extends Formatter<DependencyReques
   public String format(DependencyRequest request) {
     return request
         .requestElement()
-        .map(element -> element.accept(formatVisitor, request))
+        .map(element -> element.java().accept(formatVisitor, request))
         .orElse("");
   }
 

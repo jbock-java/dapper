@@ -19,6 +19,7 @@ package dagger.model;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Provides;
+import dagger.spi.model.DaggerElement;
 import dagger.spi.model.Key;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,18 +39,15 @@ public final class DependencyRequest {
 
   private final RequestKind kind;
   private final Key key;
-  private final Optional<Element> requestElement;
-  private final boolean isNullable;
+  private final Optional<DaggerElement> requestElement;
 
   private DependencyRequest(
       RequestKind kind,
       Key key,
-      Optional<Element> requestElement,
-      boolean isNullable) {
+      Optional<DaggerElement> requestElement) {
     this.kind = requireNonNull(kind);
     this.key = requireNonNull(key);
     this.requestElement = requireNonNull(requestElement);
-    this.isNullable = isNullable;
   }
 
   /** The kind of this request. */
@@ -66,16 +64,8 @@ public final class DependencyRequest {
    * The element that declares this dependency request. Absent for <a href="#synthetic">synthetic
    * </a> requests.
    */
-  public Optional<Element> requestElement() {
+  public Optional<DaggerElement> requestElement() {
     return requestElement;
-  }
-
-  /**
-   * Returns {@code true} if this request allows null objects. A request is nullable if it is
-   * has an annotation with "Nullable" as its simple name.
-   */
-  public boolean isNullable() {
-    return isNullable;
   }
 
   @Override
@@ -83,12 +73,12 @@ public final class DependencyRequest {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     DependencyRequest that = (DependencyRequest) o;
-    return isNullable == that.isNullable && kind == that.kind && key.equals(that.key) && requestElement.equals(that.requestElement);
+    return kind == that.kind && key.equals(that.key) && requestElement.equals(that.requestElement);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(kind, key, requestElement, isNullable);
+    return Objects.hash(kind, key, requestElement);
   }
 
   /** Returns a new builder of dependency requests. */
@@ -100,8 +90,7 @@ public final class DependencyRequest {
   public static final class Builder {
     private RequestKind kind;
     private Key key;
-    private Optional<Element> requestElement = Optional.empty();
-    private boolean isNullable;
+    private Optional<DaggerElement> requestElement = Optional.empty();
 
     private Builder() {
     }
@@ -116,13 +105,8 @@ public final class DependencyRequest {
       return this;
     }
 
-    public Builder requestElement(Element requestElement) {
+    public Builder requestElement(DaggerElement requestElement) {
       this.requestElement = Optional.of(requestElement);
-      return this;
-    }
-
-    public Builder isNullable(boolean isNullable) {
-      this.isNullable = isNullable;
       return this;
     }
 
@@ -130,8 +114,7 @@ public final class DependencyRequest {
       return new DependencyRequest(
           this.kind,
           this.key,
-          this.requestElement,
-          this.isNullable);
+          this.requestElement);
     }
   }
 }

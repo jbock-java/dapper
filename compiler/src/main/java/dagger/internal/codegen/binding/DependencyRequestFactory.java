@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
+import dagger.spi.model.DaggerElement;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -89,7 +90,7 @@ public final class DependencyRequestFactory {
     return DependencyRequest.builder()
         .kind(requestKind)
         .key(keyFactory.forQualifiedType(qualifier, extractKeyType(type)))
-        .requestElement(requestElement)
+        .requestElement(DaggerElement.fromJava(requestElement))
         .build();
   }
 }

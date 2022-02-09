@@ -146,7 +146,7 @@ final class InjectionMethods {
           binding.provisionDependencies().stream()
               .collect(
                   toImmutableMap(
-                      request -> MoreElements.asVariable(request.requestElement().orElseThrow()),
+                      request -> MoreElements.asVariable(request.requestElement().orElseThrow().java()),
                       request -> request));
 
       List<CodeBlock> arguments = new ArrayList<>();
@@ -224,7 +224,7 @@ final class InjectionMethods {
       if (!dependency.kind().equals(RequestKind.INSTANCE)) {
         TypeName usageTypeName = accessibleType(dependency);
         codeBlock.add("($T) ($T)", usageTypeName, rawTypeName(usageTypeName));
-      } else if (dependency.requestElement().orElseThrow().asType().getKind().equals(TypeKind.TYPEVAR)) {
+      } else if (dependency.requestElement().orElseThrow().java().asType().getKind().equals(TypeKind.TYPEVAR)) {
         codeBlock.add("($T)", keyType);
       }
     }
@@ -240,7 +240,7 @@ final class InjectionMethods {
         requestTypeName(dependency.kind(), accessibleType(dependency.key().type().java()));
     return dependency
         .requestElement()
-        .map(element -> element.asType().getKind().isPrimitive())
+        .map(element -> element.java().asType().getKind().isPrimitive())
         .orElse(false)
         ? typeName.unbox()
         : typeName;
