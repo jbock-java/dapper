@@ -49,6 +49,22 @@ class JavacAnnotationValue implements XAnnotationValue {
     return annotationValue;
   }
 
+  @Override
+  @SuppressWarnings("unchecked") // Values in a list are always wrapped in XAnnotationValue
+  public List<XAnnotationValue> asAnnotationValueList() {
+    return (List<XAnnotationValue>) value();
+  }
+
+  @Override
+  public List<XType> asTypeList() {
+    return asAnnotationValueList().stream().map(XAnnotationValue::asType).collect(Collectors.toList());
+  }
+
+  @Override
+  public XType asType() {
+    return (XType) valueProvider.get();
+  }
+
   private static final SimpleAnnotationValueVisitor8<Object, VisitorData> UNWRAP_VISITOR = new SimpleAnnotationValueVisitor8<>() {
     @Override
     public Object visitBoolean(boolean b, VisitorData visitorData) {

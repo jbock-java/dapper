@@ -46,6 +46,17 @@ abstract class JavacType implements XType {
   }
 
   @Override
+  public XType boxed() {
+    if (typeMirror.getKind().isPrimitive()) {
+      return env.wrap(env.getTypeUtils().boxedClass(MoreTypes.asPrimitiveType(typeMirror)).asType());
+    }
+    if (typeMirror.getKind() == TypeKind.VOID) {
+      return env.wrap(env.getElementUtils().getTypeElement("java.lang.Void").asType());
+    }
+    return null;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

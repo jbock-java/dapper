@@ -11,6 +11,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 public abstract class XProcessingEnv {
 
@@ -19,6 +21,11 @@ public abstract class XProcessingEnv {
   }
 
   public abstract XMessager getMessager();
+
+  public abstract Elements getElementUtils();
+
+  public abstract Types getTypeUtils();
+
 
   XType wrap(TypeMirror typeMirror) {
     switch (typeMirror.getKind()) {

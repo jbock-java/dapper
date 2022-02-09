@@ -7,6 +7,8 @@ public interface XAnnotation {
 
   List<XAnnotationValue> getAnnotationValues();
 
+  XAnnotationValue getAnnotationValue(String methodName);
+
   /**
    * The {@code XType} representing the annotation class.
    *
@@ -27,4 +29,7 @@ public interface XAnnotation {
    * Accessing this forces the type to be resolved.
    */
   String getQualifiedName();
+
+  /** Returns the value of the given {@code methodName} as a list of type references. */
+  List<XType> getAsTypeList(String methodName);
 }

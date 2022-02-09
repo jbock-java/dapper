@@ -26,10 +26,12 @@ public class JavacProcessingEnv extends XProcessingEnv {
     this.delegate = delegate;
   }
 
+  @Override
   public Elements getElementUtils() {
     return delegate.getElementUtils();
   }
 
+  @Override
   public Types getTypeUtils() {
     return delegate.getTypeUtils();
   }
