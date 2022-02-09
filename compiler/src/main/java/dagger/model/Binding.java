@@ -17,6 +17,8 @@
 package dagger.model;
 
 import dagger.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.DaggerElement;
+import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import java.util.Optional;
 import java.util.Set;
@@ -49,16 +51,16 @@ public interface Binding extends MaybeBinding {
   Set<DependencyRequest> dependencies();
 
   /**
-   * The {@link Element} that declares this binding. Absent for {@linkplain BindingKind binding
+   * The {@link DaggerElement} that declares this binding. Absent for {@linkplain BindingKind binding
    * kinds} that are not always declared by exactly one element.
    */
-  Optional<Element> bindingElement();
+  Optional<DaggerElement> bindingElement();
 
   /**
-   * The {@link TypeElement} of the module which contributes this binding. Absent for bindings that
+   * The {@link DaggerTypeElement} of the module which contributes this binding. Absent for bindings that
    * have no {@link #bindingElement() binding element}.
    */
-  Optional<TypeElement> contributingModule();
+  Optional<DaggerTypeElement> contributingModule();
 
   /**
    * Returns {@code true} if using this binding requires an instance of the {@link

@@ -37,6 +37,7 @@ import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
+import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.common.graph.ImmutableNetwork;
 import io.jbock.common.graph.Network;
@@ -318,6 +319,7 @@ public final class BindingGraph {
         contributionBindings.values().stream()
             .map(BindingNode::contributingModule)
             .flatMap(Optional::stream)
+            .map(DaggerTypeElement::java)
             .collect(toImmutableSet());
 
     return bindingGraph;

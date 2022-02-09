@@ -127,7 +127,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
         case PROVISION:
           message.append(
               methodSignatureFormatter.format(
-                  MoreElements.asExecutable(binding.bindingElement().orElseThrow())));
+                  MoreElements.asExecutable(binding.bindingElement().orElseThrow().java())));
           break;
 
         case INJECTION:
@@ -135,7 +135,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
               .append(getReadableSource(binding.scope().orElseThrow()))
               .append(" class ")
               .append(
-                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow()).getQualifiedName());
+                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow().java()).getQualifiedName());
           break;
 
         default:

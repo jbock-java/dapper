@@ -23,6 +23,8 @@ import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
+import dagger.spi.model.DaggerElement;
+import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -118,13 +120,13 @@ public final class BindingNode implements dagger.model.Binding {
   }
 
   @Override
-  public Optional<Element> bindingElement() {
-    return delegate().bindingElement();
+  public Optional<DaggerElement> bindingElement() {
+    return delegate().bindingElement().map(DaggerElement::fromJava);
   }
 
   @Override
-  public Optional<TypeElement> contributingModule() {
-    return delegate().contributingModule();
+  public Optional<DaggerTypeElement> contributingModule() {
+    return delegate().contributingModule().map(DaggerTypeElement::fromJava);
   }
 
   @Override

@@ -36,6 +36,8 @@ import dagger.model.BindingKind;
 import dagger.model.ComponentPath;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.DaggerElement;
+import dagger.spi.model.DaggerTypeElement;
 import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Comparator;
@@ -310,7 +312,9 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
 
     private static BindingElement forBinding(Binding binding) {
       return new BindingElement(
-          binding.kind(), binding.bindingElement(), binding.contributingModule());
+          binding.kind(),
+          binding.bindingElement().map(DaggerElement::java),
+          binding.contributingModule().map(DaggerTypeElement::java));
     }
   }
 }
