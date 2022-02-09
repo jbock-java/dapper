@@ -401,7 +401,7 @@ public final class BindingGraph {
   public Optional<ExecutableElement> factoryMethod() {
     return topLevelBindingGraph().network().inEdges(componentNode()).stream()
         .filter(edge -> edge instanceof ChildFactoryMethodEdge)
-        .map(edge -> ((ChildFactoryMethodEdge) edge).factoryMethod())
+        .map(edge -> ((ChildFactoryMethodEdge) edge).factoryMethod().java())
         .collect(toOptional());
   }
 

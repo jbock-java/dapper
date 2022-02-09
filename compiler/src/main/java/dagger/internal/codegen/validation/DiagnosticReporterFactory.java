@@ -123,7 +123,7 @@ final class DiagnosticReporterFactory {
         Diagnostic.Kind diagnosticKind,
         ChildFactoryMethodEdge childFactoryMethodEdge,
         String message) {
-      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod());
+      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod().java());
     }
 
     @Override

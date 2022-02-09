@@ -36,6 +36,7 @@ import dagger.model.BindingGraph.MissingBinding;
 import dagger.model.BindingGraph.Node;
 import dagger.model.ComponentPath;
 import dagger.model.DependencyRequest;
+import dagger.spi.model.DaggerExecutableElement;
 import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.common.graph.ImmutableNetwork;
@@ -271,7 +272,7 @@ final class BindingGraphConverter {
       network.addEdge(
           parentComponent,
           currentComponent,
-          new ChildFactoryMethodEdgeImpl(factoryMethod));
+          new ChildFactoryMethodEdgeImpl(DaggerExecutableElement.fromJava(factoryMethod)));
     }
 
     /**

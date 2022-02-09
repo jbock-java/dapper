@@ -107,7 +107,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
     ComponentNode parent = (ComponentNode) bindingGraph.network().incidentNodes(edge).source();
     DeclaredType parentType = asDeclared(parent.componentPath().currentComponent().java().asType());
     ExecutableType factoryMethodType =
-        asExecutable(types.asMemberOf(parentType, edge.factoryMethod()));
+        asExecutable(types.asMemberOf(parentType, edge.factoryMethod().java()));
     return asTypeElements(factoryMethodType.getParameterTypes());
   }
 

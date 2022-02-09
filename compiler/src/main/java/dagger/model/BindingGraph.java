@@ -26,6 +26,8 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.Module;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.spi.model.DaggerExecutableElement;
+import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.common.graph.EndpointPair;
 import io.jbock.common.graph.ImmutableNetwork;
@@ -285,7 +287,7 @@ public abstract class BindingGraph {
    */
   public interface ChildFactoryMethodEdge extends Edge {
     /** The subcomponent factory method element. */
-    ExecutableElement factoryMethod();
+    DaggerExecutableElement factoryMethod();
   }
 
   /**
@@ -304,7 +306,7 @@ public abstract class BindingGraph {
      * this edge. Empty if the parent component has a subcomponent creator method and there are no
      * declaring modules.
      */
-    Set<TypeElement> declaringModules();
+    Set<DaggerTypeElement> declaringModules();
   }
 
   /** A node in the binding graph. Either a {@link Binding} or a {@link ComponentNode}. */

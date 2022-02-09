@@ -191,14 +191,14 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
       // merged.
       if (elementEncloses(
           graph.rootComponentNode().componentPath().currentComponent().java(),
-          childFactoryMethodEdge.factoryMethod())) {
+          childFactoryMethodEdge.factoryMethod().java())) {
         // Let this pass through since it is not an error reported on the root component
         delegate.reportSubcomponentFactoryMethod(diagnosticKind, childFactoryMethodEdge, message);
       } else {
         addMessage(
             diagnosticKind,
             String.format(
-                "[%s] %s", elementToString(childFactoryMethodEdge.factoryMethod()), message));
+                "[%s] %s", elementToString(childFactoryMethodEdge.factoryMethod().java()), message));
       }
     }
 
