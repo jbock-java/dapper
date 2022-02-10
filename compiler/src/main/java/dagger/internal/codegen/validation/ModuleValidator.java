@@ -580,7 +580,7 @@ public final class ModuleValidator {
       XTypeElement module, ValidationReport.Builder report) {
     BindingGraph bindingGraph =
         bindingGraphFactory.create(
-                componentDescriptorFactory.moduleComponentDescriptor(module.toJavac()), true)
+                componentDescriptorFactory.moduleComponentDescriptor(module), true)
             .topLevelBindingGraph();
     if (!bindingGraphValidator.isValid(bindingGraph)) {
       // Since the validator uses a DiagnosticReporter to report errors, the ValdiationReport won't

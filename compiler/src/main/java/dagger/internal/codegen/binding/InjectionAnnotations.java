@@ -48,6 +48,10 @@ public final class InjectionAnnotations {
     this.processingEnv = processingEnv;
   }
 
+  public Optional<AnnotationMirror> getQualifier(XElement element) {
+    return getQualifier(element.toJavac());
+  }
+
   public Optional<AnnotationMirror> getQualifier(Element e) {
     if (!SuperficialValidation.validateElement(e)) {
       throw new TypeNotPresentException(e.toString(), null);

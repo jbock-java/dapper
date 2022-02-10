@@ -16,7 +16,9 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
+import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
@@ -24,10 +26,9 @@ import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentCon
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static io.jbock.auto.common.MoreElements.asType;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
-import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.VOID;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ComponentAnnotation;
@@ -36,9 +37,10 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.Scope;
 import io.jbock.auto.common.MoreTypes;
@@ -48,11 +50,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link ComponentDescriptor}s. */
 public final class ComponentDescriptorFactory {
@@ -80,57 +79,31 @@ public final class ComponentDescriptorFactory {
   }
 
   /** Returns a descriptor for a root component type. */
-  public ComponentDescriptor rootComponentDescriptor(XTypeElement xTypeElement) {
-    return rootComponentDescriptor(xTypeElement.toJavac());
-  }
-
-  /** Returns a descriptor for a root component type. */
-  public ComponentDescriptor rootComponentDescriptor(TypeElement typeElement) {
-    return create(
-        typeElement,
-        checkAnnotation(
-            typeElement,
-            ComponentAnnotation::rootComponentAnnotation,
-            "must have a component annotation"));
-  }
-
-  public ComponentDescriptor subcomponentDescriptor(XTypeElement typeElement) {
-    return subcomponentDescriptor(typeElement.toJavac());
+  public ComponentDescriptor rootComponentDescriptor(XTypeElement typeElement) {
+    Optional<ComponentAnnotation> annotation = rootComponentAnnotation(typeElement);
+    Preconditions.checkArgument(annotation.isPresent(), "%s must have a component annotation", typeElement);
+    return create(typeElement, annotation.get());
   }
 
   /** Returns a descriptor for a subcomponent type. */
-  private ComponentDescriptor subcomponentDescriptor(TypeElement typeElement) {
-    return create(
-        typeElement,
-        checkAnnotation(
-            typeElement,
-            ComponentAnnotation::subcomponentAnnotation,
-            "must have a subcomponent annotation"));
+  public ComponentDescriptor subcomponentDescriptor(XTypeElement typeElement) {
+    Optional<ComponentAnnotation> annotation = subcomponentAnnotation(typeElement);
+    Preconditions.checkArgument(annotation.isPresent(), "%s must have a subcomponent annotation", typeElement);
+    return create(typeElement, annotation.get());
   }
 
   /**
    * Returns a descriptor for a fictional component based on a module type in order to validate its
    * bindings.
    */
-  public ComponentDescriptor moduleComponentDescriptor(TypeElement typeElement) {
-    return create(
-        typeElement,
-        ComponentAnnotation.fromModuleAnnotation(
-            checkAnnotation(
-                typeElement, ModuleAnnotation::moduleAnnotation, "must have a module annotation")));
-  }
-
-  private static <A> A checkAnnotation(
-      TypeElement typeElement,
-      Function<TypeElement, Optional<A>> annotationFunction,
-      String message) {
-    return annotationFunction
-        .apply(typeElement)
-        .orElseThrow(() -> new IllegalArgumentException(typeElement + " " + message));
+  public ComponentDescriptor moduleComponentDescriptor(XTypeElement typeElement) {
+    Optional<ModuleAnnotation> annotation = moduleAnnotation(typeElement);
+    Preconditions.checkArgument(annotation.isPresent(), "%s must have a module annotation", typeElement);
+    return create(typeElement, ComponentAnnotation.fromModuleAnnotation(annotation.get()));
   }
 
   private ComponentDescriptor create(
-      TypeElement typeElement, ComponentAnnotation componentAnnotation) {
+      XTypeElement typeElement, ComponentAnnotation componentAnnotation) {
     Set<ComponentRequirement> componentDependencies =
         componentAnnotation.dependencyTypes().stream()
             .map(ComponentRequirement::forDependency)
@@ -144,28 +117,29 @@ public final class ComponentDescriptorFactory {
           methodsIn(elements.getAllMembers(componentDependency.typeElement()))) {
         if (isComponentContributionMethod(elements, dependencyMethod)) {
           dependenciesByDependencyMethod.put(
-              (XMethodElement) XConverters.toXProcessing(dependencyMethod, processingEnv), componentDependency);
+              (XMethodElement) toXProcessing(dependencyMethod, processingEnv), componentDependency);
         }
       }
     }
 
     // Start with the component's modules. For fictional components built from a module, start with
     // that module.
-    Set<TypeElement> modules =
+    Set<XTypeElement> modules =
         componentAnnotation.isRealComponent()
-            ? componentAnnotation.modules()
+            ? componentAnnotation.modules().stream()
+            .map(module -> toXProcessing(module, processingEnv))
+            .collect(toImmutableSet())
             : Set.of(typeElement);
 
     Set<ModuleDescriptor> transitiveModules =
         moduleDescriptorFactory.transitiveModules(modules);
 
-    Set<ComponentDescriptor> subcomponentsFromModules = new LinkedHashSet<>();
-    for (ModuleDescriptor module : transitiveModules) {
-      for (SubcomponentDeclaration subcomponentDeclaration : module.subcomponentDeclarations()) {
-        TypeElement subcomponent = subcomponentDeclaration.subcomponentType();
-        subcomponentsFromModules.add(subcomponentDescriptor(subcomponent));
-      }
-    }
+    Set<ComponentDescriptor> subcomponentsFromModules =
+        transitiveModules.stream()
+            .flatMap(transitiveModule -> transitiveModule.subcomponentDeclarations().stream())
+            .map(SubcomponentDeclaration::subcomponentType)
+            .map(this::subcomponentDescriptor)
+            .collect(toImmutableSet());
 
     Set<ComponentMethodDescriptor> componentMethodsBuilder =
         new LinkedHashSet<>();
@@ -174,9 +148,7 @@ public final class ComponentDescriptorFactory {
     Map<ComponentMethodDescriptor, ComponentDescriptor>
         subcomponentsByBuilderMethod = new LinkedHashMap<>();
     if (componentAnnotation.isRealComponent()) {
-      Set<ExecutableElement> unimplementedMethods =
-          elements.getUnimplementedMethods(typeElement);
-      for (ExecutableElement componentMethod : unimplementedMethods) {
+      for (XMethodElement componentMethod : getAllUnimplementedMethods(typeElement)) {
         ComponentMethodDescriptor componentMethodDescriptor =
             getDescriptorForComponentMethod(typeElement, componentMethod);
         componentMethodsBuilder.add(componentMethodDescriptor);
@@ -196,7 +168,7 @@ public final class ComponentDescriptorFactory {
     }
 
     // Validation should have ensured that this set will have at most one element.
-    Set<TypeElement> enclosedCreators =
+    Set<XTypeElement> enclosedCreators =
         enclosedAnnotatedTypes(typeElement, creatorAnnotationsFor(componentAnnotation));
 
     Optional<ComponentCreatorDescriptor> creatorDescriptor =
@@ -211,7 +183,7 @@ public final class ComponentDescriptorFactory {
     return new ComponentDescriptor(
         processingEnv,
         componentAnnotation,
-        XConverters.toXProcessing(typeElement, processingEnv),
+        toXProcessing(typeElement.toJavac(), processingEnv),
         componentDependencies,
         transitiveModules,
         dependenciesByDependencyMethod,
@@ -224,18 +196,15 @@ public final class ComponentDescriptorFactory {
   }
 
   private ComponentMethodDescriptor getDescriptorForComponentMethod(
-      TypeElement componentElement,
-      ExecutableElement componentMethod) {
+      XTypeElement componentElement,
+      XMethodElement componentMethod) {
     ComponentMethodDescriptor.Builder descriptor =
         ComponentMethodDescriptor.builder(componentMethod);
 
-    ExecutableType resolvedComponentMethod =
-        MoreTypes.asExecutable(
-            types.asMemberOf(MoreTypes.asDeclared(componentElement.asType()), componentMethod));
-    TypeMirror returnType = resolvedComponentMethod.getReturnType();
-    if (returnType.getKind().equals(DECLARED)
-        && injectionAnnotations.getQualifier(componentMethod).isEmpty()) {
-      TypeElement returnTypeElement = asTypeElement(returnType);
+    XMethodType resolvedComponentMethod = componentMethod.asMemberOf(componentElement.getType());
+    XType returnType = resolvedComponentMethod.getReturnType();
+    if (isDeclared(returnType) && injectionAnnotations.getQualifier(componentMethod).isEmpty()) {
+      XTypeElement returnTypeElement = returnType.getTypeElement();
       if (subcomponentAnnotation(returnTypeElement).isPresent()) {
         // It's a subcomponent factory method. There is no dependency request, and there could be
         // any number of parameters. Just return the descriptor.
@@ -243,21 +212,28 @@ public final class ComponentDescriptorFactory {
       }
       if (isSubcomponentCreator(returnTypeElement)) {
         descriptor.subcomponent(
-            subcomponentDescriptor(asType(returnTypeElement.getEnclosingElement())));
+            subcomponentDescriptor(returnTypeElement.getEnclosingTypeElement()));
       }
     }
 
+    // TODO(bcorso): Add an XConverters.toJavac() method to convert between XMethodType and
+    // ExecutableType so that we don't have to recalculate the method type for cases like this.
+    ExecutableType javaResolvedComponentMethod =
+        MoreTypes.asExecutable(
+            types.asMemberOf(
+                MoreTypes.asDeclared(componentElement.getType().toJavac()),
+                componentMethod.toJavac()));
     if (componentMethod.getParameters().size() != 0) {
       throw new IllegalArgumentException(
           "component method has too many parameters: " + componentMethod);
     }
     Preconditions.checkArgument(
-        !returnType.getKind().equals(VOID),
+        !returnType.isVoid(),
         "component method cannot be void: %s",
         componentMethod);
     return descriptor.dependencyRequest(
             dependencyRequestFactory.forComponentProvisionMethod(
-                componentMethod, resolvedComponentMethod))
+                componentMethod, javaResolvedComponentMethod))
         .build();
   }
 }

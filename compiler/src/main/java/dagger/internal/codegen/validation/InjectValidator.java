@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -35,6 +36,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.model.Scope;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -63,6 +65,7 @@ import javax.tools.Diagnostic.Kind;
  */
 @Singleton
 public final class InjectValidator implements ClearableCache {
+  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private final DaggerElements elements;
   private final CompilerOptions compilerOptions;
@@ -73,12 +76,14 @@ public final class InjectValidator implements ClearableCache {
 
   @Inject
   InjectValidator(
+      XProcessingEnv processingEnv,
       DaggerTypes types,
       DaggerElements elements,
       DependencyRequestValidator dependencyRequestValidator,
       CompilerOptions compilerOptions,
       InjectionAnnotations injectionAnnotations) {
     this(
+        processingEnv,
         types,
         elements,
         compilerOptions,
@@ -88,12 +93,14 @@ public final class InjectValidator implements ClearableCache {
   }
 
   private InjectValidator(
+      XProcessingEnv processingEnv,
       DaggerTypes types,
       DaggerElements elements,
       CompilerOptions compilerOptions,
       DependencyRequestValidator dependencyRequestValidator,
       Optional<Kind> privateAndStaticInjectionDiagnosticKind,
       InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.types = types;
     this.elements = elements;
     this.compilerOptions = compilerOptions;
@@ -116,6 +123,7 @@ public final class InjectValidator implements ClearableCache {
     return compilerOptions.ignorePrivateAndStaticInjectionForComponent()
         ? this
         : new InjectValidator(
+        processingEnv,
         types,
         elements,
         compilerOptions,
@@ -164,7 +172,7 @@ public final class InjectValidator implements ClearableCache {
       scopeErrorMsg += "; annotate the class instead";
     }
 
-    for (Scope scope : scopesOf(constructorElement)) {
+    for (Scope scope : scopesOf(toXProcessing(constructorElement, processingEnv))) {
       builder.addError(scopeErrorMsg, constructorElement, scope.scopeAnnotation().java());
     }
 
@@ -214,7 +222,7 @@ public final class InjectValidator implements ClearableCache {
       builder.addError("Types may only contain one injected constructor", constructorElement);
     }
 
-    Set<Scope> scopes = scopesOf(enclosingElement);
+    Set<Scope> scopes = scopesOf(toXProcessing(enclosingElement, processingEnv));
     if (injectAnnotation == AssistedInject.class) {
       for (Scope scope : scopes) {
         builder.addError(

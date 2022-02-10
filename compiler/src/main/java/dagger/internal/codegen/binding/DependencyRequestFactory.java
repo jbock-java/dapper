@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import dagger.spi.model.DaggerElement;
@@ -70,6 +71,11 @@ public final class DependencyRequestFactory {
     Preconditions.checkArgument(!AssistedInjectionAnnotations.isAssistedParameter(variableElement));
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(variableElement);
     return newDependencyRequest(variableElement, resolvedType, qualifier);
+  }
+
+  public DependencyRequest forComponentProvisionMethod(
+      XMethodElement provisionMethod, ExecutableType provisionMethodType) {
+    return forComponentProvisionMethod(provisionMethod.toJavac(), provisionMethodType);
   }
 
   public DependencyRequest forComponentProvisionMethod(

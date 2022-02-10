@@ -144,7 +144,7 @@ public abstract class ComponentAnnotation {
    * Returns an object representing a root component annotation, not a subcomponent annotation, if
    * one is present on {@code typeElement}.
    */
-  public static Optional<ComponentAnnotation> rootComponentAnnotation(TypeElement typeElement) {
+  public static Optional<ComponentAnnotation> rootComponentAnnotation(XTypeElement typeElement) {
     return anyComponentAnnotation(typeElement, ROOT_COMPONENT_ANNOTATIONS);
   }
 
@@ -171,6 +171,11 @@ public abstract class ComponentAnnotation {
    */
   public static Optional<ComponentAnnotation> anyComponentAnnotation(XElement element) {
     return anyComponentAnnotation(element.toJavac(), ALL_COMPONENT_ANNOTATIONS);
+  }
+
+  private static Optional<ComponentAnnotation> anyComponentAnnotation(
+      XElement element, Collection<ClassName> annotations) {
+    return anyComponentAnnotation(element.toJavac(), annotations);
   }
 
   private static Optional<ComponentAnnotation> anyComponentAnnotation(

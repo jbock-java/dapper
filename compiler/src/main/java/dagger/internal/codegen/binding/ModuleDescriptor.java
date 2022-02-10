@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreElements.getPackage;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
@@ -35,6 +36,8 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -149,6 +152,7 @@ public final class ModuleDescriptor {
   /** A {@link ModuleDescriptor} factory. */
   @Singleton
   public static final class Factory implements ClearableCache {
+    private final XProcessingEnv processingEnv;
     private final DaggerElements elements;
     private final BindingFactory bindingFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
@@ -157,14 +161,20 @@ public final class ModuleDescriptor {
 
     @Inject
     Factory(
+        XProcessingEnv processingEnv,
         DaggerElements elements,
         BindingFactory bindingFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
         SubcomponentDeclaration.Factory subcomponentDeclarationFactory) {
+      this.processingEnv = processingEnv;
       this.elements = elements;
       this.bindingFactory = bindingFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
       this.subcomponentDeclarationFactory = subcomponentDeclarationFactory;
+    }
+
+    public ModuleDescriptor create(XTypeElement moduleElement) {
+      return create(moduleElement.toJavac());
     }
 
     public ModuleDescriptor create(TypeElement moduleElement) {
@@ -188,13 +198,14 @@ public final class ModuleDescriptor {
           moduleElement,
           collectIncludedModules(new LinkedHashSet<>(), moduleElement),
           bindings,
-          subcomponentDeclarationFactory.forModule(moduleElement),
+          subcomponentDeclarationFactory.forModule(toXProcessing(moduleElement, processingEnv)),
           delegates,
           ModuleKind.forAnnotatedElement(moduleElement).orElseThrow());
     }
 
     /** Returns all the modules transitively included by given modules, including the arguments. */
-    Set<ModuleDescriptor> transitiveModules(Set<TypeElement> modules) {
+    Set<ModuleDescriptor> transitiveModules(Set<XTypeElement> modules) {
+      // Traverse as a graph to automatically handle modules with cyclic includes.
       Set<ModuleDescriptor> result = new LinkedHashSet<>();
       Traverser.forGraph(
               (ModuleDescriptor module) -> module.includedModules().stream().map(this::create).collect(Collectors.toList()))

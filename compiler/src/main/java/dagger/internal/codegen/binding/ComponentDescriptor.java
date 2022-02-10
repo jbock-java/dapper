@@ -418,17 +418,17 @@ public final class ComponentDescriptor {
     }
 
     /** A {@link ComponentMethodDescriptor}builder for a method. */
-    public static Builder builder(ExecutableElement method) {
+    public static Builder builder(XMethodElement method) {
       return new Builder(method);
     }
 
     /** A builder of {@link ComponentMethodDescriptor}s. */
     public static final class Builder {
-      private final ExecutableElement methodElement;
+      private final XMethodElement methodElement;
       private Optional<DependencyRequest> dependencyRequest = Optional.empty();
       private Optional<ComponentDescriptor> subcomponent = Optional.empty();
 
-      private Builder(ExecutableElement methodElement) {
+      private Builder(XMethodElement methodElement) {
         this.methodElement = methodElement;
       }
 
@@ -446,14 +446,14 @@ public final class ComponentDescriptor {
 
       /** Builds the descriptor. */
       public ComponentDescriptor.ComponentMethodDescriptor build() {
-        if (this.methodElement == null) {
+        if (methodElement == null) {
           String missing = " methodElement";
           throw new IllegalStateException("Missing required properties:" + missing);
         }
         return new ComponentMethodDescriptor(
-            this.methodElement,
-            this.dependencyRequest,
-            this.subcomponent);
+            methodElement.toJavac(),
+            dependencyRequest,
+            subcomponent);
       }
     }
   }

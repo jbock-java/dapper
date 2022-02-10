@@ -24,6 +24,7 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -47,6 +48,7 @@ import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.model.Scope;
 import io.jbock.auto.common.Equivalence.Wrapper;
 import io.jbock.auto.common.MoreElements;
@@ -88,6 +90,7 @@ import javax.tools.Diagnostic;
 // TODO(dpb): Combine with ComponentHierarchyValidator.
 public final class ComponentDescriptorValidator {
 
+  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
@@ -96,11 +99,13 @@ public final class ComponentDescriptorValidator {
 
   @Inject
   ComponentDescriptorValidator(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       CompilerOptions compilerOptions,
       MethodSignatureFormatter methodSignatureFormatter,
       ComponentHierarchyValidator componentHierarchyValidator) {
+    this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.compilerOptions = compilerOptions;
@@ -180,7 +185,7 @@ public final class ComponentDescriptorValidator {
           // Always validate direct component dependencies referenced by this component regardless
           // of the flag value
           || dependencyStack.isEmpty()) {
-        rootComponentAnnotation(dependency)
+        rootComponentAnnotation(toXProcessing(dependency, processingEnv))
             .ifPresent(
                 componentAnnotation -> {
                   dependencyStack.push(dependency);
@@ -424,7 +429,7 @@ public final class ComponentDescriptorValidator {
           // of the flag value
           || scopedDependencyStack.isEmpty()) {
         // TODO(beder): transitively check scopes of production components too.
-        rootComponentAnnotation(dependency)
+        rootComponentAnnotation(toXProcessing(dependency, processingEnv))
             .ifPresent(
                 componentAnnotation -> {
                   Set<TypeElement> scopedDependencies =
@@ -435,10 +440,7 @@ public final class ComponentDescriptorValidator {
                     scopedDependencyStack.push(dependency);
                     for (TypeElement scopedDependency : scopedDependencies) {
                       validateDependencyScopeHierarchy(
-                          component,
-                          scopedDependency,
-                          scopeStack,
-                          scopedDependencyStack);
+                          component, scopedDependency, scopeStack, scopedDependencyStack);
                     }
                     scopedDependencyStack.pop();
                     scopeStack.pop();

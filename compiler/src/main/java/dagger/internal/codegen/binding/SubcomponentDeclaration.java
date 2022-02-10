@@ -22,6 +22,9 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
@@ -40,7 +43,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   private final Optional<Element> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final Key key;
-  private final TypeElement subcomponentType;
+  private final XTypeElement subcomponentType;
   private final ModuleAnnotation moduleAnnotation;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(bindingElement(), contributingModule(), key(), subcomponentType(), moduleAnnotation()));
@@ -49,7 +52,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       Optional<Element> bindingElement,
       Optional<TypeElement> contributingModule,
       Key key,
-      TypeElement subcomponentType,
+      XTypeElement subcomponentType,
       ModuleAnnotation moduleAnnotation) {
     this.bindingElement = requireNonNull(bindingElement);
     this.contributingModule = requireNonNull(contributingModule);
@@ -79,7 +82,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   /**
    * The type element that defines the {@link dagger.Subcomponent} for this declaration.
    */
-  TypeElement subcomponentType() {
+  XTypeElement subcomponentType() {
     return subcomponentType;
   }
 
@@ -115,18 +118,21 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       this.keyFactory = keyFactory;
     }
 
-    Set<SubcomponentDeclaration> forModule(TypeElement module) {
+    Set<SubcomponentDeclaration> forModule(XTypeElement module) {
       Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
       ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).orElseThrow();
       Element subcomponentAttribute =
           getAnnotationElementAndValue(moduleAnnotation.annotation(), "subcomponents").getKey();
-      for (TypeElement subcomponent : moduleAnnotation.subcomponents()) {
+      XAnnotation moduleXAnnotation = module.getAnnotation(moduleAnnotation.className());
+
+      for (XType subcomponentType : moduleXAnnotation.getAsTypeList("subcomponents")) {
+        XTypeElement subcomponent = subcomponentType.getTypeElement();
         declarations.add(
             new SubcomponentDeclaration(
                 Optional.of(subcomponentAttribute),
-                Optional.of(module),
+                Optional.of(module.toJavac()),
                 keyFactory.forSubcomponentCreator(
-                    getSubcomponentCreator(subcomponent).orElseThrow().asType()),
+                    getSubcomponentCreator(subcomponent).orElseThrow().toJavac().asType()),
                 subcomponent,
                 moduleAnnotation));
       }

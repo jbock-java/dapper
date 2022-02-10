@@ -31,6 +31,7 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
 import io.jbock.auto.common.MoreTypes;
 import java.util.LinkedHashMap;
@@ -185,10 +186,11 @@ public final class ComponentCreatorDescriptor {
 
   /** Creates a new {@link ComponentCreatorDescriptor} for the given creator {@code type}. */
   public static ComponentCreatorDescriptor create(
-      TypeElement typeElement,
+      XTypeElement xTypeElement,
       DaggerElements elements,
       DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory) {
+    TypeElement typeElement = xTypeElement.toJavac();
     DeclaredType type = asDeclared(typeElement.asType());
     TypeMirror componentType = typeElement.getEnclosingElement().asType();
 

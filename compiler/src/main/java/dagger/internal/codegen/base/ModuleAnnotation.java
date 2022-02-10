@@ -74,7 +74,12 @@ public final class ModuleAnnotation {
 
   /** The simple name of the annotation. */
   public String annotationName() {
-    return annotation.getAnnotationType().asElement().getSimpleName().toString();
+    return className().simpleName();
+  }
+
+  /** Returns the {@link ClassName} name of the annotation. */
+  public ClassName className() {
+    return ClassName.get(asTypeElement(annotation().getAnnotationType()));
   }
 
   /**

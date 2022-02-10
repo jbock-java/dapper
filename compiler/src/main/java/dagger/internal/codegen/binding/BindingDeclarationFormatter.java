@@ -102,7 +102,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
   private String formatSubcomponentDeclaration(SubcomponentDeclaration subcomponentDeclaration) {
     List<TypeElement> moduleSubcomponents =
         subcomponentDeclaration.moduleAnnotation().subcomponents();
-    int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType());
+    int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType().toJavac());
     StringBuilder annotationValue = new StringBuilder();
     if (moduleSubcomponents.size() != 1) {
       annotationValue.append("{");
