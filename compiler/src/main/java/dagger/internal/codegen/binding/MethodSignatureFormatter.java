@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypeP
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -60,6 +61,10 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
             MoreElements.asType(method.getEnclosingElement()));
       }
     };
+  }
+
+  public String format(XMethodElement method) {
+    return format(method.toJavac());
   }
 
   @Override

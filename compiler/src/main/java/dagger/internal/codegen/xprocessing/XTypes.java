@@ -18,6 +18,7 @@ package dagger.internal.codegen.xprocessing;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 
+import io.jbock.auto.common.MoreTypes;
 import javax.lang.model.type.TypeKind;
 
 /** A utility class for {@link XType} helper methods. */
@@ -31,6 +32,15 @@ public final class XTypes {
   /** Returns {@code true} if the given type is a type variable. */
   public static boolean isTypeVariable(XType type) {
     return type.toJavac().getKind() == TypeKind.TYPEVAR;
+  }
+
+  /**
+   * Returns {@code true} if {@code type1} is equivalent to {@code type2}.
+   *
+   * <p>See {@link MoreTypes#equivalence()}.
+   */
+  public static boolean areEquivalentTypes(XType type1, XType type2) {
+    return MoreTypes.equivalence().equivalent(type1.toJavac(), type2.toJavac());
   }
 
   /** Returns {@code true} if the given type is a primitive type. */

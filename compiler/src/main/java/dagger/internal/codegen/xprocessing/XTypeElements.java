@@ -17,7 +17,9 @@
 package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static io.jbock.auto.common.Visibility.effectiveVisibilityOfElement;
 
+import io.jbock.auto.common.Visibility;
 import java.util.List;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
@@ -30,6 +32,11 @@ public final class XTypeElements {
     // XTypeElement#hasTypeParameters() in XProcessing. XTypes#getTypeArguments() isn't quite the
     // same -- it tells you if the declared type has parameters rather than the element itself.
     return !type.toJavac().getTypeParameters().isEmpty();
+  }
+
+  /** Returns all non-private, non-static, abstract methods in {@code type}. */
+  public static Visibility effectiveVisibility(XTypeElement type) {
+    return effectiveVisibilityOfElement(type.toJavac());
   }
 
   /** Returns all non-private, non-static, abstract methods in {@code type}. */

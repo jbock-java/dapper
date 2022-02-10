@@ -16,46 +16,37 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.ComponentAnnotation.componentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.isModuleAnnotation;
-import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
-import static dagger.internal.codegen.base.MoreAnnotationValues.asType;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
+import static dagger.internal.codegen.xprocessing.XTypeElements.effectiveVisibility;
 import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XTypes.areEquivalentTypes;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.Visibility.PRIVATE;
 import static io.jbock.auto.common.Visibility.PUBLIC;
-import static io.jbock.auto.common.Visibility.effectiveVisibilityOfElement;
 import static java.util.stream.Collectors.joining;
-import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.STATIC;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotationValue;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingGraph;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.auto.common.Visibility;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
@@ -72,13 +63,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
 /**
  * A {@linkplain ValidationReport validator} for {@link dagger.Module}s.
@@ -92,8 +76,6 @@ public final class ModuleValidator {
           TypeNames.SUBCOMPONENT_BUILDER,
           TypeNames.SUBCOMPONENT_FACTORY);
 
-  private final DaggerTypes types;
-  private final DaggerElements elements;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final ComponentDescriptorFactory componentDescriptorFactory;
@@ -105,16 +87,12 @@ public final class ModuleValidator {
 
   @Inject
   ModuleValidator(
-      DaggerTypes types,
-      DaggerElements elements,
       AnyBindingMethodValidator anyBindingMethodValidator,
       MethodSignatureFormatter methodSignatureFormatter,
       ComponentDescriptorFactory componentDescriptorFactory,
       BindingGraphFactory bindingGraphFactory,
       BindingGraphValidator bindingGraphValidator,
       XProcessingEnv processingEnv) {
-    this.types = types;
-    this.elements = elements;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.componentDescriptorFactory = componentDescriptorFactory;
@@ -193,7 +171,7 @@ public final class ModuleValidator {
     validateReferencedModules(module, moduleKind, visitedModules, builder);
     validateReferencedSubcomponents(module, moduleKind, builder);
     validateNoScopeAnnotationsOnModuleElement(module, moduleKind, builder);
-    validateSelfCycles(module, builder);
+    validateSelfCycles(module, moduleKind, builder);
 
     if (builder.build().isClean()
         && bindingGraphValidator.shouldDoFullBindingGraphValidation(module)) {
@@ -207,34 +185,30 @@ public final class ModuleValidator {
       XTypeElement subject,
       ModuleKind moduleKind,
       ValidationReport.Builder builder) {
-    XAnnotation xModuleAnnotation = moduleKind.getModuleAnnotation(subject);
-    ModuleAnnotation moduleAnnotation = moduleAnnotation(xModuleAnnotation);
-
-    // TODO(bcorso): Currently, XProcessing does not represent an annotation value list as a list of
-    // List<XAnnotationValue>, so we're sticking with Javac for now.
-    for (AnnotationValue subcomponentAttribute :
-        moduleAnnotation.subcomponentsAsAnnotationValues()) {
-      TypeMirror type = asType(subcomponentAttribute);
-      if (type.getKind() != TypeKind.DECLARED) {
+    XAnnotation moduleAnnotation = moduleKind.getModuleAnnotation(subject);
+    for (XAnnotationValue subcomponentValue :
+        moduleAnnotation.getAsAnnotationValueList("subcomponents")) {
+      XType type = subcomponentValue.asType();
+      if (!isDeclared(type)) {
         builder.addError(
             type + " is not a valid subcomponent type",
-            subject.toJavac(),
-            moduleAnnotation.annotation(),
-            subcomponentAttribute);
+            subject,
+            moduleAnnotation,
+            subcomponentValue);
         continue;
       }
 
-      XTypeElement subcomponentElement = toXProcessing(asTypeElement(type), processingEnv);
+      XTypeElement subcomponentElement = type.getTypeElement();
       if (hasAnyAnnotation(subcomponentElement, SUBCOMPONENT_TYPES)) {
-        validateSubcomponentHasBuilder(subject, subcomponentElement, xModuleAnnotation, builder);
+        validateSubcomponentHasBuilder(subject, subcomponentElement, moduleAnnotation, builder);
       } else {
         builder.addError(
             hasAnyAnnotation(subcomponentElement, SUBCOMPONENT_CREATOR_TYPES)
                 ? moduleSubcomponentsIncludesCreator(subcomponentElement)
                 : moduleSubcomponentsIncludesNonSubcomponent(subcomponentElement),
-            subject.toJavac(),
-            moduleAnnotation.annotation(),
-            subcomponentAttribute);
+            subject,
+            moduleAnnotation,
+            subcomponentValue);
       }
       ;
     }
@@ -355,26 +329,24 @@ public final class ModuleValidator {
       Set<XTypeElement> visitedModules) {
     ValidationReport.Builder subreport = ValidationReport.about(annotatedType);
 
-    // TODO(bcorso): Consider creating a DiagnosticLocation object to encapsulate the location in a
-    // single object to avoid duplication across all reported errors
-    for (AnnotationValue includedModule : getModules(annotation.toJavac())) {
-      TypeMirror type = asType(includedModule);
-      if (type.getKind() != TypeKind.DECLARED) {
+    for (XAnnotationValue includedModule : getModules(annotation)) {
+      XType type = includedModule.asType();
+      if (!isDeclared(type)) {
         subreport.addError(
             String.format("%s is not a valid module type.", type),
-            annotatedType.toJavac(),
-            annotation.toJavac(),
+            annotatedType,
+            annotation,
             includedModule);
         continue;
       }
 
-      XTypeElement module = toXProcessing(asTypeElement(type), processingEnv);
+      XTypeElement module = type.getTypeElement();
       if (hasTypeParameters(module)) {
         subreport.addError(
             String.format(
                 "%s is listed as a module, but has type parameters", module.getQualifiedName()),
-            annotatedType.toJavac(),
-            annotation.toJavac(),
+            annotatedType,
+            annotation,
             includedModule);
       }
       Set<ClassName> validModuleAnnotations =
@@ -388,26 +360,26 @@ public final class ModuleValidator {
                     + validModuleAnnotations.stream()
                     .map(otherClass -> "@" + otherClass.simpleName())
                     .collect(joining(", "))),
-            annotatedType.toJavac(),
-            annotation.toJavac(),
+            annotatedType,
+            annotation,
             includedModule);
       } else if (knownModules.contains(module) && !validate(module, visitedModules).isClean()) {
         subreport.addError(
             String.format("%s has errors", module.getQualifiedName()),
-            annotatedType.toJavac(),
-            annotation.toJavac(),
+            annotatedType,
+            annotation,
             includedModule);
       }
     }
     return subreport.build();
   }
 
-  private static List<AnnotationValue> getModules(AnnotationMirror annotation) {
+  private static List<XAnnotationValue> getModules(XAnnotation annotation) {
     if (isModuleAnnotation(annotation)) {
-      return moduleAnnotation(annotation).includesAsAnnotationValues();
+      return List.copyOf(annotation.getAsAnnotationValueList("includes"));
     }
     if (isComponentAnnotation(annotation)) {
-      return componentAnnotation(annotation).moduleValues();
+      return List.copyOf(annotation.getAsAnnotationValueList("modules"));
     }
     throw new IllegalArgumentException(String.format("unsupported annotation: %s", annotation));
   }
@@ -438,7 +410,7 @@ public final class ModuleValidator {
     Set<XMethodElement> visitedMethods = new HashSet<>();
     Map<String, List<XMethodElement>> allMethodsByName = new LinkedHashMap<>(moduleMethodsByName);
 
-    while (!types.isSameType(currentClass.getSuperType().toJavac(), objectType.toJavac())) {
+    while (!currentClass.getSuperType().isSameType(objectType)) {
       currentClass = currentClass.getSuperType().getTypeElement();
       List<XMethodElement> superclassMethods = currentClass.getDeclaredMethods();
       for (XMethodElement superclassMethod : superclassMethods) {
@@ -450,7 +422,7 @@ public final class ModuleValidator {
             builder.addError(
                 String.format(
                     "Binding methods may not override another method. Overrides: %s",
-                    methodSignatureFormatter.format(superclassMethod.toJavac())),
+                    methodSignatureFormatter.format(superclassMethod)),
                 bindingMethod);
           }
         }
@@ -461,7 +433,7 @@ public final class ModuleValidator {
               builder.addError(
                   String.format(
                       "Binding methods may not be overridden in modules. Overrides: %s",
-                      methodSignatureFormatter.format(superclassMethod.toJavac())),
+                      methodSignatureFormatter.format(superclassMethod)),
                   method);
             }
           }
@@ -476,9 +448,7 @@ public final class ModuleValidator {
       XTypeElement moduleElement,
       ModuleKind moduleKind,
       ValidationReport.Builder reportBuilder) {
-    ModuleAnnotation moduleAnnotation =
-        moduleAnnotation(moduleKind.getModuleAnnotation(moduleElement));
-    Visibility moduleEffectiveVisibility = effectiveVisibilityOfElement(moduleElement.toJavac());
+    Visibility moduleEffectiveVisibility = effectiveVisibility(moduleElement);
     if (moduleElement.isPrivate()) {
       reportBuilder.addError("Modules cannot be private.", moduleElement);
     } else if (moduleEffectiveVisibility.equals(PRIVATE)) {
@@ -493,8 +463,8 @@ public final class ModuleValidator {
       case MEMBER:
       case TOP_LEVEL:
         if (moduleEffectiveVisibility.equals(PUBLIC)) {
-          Set<TypeElement> invalidVisibilityIncludes =
-              getModuleIncludesWithInvalidVisibility(moduleAnnotation);
+          Set<XTypeElement> invalidVisibilityIncludes =
+              getModuleIncludesWithInvalidVisibility(moduleKind.getModuleAnnotation(moduleElement));
           if (!invalidVisibilityIncludes.isEmpty()) {
             reportBuilder.addError(
                 String.format(
@@ -510,10 +480,11 @@ public final class ModuleValidator {
     }
   }
 
-  private Set<TypeElement> getModuleIncludesWithInvalidVisibility(
-      ModuleAnnotation moduleAnnotation) {
-    return moduleAnnotation.includes().stream()
-        .filter(include -> !effectiveVisibilityOfElement(include).equals(PUBLIC))
+  private Set<XTypeElement> getModuleIncludesWithInvalidVisibility(
+      XAnnotation moduleAnnotation) {
+    return moduleAnnotation.getAnnotationValue("includes").asTypeList().stream()
+        .map(XType::getTypeElement)
+        .filter(include -> !effectiveVisibility(include).equals(PUBLIC))
         .filter(this::requiresModuleInstance)
         .collect(Collectors.toSet());
   }
@@ -524,19 +495,15 @@ public final class ModuleValidator {
    * {@code abstract} nor {@code static}. Alternatively, if the module is a Kotlin Object then the
    * binding methods are considered {@code static}, requiring no module instance.
    */
-  private boolean requiresModuleInstance(TypeElement module) {
-    // Note elements.getAllMembers(module) rather than module.getEnclosedElements() here: we need to
-    // include binding methods declared in supertypes because unlike most other validations being
-    // done in this class, which assume that supertype binding methods will be validated in a
-    // separate call to the validator since the supertype itself must be a @Module, we need to look
-    // at all the binding methods in the module's type hierarchy here.
-    return methodsIn(elements.getAllMembers(module)).stream()
-        .filter(
-            method ->
-                anyBindingMethodValidator.isBindingMethod(
-                    toXProcessing(method, processingEnv)))
-        .map(ExecutableElement::getModifiers)
-        .anyMatch(modifiers -> !modifiers.contains(ABSTRACT) && !modifiers.contains(STATIC));
+  private boolean requiresModuleInstance(XTypeElement module) {
+    // Note: We use XTypeElement#getAllMethods() rather than XTypeElement#getDeclaredMethods() here
+    // because we need to include binding methods declared in supertypes because unlike most other
+    // validations being done in this class, which assume that supertype binding methods will be
+    // validated in a separate call to the validator since the supertype itself must be a @Module,
+    // we need to look at all the binding methods in the module's type hierarchy here.
+    return !module.getAllMethods().stream()
+        .filter(anyBindingMethodValidator::isBindingMethod)
+        .allMatch(method -> method.isAbstract() || method.isStatic());
   }
 
   private void validateNoScopeAnnotationsOnModuleElement(
@@ -552,35 +519,24 @@ public final class ModuleValidator {
   }
 
   private void validateSelfCycles(
-      XTypeElement module, ValidationReport.Builder builder) {
-    ModuleAnnotation moduleAnnotation = moduleAnnotation(module).orElseThrow();
-    moduleAnnotation
-        .includesAsAnnotationValues()
+      XTypeElement module, ModuleKind moduleKind, ValidationReport.Builder builder) {
+    XAnnotation moduleAnnotation = moduleKind.getModuleAnnotation(module);
+    moduleAnnotation.getAsAnnotationValueList("includes").stream()
+        .filter(includedModule -> areEquivalentTypes(module.getType(), includedModule.asType()))
         .forEach(
-            value ->
-                value.accept(
-                    new SimpleAnnotationValueVisitor8<Void, Void>() {
-                      @Override
-                      public Void visitType(TypeMirror includedModule, Void aVoid) {
-                        if (MoreTypes.equivalence().equivalent(module.toJavac().asType(), includedModule)) {
-                          String moduleKind = moduleAnnotation.annotationName();
-                          builder.addError(
-                              String.format("@%s cannot include themselves.", moduleKind),
-                              module.toJavac(),
-                              moduleAnnotation.annotation(),
-                              value);
-                        }
-                        return null;
-                      }
-                    },
-                    null));
+            includedModule ->
+                builder.addError(
+                    String.format(
+                        "@%s cannot include themselves.", moduleKind.annotation().simpleName()),
+                    module,
+                    moduleAnnotation,
+                    includedModule));
   }
-
   private void validateModuleBindings(
       XTypeElement module, ValidationReport.Builder report) {
     BindingGraph bindingGraph =
-        bindingGraphFactory.create(
-                componentDescriptorFactory.moduleComponentDescriptor(module), true)
+        bindingGraphFactory
+            .create(componentDescriptorFactory.moduleComponentDescriptor(module), true)
             .topLevelBindingGraph();
     if (!bindingGraphValidator.isValid(bindingGraph)) {
       // Since the validator uses a DiagnosticReporter to report errors, the ValdiationReport won't
