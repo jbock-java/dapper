@@ -25,6 +25,7 @@ import static javax.lang.model.element.ElementKind.METHOD;
 import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreTypes;
@@ -65,6 +66,10 @@ public final class KeyFactory {
     ExecutableType resolvedMethod =
         asExecutable(types.asMemberOf(declaredContainer, subcomponentCreatorMethod));
     return Key.builder(fromJava(resolvedMethod.getReturnType())).build();
+  }
+
+  public Key forSubcomponentCreator(XType creatorType) {
+    return forSubcomponentCreator(creatorType.toJavac());
   }
 
   public Key forSubcomponentCreator(TypeMirror creatorType) {

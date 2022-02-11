@@ -20,7 +20,6 @@ import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -37,7 +36,10 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ComponentRequirement.NullPolicy;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.MethodSpecs;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
@@ -51,28 +53,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 
 /** Factory for creating {@link ComponentCreatorImplementation} instances. */
 final class ComponentCreatorImplementationFactory {
 
   private final ComponentImplementation componentImplementation;
   private final DaggerElements elements;
-  private final DaggerTypes types;
   private final ModuleProxies moduleProxies;
 
   @Inject
   ComponentCreatorImplementationFactory(
       ComponentImplementation componentImplementation,
       DaggerElements elements,
-      DaggerTypes types,
       ModuleProxies moduleProxies) {
     this.componentImplementation = componentImplementation;
     this.elements = elements;
-    this.types = types;
     this.moduleProxies = moduleProxies;
   }
 
@@ -405,16 +401,16 @@ final class ComponentCreatorImplementationFactory {
       return new LinkedHashMap<>(
           Util.transformValues(
               creatorDescriptor.factoryParameters(),
-              element -> element.getSimpleName().toString()));
+              XVariableElement::getName));
     }
 
-    private DeclaredType creatorType() {
-      return asDeclared(creatorDescriptor.typeElement().asType());
+    private XType creatorType() {
+      return creatorDescriptor.typeElement().getType();
     }
 
     @Override
     protected MethodSpec.Builder factoryMethodBuilder() {
-      return MethodSpec.overriding(creatorDescriptor.factoryMethod(), creatorType(), types);
+      return MethodSpecs.overriding(creatorDescriptor.factoryMethod(), creatorType());
     }
 
     private RequirementStatus requirementStatus(ComponentRequirement requirement) {
@@ -445,9 +441,9 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected MethodSpec.Builder setterMethodBuilder(ComponentRequirement requirement) {
-      ExecutableElement supertypeMethod = creatorDescriptor.setterMethods().get(requirement);
-      MethodSpec.Builder method = MethodSpec.overriding(supertypeMethod, creatorType(), types);
-      if (!supertypeMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
+      XMethodElement supertypeMethod = creatorDescriptor.setterMethods().get(requirement);
+      MethodSpec.Builder method = MethodSpecs.overriding(supertypeMethod, creatorType());
+      if (!supertypeMethod.getReturnType().isVoid()) {
         // Take advantage of covariant returns so that we don't have to worry about type variables
         method.returns(componentImplementation.getCreatorName());
       }

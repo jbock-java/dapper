@@ -170,13 +170,12 @@ public final class ComponentDescriptorFactory {
     // Validation should have ensured that this set will have at most one element.
     Set<XTypeElement> enclosedCreators =
         enclosedAnnotatedTypes(typeElement, creatorAnnotationsFor(componentAnnotation));
-
     Optional<ComponentCreatorDescriptor> creatorDescriptor =
         enclosedCreators.isEmpty()
             ? Optional.empty()
             : Optional.of(
             ComponentCreatorDescriptor.create(
-                getOnlyElement(enclosedCreators), elements, types, dependencyRequestFactory));
+                getOnlyElement(enclosedCreators), types, dependencyRequestFactory));
 
     Set<Scope> scopes = scopesOf(typeElement);
 

@@ -16,12 +16,24 @@
 
 package dagger.internal.codegen.javapoet;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeSpec;
 import javax.lang.model.element.TypeElement;
 
 /** Convenience methods for use with JavaPoet's {@link TypeSpec}. */
 public final class TypeSpecs {
+
+  /**
+   * If {@code supertype} is a class, adds it as a superclass for {@code typeBuilder}; if it is an
+   * interface, adds it as a superinterface.
+   *
+   * @return {@code typeBuilder}
+   */
+  public static TypeSpec.Builder addSupertype(
+      TypeSpec.Builder typeBuilder, XTypeElement supertype) {
+    return addSupertype(typeBuilder, supertype.toJavac());
+  }
 
   /**
    * If {@code supertype} is a class, adds it as a superclass for {@code typeBuilder}; if it is an

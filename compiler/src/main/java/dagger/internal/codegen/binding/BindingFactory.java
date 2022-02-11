@@ -40,6 +40,7 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
@@ -52,7 +53,6 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -275,10 +275,10 @@ public final class BindingFactory {
    * Returns a {@link dagger.model.BindingKind#BOUND_INSTANCE} binding for a
    * {@code @BindsInstance}-annotated builder setter method or factory method parameter.
    */
-  ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, Element element) {
-    Preconditions.checkArgument(element instanceof VariableElement || element instanceof ExecutableElement);
+  ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, XElement element) {
+    Preconditions.checkArgument(element.isVariableElement() || element.isMethod());
     return ProvisionBinding.builder()
-        .bindingElement(element)
+        .bindingElement(element.toJavac())
         .key(requirement.key().orElseThrow())
         .kind(BOUND_INSTANCE)
         .build();

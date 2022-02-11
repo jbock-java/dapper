@@ -288,7 +288,7 @@ public final class ComponentDescriptor {
                   .filter(child -> child.creatorDescriptor().isPresent())
                   .collect(
                       toImmutableMap(
-                          child -> child.creatorDescriptor().orElseThrow().typeElement(),
+                          child -> child.creatorDescriptor().orElseThrow().typeElement().toJavac(),
                           child -> child)));
 
   /** Returns the child component with the given builder type. */

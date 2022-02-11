@@ -20,32 +20,26 @@ import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static java.util.Objects.requireNonNull;
 
-import dagger.BindsInstance;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.DependencyRequest;
-import io.jbock.auto.common.MoreTypes;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * A descriptor for a component <i>creator</i> type: that is, a type annotated with
@@ -53,25 +47,25 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class ComponentCreatorDescriptor {
 
-  private final Supplier<Map<ComponentRequirement, Element>> requirementElements = Suppliers.memoize(() ->
+  private final Supplier<Map<ComponentRequirement, XElement>> requirementElements = Suppliers.memoize(() ->
       flatten(unvalidatedRequirementElements()));
-  private final Supplier<Map<ComponentRequirement, ExecutableElement>> setterMethods = Suppliers.memoize(() ->
+  private final Supplier<Map<ComponentRequirement, XMethodElement>> setterMethods = Suppliers.memoize(() ->
       flatten(unvalidatedSetterMethods()));
-  private final Supplier<Map<ComponentRequirement, VariableElement>> factoryParameters = Suppliers.memoize(() ->
+  private final Supplier<Map<ComponentRequirement, XExecutableParameterElement>> factoryParameters = Suppliers.memoize(() ->
       flatten(unvalidatedFactoryParameters()));
 
   private final ComponentCreatorAnnotation annotation;
-  private final TypeElement typeElement;
-  private final ExecutableElement factoryMethod;
-  private final Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods;
-  private final Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters;
+  private final XTypeElement typeElement;
+  private final XMethodElement factoryMethod;
+  private final Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods;
+  private final Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters;
 
   private ComponentCreatorDescriptor(
       ComponentCreatorAnnotation annotation,
-      TypeElement typeElement,
-      ExecutableElement factoryMethod,
-      Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods,
-      Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters) {
+      XTypeElement typeElement,
+      XMethodElement factoryMethod,
+      Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods,
+      Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters) {
     this.annotation = requireNonNull(annotation);
     this.typeElement = requireNonNull(typeElement);
     this.factoryMethod = requireNonNull(factoryMethod);
@@ -90,12 +84,12 @@ public final class ComponentCreatorDescriptor {
   }
 
   /** The annotated creator type. */
-  public TypeElement typeElement() {
+  public XTypeElement typeElement() {
     return typeElement;
   }
 
   /** The method that creates and returns a component instance. */
-  public ExecutableElement factoryMethod() {
+  public XMethodElement factoryMethod() {
     return factoryMethod;
   }
 
@@ -105,7 +99,7 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  Map<ComponentRequirement, Set<ExecutableElement>> unvalidatedSetterMethods() {
+  Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods() {
     return unvalidatedSetterMethods;
   }
 
@@ -115,7 +109,7 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  Map<ComponentRequirement, Set<VariableElement>> unvalidatedFactoryParameters() {
+  Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters() {
     return unvalidatedFactoryParameters;
   }
 
@@ -127,7 +121,7 @@ public final class ComponentCreatorDescriptor {
    * method should only be called when validating the descriptor.
    */
   @SuppressWarnings(value = {"unchecked", "rawtypes"})
-  public Map<ComponentRequirement, Set<Element>>
+  public Map<ComponentRequirement, Set<XElement>>
   unvalidatedRequirementElements() {
     // ComponentCreatorValidator ensures that there are either setter methods or factory method
     // parameters, but not both, so we can cheat a little here since we know that only one of
@@ -141,17 +135,17 @@ public final class ComponentCreatorDescriptor {
    * Map of component requirements to elements (setter methods or factory method parameters) that
    * set them.
    */
-  Map<ComponentRequirement, Element> requirementElements() {
+  Map<ComponentRequirement, XElement> requirementElements() {
     return requirementElements.get();
   }
 
   /** Map of component requirements to setter methods for those requirements. */
-  public Map<ComponentRequirement, ExecutableElement> setterMethods() {
+  public Map<ComponentRequirement, XMethodElement> setterMethods() {
     return setterMethods.get();
   }
 
   /** Map of component requirements to factory method parameters for those requirements. */
-  public Map<ComponentRequirement, VariableElement> factoryParameters() {
+  public Map<ComponentRequirement, XExecutableParameterElement> factoryParameters() {
     return factoryParameters.get();
   }
 
@@ -180,79 +174,79 @@ public final class ComponentCreatorDescriptor {
   }
 
   /** Returns the element in this creator that sets the given {@code requirement}. */
-  Element elementForRequirement(ComponentRequirement requirement) {
+  XElement elementForRequirement(ComponentRequirement requirement) {
     return requirementElements().get(requirement);
   }
 
   /** Creates a new {@link ComponentCreatorDescriptor} for the given creator {@code type}. */
   public static ComponentCreatorDescriptor create(
-      XTypeElement xTypeElement,
-      DaggerElements elements,
+      XTypeElement creator,
       DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory) {
-    TypeElement typeElement = xTypeElement.toJavac();
-    DeclaredType type = asDeclared(typeElement.asType());
-    TypeMirror componentType = typeElement.getEnclosingElement().asType();
+    XType componentType = creator.getEnclosingTypeElement().getType();
 
-    Map<ComponentRequirement, Set<ExecutableElement>> setterMethods =
+    Map<ComponentRequirement, Set<XMethodElement>> setterMethods =
         new LinkedHashMap<>();
 
-    ExecutableElement factoryMethod = null;
-    for (ExecutableElement method : elements.getUnimplementedMethods(typeElement)) {
-      ExecutableType resolvedMethodType = MoreTypes.asExecutable(types.asMemberOf(type, method));
+    XMethodElement factoryMethod = null;
+    for (XMethodElement method : getAllUnimplementedMethods(creator)) {
+      XMethodType resolvedMethodType = method.asMemberOf(creator.getType());
 
       if (types.isSubtype(componentType, resolvedMethodType.getReturnType())) {
+        Preconditions.checkState(factoryMethod == null); // validation should have ensured there's only 1.
         factoryMethod = method;
       } else {
-        VariableElement parameter = getOnlyElement(method.getParameters());
-        TypeMirror parameterType = getOnlyElement(resolvedMethodType.getParameterTypes());
+        XExecutableParameterElement parameter = getOnlyElement(method.getParameters());
+        XType parameterType = getOnlyElement(resolvedMethodType.getParameterTypes());
         setterMethods.merge(
-            requirement(method, parameter, parameterType, dependencyRequestFactory, method),
-            Set.of(method), Util::mutableUnion);
+            requirement(
+                method, parameter, parameterType, dependencyRequestFactory, method.getName()),
+            Set.of(method),
+            Util::mutableUnion);
       }
     }
     Preconditions.checkState(factoryMethod != null); // validation should have ensured this.
 
-    Map<ComponentRequirement, Set<VariableElement>> factoryParameters =
+    Map<ComponentRequirement, Set<XExecutableParameterElement>> factoryParameters =
         new LinkedHashMap<>();
 
-    ExecutableType resolvedFactoryMethodType =
-        MoreTypes.asExecutable(types.asMemberOf(type, factoryMethod));
-    List<? extends VariableElement> parameters = factoryMethod.getParameters();
-    List<? extends TypeMirror> parameterTypes = resolvedFactoryMethodType.getParameterTypes();
+    XMethodType resolvedFactoryMethodType = factoryMethod.asMemberOf(creator.getType());
+    List<XExecutableParameterElement> parameters = factoryMethod.getParameters();
+    List<XType> parameterTypes = resolvedFactoryMethodType.getParameterTypes();
     for (int i = 0; i < parameters.size(); i++) {
-      VariableElement parameter = parameters.get(i);
-      TypeMirror parameterType = parameterTypes.get(i);
+      XExecutableParameterElement parameter = parameters.get(i);
+      XType parameterType = parameterTypes.get(i);
       factoryParameters.merge(
-          requirement(factoryMethod, parameter, parameterType, dependencyRequestFactory, parameter),
-          Set.of(parameter), Util::mutableUnion);
+          requirement(
+              factoryMethod,
+              parameter,
+              parameterType,
+              dependencyRequestFactory,
+              parameter.getName()),
+          Set.of(parameter),
+          Util::mutableUnion);
     }
-
     // Validation should have ensured exactly one creator annotation is present on the type.
-    ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(typeElement));
+    ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(creator));
     return new ComponentCreatorDescriptor(
-        annotation, typeElement, factoryMethod,
-        setterMethods,
-        factoryParameters);
-  }
+        annotation, creator, factoryMethod, setterMethods, factoryParameters);  }
 
   private static ComponentRequirement requirement(
-      ExecutableElement method,
-      VariableElement parameter,
-      TypeMirror type,
+      XMethodElement method,
+      XExecutableParameterElement parameter,
+      XType parameterType,
       DependencyRequestFactory dependencyRequestFactory,
-      Element elementForVariableName) {
-    if (isAnnotationPresent(method, BindsInstance.class)
-        || isAnnotationPresent(parameter, BindsInstance.class)) {
+      String variableName) {
+    if (method.hasAnnotation(TypeNames.BINDS_INSTANCE)
+        || parameter.hasAnnotation(TypeNames.BINDS_INSTANCE)) {
       DependencyRequest request =
-          dependencyRequestFactory.forRequiredResolvedVariable(parameter, type);
-      String variableName = elementForVariableName.getSimpleName().toString();
+          dependencyRequestFactory.forRequiredResolvedVariable(parameter, parameterType);
       return ComponentRequirement.forBoundInstance(
           request.key(), variableName);
     }
 
-    return moduleAnnotation(asTypeElement(type)).isPresent()
-        ? ComponentRequirement.forModule(type)
-        : ComponentRequirement.forDependency(type);
+    return moduleAnnotation(parameterType.getTypeElement()).isPresent()
+        ? ComponentRequirement.forModule(parameterType)
+        : ComponentRequirement.forDependency(parameterType);
   }
 }

@@ -142,7 +142,7 @@ public final class ComponentNames {
               if (componentDescriptor.creatorDescriptor().isPresent()) {
                 Key creatorKey =
                     keyFactory.forSubcomponentCreator(
-                        componentDescriptor.creatorDescriptor().get().typeElement().asType());
+                        componentDescriptor.creatorDescriptor().get().typeElement().getType());
                 builder.merge(creatorKey, List.of(componentPath), Util::mutableConcat);
               }
             });

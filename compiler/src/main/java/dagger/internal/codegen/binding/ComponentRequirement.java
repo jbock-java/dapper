@@ -26,6 +26,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.Equivalence;
@@ -205,12 +206,20 @@ public final class ComponentRequirement {
     return Objects.hash(kind, wrappedType, key, variableName);
   }
 
+  public static ComponentRequirement forDependency(XType type) {
+    return forDependency(type.toJavac());
+  }
+
   public static ComponentRequirement forDependency(TypeMirror type) {
     return new ComponentRequirement(
         Kind.DEPENDENCY,
         MoreTypes.equivalence().wrap(requireNonNull(type)),
         Optional.empty(),
         simpleVariableName(MoreTypes.asTypeElement(type)));
+  }
+
+  public static ComponentRequirement forModule(XType type) {
+    return forModule(type.toJavac());
   }
 
   public static ComponentRequirement forModule(TypeMirror type) {

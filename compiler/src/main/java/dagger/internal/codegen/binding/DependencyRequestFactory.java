@@ -22,6 +22,8 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.model.DependencyRequest;
 import dagger.model.RequestKind;
 import dagger.spi.model.DaggerElement;
@@ -61,6 +63,11 @@ public final class DependencyRequestFactory {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
     }
     return builder;
+  }
+
+  DependencyRequest forRequiredResolvedVariable(
+      XVariableElement variableElement, XType resolvedType) {
+    return forRequiredResolvedVariable(variableElement.toJavac(), resolvedType.toJavac());
   }
 
   DependencyRequest forRequiredResolvedVariable(
