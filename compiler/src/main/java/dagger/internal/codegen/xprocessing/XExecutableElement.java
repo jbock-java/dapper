@@ -2,7 +2,6 @@ package dagger.internal.codegen.xprocessing;
 
 import java.util.List;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
 
 public interface XExecutableElement extends XElement {
 
@@ -13,7 +12,12 @@ public interface XExecutableElement extends XElement {
 
   List<XExecutableParameterElement> getParameters();
 
-  List<? extends TypeMirror> getThrownTypes();
+  List<XType> getThrownTypes();
+
+  /**
+   * Returns true if this method receives a vararg parameter.
+   */
+  boolean isVarArgs();
 
   @Override
   String toString();

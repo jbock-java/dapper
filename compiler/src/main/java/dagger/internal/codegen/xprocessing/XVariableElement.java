@@ -7,4 +7,6 @@ public interface XVariableElement extends XElement {
   VariableElement toJavac();
 
   XType getType();
+
+  String getName();
 }

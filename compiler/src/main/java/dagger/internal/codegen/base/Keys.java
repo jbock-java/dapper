@@ -21,6 +21,8 @@ import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPr
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
@@ -45,6 +47,16 @@ public final class Keys {
   public static boolean isValidImplicitProvisionKey(Key key, DaggerTypes types) {
     return isValidImplicitProvisionKey(
         key.qualifier().map(DaggerAnnotation::java), key.type().java(), types);
+  }
+
+  /**
+   * Returns {@code true} if a key with {@code qualifier} and {@code type} is valid as an implicit
+   * key (that is, if it's valid for a just-in-time binding by discovering an {@code @Inject}
+   * constructor).
+   */
+  public static boolean isValidImplicitProvisionKey(
+      Optional<XAnnotation> qualifier, XType type, DaggerTypes types) {
+    return isValidImplicitProvisionKey(qualifier.map(XAnnotation::toJavac), type.toJavac(), types);
   }
 
   /**

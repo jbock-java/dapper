@@ -24,12 +24,12 @@ import static dagger.internal.codegen.xprocessing.XMethodElements.getEnclosingTy
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<XMethodElement> {
   @Inject
@@ -73,10 +73,10 @@ final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<X
     }
 
     @Override
-    protected Optional<TypeMirror> bindingElementType() {
+    protected Optional<XType> bindingElementType() {
       List<? extends XVariableElement> parameters = method.getParameters();
       return parameters.size() == 1
-          ? Optional.of(getOnlyElement(parameters).getType().toJavac())
+          ? Optional.of(getOnlyElement(parameters).getType())
           : Optional.empty();
     }
   }

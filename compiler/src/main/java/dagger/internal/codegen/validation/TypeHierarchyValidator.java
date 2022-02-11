@@ -17,6 +17,7 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.auto.common.SuperficialValidation;
@@ -29,6 +30,16 @@ import javax.lang.model.type.TypeMirror;
 /** Utility methods for validating the type hierarchy of a given type. */
 final class TypeHierarchyValidator {
   private TypeHierarchyValidator() {
+  }
+
+  /**
+   * Validate the type hierarchy of the given type including all super classes, interfaces, and
+   * type parameters.
+   *
+   * @throws TypeNotPresentException if an type in the hierarchy is not valid.
+   */
+  public static void validateTypeHierarchy(XType type, DaggerTypes types) {
+    validateTypeHierarchy(type.toJavac(), types);
   }
 
   /**

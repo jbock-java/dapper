@@ -20,6 +20,7 @@ import static io.jbock.auto.common.MoreTypes.isType;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
 import javax.lang.model.type.TypeMirror;
@@ -31,6 +32,11 @@ import javax.lang.model.type.TypeMirror;
 public final class FrameworkTypes {
   private static final List<ClassName> PROVISION_TYPES =
       List.of(TypeNames.PROVIDER, TypeNames.LAZY);
+
+  /** Returns true if the type represents a framework type. */
+  public static boolean isFrameworkType(XType type) {
+    return isFrameworkType(type.toJavac());
+  }
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(TypeMirror type) {

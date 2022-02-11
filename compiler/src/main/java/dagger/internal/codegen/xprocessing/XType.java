@@ -1,5 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.javapoet.TypeName;
 import java.util.List;
 import javax.lang.model.type.TypeMirror;
 
@@ -11,9 +12,13 @@ public interface XType {
 
   List<XType> getTypeArguments();
 
+  TypeName getTypeName();
+
   boolean isSameType(XType other);
 
   boolean isVoid();
+
+  boolean isArray();
 
   /**
    * Returns boxed version of this type if it is a primitive or itself if it is not a primitive

@@ -25,6 +25,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import jakarta.inject.Inject;
 import java.util.Set;
 
@@ -33,11 +34,13 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
 
   @Inject
   ProvidesMethodValidator(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
+        processingEnv,
         elements,
         types,
         TypeNames.PROVIDES,

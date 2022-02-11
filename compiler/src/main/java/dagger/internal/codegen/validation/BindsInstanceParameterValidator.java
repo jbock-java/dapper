@@ -22,9 +22,9 @@ import static dagger.internal.codegen.xprocessing.XTypes.isTypeVariable;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.type.TypeMirror;
 
 final class BindsInstanceParameterValidator extends BindsInstanceElementValidator<XExecutableParameterElement> {
   @Inject
@@ -62,8 +62,8 @@ final class BindsInstanceParameterValidator extends BindsInstanceElementValidato
     }
 
     @Override
-    protected Optional<TypeMirror> bindingElementType() {
-      return Optional.of(element.toJavac().asType());
+    protected Optional<XType> bindingElementType() {
+      return Optional.of(parameter.getType());
     }
   }
 }

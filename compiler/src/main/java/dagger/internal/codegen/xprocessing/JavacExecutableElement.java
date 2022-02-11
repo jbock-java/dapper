@@ -2,8 +2,8 @@ package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreElements;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
 
 abstract class JavacExecutableElement extends JavacElement implements XExecutableElement {
 
@@ -26,8 +26,15 @@ abstract class JavacExecutableElement extends JavacElement implements XExecutabl
     return env().wrapTypeElement(MoreElements.asType(executableElement.getEnclosingElement()));
   }
 
-  public List<? extends TypeMirror> getThrownTypes() {
-    return executableElement.getThrownTypes();
+  public List<XType> getThrownTypes() {
+    return executableElement.getThrownTypes().stream()
+        .map(env()::wrap)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public boolean isVarArgs() {
+    return executableElement.isVarArgs();
   }
 
   XTypeElement containing() {

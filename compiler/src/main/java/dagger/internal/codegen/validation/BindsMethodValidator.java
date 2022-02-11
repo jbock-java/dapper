@@ -20,19 +20,18 @@ import static dagger.internal.codegen.validation.BindingElementValidator.AllowsS
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
 import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
+import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.lang.model.type.TypeMirror;
 
 /** A validator for {@link dagger.Binds} methods. */
 final class BindsMethodValidator extends BindingMethodValidator {
@@ -40,11 +39,13 @@ final class BindsMethodValidator extends BindingMethodValidator {
 
   @Inject
   BindsMethodValidator(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
+        processingEnv,
         elements,
         types,
         TypeNames.BINDS,
@@ -84,10 +85,10 @@ final class BindsMethodValidator extends BindingMethodValidator {
     @Override
     protected void checkParameter(XVariableElement parameter) {
       super.checkParameter(parameter);
-      TypeMirror leftHandSide = boxIfNecessary(method.getReturnType().toJavac());
-      TypeMirror rightHandSide = parameter.getType().toJavac();
+      XType leftHandSide = boxIfNecessary(method.getReturnType());
+      XType rightHandSide = parameter.getType();
 
-      if (!types.isAssignable(rightHandSide, leftHandSide)) {
+      if (!types.isAssignable(rightHandSide.toJavac(), leftHandSide.toJavac())) {
         // Validate the type hierarchy of both sides to make sure they're both valid.
         // If one of the types isn't valid it means we need to delay validation to the next round.
         // Note: BasicAnnotationProcessor only performs superficial validation on the referenced
@@ -102,11 +103,8 @@ final class BindsMethodValidator extends BindingMethodValidator {
       }
     }
 
-    private TypeMirror boxIfNecessary(TypeMirror maybePrimitive) {
-      if (maybePrimitive.getKind().isPrimitive()) {
-        return types.boxedClass(MoreTypes.asPrimitiveType(maybePrimitive)).asType();
-      }
-      return maybePrimitive;
+    private XType boxIfNecessary(XType maybePrimitive) {
+      return isPrimitive(maybePrimitive) ? maybePrimitive.boxed() : maybePrimitive;
     }
   }
 }

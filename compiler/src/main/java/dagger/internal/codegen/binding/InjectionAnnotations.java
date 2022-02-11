@@ -25,6 +25,7 @@ import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.SuperficialValidation;
 import jakarta.inject.Inject;
@@ -79,6 +80,11 @@ public final class InjectionAnnotations {
     Set<? extends AnnotationMirror> qualifiers =
         AnnotationMirrors.getAnnotatedAnnotations(element, Qualifier.class);
     return List.copyOf(qualifiers);
+  }
+
+  /** Returns the constructors in {@code type} that are annotated with {@link Inject}. */
+  public static Set<ExecutableElement> injectedConstructors(XTypeElement type) {
+    return injectedConstructors(type.toJavac());
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */

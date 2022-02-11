@@ -23,9 +23,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPrese
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
-import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ClearableCache;
@@ -33,7 +30,6 @@ import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -41,32 +37,26 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XTypeElements;
-import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 
 /** Validates types annotated with component creator annotations. */
 @Singleton
 public final class ComponentCreatorValidator implements ClearableCache {
 
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
+  private final DaggerTypes types;
 
   @Inject
-  ComponentCreatorValidator() {
+  ComponentCreatorValidator(DaggerTypes types) {
+    this.types = types;
   }
 
   @Override
@@ -323,7 +313,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     private boolean validateFactoryMethodReturnType(XMethodElement method) {
       XTypeElement component = creator.getEnclosingTypeElement();
       XType returnType = method.asMemberOf(creator.getType()).getReturnType();
-      if (!returnType.isAssignableFrom(component.getType())) {
+      if (!types.isSubtype(component.getType(), returnType)) {
         error(
             method,
             messages.factoryMethodMustReturnComponentType(),

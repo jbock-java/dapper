@@ -27,6 +27,8 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
@@ -37,6 +39,7 @@ import javax.lang.model.type.TypeMirror;
 /** A validator for methods that represent binding declarations. */
 abstract class BindingMethodValidator extends BindingElementValidator<XMethodElement> {
 
+  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final DependencyRequestValidator dependencyRequestValidator;
@@ -53,6 +56,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
    *     annotated with one of these annotations
    */
   protected BindingMethodValidator(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       ClassName methodAnnotation,
@@ -63,6 +67,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
     super(allowsScoping, injectionAnnotations);
+    this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.methodAnnotation = methodAnnotation;
@@ -106,8 +111,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
     }
 
     @Override
-    protected final Optional<TypeMirror> bindingElementType() {
-      return Optional.of(element.getReturnType().toJavac());
+    protected final Optional<XType> bindingElementType() {
+      return Optional.of(element.getReturnType());
     }
 
     @Override
@@ -263,9 +268,9 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
         BindingMethodValidator validator,
         XExecutableElement element,
         ValidationReport.Builder report) {
-      TypeMirror exceptionSupertype = validator.elements.getTypeElement(superclass).asType();
-      TypeMirror errorType = validator.elements.getTypeElement(TypeNames.ERROR).asType();
-      for (TypeMirror thrownType : element.getThrownTypes()) {
+      XType exceptionSupertype = validator.processingEnv.findType(superclass);
+      XType errorType = validator.processingEnv.findType(TypeNames.ERROR);
+      for (XType thrownType : element.getThrownTypes()) {
         if (!validator.types.isSubtype(thrownType, exceptionSupertype)
             && !validator.types.isSubtype(thrownType, errorType)) {
           report.addError(errorMessage(validator));

@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
@@ -294,6 +295,10 @@ public final class DaggerTypes implements Types {
   @Override
   public boolean isSameType(TypeMirror t1, TypeMirror t2) {
     return types.isSameType(t1, t2);
+  }
+
+  public boolean isSubtype(XType t1, XType t2) {
+    return isSubtype(t1.toJavac(), t2.toJavac());
   }
 
   @Override

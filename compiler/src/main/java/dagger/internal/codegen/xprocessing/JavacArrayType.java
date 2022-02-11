@@ -3,7 +3,7 @@ package dagger.internal.codegen.xprocessing;
 import java.util.List;
 import javax.lang.model.type.ArrayType;
 
-class JavacArrayType extends JavacType {
+class JavacArrayType extends JavacType implements XArrayType {
 
   private final ArrayType arrayType;
 

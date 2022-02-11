@@ -20,6 +20,9 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeVariable;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.ARRAY;
@@ -31,6 +34,8 @@ import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.Scope;
 import dagger.spi.model.Key;
 import java.util.Formatter;
@@ -129,8 +134,8 @@ public abstract class BindingElementValidator<E extends XElement> {
      * that the contributed type is ambiguous or missing, i.e. a {@code @BindsInstance} method with
      * zero or many parameters.
      */
-    // TODO(dpb): should this be an ImmutableList<TypeMirror>, with this class checking the size?
-    protected abstract Optional<TypeMirror> bindingElementType();
+    // TODO(dpb): should this be an ImmutableList<XType>, with this class checking the size?
+    protected abstract Optional<XType> bindingElementType();
 
     /**
      * Adds an error if the {@link #bindingElementType() binding element type} is not appropriate.
@@ -149,14 +154,13 @@ public abstract class BindingElementValidator<E extends XElement> {
     /**
      * Adds an error if {@code keyType} is not a primitive, declared type, array, or type variable.
      */
-    protected void checkKeyType(TypeMirror keyType) {
-      TypeKind kind = keyType.getKind();
-      if (kind.equals(VOID)) {
+    protected void checkKeyType(XType keyType) {
+      if (keyType.isVoid()) {
         report.addError(bindingElements("must %s a value (not void)", bindingElementTypeVerb()));
-      } else if (!(kind.isPrimitive()
-          || kind.equals(DECLARED)
-          || kind.equals(ARRAY)
-          || kind.equals(TYPEVAR))) {
+      } else if (!(isPrimitive(keyType)
+          || isDeclared(keyType)
+          || keyType.isArray()
+          || isTypeVariable(keyType))) {
         report.addError(badTypeMessage());
       }
     }
@@ -165,8 +169,8 @@ public abstract class BindingElementValidator<E extends XElement> {
     private void checkAssistedType() {
       if (qualifiers.isEmpty()
           && bindingElementType().isPresent()
-          && bindingElementType().get().getKind() == DECLARED) {
-        TypeElement keyElement = asTypeElement(bindingElementType().get());
+          && isDeclared(bindingElementType().get())) {
+        XTypeElement keyElement = bindingElementType().get().getTypeElement();
         if (isAssistedInjectionType(keyElement)) {
           report.addError("Dagger does not support providing @AssistedInject types.", keyElement);
         }

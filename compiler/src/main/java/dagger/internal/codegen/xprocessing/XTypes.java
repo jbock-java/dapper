@@ -19,10 +19,16 @@ package dagger.internal.codegen.xprocessing;
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.TypeKind;
 
 /** A utility class for {@link XType} helper methods. */
 public final class XTypes {
+
+  /** Returns {@code true} if the raw type of {@code type} is equal to {@code className}. */
+  public static boolean isTypeOf(XType type, ClassName className) {
+    return isDeclared(type) && type.getTypeElement().getClassName().equals(className);
+  }
 
   /** Returns {@code true} if the given type is a primitive type. */
   public static boolean isDeclared(XType type) {

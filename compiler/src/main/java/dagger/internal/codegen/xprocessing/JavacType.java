@@ -1,6 +1,8 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -36,6 +38,19 @@ abstract class JavacType implements XType {
 
   public boolean isVoid() {
     return typeMirror.getKind() == TypeKind.VOID;
+  }
+
+  @Override
+  public boolean isArray() {
+    return this instanceof XArrayType;
+  }
+
+  @Override
+  public TypeName getTypeName() {
+    if (typeMirror.getKind() == TypeKind.NONE) {
+      return ClassName.get("androidx.room.compiler.processing.error", "NotAType");
+    }
+    return TypeName.get(typeMirror);
   }
 
   /**

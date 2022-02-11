@@ -37,6 +37,8 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingKind;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreElements;
@@ -76,10 +78,20 @@ public final class AssistedInjectionAnnotations {
   }
 
   /** Returns {@code true} if the element uses assisted injection. */
+  public static boolean isAssistedInjectionType(XTypeElement typeElement) {
+    return isAssistedInjectionType(typeElement.toJavac());
+  }
+
+  /** Returns {@code true} if the element uses assisted injection. */
   public static boolean isAssistedInjectionType(TypeElement typeElement) {
     Set<ExecutableElement> injectConstructors = assistedInjectedConstructors(typeElement);
     return !injectConstructors.isEmpty()
         && isAnnotationPresent(getOnlyElement(injectConstructors), AssistedInject.class);
+  }
+
+  /** Returns {@code true} if this binding is an assisted factory. */
+  public static boolean isAssistedFactoryType(XElement element) {
+    return isAssistedFactoryType(element.toJavac());
   }
 
   /** Returns {@code true} if this binding is an assisted factory. */

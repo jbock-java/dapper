@@ -24,4 +24,9 @@ abstract class JavacVariableElement extends JavacElement implements XVariableEle
   public XType getType() {
     return env.wrap(element.asType());
   }
+
+  @Override
+  public String getName() {
+    return element.getSimpleName().toString();
+  }
 }

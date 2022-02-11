@@ -47,6 +47,11 @@ class JavacElement implements XElement {
   }
 
   @Override
+  public boolean isVariableElement() {
+    return this instanceof XVariableElement;
+  }
+
+  @Override
   public boolean isMethodParameter() {
     return this instanceof XExecutableParameterElement;
   }

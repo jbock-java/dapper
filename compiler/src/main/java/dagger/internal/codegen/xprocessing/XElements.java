@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
+import dagger.internal.codegen.base.Preconditions;
 import io.jbock.javapoet.ClassName;
 import java.util.Collection;
 import java.util.Optional;
@@ -8,6 +9,21 @@ import java.util.Set;
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@link XElement} helper methods. */
 public final class XElements {
+
+  public static XExecutableParameterElement asMethodParameter(XElement element) {
+    Preconditions.checkState(element.isMethodParameter());
+    return (XExecutableParameterElement) element;
+  }
+
+  public static XVariableElement asVariable(XElement element) {
+    Preconditions.checkState(element.isVariableElement());
+    return (XVariableElement) element;
+  }
+
+  public static XMethodElement asMethod(XElement element) {
+    Preconditions.checkState(element.isMethod());
+    return (XMethodElement) element;
+  }
 
   public static Set<XAnnotation> getAnnotatedAnnotations(
       XAnnotated annotated, ClassName annotationName) {

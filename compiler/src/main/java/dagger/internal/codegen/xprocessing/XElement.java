@@ -8,5 +8,7 @@ public interface XElement extends XAnnotated, XHasModifiers {
 
   boolean isMethod();
 
+  boolean isVariableElement();
+
   boolean isMethodParameter();
 }
