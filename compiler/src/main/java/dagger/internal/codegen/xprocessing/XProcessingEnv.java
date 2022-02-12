@@ -26,7 +26,6 @@ public abstract class XProcessingEnv {
 
   public abstract Types getTypeUtils();
 
-
   XType wrap(TypeMirror typeMirror) {
     switch (typeMirror.getKind()) {
       case ARRAY:
@@ -91,4 +90,8 @@ public abstract class XProcessingEnv {
    * exist.
    */
   public abstract XTypeElement findTypeElement(String qName);
+
+  public XTypeElement findTypeElement(TypeName typeName) {
+    return findTypeElement(typeName.toString());
+  }
 }

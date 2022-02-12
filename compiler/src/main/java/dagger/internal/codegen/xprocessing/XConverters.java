@@ -48,4 +48,8 @@ public class XConverters {
   public static XType toXProcessing(TypeMirror type, XProcessingEnv env) {
     return env.wrap(type);
   }
+
+  public static ExecutableElement toJavac(XExecutableElement element) {
+    return element.toJavac();
+  }
 }

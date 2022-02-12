@@ -17,6 +17,7 @@
 package dagger.internal.codegen.langmodel;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.hasModifiers;
 import static java.util.Comparator.comparing;
@@ -26,6 +27,9 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
@@ -40,7 +44,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -260,6 +263,20 @@ public final class DaggerElements implements Elements, ClearableCache {
    * href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.3">JVM
    * specification, section 4.3.3</a>.
    */
+  // TODO(bcorso): Expose getMethodDescriptor() method in XProcessing instead.
+  public static String getMethodDescriptor(XMethodElement element) {
+    return getMethodDescriptor(toJavac(element));
+  }
+
+  /**
+   * Returns the method descriptor of the given {@code element}.
+   *
+   * <p>This is useful for matching Kotlin Metadata JVM Signatures with elements from the AST.
+   *
+   * <p>For reference, see the <a
+   * href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.3">JVM
+   * specification, section 4.3.3</a>.
+   */
   public static String getMethodDescriptor(ExecutableElement element) {
     return element.getSimpleName() + getDescriptor(element.asType());
   }
@@ -392,6 +409,15 @@ public final class DaggerElements implements Elements, ClearableCache {
           return element.getSimpleName().toString();
         }
       };
+
+  /** Returns the type element or throws {@link TypeNotPresentException} if it is null. */
+  public static XTypeElement checkTypePresent(XProcessingEnv processingEnv, ClassName className) {
+    XTypeElement type = processingEnv.findTypeElement(className);
+    if (type == null) {
+      throw new TypeNotPresentException(className.canonicalName(), null);
+    }
+    return type;
+  }
 
   /**
    * Invokes {@link Elements#getTypeElement(CharSequence)}, throwing {@link TypeNotPresentException}
