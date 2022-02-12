@@ -421,10 +421,6 @@ public final class BindingGraphFactory implements ClearableCache {
         // binding declarations
         return bindingFactory.unresolvedDelegateBinding(delegateDeclaration);
       }
-      // It doesn't matter which of these is selected, since they will later on produce a
-      // duplicate binding error.
-      ContributionBinding explicitDelegate =
-          resolvedDelegate.contributionBindings().iterator().next();
       return bindingFactory.delegateBinding(delegateDeclaration);
     }
 

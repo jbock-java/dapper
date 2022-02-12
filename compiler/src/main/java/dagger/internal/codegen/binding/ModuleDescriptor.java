@@ -18,31 +18,28 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreElements.getPackage;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
-import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
@@ -52,41 +49,36 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 /** Contains metadata that describes a module. */
 public final class ModuleDescriptor {
 
-  private final TypeElement moduleElement;
-  private final Set<TypeElement> includedModules;
+  private final XTypeElement xModuleElement;
   private final Set<ContributionBinding> bindings;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final Set<DelegateDeclaration> delegateDeclarations;
   private final ModuleKind kind;
 
   ModuleDescriptor(
-      TypeElement moduleElement,
-      Set<TypeElement> includedModules,
+      XTypeElement xModuleElement,
       Set<ContributionBinding> bindings,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<DelegateDeclaration> delegateDeclarations,
       ModuleKind kind) {
-    this.moduleElement = requireNonNull(moduleElement);
-    this.includedModules = requireNonNull(includedModules);
+    this.xModuleElement = requireNonNull(xModuleElement);
     this.bindings = requireNonNull(bindings);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.delegateDeclarations = requireNonNull(delegateDeclarations);
     this.kind = requireNonNull(kind);
   }
 
-  public TypeElement moduleElement() {
-    return moduleElement;
+  XTypeElement xModuleElement() {
+    return xModuleElement;
   }
 
-  Set<TypeElement> includedModules() {
-    return includedModules;
+  public TypeElement moduleElement() {
+    return xModuleElement.toJavac();
   }
 
   public Set<ContributionBinding> bindings() {
@@ -131,8 +123,7 @@ public final class ModuleDescriptor {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ModuleDescriptor that = (ModuleDescriptor) o;
-    return moduleElement.equals(that.moduleElement)
-        && includedModules.equals(that.includedModules)
+    return xModuleElement.equals(that.xModuleElement)
         && bindings.equals(that.bindings)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations)
         && delegateDeclarations.equals(that.delegateDeclarations)
@@ -141,8 +132,7 @@ public final class ModuleDescriptor {
 
   @Override
   public int hashCode() {
-    return Objects.hash(moduleElement,
-        includedModules,
+    return Objects.hash(xModuleElement,
         bindings,
         subcomponentDeclarations,
         delegateDeclarations,
@@ -157,7 +147,7 @@ public final class ModuleDescriptor {
     private final BindingFactory bindingFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
     private final SubcomponentDeclaration.Factory subcomponentDeclarationFactory;
-    private final Map<TypeElement, ModuleDescriptor> cache = new HashMap<>();
+    private final Map<XTypeElement, ModuleDescriptor> cache = new HashMap<>();
 
     @Inject
     Factory(
@@ -174,31 +164,32 @@ public final class ModuleDescriptor {
     }
 
     public ModuleDescriptor create(XTypeElement moduleElement) {
-      return create(moduleElement.toJavac());
-    }
-
-    public ModuleDescriptor create(TypeElement moduleElement) {
       return reentrantComputeIfAbsent(cache, moduleElement, this::createUncached);
     }
 
-    public ModuleDescriptor createUncached(TypeElement moduleElement) {
+    public ModuleDescriptor createUncached(XTypeElement moduleElement) {
       Set<ContributionBinding> bindings = new LinkedHashSet<>();
       Set<DelegateDeclaration> delegates = new LinkedHashSet<>();
 
-      for (ExecutableElement moduleMethod : methodsIn(elements.getAllMembers(moduleElement))) {
-        if (isAnnotationPresent(moduleMethod, Provides.class)) {
-          bindings.add(bindingFactory.providesMethodBinding(moduleMethod, moduleElement));
-        }
-        if (isAnnotationPresent(moduleMethod, Binds.class)) {
-          delegates.add(bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
-        }
-      }
+      methodsIn(elements.getAllMembers(toJavac(moduleElement))).stream()
+          .map(method -> toXProcessing(method, processingEnv))
+          .filter(XElement::isMethod)
+          .map(XElements::asMethod)
+          .forEach(
+              moduleMethod -> {
+                if (moduleMethod.hasAnnotation(TypeNames.PROVIDES)) {
+                  bindings.add(bindingFactory.providesMethodBinding(moduleMethod, moduleElement));
+                }
+                if (moduleMethod.hasAnnotation(TypeNames.BINDS)) {
+                  delegates.add(
+                      bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
+                }
+              });
 
       return new ModuleDescriptor(
           moduleElement,
-          collectIncludedModules(new LinkedHashSet<>(), moduleElement),
           bindings,
-          subcomponentDeclarationFactory.forModule(toXProcessing(moduleElement, processingEnv)),
+          subcomponentDeclarationFactory.forModule(moduleElement),
           delegates,
           ModuleKind.forAnnotatedElement(moduleElement).orElseThrow());
     }
@@ -208,52 +199,38 @@ public final class ModuleDescriptor {
       // Traverse as a graph to automatically handle modules with cyclic includes.
       Set<ModuleDescriptor> result = new LinkedHashSet<>();
       Traverser.forGraph(
-              (ModuleDescriptor module) -> module.includedModules().stream().map(this::create).collect(Collectors.toList()))
+              (ModuleDescriptor module) -> includedModules(module).stream().map(this::create).collect(Collectors.toList()))
           .depthFirstPreOrder(modules.stream().map(this::create).collect(Collectors.toList()))
           .forEach(result::add);
       return result;
     }
 
-    private Set<TypeElement> collectIncludedModules(
-        Set<TypeElement> includedModules, TypeElement moduleElement) {
-      TypeMirror superclass = moduleElement.getSuperclass();
-      if (!superclass.getKind().equals(NONE)) {
-        Preconditions.checkState(superclass.getKind().equals(DECLARED));
-        TypeElement superclassElement = MoreTypes.asTypeElement(superclass);
-        if (!superclassElement.getQualifiedName().contentEquals(Object.class.getCanonicalName())) {
-          collectIncludedModules(includedModules, superclassElement);
+
+    private Set<XTypeElement> includedModules(ModuleDescriptor moduleDescriptor) {
+      return new LinkedHashSet<>(
+          collectIncludedModules(new LinkedHashSet<>(), moduleDescriptor.xModuleElement()));
+    }
+
+    private Set<XTypeElement> collectIncludedModules(
+        Set<XTypeElement> includedModules, XTypeElement moduleElement) {
+
+      XType superclass = moduleElement.getSuperType();
+
+      if (superclass != null) {
+        Preconditions.checkState(isDeclared(superclass));
+        if (!TypeName.OBJECT.equals(superclass.getTypeName())) {
+          collectIncludedModules(includedModules, superclass.getTypeElement());
         }
       }
+
       moduleAnnotation(moduleElement)
           .ifPresent(
-              moduleAnnotation -> {
-                includedModules.addAll(moduleAnnotation.includes());
-                includedModules.addAll(implicitlyIncludedModules(moduleElement));
-              });
+              moduleAnnotation ->
+                  includedModules.addAll(
+                      moduleAnnotation.includes().stream()
+                          .map(includedModule -> toXProcessing(includedModule, processingEnv))
+                          .collect(toImmutableSet())));
       return includedModules;
-    }
-
-    // @ContributesAndroidInjector generates a module that is implicitly included in the enclosing
-    // module
-    private Set<TypeElement> implicitlyIncludedModules(TypeElement moduleElement) {
-      TypeElement contributesAndroidInjector =
-          elements.getTypeElement("dagger.android.ContributesAndroidInjector");
-      if (contributesAndroidInjector == null) {
-        return Set.of();
-      }
-      return methodsIn(moduleElement.getEnclosedElements()).stream()
-          .filter(method -> isAnnotationPresent(method, contributesAndroidInjector.asType()))
-          .map(method -> elements.checkTypePresent(implicitlyIncludedModuleName(method)))
-          .collect(toImmutableSet());
-    }
-
-    private String implicitlyIncludedModuleName(ExecutableElement method) {
-      String name = method.getSimpleName().toString();
-      return getPackage(method).getQualifiedName()
-          + "."
-          + classFileName(ClassName.get(MoreElements.asType(method.getEnclosingElement())))
-          + "_"
-          + Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
     @Override

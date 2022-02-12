@@ -16,16 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.DaggerType.fromJava;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreTypes;
@@ -77,14 +81,19 @@ public final class KeyFactory {
   }
 
   public Key forProvidesMethod(ExecutableElement method, TypeElement contributingModule) {
-    return forBindingMethod(
-        method, contributingModule);
+    return forBindingMethod(method, contributingModule);
   }
 
   /** Returns the key bound by a {@link Binds} method. */
   Key forBindsMethod(ExecutableElement method, TypeElement contributingModule) {
-    Preconditions.checkArgument(isAnnotationPresent(method, Binds.class));
+    Preconditions.checkArgument(isAnnotationPresent(method, TypeNames.BINDS));
     return forBindingMethod(method, contributingModule);
+  }
+
+  private Key forBindingMethod(
+      XMethodElement method,
+      XTypeElement contributingModule) {
+    return forBindingMethod(toJavac(method), toJavac(contributingModule));
   }
 
   private Key forBindingMethod(
