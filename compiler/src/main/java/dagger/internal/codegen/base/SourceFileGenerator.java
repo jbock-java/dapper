@@ -26,6 +26,8 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
@@ -57,6 +59,14 @@ public abstract class SourceFileGenerator<T> {
 
   public SourceFileGenerator(SourceFileGenerator<T> delegate) {
     this(delegate.filer, delegate.elements);
+  }
+
+  /**
+   * Generates a source file to be compiled for {@code T}. Writes any generation exception to {@code
+   * messager} and does not throw.
+   */
+  public void generate(T input, XMessager messager) {
+    generate(input, XConverters.toJavac(messager));
   }
 
   /**
