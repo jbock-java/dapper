@@ -26,13 +26,15 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
@@ -40,12 +42,17 @@ import javax.lang.model.type.DeclaredType;
 /** An annotation processor for {@link dagger.assisted.AssistedInject}-annotated elements. */
 final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XExecutableElement> {
   private final DaggerTypes types;
-  private final Messager messager;
+  private final XMessager messager;
+  private final XProcessingEnv processingEnv;
 
   @Inject
-  AssistedInjectProcessingStep(DaggerTypes types, Messager messager) {
+  AssistedInjectProcessingStep(
+      DaggerTypes types,
+      XMessager messager,
+      XProcessingEnv processingEnv) {
     this.types = types;
     this.messager = messager;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -55,19 +62,18 @@ final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XEx
 
   @Override
   protected void process(
-      XExecutableElement xElement, Set<ClassName> annotations) {
-    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
-    ExecutableElement assistedInjectElement = xElement.toJavac();
+      XExecutableElement assistedInjectElement, Set<ClassName> annotations) {
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 
   private final class AssistedInjectValidator {
-    ValidationReport validate(ExecutableElement constructor) {
-      Preconditions.checkState(constructor.getKind() == ElementKind.CONSTRUCTOR);
+    ValidationReport validate(XExecutableElement constructor) {
+      ExecutableElement javaConstructor = XConverters.toJavac(constructor);
+      Preconditions.checkState(javaConstructor.getKind() == ElementKind.CONSTRUCTOR);
       ValidationReport.Builder report = ValidationReport.about(constructor);
 
       DeclaredType assistedInjectType =
-          asDeclared(closestEnclosingTypeElement(constructor).asType());
+          asDeclared(closestEnclosingTypeElement(javaConstructor).asType());
       List<AssistedParameter> assistedParameters =
           AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType, types);
 
@@ -79,7 +85,7 @@ final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XEx
                       + "Consider setting an identifier on the parameter by using "
                       + "@Assisted(\"identifier\") in both the factory and @AssistedInject constructor",
                   assistedParameter),
-              assistedParameter.variableElement());
+              XConverters.toXProcessing(assistedParameter.variableElement(), processingEnv));
         }
       }
 

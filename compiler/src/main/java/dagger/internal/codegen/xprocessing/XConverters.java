@@ -62,6 +62,10 @@ public class XConverters {
     return element.toJavac();
   }
 
+  public static VariableElement toJavac(XVariableElement element) {
+    return element.toJavac();
+  }
+
   public static TypeMirror toJavac(XType type) {
     return type.toJavac();
   }

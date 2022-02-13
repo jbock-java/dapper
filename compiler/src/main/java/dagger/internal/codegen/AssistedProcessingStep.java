@@ -26,11 +26,12 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -44,13 +45,13 @@ import javax.lang.model.element.VariableElement;
 final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariableElement> {
   private final InjectionAnnotations injectionAnnotations;
   private final DaggerElements elements;
-  private final Messager messager;
+  private final XMessager messager;
 
   @Inject
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
       DaggerElements elements,
-      Messager messager) {
+      XMessager messager) {
     this.injectionAnnotations = injectionAnnotations;
     this.elements = elements;
     this.messager = messager;
@@ -62,17 +63,16 @@ final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariable
   }
 
   @Override
-  protected void process(XVariableElement xElement, Set<ClassName> annotations) {
-    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
-    VariableElement assisted = xElement.toJavac();
+  protected void process(XVariableElement assisted, Set<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 
   private final class AssistedValidator {
-    ValidationReport validate(VariableElement assisted) {
+    ValidationReport validate(XVariableElement assisted) {
       ValidationReport.Builder report = ValidationReport.about(assisted);
 
-      Element enclosingElement = assisted.getEnclosingElement();
+      VariableElement javaAssisted = XConverters.toJavac(assisted);
+      Element enclosingElement = javaAssisted.getEnclosingElement();
       if (!isAssistedInjectConstructor(enclosingElement)
           && !isAssistedFactoryCreateMethod(enclosingElement)) {
         report.addError(
