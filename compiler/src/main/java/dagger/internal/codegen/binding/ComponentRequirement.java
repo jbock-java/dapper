@@ -17,6 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -27,6 +28,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.Equivalence;
@@ -243,6 +245,16 @@ public final class ComponentRequirement {
     return forBoundInstance(
         binding.key(),
         binding.bindingElement().orElseThrow().getSimpleName().toString());
+  }
+
+  /**
+   * Returns true if and only if a component can instantiate new instances (typically of a module)
+   * rather than requiring that they be passed.
+   */
+  // TODO(bcorso): Should this method throw if its called knowing that an instance is not needed?
+  public static boolean componentCanMakeNewInstances(
+      XTypeElement typeElement) {
+    return componentCanMakeNewInstances(toJavac(typeElement));
   }
 
   /**

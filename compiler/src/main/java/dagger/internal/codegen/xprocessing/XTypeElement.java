@@ -16,6 +16,12 @@ public interface XTypeElement extends XMemberContainer {
 
   String getQualifiedName();
 
+  /**
+   * SimpleName of the type converted to String.
+   */
+  String getName();
+
+
   ClassName getClassName();
 
   XType getType();

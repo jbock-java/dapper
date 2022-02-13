@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.getPackage;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -23,6 +24,7 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
 import javax.lang.model.element.Element;
@@ -175,6 +177,13 @@ public final class Accessibility {
   /** Returns true if the given element can be referenced from any package. */
   public static boolean isElementPubliclyAccessible(Element element) {
     return element.accept(new ElementAccessibilityVisitor(), null);
+  }
+
+  /** Returns true if the given element can be referenced from code in the given package. */
+  // TODO(gak): account for protected
+  // TODO(bcorso): account for kotlin srcs (package-private doesn't exist, internal does exist).
+  public static boolean isElementAccessibleFrom(XElement element, String packageName) {
+    return isElementAccessibleFrom(toJavac(element), packageName);
   }
 
   /** Returns true if the given element can be referenced from code in the given package. */

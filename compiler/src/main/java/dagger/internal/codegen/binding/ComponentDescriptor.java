@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.Suppliers.memoizeInt;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.Component;
@@ -112,7 +111,7 @@ public final class ComponentDescriptor {
         .filter(
             module ->
                 module.bindings().stream().anyMatch(ContributionBinding::requiresModuleInstance))
-        .map(module -> ComponentRequirement.forModule(module.moduleElement().asType()))
+        .map(module -> ComponentRequirement.forModule(module.moduleElement().getType()))
         .forEach(requirements::add);
     requirements.addAll(dependencies());
     requirements.addAll(
@@ -172,8 +171,8 @@ public final class ComponentDescriptor {
   public Set<ComponentRequirement> dependenciesAndConcreteModules() {
     return Stream.concat(
             moduleTypes().stream()
-                .filter(dep -> !dep.getModifiers().contains(ABSTRACT))
-                .map(module -> ComponentRequirement.forModule(module.asType())),
+                .filter(dep -> !dep.isAbstract())
+                .map(module -> ComponentRequirement.forModule(module.getType())),
             dependencies().stream())
         .collect(toImmutableSet());
   }
@@ -187,7 +186,7 @@ public final class ComponentDescriptor {
   }
 
   /** The types of the {@link #modules()}. */
-  public Set<TypeElement> moduleTypes() {
+  public Set<XTypeElement> moduleTypes() {
     return modules().stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
   }
 

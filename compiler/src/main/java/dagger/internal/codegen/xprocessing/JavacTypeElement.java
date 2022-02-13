@@ -123,6 +123,11 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   }
 
   @Override
+  public String getName() {
+    return typeElement.getSimpleName().toString();
+  }
+
+  @Override
   public ClassName getClassName() {
     return ClassName.get(typeElement);
   }

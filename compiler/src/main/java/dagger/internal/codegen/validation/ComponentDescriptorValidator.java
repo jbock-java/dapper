@@ -259,7 +259,7 @@ public final class ComponentDescriptorValidator {
 
     private void validateModules(ComponentDescriptor component) {
       for (ModuleDescriptor module : component.modules()) {
-        if (module.moduleElement().getModifiers().contains(Modifier.ABSTRACT)) {
+        if (module.moduleElement().isAbstract()) {
           for (ContributionBinding binding : module.bindings()) {
             if (binding.requiresModuleInstance()) {
               report(component).addError(abstractModuleHasInstanceBindingMethodsError(module));

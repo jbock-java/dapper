@@ -49,36 +49,31 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.lang.model.element.TypeElement;
 
 /** Contains metadata that describes a module. */
 public final class ModuleDescriptor {
 
-  private final XTypeElement xModuleElement;
+  private final XTypeElement moduleElement;
   private final Set<ContributionBinding> bindings;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
   private final Set<DelegateDeclaration> delegateDeclarations;
   private final ModuleKind kind;
 
   ModuleDescriptor(
-      XTypeElement xModuleElement,
+      XTypeElement moduleElement,
       Set<ContributionBinding> bindings,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       Set<DelegateDeclaration> delegateDeclarations,
       ModuleKind kind) {
-    this.xModuleElement = requireNonNull(xModuleElement);
+    this.moduleElement = requireNonNull(moduleElement);
     this.bindings = requireNonNull(bindings);
     this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
     this.delegateDeclarations = requireNonNull(delegateDeclarations);
     this.kind = requireNonNull(kind);
   }
 
-  XTypeElement xModuleElement() {
-    return xModuleElement;
-  }
-
-  public TypeElement moduleElement() {
-    return xModuleElement.toJavac();
+  public XTypeElement moduleElement() {
+    return moduleElement;
   }
 
   public Set<ContributionBinding> bindings() {
@@ -123,7 +118,7 @@ public final class ModuleDescriptor {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ModuleDescriptor that = (ModuleDescriptor) o;
-    return xModuleElement.equals(that.xModuleElement)
+    return moduleElement.equals(that.moduleElement)
         && bindings.equals(that.bindings)
         && subcomponentDeclarations.equals(that.subcomponentDeclarations)
         && delegateDeclarations.equals(that.delegateDeclarations)
@@ -132,7 +127,7 @@ public final class ModuleDescriptor {
 
   @Override
   public int hashCode() {
-    return Objects.hash(xModuleElement,
+    return Objects.hash(moduleElement,
         bindings,
         subcomponentDeclarations,
         delegateDeclarations,
@@ -208,7 +203,7 @@ public final class ModuleDescriptor {
 
     private Set<XTypeElement> includedModules(ModuleDescriptor moduleDescriptor) {
       return new LinkedHashSet<>(
-          collectIncludedModules(new LinkedHashSet<>(), moduleDescriptor.xModuleElement()));
+          collectIncludedModules(new LinkedHashSet<>(), moduleDescriptor.moduleElement()));
     }
 
     private Set<XTypeElement> collectIncludedModules(

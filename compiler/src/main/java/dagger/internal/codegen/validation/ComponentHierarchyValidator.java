@@ -19,14 +19,17 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.Scope;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -35,15 +38,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 /** Validates the relationships between parent components and subcomponents. */
 final class ComponentHierarchyValidator {
+  private final XProcessingEnv processingEnv;
   private final CompilerOptions compilerOptions;
 
   @Inject
-  ComponentHierarchyValidator(CompilerOptions compilerOptions) {
+  ComponentHierarchyValidator(
+      XProcessingEnv processingEnv,
+      CompilerOptions compilerOptions) {
+    this.processingEnv = processingEnv;
     this.compilerOptions = compilerOptions;
   }
 
@@ -53,7 +59,7 @@ final class ComponentHierarchyValidator {
     validateSubcomponentMethods(
         report,
         componentDescriptor,
-        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement().toJavac()));
+        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
     validateRepeatedScopedDeclarations(report, componentDescriptor, new LinkedHashMap<>());
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
@@ -66,7 +72,7 @@ final class ComponentHierarchyValidator {
   private void validateSubcomponentMethods(
       ValidationReport.Builder report,
       ComponentDescriptor componentDescriptor,
-      Map<TypeElement, TypeElement> existingModuleToOwners) {
+      Map<XTypeElement, XTypeElement> existingModuleToOwners) {
     componentDescriptor
         .childComponentsDeclaredByFactoryMethods()
         .forEach(
@@ -80,11 +86,11 @@ final class ComponentHierarchyValidator {
                 validateFactoryMethodParameters(report, method, existingModuleToOwners);
               }
 
-              Set<TypeElement> difference = Util.difference(childComponent.moduleTypes(), existingModuleToOwners.keySet());
-              Map<TypeElement, TypeElement> newExistingModuleToOwners = new LinkedHashMap<>(Math.max(16, (int) (1.5 * (existingModuleToOwners.size() + difference.size()))));
+              Set<XTypeElement> difference = Util.difference(childComponent.moduleTypes(), existingModuleToOwners.keySet());
+              Map<XTypeElement, XTypeElement> newExistingModuleToOwners = new LinkedHashMap<>(Math.max(16, (int) (1.5 * (existingModuleToOwners.size() + difference.size()))));
               newExistingModuleToOwners.putAll(existingModuleToOwners);
               difference.forEach(module ->
-                  newExistingModuleToOwners.put(childComponent.typeElement().toJavac(), module));
+                  newExistingModuleToOwners.put(childComponent.typeElement(), module));
               validateSubcomponentMethods(
                   report,
                   childComponent,
@@ -95,19 +101,19 @@ final class ComponentHierarchyValidator {
   private void validateFactoryMethodParameters(
       ValidationReport.Builder report,
       ComponentMethodDescriptor subcomponentMethodDescriptor,
-      Map<TypeElement, TypeElement> existingModuleToOwners) {
+      Map<XTypeElement, XTypeElement> existingModuleToOwners) {
     for (VariableElement factoryMethodParameter :
         subcomponentMethodDescriptor.methodElement().getParameters()) {
-      TypeElement moduleType = MoreTypes.asTypeElement(factoryMethodParameter.asType());
-      TypeElement originatingComponent = existingModuleToOwners.get(moduleType);
-      if (originatingComponent != null) {
+      XTypeElement moduleType = toXProcessing(asTypeElement(factoryMethodParameter.asType()), processingEnv);
+      if (existingModuleToOwners.containsKey(moduleType)) {
         /* Factory method tries to pass a module that is already present in the parent.
          * This is an error. */
         report.addError(
             String.format(
                 "%s is present in %s. A subcomponent cannot use an instance of a "
                     + "module that differs from its parent.",
-                moduleType.getSimpleName(), originatingComponent.getQualifiedName()),
+                moduleType.getName(),
+                existingModuleToOwners.get(moduleType).getQualifiedName()),
             factoryMethodParameter);
       }
     }

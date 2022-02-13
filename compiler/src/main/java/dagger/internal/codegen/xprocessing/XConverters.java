@@ -56,4 +56,8 @@ public class XConverters {
   public static TypeElement toJavac(XTypeElement element) {
     return element.toJavac();
   }
+
+  public static Element toJavac(XElement element) {
+    return element.toJavac();
+  }
 }

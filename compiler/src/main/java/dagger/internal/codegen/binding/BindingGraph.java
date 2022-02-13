@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.toCollection;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
 import dagger.model.BindingGraph.Node;
@@ -381,7 +382,10 @@ public final class BindingGraph {
    * ancestors.
    */
   public Set<TypeElement> ownedModuleTypes() {
-    return ownedModules.stream().map(ModuleDescriptor::moduleElement).collect(toImmutableSet());
+    return ownedModules.stream()
+        .map(ModuleDescriptor::moduleElement)
+        .map(XConverters::toJavac)
+        .collect(toImmutableSet());
   }
 
   /**
