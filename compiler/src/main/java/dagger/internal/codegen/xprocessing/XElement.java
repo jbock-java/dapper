@@ -11,4 +11,8 @@ public interface XElement extends XAnnotated, XHasModifiers {
   boolean isVariableElement();
 
   boolean isMethodParameter();
+
+  static boolean isTypeElement(XElement element) {
+    return element instanceof XTypeElement;
+  }
 }

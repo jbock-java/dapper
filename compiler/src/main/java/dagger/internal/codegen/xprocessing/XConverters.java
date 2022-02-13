@@ -60,4 +60,8 @@ public class XConverters {
   public static Element toJavac(XElement element) {
     return element.toJavac();
   }
+
+  public static TypeMirror toJavac(XType type) {
+    return type.toJavac();
+  }
 }

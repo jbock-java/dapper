@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
@@ -38,6 +39,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingKind;
 import io.jbock.auto.common.Equivalence;
@@ -61,11 +63,23 @@ import javax.lang.model.type.TypeMirror;
 
 /** Assisted injection utility methods. */
 public final class AssistedInjectionAnnotations {
+  /** Returns the factory method for the given factory {@link XTypeElement}. */
+  public static ExecutableElement assistedFactoryMethod(
+      XTypeElement factory, DaggerElements elements) {
+    return assistedFactoryMethod(toJavac(factory), elements);
+  }
+
   /** Returns the factory method for the given factory {@link TypeElement}. */
   public static ExecutableElement assistedFactoryMethod(
       TypeElement factory, DaggerElements elements) {
     Set<ExecutableElement> executableElements = assistedFactoryMethods(factory, elements);
     return getOnlyElement(executableElements);
+  }
+
+  /** Returns the list of abstract factory methods for the given factory {@link XTypeElement}. */
+  public static Set<ExecutableElement> assistedFactoryMethods(
+      XTypeElement factory, DaggerElements elements) {
+    return assistedFactoryMethods(toJavac(factory), elements);
   }
 
   /** Returns the list of abstract factory methods for the given factory {@link TypeElement}. */
@@ -206,6 +220,11 @@ public final class AssistedInjectionAnnotations {
     }
 
     public static AssistedFactoryMetadata create(
+        XType factory, DaggerElements elements, DaggerTypes types) {
+      return create(toJavac(factory), elements, types);
+    }
+
+    public static AssistedFactoryMetadata create(
         TypeMirror factory, DaggerElements elements, DaggerTypes types) {
       DeclaredType factoryType = asDeclared(factory);
       TypeElement factoryElement = asTypeElement(factoryType);
@@ -336,6 +355,11 @@ public final class AssistedInjectionAnnotations {
           ? String.format("@Assisted %s", type())
           : String.format("@Assisted(\"%s\") %s", qualifier(), type());
     }
+  }
+
+  public static List<AssistedParameter> assistedInjectAssistedParameters(
+      XType assistedInjectType, DaggerTypes types) {
+    return assistedInjectAssistedParameters(asDeclared(toJavac(assistedInjectType)), types);
   }
 
   public static List<AssistedParameter> assistedInjectAssistedParameters(

@@ -17,14 +17,21 @@
 package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static io.jbock.auto.common.Visibility.effectiveVisibilityOfElement;
 
+import dagger.internal.codegen.base.Preconditions;
 import io.jbock.auto.common.Visibility;
 import java.util.List;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@link XTypeElement} helper methods. */
 public final class XTypeElements {
+
+  public static XTypeElement asTypeElement(XElement element) {
+    Preconditions.checkState(isTypeElement(element));
+    return (XTypeElement) element;
+  }
 
   /** Returns {@code true} if the given {@code type} has type parameters. */
   public static boolean hasTypeParameters(XTypeElement type) {
