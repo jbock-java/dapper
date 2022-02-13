@@ -16,45 +16,48 @@
 
 package dagger.internal.codegen;
 
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 
-import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
-import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XVariableElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 
 /**
  * An annotation processor for {@link dagger.assisted.Assisted}-annotated types.
  *
  * <p>This processing step should run after {@link AssistedFactoryProcessingStep}.
  */
-final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariableElement> {
+final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XExecutableParameterElement> {
   private final InjectionAnnotations injectionAnnotations;
   private final DaggerElements elements;
   private final XMessager messager;
+  private final XProcessingEnv processingEnv;
 
   @Inject
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
       DaggerElements elements,
-      XMessager messager) {
+      XMessager messager,
+      XProcessingEnv processingEnv) {
     this.injectionAnnotations = injectionAnnotations;
     this.elements = elements;
     this.messager = messager;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -63,16 +66,15 @@ final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariable
   }
 
   @Override
-  protected void process(XVariableElement assisted, Set<ClassName> annotations) {
+  protected void process(XExecutableParameterElement assisted, Set<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 
   private final class AssistedValidator {
-    ValidationReport validate(XVariableElement assisted) {
+    ValidationReport validate(XExecutableParameterElement assisted) {
       ValidationReport.Builder report = ValidationReport.about(assisted);
 
-      VariableElement javaAssisted = XConverters.toJavac(assisted);
-      Element enclosingElement = javaAssisted.getEnclosingElement();
+      XExecutableElement enclosingElement = assisted.getEnclosingMethodElement();
       if (!isAssistedInjectConstructor(enclosingElement)
           && !isAssistedFactoryCreateMethod(enclosingElement)) {
         report.addError(
@@ -92,19 +94,17 @@ final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XVariable
     }
   }
 
-  private boolean isAssistedInjectConstructor(Element element) {
-    return element.getKind() == ElementKind.CONSTRUCTOR
-        && isAnnotationPresent(element, AssistedInject.class);
+  private boolean isAssistedInjectConstructor(XExecutableElement executableElement) {
+    return isConstructor(executableElement)
+        && executableElement.hasAnnotation(TypeNames.ASSISTED_INJECT);
   }
 
-  private boolean isAssistedFactoryCreateMethod(Element element) {
-    if (element.getKind() == ElementKind.METHOD) {
-      TypeElement enclosingElement = closestEnclosingTypeElement(element);
-      return AssistedInjectionAnnotations.isAssistedFactoryType(enclosingElement)
+  private boolean isAssistedFactoryCreateMethod(XExecutableElement executableElement) {
+    if (isMethod(executableElement)) {
+      XTypeElement enclosingElement = closestEnclosingTypeElement(executableElement, processingEnv);
+      return isAssistedFactoryType(enclosingElement)
           // This assumes we've already validated AssistedFactory and that a valid method exists.
-          && AssistedInjectionAnnotations.assistedFactoryMethod(enclosingElement, elements)
-          .equals(element);
+          && assistedFactoryMethod(enclosingElement, elements).equals(toJavac(executableElement));
     }
-    return false;
-  }
+    return false;  }
 }

@@ -1,5 +1,8 @@
 package dagger.internal.codegen.xprocessing;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
+import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 
 import dagger.internal.codegen.base.Preconditions;
 import io.jbock.javapoet.ClassName;
@@ -11,17 +14,17 @@ import java.util.Set;
 public final class XElements {
 
   public static XExecutableParameterElement asMethodParameter(XElement element) {
-    Preconditions.checkState(element.isMethodParameter());
+    Preconditions.checkState(isMethodParameter(element));
     return (XExecutableParameterElement) element;
   }
 
   public static XVariableElement asVariable(XElement element) {
-    Preconditions.checkState(element.isVariableElement());
+    Preconditions.checkState(isVariableElement(element));
     return (XVariableElement) element;
   }
 
   public static XMethodElement asMethod(XElement element) {
-    Preconditions.checkState(element.isMethod());
+    Preconditions.checkState(isMethod(element));
     return (XMethodElement) element;
   }
 

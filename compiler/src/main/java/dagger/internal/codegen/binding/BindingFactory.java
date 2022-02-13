@@ -18,6 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 import static dagger.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.model.BindingKind.BOUND_INSTANCE;
@@ -276,7 +278,7 @@ public final class BindingFactory {
    * {@code @BindsInstance}-annotated builder setter method or factory method parameter.
    */
   ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, XElement element) {
-    Preconditions.checkArgument(element.isVariableElement() || element.isMethod());
+    Preconditions.checkArgument(isVariableElement(element) || isMethod(element));
     return ProvisionBinding.builder()
         .bindingElement(element.toJavac())
         .key(requirement.key().orElseThrow())

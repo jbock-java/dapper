@@ -6,13 +6,23 @@ public interface XElement extends XAnnotated, XHasModifiers {
 
   Element toJavac();
 
-  boolean isMethod();
-
-  boolean isVariableElement();
-
-  boolean isMethodParameter();
-
   static boolean isTypeElement(XElement element) {
     return element instanceof XTypeElement;
+  }
+
+  static boolean isConstructor(XElement element) {
+    return element instanceof XConstructorElement;
+  }
+
+  static boolean isMethod(XElement element) {
+    return element instanceof XMethodElement;
+  }
+
+  static boolean isVariableElement(XElement element) {
+    return element instanceof XVariableElement;
+  }
+
+  static boolean isMethodParameter(XElement element) {
+    return element instanceof XExecutableParameterElement;
   }
 }

@@ -16,20 +16,18 @@
 
 package dagger.internal.codegen;
 
-import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectAssistedParameters;
 
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConverters;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.HashSet;
@@ -37,22 +35,18 @@ import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.DeclaredType;
 
 /** An annotation processor for {@link dagger.assisted.AssistedInject}-annotated elements. */
-final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XExecutableElement> {
+final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XConstructorElement> {
   private final DaggerTypes types;
   private final XMessager messager;
-  private final XProcessingEnv processingEnv;
 
   @Inject
   AssistedInjectProcessingStep(
       DaggerTypes types,
-      XMessager messager,
-      XProcessingEnv processingEnv) {
+      XMessager messager) {
     this.types = types;
     this.messager = messager;
-    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -62,30 +56,30 @@ final class AssistedInjectProcessingStep extends XTypeCheckingProcessingStep<XEx
 
   @Override
   protected void process(
-      XExecutableElement assistedInjectElement, Set<ClassName> annotations) {
+      XConstructorElement assistedInjectElement, Set<ClassName> annotations) {
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 
   private final class AssistedInjectValidator {
-    ValidationReport validate(XExecutableElement constructor) {
+    ValidationReport validate(XConstructorElement constructor) {
       ExecutableElement javaConstructor = XConverters.toJavac(constructor);
       Preconditions.checkState(javaConstructor.getKind() == ElementKind.CONSTRUCTOR);
       ValidationReport.Builder report = ValidationReport.about(constructor);
 
-      DeclaredType assistedInjectType =
-          asDeclared(closestEnclosingTypeElement(javaConstructor).asType());
+      XType assistedInjectType = constructor.getEnclosingElement().getType();
       List<AssistedParameter> assistedParameters =
-          AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType, types);
+          assistedInjectAssistedParameters(assistedInjectType, types);
 
       Set<AssistedParameter> uniqueAssistedParameters = new HashSet<>();
       for (AssistedParameter assistedParameter : assistedParameters) {
         if (!uniqueAssistedParameters.add(assistedParameter)) {
           report.addError(
-              String.format("@AssistedInject constructor has duplicate @Assisted type: %s. "
-                      + "Consider setting an identifier on the parameter by using "
-                      + "@Assisted(\"identifier\") in both the factory and @AssistedInject constructor",
+              String.format(
+                  "@AssistedInject constructor has duplicate @Assisted type: %s. Consider setting"
+                      + " an identifier on the parameter by using @Assisted(\"identifier\") in both"
+                      + " the factory and @AssistedInject constructor",
                   assistedParameter),
-              XConverters.toXProcessing(assistedParameter.variableElement(), processingEnv));
+              assistedParameter.variableElement());
         }
       }
 

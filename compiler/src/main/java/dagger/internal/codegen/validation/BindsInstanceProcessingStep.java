@@ -16,6 +16,9 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
+
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -51,9 +54,9 @@ public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingSt
 
   @Override
   protected void process(XElement element, Set<ClassName> annotations) {
-    if (element.isMethod()) {
+    if (isMethod(element)) {
       methodValidator.validate((XMethodElement) element).printMessagesTo(messager);
-    } else if (element.isMethodParameter()) {
+    } else if (isMethodParameter(element)) {
       parameterValidator.validate((XExecutableParameterElement) element).printMessagesTo(messager);
     } else {
       throw new AssertionError(element);

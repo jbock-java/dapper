@@ -42,21 +42,6 @@ class JavacElement implements XElement {
   }
 
   @Override
-  public boolean isMethod() {
-    return this instanceof XMethodElement;
-  }
-
-  @Override
-  public boolean isVariableElement() {
-    return this instanceof XVariableElement;
-  }
-
-  @Override
-  public boolean isMethodParameter() {
-    return this instanceof XExecutableParameterElement;
-  }
-
-  @Override
   public final boolean isPublic() {
     return element.getModifiers().contains(Modifier.PUBLIC);
   }

@@ -25,9 +25,10 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -59,8 +60,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.model.Scope;
 import io.jbock.auto.common.Equivalence.Wrapper;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -75,13 +74,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
@@ -370,9 +363,9 @@ public final class ComponentDescriptorValidator {
       // TODO(cgdecker): Extract some or all of this to another class?
       // But note that it does different formatting for parameters than
       // DaggerElements.elementToString(Element).
-      if (element.isMethod()) {
+      if (isMethod(element)) {
         return methodSignatureFormatter.format(asMethod(element), Optional.of(container));
-      } else if (element.isMethodParameter()) {
+      } else if (isMethodParameter(element)) {
         return formatParameter(asMethodParameter(element), container);
       }
       // This method shouldn't be called with any other type of element.
@@ -394,7 +387,7 @@ public final class ComponentDescriptorValidator {
     }
 
     private XType resolveParameterType(XExecutableParameterElement parameter, XType container) {
-      Preconditions.checkArgument(parameter.getEnclosingMethodElement().isMethod());
+      Preconditions.checkArgument(isMethod(parameter.getEnclosingMethodElement()));
       XMethodElement method = asMethod(parameter.getEnclosingMethodElement());
       int parameterIndex = method.getParameters().indexOf(parameter);
 
