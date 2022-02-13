@@ -22,6 +22,10 @@ public interface XElement extends XAnnotated, XHasModifiers {
     return element instanceof XVariableElement;
   }
 
+  static boolean isField(XElement element) {
+    return element instanceof XFieldElement;
+  }
+
   static boolean isMethodParameter(XElement element) {
     return element instanceof XExecutableParameterElement;
   }

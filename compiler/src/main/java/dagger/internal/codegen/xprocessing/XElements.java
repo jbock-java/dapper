@@ -1,5 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
+import static dagger.internal.codegen.xprocessing.XElement.isField;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
@@ -18,9 +20,19 @@ public final class XElements {
     return (XExecutableParameterElement) element;
   }
 
+  public static XFieldElement asField(XElement element) {
+    Preconditions.checkState(isField(element));
+    return (XFieldElement) element;
+  }
+
   public static XVariableElement asVariable(XElement element) {
     Preconditions.checkState(isVariableElement(element));
     return (XVariableElement) element;
+  }
+
+  public static XConstructorElement asConstructor(XElement element) {
+    Preconditions.checkState(isConstructor(element));
+    return (XConstructorElement) element;
   }
 
   public static XMethodElement asMethod(XElement element) {
