@@ -29,6 +29,7 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -37,14 +38,13 @@ import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 
 /**
  * A {@link Step} that validates module classes and generates factories for binding
  * methods.
  */
 final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
-  private final Messager messager;
+  private final XMessager messager;
   private final ModuleValidator moduleValidator;
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
@@ -53,7 +53,7 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
 
   @Inject
   ModuleProcessingStep(
-      Messager messager,
+      XMessager messager,
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,

@@ -56,6 +56,7 @@ import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.model.BindingGraph.Node;
 import dagger.model.RequestKind;
 import dagger.spi.model.Key;
@@ -245,7 +246,7 @@ public final class ComponentImplementation {
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final Map<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
-  private final Messager messager;
+  private final XMessager messager;
   private final CompilerMode compilerMode;
 
   @Inject
@@ -260,7 +261,7 @@ public final class ComponentImplementation {
       CompilerOptions compilerOptions,
       DaggerElements elements,
       DaggerTypes types,
-      Messager messager) {
+      XMessager messager) {
     this.parent = parent;
     this.childComponentImplementationFactory = childComponentImplementationFactory;
     this.bindingExpressionsProvider = bindingExpressionsProvider;

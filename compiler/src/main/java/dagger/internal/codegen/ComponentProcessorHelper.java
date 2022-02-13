@@ -24,11 +24,11 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.BindingGraphPlugins;
+import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 
 /**
@@ -41,7 +41,7 @@ public class ComponentProcessorHelper {
   private final List<BasicAnnotationProcessor.Step> processingSteps;
   private final BindingGraphPlugins bindingGraphPlugins;
   private final Set<ClearableCache> clearableCaches;
-  private final Messager messager;
+  private final XMessager messager;
 
   @Inject
   ComponentProcessorHelper(
@@ -50,7 +50,7 @@ public class ComponentProcessorHelper {
       List<BasicAnnotationProcessor.Step> processingSteps,
       BindingGraphPlugins bindingGraphPlugins,
       Set<ClearableCache> clearableCaches,
-      Messager messager) {
+      XMessager messager) {
     this.injectBindingRegistry = injectBindingRegistry;
     this.factoryGenerator = factoryGenerator;
     this.processingSteps = processingSteps;
@@ -76,7 +76,7 @@ public class ComponentProcessorHelper {
         injectBindingRegistry.generateSourcesForRequiredBindings(
             factoryGenerator);
       } catch (SourceFileGenerationException e) {
-        e.printMessageTo(messager);
+        e.printMessageTo(messager.toJavac());
       }
     }
     clearableCaches.forEach(ClearableCache::clearCache);

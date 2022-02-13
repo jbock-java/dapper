@@ -21,18 +21,19 @@ import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.processing.Filer;
 
 /** Initializes {@link BindingGraphPlugin}s. */
 public final class BindingGraphPlugins {
   private final Set<BindingGraphPlugin> plugins;
-  private final Filer filer;
+  private final XFiler filer;
   private final DaggerTypes types;
   private final DaggerElements elements;
   private final Map<String, String> processingOptions;
@@ -41,7 +42,7 @@ public final class BindingGraphPlugins {
   BindingGraphPlugins(
       @Validation Set<BindingGraphPlugin> validationPlugins,
       Set<BindingGraphPlugin> externalPlugins,
-      Filer filer,
+      XFiler filer,
       DaggerTypes types,
       DaggerElements elements,
       @ProcessingOptions Map<String, String> processingOptions) {
@@ -66,7 +67,7 @@ public final class BindingGraphPlugins {
   }
 
   private void initializePlugin(BindingGraphPlugin plugin) {
-    plugin.initFiler(filer);
+    plugin.initFiler(XConverters.toJavac(filer));
     plugin.initTypes(types);
     plugin.initElements(elements);
     Set<String> supportedOptions = plugin.supportedOptions();

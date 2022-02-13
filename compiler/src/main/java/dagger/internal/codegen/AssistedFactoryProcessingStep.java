@@ -51,6 +51,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -81,7 +82,7 @@ import javax.lang.model.type.DeclaredType;
 final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
   private final XProcessingEnv processingEnv;
   private final XMessager messager;
-  private final Filer filer;
+  private final XFiler filer;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
@@ -90,7 +91,7 @@ final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XT
   AssistedFactoryProcessingStep(
       XProcessingEnv processingEnv,
       XMessager messager,
-      Filer filer,
+      XFiler filer,
       DaggerElements elements,
       DaggerTypes types,
       BindingFactory bindingFactory) {

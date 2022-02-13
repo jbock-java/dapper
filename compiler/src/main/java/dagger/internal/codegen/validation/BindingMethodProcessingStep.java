@@ -17,6 +17,7 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
@@ -27,12 +28,12 @@ import javax.annotation.processing.Messager;
 public final class BindingMethodProcessingStep
     extends XTypeCheckingProcessingStep<XMethodElement> {
 
-  private final Messager messager;
+  private final XMessager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
 
   @Inject
   BindingMethodProcessingStep(
-      Messager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
+      XMessager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }

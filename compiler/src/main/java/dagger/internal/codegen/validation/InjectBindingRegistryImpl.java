@@ -36,6 +36,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -65,7 +66,7 @@ import javax.tools.Diagnostic.Kind;
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final DaggerElements elements;
   private final DaggerTypes types;
-  private final Messager messager;
+  private final XMessager messager;
   private final InjectValidator injectValidator;
   private final InjectValidator injectValidatorWhenGeneratingCode;
   private final KeyFactory keyFactory;
@@ -162,7 +163,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   InjectBindingRegistryImpl(
       DaggerElements elements,
       DaggerTypes types,
-      Messager messager,
+      XMessager messager,
       InjectValidator injectValidator,
       KeyFactory keyFactory,
       BindingFactory bindingFactory,

@@ -26,13 +26,12 @@ import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptio
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.BindingGraphPlugin;
 import jakarta.inject.Singleton;
 import java.util.Map;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 
@@ -52,21 +51,13 @@ interface ProcessingEnvironmentModule {
   }
 
   @Provides
-  static XMessager xMessager(XProcessingEnv processingEnvironment) {
-    return processingEnvironment.getMessager();
+  static XMessager messager(XProcessingEnv xProcessingEnv) {
+    return xProcessingEnv.getMessager();
   }
 
-  // TODO(bcorso): Remove this once we've replaced all inject sites with XMessager.
   @Provides
-  static Messager messager(XMessager messager) {
-    return messager.toJavac();
-  }
-
-  // TODO(bcorso): Return XFiler. We'll likely need a XConverters.toXProcessing(Filer) so that we
-  // can convert our custom FormattingFiler into an XFiler.
-  @Provides
-  static Filer filer(CompilerOptions compilerOptions, XProcessingEnv xProcessingEnv) {
-    return xProcessingEnv.toJavac().getFiler();
+  static XFiler filer(CompilerOptions compilerOptions, XProcessingEnv xProcessingEnv) {
+    return xProcessingEnv.getFiler();
   }
 
   @Provides

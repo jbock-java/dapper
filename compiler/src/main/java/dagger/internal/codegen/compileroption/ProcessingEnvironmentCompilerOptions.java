@@ -42,6 +42,7 @@ import static java.util.stream.Stream.concat;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Arrays;
@@ -68,7 +69,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   // EnumOption<T> doesn't support integer inputs so just doing this as a 1-off for now.
   private static final String KEYS_PER_COMPONENT_SHARD = "dagger.keysPerComponentShard";
 
-  private final Messager messager;
+  private final XMessager messager;
   private final Map<String, String> options;
   private final Map<EnumOption<?>, Object> enumOptions = new HashMap<>();
   private final Map<EnumOption<?>, Map<String, ? extends Enum<?>>> allCommandLineOptions =
@@ -76,7 +77,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
   @Inject
   ProcessingEnvironmentCompilerOptions(
-      Messager messager,
+      XMessager messager,
       @ProcessingOptions Map<String, String> options,
       DaggerElements elements) {
     this.messager = messager;

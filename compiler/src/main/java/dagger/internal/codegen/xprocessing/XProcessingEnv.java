@@ -94,4 +94,6 @@ public abstract class XProcessingEnv {
   public XTypeElement findTypeElement(TypeName typeName) {
     return findTypeElement(typeName.toString());
   }
+
+  public abstract XFiler getFiler();
 }

@@ -38,7 +38,7 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   @Override
   public XMessager getMessager() {
-    return new XMessager(delegate.getMessager());
+    return new JavacMessager(delegate.getMessager());
   }
 
   @Override
@@ -58,5 +58,10 @@ public class JavacProcessingEnv extends XProcessingEnv {
   @Override
   public XTypeElement findTypeElement(String qName) {
     return wrapTypeElement(delegate.getElementUtils().getTypeElement(qName));
+  }
+
+  @Override
+  public XFiler getFiler() {
+    return new JavacFiler(this, delegate.getFiler());
   }
 }

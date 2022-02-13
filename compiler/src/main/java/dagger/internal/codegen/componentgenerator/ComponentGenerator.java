@@ -24,11 +24,11 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
+import dagger.internal.codegen.xprocessing.XFiler;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 
 /** Generates the implementation of the abstract types annotated with {@link Component}. */
@@ -37,7 +37,7 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
 
   @Inject
   ComponentGenerator(
-      Filer filer,
+      XFiler filer,
       DaggerElements elements,
       TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory) {
     super(filer, elements);

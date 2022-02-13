@@ -27,6 +27,7 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.JavaFile;
@@ -35,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 
@@ -49,10 +49,10 @@ import javax.lang.model.element.Element;
 public abstract class SourceFileGenerator<T> {
   private static final String GENERATED_COMMENTS = "https://github.com/jbock-java/dapper";
 
-  private final Filer filer;
+  private final XFiler filer;
   private final DaggerElements elements;
 
-  public SourceFileGenerator(Filer filer, DaggerElements elements) {
+  public SourceFileGenerator(XFiler filer, DaggerElements elements) {
     this.filer = requireNonNull(filer);
     this.elements = requireNonNull(elements);
   }
@@ -85,7 +85,7 @@ public abstract class SourceFileGenerator<T> {
   public void generate(T input) throws SourceFileGenerationException {
     for (TypeSpec.Builder type : topLevelTypes(input)) {
       try {
-        buildJavaFile(input, type).writeTo(filer);
+        buildJavaFile(input, type).writeTo(XConverters.toJavac(filer));
       } catch (Exception e) {
         throw new SourceFileGenerationException(Optional.empty(), e, originatingElement(input));
       }

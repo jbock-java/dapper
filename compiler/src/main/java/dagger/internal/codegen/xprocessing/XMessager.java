@@ -1,16 +1,31 @@
 package dagger.internal.codegen.xprocessing;
 
 import javax.annotation.processing.Messager;
+import javax.tools.Diagnostic;
 
-public class XMessager {
+public interface XMessager {
 
-  private final Messager messager;
+  void printMessage(
+      Diagnostic.Kind kind,
+      String msg);
 
-  XMessager(Messager messager) {
-    this.messager = messager;
-  }
+  void printMessage(
+      Diagnostic.Kind kind,
+      String msg,
+      XElement element);
 
-  public Messager toJavac() {
-    return messager;
-  }
+  void printMessage(
+      Diagnostic.Kind kind,
+      String msg,
+      XElement element,
+      XAnnotation annotation);
+
+  void printMessage(
+      Diagnostic.Kind kind,
+      String msg,
+      XElement element,
+      XAnnotation annotation,
+      XAnnotationValue annotationValue);
+
+  Messager toJavac();
 }

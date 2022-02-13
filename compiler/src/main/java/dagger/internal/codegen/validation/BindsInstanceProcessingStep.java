@@ -22,11 +22,11 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 
 /**
  * Processing step that validates that the {@code BindsInstance} annotation is applied to the
@@ -35,13 +35,13 @@ import javax.annotation.processing.Messager;
 public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingStep<XElement> {
   private final BindsInstanceMethodValidator methodValidator;
   private final BindsInstanceParameterValidator parameterValidator;
-  private final Messager messager;
+  private final XMessager messager;
 
   @Inject
   BindsInstanceProcessingStep(
       BindsInstanceMethodValidator methodValidator,
       BindsInstanceParameterValidator parameterValidator,
-      Messager messager) {
+      XMessager messager) {
     this.methodValidator = methodValidator;
     this.parameterValidator = parameterValidator;
     this.messager = messager;

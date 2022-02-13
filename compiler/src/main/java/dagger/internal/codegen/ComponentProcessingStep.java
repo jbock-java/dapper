@@ -34,19 +34,19 @@ import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.BasicAnnotationProcessor;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 
 /**
  * A {@link BasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
  * as part of the {@link ComponentProcessor}.
  */
 final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
-  private final Messager messager;
+  private final XMessager messager;
   private final ComponentValidator componentValidator;
   private final ComponentCreatorValidator creatorValidator;
   private final ComponentDescriptorValidator componentDescriptorValidator;
@@ -57,7 +57,7 @@ final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeEle
 
   @Inject
   ComponentProcessingStep(
-      Messager messager,
+      XMessager messager,
       ComponentValidator componentValidator,
       ComponentCreatorValidator creatorValidator,
       ComponentDescriptorValidator componentDescriptorValidator,

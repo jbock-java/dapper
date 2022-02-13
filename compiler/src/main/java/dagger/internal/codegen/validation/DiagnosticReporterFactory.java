@@ -20,6 +20,8 @@ import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.model.BindingGraph;
 import dagger.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.model.BindingGraph.ComponentNode;
@@ -41,12 +43,12 @@ import javax.tools.Diagnostic;
 // TODO(ronshapiro): If multiple plugins print errors on the same node/edge, should we condense the
 // messages and only print the dependency trace once?
 final class DiagnosticReporterFactory {
-  private final Messager messager;
+  private final XMessager messager;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
   @Inject
   DiagnosticReporterFactory(
-      Messager messager, DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
+      XMessager messager, DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
     this.messager = messager;
     this.diagnosticMessageGeneratorFactory = diagnosticMessageGeneratorFactory;
   }
@@ -159,7 +161,7 @@ final class DiagnosticReporterFactory {
         elementToReport = rootComponent;
       }
 
-      messager.printMessage(diagnosticKind, fullMessage.append(message), elementToReport);
+      XConverters.toJavac(messager).printMessage(diagnosticKind, fullMessage.append(message), elementToReport);
     }
 
     private void appendBracketPrefix(StringBuilder message, String prefix) {

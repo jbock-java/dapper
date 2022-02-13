@@ -1,5 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -72,5 +73,9 @@ public class XConverters {
 
   public static Messager toJavac(XMessager messager) {
     return messager.toJavac();
+  }
+
+  public static Filer toJavac(XFiler filer) {
+    return filer.toJavac();
   }
 }

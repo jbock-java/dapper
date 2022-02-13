@@ -47,6 +47,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
+import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import io.jbock.javapoet.ClassName;
@@ -62,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 
@@ -75,7 +75,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
 
   @Inject
   FactoryGenerator(
-      Filer filer,
+      XFiler filer,
       DaggerElements elements,
       CompilerOptions compilerOptions) {
     super(filer, elements);
@@ -85,7 +85,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   @Override
   public Element originatingElement(ProvisionBinding binding) {
     // we only create factories for bindings that have a binding element
-    return binding.bindingElement().get();
+    return binding.bindingElement().orElseThrow();
   }
 
   @Override
