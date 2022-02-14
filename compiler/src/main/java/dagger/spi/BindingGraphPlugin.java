@@ -16,7 +16,7 @@
 
 package dagger.spi;
 
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;

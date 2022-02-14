@@ -31,7 +31,7 @@ import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.Scope;
+import dagger.spi.model.Scope;
 import dagger.spi.model.Key;
 import java.util.Formatter;
 import java.util.HashMap;

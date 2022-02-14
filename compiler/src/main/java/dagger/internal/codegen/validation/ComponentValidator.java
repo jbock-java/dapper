@@ -59,7 +59,7 @@ import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;

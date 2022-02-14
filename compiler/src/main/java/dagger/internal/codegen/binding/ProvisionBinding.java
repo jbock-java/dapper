@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.model.BindingKind.COMPONENT_PROVISION;
-import static dagger.model.BindingKind.PROVISION;
+import static dagger.spi.model.BindingKind.COMPONENT_PROVISION;
+import static dagger.spi.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.model.BindingKind;
-import dagger.model.DependencyRequest;
-import dagger.model.Scope;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Scope;
 import dagger.spi.model.Key;
 import java.util.LinkedHashSet;
 import java.util.List;

@@ -20,7 +20,7 @@ import static dagger.model.testing.BindingGraphSubject.assertThat;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import static io.jbock.testing.compile.Compiler.javac;
 
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;

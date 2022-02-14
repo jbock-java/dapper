@@ -18,9 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static java.util.Objects.requireNonNull;
 
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.ComponentPath;
-import dagger.model.Scope;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.ComponentPath;
+import dagger.spi.model.Scope;
 import java.util.Objects;
 import java.util.Set;
 

@@ -27,7 +27,7 @@ import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Collection;

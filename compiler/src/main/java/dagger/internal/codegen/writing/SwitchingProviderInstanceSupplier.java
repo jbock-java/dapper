@@ -25,7 +25,7 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import io.jbock.javapoet.CodeBlock;
 
 /**

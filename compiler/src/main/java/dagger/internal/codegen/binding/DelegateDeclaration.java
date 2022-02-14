@@ -25,7 +25,7 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;

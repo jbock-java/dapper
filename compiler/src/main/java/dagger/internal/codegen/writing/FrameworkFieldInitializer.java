@@ -29,7 +29,7 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;

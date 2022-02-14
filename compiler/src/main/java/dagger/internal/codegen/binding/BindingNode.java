@@ -19,10 +19,10 @@ package dagger.internal.codegen.binding;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Module;
-import dagger.model.BindingKind;
-import dagger.model.ComponentPath;
-import dagger.model.DependencyRequest;
-import dagger.model.Scope;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.ComponentPath;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Scope;
 import dagger.spi.model.DaggerElement;
 import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
@@ -33,13 +33,13 @@ import java.util.Set;
 import javax.lang.model.element.Element;
 
 /**
- * An implementation of {@link dagger.model.Binding} that also exposes {@link BindingDeclaration}s
+ * An implementation of {@link dagger.spi.model.Binding} that also exposes {@link BindingDeclaration}s
  * associated with the binding.
  */
-// TODO(dpb): Consider a supertype of dagger.model.Binding that
+// TODO(dpb): Consider a supertype of dagger.spi.model.Binding that
 // dagger.internal.codegen.binding.Binding
 // could also implement.
-public final class BindingNode implements dagger.model.Binding {
+public final class BindingNode implements dagger.spi.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,

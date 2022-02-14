@@ -19,7 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 
@@ -29,13 +29,13 @@ import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.Edge;
-import dagger.model.BindingGraph.MissingBinding;
-import dagger.model.BindingGraph.Node;
-import dagger.model.ComponentPath;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.Edge;
+import dagger.spi.model.BindingGraph.MissingBinding;
+import dagger.spi.model.BindingGraph.Node;
+import dagger.spi.model.ComponentPath;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.DaggerExecutableElement;
 import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
@@ -59,7 +59,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
-/** Converts {@link BindingGraph}s to {@link dagger.model.BindingGraph}s. */
+/** Converts {@link BindingGraph}s to {@link dagger.spi.model.BindingGraph}s. */
 final class BindingGraphConverter {
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
@@ -69,7 +69,7 @@ final class BindingGraphConverter {
   }
 
   /**
-   * Creates the external {@link dagger.model.BindingGraph} representing the given internal {@link
+   * Creates the external {@link dagger.spi.model.BindingGraph} representing the given internal {@link
    * BindingGraph}.
    */
   BindingGraph convert(LegacyBindingGraph legacyBindingGraph, boolean isFullBindingGraph) {
@@ -314,7 +314,7 @@ final class BindingGraphConverter {
     }
 
     /**
-     * Adds a {@link dagger.model.BindingGraph.DependencyEdge} from a node to the binding(s) that
+     * Adds a {@link dagger.spi.model.BindingGraph.DependencyEdge} from a node to the binding(s) that
      * satisfy a dependency request.
      */
     private void addDependencyEdges(Node source, DependencyRequest dependencyRequest) {

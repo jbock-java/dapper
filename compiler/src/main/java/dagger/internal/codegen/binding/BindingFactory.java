@@ -20,16 +20,16 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
-import static dagger.model.BindingKind.ASSISTED_FACTORY;
-import static dagger.model.BindingKind.ASSISTED_INJECTION;
-import static dagger.model.BindingKind.BOUND_INSTANCE;
-import static dagger.model.BindingKind.COMPONENT;
-import static dagger.model.BindingKind.COMPONENT_DEPENDENCY;
-import static dagger.model.BindingKind.COMPONENT_PROVISION;
-import static dagger.model.BindingKind.DELEGATE;
-import static dagger.model.BindingKind.INJECTION;
-import static dagger.model.BindingKind.PROVISION;
-import static dagger.model.BindingKind.SUBCOMPONENT_CREATOR;
+import static dagger.spi.model.BindingKind.ASSISTED_FACTORY;
+import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
+import static dagger.spi.model.BindingKind.BOUND_INSTANCE;
+import static dagger.spi.model.BindingKind.COMPONENT;
+import static dagger.spi.model.BindingKind.COMPONENT_DEPENDENCY;
+import static dagger.spi.model.BindingKind.COMPONENT_PROVISION;
+import static dagger.spi.model.BindingKind.DELEGATE;
+import static dagger.spi.model.BindingKind.INJECTION;
+import static dagger.spi.model.BindingKind.PROVISION;
+import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static dagger.spi.model.DaggerType.fromJava;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
@@ -45,8 +45,9 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.DependencyRequest;
-import dagger.model.RequestKind;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.RequestKind;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -85,7 +86,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns an {@link dagger.model.BindingKind#INJECTION} binding.
+   * Returns an {@link BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
    * @param resolvedType the parameterized type if the constructor is for a generic class and the
@@ -182,7 +183,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#PROVISION} binding for a
+   * Returns a {@link BindingKind#PROVISION} binding for a
    * {@code @Provides}-annotated method.
    *
    * @param contributedBy the installed module that declares or inherits the method
@@ -193,7 +194,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#PROVISION} binding for a {@code @Provides}-annotated
+   * Returns a {@link BindingKind#PROVISION} binding for a {@code @Provides}-annotated
    * method.
    *
    * @param contributedBy the installed module that declares or inherits the method
@@ -233,7 +234,7 @@ public final class BindingFactory {
                 method.getParameters(), methodType.getParameterTypes()));
   }
 
-  /** Returns a {@link dagger.model.BindingKind#COMPONENT} binding for the component. */
+  /** Returns a {@link BindingKind#COMPONENT} binding for the component. */
   public ProvisionBinding componentBinding(XTypeElement componentDefinitionType) {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
@@ -244,7 +245,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#COMPONENT_DEPENDENCY} binding for a component's
+   * Returns a {@link BindingKind#COMPONENT_DEPENDENCY} binding for a component's
    * dependency.
    */
   public ProvisionBinding componentDependencyBinding(ComponentRequirement dependency) {
@@ -257,7 +258,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#COMPONENT_PROVISION}
+   * Returns a {@link BindingKind#COMPONENT_PROVISION}
    * binding for a method on a component's dependency.
    */
   public ProvisionBinding componentDependencyMethodBinding(
@@ -274,7 +275,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#BOUND_INSTANCE} binding for a
+   * Returns a {@link BindingKind#BOUND_INSTANCE} binding for a
    * {@code @BindsInstance}-annotated builder setter method or factory method parameter.
    */
   ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, XElement element) {
@@ -287,7 +288,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#SUBCOMPONENT_CREATOR} binding declared by a component
+   * Returns a {@link BindingKind#SUBCOMPONENT_CREATOR} binding declared by a component
    * method that returns a subcomponent builder. Use {{@link
    * #subcomponentCreatorBinding(Set)}} for bindings declared using {@link
    * Module#subcomponents()}.
@@ -309,7 +310,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#SUBCOMPONENT_CREATOR} binding declared using {@link
+   * Returns a {@link BindingKind#SUBCOMPONENT_CREATOR} binding declared using {@link
    * Module#subcomponents()}.
    */
   ProvisionBinding subcomponentCreatorBinding(
@@ -322,7 +323,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#DELEGATE} binding.
+   * Returns a {@link BindingKind#DELEGATE} binding.
    *
    * @param delegateDeclaration the {@code @Binds}-annotated declaration
    */
@@ -335,7 +336,7 @@ public final class BindingFactory {
   }
 
   /**
-   * Returns a {@link dagger.model.BindingKind#DELEGATE} binding used when there is no binding that
+   * Returns a {@link BindingKind#DELEGATE} binding used when there is no binding that
    * satisfies the {@code @Binds} declaration.
    */
   public ContributionBinding unresolvedDelegateBinding(DelegateDeclaration delegateDeclaration) {

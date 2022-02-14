@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 import static java.util.Objects.requireNonNull;
 
 import dagger.Provides;
-import dagger.spi.model.DaggerElement;
-import dagger.spi.model.Key;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Element;

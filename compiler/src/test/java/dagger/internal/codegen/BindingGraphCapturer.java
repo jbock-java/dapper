@@ -16,14 +16,14 @@
 
 package dagger.internal.codegen;
 
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A testing plugin that captures {@link dagger.model.BindingGraph}s for tests to make assertions
+ * A testing plugin that captures {@link BindingGraph}s for tests to make assertions
  * about.
  */
 // TODO(dpb): Move to dagger.spi.testing?

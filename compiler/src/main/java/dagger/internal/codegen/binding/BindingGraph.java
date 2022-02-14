@@ -24,8 +24,8 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.model.BindingGraph.Edge;
-import static dagger.model.BindingGraph.MissingBinding;
+import static dagger.spi.model.BindingGraph.Edge;
+import static dagger.spi.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
@@ -33,11 +33,11 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.xprocessing.XConverters;
-import dagger.model.BindingGraph.ChildFactoryMethodEdge;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.Node;
-import dagger.model.ComponentPath;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.Node;
+import dagger.spi.model.ComponentPath;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.common.graph.ImmutableNetwork;
@@ -109,7 +109,7 @@ public final class BindingGraph {
    * A graph that represents the entire network of nodes from all components, subcomponents and
    * their bindings.
    */
-  public static final class TopLevelBindingGraph extends dagger.model.BindingGraph {
+  public static final class TopLevelBindingGraph extends dagger.spi.model.BindingGraph {
 
     private final Supplier<Map<ComponentPath, List<BindingNode>>> bindingsByComponent = memoize(() -> bindings().stream().map(BindingNode.class::cast).collect(
         Collectors.groupingBy(Node::componentPath)));
@@ -138,7 +138,7 @@ public final class BindingGraph {
 
     TopLevelBindingGraph(
         ImmutableNetwork<Node, Edge> network,
-        Set<dagger.model.Binding> bindings,
+        Set<dagger.spi.model.Binding> bindings,
         Set<MissingBinding> missingBindings,
         Set<ComponentNode> componentNodes,
         boolean isFullBindingGraph,
@@ -182,7 +182,7 @@ public final class BindingGraph {
           frameworkTypeBindings);
     }
 
-    // This overrides dagger.model.BindingGraph with a more efficient implementation.
+    // This overrides dagger.spi.model.BindingGraph with a more efficient implementation.
     @Override
     public Optional<ComponentNode> componentNode(ComponentPath componentPath) {
       return mComponentNodes.containsKey(componentPath)
@@ -218,9 +218,9 @@ public final class BindingGraph {
     }
 
     private static Set<Binding> frameworkRequestBindingSet(
-        ImmutableNetwork<Node, Edge> network, Set<dagger.model.Binding> bindings) {
+        ImmutableNetwork<Node, Edge> network, Set<dagger.spi.model.Binding> bindings) {
       Set<Binding> frameworkRequestBindings = new HashSet<>();
-      for (dagger.model.Binding binding : bindings) {
+      for (dagger.spi.model.Binding binding : bindings) {
         List<DependencyEdge> edges =
             network.inEdges(binding).stream()
                 .flatMap(instancesOf(DependencyEdge.class))
@@ -243,12 +243,12 @@ public final class BindingGraph {
   }
 
   private static final class NodesByClass {
-    final Set<dagger.model.Binding> bindings;
+    final Set<dagger.spi.model.Binding> bindings;
     final Set<MissingBinding> missingBindings;
     final Set<ComponentNode> componentNodes;
 
     NodesByClass(
-        Set<dagger.model.Binding> bindings,
+        Set<dagger.spi.model.Binding> bindings,
         Set<MissingBinding> missingBindings,
         Set<ComponentNode> componentNodes) {
       this.bindings = bindings;
@@ -257,9 +257,9 @@ public final class BindingGraph {
     }
 
     static NodesByClass create(ImmutableNetwork<Node, Edge> network) {
-      Set<dagger.model.Binding> bindings = network.nodes().stream()
-          .filter(node -> node instanceof dagger.model.Binding)
-          .map(dagger.model.Binding.class::cast)
+      Set<dagger.spi.model.Binding> bindings = network.nodes().stream()
+          .filter(node -> node instanceof dagger.spi.model.Binding)
+          .map(dagger.spi.model.Binding.class::cast)
           .collect(toCollection(LinkedHashSet::new));
       Set<MissingBinding> missingBindings = network.nodes().stream()
           .filter(node -> node instanceof MissingBinding)

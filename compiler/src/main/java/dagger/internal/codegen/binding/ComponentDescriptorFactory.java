@@ -42,7 +42,7 @@ import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.Scope;
+import dagger.spi.model.Scope;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;

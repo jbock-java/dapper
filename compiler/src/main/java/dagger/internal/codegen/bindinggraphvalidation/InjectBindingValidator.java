@@ -16,14 +16,15 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.model.BindingKind.INJECTION;
+import static dagger.spi.model.BindingKind.INJECTION;
 
 import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Item;
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.Binding;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 
@@ -50,7 +51,7 @@ final class InjectBindingValidator implements BindingGraphPlugin {
   }
 
   private void validateInjectionBinding(
-      dagger.model.Binding node, DiagnosticReporter diagnosticReporter) {
+      Binding node, DiagnosticReporter diagnosticReporter) {
     ValidationReport typeReport =
         injectValidator.validateType(MoreTypes.asTypeElement(node.key().type().java()));
     for (Item item : typeReport.allItems()) {

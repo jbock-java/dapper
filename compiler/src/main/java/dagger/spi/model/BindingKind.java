@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 /** Represents the different kinds of {@link Binding}s that can exist in a binding graph. */
 public enum BindingKind {

@@ -19,14 +19,14 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
-import static dagger.model.BindingKind.ASSISTED_INJECTION;
-import static dagger.model.BindingKind.INJECTION;
+import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
+import static dagger.spi.model.BindingKind.INJECTION;
 import static javax.lang.model.SourceVersion.isName;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
-import dagger.model.DependencyRequest;
-import dagger.model.RequestKind;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;

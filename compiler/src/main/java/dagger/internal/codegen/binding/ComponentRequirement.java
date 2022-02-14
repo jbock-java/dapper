@@ -29,7 +29,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreElements;

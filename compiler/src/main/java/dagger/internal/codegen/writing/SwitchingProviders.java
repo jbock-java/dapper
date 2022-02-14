@@ -36,7 +36,7 @@ import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;

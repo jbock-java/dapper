@@ -17,7 +17,7 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.model.BindingKind.INJECTION;
+import static dagger.spi.model.BindingKind.INJECTION;
 import static java.util.Objects.requireNonNull;
 
 import dagger.assisted.Assisted;

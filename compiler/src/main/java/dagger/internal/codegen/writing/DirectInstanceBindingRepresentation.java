@@ -27,7 +27,7 @@ import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

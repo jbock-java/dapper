@@ -19,7 +19,7 @@ package dagger.internal.codegen.validation;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import dagger.spi.model.DaggerTypeElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

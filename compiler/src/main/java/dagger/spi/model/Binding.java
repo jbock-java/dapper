@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
-import dagger.model.BindingGraph.MaybeBinding;
-import dagger.spi.model.DaggerElement;
-import dagger.spi.model.DaggerTypeElement;
-import dagger.spi.model.Key;
+import dagger.spi.model.BindingGraph.MaybeBinding;
 import java.util.Optional;
 import java.util.Set;
 

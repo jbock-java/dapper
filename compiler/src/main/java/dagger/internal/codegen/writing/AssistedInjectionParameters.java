@@ -27,7 +27,7 @@ import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import java.util.ArrayList;

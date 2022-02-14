@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 import dagger.Lazy;
-import dagger.spi.model.Key;
 
 /**
  * Represents the different kinds of {@link javax.lang.model.type.TypeMirror types} that may be

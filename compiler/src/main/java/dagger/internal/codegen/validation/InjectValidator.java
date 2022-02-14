@@ -37,7 +37,7 @@ import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.model.Scope;
+import dagger.spi.model.Scope;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;

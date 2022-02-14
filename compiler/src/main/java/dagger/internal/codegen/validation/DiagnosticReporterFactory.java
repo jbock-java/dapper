@@ -22,12 +22,11 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ChildFactoryMethodEdge;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.MaybeBinding;
-import dagger.spi.BindingGraphPlugin;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.MaybeBinding;
 import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import java.util.Arrays;

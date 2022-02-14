@@ -31,7 +31,8 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -44,7 +45,7 @@ import javax.lang.model.type.TypeMirror;
 
 /**
  * A binding expression that invokes methods or constructors directly (without attempting to scope)
- * {@link dagger.model.RequestKind#INSTANCE} requests.
+ * {@link RequestKind#INSTANCE} requests.
  */
 final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   private final CompilerOptions compilerOptions;

@@ -19,7 +19,7 @@ package dagger.internal.codegen.bindinggraphvalidation;
 import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
-import static dagger.model.BindingKind.INJECTION;
+import static dagger.spi.model.BindingKind.INJECTION;
 import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
@@ -27,9 +27,9 @@ import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.model.Binding;
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ComponentNode;
+import dagger.spi.model.Binding;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import io.jbock.auto.common.MoreElements;
@@ -65,7 +65,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
     Map<ComponentNode, Set<Binding>> incompatibleBindings =
         new LinkedHashMap<>();
-    for (dagger.model.Binding binding : bindingGraph.bindings()) {
+    for (Binding binding : bindingGraph.bindings()) {
       binding
           .scope()
           .filter(scope -> !scope.isReusable())

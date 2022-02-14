@@ -46,7 +46,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.BindingGraph;
+import dagger.spi.model.BindingGraph;
 import io.jbock.auto.common.Visibility;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;

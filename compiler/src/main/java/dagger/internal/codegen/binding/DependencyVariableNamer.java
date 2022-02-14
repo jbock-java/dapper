@@ -19,7 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 
 import dagger.Lazy;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
 import io.jbock.auto.common.MoreTypes;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

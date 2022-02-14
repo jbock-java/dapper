@@ -18,7 +18,7 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.anonymousProvider;
-import static dagger.model.RequestKind.INSTANCE;
+import static dagger.spi.model.RequestKind.INSTANCE;
 import static java.util.Objects.requireNonNull;
 
 import dagger.assisted.Assisted;

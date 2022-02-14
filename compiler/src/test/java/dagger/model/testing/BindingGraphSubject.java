@@ -21,8 +21,8 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static io.jbock.common.truth.Truth.assertAbout;
 import static java.util.Objects.requireNonNull;
 
-import dagger.model.Binding;
-import dagger.model.BindingGraph;
+import dagger.spi.model.Binding;
+import dagger.spi.model.BindingGraph;
 import io.jbock.common.truth.FailureMetadata;
 import io.jbock.common.truth.Subject;
 import java.util.Set;

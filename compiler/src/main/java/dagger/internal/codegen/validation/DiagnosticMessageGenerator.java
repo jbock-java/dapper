@@ -33,12 +33,13 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.Edge;
-import dagger.model.BindingGraph.MaybeBinding;
-import dagger.model.BindingGraph.Node;
-import dagger.model.ComponentPath;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.Edge;
+import dagger.spi.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.BindingGraph.Node;
+import dagger.spi.model.ComponentPath;
+import dagger.spi.model.Binding;
 import dagger.spi.model.DaggerElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -134,7 +135,7 @@ public final class DiagnosticMessageGenerator {
       dependencyTrace = List.of(dependencyEdge);
     } else {
       // It's not an entry point, so it's part of a binding
-      dagger.model.Binding binding = (dagger.model.Binding) source(dependencyEdge);
+      Binding binding = (Binding) source(dependencyEdge);
       entryPoints = graph.entryPointEdgesDependingOnBinding(binding);
       dependencyTrace = Stream.concat(Stream.of(dependencyEdge), dependencyTrace(binding, entryPoints).stream())
           .collect(Collectors.toList());

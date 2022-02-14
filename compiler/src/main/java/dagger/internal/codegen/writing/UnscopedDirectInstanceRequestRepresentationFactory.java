@@ -19,7 +19,7 @@ package dagger.internal.codegen.writing;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
 
 /**

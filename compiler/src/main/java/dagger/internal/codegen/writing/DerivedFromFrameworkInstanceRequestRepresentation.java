@@ -27,8 +27,8 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.BindingKind;
-import dagger.model.RequestKind;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.ClassName;
 
 /** A binding expression that depends on a framework instance. */

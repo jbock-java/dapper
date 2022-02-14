@@ -21,7 +21,7 @@ import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.model.Scope;
+import dagger.spi.model.Scope;
 import dagger.spi.model.DaggerAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
 import java.util.Optional;

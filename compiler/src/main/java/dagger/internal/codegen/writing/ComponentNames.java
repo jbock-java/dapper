@@ -28,7 +28,7 @@ import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.KeyFactory;
-import dagger.model.ComponentPath;
+import dagger.spi.model.ComponentPath;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;

@@ -19,7 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static java.util.stream.Collectors.joining;
 
-import dagger.model.BindingGraph.SubcomponentCreatorBindingEdge;
+import dagger.spi.model.BindingGraph.SubcomponentCreatorBindingEdge;
 import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.LinkedHashSet;

@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.binding;
 
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 
 /**
  * A mapper for associating a {@link RequestKind} to a {@link FrameworkType}, dependent on the type

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.DaggerAnnotation;
-import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Singleton;
 

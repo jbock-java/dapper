@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.RequestKinds.requestType;
 
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.DaggerAnnotation;
 import jakarta.inject.Inject;
 import java.util.Optional;

@@ -28,7 +28,7 @@ import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;

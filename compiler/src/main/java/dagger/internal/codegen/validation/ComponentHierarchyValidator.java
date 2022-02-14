@@ -29,7 +29,7 @@ import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.Scope;
+import dagger.spi.model.Scope;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

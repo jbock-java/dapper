@@ -23,9 +23,9 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.BindingKind;
-import dagger.model.DependencyRequest;
-import dagger.model.Scope;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Scope;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

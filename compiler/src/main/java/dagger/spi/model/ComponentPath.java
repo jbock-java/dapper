@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
-import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
 import java.util.Objects;

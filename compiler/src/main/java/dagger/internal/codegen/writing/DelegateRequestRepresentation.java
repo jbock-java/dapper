@@ -20,7 +20,7 @@ import static dagger.internal.codegen.base.RequestKinds.requestType;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.model.BindingKind.DELEGATE;
+import static dagger.spi.model.BindingKind.DELEGATE;
 import static java.util.Objects.requireNonNull;
 
 import dagger.assisted.Assisted;
@@ -32,7 +32,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.model.RequestKind;
+import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;

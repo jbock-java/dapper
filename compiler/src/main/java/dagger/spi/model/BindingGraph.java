@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.model;
+package dagger.spi.model;
 
 import static dagger.internal.codegen.base.Util.intersection;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
@@ -26,9 +26,6 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.Module;
 import dagger.internal.codegen.base.Suppliers;
-import dagger.spi.model.DaggerExecutableElement;
-import dagger.spi.model.DaggerTypeElement;
-import dagger.spi.model.Key;
 import io.jbock.common.graph.EndpointPair;
 import io.jbock.common.graph.ImmutableNetwork;
 import io.jbock.common.graph.MutableNetwork;

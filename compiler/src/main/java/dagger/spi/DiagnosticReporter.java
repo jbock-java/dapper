@@ -16,11 +16,11 @@
 
 package dagger.spi;
 
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ChildFactoryMethodEdge;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.MaybeBinding;
 import javax.tools.Diagnostic;
 
 /**

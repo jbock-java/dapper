@@ -41,7 +41,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.model.BindingKind;
+import dagger.spi.model.BindingKind;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;

@@ -37,7 +37,7 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.model.DependencyRequest;
+import dagger.spi.model.DependencyRequest;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
