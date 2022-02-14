@@ -17,23 +17,23 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static io.jbock.auto.common.MoreTypes.asTypeElements;
-import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -51,7 +51,7 @@ import javax.lang.model.type.TypeMirror;
  * annotation that is being treated as a component annotation when validating full binding graphs
  * for modules.
  */
-public abstract class ComponentAnnotation {
+public final class ComponentAnnotation {
   /** The root component annotation types. */
   private static final Set<ClassName> ROOT_COMPONENT_ANNOTATIONS =
       Set.of(TypeNames.COMPONENT);
@@ -59,7 +59,6 @@ public abstract class ComponentAnnotation {
   /** The subcomponent annotation types. */
   private static final Set<ClassName> SUBCOMPONENT_ANNOTATIONS =
       Set.of(TypeNames.SUBCOMPONENT);
-
 
   // TODO(erichang): Move ComponentCreatorAnnotation into /base and use that here?
   /** The component/subcomponent creator annotation types. */
@@ -72,72 +71,112 @@ public abstract class ComponentAnnotation {
 
   /** All component annotation types. */
   private static final Set<ClassName> ALL_COMPONENT_ANNOTATIONS =
-      Stream.of(ROOT_COMPONENT_ANNOTATIONS, SUBCOMPONENT_ANNOTATIONS)
+      new LinkedHashSet<>(Stream.of(ROOT_COMPONENT_ANNOTATIONS, SUBCOMPONENT_ANNOTATIONS)
           .flatMap(Set::stream)
-          .collect(Collectors.collectingAndThen(Collectors.toList(), LinkedHashSet::new));
+          .collect(Collectors.toList()));
 
   /** All component and creator annotation types. */
   private static final Set<ClassName> ALL_COMPONENT_AND_CREATOR_ANNOTATIONS =
-      Stream.of(ALL_COMPONENT_ANNOTATIONS, CREATOR_ANNOTATIONS)
+      new LinkedHashSet<>(Stream.of(ALL_COMPONENT_ANNOTATIONS, CREATOR_ANNOTATIONS)
           .flatMap(Set::stream)
-          .collect(Collectors.collectingAndThen(Collectors.toList(), LinkedHashSet::new));
+          .collect(Collectors.toList()));
+
+  private final AnnotationMirror annotation;
+
+  public ComponentAnnotation(AnnotationMirror annotation) {
+    this.annotation = annotation;
+  }
 
   /** The annotation itself. */
-  public abstract AnnotationMirror annotation();
+  public AnnotationMirror annotation() {
+    return annotation;
+  }
 
   /** The simple name of the annotation type. */
   public String simpleName() {
-    return MoreAnnotationMirrors.simpleName(annotation()).toString();
+    return annotationClassName().simpleName();
   }
 
   /**
    * Returns {@code true} if the annotation is a {@code @Subcomponent} or
    * {@code @ProductionSubcomponent}.
    */
-  public abstract boolean isSubcomponent();
+  public boolean isSubcomponent() {
+    return SUBCOMPONENT_ANNOTATIONS.contains(annotationClassName());
+  }
 
   /**
    * Returns {@code true} if the annotation is a real component annotation and not a module
    * annotation.
    */
-  public abstract boolean isRealComponent();
+  public boolean isRealComponent() {
+    return ALL_COMPONENT_ANNOTATIONS.contains(annotationClassName());
+  }
 
   /** The values listed as {@code dependencies}. */
-  public abstract List<AnnotationValue> dependencyValues();
+  private final Supplier<List<AnnotationValue>> dependencyValuesCache = memoize(() ->
+      isRootComponent() ? getAnnotationValues("dependencies") : List.of());
+
+  public List<AnnotationValue> dependencyValues() {
+    return dependencyValuesCache.get();
+  }
 
   /** The types listed as {@code dependencies}. */
+  private final Supplier<List<TypeMirror>> dependencyTypesCache = memoize(() ->
+      dependencyValues().stream()
+          .map(MoreAnnotationValues::asType)
+          .collect(toImmutableList()));
+
   public List<TypeMirror> dependencyTypes() {
-    return dependencyValues().stream().map(MoreAnnotationValues::asType).collect(toImmutableList());
+    return dependencyTypesCache.get();
   }
 
   /**
    * The types listed as {@code dependencies}.
-   *
-   * @throws IllegalArgumentException if any of {@link #dependencyTypes()} are error types
    */
+  private final Supplier<List<TypeElement>> dependenciesCache = memoize(() ->
+      List.copyOf(asTypeElements(dependencyTypes())));
+
   public List<TypeElement> dependencies() {
-    return new ArrayList<>(asTypeElements(dependencyTypes()));
+    return dependenciesCache.get();
   }
 
   /** The values listed as {@code modules}. */
-  public abstract List<AnnotationValue> moduleValues();
+  private final Supplier<List<AnnotationValue>> moduleValuesCache = memoize(() ->
+      getAnnotationValues(isRealComponent() ? "modules" : "includes"));
+
+  public List<AnnotationValue> moduleValues() {
+    return moduleValuesCache.get();
+  }
 
   /** The types listed as {@code modules}. */
+  private final Supplier<List<TypeMirror>> moduleTypesCache = memoize(() ->
+      moduleValues().stream().map(MoreAnnotationValues::asType).collect(toImmutableList()));
+
   public List<TypeMirror> moduleTypes() {
-    return moduleValues().stream().map(MoreAnnotationValues::asType).collect(toImmutableList());
+    return moduleTypesCache.get();
   }
 
   /**
    * The types listed as {@code modules}.
-   *
-   * @throws IllegalArgumentException if any of {@link #moduleTypes()} are error types
    */
+  private final Supplier<Set<TypeElement>> modulesCache = memoize(() ->
+      asTypeElements(moduleTypes()));
+
   public Set<TypeElement> modules() {
-    return asTypeElements(moduleTypes());
+    return modulesCache.get();
   }
 
-  protected final List<AnnotationValue> getAnnotationValues(String parameterName) {
+  private List<AnnotationValue> getAnnotationValues(String parameterName) {
     return asAnnotationValues(getAnnotationValue(annotation(), parameterName));
+  }
+
+  private boolean isRootComponent() {
+    return ROOT_COMPONENT_ANNOTATIONS.contains(annotationClassName());
+  }
+
+  private ClassName annotationClassName() {
+    return ClassName.get(asTypeElement(annotation().getAnnotationType()));
   }
 
   /**
@@ -148,13 +187,12 @@ public abstract class ComponentAnnotation {
     return anyComponentAnnotation(typeElement, ROOT_COMPONENT_ANNOTATIONS);
   }
 
-
   /**
    * Returns an object representing a subcomponent annotation, if one is present on {@code
    * typeElement}.
    */
   public static Optional<ComponentAnnotation> subcomponentAnnotation(XTypeElement typeElement) {
-    return subcomponentAnnotation(typeElement.toJavac());
+    return subcomponentAnnotation(toJavac(typeElement));
   }
 
   /**
@@ -170,12 +208,12 @@ public abstract class ComponentAnnotation {
    * on {@code typeElement}.
    */
   public static Optional<ComponentAnnotation> anyComponentAnnotation(XElement element) {
-    return anyComponentAnnotation(element.toJavac(), ALL_COMPONENT_ANNOTATIONS);
+    return anyComponentAnnotation(toJavac(element), ALL_COMPONENT_ANNOTATIONS);
   }
 
   private static Optional<ComponentAnnotation> anyComponentAnnotation(
       XElement element, Collection<ClassName> annotations) {
-    return anyComponentAnnotation(element.toJavac(), annotations);
+    return anyComponentAnnotation(toJavac(element), annotations);
   }
 
   private static Optional<ComponentAnnotation> anyComponentAnnotation(
@@ -183,44 +221,35 @@ public abstract class ComponentAnnotation {
     return getAnyAnnotation(element, annotations).map(ComponentAnnotation::componentAnnotation);
   }
 
-
   /** Returns {@code true} if the argument is a component annotation. */
   public static boolean isComponentAnnotation(XAnnotation annotation) {
-    return isComponentAnnotation(annotation.toJavac());
+    return isComponentAnnotation(toJavac(annotation));
   }
-
 
   /** Returns {@code true} if the argument is a component annotation. */
   public static boolean isComponentAnnotation(AnnotationMirror annotation) {
-    return ALL_COMPONENT_ANNOTATIONS.stream()
-        .anyMatch(annotationClass -> isTypeOf(annotationClass, annotation.getAnnotationType()));
+    ClassName className = ClassName.get(asTypeElement(annotation.getAnnotationType()));
+    return ALL_COMPONENT_ANNOTATIONS.contains(className);
   }
 
   /** Creates an object representing a component or subcomponent annotation. */
   public static ComponentAnnotation componentAnnotation(XAnnotation annotation) {
-    return componentAnnotation(annotation.toJavac());
+    return componentAnnotation(toJavac(annotation));
   }
 
   /** Creates an object representing a component or subcomponent annotation. */
   public static ComponentAnnotation componentAnnotation(AnnotationMirror annotation) {
-    RealComponentAnnotation.Builder annotationBuilder =
-        RealComponentAnnotation.builder().annotation(annotation);
-
-    if (isTypeOf(TypeNames.COMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isSubcomponent(false).build();
-    }
-    if (isTypeOf(TypeNames.SUBCOMPONENT, annotation.getAnnotationType())) {
-      return annotationBuilder.isSubcomponent(true).build();
-    }
-    throw new IllegalArgumentException(
+    checkState(
+        isComponentAnnotation(annotation),
         annotation
             + " must be a Component, Subcomponent, ProductionComponent, "
             + "or ProductionSubcomponent annotation");
+    return new ComponentAnnotation(annotation);
   }
 
   /** Creates a fictional component annotation representing a module. */
   public static ComponentAnnotation fromModuleAnnotation(ModuleAnnotation moduleAnnotation) {
-    return new FictionalComponentAnnotation(moduleAnnotation);
+    return new ComponentAnnotation(moduleAnnotation.annotation());
   }
 
   /** The root component annotation types. */
@@ -241,181 +270,5 @@ public abstract class ComponentAnnotation {
   /** All component and creator annotation types. */
   public static Set<ClassName> allComponentAndCreatorAnnotations() {
     return ALL_COMPONENT_AND_CREATOR_ANNOTATIONS;
-  }
-
-  /**
-   * An actual component annotation.
-   *
-   * @see FictionalComponentAnnotation
-   */
-  private static final class RealComponentAnnotation extends ComponentAnnotation {
-
-    final Supplier<List<AnnotationValue>> dependencyValues = Suppliers.memoize(() ->
-        isSubcomponent() ? List.of() : getAnnotationValues("dependencies"));
-    final Supplier<List<TypeMirror>> dependencyTypes = Suppliers.memoize(super::dependencyTypes);
-    final Supplier<List<TypeElement>> dependencies = Suppliers.memoize(super::dependencies);
-    final Supplier<List<AnnotationValue>> moduleValues = Suppliers.memoize(() -> getAnnotationValues("modules"));
-    final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
-    final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
-
-    final AnnotationMirror annotation;
-    final boolean isSubcomponent;
-
-    RealComponentAnnotation(
-        AnnotationMirror annotation,
-        boolean isSubcomponent) {
-      this.annotation = requireNonNull(annotation);
-      this.isSubcomponent = isSubcomponent;
-    }
-
-    @Override
-    public AnnotationMirror annotation() {
-      return annotation;
-    }
-
-    @Override
-    public boolean isSubcomponent() {
-      return isSubcomponent;
-    }
-
-    @Override
-    public List<AnnotationValue> dependencyValues() {
-      return dependencyValues.get();
-    }
-
-    @Override
-    public List<TypeMirror> dependencyTypes() {
-      return dependencyTypes.get();
-    }
-
-    @Override
-    public List<TypeElement> dependencies() {
-      return dependencies.get();
-    }
-
-    @Override
-    public boolean isRealComponent() {
-      return true;
-    }
-
-    @Override
-    public List<AnnotationValue> moduleValues() {
-      return moduleValues.get();
-    }
-
-    @Override
-    public List<TypeMirror> moduleTypes() {
-      return moduleTypes.get();
-    }
-
-    @Override
-    public Set<TypeElement> modules() {
-      return modules.get();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      RealComponentAnnotation that = (RealComponentAnnotation) o;
-      return isSubcomponent == that.isSubcomponent
-          && annotation.equals(that.annotation);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(annotation, isSubcomponent);
-    }
-
-    static Builder builder() {
-      return new Builder();
-    }
-
-    static final class Builder {
-      AnnotationMirror annotation;
-      Boolean isSubcomponent;
-
-      ComponentAnnotation.RealComponentAnnotation.Builder annotation(AnnotationMirror annotation) {
-        this.annotation = annotation;
-        return this;
-      }
-
-      ComponentAnnotation.RealComponentAnnotation.Builder isSubcomponent(boolean isSubcomponent) {
-        this.isSubcomponent = isSubcomponent;
-        return this;
-      }
-
-      RealComponentAnnotation build() {
-        return new RealComponentAnnotation(annotation, isSubcomponent);
-      }
-    }
-  }
-
-  /**
-   * A fictional component annotation used to represent modules or other collections of bindings as
-   * a component.
-   */
-  private static final class FictionalComponentAnnotation extends ComponentAnnotation {
-
-    final Supplier<List<TypeMirror>> moduleTypes = Suppliers.memoize(super::moduleTypes);
-    final Supplier<Set<TypeElement>> modules = Suppliers.memoize(super::modules);
-
-    final ModuleAnnotation moduleAnnotation;
-
-    FictionalComponentAnnotation(ModuleAnnotation moduleAnnotation) {
-      this.moduleAnnotation = requireNonNull(moduleAnnotation);
-    }
-
-    @Override
-    public AnnotationMirror annotation() {
-      return moduleAnnotation().annotation();
-    }
-
-    @Override
-    public boolean isSubcomponent() {
-      return false;
-    }
-
-    @Override
-    public boolean isRealComponent() {
-      return false;
-    }
-
-    @Override
-    public List<AnnotationValue> dependencyValues() {
-      return List.of();
-    }
-
-    @Override
-    public List<AnnotationValue> moduleValues() {
-      return moduleAnnotation().includesAsAnnotationValues();
-    }
-
-    @Override
-    public List<TypeMirror> moduleTypes() {
-      return moduleTypes.get();
-    }
-
-    @Override
-    public Set<TypeElement> modules() {
-      return modules.get();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      FictionalComponentAnnotation that = (FictionalComponentAnnotation) o;
-      return moduleAnnotation.equals(that.moduleAnnotation);
-    }
-
-    @Override
-    public int hashCode() {
-      return moduleAnnotation.hashCode();
-    }
-
-    ModuleAnnotation moduleAnnotation() {
-      return moduleAnnotation;
-    }
   }
 }
