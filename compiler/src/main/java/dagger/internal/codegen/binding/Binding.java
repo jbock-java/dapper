@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.binding.FrameworkType.PROVIDER;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -25,18 +26,17 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor9;
 
 /**
  * An abstract type for classes representing a Dagger binding. Particularly, contains the {@link
@@ -104,25 +104,15 @@ public abstract class Binding extends BindingDeclaration {
       return false;
     }
 
-    List<TypeMirror> defaultTypes = new ArrayList<>();
-    for (TypeParameterElement parameter : element.getTypeParameters()) {
-      defaultTypes.add(parameter.asType());
-    }
+    List<TypeMirror> defaultTypes =
+        element.getTypeParameters().stream()
+            .map(TypeParameterElement::asType)
+            .collect(Collectors.toList());
 
     List<TypeMirror> actualTypes =
-        type.accept(
-            new SimpleTypeVisitor9<List<TypeMirror>, Void>() {
-              @Override
-              protected List<TypeMirror> defaultAction(TypeMirror e, Void p) {
-                return List.of();
-              }
-
-              @Override
-              public List<TypeMirror> visitDeclared(DeclaredType t, Void p) {
-                return List.copyOf(t.getTypeArguments());
-              }
-            },
-            null);
+        type.getKind() == TypeKind.DECLARED
+            ? List.copyOf(asDeclared(type).getTypeArguments())
+            : List.of();
 
     // The actual type parameter size can be different if the user is using a raw type.
     if (defaultTypes.size() != actualTypes.size()) {
