@@ -550,7 +550,7 @@ public final class ComponentImplementation {
       if (type instanceof DeclaredType
           && isProtectedMemberOf(
           MoreTypes.asDeclared(type),
-          getComponentImplementation().componentDescriptor().typeElement().toJavac())) {
+          getComponentImplementation().componentDescriptor().typeElement())) {
         return true;
       }
       return false;
