@@ -23,12 +23,7 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAss
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeVariable;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.type.TypeKind.ARRAY;
-import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
-import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -43,9 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 /** A validator for elements that represent binding declarations. */
 public abstract class BindingElementValidator<E extends XElement> {

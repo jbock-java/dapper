@@ -1,7 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.javapoet.ClassName;
-import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.TypeElement;
 

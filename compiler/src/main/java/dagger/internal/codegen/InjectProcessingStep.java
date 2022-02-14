@@ -18,8 +18,8 @@ package dagger.internal.codegen;
 
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
-import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
@@ -38,12 +38,15 @@ import javax.lang.model.util.ElementKindVisitor8;
  * annotation.
  */
 // TODO(gak): add some error handling for bad source files
-final class InjectProcessingStep extends XTypeCheckingProcessingStep<XElement> {
+final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   private final ElementVisitor<Void, Void> visitor;
   private final Set<Element> processedElements = new LinkedHashSet<>();
 
   @Inject
-  InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
+  InjectProcessingStep(
+      EnclosingTypeElementValidator elementValidator,
+      InjectBindingRegistry injectBindingRegistry) {
+    super(elementValidator);
     this.visitor =
         new ElementKindVisitor8<>() {
           @Override

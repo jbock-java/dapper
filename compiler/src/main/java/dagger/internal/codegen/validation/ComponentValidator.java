@@ -44,7 +44,6 @@ import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentKind;
-import dagger.internal.codegen.binding.ConfigurationAnnotations;
 import dagger.internal.codegen.binding.DependencyRequestFactory;
 import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;

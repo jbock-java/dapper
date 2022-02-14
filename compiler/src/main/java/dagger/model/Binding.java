@@ -22,8 +22,6 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.Key;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /**
  * The association between a {@link Key} and the way in which instances of the key are provided.

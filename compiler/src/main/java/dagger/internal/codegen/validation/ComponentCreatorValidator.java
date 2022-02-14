@@ -19,7 +19,6 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;

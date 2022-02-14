@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /**
  * An implementation of {@link dagger.model.Binding} that also exposes {@link BindingDeclaration}s

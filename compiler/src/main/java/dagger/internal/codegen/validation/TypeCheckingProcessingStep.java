@@ -18,33 +18,28 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
-import io.jbock.auto.common.BasicAnnotationProcessor.Step;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XProcessingStep;
 import io.jbock.javapoet.ClassName;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
-import javax.lang.model.element.Element;
 
 /**
- * A {@link Step} that processes one element at a time and defers any for which {@link
+ * A {@link XProcessingStep} that processes one element at a time and defers any for which {@link
  * TypeNotPresentException} is thrown.
  */
-// TODO(dpb): Contribute to auto-common.
-public abstract class TypeCheckingProcessingStep<E extends Element> implements Step {
-  private final Function<Element, E> downcaster;
+public abstract class TypeCheckingProcessingStep<E extends XElement> extends XProcessingStep {
 
-  protected TypeCheckingProcessingStep(Function<Element, E> downcaster) {
-    this.downcaster = requireNonNull(downcaster);
+  private final EnclosingTypeElementValidator elementValidator;
+
+  protected TypeCheckingProcessingStep(EnclosingTypeElementValidator elementValidator) {
+    this.elementValidator = elementValidator;
   }
 
   @Override
@@ -52,27 +47,26 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
     return annotationClassNames().stream().map(ClassName::canonicalName).collect(toImmutableSet());
   }
 
+  @SuppressWarnings("unchecked") // Subclass must ensure all annotated targets are of valid type.
   @Override
-  public Set<Element> process(Map<String, Set<Element>> elementsByAnnotation) {
-    Map<String, ClassName> annotationClassNames =
-        annotationClassNames().stream()
-            .collect(toImmutableMap(ClassName::canonicalName, className -> className));
-    Preconditions.checkState(
-        annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
-        "Unexpected annotations for %s: %s",
-        this.getClass().getName(),
-        Util.difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
-
-    Set<Element> deferredElements = new LinkedHashSet<>();
-    elementsByAnnotation.entrySet().stream()
-        .flatMap(e -> e.getValue().stream().map(v -> new SimpleImmutableEntry<>(e.getKey(), v)))
-        .collect(groupingBy(Entry::getValue, mapping(Entry::getKey, toList())))
+  public Set<XElement> process(
+      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+    Set<XElement> deferredElements = new LinkedHashSet<>();
+    inverse(elementsByAnnotation)
         .forEach(
             (element, annotations) -> {
               try {
-                process(
-                    downcaster.apply(element),
-                    annotations.stream().map(annotationClassNames::get).collect(toImmutableSet()));
+                // The XBasicAnnotationProcessor only validates the element itself. However, we
+                // validate the enclosing type here to keep the previous behavior of
+                // BasicAnnotationProcessor, since Dagger still relies on this behavior.
+                // TODO(b/201479062): It's inefficient to require validation of the entire enclosing
+                //  type, we should try to remove this and handle any additional validation into the
+                //  steps that need it.
+                if (elementValidator.validateEnclosingType(element)) {
+                  process((E) element, annotations);
+                } else {
+                  deferredElements.add(element);
+                }
               } catch (TypeNotPresentException e) {
                 deferredElements.add(element);
               }
@@ -84,10 +78,30 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements S
    * Processes one element. If this method throws {@link TypeNotPresentException}, the element will
    * be deferred until the next round of processing.
    *
-   * @param annotations the subset of {@link Step#annotations()} that annotate {@code element}
+   * @param annotations the subset of {@link XProcessingStep#annotations()} that annotate {@code
+   *     element}
    */
   protected abstract void process(E element, Set<ClassName> annotations);
 
-  /** Returns the set of annotations processed by this {@link Step}. */
+  private Map<XElement, Set<ClassName>> inverse(
+      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
+    Map<String, ClassName> annotationClassNames =
+        annotationClassNames().stream()
+            .collect(toImmutableMap(ClassName::canonicalName, className -> className));
+    Preconditions.checkState(
+        annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
+        "Unexpected annotations for %s: %s",
+        this.getClass().getName(),
+        Util.difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
+
+    Map<XElement, Set<ClassName>> builder = new LinkedHashMap<>();
+    elementsByAnnotation.forEach(
+        (annotationName, elementSet) ->
+            elementSet.forEach(
+                element -> builder.merge(element, Set.of(annotationClassNames.get(annotationName)), Util::mutableUnion)));
+    return builder;
+  }
+
+  /** Returns the set of annotations processed by this processing step. */
   protected abstract Set<ClassName> annotationClassNames();
 }

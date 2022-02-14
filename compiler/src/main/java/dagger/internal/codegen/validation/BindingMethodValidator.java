@@ -34,7 +34,6 @@ import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.type.TypeMirror;
 
 /** A validator for methods that represent binding declarations. */
 abstract class BindingMethodValidator extends BindingElementValidator<XMethodElement> {

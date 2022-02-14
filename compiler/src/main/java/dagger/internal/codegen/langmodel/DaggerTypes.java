@@ -27,7 +27,6 @@ import io.jbock.common.graph.Traverser;
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
-import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;

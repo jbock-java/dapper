@@ -24,9 +24,10 @@ import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.ModuleValidator;
+import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
@@ -43,7 +44,7 @@ import java.util.Set;
  * A {@link Step} that validates module classes and generates factories for binding
  * methods.
  */
-final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
+final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
   private final XMessager messager;
   private final ModuleValidator moduleValidator;
   private final BindingFactory bindingFactory;
@@ -54,10 +55,12 @@ final class ModuleProcessingStep extends XTypeCheckingProcessingStep<XTypeElemen
   @Inject
   ModuleProcessingStep(
       XMessager messager,
+      EnclosingTypeElementValidator elementValidator,
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
       @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator) {
+    super(elementValidator);
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;

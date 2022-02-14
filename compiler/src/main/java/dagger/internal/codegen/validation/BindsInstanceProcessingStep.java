@@ -32,7 +32,7 @@ import java.util.Set;
  * Processing step that validates that the {@code BindsInstance} annotation is applied to the
  * correct elements.
  */
-public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingStep<XElement> {
+public final class BindsInstanceProcessingStep extends TypeCheckingProcessingStep<XElement> {
   private final BindsInstanceMethodValidator methodValidator;
   private final BindsInstanceParameterValidator parameterValidator;
   private final XMessager messager;
@@ -40,8 +40,10 @@ public final class BindsInstanceProcessingStep extends XTypeCheckingProcessingSt
   @Inject
   BindsInstanceProcessingStep(
       BindsInstanceMethodValidator methodValidator,
+      EnclosingTypeElementValidator elementValidator,
       BindsInstanceParameterValidator parameterValidator,
       XMessager messager) {
+    super(elementValidator);
     this.methodValidator = methodValidator;
     this.parameterValidator = parameterValidator;
     this.messager = messager;

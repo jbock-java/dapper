@@ -26,8 +26,9 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
+import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMessager;
@@ -42,7 +43,7 @@ import java.util.Set;
  *
  * <p>This processing step should run after {@link AssistedFactoryProcessingStep}.
  */
-final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XExecutableParameterElement> {
+final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutableParameterElement> {
   private final InjectionAnnotations injectionAnnotations;
   private final DaggerElements elements;
   private final XMessager messager;
@@ -51,9 +52,11 @@ final class AssistedProcessingStep extends XTypeCheckingProcessingStep<XExecutab
   @Inject
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
+      EnclosingTypeElementValidator elementValidator,
       DaggerElements elements,
       XMessager messager,
       XProcessingEnv processingEnv) {
+    super(elementValidator);
     this.injectionAnnotations = injectionAnnotations;
     this.elements = elements;
     this.messager = messager;

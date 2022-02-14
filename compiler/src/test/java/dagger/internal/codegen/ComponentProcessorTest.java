@@ -2252,4 +2252,48 @@ class ComponentProcessorTest {
                     "}")
                 .lines());
   }
+
+  @Test
+  void injectedTypeHasGeneratedParam() {
+    JavaFileObject foo =
+        JavaFileObjects.forSourceLines(
+            "test.Foo",
+            "package test;",
+            "",
+            "import jakarta.inject.Inject;",
+            "",
+            "public final class Foo {",
+            "",
+            "  @Inject",
+            "  public Foo(GeneratedParam param) {}",
+            "}");
+    JavaFileObject component =
+        JavaFileObjects.forSourceLines(
+            "test.TestComponent",
+            "package test;",
+            "",
+            "import dagger.Component;",
+            "import java.util.Set;",
+            "",
+            "@Component",
+            "interface TestComponent {",
+            "  Foo foo();",
+            "}");
+
+    Compilation compilation =
+        daggerCompiler(
+            new GeneratingProcessor(
+                "test.GeneratedParam",
+                "package test;",
+                "",
+                "import jakarta.inject.Inject;",
+                "",
+                "public final class GeneratedParam {",
+                "",
+                "  @Inject",
+                "  public GeneratedParam() {}",
+                "}"))
+            .compile(foo, component);
+    assertThat(compilation).succeededWithoutWarnings();
+  }
 }

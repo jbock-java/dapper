@@ -32,8 +32,9 @@ import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
+import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
+import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.BasicAnnotationProcessor;
@@ -45,7 +46,7 @@ import java.util.Set;
  * A {@link BasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
  * as part of the {@link ComponentProcessor}.
  */
-final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
+final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
   private final XMessager messager;
   private final ComponentValidator componentValidator;
   private final ComponentCreatorValidator creatorValidator;
@@ -58,6 +59,7 @@ final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeEle
   @Inject
   ComponentProcessingStep(
       XMessager messager,
+      EnclosingTypeElementValidator elementValidator,
       ComponentValidator componentValidator,
       ComponentCreatorValidator creatorValidator,
       ComponentDescriptorValidator componentDescriptorValidator,
@@ -65,6 +67,7 @@ final class ComponentProcessingStep extends XTypeCheckingProcessingStep<XTypeEle
       BindingGraphFactory bindingGraphFactory,
       SourceFileGenerator<BindingGraph> componentGenerator,
       BindingGraphValidator bindingGraphValidator) {
+    super(elementValidator);
     this.messager = messager;
     this.componentValidator = componentValidator;
     this.creatorValidator = creatorValidator;

@@ -49,8 +49,9 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
+import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.validation.XTypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -72,14 +73,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 /** An annotation processor for {@link dagger.assisted.AssistedFactory}-annotated types. */
-final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XTypeElement> {
+final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
   private final XProcessingEnv processingEnv;
   private final XMessager messager;
   private final XFiler filer;
@@ -90,11 +90,13 @@ final class AssistedFactoryProcessingStep extends XTypeCheckingProcessingStep<XT
   @Inject
   AssistedFactoryProcessingStep(
       XProcessingEnv processingEnv,
+      EnclosingTypeElementValidator elementValidator,
       XMessager messager,
       XFiler filer,
       DaggerElements elements,
       DaggerTypes types,
       BindingFactory bindingFactory) {
+    super(elementValidator);
     this.processingEnv = processingEnv;
     this.messager = messager;
     this.filer = filer;

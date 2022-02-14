@@ -23,7 +23,6 @@ import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;

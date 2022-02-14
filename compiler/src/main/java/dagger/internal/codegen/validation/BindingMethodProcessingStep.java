@@ -22,18 +22,20 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.annotation.processing.Messager;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
 public final class BindingMethodProcessingStep
-    extends XTypeCheckingProcessingStep<XMethodElement> {
+    extends TypeCheckingProcessingStep<XMethodElement> {
 
   private final XMessager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
 
   @Inject
   BindingMethodProcessingStep(
-      XMessager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
+      XMessager messager,
+      EnclosingTypeElementValidator elementValidator,
+      AnyBindingMethodValidator anyBindingMethodValidator) {
+    super(elementValidator);
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }
