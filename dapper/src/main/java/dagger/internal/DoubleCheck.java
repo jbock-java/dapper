@@ -16,7 +16,7 @@
 
 package dagger.internal;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Lazy;
 import jakarta.inject.Provider;
@@ -60,11 +60,8 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
    * new instance is the same as the current instance, return the instance. However, if the new
    * instance differs from the current instance, an {@link IllegalStateException} is thrown.
    */
-  public static Object reentrantCheck(Object currentInstance, Object newInstance) {
-    boolean isReentrant = !(currentInstance == UNINITIALIZED
-        // This check is needed for fastInit's implementation, which uses MemoizedSentinel types.
-        || currentInstance instanceof MemoizedSentinel);
-
+  private static Object reentrantCheck(Object currentInstance, Object newInstance) {
+    boolean isReentrant = currentInstance != UNINITIALIZED;
     if (isReentrant && currentInstance != newInstance) {
       throw new IllegalStateException("Scoped provider was invoked recursively returning "
           + "different results: " + currentInstance + " & " + newInstance + ". This is likely "
@@ -77,7 +74,7 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
   // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> delegate)"
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Provider<T> provider(P delegate) {
-    requireNonNull(delegate);
+    checkNotNull(delegate);
     if (delegate instanceof DoubleCheck) {
       /* This should be a rare case, but if we have a scoped @Binds that delegates to a scoped
        * binding, we shouldn't cache the value again. */
@@ -91,8 +88,7 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Lazy<T> lazy(P provider) {
     if (provider instanceof Lazy) {
-      @SuppressWarnings("unchecked")
-      final Lazy<T> lazy = (Lazy<T>) provider;
+      @SuppressWarnings("unchecked") final Lazy<T> lazy = (Lazy<T>) provider;
       // Avoids memoizing a value that is already memoized.
       // NOTE: There is a pathological case where Provider<P> may implement Lazy<L>, but P and L
       // are different types using covariant return on get(). Right now this is used with
@@ -100,6 +96,6 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
       // the same, so it will be fine for that case.
       return lazy;
     }
-    return new DoubleCheck<T>(requireNonNull(provider));
+    return new DoubleCheck<T>(checkNotNull(provider));
   }
 }
