@@ -18,6 +18,7 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAndCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -25,17 +26,13 @@ import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor9;
 
 /** Utility methods related to {@link Key}s. */
 public final class Keys {
@@ -71,35 +68,33 @@ public final class Keys {
       return false;
     }
 
-    return type.accept(
-        new SimpleTypeVisitor9<Boolean, Void>(false) {
-          @Override
-          public Boolean visitDeclared(DeclaredType type, Void ignored) {
-            // Non-classes or abstract classes aren't allowed.
-            TypeElement element = MoreElements.asType(type.asElement());
-            if (!element.getKind().equals(ElementKind.CLASS)
-                || element.getModifiers().contains(Modifier.ABSTRACT)) {
-              return false;
-            }
+    // A provision type must be a declared type
+    if (type.getKind() != TypeKind.DECLARED) {
+      return false;
+    }
 
-            // If the key has type arguments, validate that each type argument is declared.
-            // Otherwise the type argument may be a wildcard (or other type), and we can't
-            // resolve that to actual types.
-            for (TypeMirror arg : type.getTypeArguments()) {
-              if (arg.getKind() != TypeKind.DECLARED) {
-                return false;
-              }
-            }
+    // Non-classes or abstract classes aren't allowed.
+    DeclaredType declaredType = asDeclared(type);
+    if (!declaredType.asElement().getKind().equals(ElementKind.CLASS)
+        || declaredType.asElement().getModifiers().contains(Modifier.ABSTRACT)) {
+      return false;
+    }
 
-            // Also validate that the key is not the erasure of a generic type.
-            // If it is, that means the user referred to Foo<T> as just 'Foo',
-            // which we don't allow.  (This is a judgement call -- we *could*
-            // allow it and instantiate the type bounds... but we don't.)
-            return MoreTypes.asDeclared(element.asType()).getTypeArguments().isEmpty()
-                || !types.isSameType(types.erasure(element.asType()), type);
-          }
-        },
-        null);
+    // If the key has type arguments, validate that each type argument is declared.
+    // Otherwise the type argument may be a wildcard (or other type), and we can't
+    // resolve that to actual types.
+    for (TypeMirror arg : declaredType.getTypeArguments()) {
+      if (arg.getKind() != TypeKind.DECLARED) {
+        return false;
+      }
+    }
+
+    // Also validate that the key is not the erasure of a generic type.
+    // If it is, that means the user referred to Foo<T> as just 'Foo',
+    // which we don't allow.  (This is a judgement call -- we *could*
+    // allow it and instantiate the type bounds... but we don't.)
+    return declaredType.getTypeArguments().isEmpty()
+        || !types.isSameType(types.erasure(declaredType), declaredType);
   }
 
   /**
