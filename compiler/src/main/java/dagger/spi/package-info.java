@@ -15,12 +15,6 @@
  */
 
 /**
- * This package contains the Service Provider interface (SPI) to the {@link dagger.model} APIs at
- * annotation-processing-time.
- *
- * <p>This package is experimental, and APIs may change at over time.
+ * Service Provider interface (SPI).
  */
-@Beta
 package dagger.spi;
-
-import dagger.internal.Beta;
