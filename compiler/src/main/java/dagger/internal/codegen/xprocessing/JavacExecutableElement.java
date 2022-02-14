@@ -22,7 +22,7 @@ abstract class JavacExecutableElement extends JavacElement implements XExecutabl
   }
 
   @Override
-  public XMemberContainer getEnclosingElement() {
+  public XTypeElement getEnclosingElement() {
     return env().wrapTypeElement(MoreElements.asType(executableElement.getEnclosingElement()));
   }
 

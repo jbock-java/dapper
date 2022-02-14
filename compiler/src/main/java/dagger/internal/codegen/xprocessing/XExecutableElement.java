@@ -8,7 +8,7 @@ public interface XExecutableElement extends XElement {
   @Override
   ExecutableElement toJavac();
 
-  XMemberContainer getEnclosingElement();
+  XTypeElement getEnclosingElement();
 
   List<XExecutableParameterElement> getParameters();
 
