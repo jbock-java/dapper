@@ -54,8 +54,8 @@ final class DiagnosticReporterFactory {
 
   /** Creates a reporter for a binding graph and a plugin. */
   DiagnosticReporterImpl reporter(
-      BindingGraph graph, BindingGraphPlugin plugin, boolean reportErrorsAsWarnings) {
-    return new DiagnosticReporterImpl(graph, plugin.pluginName(), reportErrorsAsWarnings);
+      BindingGraph graph, String pluginName, boolean reportErrorsAsWarnings) {
+    return new DiagnosticReporterImpl(graph, pluginName, reportErrorsAsWarnings);
   }
 
   /**

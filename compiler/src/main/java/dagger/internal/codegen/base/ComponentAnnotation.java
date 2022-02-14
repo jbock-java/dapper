@@ -34,6 +34,7 @@ import io.jbock.javapoet.ClassName;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -270,5 +271,18 @@ public final class ComponentAnnotation {
   /** All component and creator annotation types. */
   public static Set<ClassName> allComponentAndCreatorAnnotations() {
     return ALL_COMPONENT_AND_CREATOR_ANNOTATIONS;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ComponentAnnotation that = (ComponentAnnotation) o;
+    return annotation.equals(that.annotation);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(annotation);
   }
 }

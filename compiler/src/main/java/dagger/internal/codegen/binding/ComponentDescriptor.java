@@ -337,16 +337,16 @@ public final class ComponentDescriptor {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(typeElement(), annotation());
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ComponentDescriptor that = (ComponentDescriptor) o;
-    return annotation.equals(that.annotation) && typeElement.equals(that.typeElement);
-  }
-
-  @Override
-  public int hashCode() {
-    return hashCode.getAsInt();
+    return annotation.equals(that.annotation) && typeElement.equals(that.typeElement) && dependencies.equals(that.dependencies) && modules.equals(that.modules);
   }
 
   /** A component method. */

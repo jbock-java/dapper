@@ -165,6 +165,18 @@ public final class Util {
     return result;
   }
 
+  public static <K, V>
+  Map<K, V> filterKeys(Map<K, V> fromMap, Predicate<K> predicate) {
+    LinkedHashMap<K, V> result = new LinkedHashMap<>();
+    fromMap.forEach((key, value) -> {
+      if (!predicate.test(key)) {
+        return;
+      }
+      result.put(key, value);
+    });
+    return result;
+  }
+
   public static <E> List<List<E>> partition(List<E> list, int size) {
     if (list.size() <= size) {
       return List.of(list);
