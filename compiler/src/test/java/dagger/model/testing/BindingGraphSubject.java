@@ -19,6 +19,7 @@ package dagger.model.testing;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static io.jbock.common.truth.Truth.assertAbout;
+import static java.util.Objects.requireNonNull;
 
 import dagger.model.Binding;
 import dagger.model.BindingGraph;
@@ -39,7 +40,7 @@ public final class BindingGraphSubject extends Subject {
 
   private BindingGraphSubject(FailureMetadata metadata, BindingGraph actual) {
     super(metadata, actual);
-    this.actual = actual;
+    this.actual = requireNonNull(actual);
   }
 
   /**

@@ -20,6 +20,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.model.BindingGraph;
+import dagger.spi.model.DaggerTypeElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -27,13 +28,16 @@ import jakarta.inject.Singleton;
 @Singleton
 public final class BindingGraphValidator {
   private final ValidationBindingGraphPlugins validationPlugins;
+  private final ExternalBindingGraphPlugins externalPlugins;
   private final CompilerOptions compilerOptions;
 
   @Inject
   BindingGraphValidator(
       ValidationBindingGraphPlugins validationPlugins,
+      ExternalBindingGraphPlugins externalPlugins,
       CompilerOptions compilerOptions) {
     this.validationPlugins = validationPlugins;
+    this.externalPlugins = externalPlugins;
     this.compilerOptions = compilerOptions;
   }
 
@@ -49,7 +53,7 @@ public final class BindingGraphValidator {
 
   /** Returns {@code true} if no errors are reported for {@code graph}. */
   public boolean isValid(BindingGraph graph) {
-    return visitValidationPlugins(graph);
+    return visitValidationPlugins(graph) && visitExternalPlugins(graph);
   }
 
   /** Returns {@code true} if validation plugins report no errors. */
@@ -59,5 +63,19 @@ public final class BindingGraphValidator {
     }
 
     return validationPlugins.visit(graph);
+  }
+
+  /** Returns {@code true} if external plugins report no errors. */
+  private boolean visitExternalPlugins(BindingGraph graph) {
+    DaggerTypeElement component = graph.rootComponentNode().componentPath().currentComponent();
+    if (graph.isFullBindingGraph()
+        // TODO(b/135938915): Consider not visiting plugins if only
+        // fullBindingGraphValidation is enabled.
+        && !requiresFullBindingGraphValidation()
+        && !compilerOptions.pluginsVisitFullBindingGraphs(component.java())) {
+      return true;
+    }
+
+    return externalPlugins.visit(graph);
   }
 }

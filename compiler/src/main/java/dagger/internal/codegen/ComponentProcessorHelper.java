@@ -19,14 +19,16 @@ package dagger.internal.codegen;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
+import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.RoundEnvironment;
@@ -40,6 +42,7 @@ public class ComponentProcessorHelper {
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
   private final List<BasicAnnotationProcessor.Step> processingSteps;
   private final ValidationBindingGraphPlugins validationBindingGraphPlugins;
+  private final ExternalBindingGraphPlugins externalBindingGraphPlugins;
   private final Set<ClearableCache> clearableCaches;
   private final XMessager messager;
 
@@ -49,24 +52,29 @@ public class ComponentProcessorHelper {
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
       List<BasicAnnotationProcessor.Step> processingSteps,
       ValidationBindingGraphPlugins validationBindingGraphPlugins,
+      ExternalBindingGraphPlugins externalBindingGraphPlugins,
       Set<ClearableCache> clearableCaches,
       XMessager messager) {
     this.injectBindingRegistry = injectBindingRegistry;
     this.factoryGenerator = factoryGenerator;
     this.processingSteps = processingSteps;
     this.validationBindingGraphPlugins = validationBindingGraphPlugins;
+    this.externalBindingGraphPlugins = externalBindingGraphPlugins;
     this.clearableCaches = clearableCaches;
     this.messager = messager;
   }
 
   Set<String> getSupportedOptions() {
-    return Util.union(
-        ProcessingEnvironmentCompilerOptions.supportedOptions(),
-        validationBindingGraphPlugins.allSupportedOptions());
+    ArrayList<String> result = new ArrayList<>();
+    result.addAll(ProcessingEnvironmentCompilerOptions.supportedOptions());
+    result.addAll(validationBindingGraphPlugins.allSupportedOptions());
+    result.addAll(externalBindingGraphPlugins.allSupportedOptions());
+    return new LinkedHashSet<>(result);
   }
 
   Iterable<? extends BasicAnnotationProcessor.Step> steps() {
     validationBindingGraphPlugins.initializePlugins();
+    externalBindingGraphPlugins.initializePlugins();
     return processingSteps;
   }
 
