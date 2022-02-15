@@ -30,4 +30,8 @@ public interface XType {
    * Returns {@code true} if this type can be assigned from {@code other}
    */
   boolean isAssignableFrom(XType other);
+
+  static boolean isVoid(XType type) {
+    return type.isVoid();
+  }
 }

@@ -17,6 +17,8 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
@@ -50,18 +52,36 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
 
   /**
    * A formatter that uses the type where the method is declared for the annotations and name of the
+   * method, but the method's resolved type as a member of {@code type} for the key.
+   */
+  public Formatter<XMethodElement> typedFormatter(XType type) {
+    Preconditions.checkArgument(isDeclared(type));
+    return new Formatter<>() {
+      @Override
+      public String format(XMethodElement method) {
+        return formatMethod(MoreTypes.asDeclared(toJavac(type)), toJavac(method));
+      }
+    };
+  }
+
+  /**
+   * A formatter that uses the type where the method is declared for the annotations and name of the
    * method, but the method's resolved type as a member of {@code declaredType} for the key.
    */
   public Formatter<ExecutableElement> typedFormatter(DeclaredType declaredType) {
     return new Formatter<>() {
       @Override
       public String format(ExecutableElement method) {
-        return MethodSignatureFormatter.this.format(
-            method,
-            MoreTypes.asExecutable(types.asMemberOf(declaredType, method)),
-            MoreElements.asType(method.getEnclosingElement()));
+        return formatMethod(declaredType, method);
       }
     };
+  }
+
+  private String formatMethod(DeclaredType declaredType, ExecutableElement method) {
+    return format(
+        method,
+        MoreTypes.asExecutable(types.asMemberOf(declaredType, method)),
+        MoreElements.asType(method.getEnclosingElement()));
   }
 
   public String format(XMethodElement method) {
