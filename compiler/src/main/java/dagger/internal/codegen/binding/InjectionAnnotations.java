@@ -21,7 +21,9 @@ import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -83,8 +85,10 @@ public final class InjectionAnnotations {
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@link Inject}. */
-  public static Set<ExecutableElement> injectedConstructors(XTypeElement type) {
-    return injectedConstructors(type.toJavac());
+  public static Set<XConstructorElement> injectedConstructors(XTypeElement type) {
+    return type.getConstructors().stream()
+        .filter(constructor -> constructor.hasAnnotation(TypeNames.INJECT))
+        .collect(toImmutableSet());
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */

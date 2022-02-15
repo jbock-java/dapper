@@ -110,6 +110,10 @@ public final class KeyFactory {
     return forQualifiedType(injectionAnnotations.getQualifier(method), keyType);
   }
 
+  public Key forInjectConstructorWithResolvedType(XType type) {
+    return forInjectConstructorWithResolvedType(toJavac(type));
+  }
+
   public Key forInjectConstructorWithResolvedType(TypeMirror type) {
     return Key.builder(fromJava(type)).build();
   }

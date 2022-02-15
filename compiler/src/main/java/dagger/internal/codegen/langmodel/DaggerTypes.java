@@ -18,7 +18,9 @@ package dagger.internal.codegen.langmodel;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -139,6 +141,14 @@ public final class DaggerTypes implements Types {
    * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
    * {@link Optional} is returned if there is no non-{@link Object} superclass.
    */
+  public Optional<DeclaredType> nonObjectSuperclass(XType type) {
+    return isDeclared(type) ? nonObjectSuperclass(asDeclared(toJavac(type))) : Optional.empty();
+  }
+
+  /**
+   * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
+   * {@link Optional} is returned if there is no non-{@link Object} superclass.
+   */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
     return MoreTypes.nonObjectSuperclass(types, elements, type);
   }
@@ -180,7 +190,7 @@ public final class DaggerTypes implements Types {
   }
 
   private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
-    DeclaredType declaredType = MoreTypes.asDeclared(type);
+    DeclaredType declaredType = asDeclared(type);
     TypeElement typeElement = MoreElements.asType(declaredType.asElement());
     Preconditions.checkArgument(
         !typeElement.getTypeParameters().isEmpty(),
@@ -235,7 +245,7 @@ public final class DaggerTypes implements Types {
    * @throws IllegalArgumentException if {@code} has more than one type argument.
    */
   public DeclaredType rewrapType(TypeMirror type, ClassName wrappingClassName) {
-    List<? extends TypeMirror> typeArguments = MoreTypes.asDeclared(type).getTypeArguments();
+    List<? extends TypeMirror> typeArguments = asDeclared(type).getTypeArguments();
     TypeElement wrappingType = elements.getTypeElement(wrappingClassName);
     switch (typeArguments.size()) {
       case 0:
@@ -310,7 +320,7 @@ public final class DaggerTypes implements Types {
    * resolve type variables to concrete types, etc.
    */
   public ExecutableType resolveExecutableType(ExecutableElement element, TypeMirror containerType) {
-    return MoreTypes.asExecutable(asMemberOf(MoreTypes.asDeclared(containerType), element));
+    return MoreTypes.asExecutable(asMemberOf(asDeclared(containerType), element));
   }
 
   // Implementation of Types methods, delegating to types.

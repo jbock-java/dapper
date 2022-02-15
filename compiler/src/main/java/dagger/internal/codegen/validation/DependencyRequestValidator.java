@@ -19,31 +19,36 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.type.TypeKind.WILDCARD;
 
-import dagger.assisted.Assisted;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
-import java.util.Collection;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 /** Validation for dependency requests. */
 final class DependencyRequestValidator {
+  private final XProcessingEnv processingEnv;
   private final InjectionAnnotations injectionAnnotations;
 
   @Inject
   DependencyRequestValidator(
+      XProcessingEnv processingEnv,
       InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.injectionAnnotations = injectionAnnotations;
   }
 
@@ -53,16 +58,7 @@ final class DependencyRequestValidator {
    */
   void validateDependencyRequest(
       ValidationReport.Builder report, XElement requestElement, XType requestType) {
-    validateDependencyRequest(report, requestElement.toJavac(), requestType.toJavac());
-  }
-
-  /**
-   * Adds an error if the given dependency request has more than one qualifier annotation or is a
-   * non-instance request with a wildcard type.
-   */
-  void validateDependencyRequest(
-      ValidationReport.Builder report, Element requestElement, TypeMirror requestType) {
-    if (MoreElements.isAnnotationPresent(requestElement, Assisted.class)) {
+    if (requestElement.hasAnnotation(TypeNames.ASSISTED)) {
       // Don't validate assisted parameters. These are not dependency requests.
       return;
     }
@@ -72,19 +68,17 @@ final class DependencyRequestValidator {
 
   private final class Validator {
     private final ValidationReport.Builder report;
-    private final Element requestElement;
-    private final TypeMirror requestType;
-    private final TypeMirror keyType;
-    private final RequestKind requestKind;
-    private final Collection<? extends AnnotationMirror> qualifiers;
+    private final XElement requestElement;
+    private final XType requestType;
+    private final XType keyType;
+    private final Set<XAnnotation> qualifiers;
 
 
-    Validator(ValidationReport.Builder report, Element requestElement, TypeMirror requestType) {
+    Validator(ValidationReport.Builder report, XElement requestElement, XType requestType) {
       this.report = report;
       this.requestElement = requestElement;
       this.requestType = requestType;
       this.keyType = extractKeyType(requestType);
-      this.requestKind = RequestKinds.getRequestKind(requestType);
       this.qualifiers = injectionAnnotations.getQualifiers(requestElement);
     }
 
@@ -95,7 +89,7 @@ final class DependencyRequestValidator {
 
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
-        for (AnnotationMirror qualifier : qualifiers) {
+        for (XAnnotation qualifier : qualifiers) {
           report.addError(
               "A single dependency request may not use more than one @Qualifier",
               requestElement,
@@ -105,8 +99,8 @@ final class DependencyRequestValidator {
     }
 
     private void checkType() {
-      if (qualifiers.isEmpty() && keyType.getKind() == TypeKind.DECLARED) {
-        TypeElement typeElement = asTypeElement(keyType);
+      if (qualifiers.isEmpty() && isDeclared(keyType)) {
+        XTypeElement typeElement = keyType.getTypeElement();
         if (isAssistedInjectionType(typeElement)) {
           report.addError(
               "Dagger does not support injecting @AssistedInject type, "
@@ -114,6 +108,7 @@ final class DependencyRequestValidator {
                   + ". Did you mean to inject its assisted factory type instead?",
               requestElement);
         }
+        RequestKind requestKind = RequestKinds.getRequestKind(requestType);
         if (!(requestKind == RequestKind.INSTANCE || requestKind == RequestKind.PROVIDER)
             && isAssistedFactoryType(typeElement)) {
           report.addError(
@@ -123,7 +118,7 @@ final class DependencyRequestValidator {
               requestElement);
         }
       }
-      if (keyType.getKind().equals(WILDCARD)) {
+      if (isWildcard(keyType)) {
         // TODO(ronshapiro): Explore creating this message using RequestKinds.
         report.addError(
             "Dagger does not support injecting Provider<T>, Lazy<T>, Producer<T>, "

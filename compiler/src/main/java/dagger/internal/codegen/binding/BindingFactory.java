@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 import static dagger.spi.model.BindingKind.ASSISTED_FACTORY;
@@ -42,13 +43,14 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.RequestKind;
 import dagger.spi.model.BindingKind;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
+import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -83,6 +85,19 @@ public final class BindingFactory {
     this.keyFactory = keyFactory;
     this.dependencyRequestFactory = dependencyRequestFactory;
     this.injectionAnnotations = injectionAnnotations;
+  }
+
+  /**
+   * Returns an {@link dagger.spi.model.BindingKind#INJECTION} binding.
+   *
+   * @param constructorElement the {@code @Inject}-annotated constructor
+   * @param resolvedType the parameterized type if the constructor is for a generic class and the
+   *     binding should be for the parameterized type
+   */
+  // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
+  public ProvisionBinding injectionBinding(
+      XConstructorElement constructorElement, Optional<TypeMirror> resolvedType) {
+    return injectionBinding(toJavac(constructorElement), resolvedType);
   }
 
   /**

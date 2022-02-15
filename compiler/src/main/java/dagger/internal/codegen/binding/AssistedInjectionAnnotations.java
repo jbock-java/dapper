@@ -38,6 +38,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -166,6 +167,13 @@ public final class AssistedInjectionAnnotations {
             .map(metadata.assistedInjectAssistedParametersMap()::get)
             .collect(toImmutableList()),
         factoryMethodType.getParameterTypes());
+  }
+
+  /** Returns the constructors in {@code type} that are annotated with {@link AssistedInject}. */
+  public static Set<XConstructorElement> assistedInjectedConstructors(XTypeElement type) {
+    return type.getConstructors().stream()
+        .filter(constructor -> constructor.hasAnnotation(TypeNames.ASSISTED_INJECT))
+        .collect(toImmutableSet());
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@link AssistedInject}. */

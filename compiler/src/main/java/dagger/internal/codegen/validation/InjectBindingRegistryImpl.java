@@ -20,9 +20,11 @@ import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
+import static io.jbock.auto.common.MoreElements.asType;
 import static java.util.Objects.requireNonNull;
+import static javax.lang.model.type.TypeKind.DECLARED;
 
 import dagger.Component;
 import dagger.Provides;
@@ -42,8 +44,10 @@ import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -55,9 +59,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
@@ -68,6 +69,7 @@ import javax.tools.Diagnostic.Kind;
  */
 @Singleton
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
+  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final XMessager messager;
@@ -92,7 +94,11 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
            binding != null;
            binding = bindingsRequiringGeneration.poll()) {
         Preconditions.checkState(binding.unresolved().isEmpty());
-        if (injectValidatorWhenGeneratingCode.isValidType(binding.key().type().java())) {
+        TypeMirror type = binding.key().type().java();
+        if (!type.getKind().equals(DECLARED)
+            || injectValidatorWhenGeneratingCode
+            .validateType(toXProcessing(MoreTypes.asTypeElement(type), processingEnv))
+            .isClean()) {
           generator.generate(binding);
         }
         materializedBindingKeys.add(binding.key());
@@ -158,6 +164,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
             binding, previousValue, key);
       }
     }
+
   }
 
   private final BindingsCollection<ProvisionBinding> provisionBindings =
@@ -165,6 +172,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Inject
   InjectBindingRegistryImpl(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       XMessager messager,
@@ -172,6 +180,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       KeyFactory keyFactory,
       BindingFactory bindingFactory,
       CompilerOptions compilerOptions) {
+    this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.messager = messager;
@@ -201,15 +210,15 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Override
   public Optional<ProvisionBinding> tryRegisterInjectConstructor(XConstructorElement constructorElement) {
-    return tryRegisterConstructor(toJavac(constructorElement), Optional.empty(), false);
+    return tryRegisterConstructor(constructorElement, Optional.empty(), false);
   }
 
   private Optional<ProvisionBinding> tryRegisterConstructor(
-      ExecutableElement constructorElement,
+      XConstructorElement constructorElement,
       Optional<TypeMirror> resolvedType,
       boolean warnIfNotAlreadyGenerated) {
-    TypeElement typeElement = MoreElements.asType(constructorElement.getEnclosingElement());
-    DeclaredType type = MoreTypes.asDeclared(typeElement.asType());
+    XTypeElement typeElement = constructorElement.getEnclosingElement();
+    XType type = typeElement.getType();
     Key key = keyFactory.forInjectConstructorWithResolvedType(type);
     ProvisionBinding cachedBinding = provisionBindings.getBinding(key);
     if (cachedBinding != null) {
@@ -229,15 +238,15 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Override
   public void tryRegisterInjectField(XFieldElement fieldElement) {
-    tryRegisterMembersInjectedType(toJavac(asTypeElement(fieldElement.getEnclosingElement())));
+    tryRegisterMembersInjectedType(asTypeElement(fieldElement.getEnclosingElement()));
   }
 
   @Override
   public void tryRegisterInjectMethod(XMethodElement methodElement) {
-    tryRegisterMembersInjectedType(toJavac(asTypeElement(methodElement.getEnclosingElement())));
+    tryRegisterMembersInjectedType(asTypeElement(methodElement.getEnclosingElement()));
   }
 
-  private void tryRegisterMembersInjectedType(TypeElement typeElement) {
+  private void tryRegisterMembersInjectedType(XTypeElement typeElement) {
     ValidationReport report =
         injectValidator.validateMembersInjectionType(typeElement);
     report.printMessagesTo(messager);
@@ -255,8 +264,8 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     }
 
     // ok, let's see if we can find an @Inject constructor
-    TypeElement element = MoreElements.asType(types.asElement(key.type().java()));
-    Set<ExecutableElement> injectConstructors = new LinkedHashSet<>();
+    XTypeElement element = toXProcessing(asType(types.asElement(key.type().java())), processingEnv);
+    Set<XConstructorElement> injectConstructors = new LinkedHashSet<>();
     injectConstructors.addAll(injectedConstructors(element));
     injectConstructors.addAll(assistedInjectedConstructors(element));
     switch (injectConstructors.size()) {

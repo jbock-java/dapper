@@ -16,25 +16,31 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.spi.model.BindingKind.INJECTION;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Item;
-import dagger.spi.model.BindingGraph;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.BindingGraphPlugin;
 import dagger.spi.DiagnosticReporter;
 import dagger.spi.model.Binding;
-import io.jbock.auto.common.MoreTypes;
+import dagger.spi.model.BindingGraph;
 import jakarta.inject.Inject;
 
 /** Validates bindings from {@code @Inject}-annotated constructors. */
 final class InjectBindingValidator implements BindingGraphPlugin {
 
+  private final XProcessingEnv processingEnv;
   private final InjectValidator injectValidator;
 
   @Inject
-  InjectBindingValidator(InjectValidator injectValidator) {
+  InjectBindingValidator(
+      XProcessingEnv processingEnv,
+      InjectValidator injectValidator) {
+    this.processingEnv = processingEnv;
     this.injectValidator = injectValidator.whenGeneratingCode();
   }
 
@@ -53,7 +59,8 @@ final class InjectBindingValidator implements BindingGraphPlugin {
   private void validateInjectionBinding(
       Binding node, DiagnosticReporter diagnosticReporter) {
     ValidationReport typeReport =
-        injectValidator.validateType(MoreTypes.asTypeElement(node.key().type().java()));
+        injectValidator.validateType(
+            toXProcessing(asTypeElement(node.key().type().java()), processingEnv));
     for (Item item : typeReport.allItems()) {
       diagnosticReporter.reportBinding(item.kind(), node, item.message());
     }
