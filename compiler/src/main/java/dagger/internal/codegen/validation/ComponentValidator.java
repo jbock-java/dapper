@@ -34,8 +34,6 @@ import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Comparator.comparing;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
@@ -51,7 +49,6 @@ import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -77,7 +74,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.lang.model.type.ExecutableType;
 
 /**
  * Performs superficial validation of the contract of the {@link Component} annotation.
@@ -86,7 +82,6 @@ import javax.lang.model.type.ExecutableType;
 public final class ComponentValidator implements ClearableCache {
   private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
-  private final DaggerTypes types;
   private final ModuleValidator moduleValidator;
   private final ComponentCreatorValidator creatorValidator;
   private final DependencyRequestValidator dependencyRequestValidator;
@@ -98,7 +93,6 @@ public final class ComponentValidator implements ClearableCache {
   ComponentValidator(
       XProcessingEnv processingEnv,
       DaggerElements elements,
-      DaggerTypes types,
       ModuleValidator moduleValidator,
       ComponentCreatorValidator creatorValidator,
       DependencyRequestValidator dependencyRequestValidator,
@@ -106,7 +100,6 @@ public final class ComponentValidator implements ClearableCache {
       DependencyRequestFactory dependencyRequestFactory) {
     this.processingEnv = processingEnv;
     this.elements = elements;
-    this.types = types;
     this.moduleValidator = moduleValidator;
     this.creatorValidator = creatorValidator;
     this.dependencyRequestValidator = dependencyRequestValidator;
@@ -490,8 +483,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private DependencyRequest dependencyRequest(XMethodElement method) {
-      ExecutableType methodType =
-          asExecutable(types.asMemberOf(asDeclared(toJavac(component.getType())), toJavac(method)));
+      XMethodType methodType = method.asMemberOf(component.getType());
       return dependencyRequestFactory.forComponentProvisionMethod(method, methodType);
     }
   }

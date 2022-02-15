@@ -43,7 +43,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -51,7 +50,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.ExecutableType;
 
 /** A factory for {@link ComponentDescriptor}s. */
 public final class ComponentDescriptorFactory {
@@ -213,13 +211,6 @@ public final class ComponentDescriptorFactory {
       }
     }
 
-    // TODO(bcorso): Add an XConverters.toJavac() method to convert between XMethodType and
-    // ExecutableType so that we don't have to recalculate the method type for cases like this.
-    ExecutableType javaResolvedComponentMethod =
-        MoreTypes.asExecutable(
-            types.asMemberOf(
-                MoreTypes.asDeclared(componentElement.getType().toJavac()),
-                componentMethod.toJavac()));
     if (componentMethod.getParameters().size() != 0) {
       throw new IllegalArgumentException(
           "component method has too many parameters: " + componentMethod);
@@ -230,7 +221,7 @@ public final class ComponentDescriptorFactory {
         componentMethod);
     return descriptor.dependencyRequest(
             dependencyRequestFactory.forComponentProvisionMethod(
-                componentMethod, javaResolvedComponentMethod))
+                componentMethod, resolvedComponentMethod))
         .build();
   }
 }

@@ -17,6 +17,8 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
@@ -51,8 +53,8 @@ public final class InjectionAnnotations {
     this.processingEnv = processingEnv;
   }
 
-  public Optional<AnnotationMirror> getQualifier(XElement element) {
-    return getQualifier(element.toJavac());
+  public Optional<XAnnotation> getQualifier(XElement element) {
+    return getQualifier(toJavac(element)).map(qualifier -> toXProcessing(qualifier, processingEnv));
   }
 
   public Optional<AnnotationMirror> getQualifier(Element e) {
@@ -74,7 +76,7 @@ public final class InjectionAnnotations {
 
   public Set<XAnnotation> getQualifiers(XElement element) {
     return getQualifiers(element.toJavac()).stream()
-        .map(qualifier -> XConverters.toXProcessing(qualifier, processingEnv))
+        .map(qualifier -> toXProcessing(qualifier, processingEnv))
         .collect(toImmutableSet());
   }
 

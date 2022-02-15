@@ -18,15 +18,20 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
+import dagger.spi.model.DaggerElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
-import dagger.spi.model.DaggerElement;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,9 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -81,20 +84,21 @@ public final class DependencyRequestFactory {
   }
 
   public DependencyRequest forComponentProvisionMethod(
-      XMethodElement provisionMethod, ExecutableType provisionMethodType) {
-    return forComponentProvisionMethod(provisionMethod.toJavac(), provisionMethodType);
-  }
-
-  public DependencyRequest forComponentProvisionMethod(
-      ExecutableElement provisionMethod, ExecutableType provisionMethodType) {
+      XMethodElement provisionMethod, XMethodType provisionMethodType) {
     requireNonNull(provisionMethod);
     requireNonNull(provisionMethodType);
     Preconditions.checkArgument(
         provisionMethod.getParameters().isEmpty(),
         "Component provision methods must be empty: %s",
         provisionMethod);
-    Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(provisionMethod);
+    Optional<XAnnotation> qualifier = injectionAnnotations.getQualifier(provisionMethod);
     return newDependencyRequest(provisionMethod, provisionMethodType.getReturnType(), qualifier);
+  }
+
+  private DependencyRequest newDependencyRequest(
+      XElement requestElement, XType type, Optional<XAnnotation> qualifier) {
+    return newDependencyRequest(
+        toJavac(requestElement), toJavac(type), qualifier.map(XConverters::toJavac));
   }
 
   private DependencyRequest newDependencyRequest(
