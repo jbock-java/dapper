@@ -215,7 +215,8 @@ final class ComponentHierarchyValidator {
 
   private Set<Scope> moduleScopes(ModuleDescriptor module) {
     return module.allBindingDeclarations().stream()
-        .map(declaration -> uniqueScopeOf(declaration.bindingElement().orElseThrow()))
+        .map(declaration ->
+            uniqueScopeOf(toXProcessing(declaration.bindingElement().orElseThrow(), processingEnv)))
         .filter(scope -> scope.isPresent() && !scope.orElseThrow().isReusable())
         .map(Optional::orElseThrow)
         .collect(Collectors.toCollection(LinkedHashSet::new));

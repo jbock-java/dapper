@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 import static dagger.spi.model.BindingKind.ASSISTED_FACTORY;
@@ -46,6 +47,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
@@ -67,6 +69,7 @@ import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Binding} objects. */
 public final class BindingFactory {
+  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private final KeyFactory keyFactory;
   private final DependencyRequestFactory dependencyRequestFactory;
@@ -75,11 +78,13 @@ public final class BindingFactory {
 
   @Inject
   BindingFactory(
+      XProcessingEnv processingEnv,
       DaggerTypes types,
       DaggerElements elements,
       KeyFactory keyFactory,
       DependencyRequestFactory dependencyRequestFactory,
       InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.types = types;
     this.elements = elements;
     this.keyFactory = keyFactory;
@@ -154,7 +159,9 @@ public final class BindingFactory {
                 isAnnotationPresent(constructorElement, AssistedInject.class)
                     ? ASSISTED_INJECTION
                     : INJECTION)
-            .scope(uniqueScopeOf(constructorElement.getEnclosingElement()));
+            .scope(
+                uniqueScopeOf(
+                    toXProcessing(constructorElement.getEnclosingElement(), processingEnv)));
 
     TypeElement bindingTypeElement = MoreElements.asType(constructorElement.getEnclosingElement());
     if (hasNonDefaultTypeParameters(bindingTypeElement, key.type().java(), types)) {
@@ -223,7 +230,7 @@ public final class BindingFactory {
         keyFactory.forProvidesMethod(providesMethod, contributedBy),
         this::providesMethodBinding)
         .kind(PROVISION)
-        .scope(uniqueScopeOf(providesMethod))
+        .scope(uniqueScopeOf(toXProcessing(providesMethod, processingEnv)))
         .build();
   }
 
@@ -283,7 +290,7 @@ public final class BindingFactory {
     ProvisionBinding.Builder builder = ProvisionBinding.builder()
         .key(keyFactory.forComponentMethod(dependencyMethod))
         .kind(COMPONENT_PROVISION)
-        .scope(uniqueScopeOf(dependencyMethod));
+        .scope(uniqueScopeOf(toXProcessing(dependencyMethod, processingEnv)));
     return builder
         .bindingElement(dependencyMethod)
         .build();
@@ -346,7 +353,9 @@ public final class BindingFactory {
       DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
         ProvisionBinding.builder()
-            .scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow())),
+            .scope(
+                uniqueScopeOf(
+                    toXProcessing(delegateDeclaration.bindingElement().orElseThrow(), processingEnv))),
         delegateDeclaration);
   }
 
@@ -356,9 +365,11 @@ public final class BindingFactory {
    */
   public ContributionBinding unresolvedDelegateBinding(DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
-        ProvisionBinding.builder().scope(uniqueScopeOf(delegateDeclaration.bindingElement().orElseThrow())),
-        delegateDeclaration
-    );
+        ProvisionBinding.builder()
+            .scope(
+                uniqueScopeOf(
+                    toXProcessing(delegateDeclaration.bindingElement().orElseThrow(), processingEnv))),
+        delegateDeclaration);
   }
 
   private ContributionBinding buildDelegateBinding(
