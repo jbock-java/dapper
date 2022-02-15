@@ -30,6 +30,7 @@ import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
+import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;

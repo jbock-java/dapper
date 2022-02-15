@@ -35,6 +35,7 @@ import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
+import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;

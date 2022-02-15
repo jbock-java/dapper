@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -13,6 +14,8 @@ public class JavacProcessingEnv extends XProcessingEnv {
   private static final Map<String, TypeKind> PRIMITIVE_TYPES = getPrimitiveTypes();
 
   private final ProcessingEnvironment delegate;
+
+  private final XTypeElementStore typeElementStore;
 
   private static Map<String, TypeKind> getPrimitiveTypes() {
     Map<String, TypeKind> types = new HashMap<>();
@@ -24,6 +27,10 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   public JavacProcessingEnv(ProcessingEnvironment delegate) {
     this.delegate = delegate;
+    this.typeElementStore = new XTypeElementStore(
+        qName -> delegate.getElementUtils().getTypeElement(qName),
+        it -> it.getQualifiedName().toString(),
+        it -> JavacTypeElement.create(this, it));
   }
 
   @Override
@@ -63,5 +70,14 @@ public class JavacProcessingEnv extends XProcessingEnv {
   @Override
   public XFiler getFiler() {
     return new JavacFiler(this, delegate.getFiler());
+  }
+
+  @Override
+  XTypeElement wrapTypeElement(TypeElement typeElement) {
+    return typeElementStore.get(typeElement);
+  }
+
+  void clearCache() {
+    typeElementStore.clear();
   }
 }

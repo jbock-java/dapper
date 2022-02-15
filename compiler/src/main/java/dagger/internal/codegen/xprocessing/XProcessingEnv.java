@@ -37,13 +37,7 @@ public abstract class XProcessingEnv {
     }
   }
 
-  XTypeElement wrapTypeElement(TypeElement typeElement) {
-    if (typeElement.getKind() == ElementKind.ENUM) {
-      return new JavacEnumTypeElement(this, typeElement);
-    } else {
-      return new DefaultJavacTypeElement(this, typeElement);
-    }
-  }
+  abstract XTypeElement wrapTypeElement(TypeElement typeElement);
 
   XVariableElement wrapVariableElement(VariableElement element) {
     Element enclosingElement = element.getEnclosingElement();

@@ -235,4 +235,14 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
         .stream().map(it -> env().wrapTypeElement(it))
         .collect(Collectors.toList());
   }
+
+  static JavacTypeElement create(
+      JavacProcessingEnv env,
+      TypeElement typeElement) {
+    if (typeElement.getKind() == ElementKind.ENUM) {
+      return new JavacEnumTypeElement(env, typeElement);
+    } else {
+      return new DefaultJavacTypeElement(env, typeElement);
+    }
+  }
 }

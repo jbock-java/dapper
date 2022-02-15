@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dagger.internal.codegen;
+package dagger.internal.codegen.xprocessing;
 
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.asPackage;
@@ -23,11 +23,10 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.XBasicAnnotationProcessor;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.xprocessing.JavacProcessingEnv;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.auto.common.MoreTypes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -64,12 +63,17 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor im
     private final Map<Step, Set<ElementName>> elementsDeferredBySteps =
             new LinkedHashMap<>();
 
-    private final Supplier<XProcessingEnv> xEnv = Suppliers.memoize(() -> new JavacProcessingEnv(processingEnv));
+    private final Supplier<JavacProcessingEnv> xEnv = Suppliers.memoize(() -> new JavacProcessingEnv(processingEnv));
     private Elements elements;
     private Messager messager;
     private List<Step> steps;
 
-    public XProcessingEnv getXProcessingEnv() {
+    JavacProcessingEnv xEnv() {
+        return xEnv.get();
+    }
+
+    @Override
+    public JavacProcessingEnv getXProcessingEnv() {
         return xEnv.get();
     }
 
@@ -160,8 +164,8 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor im
         }
 
         process(validElements(roundEnv));
-
         postRound(roundEnv);
+        xEnv().clearCache();
 
         return false;
     }

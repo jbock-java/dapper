@@ -24,6 +24,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
+import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XMessager;
 import jakarta.inject.Inject;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 package dagger.internal.codegen;
 
+import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 
