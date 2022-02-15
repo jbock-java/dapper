@@ -21,6 +21,7 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assis
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Component;
@@ -38,7 +39,9 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -225,7 +228,16 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   }
 
   @Override
-  public void tryRegisterMembersInjectedType(TypeElement typeElement) {
+  public void tryRegisterInjectField(XFieldElement fieldElement) {
+    tryRegisterMembersInjectedType(toJavac(asTypeElement(fieldElement.getEnclosingElement())));
+  }
+
+  @Override
+  public void tryRegisterInjectMethod(XMethodElement methodElement) {
+    tryRegisterMembersInjectedType(toJavac(asTypeElement(methodElement.getEnclosingElement())));
+  }
+
+  private void tryRegisterMembersInjectedType(TypeElement typeElement) {
     ValidationReport report =
         injectValidator.validateMembersInjectionType(typeElement);
     report.printMessagesTo(messager);

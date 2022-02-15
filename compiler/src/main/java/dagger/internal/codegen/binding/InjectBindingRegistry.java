@@ -21,6 +21,8 @@ import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.spi.model.Key;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
@@ -41,7 +43,9 @@ public interface InjectBindingRegistry {
 
   Optional<ProvisionBinding> tryRegisterInjectConstructor(XConstructorElement constructorElement);
 
-  void tryRegisterMembersInjectedType(TypeElement typeElement);
+  void tryRegisterInjectField(XFieldElement fieldElement);
+
+  void tryRegisterInjectMethod(XMethodElement methodElement);
 
   /**
    * This method ensures that sources for all registered {@link Binding bindings} (either explicitly

@@ -17,7 +17,11 @@
 package dagger.internal.codegen;
 
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
+import static dagger.internal.codegen.xprocessing.XElement.isField;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
+import static dagger.internal.codegen.xprocessing.XElements.asField;
+import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -63,6 +67,10 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
 
     if (isConstructor(injectElement)) {
       injectBindingRegistry.tryRegisterInjectConstructor(asConstructor(injectElement));
+    } else if (isField(injectElement)) {
+      injectBindingRegistry.tryRegisterInjectField(asField(injectElement));
+    } else if (isMethod(injectElement)) {
+      injectBindingRegistry.tryRegisterInjectMethod(asMethod(injectElement));
     }
     processedElements.add(injectElement);
   }
