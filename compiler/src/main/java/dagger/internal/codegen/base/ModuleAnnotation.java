@@ -16,98 +16,76 @@
 
 package dagger.internal.codegen.base;
 
-import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
+import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
-import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
 public final class ModuleAnnotation {
   private static final Set<ClassName> MODULE_ANNOTATIONS =
       Set.of(TypeNames.MODULE);
 
-  private final Supplier<List<TypeElement>> includes = Suppliers.memoize(() ->
-      includesAsAnnotationValues().stream()
-          .map(MoreAnnotationValues::asType)
-          .map(MoreTypes::asTypeElement)
-          .collect(toImmutableList()));
+  private final XAnnotation annotation;
+  private final ClassName className;
 
-  private final Supplier<List<AnnotationValue>> includesAsAnnotationValues = Suppliers.memoize(() ->
-      asAnnotationValues(getAnnotationValue(annotation(), "includes")));
-
-  private final Supplier<List<TypeElement>> subcomponents = Suppliers.memoize(() ->
-      subcomponentsAsAnnotationValues().stream()
-          .map(MoreAnnotationValues::asType)
-          .map(MoreTypes::asTypeElement)
-          .collect(toImmutableList()));
-
-  private final Supplier<List<AnnotationValue>> subcomponentsAsAnnotationValues = Suppliers.memoize(() ->
-      asAnnotationValues(getAnnotationValue(annotation(), "subcomponents")));
-
-  public ModuleAnnotation(AnnotationMirror annotation) {
+  private ModuleAnnotation(
+      XAnnotation annotation,
+      ClassName className) {
     this.annotation = annotation;
+    this.className = className;
   }
 
   /** The annotation itself. */
-  // This does not use AnnotationMirrors.equivalence() because we want the actual annotation
-  // instance.
-  public AnnotationMirror annotation() {
+  public XAnnotation annotation() {
     return annotation;
-  }
-
-  private final AnnotationMirror annotation;
-
-  /** The simple name of the annotation. */
-  public String annotationName() {
-    return className().simpleName();
   }
 
   /** Returns the {@link ClassName} name of the annotation. */
   public ClassName className() {
-    return ClassName.get(asTypeElement(annotation().getAnnotationType()));
+    return className;
+  }
+
+  /** The simple name of the annotation. */
+  public String simpleName() {
+    return className().simpleName();
   }
 
   /**
    * The types specified in the {@code includes} attribute.
-   *
-   * @throws IllegalArgumentException if any of the values are error types
    */
-  public List<TypeElement> includes() {
-    return includes.get();
-  }
+  private final Supplier<List<XTypeElement>> includesCache = memoize(() ->
+      annotation().getAsTypeList("includes").stream()
+          .map(XType::getTypeElement)
+          .collect(toImmutableList()));
 
-  /** The values specified in the {@code includes} attribute. */
-  public List<AnnotationValue> includesAsAnnotationValues() {
-    return includesAsAnnotationValues.get();
+  public List<XTypeElement> includes() {
+    return includesCache.get();
   }
 
   /**
    * The types specified in the {@code subcomponents} attribute.
-   *
-   * @throws IllegalArgumentException if any of the values are error types
    */
-  public List<TypeElement> subcomponents() {
-    return subcomponents.get();
-  }
+  private final Supplier<List<XTypeElement>> subcomponentsCache = memoize(() ->
+      annotation().getAsTypeList("subcomponents").stream()
+          .map(XType::getTypeElement)
+          .collect(toImmutableList()));
 
-  /** The values specified in the {@code subcomponents} attribute. */
-  public List<AnnotationValue> subcomponentsAsAnnotationValues() {
-    return subcomponentsAsAnnotationValues.get();
+  public List<XTypeElement> subcomponents() {
+    return subcomponentsCache.get();
   }
 
   /** Returns {@code true} if the argument is a {@code @Module}. */
@@ -123,27 +101,17 @@ public final class ModuleAnnotation {
   }
 
   /**
-   * Creates an object that represents a {@code @Module}.
+   * Creates an object that represents a {@code @Module} or {@code @ProducerModule}.
    *
-   * @throws IllegalArgumentException if {@link #isModuleAnnotation(AnnotationMirror)} returns
-   *     {@code false}
+   * @throws IllegalArgumentException if {@link #isModuleAnnotation(XAnnotation)} returns {@code
+   *     false}
    */
   public static ModuleAnnotation moduleAnnotation(XAnnotation annotation) {
-    return moduleAnnotation(annotation.toJavac());
-  }
-
-  /**
-   * Creates an object that represents a {@code @Module}.
-   *
-   * @throws IllegalArgumentException if {@link #isModuleAnnotation(AnnotationMirror)} returns
-   *     {@code false}
-   */
-  public static ModuleAnnotation moduleAnnotation(AnnotationMirror annotation) {
     Preconditions.checkArgument(
         isModuleAnnotation(annotation),
         "%s is not a Module or ProducerModule annotation",
         annotation);
-    return new ModuleAnnotation(annotation);
+    return new ModuleAnnotation(annotation, getClassName(annotation));
   }
 
   /**
@@ -151,15 +119,7 @@ public final class ModuleAnnotation {
    * annotates {@code typeElement}.
    */
   public static Optional<ModuleAnnotation> moduleAnnotation(XElement element) {
-    return moduleAnnotation(element.toJavac());
-  }
-
-  /**
-   * Returns an object representing the {@code @Module} or {@code @ProducerModule} annotation if one
-   * annotates {@code typeElement}.
-   */
-  public static Optional<ModuleAnnotation> moduleAnnotation(Element typeElement) {
-    return getAnyAnnotation(typeElement, List.of(TypeNames.MODULE))
+    return getAnyAnnotation(element, TypeNames.MODULE)
         .map(ModuleAnnotation::moduleAnnotation);
   }
 }

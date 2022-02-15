@@ -126,9 +126,7 @@ public final class ComponentDescriptorFactory {
     // that module.
     Set<XTypeElement> modules =
         componentAnnotation.isRealComponent()
-            ? componentAnnotation.modules().stream()
-            .map(module -> toXProcessing(module, processingEnv))
-            .collect(toImmutableSet())
+            ? componentAnnotation.modules()
             : Set.of(typeElement);
 
     Set<ModuleDescriptor> transitiveModules =

@@ -17,13 +17,13 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationElementAndValue;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import jakarta.inject.Inject;
@@ -119,20 +119,21 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
     }
 
     Set<SubcomponentDeclaration> forModule(XTypeElement module) {
-      Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
-      ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).orElseThrow();
-      Element subcomponentAttribute =
-          getAnnotationElementAndValue(moduleAnnotation.annotation(), "subcomponents").getKey();
-      XAnnotation moduleXAnnotation = module.getAnnotation(moduleAnnotation.className());
+      ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).get();
+      XElement subcomponentAttribute =
+          moduleAnnotation.annotation().getType().getTypeElement().getDeclaredMethods().stream()
+              .filter(method -> method.getName().contentEquals("subcomponents"))
+              .collect(toOptional())
+              .orElseThrow();
 
-      for (XType subcomponentType : moduleXAnnotation.getAsTypeList("subcomponents")) {
-        XTypeElement subcomponent = subcomponentType.getTypeElement();
+      Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
+      for (XTypeElement subcomponent : moduleAnnotation.subcomponents()) {
         declarations.add(
             new SubcomponentDeclaration(
-                Optional.of(subcomponentAttribute),
-                Optional.of(module.toJavac()),
+                Optional.of(toJavac(subcomponentAttribute)),
+                Optional.of(toJavac(module)),
                 keyFactory.forSubcomponentCreator(
-                    getSubcomponentCreator(subcomponent).orElseThrow().toJavac().asType()),
+                    toJavac(getSubcomponentCreator(subcomponent).orElseThrow().getType())),
                 subcomponent,
                 moduleAnnotation));
       }

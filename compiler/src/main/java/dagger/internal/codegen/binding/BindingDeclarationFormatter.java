@@ -23,6 +23,7 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.EXECUTABLE;
 
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -30,7 +31,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 /**
@@ -100,9 +100,9 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
   }
 
   private String formatSubcomponentDeclaration(SubcomponentDeclaration subcomponentDeclaration) {
-    List<TypeElement> moduleSubcomponents =
+    List<XTypeElement> moduleSubcomponents =
         subcomponentDeclaration.moduleAnnotation().subcomponents();
-    int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType().toJavac());
+    int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType());
     StringBuilder annotationValue = new StringBuilder();
     if (moduleSubcomponents.size() != 1) {
       annotationValue.append("{");
@@ -118,7 +118,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
 
     return String.format(
         "@%s(subcomponents = %s) for %s",
-        subcomponentDeclaration.moduleAnnotation().annotationName(),
+        subcomponentDeclaration.moduleAnnotation().simpleName(),
         annotationValue,
         subcomponentDeclaration.contributingModule().orElseThrow());
   }

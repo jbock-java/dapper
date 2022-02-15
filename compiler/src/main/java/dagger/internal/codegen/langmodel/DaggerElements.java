@@ -28,6 +28,8 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.xprocessing.XAnnotated;
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -37,6 +39,7 @@ import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
 import io.jbock.javapoet.ClassName;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -196,6 +199,37 @@ public final class DaggerElements implements Elements, ClearableCache {
    */
   public static boolean isAnnotationPresent(Element element, ClassName annotationName) {
     return getAnnotationMirror(element, annotationName).isPresent();
+  }
+
+  /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
+  public static boolean hasAnyAnnotation(XAnnotated annotated, ClassName... annotations) {
+    return hasAnyAnnotation(annotated, Arrays.asList(annotations));
+  }
+
+  /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
+  public static boolean hasAnyAnnotation(XAnnotated annotated, Collection<ClassName> annotations) {
+    return annotations.stream().anyMatch(annotated::hasAnnotation);
+  }
+
+  /**
+   * Returns any annotation from {@code annotations} that annotates {@code annotated} or else {@code
+   * Optional.empty()}.
+   */
+  public static Optional<XAnnotation> getAnyAnnotation(
+      XAnnotated annotated, ClassName... annotations) {
+    return getAnyAnnotation(annotated, Arrays.asList(annotations));
+  }
+
+  /**
+   * Returns any annotation from {@code annotations} that annotates {@code annotated} or else
+   * {@code Optional.empty()}.
+   */
+  public static Optional<XAnnotation> getAnyAnnotation(
+      XAnnotated annotated, Collection<ClassName> annotations) {
+    return annotations.stream()
+        .filter(annotated::hasAnnotation)
+        .map(annotated::getAnnotation)
+        .findFirst();
   }
 
   /**

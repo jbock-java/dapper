@@ -17,32 +17,18 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
-import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
-import static javax.lang.model.util.ElementFilter.typesIn;
 
 import dagger.Component;
 import dagger.Module;
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.TypeName;
-import java.util.ArrayDeque;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Utility methods related to dagger configuration annotations (e.g.: {@link Component} and {@link
@@ -58,58 +44,8 @@ public final class ConfigurationAnnotations {
         .findFirst();
   }
 
-  public static Optional<TypeElement> getSubcomponentCreator(TypeElement subcomponent) {
-    Preconditions.checkArgument(subcomponentAnnotation(subcomponent).isPresent());
-    return typesIn(subcomponent.getEnclosedElements()).stream()
-        .filter(ConfigurationAnnotations::isSubcomponentCreator)
-        // TODO(bcorso): Consider doing toOptional() instead since there should be at most 1.
-        .findFirst();
-  }
-
   static boolean isSubcomponentCreator(XElement element) {
-    return isSubcomponentCreator(element.toJavac());
-  }
-
-  static boolean isSubcomponentCreator(Element element) {
-    return isAnyAnnotationPresent(element, subcomponentCreatorAnnotations());
-  }
-
-  /**
-   * Returns the full set of modules transitively {@linkplain Module#includes included} from the
-   * given seed modules. If a module is malformed and a type listed in {@link Module#includes} is
-   * not annotated with {@link Module}, it is ignored.
-   *
-   * @deprecated Use {@link ComponentDescriptor#modules()}.
-   */
-  @Deprecated
-  public static Set<TypeElement> getTransitiveModules(
-      DaggerTypes types, DaggerElements elements, Set<TypeElement> seedModules) {
-    TypeMirror objectType = elements.getTypeElement(TypeName.OBJECT).asType();
-    Queue<TypeElement> moduleQueue = new ArrayDeque<>(seedModules);
-    Set<TypeElement> moduleElements = new LinkedHashSet<>();
-    TypeElement moduleElement;
-    while ((moduleElement = moduleQueue.poll()) != null) {
-      TypeElement mel = moduleElement;
-      moduleAnnotation(moduleElement)
-          .ifPresent(
-              moduleAnnotation -> {
-                Set<TypeElement> moduleDependencies =
-                    new LinkedHashSet<>();
-                moduleDependencies.addAll(moduleAnnotation.includes());
-                // We don't recur on the parent class because we don't want the parent class as a
-                // root that the component depends on, and also because we want the dependencies
-                // rooted against this element, not the parent.
-                addIncludesFromSuperclasses(
-                    types, mel, moduleDependencies, objectType);
-                moduleElements.add(mel);
-                for (TypeElement dependencyType : moduleDependencies) {
-                  if (!moduleElements.contains(dependencyType)) {
-                    moduleQueue.add(dependencyType);
-                  }
-                }
-              });
-    }
-    return moduleElements;
+    return hasAnyAnnotation(element, subcomponentCreatorAnnotations());
   }
 
   /** Returns the enclosed types annotated with the given annotation. */
@@ -118,23 +54,6 @@ public final class ConfigurationAnnotations {
     return typeElement.getEnclosedTypeElements().stream()
         .filter(enclosedType -> hasAnyAnnotation(enclosedType, annotations))
         .collect(toImmutableSet());
-  }
-
-  /** Traverses includes from superclasses and adds them into the builder. */
-  private static void addIncludesFromSuperclasses(
-      DaggerTypes types,
-      TypeElement element,
-      Set<TypeElement> builder,
-      TypeMirror objectType) {
-    // Also add the superclass to the queue, in case any @Module definitions were on that.
-    TypeMirror superclass = element.getSuperclass();
-    while (!types.isSameType(objectType, superclass)
-        && superclass.getKind().equals(TypeKind.DECLARED)) {
-      element = MoreElements.asType(types.asElement(superclass));
-      moduleAnnotation(element)
-          .ifPresent(moduleAnnotation -> builder.addAll(moduleAnnotation.includes()));
-      superclass = element.getSuperclass();
-    }
   }
 
   private ConfigurationAnnotations() {

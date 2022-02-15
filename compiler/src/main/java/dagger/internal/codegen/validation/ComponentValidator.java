@@ -23,15 +23,14 @@ import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creator
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.binding.ComponentKind.annotationsFor;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
-import static dagger.internal.codegen.binding.ConfigurationAnnotations.getTransitiveModules;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.builderMethodRequiresNoArgs;
 import static dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages.moreThanOneRefToSubcomponent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.asElement;
 import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Comparator.comparing;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -52,33 +51,32 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Performs superficial validation of the contract of the {@link Component} annotation.
@@ -93,7 +91,6 @@ public final class ComponentValidator implements ClearableCache {
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final DependencyRequestFactory dependencyRequestFactory;
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
-  private final XProcessingEnv processingEnv;
 
   @Inject
   ComponentValidator(
@@ -103,8 +100,7 @@ public final class ComponentValidator implements ClearableCache {
       ComponentCreatorValidator creatorValidator,
       DependencyRequestValidator dependencyRequestValidator,
       MethodSignatureFormatter methodSignatureFormatter,
-      DependencyRequestFactory dependencyRequestFactory,
-      XProcessingEnv processingEnv) {
+      DependencyRequestFactory dependencyRequestFactory) {
     this.elements = elements;
     this.types = types;
     this.moduleValidator = moduleValidator;
@@ -112,7 +108,6 @@ public final class ComponentValidator implements ClearableCache {
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.dependencyRequestFactory = dependencyRequestFactory;
-    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -294,14 +289,12 @@ public final class ComponentValidator implements ClearableCache {
                 .stream()
                 .map(ModuleKind::annotation)
                 .collect(toImmutableSet());
-        Set<TypeElement> moduleTypes =
+        Set<XTypeElement> moduleTypes =
             ComponentAnnotation.componentAnnotation(subcomponentAnnotation).modules();
         // TODO(gak): This logic maybe/probably shouldn't live here as it requires us to traverse
         // subcomponents and their modules separately from how it is done in ComponentDescriptor and
         // ModuleDescriptor
-        @SuppressWarnings("deprecation")
-        Set<TypeElement> transitiveModules =
-            getTransitiveModules(types, elements, moduleTypes);
+        Set<XTypeElement> transitiveModules = getTransitiveModules(moduleTypes);
 
         Set<XTypeElement> referencedModules = new HashSet<>();
         for (int i = 0; i < parameterTypes.size(); i++) {
@@ -317,7 +310,7 @@ public final class ComponentValidator implements ClearableCache {
                       module.getQualifiedName()),
                   parameter);
             }
-            if (!transitiveModules.contains(module.toJavac())) {
+            if (!transitiveModules.contains(module)) {
               report.addError(
                   String.format(
                       "%s is present as an argument to the %s factory method, but is not one of the"
@@ -334,6 +327,45 @@ public final class ComponentValidator implements ClearableCache {
                 parameter);
           }
         }
+      }
+
+      /**
+       * Returns the full set of modules transitively included from the given seed modules, which
+       * includes all transitive {@link dagger.Module#includes} and all transitive super classes. If a
+       * module is malformed and a type listed in {@link dagger.Module#includes} is not annotated with
+       * {@link dagger.Module}, it is ignored.
+       */
+      private Set<XTypeElement> getTransitiveModules(
+          Collection<XTypeElement> seedModules) {
+        Set<XTypeElement> processedElements = new LinkedHashSet<>();
+        Queue<XTypeElement> moduleQueue = new ArrayDeque<>(seedModules);
+        Set<XTypeElement> moduleElements = new LinkedHashSet<>();
+        while (!moduleQueue.isEmpty()) {
+          XTypeElement moduleElement = moduleQueue.poll();
+          if (processedElements.add(moduleElement)) {
+            moduleAnnotation(moduleElement)
+                .ifPresent(
+                    moduleAnnotation -> {
+                      moduleElements.add(moduleElement);
+                      moduleQueue.addAll(moduleAnnotation.includes());
+                      moduleQueue.addAll(includesFromSuperclasses(moduleElement));
+                    });
+          }
+        }
+        return moduleElements;
+      }
+
+      /** Returns {@link dagger.Module#includes()} from all transitive super classes. */
+      private Set<XTypeElement> includesFromSuperclasses(XTypeElement element) {
+        Set<XTypeElement> builder = new LinkedHashSet<>();
+        XType superclass = element.getSuperType();
+        while (superclass != null && !TypeName.OBJECT.equals(superclass.getTypeName())) {
+          element = superclass.getTypeElement();
+          moduleAnnotation(element)
+              .ifPresent(moduleAnnotation -> builder.addAll(moduleAnnotation.includes()));
+          superclass = element.getSuperType();
+        }
+        return builder;
       }
 
       private void validateSubcomponentCreatorMethod() {
@@ -431,10 +463,10 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void validateComponentDependencies() {
-      for (TypeMirror type : componentAnnotation().dependencyTypes()) {
-        if (type.getKind() != TypeKind.DECLARED) {
+      for (XType type : componentAnnotation().dependencyTypes()) {
+        if (!isDeclared(type)) {
           report.addError(type + " is not a valid component dependency type");
-        } else if (moduleAnnotation(asElement(type)).isPresent()) {
+        } else if (moduleAnnotation(type.getTypeElement()).isPresent()) {
           report.addError(type + " is a module, which cannot be a component dependency");
         }
       }
@@ -444,7 +476,7 @@ public final class ComponentValidator implements ClearableCache {
       report.addSubreport(
           moduleValidator.validateReferencedModules(
               component,
-              XConverters.toXProcessing(componentAnnotation().annotation(), processingEnv),
+              componentAnnotation().annotation(),
               componentKind().legalModuleKinds(),
               new HashSet<>()));
     }
