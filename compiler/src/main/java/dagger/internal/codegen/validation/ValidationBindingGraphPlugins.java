@@ -25,11 +25,10 @@ import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
-import dagger.spi.model.BindingGraph;
 import dagger.spi.BindingGraphPlugin;
+import dagger.spi.model.BindingGraph;
 import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +92,7 @@ public final class ValidationBindingGraphPlugins {
 
     boolean isClean = true;
     for (BindingGraphPlugin plugin : plugins) {
-      DiagnosticReporterImpl reporter =
+      DiagnosticReporterFactory.DiagnosticReporterImpl reporter =
           diagnosticReporterFactory.reporter(graph, plugin.pluginName(), errorsAsWarnings);
       plugin.visitGraph(graph, reporter);
       if (reporter.reportedDiagnosticKinds().contains(ERROR)) {
