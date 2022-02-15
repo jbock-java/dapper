@@ -18,6 +18,8 @@ package dagger.internal.codegen.xprocessing;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.TypeKind;
@@ -28,6 +30,11 @@ public final class XTypes {
   /** Returns {@code true} if the raw type of {@code type} is equal to {@code className}. */
   public static boolean isTypeOf(XType type, ClassName className) {
     return isDeclared(type) && type.getTypeElement().getClassName().equals(className);
+  }
+
+  /** Returns {@code true} if the given type is a declared type. */
+  public static boolean isWildcard(XType type) {
+    return toJavac(type).getKind().equals(TypeKind.WILDCARD);
   }
 
   /** Returns {@code true} if the given type is a primitive type. */

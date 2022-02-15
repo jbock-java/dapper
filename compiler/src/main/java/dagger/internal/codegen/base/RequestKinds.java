@@ -20,6 +20,8 @@ import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
+import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.RequestKind.LAZY;
 import static dagger.spi.model.RequestKind.PROVIDER;
 import static dagger.spi.model.RequestKind.PROVIDER_OF_LAZY;
@@ -29,6 +31,7 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
@@ -80,6 +83,11 @@ public final class RequestKinds {
           LAZY, TypeNames.LAZY);
 
   /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
+  public static RequestKind getRequestKind(XType type) {
+    return getRequestKind(toJavac(type));
+  }
+
+  /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(TypeMirror type) {
     checkTypePresent(type);
     if (!isType(type) // TODO(b/147320669): isType check can be removed once this bug is fixed.
@@ -91,13 +99,37 @@ public final class RequestKinds {
     }
     for (RequestKind kind : FRAMEWORK_CLASSES.keySet()) {
       if (isTypeOf(frameworkClass(kind), type)) {
-        if (kind.equals(PROVIDER) && getRequestKind(DaggerTypes.unwrapType(type)).equals(LAZY)) {
+        if (kind.equals(PROVIDER) && getRequestKind(unwrapType(type)).equals(LAZY)) {
           return PROVIDER_OF_LAZY;
         }
         return kind;
       }
     }
     return RequestKind.INSTANCE;
+  }
+
+  /**
+   * Unwraps the framework class(es) of {@code requestKind} from {@code type}. If {@code
+   * requestKind} is {@link RequestKind#INSTANCE}, this acts as an identity function.
+   *
+   * @throws TypeNotPresentException if {@code type} is an {@link javax.lang.model.type.ErrorType},
+   *     which may mean that the type will be generated in a later round of processing
+   * @throws IllegalArgumentException if {@code type} is not wrapped with {@code requestKind}'s
+   *     framework class(es).
+   */
+  public static XType extractKeyType(XType type) {
+    return extractKeyType(getRequestKind(type), type);
+  }
+
+  private static XType extractKeyType(RequestKind requestKind, XType type) {
+    switch (requestKind) {
+      case INSTANCE:
+        return type;
+      case PROVIDER_OF_LAZY:
+        return extractKeyType(LAZY, extractKeyType(PROVIDER, type));
+      default:
+        return unwrapType(type);
+    }
   }
 
   /**
@@ -121,7 +153,7 @@ public final class RequestKinds {
         return extractKeyType(LAZY, extractKeyType(PROVIDER, type));
       default:
         Preconditions.checkArgument(isType(type));
-        return DaggerTypes.unwrapType(type);
+        return unwrapType(type);
     }
   }
 

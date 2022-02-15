@@ -16,11 +16,14 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
@@ -156,10 +159,46 @@ public final class DaggerTypes implements Types {
    * @throws IllegalArgumentException if {@code type} is not a declared type or has zero or more
    *     than one type arguments.
    */
+  public static XType unwrapType(XType type) {
+    XType unwrapped = unwrapTypeOrDefault(type, null);
+    Preconditions.checkArgument(unwrapped != null, "%s is a raw type", type);
+    return unwrapped;
+  }
+
+  /**
+   * Returns {@code type}'s single type argument.
+   *
+   * <p>For example, if {@code type} is {@code List<Number>} this will return {@code Number}.
+   *
+   * @throws IllegalArgumentException if {@code type} is not a declared type or has zero or more
+   *     than one type arguments.
+   */
   public static TypeMirror unwrapType(TypeMirror type) {
     TypeMirror unwrapped = unwrapTypeOrDefault(type, null);
-    requireNonNull(unwrapped, () -> String.format("%s is a raw type", type));
+    checkArgument(unwrapped != null, "%s is a raw type", type);
     return unwrapped;
+  }
+
+  private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
+    DeclaredType declaredType = MoreTypes.asDeclared(type);
+    TypeElement typeElement = MoreElements.asType(declaredType.asElement());
+    Preconditions.checkArgument(
+        !typeElement.getTypeParameters().isEmpty(),
+        "%s does not have a type parameter",
+        typeElement.getQualifiedName());
+    return getOnlyElement(declaredType.getTypeArguments(), defaultType);
+  }
+
+  private static XType unwrapTypeOrDefault(XType type, XType defaultType) {
+    // Check the type parameters of the element's XType since the input XType could be raw.
+    checkArgument(isDeclared(type));
+    XTypeElement typeElement = type.getTypeElement();
+    checkArgument(
+        typeElement.getType().getTypeArguments().size() == 1,
+        "%s does not have exactly 1 type parameter. Found: %s",
+        typeElement.getQualifiedName(),
+        typeElement.getType().getTypeArguments());
+    return getOnlyElement(type.getTypeArguments(), defaultType);
   }
 
   /**
@@ -172,16 +211,6 @@ public final class DaggerTypes implements Types {
    */
   public TypeMirror unwrapTypeOrObject(TypeMirror type) {
     return unwrapTypeOrDefault(type, elements.getTypeElement(TypeName.OBJECT).asType());
-  }
-
-  private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
-    DeclaredType declaredType = MoreTypes.asDeclared(type);
-    TypeElement typeElement = MoreElements.asType(declaredType.asElement());
-    Preconditions.checkArgument(
-        !typeElement.getTypeParameters().isEmpty(),
-        "%s does not have a type parameter",
-        typeElement.getQualifiedName());
-    return getOnlyElement(declaredType.getTypeArguments(), defaultType);
   }
 
   /**
