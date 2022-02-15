@@ -26,9 +26,9 @@ import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 
-public class ScopingValidationTest {
+class ScopingValidationTest {
   @Test
-  public void componentWithoutScopeIncludesScopedBindings_Fail() {
+  void componentWithoutScopeIncludesScopedBindings_Fail() {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.MyComponent",
@@ -76,11 +76,14 @@ public class ScopingValidationTest {
             message(
                 "MyComponent (unscoped) may not reference scoped bindings:",
                 "    @Singleton class ScopedType",
+                "    ScopedType is requested at",
+                "        MyComponent.string()",
+                "",
                 "    @Provides @Singleton String ScopedModule.string()"));
   }
 
   @Test // b/79859714
-  public void bindsWithChildScope_inParentModule_notAllowed() {
+  void bindsWithChildScope_inParentModule_notAllowed() {
     JavaFileObject childScope =
         JavaFileObjects.forSourceLines(
             "test.ChildScope",
@@ -161,7 +164,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentWithScopeIncludesIncompatiblyScopedBindings_Fail() {
+  void componentWithScopeIncludesIncompatiblyScopedBindings_Fail() {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.MyComponent",
@@ -233,7 +236,11 @@ public class ScopingValidationTest {
                 "MyComponent scoped with @Singleton "
                     + "may not reference bindings with different scopes:",
                 "    @PerTest class ScopedType",
+                "    ScopedType is requested at",
+                "        MyComponent.string()",
+                "",
                 "    @Provides @PerTest String ScopedModule.string()",
+                "",
                 "    @Provides @Per(MyComponent.class) boolean "
                     + "ScopedModule.bool()"))
         .inFile(componentFile)
@@ -248,7 +255,9 @@ public class ScopingValidationTest {
             message(
                 "ScopedModule contains bindings with different scopes:",
                 "    @Provides @PerTest String ScopedModule.string()",
+                "",
                 "    @Provides @Singleton float ScopedModule.floatingPoint()",
+                "",
                 "    @Provides @Per(MyComponent.class) boolean "
                     + "ScopedModule.bool()"))
         .inFile(moduleFile)
@@ -256,7 +265,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void fullBindingGraphValidationDoesNotReportForOneScope() {
+  void fullBindingGraphValidationDoesNotReportForOneScope() {
     Compilation compilation =
         compilerWithOptions(
             "-Adagger.fullBindingGraphValidation=ERROR",
@@ -280,7 +289,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void fullBindingGraphValidationDoesNotReportInjectBindings() {
+  void fullBindingGraphValidationDoesNotReportInjectBindings() {
     Compilation compilation =
         compilerWithOptions(
             "-Adagger.fullBindingGraphValidation=ERROR",
@@ -379,7 +388,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentWithScopeCanDependOnMultipleScopedComponents() {
+  void componentWithScopeCanDependOnMultipleScopedComponents() {
     // If a scoped component will have dependencies, they can include multiple scoped component
     JavaFileObject type =
         JavaFileObjects.forSourceLines(
@@ -475,7 +484,7 @@ public class ScopingValidationTest {
   //         ComponentC
   //         [SimpleType getSimpleType()]
   @Test
-  public void componentWithScopeCanDependOnMultipleScopedComponentsEvenDoingADiamond() {
+  void componentWithScopeCanDependOnMultipleScopedComponentsEvenDoingADiamond() {
     JavaFileObject type =
         JavaFileObjects.forSourceLines(
             "test.SimpleType",
@@ -567,7 +576,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentWithoutScopeCannotDependOnScopedComponent() {
+  void componentWithoutScopeCannotDependOnScopedComponent() {
     JavaFileObject type =
         JavaFileObjects.forSourceLines(
             "test.SimpleType",
@@ -614,7 +623,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentWithSingletonScopeMayNotDependOnOtherScope() {
+  void componentWithSingletonScopeMayNotDependOnOtherScope() {
     // Singleton must be the widest lifetime of present scopes.
     JavaFileObject type =
         JavaFileObjects.forSourceLines(
@@ -671,7 +680,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentScopeWithMultipleScopedDependenciesMustNotCycle() {
+  void componentScopeWithMultipleScopedDependenciesMustNotCycle() {
     JavaFileObject type =
         JavaFileObjects.forSourceLines(
             "test.SimpleType",
@@ -763,7 +772,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void componentScopeAncestryMustNotCycle() {
+  void componentScopeAncestryMustNotCycle() {
     // The dependency relationship of components is necessarily from shorter lifetimes to
     // longer lifetimes.  The scoping annotations must reflect this, and so one cannot declare
     // scopes on components such that they cycle.
@@ -852,7 +861,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void reusableNotAllowedOnComponent() {
+  void reusableNotAllowedOnComponent() {
     JavaFileObject someComponent =
         JavaFileObjects.forSourceLines(
             "test.SomeComponent",
@@ -873,7 +882,7 @@ public class ScopingValidationTest {
   }
 
   @Test
-  public void reusableNotAllowedOnSubcomponent() {
+  void reusableNotAllowedOnSubcomponent() {
     JavaFileObject someSubcomponent =
         JavaFileObjects.forSourceLines(
             "test.SomeComponent",

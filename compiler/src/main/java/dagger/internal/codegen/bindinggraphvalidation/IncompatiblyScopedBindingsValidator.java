@@ -27,11 +27,12 @@ import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
+import dagger.spi.BindingGraphPlugin;
+import dagger.spi.DiagnosticReporter;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ComponentNode;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
@@ -48,12 +49,16 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
 
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final CompilerOptions compilerOptions;
+  private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
   @Inject
   IncompatiblyScopedBindingsValidator(
-      MethodSignatureFormatter methodSignatureFormatter, CompilerOptions compilerOptions) {
+      MethodSignatureFormatter methodSignatureFormatter,
+      CompilerOptions compilerOptions,
+      DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.compilerOptions = compilerOptions;
+    this.diagnosticMessageGeneratorFactory = diagnosticMessageGeneratorFactory;
   }
 
   @Override
@@ -63,6 +68,8 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
 
   @Override
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
+    DiagnosticMessageGenerator diagnosticMessageGenerator =
+        diagnosticMessageGeneratorFactory.create(bindingGraph);
     Map<ComponentNode, Set<Binding>> incompatibleBindings =
         new LinkedHashMap<>();
     for (Binding binding : bindingGraph.bindings()) {
@@ -86,13 +93,15 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
               });
     }
     incompatibleBindings
-        .forEach((componentNode, bindings) -> report(componentNode, bindings, diagnosticReporter));
+        .forEach((componentNode, bindings) ->
+            report(componentNode, bindings, diagnosticReporter, diagnosticMessageGenerator));
   }
 
   private void report(
       ComponentNode componentNode,
       Set<Binding> bindings,
-      DiagnosticReporter diagnosticReporter) {
+      DiagnosticReporter diagnosticReporter,
+      DiagnosticMessageGenerator diagnosticMessageGenerator) {
     Diagnostic.Kind diagnosticKind = ERROR;
     StringBuilder message =
         new StringBuilder(
@@ -135,12 +144,15 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
               .append(getReadableSource(binding.scope().orElseThrow()))
               .append(" class ")
               .append(
-                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow().java()).getQualifiedName());
+                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow().java()).getQualifiedName())
+              .append(diagnosticMessageGenerator.getMessage(binding));
           break;
 
         default:
           throw new AssertionError(binding);
       }
+
+      message.append('\n');
     }
     diagnosticReporter.reportComponent(diagnosticKind, componentNode, message.toString());
   }
