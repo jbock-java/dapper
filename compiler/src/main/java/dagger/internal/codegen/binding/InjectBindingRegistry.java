@@ -20,6 +20,7 @@ import dagger.Component;
 import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.spi.model.Key;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
@@ -38,7 +39,7 @@ public interface InjectBindingRegistry {
    */
   Optional<ProvisionBinding> getOrFindProvisionBinding(Key key);
 
-  Optional<ProvisionBinding> tryRegisterConstructor(ExecutableElement constructorElement);
+  Optional<ProvisionBinding> tryRegisterInjectConstructor(XConstructorElement constructorElement);
 
   void tryRegisterMembersInjectedType(TypeElement typeElement);
 

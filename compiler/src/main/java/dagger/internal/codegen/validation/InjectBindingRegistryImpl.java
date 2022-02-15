@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Component;
@@ -36,6 +37,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
@@ -195,8 +197,8 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   }
 
   @Override
-  public Optional<ProvisionBinding> tryRegisterConstructor(ExecutableElement constructorElement) {
-    return tryRegisterConstructor(constructorElement, Optional.empty(), false);
+  public Optional<ProvisionBinding> tryRegisterInjectConstructor(XConstructorElement constructorElement) {
+    return tryRegisterConstructor(toJavac(constructorElement), Optional.empty(), false);
   }
 
   private Optional<ProvisionBinding> tryRegisterConstructor(

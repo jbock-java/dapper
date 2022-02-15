@@ -16,22 +16,20 @@
 
 package dagger.internal.codegen;
 
+import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
+import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
+
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XElement;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementVisitor;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.ElementKindVisitor8;
 
 /**
  * An annotation processor for generating Dagger implementation code based on the {@code Inject}
@@ -39,37 +37,15 @@ import javax.lang.model.util.ElementKindVisitor8;
  */
 // TODO(gak): add some error handling for bad source files
 final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
-  private final ElementVisitor<Void, Void> visitor;
-  private final Set<Element> processedElements = new LinkedHashSet<>();
+  private final InjectBindingRegistry injectBindingRegistry;
+  private final Set<XElement> processedElements = new HashSet<>();
 
   @Inject
   InjectProcessingStep(
       EnclosingTypeElementValidator elementValidator,
       InjectBindingRegistry injectBindingRegistry) {
     super(elementValidator);
-    this.visitor =
-        new ElementKindVisitor8<>() {
-          @Override
-          public Void visitExecutableAsConstructor(
-              ExecutableElement constructorElement, Void aVoid) {
-            injectBindingRegistry.tryRegisterConstructor(constructorElement);
-            return null;
-          }
-
-          @Override
-          public Void visitVariableAsField(VariableElement fieldElement, Void aVoid) {
-            injectBindingRegistry.tryRegisterMembersInjectedType(
-                MoreElements.asType(fieldElement.getEnclosingElement()));
-            return null;
-          }
-
-          @Override
-          public Void visitExecutableAsMethod(ExecutableElement methodElement, Void aVoid) {
-            injectBindingRegistry.tryRegisterMembersInjectedType(
-                MoreElements.asType(methodElement.getEnclosingElement()));
-            return null;
-          }
-        };
+    this.injectBindingRegistry = injectBindingRegistry;
   }
 
   @Override
@@ -78,17 +54,16 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   }
 
   @Override
-  protected void process(XElement xElement, Set<ClassName> annotations) {
-    // TODO(bcorso): Remove conversion to javac type and use XProcessing throughout.
-    Element injectElement = xElement.toJavac();
+  protected void process(XElement injectElement, Set<ClassName> annotations) {
     // Only process an element once to avoid getting duplicate errors when an element is annotated
     // with multiple inject annotations.
     if (processedElements.contains(injectElement)) {
       return;
     }
 
-    injectElement.accept(visitor, null);
-
+    if (isConstructor(injectElement)) {
+      injectBindingRegistry.tryRegisterInjectConstructor(asConstructor(injectElement));
+    }
     processedElements.add(injectElement);
   }
 }
