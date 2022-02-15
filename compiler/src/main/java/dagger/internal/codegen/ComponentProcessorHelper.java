@@ -25,7 +25,6 @@ import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptio
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.XMessager;
-import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -40,7 +39,7 @@ public class ComponentProcessorHelper {
 
   private final InjectBindingRegistry injectBindingRegistry;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  private final List<BasicAnnotationProcessor.Step> processingSteps;
+  private final List<JavacBasicAnnotationProcessor.Step> processingSteps;
   private final ValidationBindingGraphPlugins validationBindingGraphPlugins;
   private final ExternalBindingGraphPlugins externalBindingGraphPlugins;
   private final Set<ClearableCache> clearableCaches;
@@ -50,7 +49,7 @@ public class ComponentProcessorHelper {
   ComponentProcessorHelper(
       InjectBindingRegistry injectBindingRegistry,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      List<BasicAnnotationProcessor.Step> processingSteps,
+      List<JavacBasicAnnotationProcessor.Step> processingSteps,
       ValidationBindingGraphPlugins validationBindingGraphPlugins,
       ExternalBindingGraphPlugins externalBindingGraphPlugins,
       Set<ClearableCache> clearableCaches,
@@ -72,7 +71,7 @@ public class ComponentProcessorHelper {
     return new LinkedHashSet<>(result);
   }
 
-  Iterable<? extends BasicAnnotationProcessor.Step> steps() {
+  Iterable<? extends JavacBasicAnnotationProcessor.Step> steps() {
     validationBindingGraphPlugins.initializePlugins();
     externalBindingGraphPlugins.initializePlugins();
     return processingSteps;

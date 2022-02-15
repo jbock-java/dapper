@@ -37,13 +37,12 @@ import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.common.BasicAnnotationProcessor;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
 
 /**
- * A {@link BasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
+ * A {@link JavacBasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
  * as part of the {@link ComponentProcessor}.
  */
 final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {

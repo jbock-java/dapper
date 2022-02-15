@@ -35,7 +35,6 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.spi.BindingGraphPlugin;
-import io.jbock.auto.common.BasicAnnotationProcessor;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +53,7 @@ import javax.lang.model.element.Element;
  *
  * <p>TODO(gak): give this some better documentation
  */
-public class ComponentProcessor extends BasicAnnotationProcessor {
+public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   private final Optional<Set<BindingGraphPlugin>> testingPlugins;
 
   private ComponentProcessorHelper helper;
@@ -96,9 +95,12 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   }
 
   @Override
+  public void initialize(XProcessingEnv env) {
+    helper = ProcessorComponent.factory().create(env, testingPlugins).helper();
+  }
+
+  @Override
   protected Iterable<? extends Step> steps() {
-    XProcessingEnv xProcessingEnv = XProcessingEnv.create(processingEnv);
-    helper = ProcessorComponent.factory().create(xProcessingEnv, testingPlugins).helper();
     return helper.steps();
   }
 
