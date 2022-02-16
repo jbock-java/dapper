@@ -18,7 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.spi.model.DaggerType.fromJava;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
@@ -27,10 +27,13 @@ import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.DaggerType;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
@@ -45,12 +48,16 @@ import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Key}s. */
 public final class KeyFactory {
+  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private final InjectionAnnotations injectionAnnotations;
 
   @Inject
   KeyFactory(
-      DaggerTypes types, InjectionAnnotations injectionAnnotations) {
+      XProcessingEnv processingEnv,
+      DaggerTypes types,
+      InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.types = requireNonNull(types);
     this.injectionAnnotations = injectionAnnotations;
   }
@@ -124,8 +131,22 @@ public final class KeyFactory {
   }
 
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
-    return Key.builder(fromJava(boxPrimitives(type)))
-        .qualifier(qualifier.map(DaggerAnnotation::fromJava))
+    return forQualifiedType(
+        qualifier.map(annotation -> toXProcessing(annotation, processingEnv)),
+        toXProcessing(type, processingEnv));
+  }
+
+  Key forQualifiedType(Optional<XAnnotation> qualifier, XType type) {
+    return Key.builder(DaggerType.from(type.boxed()))
+        .qualifier(qualifier.map(DaggerAnnotation::from))
         .build();
+  }
+
+  private DaggerAnnotation fromJava(AnnotationMirror annotation) {
+    return DaggerAnnotation.from(toXProcessing(annotation, processingEnv));
+  }
+
+  private DaggerType fromJava(TypeMirror typeMirror) {
+    return DaggerType.from(toXProcessing(typeMirror, processingEnv));
   }
 }

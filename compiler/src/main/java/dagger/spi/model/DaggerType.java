@@ -15,6 +15,9 @@
 
 package dagger.spi.model;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreTypes;
 import java.util.Objects;
@@ -23,28 +26,37 @@ import javax.lang.model.type.TypeMirror;
 /** Wrapper type for a type. */
 public final class DaggerType {
 
+  private final XType type;
   private final Equivalence.Wrapper<TypeMirror> typeMirror;
 
-  private DaggerType(Equivalence.Wrapper<TypeMirror> typeMirror) {
+  private DaggerType(
+      XType type,
+      Equivalence.Wrapper<TypeMirror> typeMirror) {
+    this.type = type;
     this.typeMirror = typeMirror;
   }
 
-  public static DaggerType fromJava(TypeMirror typeMirror) {
+  public static DaggerType from(XType type) {
+    Objects.requireNonNull(type);
     return new DaggerType(
-        MoreTypes.equivalence().wrap(Objects.requireNonNull(typeMirror)));
+        type, MoreTypes.equivalence().wrap(toJavac(type)));
   }
 
-  public Equivalence.Wrapper<TypeMirror> typeMirror() {
+  Equivalence.Wrapper<TypeMirror> typeMirror() {
     return typeMirror;
   }
 
+  public XType xprocessing() {
+    return type;
+  }
+
   public TypeMirror java() {
-    return typeMirror().get();
+    return toJavac(type);
   }
 
   @Override
   public String toString() {
-    return java().toString();
+    return type.toString();
   }
 
   @Override
@@ -57,6 +69,6 @@ public final class DaggerType {
 
   @Override
   public int hashCode() {
-    return Objects.hash(typeMirror);
+    return typeMirror.hashCode();
   }
 }

@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -27,6 +28,7 @@ import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.DaggerElement;
@@ -49,11 +51,16 @@ import javax.lang.model.type.TypeMirror;
  * may mean that the type will be generated in a later round of processing.
  */
 public final class DependencyRequestFactory {
+  private final XProcessingEnv processingEnv;
   private final KeyFactory keyFactory;
   private final InjectionAnnotations injectionAnnotations;
 
   @Inject
-  DependencyRequestFactory(KeyFactory keyFactory, InjectionAnnotations injectionAnnotations) {
+  DependencyRequestFactory(
+      XProcessingEnv processingEnv,
+      KeyFactory keyFactory,
+      InjectionAnnotations injectionAnnotations) {
+    this.processingEnv = processingEnv;
     this.keyFactory = keyFactory;
     this.injectionAnnotations = injectionAnnotations;
   }
@@ -107,7 +114,7 @@ public final class DependencyRequestFactory {
     return DependencyRequest.builder()
         .kind(requestKind)
         .key(keyFactory.forQualifiedType(qualifier, extractKeyType(type)))
-        .requestElement(DaggerElement.fromJava(requestElement))
+        .requestElement(DaggerElement.from(toXProcessing(requestElement, processingEnv)))
         .build();
   }
 }

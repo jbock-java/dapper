@@ -16,9 +16,11 @@
 
 package dagger.spi.model;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.Equivalence;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
@@ -26,32 +28,39 @@ import javax.lang.model.element.AnnotationMirror;
 /** Wrapper type for an annotation. */
 public final class DaggerAnnotation {
 
+  private final XAnnotation annotation;
   private final Equivalence.Wrapper<AnnotationMirror> annotationMirror;
 
-  private DaggerAnnotation(Equivalence.Wrapper<AnnotationMirror> annotationMirror) {
+  private DaggerAnnotation(
+      XAnnotation annotation,
+      Equivalence.Wrapper<AnnotationMirror> annotationMirror) {
+    this.annotation = annotation;
     this.annotationMirror = annotationMirror;
   }
 
-  public static DaggerAnnotation fromJava(AnnotationMirror annotationMirror) {
+  public static DaggerAnnotation from(XAnnotation annotation) {
     return new DaggerAnnotation(
-        AnnotationMirrors.equivalence().wrap(Objects.requireNonNull(annotationMirror)));
+        annotation, AnnotationMirrors.equivalence().wrap(Objects.requireNonNull(toJavac(annotation))));
+  }
+
+  Equivalence.Wrapper<AnnotationMirror> annotationMirror() {
+    return annotationMirror;
   }
 
   public DaggerTypeElement annotationTypeElement() {
-    return DaggerTypeElement.fromJava(
-        MoreTypes.asTypeElement(annotationMirror().get().getAnnotationType()));
+    return DaggerTypeElement.from(annotation.getType().getTypeElement());
   }
 
   public ClassName className() {
     return annotationTypeElement().className();
   }
 
-  public Equivalence.Wrapper<AnnotationMirror> annotationMirror() {
-    return annotationMirror;
+  public XAnnotation xprocessing() {
+    return annotation;
   }
 
   public AnnotationMirror java() {
-    return annotationMirror().get();
+    return toJavac(annotation);
   }
 
   @Override
@@ -69,6 +78,6 @@ public final class DaggerAnnotation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotationMirror);
+    return annotationMirror.hashCode();
   }
 }

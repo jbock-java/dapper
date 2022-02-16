@@ -68,7 +68,7 @@ abstract class JavacType implements XType {
     if (typeMirror.getKind() == TypeKind.VOID) {
       return env.wrap(env.getElementUtils().getTypeElement("java.lang.Void").asType());
     }
-    return null;
+    return this;
   }
 
   @Override

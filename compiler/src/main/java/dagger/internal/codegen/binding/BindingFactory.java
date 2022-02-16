@@ -32,7 +32,6 @@ import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.PROVISION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static dagger.spi.model.DaggerType.fromJava;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
@@ -50,6 +49,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
+import dagger.spi.model.DaggerType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
@@ -202,6 +202,10 @@ public final class BindingFactory {
                     .build()))
         .kind(ASSISTED_FACTORY)
         .build();
+  }
+
+  private DaggerType fromJava(TypeMirror typeMirror) {
+    return DaggerType.from(toXProcessing(typeMirror, processingEnv));
   }
 
   /**

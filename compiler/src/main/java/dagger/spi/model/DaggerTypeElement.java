@@ -16,31 +16,36 @@
 
 package dagger.spi.model;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
-import java.util.Objects;
 import javax.lang.model.element.TypeElement;
 
 /** Wrapper type for a type element. */
 public final class DaggerTypeElement {
 
-  private final TypeElement element;
+  private final XTypeElement element;
 
-  private DaggerTypeElement(TypeElement element) {
+  private DaggerTypeElement(XTypeElement element) {
     this.element = element;
   }
 
-  public static DaggerTypeElement fromJava(TypeElement element) {
+  public static DaggerTypeElement from(XTypeElement element) {
     return new DaggerTypeElement(requireNonNull(element));
   }
 
-  public TypeElement java() {
+  XTypeElement xprocessing() {
     return element;
   }
 
+  public TypeElement java() {
+    return toJavac(xprocessing());
+  }
+
   public ClassName className() {
-    return ClassName.get(java());
+    return xprocessing().getClassName();
   }
 
   @Override
@@ -53,11 +58,11 @@ public final class DaggerTypeElement {
 
   @Override
   public int hashCode() {
-    return Objects.hash(element);
+    return element.hashCode();
   }
 
   @Override
   public String toString() {
-    return java().toString();
+    return xprocessing().toString();
   }
 }
