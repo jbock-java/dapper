@@ -17,7 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
-import static dagger.internal.codegen.binding.Binding.hasNonDefaultTypeParameters;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
@@ -34,6 +34,7 @@ import static dagger.spi.model.BindingKind.PROVISION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
@@ -57,14 +58,17 @@ import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@link Binding} objects. */
@@ -163,8 +167,7 @@ public final class BindingFactory {
                 uniqueScopeOf(
                     toXProcessing(constructorElement.getEnclosingElement(), processingEnv)));
 
-    TypeElement bindingTypeElement = MoreElements.asType(constructorElement.getEnclosingElement());
-    if (hasNonDefaultTypeParameters(bindingTypeElement, key.type().java(), types)) {
+    if (hasNonDefaultTypeParameters(key.type().java(), types)) {
       builder.unresolved(injectionBinding(constructorElement, Optional.empty()));
     }
     return builder.build();
@@ -386,5 +389,40 @@ public final class BindingFactory {
         .dependencies(delegateDeclaration.delegateRequest())
         .kind(DELEGATE)
         .build();
+  }
+
+  private static boolean hasNonDefaultTypeParameters(TypeMirror type, DaggerTypes types) {
+    // If the type is not declared, then it can't have type parameters.
+    if (type.getKind() != TypeKind.DECLARED) {
+      return false;
+    }
+
+    // If the element has no type parameters, none can be non-default.
+    TypeElement element = asTypeElement(type);
+    if (element.getTypeParameters().isEmpty()) {
+      return false;
+    }
+
+    List<TypeMirror> defaultTypes =
+        element.getTypeParameters().stream()
+            .map(TypeParameterElement::asType)
+            .collect(toImmutableList());
+
+    List<TypeMirror> actualTypes =
+        type.getKind() == TypeKind.DECLARED
+            ? List.copyOf(asDeclared(type).getTypeArguments())
+            : List.of();
+
+    // The actual type parameter size can be different if the user is using a raw type.
+    if (defaultTypes.size() != actualTypes.size()) {
+      return true;
+    }
+
+    for (int i = 0; i < defaultTypes.size(); i++) {
+      if (!types.isSameType(defaultTypes.get(i), actualTypes.get(i))) {
+        return true;
+      }
+    }
+    return false;
   }
 }

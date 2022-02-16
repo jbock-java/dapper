@@ -18,25 +18,17 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.binding.FrameworkType.PROVIDER;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * An abstract type for classes representing a Dagger binding. Particularly, contains the {@link
@@ -94,36 +86,5 @@ public abstract class Binding extends BindingDeclaration {
 
   public Optional<Scope> scope() {
     return Optional.empty();
-  }
-
-  // TODO(sameb): Remove the TypeElement parameter and pull it from the TypeMirror.
-  static boolean hasNonDefaultTypeParameters(
-      TypeElement element, TypeMirror type, DaggerTypes types) {
-    // If the element has no type parameters, nothing can be wrong.
-    if (element.getTypeParameters().isEmpty()) {
-      return false;
-    }
-
-    List<TypeMirror> defaultTypes =
-        element.getTypeParameters().stream()
-            .map(TypeParameterElement::asType)
-            .collect(Collectors.toList());
-
-    List<TypeMirror> actualTypes =
-        type.getKind() == TypeKind.DECLARED
-            ? List.copyOf(asDeclared(type).getTypeArguments())
-            : List.of();
-
-    // The actual type parameter size can be different if the user is using a raw type.
-    if (defaultTypes.size() != actualTypes.size()) {
-      return true;
-    }
-
-    for (int i = 0; i < defaultTypes.size(); i++) {
-      if (!types.isSameType(defaultTypes.get(i), actualTypes.get(i))) {
-        return true;
-      }
-    }
-    return false;
   }
 }
