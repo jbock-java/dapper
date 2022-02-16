@@ -22,7 +22,6 @@ import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConst
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
-import static io.jbock.auto.common.MoreElements.asType;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
@@ -215,7 +214,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   private Optional<ProvisionBinding> tryRegisterConstructor(
       XConstructorElement constructorElement,
-      Optional<TypeMirror> resolvedType,
+      Optional<XType> resolvedType,
       boolean warnIfNotAlreadyGenerated) {
     XTypeElement typeElement = constructorElement.getEnclosingElement();
     XType type = typeElement.getType();
@@ -264,7 +263,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     }
 
     // ok, let's see if we can find an @Inject constructor
-    XTypeElement element = toXProcessing(asType(types.asElement(key.type().java())), processingEnv);
+    XTypeElement element = key.type().xprocessing().getTypeElement();
     Set<XConstructorElement> injectConstructors = new LinkedHashSet<>();
     injectConstructors.addAll(injectedConstructors(element));
     injectConstructors.addAll(assistedInjectedConstructors(element));
@@ -274,7 +273,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
         return Optional.empty();
       case 1:
         return tryRegisterConstructor(
-            Util.getOnlyElement(injectConstructors), Optional.of(key.type().java()), true);
+            Util.getOnlyElement(injectConstructors), Optional.of(key.type().xprocessing()), true);
       default:
         throw new IllegalStateException("Found multiple @Inject constructors: "
             + injectConstructors);

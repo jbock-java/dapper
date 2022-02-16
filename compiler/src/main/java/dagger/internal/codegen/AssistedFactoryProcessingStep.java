@@ -342,7 +342,9 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
       ClassName generatedFactoryClassName =
           generatedClassNameForBinding(
               bindingFactory.injectionBinding(
-                  getOnlyElement(assistedInjectedConstructors(asTypeElement(assistedInjectType))),
+                  getOnlyElement(
+                      assistedInjectedConstructors(
+                          toXProcessing(asTypeElement(assistedInjectType), processingEnv))),
                   Optional.empty()));
 
       // Return the factory type resolved with the same type parameters as the assisted inject type.
