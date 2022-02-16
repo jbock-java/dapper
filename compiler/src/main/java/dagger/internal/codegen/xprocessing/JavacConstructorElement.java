@@ -29,4 +29,13 @@ class JavacConstructorElement extends JavacExecutableElement implements XConstru
         .asMemberOf(MoreTypes.asDeclared(containing().toJavac().asType()), toJavac());
     return new JavacConstructorType(env(), this, MoreTypes.asExecutable(asMemberOf));
   }
+
+  @Override
+  public XConstructorType asMemberOf(XType other) {
+    if (!(other instanceof JavacDeclaredType) || containing().getType().isSameType(other)) {
+      return getExecutableType();
+    }
+    TypeMirror asMemberOf = env().toJavac().getTypeUtils().asMemberOf(((JavacDeclaredType) other).toJavac(), toJavac());
+    return new JavacConstructorType(env(), this, MoreTypes.asExecutable(asMemberOf));
+  }
 }

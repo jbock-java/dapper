@@ -42,6 +42,7 @@ import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.BindingKind;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreElements;
@@ -193,6 +194,11 @@ public final class AssistedInjectionAnnotations {
     return constructor.getParameters().stream()
         .filter(AssistedInjectionAnnotations::isAssistedParameter)
         .collect(toImmutableList());
+  }
+
+  /** Returns {@code true} if this binding is uses assisted injection. */
+  public static boolean isAssistedParameter(XVariableElement param) {
+    return param.hasAnnotation(TypeNames.ASSISTED);
   }
 
   /** Returns {@code true} if this binding is uses assisted injection. */
