@@ -31,6 +31,7 @@ import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -404,7 +405,7 @@ public final class ComponentValidator implements ClearableCache {
           .map(method -> asMethod(toXProcessing(method, processingEnv)))
           .filter(method -> isEntryPoint(method, method.asMemberOf(component.getType())))
           .forEach(method -> {
-            String key = method.getName();
+            String key = getSimpleName(method);
             Set<XMethodElement> methods = entryPoints.getOrDefault(key, Set.of());
             if (methods.stream().noneMatch(existingMethod -> overridesAsDeclared(existingMethod, method))) {
               methods.stream()

@@ -19,6 +19,7 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static java.util.stream.Collectors.joining;
 
@@ -105,7 +106,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
         report.addError(
             String.format(
                 "%s is annotated with more than one of (%s)",
-                method.getName(),
+                getSimpleName(method),
                 methodAnnotations().stream().map(ClassName::canonicalName).collect(joining(", "))),
             method);
         break;

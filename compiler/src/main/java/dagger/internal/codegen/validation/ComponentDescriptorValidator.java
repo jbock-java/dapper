@@ -28,6 +28,7 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -371,7 +372,7 @@ public final class ComponentDescriptorValidator {
       XType parameterType = resolveParameterType(parameter, container);
       return joiner
           .add(stripCommonTypePrefixes(parameterType.getTypeName().toString()))
-          .add(parameter.getName())
+          .add(getSimpleName(parameter))
           .toString();
     }
 

@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
@@ -199,7 +201,7 @@ public final class ErrorMessages {
               + "order to provide type-safe access to these methods, override %2$s() to return "
               + "%4$s",
           componentBuilder.getQualifiedName(),
-          buildMethod.getName(),
+          getSimpleName(buildMethod),
           returnType,
           component.getQualifiedName(),
           additionalMethods.stream().map(XMethodElement::toString).collect(Collectors.joining(", ")));

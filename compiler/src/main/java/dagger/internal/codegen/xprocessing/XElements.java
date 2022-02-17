@@ -40,6 +40,12 @@ import javax.lang.model.element.ElementKind;
 /** A utility class for {@link XElement} helper methods. */
 public final class XElements {
 
+  // TODO(bcorso): Replace usages with getJvmName() once it exists.
+  /** Returns the simple name of the element. */
+  public static String getSimpleName(XElement element) {
+    return toJavac(element).getSimpleName().toString();
+  }
+
   /**
    * Returns the closest enclosing element that is a {@link XTypeElement} or throws an {@link
    * IllegalStateException} if one doesn't exists.

@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.base.Util;
@@ -111,7 +112,7 @@ final class ComponentHierarchyValidator {
             String.format(
                 "%s is present in %s. A subcomponent cannot use an instance of a "
                     + "module that differs from its parent.",
-                moduleType.getName(),
+                getSimpleName(moduleType),
                 existingModuleToOwners.get(moduleType).getQualifiedName()),
             factoryMethodParameter);
       }

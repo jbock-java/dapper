@@ -26,6 +26,7 @@ import static dagger.internal.codegen.javapoet.TypeNames.INSTANCE_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.stream.Collectors.joining;
@@ -198,7 +199,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
                 metadata.factory().getQualifiedName(),
                 metadata.factoryMethod(),
                 metadata.factory().getQualifiedName(),
-                metadata.factoryMethod().getName(),
+                getSimpleName(metadata.factoryMethod()),
                 metadata.assistedInjectAssistedParameters().stream()
                     .map(AssistedParameter::type)
                     .map(Object::toString)
@@ -301,7 +302,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
                       // use the parameter names of the @AssistedFactory method.
                       metadata.assistedInjectAssistedParameters().stream()
                           .map(metadata.assistedFactoryAssistedParametersMap()::get)
-                          .map(param -> CodeBlock.of("$L", param.getName()))
+                          .map(param -> CodeBlock.of("$L", getSimpleName(param)))
                           .collect(toParametersCodeBlock()))
                   .build())
           .addMethod(

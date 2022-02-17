@@ -24,7 +24,9 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
 import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypeElements.isEffectivelyPrivate;
@@ -41,6 +43,7 @@ import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XAnnotationValue;
+import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
@@ -154,7 +157,7 @@ public final class ModuleValidator {
 
     Map<String, List<XMethodElement>> bindingMethodsByName =
         bindingMethods.stream()
-            .collect(Collectors.groupingBy(XMethodElement::getName, LinkedHashMap::new, Collectors.toList()));
+            .collect(Collectors.groupingBy(XElements::getSimpleName, LinkedHashMap::new, Collectors.toList()));
 
     validateMethodsWithSameName(builder, bindingMethodsByName);
     if (!module.isInterface()) {
@@ -162,7 +165,7 @@ public final class ModuleValidator {
           module,
           builder,
           moduleMethods.stream()
-              .collect(Collectors.groupingBy(XMethodElement::getName, LinkedHashMap::new, Collectors.toList())),
+              .collect(Collectors.groupingBy(XElements::getSimpleName, LinkedHashMap::new, Collectors.toList())),
           bindingMethodsByName);
     }
     validateModifiers(module, builder);
@@ -251,7 +254,7 @@ public final class ModuleValidator {
             + "@%3$s.subcomponents",
         subcomponent.getQualifiedName(),
         subcomponentAnnotation(subcomponent).orElseThrow().simpleName(),
-        moduleAnnotation.getName());
+        getClassName(moduleAnnotation).simpleName());
   }
 
   enum ModuleMethodKind {
@@ -412,7 +415,7 @@ public final class ModuleValidator {
       currentClass = currentClass.getSuperType().getTypeElement();
       List<XMethodElement> superclassMethods = currentClass.getDeclaredMethods();
       for (XMethodElement superclassMethod : superclassMethods) {
-        String name = superclassMethod.getName();
+        String name = getSimpleName(superclassMethod);
         // For each method in the superclass, confirm our binding methods don't override it
         for (XMethodElement bindingMethod : bindingMethodsByName.getOrDefault(name, List.of())) {
           if (visitedMethods.add(bindingMethod)
@@ -436,7 +439,7 @@ public final class ModuleValidator {
             }
           }
         }
-        allMethodsByName.merge(superclassMethod.getName(), List.of(superclassMethod),
+        allMethodsByName.merge(getSimpleName(superclassMethod), List.of(superclassMethod),
             (list1, list2) -> Stream.of(list1, list2).flatMap(List::stream).collect(Collectors.toList()));
       }
     }

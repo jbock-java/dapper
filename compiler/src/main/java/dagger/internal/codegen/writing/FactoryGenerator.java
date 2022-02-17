@@ -29,6 +29,7 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
@@ -225,7 +226,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
                     element ->
                         ParameterSpec.builder(
                                 element.getType().getTypeName(),
-                                uniqueFieldNames.getUniqueName(element.getName()))
+                                uniqueFieldNames.getUniqueName(getSimpleName(element)))
                             .build()));
     TypeName providedTypeName = providedTypeName(binding);
     MethodSpec.Builder getMethod =

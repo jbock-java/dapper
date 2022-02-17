@@ -36,11 +36,10 @@ import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ComponentRequirement.NullPolicy;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
+import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
@@ -399,7 +398,7 @@ final class ComponentCreatorImplementationFactory {
       return new LinkedHashMap<>(
           Util.transformValues(
               creatorDescriptor.factoryParameters(),
-              XVariableElement::getName));
+              XElements::getSimpleName));
     }
 
     private XType creatorType() {

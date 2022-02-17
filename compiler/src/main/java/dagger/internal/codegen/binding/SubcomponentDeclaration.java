@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
@@ -119,7 +120,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).get();
       XElement subcomponentAttribute =
           moduleAnnotation.annotation().getType().getTypeElement().getDeclaredMethods().stream()
-              .filter(method -> method.getName().contentEquals("subcomponents"))
+              .filter(method -> getSimpleName(method).contentEquals("subcomponents"))
               .collect(toOptional())
               .orElseThrow();
 

@@ -91,7 +91,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> extends XPr
     Preconditions.checkState(
         annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
         "Unexpected annotations for %s: %s",
-        this.getClass().getName(),
+        this.getClass().getCanonicalName(),
         Util.difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
     Map<XElement, Set<ClassName>> builder = new LinkedHashMap<>();
