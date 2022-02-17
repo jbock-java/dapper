@@ -121,7 +121,7 @@ public final class ComponentRequestRepresentations {
     if (binding.requiresModuleInstance()) {
       arguments.add(
           componentRequirementExpressions.getExpressionDuringInitialization(
-              ComponentRequirement.forModule(binding.contributingModule().orElseThrow().asType()),
+              ComponentRequirement.forModule(binding.contributingModule().get().getType()),
               requestingClass));
     }
 

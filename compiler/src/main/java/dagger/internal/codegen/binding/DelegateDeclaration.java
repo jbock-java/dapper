@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Binds;
@@ -35,14 +34,13 @@ import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.TypeElement;
 
 /** The declaration for a delegate binding established by a {@link Binds} method. */
 public final class DelegateDeclaration extends BindingDeclaration {
 
   private final Key key;
   private final Optional<XElement> bindingElement;
-  private final Optional<TypeElement> contributingModule;
+  private final Optional<XTypeElement> contributingModule;
   private final DependencyRequest delegateRequest;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
       Objects.hash(
@@ -54,7 +52,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
   DelegateDeclaration(
       Key key,
       Optional<XElement> bindingElement,
-      Optional<TypeElement> contributingModule,
+      Optional<XTypeElement> contributingModule,
       DependencyRequest delegateRequest) {
     this.key = requireNonNull(key);
     this.bindingElement = requireNonNull(bindingElement);
@@ -73,7 +71,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
   }
 
   @Override
-  public Optional<TypeElement> contributingModule() {
+  public Optional<XTypeElement> contributingModule() {
     return contributingModule;
   }
 
@@ -124,7 +122,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
       return new DelegateDeclaration(
           keyFactory.forBindsMethod(bindsMethod, contributingModule),
           Optional.of(bindsMethod),
-          Optional.of(toJavac(contributingModule)),
+          Optional.of(contributingModule),
           delegateRequest);
     }
   }

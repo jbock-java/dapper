@@ -20,15 +20,14 @@ import static dagger.internal.codegen.extension.Optionals.emptiesLast;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Comparator.comparing;
 
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XElements;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import java.util.Comparator;
 import java.util.Optional;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /** An object that declares or specifies a binding. */
 public abstract class BindingDeclaration {
@@ -51,7 +50,7 @@ public abstract class BindingDeclaration {
               declaration.contributingModule().isPresent()
                   ? declaration.contributingModule()
                   : declaration.bindingTypeElement(),
-          emptiesLast(comparing((TypeElement type) -> type.getQualifiedName().toString())))
+          emptiesLast(comparing(XTypeElement::getQualifiedName)))
           .thenComparing(
               BindingDeclaration::bindingElement,
               emptiesLast(
@@ -71,10 +70,8 @@ public abstract class BindingDeclaration {
    * The type enclosing the {@link #bindingElement()}, or {@link Optional#empty()} if {@link
    * #bindingElement()} is empty.
    */
-  public final Optional<TypeElement> bindingTypeElement() {
-    return bindingElement()
-        .map(XConverters::toJavac)
-        .map(DaggerElements::closestEnclosingTypeElement);
+  public final Optional<XTypeElement> bindingTypeElement() {
+    return bindingElement().map(XElements::closestEnclosingTypeElement);
   }
 
   /**
@@ -82,5 +79,5 @@ public abstract class BindingDeclaration {
    * the class that contains {@link #bindingElement()}. Absent if {@link #bindingElement()} is
    * empty.
    */
-  public abstract Optional<TypeElement> contributingModule();
+  public abstract Optional<XTypeElement> contributingModule();
 }

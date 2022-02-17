@@ -158,7 +158,7 @@ public class SourceFiles {
       }
     }
     List<? extends TypeParameterElement> typeParameters =
-        binding.bindingTypeElement().orElseThrow().getTypeParameters();
+        toJavac(binding.bindingTypeElement().get()).getTypeParameters();
     return typeParameters.stream().map(TypeVariableName::get).collect(toImmutableList());
   }
 

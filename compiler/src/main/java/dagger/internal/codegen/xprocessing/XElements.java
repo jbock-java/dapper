@@ -39,22 +39,6 @@ import javax.lang.model.element.ElementKind;
 /** A utility class for {@link XElement} helper methods. */
 public final class XElements {
 
-  public static boolean isExecutable(XElement element) {
-    return isConstructor(element) || isMethod(element);
-  }
-
-  public static XExecutableElement asExecutable(XElement element) {
-    checkState(isExecutable(element));
-    return (XExecutableElement) element;
-  }
-
-  // TODO(bcorso): Replace usages with getJvmName() once it exists.
-
-  /** Returns the simple name of the element. */
-  public static String getSimpleName(XElement element) {
-    return toJavac(element).getSimpleName().toString();
-  }
-
   /**
    * Returns the closest enclosing element that is a {@link XTypeElement} or throws an {@link
    * IllegalStateException} if one doesn't exists.
@@ -78,6 +62,22 @@ public final class XElements {
           asMethodParameter(element).getEnclosingMethodElement());
     }
     return Optional.empty();
+  }
+
+  public static boolean isExecutable(XElement element) {
+    return isConstructor(element) || isMethod(element);
+  }
+
+  public static XExecutableElement asExecutable(XElement element) {
+    checkState(isExecutable(element));
+    return (XExecutableElement) element;
+  }
+
+  // TODO(bcorso): Replace usages with getJvmName() once it exists.
+
+  /** Returns the simple name of the element. */
+  public static String getSimpleName(XElement element) {
+    return toJavac(element).getSimpleName().toString();
   }
 
   public static boolean isEnum(XElement element) {

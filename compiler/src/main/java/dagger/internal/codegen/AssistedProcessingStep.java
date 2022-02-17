@@ -18,9 +18,9 @@ package dagger.internal.codegen;
 
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
-import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -30,7 +30,6 @@ import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
@@ -44,18 +43,15 @@ import java.util.Set;
 final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutableParameterElement> {
   private final InjectionAnnotations injectionAnnotations;
   private final XMessager messager;
-  private final XProcessingEnv processingEnv;
 
   @Inject
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
       EnclosingTypeElementValidator elementValidator,
-      XMessager messager,
-      XProcessingEnv processingEnv) {
+      XMessager messager) {
     super(elementValidator);
     this.injectionAnnotations = injectionAnnotations;
     this.messager = messager;
-    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -99,7 +95,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
 
   private boolean isAssistedFactoryCreateMethod(XExecutableElement executableElement) {
     if (isMethod(executableElement)) {
-      XTypeElement enclosingElement = closestEnclosingTypeElement(executableElement, processingEnv);
+      XTypeElement enclosingElement = closestEnclosingTypeElement(executableElement);
       return isAssistedFactoryType(enclosingElement)
           // This assumes we've already validated AssistedFactory and that a valid method exists.
           && assistedFactoryMethod(enclosingElement).equals(executableElement);

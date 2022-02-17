@@ -24,6 +24,7 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.EXECUTABLE;
 
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
@@ -84,6 +85,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
               MoreElements.asExecutable(bindingElement),
               bindingDeclaration
                   .contributingModule()
+                  .map(XConverters::toJavac)
                   .map(module -> MoreTypes.asDeclared(module.asType())));
 
         case DECLARED:

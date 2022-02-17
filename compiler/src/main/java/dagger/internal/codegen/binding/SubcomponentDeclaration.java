@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.TypeElement;
 
 /**
  * A declaration for a subcomponent that is included in a module via {@link
@@ -40,7 +39,7 @@ import javax.lang.model.element.TypeElement;
  */
 public final class SubcomponentDeclaration extends BindingDeclaration {
   private final Optional<XElement> bindingElement;
-  private final Optional<TypeElement> contributingModule;
+  private final Optional<XTypeElement> contributingModule;
   private final Key key;
   private final XTypeElement subcomponentType;
   private final ModuleAnnotation moduleAnnotation;
@@ -49,7 +48,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
 
   SubcomponentDeclaration(
       Optional<XElement> bindingElement,
-      Optional<TypeElement> contributingModule,
+      Optional<XTypeElement> contributingModule,
       Key key,
       XTypeElement subcomponentType,
       ModuleAnnotation moduleAnnotation) {
@@ -66,7 +65,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   }
 
   @Override
-  public Optional<TypeElement> contributingModule() {
+  public Optional<XTypeElement> contributingModule() {
     return contributingModule;
   }
 
@@ -130,7 +129,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
         declarations.add(
             new SubcomponentDeclaration(
                 Optional.of(subcomponentAttribute),
-                Optional.of(toJavac(module)),
+                Optional.of(module),
                 keyFactory.forSubcomponentCreator(
                     toJavac(getSubcomponentCreator(subcomponent).orElseThrow().getType())),
                 subcomponent,

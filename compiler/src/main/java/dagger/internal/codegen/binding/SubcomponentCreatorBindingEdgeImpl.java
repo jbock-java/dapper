@@ -17,10 +17,8 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Util.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static java.util.stream.Collectors.joining;
 
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.BindingGraph.SubcomponentCreatorBindingEdge;
 import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
@@ -32,13 +30,10 @@ import java.util.stream.Collectors;
 /** An implementation of {@link SubcomponentCreatorBindingEdge}. */
 public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCreatorBindingEdge {
 
-  private final XProcessingEnv processingEnv;
   private final Set<SubcomponentDeclaration> subcomponentDeclarations;
 
   SubcomponentCreatorBindingEdgeImpl(
-      XProcessingEnv processingEnv,
       Set<SubcomponentDeclaration> subcomponentDeclarations) {
-    this.processingEnv = processingEnv;
     this.subcomponentDeclarations = subcomponentDeclarations;
   }
 
@@ -47,7 +42,6 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
     return subcomponentDeclarations.stream()
         .map(SubcomponentDeclaration::contributingModule)
         .flatMap(Optional::stream)
-        .map(module -> toXProcessing(module, processingEnv))
         .map(DaggerTypeElement::from)
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }

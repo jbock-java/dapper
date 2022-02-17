@@ -143,7 +143,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   private Optional<ParameterSpec> moduleParameter(ProvisionBinding binding) {
     if (binding.requiresModuleInstance()) {
       // TODO(bcorso, dpb): Should this use contributingModule()?
-      TypeName type = TypeName.get(binding.bindingTypeElement().get().asType());
+      TypeName type = binding.bindingTypeElement().get().getType().getTypeName();
       return Optional.of(ParameterSpec.builder(type, "module").build());
     }
     return Optional.empty();

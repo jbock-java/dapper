@@ -210,7 +210,7 @@ public final class BindingFactory {
     }
     return builder
         .bindingElement(toXProcessing(method, processingEnv))
-        .contributingModule(contributedBy)
+        .contributingModule(toXProcessing(contributedBy, processingEnv))
         .key(key)
         .dependencies(
             dependencyRequestFactory.forRequiredResolvedVariables(

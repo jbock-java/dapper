@@ -18,7 +18,6 @@ package dagger.internal.codegen.langmodel;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.hasModifiers;
 import static java.util.Comparator.comparing;
@@ -30,7 +29,6 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.xprocessing.XAnnotated;
 import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -124,12 +122,6 @@ public final class DaggerElements implements Elements, ClearableCache {
   /** Returns the type element for a class name. */
   public TypeElement getTypeElement(ClassName className) {
     return getTypeElement(className.canonicalName());
-  }
-
-  /** Returns the argument or the closest enclosing element that is a {@link XTypeElement}. */
-  public static XTypeElement closestEnclosingTypeElement(
-      XElement element, XProcessingEnv processingEnv) {
-    return toXProcessing(closestEnclosingTypeElement(toJavac(element)), processingEnv);
   }
 
   /** Returns the argument or the closest enclosing element that is a {@link TypeElement}. */

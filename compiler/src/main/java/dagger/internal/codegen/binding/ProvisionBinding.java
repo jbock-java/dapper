@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
@@ -34,14 +35,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-import javax.lang.model.element.TypeElement;
 
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
 public final class ProvisionBinding extends ContributionBinding {
 
   private final Key key;
   private final Optional<XElement> bindingElement;
-  private final Optional<TypeElement> contributingModule;
+  private final Optional<XTypeElement> contributingModule;
   private final BindingKind kind;
   private final Set<DependencyRequest> provisionDependencies;
   private final Optional<ProvisionBinding> unresolved;
@@ -58,7 +58,7 @@ public final class ProvisionBinding extends ContributionBinding {
   ProvisionBinding(
       Key key,
       Optional<XElement> bindingElement,
-      Optional<TypeElement> contributingModule,
+      Optional<XTypeElement> contributingModule,
       BindingKind kind,
       Set<DependencyRequest> provisionDependencies,
       Optional<ProvisionBinding> unresolved,
@@ -88,7 +88,7 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   @Override
-  public Optional<TypeElement> contributingModule() {
+  public Optional<XTypeElement> contributingModule() {
     return contributingModule;
   }
 
@@ -171,7 +171,7 @@ public final class ProvisionBinding extends ContributionBinding {
   static final class Builder {
     private Key key;
     private Optional<XElement> bindingElement = Optional.empty();
-    private Optional<TypeElement> contributingModule = Optional.empty();
+    private Optional<XTypeElement> contributingModule = Optional.empty();
     private BindingKind kind;
     private Set<DependencyRequest> provisionDependencies;
     private Optional<ProvisionBinding> unresolved = Optional.empty();
@@ -217,7 +217,7 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    Builder contributingModule(TypeElement contributingModule) {
+    Builder contributingModule(XTypeElement contributingModule) {
       this.contributingModule = Optional.of(contributingModule);
       return this;
     }

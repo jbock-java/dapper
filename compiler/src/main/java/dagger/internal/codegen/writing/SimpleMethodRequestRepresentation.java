@@ -32,6 +32,7 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreTypes;
@@ -39,7 +40,6 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeName;
 import java.util.Optional;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -137,7 +137,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
     return provisionBinding.requiresModuleInstance()
         ? provisionBinding
         .contributingModule()
-        .map(Element::asType)
+        .map(XTypeElement::getType)
         .map(ComponentRequirement::forModule)
         .map(module -> componentRequirementExpressions.getExpression(module, requestingClass))
         : Optional.empty();
