@@ -18,7 +18,7 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
-import static dagger.internal.codegen.xprocessing.XTypeElements.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;

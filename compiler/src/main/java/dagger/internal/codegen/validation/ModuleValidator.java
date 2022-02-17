@@ -26,12 +26,11 @@ import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcom
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
-import static dagger.internal.codegen.xprocessing.XTypeElements.effectiveVisibility;
 import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XTypeElements.isEffectivelyPrivate;
+import static dagger.internal.codegen.xprocessing.XTypeElements.isEffectivelyPublic;
 import static dagger.internal.codegen.xprocessing.XTypes.areEquivalentTypes;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.Visibility.PRIVATE;
-import static io.jbock.auto.common.Visibility.PUBLIC;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.binding.BindingGraphFactory;
@@ -47,7 +46,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingGraph;
-import io.jbock.auto.common.Visibility;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
@@ -448,10 +446,9 @@ public final class ModuleValidator {
       XTypeElement moduleElement,
       ModuleKind moduleKind,
       ValidationReport.Builder reportBuilder) {
-    Visibility moduleEffectiveVisibility = effectiveVisibility(moduleElement);
     if (moduleElement.isPrivate()) {
       reportBuilder.addError("Modules cannot be private.", moduleElement);
-    } else if (moduleEffectiveVisibility.equals(PRIVATE)) {
+    } else if (isEffectivelyPrivate(moduleElement)) {
       reportBuilder.addError("Modules cannot be enclosed in private types.", moduleElement);
     }
 
@@ -462,7 +459,7 @@ public final class ModuleValidator {
         throw new IllegalStateException("Local classes shouldn't show up in the processor");
       case MEMBER:
       case TOP_LEVEL:
-        if (moduleEffectiveVisibility.equals(PUBLIC)) {
+        if (isEffectivelyPublic(moduleElement)) {
           Set<XTypeElement> invalidVisibilityIncludes =
               getModuleIncludesWithInvalidVisibility(moduleKind.getModuleAnnotation(moduleElement));
           if (!invalidVisibilityIncludes.isEmpty()) {
@@ -484,7 +481,7 @@ public final class ModuleValidator {
       XAnnotation moduleAnnotation) {
     return moduleAnnotation.getAnnotationValue("includes").asTypeList().stream()
         .map(XType::getTypeElement)
-        .filter(include -> !effectiveVisibility(include).equals(PUBLIC))
+        .filter(include -> !isEffectivelyPublic(include))
         .filter(this::requiresModuleInstance)
         .collect(Collectors.toSet());
   }
@@ -532,6 +529,7 @@ public final class ModuleValidator {
                     moduleAnnotation,
                     includedModule));
   }
+
   private void validateModuleBindings(
       XTypeElement module, ValidationReport.Builder report) {
     BindingGraph bindingGraph =

@@ -36,7 +36,7 @@ public final class DaggerTypeElement {
     return new DaggerTypeElement(requireNonNull(element));
   }
 
-  XTypeElement xprocessing() {
+  public XTypeElement xprocessing() {
     return element;
   }
 

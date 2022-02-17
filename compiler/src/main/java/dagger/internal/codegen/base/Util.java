@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /** General utilities for the annotation processor. */
 public final class Util {
@@ -190,5 +192,12 @@ public final class Util {
       current.add(list.get(i));
     }
     return result;
+  }
+
+  public static <E> Stream<E> asStream(Iterable<E> coll) {
+    if (coll instanceof Collection) {
+      return ((Collection<E>) coll).stream();
+    }
+    return StreamSupport.stream(coll.spliterator(), false);
   }
 }

@@ -16,7 +16,10 @@
 
 package dagger.internal.codegen.javapoet;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
@@ -45,8 +48,21 @@ public final class Expression {
   }
 
   /** Creates a new {@link Expression} with a {@link TypeMirror} and {@link CodeBlock}. */
+  public static Expression create(XType type, CodeBlock expression) {
+    return create(toJavac(type), expression);
+  }
+
+  /** Creates a new {@link Expression} with a {@link TypeMirror} and {@link CodeBlock}. */
   public static Expression create(TypeMirror type, CodeBlock expression) {
     return new Expression(type, expression);
+  }
+
+  /**
+   * Creates a new {@link Expression} with a {@link TypeMirror}, {@linkplain CodeBlock#of(String,
+   * Object[]) format, and arguments}.
+   */
+  public static Expression create(XType type, String format, Object... args) {
+    return create(toJavac(type), format, args);
   }
 
   /**

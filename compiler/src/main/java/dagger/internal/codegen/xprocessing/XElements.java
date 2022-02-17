@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.xprocessing;
 
-import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
@@ -26,10 +25,12 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import io.jbock.javapoet.ClassName;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
@@ -64,54 +65,47 @@ public final class XElements {
     return Optional.empty();
   }
 
+  public static boolean isEnum(XElement element) {
+    return toJavac(element).getKind() == ElementKind.ENUM;
+  }
+
   public static boolean isExecutable(XElement element) {
     return isConstructor(element) || isMethod(element);
   }
 
   public static XExecutableElement asExecutable(XElement element) {
-    checkState(isExecutable(element));
+    Preconditions.checkState(isExecutable(element));
     return (XExecutableElement) element;
   }
 
-  // TODO(bcorso): Replace usages with getJvmName() once it exists.
-
-  /** Returns the simple name of the element. */
-  public static String getSimpleName(XElement element) {
-    return toJavac(element).getSimpleName().toString();
-  }
-
-  public static boolean isEnum(XElement element) {
-    return toJavac(element).getKind() == ElementKind.ENUM;
-  }
-
   public static XTypeElement asTypeElement(XElement element) {
-    checkState(isTypeElement(element));
+    Preconditions.checkState(isTypeElement(element));
     return (XTypeElement) element;
   }
 
   // TODO(bcorso): Rename this and the XElementKt.isMethodParameter to isExecutableParameter.
   public static XExecutableParameterElement asMethodParameter(XElement element) {
-    checkState(isMethodParameter(element));
+    Preconditions.checkState(isMethodParameter(element));
     return (XExecutableParameterElement) element;
   }
 
   public static XFieldElement asField(XElement element) {
-    checkState(isField(element));
+    Preconditions.checkState(isField(element));
     return (XFieldElement) element;
   }
 
   public static XVariableElement asVariable(XElement element) {
-    checkState(isVariableElement(element));
+    Preconditions.checkState(isVariableElement(element));
     return (XVariableElement) element;
   }
 
   public static XConstructorElement asConstructor(XElement element) {
-    checkState(isConstructor(element));
+    Preconditions.checkState(isConstructor(element));
     return (XConstructorElement) element;
   }
 
   public static XMethodElement asMethod(XElement element) {
-    checkState(isMethod(element));
+    Preconditions.checkState(isMethod(element));
     return (XMethodElement) element;
   }
 
@@ -124,7 +118,7 @@ public final class XElements {
 
   /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
   public static boolean hasAnyAnnotation(XAnnotated annotated, ClassName... annotations) {
-    return hasAnyAnnotation(annotated, Util.setOf(Arrays.asList(annotations)));
+    return hasAnyAnnotation(annotated, new LinkedHashSet<>(Arrays.asList(annotations)));
   }
 
   /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
