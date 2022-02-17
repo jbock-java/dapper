@@ -114,11 +114,6 @@ public final class ComponentDescriptor {
     return requirements;
   });
 
-  private final IntSupplier hashCode = memoizeInt(() -> {
-    // TODO(b/122962745): Only use typeElement().hashCode()
-    return Objects.hash(typeElement(), annotation());
-  });
-
   private final Supplier<Map<BindingRequest, ComponentMethodDescriptor>> firstMatchingComponentMethods = Suppliers.memoize(() -> {
     Map<BindingRequest, ComponentMethodDescriptor> methods = new LinkedHashMap<>();
     for (ComponentMethodDescriptor method : entryPointMethods()) {
@@ -328,9 +323,14 @@ public final class ComponentDescriptor {
     return !isSubcomponent() || creatorDescriptor().isPresent();
   }
 
+  private final IntSupplier hashCodeCache = memoizeInt(() -> {
+    // TODO(b/122962745): Only use typeElement().hashCode()
+    return Objects.hash(typeElement(), annotation());
+  });
+
   @Override
   public int hashCode() {
-    return Objects.hash(typeElement(), annotation());
+    return hashCodeCache.getAsInt();
   }
 
   @Override

@@ -13,6 +13,11 @@ class JavacMethodType extends JavacExecutableType implements XMethodType {
 
   @Override
   public XType getReturnType() {
-    return env().wrap(executableType().getReturnType());
+    return env().wrap(toJavac().getReturnType());
+  }
+
+  @Override
+  public ExecutableType toJavac() {
+    return super.toJavac();
   }
 }

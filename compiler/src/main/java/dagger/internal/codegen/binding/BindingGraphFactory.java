@@ -19,6 +19,8 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
@@ -34,6 +36,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
 import dagger.spi.model.Key;
@@ -62,6 +65,7 @@ import javax.lang.model.type.TypeKind;
 @Singleton
 public final class BindingGraphFactory implements ClearableCache {
 
+  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final InjectBindingRegistry injectBindingRegistry;
   private final BindingFactory bindingFactory;
@@ -70,10 +74,12 @@ public final class BindingGraphFactory implements ClearableCache {
 
   @Inject
   BindingGraphFactory(
+      XProcessingEnv processingEnv,
       DaggerElements elements,
       InjectBindingRegistry injectBindingRegistry,
       BindingFactory bindingFactory,
       BindingGraphConverter bindingGraphConverter) {
+    this.processingEnv = processingEnv;
     this.elements = elements;
     this.injectBindingRegistry = injectBindingRegistry;
     this.bindingFactory = bindingFactory;
@@ -120,8 +126,9 @@ public final class BindingGraphFactory implements ClearableCache {
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(elements, method)) {
-          ProvisionBinding binding = bindingFactory.componentDependencyMethodBinding(
-              method);
+          ProvisionBinding binding =
+              bindingFactory.componentDependencyMethodBinding(
+                  componentDescriptor, asMethod(toXProcessing(method, processingEnv)));
           int previousSize = dedupeBindings.getOrDefault(method.getSimpleName().toString(), Set.of()).size();
           if (dedupeBindings.merge(
               method.getSimpleName().toString(),
@@ -156,8 +163,8 @@ public final class BindingGraphFactory implements ClearableCache {
                   .contains(childComponent)) {
                 explicitBindingsBuilder.add(
                     bindingFactory.subcomponentCreatorBinding(
-                        builderEntryPoint.methodElement(),
-                        componentDescriptor.typeElement().toJavac()));
+                        asMethod(toXProcessing(builderEntryPoint.methodElement(), processingEnv)),
+                        componentDescriptor.typeElement()));
               }
             });
 

@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.ModuleAnnotation;
@@ -131,7 +130,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
                 Optional.of(subcomponentAttribute),
                 Optional.of(module),
                 keyFactory.forSubcomponentCreator(
-                    toJavac(getSubcomponentCreator(subcomponent).orElseThrow().getType())),
+                    getSubcomponentCreator(subcomponent).get().getType()),
                 subcomponent,
                 moduleAnnotation));
       }

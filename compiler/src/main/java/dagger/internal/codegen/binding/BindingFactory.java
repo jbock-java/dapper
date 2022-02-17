@@ -20,7 +20,9 @@ import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.spi.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
@@ -32,9 +34,7 @@ import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.PROVISION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.element.ElementKind.METHOD;
 
 import dagger.Module;
 import dagger.internal.codegen.base.Preconditions;
@@ -54,16 +54,11 @@ import dagger.spi.model.DaggerType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ExecutableType;
 
 /** A factory for {@link Binding} objects. */
 public final class BindingFactory {
@@ -173,17 +168,6 @@ public final class BindingFactory {
    */
   public ProvisionBinding providesMethodBinding(
       XMethodElement providesMethod, XTypeElement contributedBy) {
-    return providesMethodBinding(providesMethod.toJavac(), contributedBy.toJavac());
-  }
-
-  /**
-   * Returns a {@link BindingKind#PROVISION} binding for a {@code @Provides}-annotated
-   * method.
-   *
-   * @param contributedBy the installed module that declares or inherits the method
-   */
-  public ProvisionBinding providesMethodBinding(
-      ExecutableElement providesMethod, TypeElement contributedBy) {
     return setMethodBindingProperties(
         ProvisionBinding.builder(),
         providesMethod,
@@ -191,29 +175,27 @@ public final class BindingFactory {
         keyFactory.forProvidesMethod(providesMethod, contributedBy),
         this::providesMethodBinding)
         .kind(PROVISION)
-        .scope(uniqueScopeOf(toXProcessing(providesMethod, processingEnv)))
+        .scope(uniqueScopeOf(providesMethod))
         .build();
   }
 
   private ProvisionBinding.Builder setMethodBindingProperties(
       ProvisionBinding.Builder builder,
-      ExecutableElement method,
-      TypeElement contributedBy,
+      XMethodElement method,
+      XTypeElement contributedBy,
       Key key,
-      BiFunction<ExecutableElement, TypeElement, ProvisionBinding> create) {
-    Preconditions.checkArgument(method.getKind().equals(METHOD));
-    ExecutableType methodType =
-        MoreTypes.asExecutable(
-            types.asMemberOf(MoreTypes.asDeclared(contributedBy.asType()), method));
-    if (!types.isSameType(methodType, method.asType())) {
-      builder.unresolved(create.apply(method, MoreElements.asType(method.getEnclosingElement())));
+      BiFunction<XMethodElement, XTypeElement, ProvisionBinding> create) {
+    XMethodType methodType = method.asMemberOf(contributedBy.getType());
+    if (!types.isSameType(toJavac(methodType), toJavac(method.getExecutableType()))) {
+      Preconditions.checkState(isTypeElement(method.getEnclosingElement()));
+      builder.unresolved(create.apply(method, asTypeElement(method.getEnclosingElement())));
     }
     return builder
-        .bindingElement(toXProcessing(method, processingEnv))
-        .contributingModule(toXProcessing(contributedBy, processingEnv))
+        .bindingElement(method)
+        .contributingModule(contributedBy)
         .key(key)
         .dependencies(
-            dependencyRequestFactory.forRequiredResolvedVariables(
+            dependencyRequestFactory.forRequiredResolvedXVariables(
                 method.getParameters(), methodType.getParameterTypes()));
   }
 
@@ -245,15 +227,14 @@ public final class BindingFactory {
    * binding for a method on a component's dependency.
    */
   public ProvisionBinding componentDependencyMethodBinding(
-      ExecutableElement dependencyMethod) {
-    Preconditions.checkArgument(dependencyMethod.getKind().equals(METHOD));
+      ComponentDescriptor componentDescriptor, XMethodElement dependencyMethod) {
     Preconditions.checkArgument(dependencyMethod.getParameters().isEmpty());
     ProvisionBinding.Builder builder = ProvisionBinding.builder()
         .key(keyFactory.forComponentMethod(dependencyMethod))
         .kind(COMPONENT_PROVISION)
-        .scope(uniqueScopeOf(toXProcessing(dependencyMethod, processingEnv)));
+        .scope(uniqueScopeOf(dependencyMethod));
     return builder
-        .bindingElement(toXProcessing(dependencyMethod, processingEnv))
+        .bindingElement(dependencyMethod)
         .build();
   }
 
@@ -279,14 +260,12 @@ public final class BindingFactory {
    * @param component the component that declares or inherits the method
    */
   ProvisionBinding subcomponentCreatorBinding(
-      ExecutableElement subcomponentCreatorMethod, TypeElement component) {
-    Preconditions.checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
+      XMethodElement subcomponentCreatorMethod, XTypeElement component) {
     Preconditions.checkArgument(subcomponentCreatorMethod.getParameters().isEmpty());
     Key key =
-        keyFactory.forSubcomponentCreatorMethod(
-            subcomponentCreatorMethod, asDeclared(component.asType()));
+        keyFactory.forSubcomponentCreatorMethod(subcomponentCreatorMethod, component.getType());
     return ProvisionBinding.builder()
-        .bindingElement(toXProcessing(subcomponentCreatorMethod, processingEnv))
+        .bindingElement(subcomponentCreatorMethod)
         .key(key)
         .kind(SUBCOMPONENT_CREATOR)
         .build();

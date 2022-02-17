@@ -25,7 +25,7 @@ abstract class JavacExecutableType implements XExecutableType {
    */
   @Override
   public List<TypeVariableName> getTypeVariableNames() {
-    return executableType().getTypeVariables().stream()
+    return toJavac().getTypeVariables().stream()
         .map(TypeVariableName::get)
         .collect(Collectors.toList());
   }
@@ -33,12 +33,12 @@ abstract class JavacExecutableType implements XExecutableType {
 
   @Override
   public List<XType> getParameterTypes() {
-    return executableType().getParameterTypes().stream()
+    return toJavac().getParameterTypes().stream()
         .map(env()::wrap)
         .collect(Collectors.toList());
   }
 
-  ExecutableType executableType() {
+  ExecutableType toJavac() {
     return executableType;
   }
 

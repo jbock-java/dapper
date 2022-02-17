@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
@@ -29,6 +30,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -66,25 +68,23 @@ public final class KeyFactory {
     return type.getKind().isPrimitive() ? types.boxedClass((PrimitiveType) type).asType() : type;
   }
 
-  Key forComponentMethod(ExecutableElement componentMethod) {
-    Preconditions.checkArgument(componentMethod.getKind().equals(METHOD));
+  Key forComponentMethod(XMethodElement componentMethod) {
     return forMethod(componentMethod, componentMethod.getReturnType());
   }
 
   Key forSubcomponentCreatorMethod(
-      ExecutableElement subcomponentCreatorMethod, DeclaredType declaredContainer) {
-    Preconditions.checkArgument(subcomponentCreatorMethod.getKind().equals(METHOD));
-    ExecutableType resolvedMethod =
-        asExecutable(types.asMemberOf(declaredContainer, subcomponentCreatorMethod));
-    return Key.builder(fromJava(resolvedMethod.getReturnType())).build();
+      XMethodElement subcomponentCreatorMethod, XType declaredContainer) {
+    Preconditions.checkArgument(isDeclared(declaredContainer));
+    XMethodType resolvedMethod = subcomponentCreatorMethod.asMemberOf(declaredContainer);
+    return Key.builder(DaggerType.from(resolvedMethod.getReturnType())).build();
   }
 
   public Key forSubcomponentCreator(XType creatorType) {
-    return forSubcomponentCreator(creatorType.toJavac());
+    return Key.builder(DaggerType.from(creatorType)).build();
   }
 
-  public Key forSubcomponentCreator(TypeMirror creatorType) {
-    return Key.builder(fromJava(creatorType)).build();
+  public Key forProvidesMethod(XMethodElement method, XTypeElement contributingModule) {
+    return forProvidesMethod(toJavac(method), toJavac(contributingModule));
   }
 
   public Key forProvidesMethod(ExecutableElement method, TypeElement contributingModule) {
@@ -116,6 +116,10 @@ public final class KeyFactory {
         MoreTypes.asExecutable(
             types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), method));
     return forMethod(method, methodType.getReturnType());
+  }
+
+  private Key forMethod(XMethodElement method, XType keyType) {
+    return forMethod(toJavac(method), toJavac(keyType));
   }
 
   private Key forMethod(ExecutableElement method, TypeMirror keyType) {

@@ -28,13 +28,12 @@ import dagger.spi.model.Scope;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 /**
- * An abstract type for classes representing a Dagger binding. Particularly, contains the {@link
- * Element} that generated the binding and the {@link DependencyRequest} instances that are required
- * to satisfy the binding, but leaves the specifics of the <i>mechanism</i> of the binding to the
+ * An abstract type for classes representing a Dagger binding. Particularly, contains the element
+ * that generated the binding and the {@link DependencyRequest} instances that are required to
+ * satisfy the binding, but leaves the specifics of the <i>mechanism</i> of the binding to the
  * subtypes.
  */
 public abstract class Binding extends BindingDeclaration {

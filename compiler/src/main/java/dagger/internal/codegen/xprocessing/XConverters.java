@@ -7,6 +7,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 public class XConverters {
@@ -65,6 +66,10 @@ public class XConverters {
 
   public static VariableElement toJavac(XVariableElement element) {
     return element.toJavac();
+  }
+
+  public static ExecutableType toJavac(XMethodType methodType) {
+    return methodType.toJavac();
   }
 
   public static AnnotationMirror toJavac(XAnnotation element) {
