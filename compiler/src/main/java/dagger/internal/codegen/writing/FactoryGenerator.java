@@ -41,7 +41,6 @@ import dagger.internal.Factory;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
@@ -61,6 +60,7 @@ import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,12 +153,16 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     UniqueNameSet uniqueFieldNames = new UniqueNameSet();
     // TODO(bcorso, dpb): Add a test for the case when a Factory parameter is named "module".
     moduleParameter(binding).ifPresent(module -> uniqueFieldNames.claim(module.name));
-    return Util.transformValues(
-        generateBindingFieldsForDependencies(binding),
-        field ->
-            FieldSpec.builder(
-                    field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
-                .build());
+    // We avoid Maps.transformValues here because it would implicitly depend on the order in which
+    // the transform function is evaluated on each entry in the map.
+    Map<DependencyRequest, FieldSpec> builder = new LinkedHashMap<>();
+    generateBindingFieldsForDependencies(binding).forEach(
+        (dependency, field) ->
+            builder.put(dependency,
+                FieldSpec.builder(
+                        field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
+                    .build()));
+    return builder;
   }
 
   private void addCreateMethod(ProvisionBinding binding, TypeSpec.Builder factoryBuilder) {
