@@ -27,6 +27,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
@@ -232,19 +233,19 @@ public final class ComponentRequirement {
         simpleVariableName(MoreTypes.asTypeElement(type)));
   }
 
-  static ComponentRequirement forBoundInstance(Key key, String variableName) {
+  static ComponentRequirement forBoundInstance(Key key, XElement elementForVariableName) {
     return new ComponentRequirement(
         Kind.BOUND_INSTANCE,
         MoreTypes.equivalence().wrap(key.type().java()),
         Optional.of(key),
-        variableName);
+        toJavac(elementForVariableName).getSimpleName().toString());
   }
 
   public static ComponentRequirement forBoundInstance(ContributionBinding binding) {
     Preconditions.checkArgument(binding.kind().equals(BindingKind.BOUND_INSTANCE));
     return forBoundInstance(
         binding.key(),
-        toJavac(binding.bindingElement().get()).getSimpleName().toString());
+        binding.bindingElement().get());
   }
 
   /**

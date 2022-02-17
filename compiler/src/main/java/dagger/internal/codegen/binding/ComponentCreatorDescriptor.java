@@ -199,8 +199,7 @@ public final class ComponentCreatorDescriptor {
         XExecutableParameterElement parameter = getOnlyElement(method.getParameters());
         XType parameterType = getOnlyElement(resolvedMethodType.getParameterTypes());
         setterMethods.merge(
-            requirement(
-                method, parameter, parameterType, dependencyRequestFactory, method.getName()),
+            requirement(method, parameter, parameterType, dependencyRequestFactory, method),
             Set.of(method),
             Util::mutableUnion);
       }
@@ -222,7 +221,7 @@ public final class ComponentCreatorDescriptor {
               parameter,
               parameterType,
               dependencyRequestFactory,
-              parameter.getName()),
+              parameter),
           Set.of(parameter),
           Util::mutableUnion);
     }
@@ -236,13 +235,13 @@ public final class ComponentCreatorDescriptor {
       XExecutableParameterElement parameter,
       XType parameterType,
       DependencyRequestFactory dependencyRequestFactory,
-      String variableName) {
+      XElement elementForVariableName) {
     if (method.hasAnnotation(TypeNames.BINDS_INSTANCE)
         || parameter.hasAnnotation(TypeNames.BINDS_INSTANCE)) {
       DependencyRequest request =
           dependencyRequestFactory.forRequiredResolvedVariable(parameter, parameterType);
       return ComponentRequirement.forBoundInstance(
-          request.key(), variableName);
+          request.key(), elementForVariableName);
     }
 
     return moduleAnnotation(parameterType.getTypeElement()).isPresent()
