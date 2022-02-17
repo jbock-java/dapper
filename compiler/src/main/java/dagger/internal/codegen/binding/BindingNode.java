@@ -128,10 +128,7 @@ public final class BindingNode implements dagger.spi.model.Binding {
 
   @Override
   public Optional<DaggerElement> bindingElement() {
-    return delegate()
-        .bindingElement()
-        .map(bindingElement -> toXProcessing(bindingElement, processingEnv))
-        .map(DaggerElement::from);
+    return delegate().bindingElement().map(DaggerElement::from);
   }
 
   @Override

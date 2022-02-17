@@ -20,6 +20,7 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBloc
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod.requiresInjectionMethod;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 
 import dagger.assisted.Assisted;
@@ -84,7 +85,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
                 provisionBinding,
                 request -> dependencyArgument(request, requestingClass).codeBlock(),
                 shardImplementation::getUniqueFieldNameForAssistedParam));
-    ExecutableElement method = asExecutable(provisionBinding.bindingElement().orElseThrow());
+    ExecutableElement method = asExecutable(toJavac(provisionBinding.bindingElement().get()));
     CodeBlock invocation;
     switch (method.getKind()) {
       case CONSTRUCTOR:

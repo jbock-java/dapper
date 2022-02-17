@@ -20,10 +20,11 @@ import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreatio
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
 import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.spi.model.Key;
 import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
-import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -35,7 +36,8 @@ public abstract class ContributionBinding extends Binding {
   /** If {@link #bindingElement()} is a method that returns a primitive type, returns that type. */
   public final Optional<TypeMirror> contributedPrimitiveType() {
     return bindingElement()
-        .filter(bindingElement -> bindingElement instanceof ExecutableElement)
+        .map(XConverters::toJavac)
+        .filter(bindingElement -> bindingElement.getKind() == ElementKind.METHOD)
         .map(bindingElement -> MoreElements.asExecutable(bindingElement).getReturnType())
         .filter(type -> type.getKind().isPrimitive());
   }

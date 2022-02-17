@@ -33,6 +33,7 @@ import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
@@ -41,7 +42,6 @@ import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
@@ -73,8 +73,8 @@ public final class ModuleProxies {
     }
 
     @Override
-    public Element originatingElement(XTypeElement moduleElement) {
-      return moduleElement.toJavac();
+    public XElement originatingElement(XTypeElement moduleElement) {
+      return moduleElement;
     }
 
     @Override

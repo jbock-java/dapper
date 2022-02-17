@@ -244,7 +244,7 @@ public final class ComponentRequirement {
     Preconditions.checkArgument(binding.kind().equals(BindingKind.BOUND_INSTANCE));
     return forBoundInstance(
         binding.key(),
-        binding.bindingElement().orElseThrow().getSimpleName().toString());
+        toJavac(binding.bindingElement().get()).getSimpleName().toString());
   }
 
   /**

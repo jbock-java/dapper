@@ -18,6 +18,7 @@ package dagger.internal.codegen.writing;
 
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
@@ -87,7 +88,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
             ComponentRequirement.forDependency(binding.key().type().java()));
 
       case COMPONENT_PROVISION:
-        return dependencyMethodProviderCreationExpressionFactory.create(binding);
+        return dependencyMethodProviderCreationExpressionFactory.create((ProvisionBinding) binding);
 
       case SUBCOMPONENT_CREATOR:
         return anonymousProviderCreationExpressionFactory.create(binding);

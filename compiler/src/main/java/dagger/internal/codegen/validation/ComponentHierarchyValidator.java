@@ -32,7 +32,6 @@ import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -215,10 +214,9 @@ final class ComponentHierarchyValidator {
 
   private Set<Scope> moduleScopes(ModuleDescriptor module) {
     return module.allBindingDeclarations().stream()
-        .map(declaration ->
-            uniqueScopeOf(toXProcessing(declaration.bindingElement().orElseThrow(), processingEnv)))
-        .filter(scope -> scope.isPresent() && !scope.orElseThrow().isReusable())
-        .map(Optional::orElseThrow)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+        .map(declaration -> uniqueScopeOf(declaration.bindingElement().get()))
+        .filter(scope -> scope.isPresent() && !scope.get().isReusable())
+        .map(Optional::get)
+        .collect(toImmutableSet());
   }
 }

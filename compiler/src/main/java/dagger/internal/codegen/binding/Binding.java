@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.binding.FrameworkType.PROVIDER;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -46,7 +47,7 @@ public abstract class Binding extends BindingDeclaration {
     if (bindingElement().isEmpty() || contributingModule().isEmpty()) {
       return false;
     }
-    Set<Modifier> modifiers = bindingElement().get().getModifiers();
+    Set<Modifier> modifiers = toJavac(bindingElement().get()).getModifiers();
     return !modifiers.contains(ABSTRACT) && !modifiers.contains(STATIC);
   }
 

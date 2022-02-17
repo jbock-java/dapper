@@ -19,15 +19,17 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.INJECTION;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.asType;
 import static javax.lang.model.SourceVersion.isName;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
@@ -67,7 +69,7 @@ public class SourceFiles {
         binding.dependencies(),
         dependency ->
             FrameworkField.create(
-                    frameworkTypeMapper.getFrameworkType().frameworkClassName(),
+                frameworkTypeMapper.getFrameworkType().frameworkClassName(),
                 TypeName.get(dependency.key().type().java()),
                 DependencyVariableNamer.name(dependency)));
   }
@@ -96,10 +98,10 @@ public class SourceFiles {
       case INJECTION:
       case PROVISION:
         return elementBasedClassName(
-            MoreElements.asExecutable(binding.bindingElement().orElseThrow()), "Factory");
+            asExecutable(toJavac(binding.bindingElement().get())), "Factory");
 
       case ASSISTED_FACTORY:
-        return siblingClassName(MoreElements.asType(binding.bindingElement().orElseThrow()), "_Impl");
+        return siblingClassName(asType(toJavac(binding.bindingElement().get())), "_Impl");
 
       default:
         throw new AssertionError();
@@ -115,7 +117,7 @@ public class SourceFiles {
    */
   public static ClassName elementBasedClassName(ExecutableElement element, String suffix) {
     ClassName enclosingClassName =
-        ClassName.get(MoreElements.asType(element.getEnclosingElement()));
+        ClassName.get(asType(element.getEnclosingElement()));
     String simpleName = element.getSimpleName().toString();
     String methodName =
         element.getKind().equals(ElementKind.CONSTRUCTOR)

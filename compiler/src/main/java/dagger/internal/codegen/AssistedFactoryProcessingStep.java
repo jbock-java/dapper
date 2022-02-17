@@ -25,7 +25,6 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.INSTANCE_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -49,6 +48,7 @@ import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -70,7 +70,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.Element;
 
 /** An annotation processor for {@link dagger.assisted.AssistedFactory}-annotated types. */
 final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
@@ -113,7 +112,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
         ProvisionBinding binding = bindingFactory.assistedFactoryBinding(factory, Optional.empty());
         new AssistedFactoryImplGenerator().generate(binding);
       } catch (SourceFileGenerationException e) {
-        e.printMessageTo(toJavac(messager));
+        e.printMessageTo(messager);
       }
     }
   }
@@ -223,7 +222,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
     }
 
     @Override
-    public Element originatingElement(ProvisionBinding binding) {
+    public XElement originatingElement(ProvisionBinding binding) {
       return binding.bindingElement().orElseThrow();
     }
 
@@ -261,8 +260,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
     // }
     @Override
     public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
-      XTypeElement factory =
-          asTypeElement(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+      XTypeElement factory = asTypeElement(binding.bindingElement().get());
 
       ClassName name = generatedClassNameForBinding(binding);
       TypeSpec.Builder builder =

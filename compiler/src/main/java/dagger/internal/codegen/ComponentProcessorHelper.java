@@ -84,7 +84,7 @@ public class ComponentProcessorHelper {
         injectBindingRegistry.generateSourcesForRequiredBindings(
             factoryGenerator);
       } catch (SourceFileGenerationException e) {
-        e.printMessageTo(messager.toJavac());
+        e.printMessageTo(messager);
       }
     }
     clearableCaches.forEach(ClearableCache::clearCache);

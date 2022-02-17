@@ -176,7 +176,6 @@ public final class ComponentDescriptorFactory {
     Set<Scope> scopes = scopesOf(typeElement);
 
     return new ComponentDescriptor(
-        processingEnv,
         componentAnnotation,
         toXProcessing(typeElement.toJavac(), processingEnv),
         componentDependencies,

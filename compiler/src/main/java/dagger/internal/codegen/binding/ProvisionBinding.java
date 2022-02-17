@@ -22,10 +22,11 @@ import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.Scope;
 import dagger.spi.model.Key;
+import dagger.spi.model.Scope;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -33,14 +34,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
 public final class ProvisionBinding extends ContributionBinding {
 
   private final Key key;
-  private final Optional<Element> bindingElement;
+  private final Optional<XElement> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final BindingKind kind;
   private final Set<DependencyRequest> provisionDependencies;
@@ -57,7 +57,7 @@ public final class ProvisionBinding extends ContributionBinding {
 
   ProvisionBinding(
       Key key,
-      Optional<Element> bindingElement,
+      Optional<XElement> bindingElement,
       Optional<TypeElement> contributingModule,
       BindingKind kind,
       Set<DependencyRequest> provisionDependencies,
@@ -83,7 +83,7 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   @Override
-  public Optional<Element> bindingElement() {
+  public Optional<XElement> bindingElement() {
     return bindingElement;
   }
 
@@ -170,7 +170,7 @@ public final class ProvisionBinding extends ContributionBinding {
   /** A {@link ProvisionBinding} builder. */
   static final class Builder {
     private Key key;
-    private Optional<Element> bindingElement = Optional.empty();
+    private Optional<XElement> bindingElement = Optional.empty();
     private Optional<TypeElement> contributingModule = Optional.empty();
     private BindingKind kind;
     private Set<DependencyRequest> provisionDependencies;
@@ -207,12 +207,12 @@ public final class ProvisionBinding extends ContributionBinding {
       return this;
     }
 
-    Builder bindingElement(Element bindingElement) {
+    Builder bindingElement(XElement bindingElement) {
       this.bindingElement = Optional.of(bindingElement);
       return this;
     }
 
-    Builder bindingElement(Optional<Element> bindingElement) {
+    Builder bindingElement(Optional<XElement> bindingElement) {
       this.bindingElement = bindingElement;
       return this;
     }

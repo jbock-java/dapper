@@ -47,6 +47,8 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
@@ -63,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 
 /**
@@ -83,7 +84,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   }
 
   @Override
-  public Element originatingElement(ProvisionBinding binding) {
+  public XElement originatingElement(ProvisionBinding binding) {
     // we only create factories for bindings that have a binding element
     return binding.bindingElement().orElseThrow();
   }
@@ -216,11 +217,11 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         assistedParameters(binding).stream()
             .collect(
                 DaggerStreams.toImmutableMap(
-                    element -> element,
+                    XConverters::toJavac,
                     element ->
                         ParameterSpec.builder(
-                                TypeName.get(element.asType()),
-                                uniqueFieldNames.getUniqueName(element.getSimpleName()))
+                                element.getType().getTypeName(),
+                                uniqueFieldNames.getUniqueName(element.getName()))
                             .build()));
     TypeName providedTypeName = providedTypeName(binding);
     MethodSpec.Builder getMethod =

@@ -25,6 +25,7 @@ import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypePubliclyAccessible;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
@@ -97,7 +98,7 @@ final class InjectionMethods {
     static MethodSpec create(
         ProvisionBinding binding,
         CompilerOptions compilerOptions) {
-      ExecutableElement element = asExecutable(binding.bindingElement().orElseThrow());
+      ExecutableElement element = asExecutable(toJavac(binding.bindingElement().get()));
       switch (element.getKind()) {
         case CONSTRUCTOR:
           return constructorProxy(element);
@@ -145,7 +146,7 @@ final class InjectionMethods {
                       request -> request));
 
       List<CodeBlock> arguments = new ArrayList<>();
-      ExecutableElement method = asExecutable(binding.bindingElement().orElseThrow());
+      ExecutableElement method = asExecutable(toJavac(binding.bindingElement().get()));
       for (VariableElement parameter : method.getParameters()) {
         if (AssistedInjectionAnnotations.isAssistedParameter(parameter)) {
           arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(parameter)));
@@ -182,7 +183,7 @@ final class InjectionMethods {
      */
     static boolean requiresInjectionMethod(
         ProvisionBinding binding, CompilerOptions compilerOptions, ClassName requestingClass) {
-      ExecutableElement method = MoreElements.asExecutable(binding.bindingElement().orElseThrow());
+      ExecutableElement method = asExecutable(toJavac(binding.bindingElement().get()));
       return binding.shouldCheckForNull(compilerOptions)
           || !isElementAccessibleFrom(method, requestingClass.packageName())
           // This check should be removable once we drop support for -source 7

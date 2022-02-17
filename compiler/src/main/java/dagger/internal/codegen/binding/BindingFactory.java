@@ -125,7 +125,7 @@ public final class BindingFactory {
 
     ProvisionBinding.Builder builder =
         ProvisionBinding.builder()
-            .bindingElement(toJavac(constructorElement))
+            .bindingElement(constructorElement)
             .key(keyFactory.forInjectConstructorWithResolvedType(enclosingType))
             .provisionDependencies(provisionDependencies)
             .kind(
@@ -154,7 +154,7 @@ public final class BindingFactory {
     XMethodType factoryMethodType = factoryMethod.asMemberOf(factoryType);
     return ProvisionBinding.builder()
         .key(Key.builder(DaggerType.from(factoryType)).build())
-        .bindingElement(toJavac(factory))
+        .bindingElement(factory)
         .provisionDependencies(
             Set.of(
                 DependencyRequest.builder()
@@ -209,7 +209,7 @@ public final class BindingFactory {
       builder.unresolved(create.apply(method, MoreElements.asType(method.getEnclosingElement())));
     }
     return builder
-        .bindingElement(method)
+        .bindingElement(toXProcessing(method, processingEnv))
         .contributingModule(contributedBy)
         .key(key)
         .dependencies(
@@ -221,7 +221,7 @@ public final class BindingFactory {
   public ProvisionBinding componentBinding(XTypeElement componentDefinitionType) {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
-        .bindingElement(componentDefinitionType.toJavac())
+        .bindingElement(componentDefinitionType)
         .key(keyFactory.forType(componentDefinitionType.getType().toJavac()))
         .kind(COMPONENT)
         .build();
@@ -234,7 +234,7 @@ public final class BindingFactory {
   public ProvisionBinding componentDependencyBinding(ComponentRequirement dependency) {
     requireNonNull(dependency);
     return ProvisionBinding.builder()
-        .bindingElement(dependency.typeElement())
+        .bindingElement(toXProcessing(dependency.typeElement(), processingEnv))
         .key(keyFactory.forType(dependency.type()))
         .kind(COMPONENT_DEPENDENCY)
         .build();
@@ -253,7 +253,7 @@ public final class BindingFactory {
         .kind(COMPONENT_PROVISION)
         .scope(uniqueScopeOf(toXProcessing(dependencyMethod, processingEnv)));
     return builder
-        .bindingElement(dependencyMethod)
+        .bindingElement(toXProcessing(dependencyMethod, processingEnv))
         .build();
   }
 
@@ -264,7 +264,7 @@ public final class BindingFactory {
   ProvisionBinding boundInstanceBinding(ComponentRequirement requirement, XElement element) {
     Preconditions.checkArgument(isVariableElement(element) || isMethod(element));
     return ProvisionBinding.builder()
-        .bindingElement(element.toJavac())
+        .bindingElement(element)
         .key(requirement.key().orElseThrow())
         .kind(BOUND_INSTANCE)
         .build();
@@ -286,7 +286,7 @@ public final class BindingFactory {
         keyFactory.forSubcomponentCreatorMethod(
             subcomponentCreatorMethod, asDeclared(component.asType()));
     return ProvisionBinding.builder()
-        .bindingElement(subcomponentCreatorMethod)
+        .bindingElement(toXProcessing(subcomponentCreatorMethod, processingEnv))
         .key(key)
         .kind(SUBCOMPONENT_CREATOR)
         .build();
@@ -314,9 +314,7 @@ public final class BindingFactory {
       DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
         ProvisionBinding.builder()
-            .scope(
-                uniqueScopeOf(
-                    toXProcessing(delegateDeclaration.bindingElement().orElseThrow(), processingEnv))),
+            .scope(uniqueScopeOf(delegateDeclaration.bindingElement().get())),
         delegateDeclaration);
   }
 
@@ -326,10 +324,7 @@ public final class BindingFactory {
    */
   public ContributionBinding unresolvedDelegateBinding(DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
-        ProvisionBinding.builder()
-            .scope(
-                uniqueScopeOf(
-                    toXProcessing(delegateDeclaration.bindingElement().orElseThrow(), processingEnv))),
+        ProvisionBinding.builder().scope(uniqueScopeOf(delegateDeclaration.bindingElement().get())),
         delegateDeclaration);
   }
 

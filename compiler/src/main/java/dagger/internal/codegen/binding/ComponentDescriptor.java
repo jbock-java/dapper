@@ -30,10 +30,8 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
@@ -47,7 +45,6 @@ import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -64,8 +61,6 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class ComponentDescriptor {
 
-  // This is required temporarily during the XProcessing migration to use toXProcessing().
-  private final XProcessingEnv processingEnv;
   private final ComponentAnnotation annotation;
   private final XTypeElement typeElement;
   private final Set<ComponentRequirement> dependencies;
@@ -79,7 +74,6 @@ public final class ComponentDescriptor {
   private final Optional<ComponentCreatorDescriptor> creatorDescriptor;
 
   ComponentDescriptor(
-      XProcessingEnv processingEnv,
       ComponentAnnotation annotation,
       XTypeElement typeElement,
       Set<ComponentRequirement> dependencies,
@@ -91,7 +85,6 @@ public final class ComponentDescriptor {
       Map<ComponentMethodDescriptor, ComponentDescriptor> childComponentsDeclaredByBuilderEntryPoints,
       Set<ComponentMethodDescriptor> componentMethods,
       Optional<ComponentCreatorDescriptor> creatorDescriptor) {
-    this.processingEnv = processingEnv;
     this.annotation = requireNonNull(annotation);
     this.typeElement = requireNonNull(typeElement);
     this.dependencies = requireNonNull(dependencies);
@@ -216,8 +209,7 @@ public final class ComponentDescriptor {
   }
 
   /** The {@linkplain #dependencies() component dependency} that defines a method. */
-  public ComponentRequirement getDependencyThatDefinesMethod(Element javaMethod) {
-    XElement method = XConverters.toXProcessing(javaMethod, processingEnv);
+  public ComponentRequirement getDependencyThatDefinesMethod(XElement method) {
     Preconditions.checkArgument(
         method instanceof XMethodElement, "method must be an executable element: %s", method);
     return requireNonNull(

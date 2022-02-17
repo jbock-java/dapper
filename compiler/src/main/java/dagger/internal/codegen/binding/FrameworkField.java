@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.internal.codegen.javapoet.TypeNames;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
@@ -77,7 +79,7 @@ public final class FrameworkField {
 
   private static String frameworkFieldName(ContributionBinding binding) {
     if (binding.bindingElement().isPresent()) {
-      return BINDING_ELEMENT_NAME.visit(binding.bindingElement().get(), binding);
+      return BINDING_ELEMENT_NAME.visit(toJavac(binding.bindingElement().get()), binding);
     }
     return KeyVariableNamer.name(binding.key());
   }

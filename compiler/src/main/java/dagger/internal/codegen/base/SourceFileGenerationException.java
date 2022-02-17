@@ -20,10 +20,10 @@ import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.validation.ValidationReport;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.ClassName;
 import java.util.Optional;
-import javax.annotation.processing.Messager;
-import javax.lang.model.element.Element;
 
 /**
  * An exception thrown to indicate that a source file could not be generated.
@@ -33,10 +33,10 @@ import javax.lang.model.element.Element;
  * for that.
  */
 public final class SourceFileGenerationException extends Exception {
-  private final Element associatedElement;
+  private final XElement associatedElement;
 
   SourceFileGenerationException(
-      Optional<ClassName> generatedClassName, Throwable cause, Element associatedElement) {
+      Optional<ClassName> generatedClassName, Throwable cause, XElement associatedElement) {
     super(createMessage(generatedClassName, cause.getMessage()), cause);
     this.associatedElement = requireNonNull(associatedElement);
   }
@@ -49,7 +49,7 @@ public final class SourceFileGenerationException extends Exception {
         message);
   }
 
-  public void printMessageTo(Messager messager) {
+  public void printMessageTo(XMessager messager) {
     messager.printMessage(ERROR, getMessage(), associatedElement);
   }
 }

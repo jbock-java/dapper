@@ -92,6 +92,11 @@ public final class KeyFactory {
   }
 
   /** Returns the key bound by a {@link Binds} method. */
+  Key forBindsMethod(XMethodElement method, XTypeElement contributingModule) {
+    return forBindsMethod(toJavac(method), toJavac(contributingModule));
+  }
+
+  /** Returns the key bound by a {@link Binds} method. */
   Key forBindsMethod(ExecutableElement method, TypeElement contributingModule) {
     Preconditions.checkArgument(isAnnotationPresent(method, TypeNames.BINDS));
     return forBindingMethod(method, contributingModule);

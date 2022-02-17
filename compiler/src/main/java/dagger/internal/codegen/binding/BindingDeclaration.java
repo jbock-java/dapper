@@ -17,9 +17,12 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.Optionals.emptiesLast;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import java.util.Comparator;
@@ -52,8 +55,8 @@ public abstract class BindingDeclaration {
           .thenComparing(
               BindingDeclaration::bindingElement,
               emptiesLast(
-                  comparing((Element element) -> element.getSimpleName().toString())
-                      .thenComparing((Element element) -> element.asType().toString())));
+                  comparing((XElement element) -> toJavac(element).getSimpleName().toString())
+                      .thenComparing((XElement element) -> toJavac(element).asType().toString())));
 
   /** The {@link Key} of this declaration. */
   public abstract Key key();
@@ -62,14 +65,16 @@ public abstract class BindingDeclaration {
    * The {@link Element} that declares this binding. Absent for {@linkplain BindingKind binding
    * kinds} that are not always declared by exactly one element.
    */
-  public abstract Optional<Element> bindingElement();
+  public abstract Optional<XElement> bindingElement();
 
   /**
    * The type enclosing the {@link #bindingElement()}, or {@link Optional#empty()} if {@link
    * #bindingElement()} is empty.
    */
   public final Optional<TypeElement> bindingTypeElement() {
-    return bindingElement().map(DaggerElements::closestEnclosingTypeElement);
+    return bindingElement()
+        .map(XConverters::toJavac)
+        .map(DaggerElements::closestEnclosingTypeElement);
   }
 
   /**

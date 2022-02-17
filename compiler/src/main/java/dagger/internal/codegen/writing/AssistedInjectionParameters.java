@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XTypeElements.asTypeElement;
 
@@ -29,7 +28,6 @@ import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementati
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
 import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
@@ -50,11 +48,9 @@ final class AssistedInjectionParameters {
    */
   public static List<ParameterSpec> assistedFactoryParameterSpecs(
       Binding binding,
-      XProcessingEnv processingEnv,
       ShardImplementation shardImplementation) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
-    XTypeElement factory =
-        asTypeElement(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+    XTypeElement factory = asTypeElement(binding.bindingElement().get());
     AssistedFactoryMetadata metadata = AssistedFactoryMetadata.create(factory.getType());
     XMethodType factoryMethodType =
         metadata.factoryMethod().asMemberOf(binding.key().type().xprocessing());
@@ -76,10 +72,9 @@ final class AssistedInjectionParameters {
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
   public static List<ParameterSpec> assistedParameterSpecs(
-      Binding binding, XProcessingEnv processingEnv, ShardImplementation shardImplementation) {
+      Binding binding, ShardImplementation shardImplementation) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
-    XConstructorElement constructor =
-        asConstructor(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+    XConstructorElement constructor = asConstructor(binding.bindingElement().get());
     XConstructorType constructorType = constructor.asMemberOf(binding.key().type().xprocessing());
     return assistedParameterSpecs(
         constructor.getParameters(), constructorType.getParameterTypes(), shardImplementation);

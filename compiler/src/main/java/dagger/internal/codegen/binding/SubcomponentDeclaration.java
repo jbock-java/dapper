@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -40,7 +39,7 @@ import javax.lang.model.element.TypeElement;
  * dagger.Module#subcomponents()}.
  */
 public final class SubcomponentDeclaration extends BindingDeclaration {
-  private final Optional<Element> bindingElement;
+  private final Optional<XElement> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final Key key;
   private final XTypeElement subcomponentType;
@@ -49,7 +48,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       Objects.hash(bindingElement(), contributingModule(), key(), subcomponentType(), moduleAnnotation()));
 
   SubcomponentDeclaration(
-      Optional<Element> bindingElement,
+      Optional<XElement> bindingElement,
       Optional<TypeElement> contributingModule,
       Key key,
       XTypeElement subcomponentType,
@@ -62,7 +61,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
   }
 
   @Override
-  public Optional<Element> bindingElement() {
+  public Optional<XElement> bindingElement() {
     return bindingElement;
   }
 
@@ -130,7 +129,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
       for (XTypeElement subcomponent : moduleAnnotation.subcomponents()) {
         declarations.add(
             new SubcomponentDeclaration(
-                Optional.of(toJavac(subcomponentAttribute)),
+                Optional.of(subcomponentAttribute),
                 Optional.of(toJavac(module)),
                 keyFactory.forSubcomponentCreator(
                     toJavac(getSubcomponentCreator(subcomponent).orElseThrow().getType())),

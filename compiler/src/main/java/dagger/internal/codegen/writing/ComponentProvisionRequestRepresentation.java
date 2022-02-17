@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -53,7 +55,7 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
         CodeBlock.of(
             "$L.$L()",
             componentRequirementExpressions.getExpression(componentRequirement(), requestingClass),
-            binding.bindingElement().orElseThrow().getSimpleName());
+            toJavac(binding.bindingElement().get()).getSimpleName());
     return Expression.create(
         binding.contributedPrimitiveType().orElse(binding.key().type().java()),
         maybeCheckForNull(binding, compilerOptions, invocation));

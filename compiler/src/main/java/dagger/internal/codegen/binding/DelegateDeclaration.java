@@ -16,33 +16,32 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.Binds;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ExecutableType;
 
 /** The declaration for a delegate binding established by a {@link Binds} method. */
 public final class DelegateDeclaration extends BindingDeclaration {
 
   private final Key key;
-  private final Optional<Element> bindingElement;
+  private final Optional<XElement> bindingElement;
   private final Optional<TypeElement> contributingModule;
   private final DependencyRequest delegateRequest;
   private final IntSupplier hash = Suppliers.memoizeInt(() ->
@@ -54,7 +53,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
 
   DelegateDeclaration(
       Key key,
-      Optional<Element> bindingElement,
+      Optional<XElement> bindingElement,
       Optional<TypeElement> contributingModule,
       DependencyRequest delegateRequest) {
     this.key = requireNonNull(key);
@@ -69,7 +68,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
   }
 
   @Override
-  public Optional<Element> bindingElement() {
+  public Optional<XElement> bindingElement() {
     return bindingElement;
   }
 
@@ -116,15 +115,8 @@ public final class DelegateDeclaration extends BindingDeclaration {
     }
 
     public DelegateDeclaration create(XMethodElement bindsMethod, XTypeElement contributingModule) {
-      return create(bindsMethod.toJavac(), contributingModule.toJavac());
-    }
-
-    public DelegateDeclaration create(
-        ExecutableElement bindsMethod, TypeElement contributingModule) {
-      Preconditions.checkArgument(MoreElements.isAnnotationPresent(bindsMethod, Binds.class));
-      ExecutableType resolvedMethod =
-          MoreTypes.asExecutable(
-              types.asMemberOf(MoreTypes.asDeclared(contributingModule.asType()), bindsMethod));
+      Preconditions.checkArgument(bindsMethod.hasAnnotation(TypeNames.BINDS));
+      XMethodType resolvedMethod = bindsMethod.asMemberOf(contributingModule.getType());
       DependencyRequest delegateRequest =
           dependencyRequestFactory.forRequiredResolvedVariable(
               Util.getOnlyElement(bindsMethod.getParameters()),
@@ -132,7 +124,7 @@ public final class DelegateDeclaration extends BindingDeclaration {
       return new DelegateDeclaration(
           keyFactory.forBindsMethod(bindsMethod, contributingModule),
           Optional.of(bindsMethod),
-          Optional.of(contributingModule),
+          Optional.of(toJavac(contributingModule)),
           delegateRequest);
     }
   }

@@ -19,6 +19,7 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.extension.DaggerStreams;
@@ -26,7 +27,7 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.AnnotationSpec;
@@ -36,8 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.processing.Messager;
-import javax.lang.model.element.Element;
 
 /**
  * A template class that provides a framework for properly handling IO while generating source files
@@ -66,14 +65,6 @@ public abstract class SourceFileGenerator<T> {
    * messager} and does not throw.
    */
   public void generate(T input, XMessager messager) {
-    generate(input, XConverters.toJavac(messager));
-  }
-
-  /**
-   * Generates a source file to be compiled for {@code T}. Writes any generation exception to {@code
-   * messager} and does not throw.
-   */
-  public void generate(T input, Messager messager) {
     try {
       generate(input);
     } catch (SourceFileGenerationException e) {
@@ -85,7 +76,7 @@ public abstract class SourceFileGenerator<T> {
   public void generate(T input) throws SourceFileGenerationException {
     for (TypeSpec.Builder type : topLevelTypes(input)) {
       try {
-        buildJavaFile(input, type).writeTo(XConverters.toJavac(filer));
+        buildJavaFile(input, type).writeTo(toJavac(filer));
       } catch (Exception e) {
         throw new SourceFileGenerationException(Optional.empty(), e, originatingElement(input));
       }
@@ -93,7 +84,7 @@ public abstract class SourceFileGenerator<T> {
   }
 
   private JavaFile buildJavaFile(T input, TypeSpec.Builder typeSpecBuilder) {
-    typeSpecBuilder.addOriginatingElement(originatingElement(input));
+    typeSpecBuilder.addOriginatingElement(toJavac(originatingElement(input)));
     AnnotationSpec generatedAnnotation =
         AnnotationSpec.builder(TypeNames.GENERATED)
             .addMember("value", "$S", "dagger.internal.codegen.ComponentProcessor")
@@ -110,14 +101,17 @@ public abstract class SourceFileGenerator<T> {
 
     JavaFile.Builder javaFileBuilder =
         JavaFile.builder(
-                elements.getPackageOf(originatingElement(input)).getQualifiedName().toString(),
+                elements
+                    .getPackageOf(toJavac(originatingElement(input)))
+                    .getQualifiedName()
+                    .toString(),
                 typeSpecBuilder.build())
             .skipJavaLangImports(true);
     return javaFileBuilder.build();
   }
 
   /** Returns the originating element of the generating type. */
-  public abstract Element originatingElement(T input);
+  public abstract XElement originatingElement(T input);
 
   /**
    * Returns {@link TypeSpec.Builder types} be generated for {@code T}, or an empty list if no types

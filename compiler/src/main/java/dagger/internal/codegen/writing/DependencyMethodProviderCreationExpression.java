@@ -18,6 +18,8 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind.COMPONENT_PROVISION_FACTORY;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
@@ -30,18 +32,18 @@ import static javax.lang.model.element.Modifier.STATIC;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentRequirement;
-import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
-import javax.lang.model.element.Element;
 
 /**
  * A {@code Provider} creation expression for a provision method on a component's
@@ -55,11 +57,12 @@ final class DependencyMethodProviderCreationExpression
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final CompilerOptions compilerOptions;
   private final BindingGraph graph;
-  private final ContributionBinding binding;
+  private final ProvisionBinding binding;
+  private final XMethodElement provisionMethod;
 
   @AssistedInject
   DependencyMethodProviderCreationExpression(
-      @Assisted ContributionBinding binding,
+      @Assisted ProvisionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,
       CompilerOptions compilerOptions,
@@ -69,6 +72,9 @@ final class DependencyMethodProviderCreationExpression
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.compilerOptions = compilerOptions;
     this.graph = graph;
+    Preconditions.checkArgument(binding.bindingElement().isPresent());
+    Preconditions.checkArgument(isMethod(binding.bindingElement().get()));
+    provisionMethod = asMethod(binding.bindingElement().get());
   }
 
   @Override
@@ -81,12 +87,11 @@ final class DependencyMethodProviderCreationExpression
     // What should we do?
     CodeBlock invocation =
         ComponentProvisionRequestRepresentation.maybeCheckForNull(
-            (ProvisionBinding) binding,
+            binding,
             compilerOptions,
-            CodeBlock.of(
-                "$N.$N()", dependency().variableName(), provisionMethod().getSimpleName()));
+            CodeBlock.of("$N.$N()", dependency().variableName(), provisionMethod.getName()));
     ClassName dependencyClassName = ClassName.get(dependency().typeElement());
-    TypeName keyType = TypeName.get(binding.key().type().java());
+    TypeName keyType = binding.key().type().xprocessing().getTypeName();
     MethodSpec.Builder getMethod =
         methodBuilder("get")
             .addAnnotation(Override.class)
@@ -104,7 +109,7 @@ final class DependencyMethodProviderCreationExpression
             .nestedClass(
                 ClassName.get(dependency().typeElement()).toString().replace('.', '_')
                     + "_"
-                    + binding.bindingElement().get().getSimpleName());
+                    + provisionMethod.getName());
     componentShard.addType(
         COMPONENT_PROVISION_FACTORY,
         classBuilder(factoryClassName)
@@ -126,15 +131,11 @@ final class DependencyMethodProviderCreationExpression
   }
 
   private ComponentRequirement dependency() {
-    return graph.componentDescriptor().getDependencyThatDefinesMethod(provisionMethod());
-  }
-
-  private Element provisionMethod() {
-    return binding.bindingElement().get();
+    return graph.componentDescriptor().getDependencyThatDefinesMethod(provisionMethod);
   }
 
   @AssistedFactory
-  static interface Factory {
-    DependencyMethodProviderCreationExpression create(ContributionBinding binding);
+  interface Factory {
+    DependencyMethodProviderCreationExpression create(ProvisionBinding binding);
   }
 }

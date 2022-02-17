@@ -57,7 +57,6 @@ import javax.lang.model.type.DeclaredType;
  * dagger.assisted.AssistedFactory} methods.
  */
 final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
-  private final XProcessingEnv processingEnv;
   private final ProvisionBinding binding;
   private final BindingGraph graph;
   private final SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory;
@@ -65,12 +64,10 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
 
   @AssistedInject
   AssistedFactoryRequestRepresentation(
-      XProcessingEnv processingEnv,
       @Assisted ProvisionBinding binding,
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory) {
-    this.processingEnv = processingEnv;
     this.binding = requireNonNull(binding);
     this.graph = graph;
     this.componentImplementation = componentImplementation;
@@ -97,8 +94,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
 
   private TypeSpec anonymousfactoryImpl(
       Binding assistedBinding, Expression assistedInjectionExpression) {
-    XTypeElement factory =
-        asTypeElement(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+    XTypeElement factory = asTypeElement(binding.bindingElement().get());
     XType factoryType = binding.key().type().xprocessing();
     XMethodElement factoryMethod = assistedFactoryMethod(factory);
 
@@ -115,9 +111,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
                     .addExceptions(factoryOverride.exceptions)
                     .addParameters(
                         assistedFactoryParameterSpecs(
-                            binding,
-                            processingEnv,
-                            componentImplementation.shardImplementation(assistedBinding)))
+                            binding, componentImplementation.shardImplementation(assistedBinding)))
                     .addStatement("return $L", assistedInjectionExpression.codeBlock())
                     .build());
 

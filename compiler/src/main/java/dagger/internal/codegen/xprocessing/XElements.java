@@ -39,6 +39,15 @@ import javax.lang.model.element.ElementKind;
 /** A utility class for {@link XElement} helper methods. */
 public final class XElements {
 
+  public static boolean isExecutable(XElement element) {
+    return isConstructor(element) || isMethod(element);
+  }
+
+  public static XExecutableElement asExecutable(XElement element) {
+    checkState(isExecutable(element));
+    return (XExecutableElement) element;
+  }
+
   // TODO(bcorso): Replace usages with getJvmName() once it exists.
 
   /** Returns the simple name of the element. */
@@ -73,15 +82,6 @@ public final class XElements {
 
   public static boolean isEnum(XElement element) {
     return toJavac(element).getKind() == ElementKind.ENUM;
-  }
-
-  public static boolean isExecutable(XElement element) {
-    return isConstructor(element) || isMethod(element);
-  }
-
-  public static XExecutableElement asExecutable(XElement element) {
-    checkState(isExecutable(element));
-    return (XExecutableElement) element;
   }
 
   public static XTypeElement asTypeElement(XElement element) {
