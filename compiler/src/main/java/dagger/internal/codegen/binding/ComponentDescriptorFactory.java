@@ -26,6 +26,7 @@ import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentCon
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -112,7 +113,7 @@ public final class ComponentDescriptorFactory {
 
     for (ComponentRequirement componentDependency : componentDependencies) {
       for (ExecutableElement dependencyMethod :
-          methodsIn(elements.getAllMembers(componentDependency.typeElement()))) {
+          methodsIn(elements.getAllMembers(toJavac(componentDependency.typeElement())))) {
         if (isComponentContributionMethod(elements, dependencyMethod)) {
           dependenciesByDependencyMethod.put(
               (XMethodElement) toXProcessing(dependencyMethod, processingEnv), componentDependency);

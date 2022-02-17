@@ -85,7 +85,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case COMPONENT_DEPENDENCY:
         return instanceFactoryCreationExpression(
-            ComponentRequirement.forDependency(binding.key().type().java()));
+            ComponentRequirement.forDependency(binding.key().type().xprocessing()));
 
       case COMPONENT_PROVISION:
         return dependencyMethodProviderCreationExpressionFactory.create((ProvisionBinding) binding);

@@ -27,6 +27,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
@@ -36,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.lang.model.element.TypeElement;
 
 /**
  * A central repository of expressions used to access any {@link ComponentRequirement} available to
@@ -133,7 +133,7 @@ public final class ComponentRequirementExpressions {
 
     private MemberSelect createField() {
       String fieldName = componentShard.getUniqueFieldName(componentRequirement.variableName());
-      TypeName fieldType = TypeName.get(componentRequirement.type());
+      TypeName fieldType = componentRequirement.type().getTypeName();
       FieldSpec field = FieldSpec.builder(fieldType, fieldName, PRIVATE, FINAL).build();
       componentShard.addField(COMPONENT_REQUIREMENT_FIELD, field);
       componentShard.addComponentRequirementInitialization(fieldInitialization(field));
@@ -149,7 +149,7 @@ public final class ComponentRequirementExpressions {
    * instantiated by the component (i.e. a static class with a no-arg constructor).
    */
   private final class InstantiableModuleField extends AbstractField {
-    private final TypeElement moduleElement;
+    private final XTypeElement moduleElement;
 
     InstantiableModuleField(ComponentRequirement module) {
       super(module);

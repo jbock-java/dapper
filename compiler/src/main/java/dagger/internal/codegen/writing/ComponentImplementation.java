@@ -56,6 +56,7 @@ import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.RequestKind;
@@ -444,7 +445,7 @@ public final class ComponentImplementation {
                       requirement -> requirement,
                       requirement ->
                           ParameterSpec.builder(
-                                  TypeName.get(requirement.type()),
+                                  requirement.type().getTypeName(),
                                   getUniqueFieldName(requirement.variableName() + "Param"))
                               .build()));
     }
@@ -707,7 +708,10 @@ public final class ComponentImplementation {
 
     private void addFactoryMethods() {
       if (parent.isPresent()) {
-        graph.factoryMethod().ifPresent(this::createSubcomponentFactoryMethod);
+        graph
+            .factoryMethod()
+            .map(XConverters::toJavac)
+            .ifPresent(this::createSubcomponentFactoryMethod);
       } else {
         createRootComponentFactoryMethod();
       }
@@ -781,7 +785,7 @@ public final class ComponentImplementation {
     /** {@code true} if all of the graph's required dependencies can be automatically constructed */
     private boolean canInstantiateAllRequirements() {
       return graph.componentRequirements().stream()
-          .noneMatch(dependency -> dependency.requiresAPassedInstance(elements));
+          .noneMatch(ComponentRequirement::requiresAPassedInstance);
     }
 
     private void createSubcomponentFactoryMethod(ExecutableElement factoryMethod) {

@@ -20,6 +20,7 @@ import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -59,16 +60,13 @@ import javax.lang.model.element.Modifier;
 final class ComponentCreatorImplementationFactory {
 
   private final ComponentImplementation componentImplementation;
-  private final DaggerElements elements;
   private final ModuleProxies moduleProxies;
 
   @Inject
   ComponentCreatorImplementationFactory(
       ComponentImplementation componentImplementation,
-      DaggerElements elements,
       ModuleProxies moduleProxies) {
     this.componentImplementation = componentImplementation;
-    this.elements = elements;
     this.moduleProxies = moduleProxies;
   }
 
@@ -178,7 +176,7 @@ final class ComponentCreatorImplementationFactory {
               Util.intersection(neededUserSettableRequirements(), setterMethods()),
               requirement ->
                   FieldSpec.builder(
-                          TypeName.get(requirement.type()),
+                          requirement.type().getTypeName(),
                           fieldNames.getUniqueName(requirement.variableName()),
                           PRIVATE)
                       .build());
@@ -228,7 +226,7 @@ final class ComponentCreatorImplementationFactory {
       method.addStatement(
           "this.$N = $L",
           fields.get(requirement),
-          requirement.nullPolicy(elements).equals(NullPolicy.ALLOW)
+          requirement.nullPolicy().equals(NullPolicy.ALLOW)
               ? CodeBlock.of("$N", parameter)
               : CodeBlock.of("$T.checkNotNull($N)", dagger.internal.Preconditions.class, parameter));
       return maybeReturnThis(method);
@@ -253,7 +251,7 @@ final class ComponentCreatorImplementationFactory {
               UnsupportedOperationException.class,
               String.class,
               "%s cannot be set because it is inherited from the enclosing component",
-              TypeNames.rawTypeName(TypeName.get(requirement.type())))
+              TypeNames.rawTypeName(requirement.type().getTypeName()))
           .build();
     }
 
@@ -301,7 +299,7 @@ final class ComponentCreatorImplementationFactory {
 
     private void addNullHandlingForField(
         ComponentRequirement requirement, FieldSpec field, MethodSpec.Builder factoryMethod) {
-      switch (requirement.nullPolicy(elements)) {
+      switch (requirement.nullPolicy()) {
         case NEW:
           Preconditions.checkState(requirement.kind().isModule());
           factoryMethod
@@ -325,7 +323,7 @@ final class ComponentCreatorImplementationFactory {
 
     private void addNullHandlingForParameter(
         ComponentRequirement requirement, String parameter, MethodSpec.Builder factoryMethod) {
-      if (!requirement.nullPolicy(elements).equals(NullPolicy.ALLOW)) {
+      if (!requirement.nullPolicy().equals(NullPolicy.ALLOW)) {
         // Factory method parameters are always required unless they are a nullable
         // binds-instance (i.e. ALLOW)
         factoryMethod.addStatement("$T.checkNotNull($L)", dagger.internal.Preconditions.class, parameter);
@@ -436,7 +434,10 @@ final class ComponentCreatorImplementationFactory {
      * Returns whether the given {@code requirement} is for a module type owned by the component.
      */
     private boolean isOwnedModule(ComponentRequirement requirement) {
-      return componentImplementation.graph().ownedModuleTypes().contains(requirement.typeElement());
+      return componentImplementation
+          .graph()
+          .ownedModuleTypes()
+          .contains(toJavac(requirement.typeElement()));
     }
 
     @Override
@@ -496,10 +497,10 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected MethodSpec.Builder setterMethodBuilder(ComponentRequirement requirement) {
-      String name = simpleVariableName(requirement.typeElement());
+      String name = simpleVariableName(requirement.typeElement().getClassName());
       return methodBuilder(name)
           .addModifiers(PUBLIC)
-          .addParameter(TypeName.get(requirement.type()), name)
+          .addParameter(requirement.type().getTypeName(), name)
           .returns(componentImplementation.getCreatorName());
     }
   }

@@ -24,7 +24,6 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
@@ -49,13 +48,11 @@ import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
@@ -90,21 +87,15 @@ import javax.tools.Diagnostic;
 // TODO(dpb): Combine with ComponentHierarchyValidator.
 public final class ComponentDescriptorValidator {
 
-  private final XProcessingEnv processingEnv;
-  private final DaggerElements elements;
   private final CompilerOptions compilerOptions;
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final ComponentHierarchyValidator componentHierarchyValidator;
 
   @Inject
   ComponentDescriptorValidator(
-      XProcessingEnv processingEnv,
-      DaggerElements elements,
       CompilerOptions compilerOptions,
       MethodSignatureFormatter methodSignatureFormatter,
       ComponentHierarchyValidator componentHierarchyValidator) {
-    this.processingEnv = processingEnv;
-    this.elements = elements;
     this.compilerOptions = compilerOptions;
     this.methodSignatureFormatter = methodSignatureFormatter;
     this.componentHierarchyValidator = componentHierarchyValidator;
@@ -212,7 +203,6 @@ public final class ComponentDescriptorValidator {
                   .dependencies()
                   .stream()
                   .map(ComponentRequirement::typeElement)
-                  .map(typeElement -> toXProcessing(typeElement, processingEnv))
                   .collect(toImmutableSet()));
       if (!scopes.isEmpty()) {
         // Dagger 1.x scope compatibility requires this be suppress-able.
@@ -312,7 +302,7 @@ public final class ComponentDescriptorValidator {
       Set<ComponentRequirement> mustBePassed =
           componentModuleAndDependencyRequirements.stream()
               .filter(
-                  input -> input.nullPolicy(elements).equals(NullPolicy.THROW))
+                  input -> input.nullPolicy().equals(NullPolicy.THROW))
               .collect(Collectors.toCollection(LinkedHashSet::new));
       // Component requirements that the creator must be able to set, but can't
       Set<ComponentRequirement> missingRequirements =

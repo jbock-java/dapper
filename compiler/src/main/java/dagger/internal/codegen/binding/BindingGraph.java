@@ -24,6 +24,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.BindingGraph.Edge;
 import static dagger.spi.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
@@ -33,12 +34,13 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.ComponentPath;
-import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.DaggerTypeElement;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.common.graph.ImmutableNetwork;
 import io.jbock.common.graph.Network;
@@ -97,7 +99,7 @@ public final class BindingGraph {
         .filter(
             requirement ->
                 !requirement.kind().isModule()
-                    || requiredModules.contains(requirement.typeElement()))
+                    || requiredModules.contains(toJavac(requirement.typeElement())))
         .forEach(requirements::add);
     if (factoryMethod().isPresent()) {
       requirements.addAll(factoryMethodParameters().keySet());
@@ -404,10 +406,10 @@ public final class BindingGraph {
    * </code></pre>
    */
   // TODO(b/73294201): Consider returning the resolved ExecutableType for the factory method.
-  public Optional<ExecutableElement> factoryMethod() {
+  public Optional<XExecutableElement> factoryMethod() {
     return topLevelBindingGraph().network().inEdges(componentNode()).stream()
         .filter(edge -> edge instanceof ChildFactoryMethodEdge)
-        .map(edge -> ((ChildFactoryMethodEdge) edge).factoryMethod().java())
+        .map(edge -> ((ChildFactoryMethodEdge) edge).factoryMethod().xprocessing())
         .collect(toOptional());
   }
 
@@ -418,11 +420,11 @@ public final class BindingGraph {
    */
   // TODO(dpb): Consider disallowing modules if none of their bindings are used.
   public Map<ComponentRequirement, VariableElement> factoryMethodParameters() {
-    return factoryMethod().orElseThrow().getParameters().stream()
+    return factoryMethod().get().getParameters().stream()
         .collect(
             toImmutableMap(
-                parameter -> ComponentRequirement.forModule(parameter.asType()),
-                parameter -> parameter));
+                parameter -> ComponentRequirement.forModule(parameter.getType()),
+                XConverters::toJavac));
   }
 
   /**

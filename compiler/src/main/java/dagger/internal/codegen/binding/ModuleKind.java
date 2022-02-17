@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -38,6 +38,10 @@ public enum ModuleKind {
   /** Returns the annotations for modules of the given kinds. */
   public static Set<ClassName> annotationsFor(Set<ModuleKind> kinds) {
     return kinds.stream().map(ModuleKind::annotation).collect(toImmutableSet());
+  }
+
+  public static void checkIsModule(XTypeElement moduleElement) {
+    checkArgument(forAnnotatedElement(moduleElement).isPresent());
   }
 
   /**
@@ -85,7 +89,7 @@ public enum ModuleKind {
    * @throws IllegalArgumentException if the annotation is not present on the type
    */
   public XAnnotation getModuleAnnotation(XTypeElement element) {
-    Preconditions.checkArgument(
+    checkArgument(
         element.hasAnnotation(moduleAnnotation),
         "annotation %s is not present on type %s",
         moduleAnnotation,

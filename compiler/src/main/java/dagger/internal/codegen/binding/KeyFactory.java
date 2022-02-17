@@ -20,7 +20,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPrese
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreTypes.asExecutable;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.ElementKind.METHOD;
 
@@ -43,7 +42,6 @@ import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -135,8 +133,8 @@ public final class KeyFactory {
   }
 
   // TODO(ronshapiro): Remove these conveniences which are simple wrappers around Key.Builder
-  Key forType(TypeMirror type) {
-    return Key.builder(fromJava(type)).build();
+  Key forType(XType type) {
+    return Key.builder(DaggerType.from(type)).build();
   }
 
   Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {

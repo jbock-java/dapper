@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
@@ -46,7 +45,6 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
@@ -62,7 +60,6 @@ import java.util.function.BiFunction;
 
 /** A factory for {@link Binding} objects. */
 public final class BindingFactory {
-  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private final KeyFactory keyFactory;
   private final DependencyRequestFactory dependencyRequestFactory;
@@ -70,12 +67,10 @@ public final class BindingFactory {
 
   @Inject
   BindingFactory(
-      XProcessingEnv processingEnv,
       DaggerTypes types,
       KeyFactory keyFactory,
       DependencyRequestFactory dependencyRequestFactory,
       InjectionAnnotations injectionAnnotations) {
-    this.processingEnv = processingEnv;
     this.types = types;
     this.keyFactory = keyFactory;
     this.dependencyRequestFactory = dependencyRequestFactory;
@@ -204,7 +199,7 @@ public final class BindingFactory {
     requireNonNull(componentDefinitionType);
     return ProvisionBinding.builder()
         .bindingElement(componentDefinitionType)
-        .key(keyFactory.forType(componentDefinitionType.getType().toJavac()))
+        .key(keyFactory.forType(componentDefinitionType.getType()))
         .kind(COMPONENT)
         .build();
   }
@@ -216,7 +211,7 @@ public final class BindingFactory {
   public ProvisionBinding componentDependencyBinding(ComponentRequirement dependency) {
     requireNonNull(dependency);
     return ProvisionBinding.builder()
-        .bindingElement(toXProcessing(dependency.typeElement(), processingEnv))
+        .bindingElement(dependency.typeElement())
         .key(keyFactory.forType(dependency.type()))
         .kind(COMPONENT_DEPENDENCY)
         .build();

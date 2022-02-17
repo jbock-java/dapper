@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
@@ -38,8 +39,8 @@ import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.Scope;
 import dagger.spi.model.Key;
+import dagger.spi.model.Scope;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -116,7 +117,7 @@ public final class BindingGraphFactory implements ClearableCache {
     for (ComponentRequirement dependency : componentDescriptor.dependencies()) {
       explicitBindingsBuilder.add(bindingFactory.componentDependencyBinding(dependency));
       List<ExecutableElement> dependencyMethods =
-          methodsIn(elements.getAllMembers(dependency.typeElement()));
+          methodsIn(elements.getAllMembers(toJavac(dependency.typeElement())));
 
       // Within a component dependency, we want to allow the same method to appear multiple
       // times assuming it is the exact same method. We do this by tracking a set of bindings

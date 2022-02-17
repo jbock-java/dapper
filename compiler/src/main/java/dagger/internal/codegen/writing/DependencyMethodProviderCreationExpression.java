@@ -90,7 +90,7 @@ final class DependencyMethodProviderCreationExpression
             binding,
             compilerOptions,
             CodeBlock.of("$N.$N()", dependency().variableName(), provisionMethod.getName()));
-    ClassName dependencyClassName = ClassName.get(dependency().typeElement());
+    ClassName dependencyClassName = dependency().typeElement().getClassName();
     TypeName keyType = binding.key().type().xprocessing().getTypeName();
     MethodSpec.Builder getMethod =
         methodBuilder("get")
@@ -107,7 +107,7 @@ final class DependencyMethodProviderCreationExpression
         componentShard
             .name()
             .nestedClass(
-                ClassName.get(dependency().typeElement()).toString().replace('.', '_')
+                dependency().typeElement().getQualifiedName().replace('.', '_')
                     + "_"
                     + provisionMethod.getName());
     componentShard.addType(

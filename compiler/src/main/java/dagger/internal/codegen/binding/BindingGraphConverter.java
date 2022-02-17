@@ -19,6 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
@@ -28,6 +29,7 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.Edge;
@@ -60,11 +62,14 @@ import javax.lang.model.type.TypeMirror;
 
 /** Converts {@link BindingGraph}s to {@link dagger.spi.model.BindingGraph}s. */
 final class BindingGraphConverter {
+  private final XProcessingEnv processingEnv;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
   @Inject
   BindingGraphConverter(
+      XProcessingEnv processingEnv,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
+    this.processingEnv = processingEnv;
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }
 
@@ -265,7 +270,8 @@ final class BindingGraphConverter {
       network.addEdge(
           parentComponent,
           currentComponent,
-          new ChildFactoryMethodEdgeImpl(DaggerExecutableElement.fromJava(factoryMethod)));
+          new ChildFactoryMethodEdgeImpl(
+              DaggerExecutableElement.from(toXProcessing(factoryMethod, processingEnv))));
     }
 
     /**

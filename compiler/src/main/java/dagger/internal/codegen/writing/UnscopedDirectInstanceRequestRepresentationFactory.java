@@ -74,7 +74,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
 
       case COMPONENT_DEPENDENCY:
         return componentRequirementBindingExpressionFactory.create(
-            binding, ComponentRequirement.forDependency(binding.key().type().java()));
+            binding, ComponentRequirement.forDependency(binding.key().type().xprocessing()));
 
       case COMPONENT_PROVISION:
         return componentProvisionBindingExpressionFactory.create((ProvisionBinding) binding);

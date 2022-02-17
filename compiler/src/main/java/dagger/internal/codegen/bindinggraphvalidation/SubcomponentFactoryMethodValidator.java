@@ -20,45 +20,33 @@ import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentRequirement.componentCanMakeNewInstances;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.asExecutable;
-import static io.jbock.auto.common.MoreTypes.asTypeElements;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentNodeImpl;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XExecutableType;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.BindingGraphPlugin;
+import dagger.spi.DiagnosticReporter;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
 import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
 
 /** Reports an error if a subcomponent factory method is missing required modules. */
 final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
 
-  private final XProcessingEnv processingEnv;
-  private final DaggerTypes types;
   private final Map<ComponentNode, Set<XTypeElement>> inheritedModulesCache = new HashMap<>();
 
   @Inject
-  SubcomponentFactoryMethodValidator(
-      XProcessingEnv processingEnv,
-      DaggerTypes types) {
-    this.processingEnv = processingEnv;
-    this.types = types;
+  SubcomponentFactoryMethodValidator() {
   }
 
   @Override
@@ -97,7 +85,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         .filter(binding -> binding.componentPath().equals(child.componentPath()))
         // that require a module instance
         .filter(Binding::requiresModuleInstance)
-        .map(binding -> toXProcessing(binding.contributingModule().orElseThrow().java(), processingEnv))
+        .map(binding -> binding.contributingModule().get().xprocessing())
         .distinct()
         // module owned by child
         .filter(modulesOwnedByChild::contains)
@@ -111,11 +99,11 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private Set<XTypeElement> subgraphFactoryMethodParameters(
       ChildFactoryMethodEdge edge, BindingGraph bindingGraph) {
     ComponentNode parent = (ComponentNode) bindingGraph.network().incidentNodes(edge).source();
-    DeclaredType parentType = asDeclared(parent.componentPath().currentComponent().java().asType());
-    ExecutableType factoryMethodType =
-        asExecutable(types.asMemberOf(parentType, edge.factoryMethod().java()));
-    return asTypeElements(factoryMethodType.getParameterTypes()).stream()
-        .map(typeElement -> toXProcessing(typeElement, processingEnv))
+    bindingGraph.network().incidentNodes(edge).source();
+    XType parentType = parent.componentPath().currentComponent().xprocessing().getType();
+    XExecutableType factoryMethodType = edge.factoryMethod().xprocessing().asMemberOf(parentType);
+    return factoryMethodType.getParameterTypes().stream()
+        .map(XType::getTypeElement)
         .collect(toImmutableSet());
   }
 
