@@ -35,4 +35,7 @@ public interface XAnnotation {
 
   /** Returns the value of the given {@code methodName} as a list of type references. */
   List<XType> getAsTypeList(String methodName);
+
+  /** Returns the value of the given {@code methodName} as a {@code String}. */
+  String getAsString(String methodName);
 }

@@ -16,30 +16,31 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.asExecutable;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XConstructorType;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XHasModifiers;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
@@ -48,48 +49,31 @@ import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 /** Assisted injection utility methods. */
 public final class AssistedInjectionAnnotations {
-  /** Returns the factory method for the given factory {@link XTypeElement}. */
-  public static ExecutableElement assistedFactoryMethod(
-      XTypeElement factory, DaggerElements elements) {
-    return assistedFactoryMethod(toJavac(factory), elements);
-  }
-
-  /** Returns the factory method for the given factory {@link TypeElement}. */
-  public static ExecutableElement assistedFactoryMethod(
-      TypeElement factory, DaggerElements elements) {
-    Set<ExecutableElement> executableElements = assistedFactoryMethods(factory, elements);
-    return getOnlyElement(executableElements);
+  public static XMethodElement assistedFactoryMethod(XTypeElement factory) {
+    return getOnlyElement(assistedFactoryMethods(factory));
   }
 
   /** Returns the list of abstract factory methods for the given factory {@link XTypeElement}. */
-  public static Set<ExecutableElement> assistedFactoryMethods(
-      XTypeElement factory, DaggerElements elements) {
-    return assistedFactoryMethods(toJavac(factory), elements);
-  }
-
-  /** Returns the list of abstract factory methods for the given factory {@link TypeElement}. */
-  public static Set<ExecutableElement> assistedFactoryMethods(
-      TypeElement factory, DaggerElements elements) {
-    return elements.getLocalAndInheritedMethods(factory).stream()
-        .filter(method -> method.getModifiers().contains(ABSTRACT))
-        .filter(method -> !method.isDefault())
+  public static Set<XMethodElement> assistedFactoryMethods(XTypeElement factory) {
+    return factory.getAllNonPrivateInstanceMethods().stream()
+        .filter(XHasModifiers::isAbstract)
+        .filter(method -> !method.isJavaDefault())
         .collect(toImmutableSet());
   }
 
@@ -123,24 +107,23 @@ public final class AssistedInjectionAnnotations {
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
   public static List<ParameterSpec> assistedParameterSpecs(
-      Binding binding, DaggerTypes types) {
+      Binding binding, XProcessingEnv processingEnv) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
-    ExecutableElement constructor = asExecutable(binding.bindingElement().orElseThrow());
-    ExecutableType constructorType =
-        asExecutable(types.asMemberOf(asDeclared(binding.key().type().java()), constructor));
+    XConstructorElement constructor =
+        asConstructor(toXProcessing(binding.bindingElement().get(), processingEnv));
+    XConstructorType constructorType = constructor.asMemberOf(binding.key().type().xprocessing());
     return assistedParameterSpecs(constructor.getParameters(), constructorType.getParameterTypes());
   }
 
   private static List<ParameterSpec> assistedParameterSpecs(
-      List<? extends VariableElement> paramElements, List<? extends TypeMirror> paramTypes) {
+      List<? extends XVariableElement> paramElements, List<XType> paramTypes) {
     List<ParameterSpec> assistedParameterSpecs = new ArrayList<>();
     for (int i = 0; i < paramElements.size(); i++) {
-      VariableElement paramElement = paramElements.get(i);
-      TypeMirror paramType = paramTypes.get(i);
+      XVariableElement paramElement = paramElements.get(i);
+      XType paramType = paramTypes.get(i);
       if (isAssistedParameter(paramElement)) {
         assistedParameterSpecs.add(
-            ParameterSpec.builder(TypeName.get(paramType), paramElement.getSimpleName().toString())
-                .build());
+            ParameterSpec.builder(paramType.getTypeName(), paramElement.getName()).build());
       }
     }
     return assistedParameterSpecs;
@@ -154,13 +137,14 @@ public final class AssistedInjectionAnnotations {
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
   public static List<ParameterSpec> assistedFactoryParameterSpecs(
-      Binding binding, DaggerElements elements, DaggerTypes types) {
+      Binding binding, XProcessingEnv processingEnv) {
     Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
 
-    AssistedFactoryMetadata metadata =
-        AssistedFactoryMetadata.create(binding.bindingElement().orElseThrow().asType(), elements, types);
-    ExecutableType factoryMethodType =
-        asExecutable(types.asMemberOf(asDeclared(binding.key().type().java()), metadata.factoryMethod()));
+    XTypeElement factory =
+        asTypeElement(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+    AssistedFactoryMetadata metadata = AssistedFactoryMetadata.create(factory.getType());
+    XMethodType factoryMethodType =
+        metadata.factoryMethod().asMemberOf(binding.key().type().xprocessing());
     return assistedParameterSpecs(
         // Use the order of the parameters from the @AssistedFactory method but use the parameter
         // names of the @AssistedInject constructor.
@@ -208,71 +192,73 @@ public final class AssistedInjectionAnnotations {
 
   /** Metadata about an {@link dagger.assisted.AssistedFactory} annotated type. */
   public static final class AssistedFactoryMetadata {
-    private final TypeElement factory;
-    private final DeclaredType factoryType;
-    private final ExecutableElement factoryMethod;
-    private final TypeElement assistedInjectElement;
-    private final DeclaredType assistedInjectType;
+    private final XTypeElement factory;
+    private final XType factoryType;
+    private final XMethodElement factoryMethod;
+    private final XMethodType factoryMethodType;
+    private final XTypeElement assistedInjectElement;
+    private final XType assistedInjectType;
     private final List<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters;
     private final List<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters;
 
     private AssistedFactoryMetadata(
-        TypeElement factory,
-        DeclaredType factoryType,
-        ExecutableElement factoryMethod,
-        TypeElement assistedInjectElement,
-        DeclaredType assistedInjectType,
-        List<AssistedInjectionAnnotations.AssistedParameter> assistedInjectAssistedParameters,
-        List<AssistedInjectionAnnotations.AssistedParameter> assistedFactoryAssistedParameters) {
+        XTypeElement factory,
+        XType factoryType,
+        XMethodElement factoryMethod,
+        XMethodType factoryMethodType,
+        XTypeElement assistedInjectElement,
+        XType assistedInjectType,
+        List<AssistedParameter> assistedInjectAssistedParameters,
+        List<AssistedParameter> assistedFactoryAssistedParameters) {
       this.factory = requireNonNull(factory);
       this.factoryType = requireNonNull(factoryType);
       this.factoryMethod = requireNonNull(factoryMethod);
+      this.factoryMethodType = factoryMethodType;
       this.assistedInjectElement = requireNonNull(assistedInjectElement);
       this.assistedInjectType = requireNonNull(assistedInjectType);
       this.assistedInjectAssistedParameters = requireNonNull(assistedInjectAssistedParameters);
       this.assistedFactoryAssistedParameters = requireNonNull(assistedFactoryAssistedParameters);
     }
 
-    public static AssistedFactoryMetadata create(
-        XType factory, DaggerElements elements, DaggerTypes types) {
-      return create(toJavac(factory), elements, types);
-    }
-
-    public static AssistedFactoryMetadata create(
-        TypeMirror factory, DaggerElements elements, DaggerTypes types) {
-      DeclaredType factoryType = asDeclared(factory);
-      TypeElement factoryElement = asTypeElement(factoryType);
-      ExecutableElement factoryMethod = assistedFactoryMethod(factoryElement, elements);
-      ExecutableType factoryMethodType = asExecutable(types.asMemberOf(factoryType, factoryMethod));
-      DeclaredType assistedInjectType = asDeclared(factoryMethodType.getReturnType());
+    public static AssistedFactoryMetadata create(XType factoryType) {
+      XTypeElement factoryElement = factoryType.getTypeElement();
+      XMethodElement factoryMethod = assistedFactoryMethod(factoryElement);
+      XMethodType factoryMethodType = factoryMethod.asMemberOf(factoryType);
+      XType assistedInjectType = factoryMethodType.getReturnType();
+      XTypeElement assistedInjectElement = assistedInjectType.getTypeElement();
       return new AssistedFactoryMetadata(
           factoryElement,
           factoryType,
           factoryMethod,
-          asTypeElement(assistedInjectType),
+          factoryMethodType,
+          assistedInjectElement,
           assistedInjectType,
-          AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType, types),
+          AssistedInjectionAnnotations.assistedInjectAssistedParameters(assistedInjectType),
           AssistedInjectionAnnotations.assistedFactoryAssistedParameters(
               factoryMethod, factoryMethodType));
     }
 
-    public TypeElement factory() {
+    public XTypeElement factory() {
       return factory;
     }
 
-    public DeclaredType factoryType() {
+    public XType factoryType() {
       return factoryType;
     }
 
-    public ExecutableElement factoryMethod() {
+    public XMethodElement factoryMethod() {
       return factoryMethod;
     }
 
-    public TypeElement assistedInjectElement() {
+    public XMethodType factoryMethodType() {
+      return factoryMethodType;
+    }
+
+    public XTypeElement assistedInjectElement() {
       return assistedInjectElement;
     }
 
-    public DeclaredType assistedInjectType() {
+    public XType assistedInjectType() {
       return assistedInjectType;
     }
 
@@ -284,20 +270,28 @@ public final class AssistedInjectionAnnotations {
       return assistedFactoryAssistedParameters;
     }
 
-    public Map<AssistedParameter, VariableElement> assistedInjectAssistedParametersMap() {
-      Map<AssistedParameter, VariableElement> builder = new LinkedHashMap<>();
+    private final Supplier<Map<AssistedParameter, XVariableElement>> assistedInjectAssistedParametersMapCache = Suppliers.memoize(() -> {
+      Map<AssistedParameter, XVariableElement> builder = new LinkedHashMap<>();
       for (AssistedParameter assistedParameter : assistedInjectAssistedParameters()) {
-        builder.put(assistedParameter, assistedParameter.variableElement);
+        builder.put(assistedParameter, assistedParameter.element());
       }
       return builder;
+    });
+
+    public Map<AssistedParameter, XVariableElement> assistedInjectAssistedParametersMap() {
+      return assistedInjectAssistedParametersMapCache.get();
     }
 
-    public Map<AssistedParameter, VariableElement> assistedFactoryAssistedParametersMap() {
-      Map<AssistedParameter, VariableElement> builder = new LinkedHashMap<>();
+    private final Supplier<Map<AssistedParameter, XVariableElement>> assistedFactoryAssistedParametersMapCache = Suppliers.memoize(() -> {
+      Map<AssistedParameter, XVariableElement> builder = new LinkedHashMap<>();
       for (AssistedParameter assistedParameter : assistedFactoryAssistedParameters()) {
-        builder.put(assistedParameter, assistedParameter.variableElement);
+        builder.put(assistedParameter, assistedParameter.element());
       }
       return builder;
+    });
+
+    public Map<AssistedParameter, XVariableElement> assistedFactoryAssistedParametersMap() {
+      return assistedFactoryAssistedParametersMapCache.get();
     }
   }
 
@@ -311,24 +305,30 @@ public final class AssistedInjectionAnnotations {
 
     private final String qualifier;
     private final Equivalence.Wrapper<TypeMirror> wrappedType;
-    private final VariableElement variableElement;
+    private final XVariableElement parameterElement;
+    private final XType parameterType;
 
     private AssistedParameter(
         String qualifier,
         Equivalence.Wrapper<TypeMirror> wrappedType,
-        VariableElement variableElement) {
+        XVariableElement parameterElement,
+        XType parameterType) {
       this.qualifier = requireNonNull(qualifier);
       this.wrappedType = requireNonNull(wrappedType);
-      this.variableElement = variableElement;
+      this.parameterElement = parameterElement;
+      this.parameterType = parameterType;
     }
 
-    public static AssistedParameter create(VariableElement parameter, TypeMirror parameterType) {
+    public static AssistedParameter create(
+        XVariableElement parameter,
+        XType parameterType) {
       return new AssistedParameter(
-          getAnnotationMirror(parameter, TypeNames.ASSISTED)
-              .map(assisted -> getStringValue(assisted, "value"))
+          Optional.ofNullable(parameter.getAnnotation(TypeNames.ASSISTED))
+              .map(assisted -> assisted.getAsString("value"))
               .orElse(""),
-          MoreTypes.equivalence().wrap(parameterType),
-          parameter);
+          MoreTypes.equivalence().wrap(toJavac(parameterType)),
+          parameter,
+          parameterType);
     }
 
     /** Returns the string qualifier from the {@link Assisted#value()}. */
@@ -337,17 +337,17 @@ public final class AssistedInjectionAnnotations {
     }
 
     /** Returns the wrapper for the type annotated with {@link Assisted}. */
-    public Equivalence.Wrapper<TypeMirror> wrappedType() {
+    Equivalence.Wrapper<TypeMirror> wrappedType() {
       return wrappedType;
     }
 
     /** Returns the type annotated with {@link Assisted}. */
-    public TypeMirror type() {
-      return wrappedType().get();
+    public XType type() {
+      return parameterType;
     }
 
-    public VariableElement variableElement() {
-      return variableElement;
+    public XVariableElement element() {
+      return parameterElement;
     }
 
     @Override
@@ -372,36 +372,31 @@ public final class AssistedInjectionAnnotations {
   }
 
   public static List<AssistedParameter> assistedInjectAssistedParameters(
-      XType assistedInjectType, DaggerTypes types) {
-    return assistedInjectAssistedParameters(asDeclared(toJavac(assistedInjectType)), types);
-  }
-
-  public static List<AssistedParameter> assistedInjectAssistedParameters(
-      DeclaredType assistedInjectType, DaggerTypes types) {
+      XType assistedInjectType) {
     // We keep track of the constructor both as an ExecutableElement to access @Assisted
     // parameters and as an ExecutableType to access the resolved parameter types.
-    ExecutableElement assistedInjectConstructor =
-        getOnlyElement(assistedInjectedConstructors(asTypeElement(assistedInjectType)));
-    ExecutableType assistedInjectConstructorType =
-        asExecutable(types.asMemberOf(assistedInjectType, assistedInjectConstructor));
+    XConstructorElement assistedInjectConstructor =
+        getOnlyElement(assistedInjectedConstructors(assistedInjectType.getTypeElement()));
+    XConstructorType assistedInjectConstructorType =
+        assistedInjectConstructor.asMemberOf(assistedInjectType);
 
     List<AssistedParameter> builder = new ArrayList<>();
     for (int i = 0; i < assistedInjectConstructor.getParameters().size(); i++) {
-      VariableElement parameter = assistedInjectConstructor.getParameters().get(i);
-      TypeMirror parameterType = assistedInjectConstructorType.getParameterTypes().get(i);
-      if (isAnnotationPresent(parameter, Assisted.class)) {
+      XVariableElement parameter = assistedInjectConstructor.getParameters().get(i);
+      XType parameterType = assistedInjectConstructorType.getParameterTypes().get(i);
+      if (parameter.hasAnnotation(TypeNames.ASSISTED)) {
         builder.add(AssistedParameter.create(parameter, parameterType));
       }
     }
     return builder;
   }
 
-  public static List<AssistedParameter> assistedFactoryAssistedParameters(
-      ExecutableElement factoryMethod, ExecutableType factoryMethodType) {
+  private static List<AssistedParameter> assistedFactoryAssistedParameters(
+      XMethodElement factoryMethod, XMethodType factoryMethodType) {
     List<AssistedParameter> builder = new ArrayList<>();
     for (int i = 0; i < factoryMethod.getParameters().size(); i++) {
-      VariableElement parameter = factoryMethod.getParameters().get(i);
-      TypeMirror parameterType = factoryMethodType.getParameterTypes().get(i);
+      XVariableElement parameter = factoryMethod.getParameters().get(i);
+      XType parameterType = factoryMethodType.getParameterTypes().get(i);
       builder.add(AssistedParameter.create(parameter, parameterType));
     }
     return builder;

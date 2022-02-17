@@ -10,6 +10,11 @@ public interface XMethodElement extends XExecutableElement {
 
   boolean isStaticInterfaceMethod();
 
+  /**
+   * Returns true if this method has the default modifier.
+   */
+  boolean isJavaDefault();
+
   XMethodElement copyTo(XTypeElement newContainer);
 
   XType getReturnType();

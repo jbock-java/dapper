@@ -61,4 +61,9 @@ class JavacAnnotation implements XAnnotation {
   public List<XType> getAsTypeList(String methodName) {
     return getAnnotationValue(methodName).asTypeList();
   }
+
+  @Override
+  public String getAsString(String methodName) {
+    return getAnnotationValue(methodName).asString();
+  }
 }

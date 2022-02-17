@@ -19,13 +19,11 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
@@ -45,7 +43,6 @@ import java.util.Set;
  */
 final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutableParameterElement> {
   private final InjectionAnnotations injectionAnnotations;
-  private final DaggerElements elements;
   private final XMessager messager;
   private final XProcessingEnv processingEnv;
 
@@ -53,12 +50,10 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
       EnclosingTypeElementValidator elementValidator,
-      DaggerElements elements,
       XMessager messager,
       XProcessingEnv processingEnv) {
     super(elementValidator);
     this.injectionAnnotations = injectionAnnotations;
-    this.elements = elements;
     this.messager = messager;
     this.processingEnv = processingEnv;
   }
@@ -107,7 +102,8 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
       XTypeElement enclosingElement = closestEnclosingTypeElement(executableElement, processingEnv);
       return isAssistedFactoryType(enclosingElement)
           // This assumes we've already validated AssistedFactory and that a valid method exists.
-          && assistedFactoryMethod(enclosingElement, elements).equals(toJavac(executableElement));
+          && assistedFactoryMethod(enclosingElement).equals(executableElement);
     }
-    return false;  }
+    return false;
+  }
 }

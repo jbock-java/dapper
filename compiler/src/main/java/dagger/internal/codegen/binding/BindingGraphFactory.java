@@ -302,7 +302,8 @@ public final class BindingGraphFactory implements ClearableCache {
           && isAssistedFactoryType(asTypeElement(requestKey.type().java()))) {
         bindings.add(
             bindingFactory.assistedFactoryBinding(
-                asTypeElement(requestKey.type().java()), Optional.of(requestKey.type().java())));
+                requestKey.type().xprocessing().getTypeElement(),
+                Optional.of(requestKey.type().xprocessing())));
       }
 
       // If there are no bindings, add the implicit @Inject-constructed binding if there is one.

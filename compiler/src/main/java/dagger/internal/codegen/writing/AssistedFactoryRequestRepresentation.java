@@ -19,6 +19,8 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.writing.AssistedInjectionParameters.assistedFactoryParameterSpecs;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static java.util.Objects.requireNonNull;
@@ -33,6 +35,11 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.MethodSpecs;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -50,27 +57,24 @@ import javax.lang.model.type.DeclaredType;
  * dagger.assisted.AssistedFactory} methods.
  */
 final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
+  private final XProcessingEnv processingEnv;
   private final ProvisionBinding binding;
   private final BindingGraph graph;
   private final SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory;
-  private final DaggerElements elements;
-  private final DaggerTypes types;
   private final ComponentImplementation componentImplementation;
 
   @AssistedInject
   AssistedFactoryRequestRepresentation(
+      XProcessingEnv processingEnv,
       @Assisted ProvisionBinding binding,
       BindingGraph graph,
       ComponentImplementation componentImplementation,
-      SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory,
-      DaggerTypes types,
-      DaggerElements elements) {
+      SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory) {
+    this.processingEnv = processingEnv;
     this.binding = requireNonNull(binding);
     this.graph = graph;
     this.componentImplementation = componentImplementation;
     this.simpleMethodRequestRepresentationFactory = simpleMethodRequestRepresentationFactory;
-    this.elements = elements;
-    this.types = types;
   }
 
   @Override
@@ -93,16 +97,17 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
 
   private TypeSpec anonymousfactoryImpl(
       Binding assistedBinding, Expression assistedInjectionExpression) {
-    TypeElement factory = asType(binding.bindingElement().orElseThrow());
-    DeclaredType factoryType = asDeclared(binding.key().type().java());
-    ExecutableElement factoryMethod = assistedFactoryMethod(factory, elements);
+    XTypeElement factory =
+        asTypeElement(toXProcessing(binding.bindingElement().orElseThrow(), processingEnv));
+    XType factoryType = binding.key().type().xprocessing();
+    XMethodElement factoryMethod = assistedFactoryMethod(factory);
 
     // We can't use MethodSpec.overriding directly because we need to control the parameter names.
-    MethodSpec factoryOverride = MethodSpec.overriding(factoryMethod, factoryType, types).build();
+    MethodSpec factoryOverride = MethodSpecs.overriding(factoryMethod, factoryType).build();
     TypeSpec.Builder builder =
         TypeSpec.anonymousClassBuilder("")
             .addMethod(
-                MethodSpec.methodBuilder(factoryMethod.getSimpleName().toString())
+                MethodSpec.methodBuilder(factoryMethod.getName())
                     .addModifiers(factoryOverride.modifiers)
                     .addTypeVariables(factoryOverride.typeVariables)
                     .returns(factoryOverride.returnType)
@@ -111,16 +116,15 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
                     .addParameters(
                         assistedFactoryParameterSpecs(
                             binding,
-                            elements,
-                            types,
+                            processingEnv,
                             componentImplementation.shardImplementation(assistedBinding)))
                     .addStatement("return $L", assistedInjectionExpression.codeBlock())
                     .build());
 
-    if (factory.getKind() == ElementKind.INTERFACE) {
-      builder.addSuperinterface(TypeName.get(factoryType));
+    if (factory.isInterface()) {
+      builder.addSuperinterface(factoryType.getTypeName());
     } else {
-      builder.superclass(TypeName.get(factoryType));
+      builder.superclass(factoryType.getTypeName());
     }
 
     return builder.build();

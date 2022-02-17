@@ -21,7 +21,6 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assis
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
@@ -39,16 +38,13 @@ import javax.lang.model.element.ExecutableElement;
 
 /** An annotation processor for {@link dagger.assisted.AssistedInject}-annotated elements. */
 final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XConstructorElement> {
-  private final DaggerTypes types;
   private final XMessager messager;
 
   @Inject
   AssistedInjectProcessingStep(
-      DaggerTypes types,
       EnclosingTypeElementValidator elementValidator,
       XMessager messager) {
     super(elementValidator);
-    this.types = types;
     this.messager = messager;
   }
 
@@ -63,7 +59,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 
-  private final class AssistedInjectValidator {
+  private static final class AssistedInjectValidator {
     ValidationReport validate(XConstructorElement constructor) {
       ExecutableElement javaConstructor = XConverters.toJavac(constructor);
       Preconditions.checkState(javaConstructor.getKind() == ElementKind.CONSTRUCTOR);
@@ -71,7 +67,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
 
       XType assistedInjectType = constructor.getEnclosingElement().getType();
       List<AssistedParameter> assistedParameters =
-          assistedInjectAssistedParameters(assistedInjectType, types);
+          assistedInjectAssistedParameters(assistedInjectType);
 
       Set<AssistedParameter> uniqueAssistedParameters = new HashSet<>();
       for (AssistedParameter assistedParameter : assistedParameters) {
@@ -82,7 +78,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
                       + " an identifier on the parameter by using @Assisted(\"identifier\") in both"
                       + " the factory and @AssistedInject constructor",
                   assistedParameter),
-              assistedParameter.variableElement());
+              assistedParameter.element());
         }
       }
 

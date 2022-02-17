@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
@@ -50,6 +51,11 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
   @Override
   public boolean isStaticInterfaceMethod() {
     return isStatic() && containing().toJavac().getKind() == ElementKind.INTERFACE;
+  }
+
+  @Override
+  public boolean isJavaDefault() {
+    return toJavac().getModifiers().contains(Modifier.DEFAULT);
   }
 
   @Override

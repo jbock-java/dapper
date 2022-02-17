@@ -28,12 +28,15 @@ public interface XAnnotationValue {
 
   AnnotationValue toJavac();
 
-  /**Returns the value a list of [XAnnotationValue]. */
+  /**Returns the value a list of {@code XAnnotationValue}. */
   List<XAnnotationValue> asAnnotationValueList();
 
-  /** Returns the value as a list of [XType]. */
+  /** Returns the value as a list of {@code XType}. */
   List<XType> asTypeList();
 
-  /** Returns the value as a [XType]. */
+  /** Returns the value as a {@code XType}. */
   XType asType();
+
+  /** Returns the value as a {@code String}. */
+  String asString();
 }
