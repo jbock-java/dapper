@@ -23,6 +23,7 @@ import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreElements;
@@ -97,7 +98,7 @@ public final class MethodSignatureFormatter extends Formatter<ExecutableElement>
    * Formats an ExecutableElement as if it were contained within the container, if the container is
    * present.
    */
-  public String format(XMethodElement method, Optional<XType> container) {
+  public String format(XExecutableElement method, Optional<XType> container) {
     return format(method.toJavac(), container.map(XType::toJavac).map(MoreTypes::asDeclared));
   }
 

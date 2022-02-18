@@ -16,9 +16,11 @@
 
 package dagger.internal.codegen.base;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static java.util.stream.Collectors.joining;
 
+import dagger.internal.codegen.xprocessing.XElement;
 import jakarta.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -42,6 +44,17 @@ public final class ElementFormatter extends Formatter<Element> {
   @Override
   public String format(Element element) {
     return elementToString(element);
+  }
+
+  /**
+   * Returns a useful string form for an element.
+   *
+   * <p>Elements directly enclosed by a type are preceded by the enclosing type's qualified name.
+   *
+   * <p>Parameters are given with their enclosing executable, with other parameters elided.
+   */
+  public static String elementToString(XElement element) {
+    return elementToString(toJavac(element));
   }
 
   /**
