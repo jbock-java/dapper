@@ -53,7 +53,6 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
@@ -74,16 +73,15 @@ import java.util.Set;
 
 /** An annotation processor for {@link dagger.assisted.AssistedFactory}-annotated types. */
 final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
-  private final XProcessingEnv processingEnv;
   private final XMessager messager;
   private final XFiler filer;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
+  private final EnclosingTypeElementValidator elementValidator;
 
   @Inject
   AssistedFactoryProcessingStep(
-      XProcessingEnv processingEnv,
       EnclosingTypeElementValidator elementValidator,
       XMessager messager,
       XFiler filer,
@@ -91,7 +89,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
       DaggerTypes types,
       BindingFactory bindingFactory) {
     super(elementValidator);
-    this.processingEnv = processingEnv;
+    this.elementValidator = elementValidator;
     this.messager = messager;
     this.filer = filer;
     this.elements = elements;
@@ -146,6 +144,12 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
 
       for (XMethodElement method : abstractFactoryMethods) {
         XType returnType = method.asMemberOf(factory.getType()).getReturnType();
+        // The default superficial validation only applies to the @AssistedFactory-annotated
+        // element, so we have to manually check the superficial validation  of the @AssistedInject
+        // element before using it to ensure it's ready for processing.
+        if (isDeclared(returnType)) {
+          elementValidator.validateEnclosingType(returnType.getTypeElement());
+        }
         if (!isAssistedInjectionType(returnType)) {
           report.addError(
               String.format(

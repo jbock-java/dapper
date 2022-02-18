@@ -36,12 +36,15 @@ public final class EnclosingTypeElementValidator implements ClearableCache {
   private final Map<TypeElement, Boolean> validatedTypeElements = new HashMap<>();
 
   @Inject
-  EnclosingTypeElementValidator() {}
+  EnclosingTypeElementValidator() {
+  }
 
-  public boolean validateEnclosingType(XElement element) {
+  public void validateEnclosingType(XElement element) {
     Element javaElement = XConverters.toJavac(element);
-    return validatedTypeElements.computeIfAbsent(
-        closestEnclosingTypeElement(javaElement), SuperficialValidation::validateElement);
+    if (!validatedTypeElements.computeIfAbsent(
+        closestEnclosingTypeElement(javaElement), SuperficialValidation::validateElement)) {
+      throw new TypeNotPresentException(element.toString(), null);
+    }
   }
 
   @Override
