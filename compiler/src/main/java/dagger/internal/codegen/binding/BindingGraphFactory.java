@@ -22,11 +22,11 @@ import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentCon
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static io.jbock.auto.common.MoreTypes.isType;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 
 /** A factory for {@link BindingGraph} objects. */
 @Singleton
@@ -306,8 +305,8 @@ public final class BindingGraphFactory implements ClearableCache {
 
       // Add Assisted Factory binding
       if (isType(requestKey.type().java())
-          && requestKey.type().java().getKind() == TypeKind.DECLARED
-          && isAssistedFactoryType(asTypeElement(requestKey.type().java()))) {
+          && isDeclared(requestKey.type().xprocessing())
+          && isAssistedFactoryType(requestKey.type().xprocessing().getTypeElement())) {
         bindings.add(
             bindingFactory.assistedFactoryBinding(
                 requestKey.type().xprocessing().getTypeElement(),

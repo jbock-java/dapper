@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
@@ -26,6 +27,8 @@ import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibl
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypePubliclyAccessible;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
+import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
@@ -35,9 +38,10 @@ import static javax.lang.model.type.TypeKind.VOID;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.spi.model.DependencyRequest;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
@@ -138,18 +142,18 @@ final class InjectionMethods {
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
         Function<VariableElement, String> uniqueAssistedParameterName) {
-      Map<VariableElement, DependencyRequest> dependencyRequestMap =
+      Map<XExecutableParameterElement, DependencyRequest> dependencyRequestMap =
           binding.provisionDependencies().stream()
               .collect(
                   toImmutableMap(
-                      request -> MoreElements.asVariable(request.requestElement().orElseThrow().java()),
+                      request -> asMethodParameter(request.requestElement().get().xprocessing()),
                       request -> request));
 
       List<CodeBlock> arguments = new ArrayList<>();
-      ExecutableElement method = asExecutable(toJavac(binding.bindingElement().get()));
-      for (VariableElement parameter : method.getParameters()) {
-        if (AssistedInjectionAnnotations.isAssistedParameter(parameter)) {
-          arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(parameter)));
+      XExecutableElement method = asExecutable(binding.bindingElement().get());
+      for (XExecutableParameterElement parameter : method.getParameters()) {
+        if (isAssistedParameter(parameter)) {
+          arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(toJavac(parameter))));
         } else if (dependencyRequestMap.containsKey(parameter)) {
           DependencyRequest request = dependencyRequestMap.get(parameter);
           arguments.add(dependencyUsage.apply(request));
