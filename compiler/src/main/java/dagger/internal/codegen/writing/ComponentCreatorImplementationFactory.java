@@ -433,10 +433,7 @@ final class ComponentCreatorImplementationFactory {
      * Returns whether the given {@code requirement} is for a module type owned by the component.
      */
     private boolean isOwnedModule(ComponentRequirement requirement) {
-      return componentImplementation
-          .graph()
-          .ownedModuleTypes()
-          .contains(toJavac(requirement.typeElement()));
+      return componentImplementation.graph().ownedModuleTypes().contains(requirement.typeElement());
     }
 
     @Override

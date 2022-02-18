@@ -21,6 +21,7 @@ import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -175,7 +176,7 @@ public final class ComponentRequestRepresentations {
     BindingRequest request = bindingRequest(componentMethod.dependencyRequest().get());
     return MethodSpec.overriding(
             componentMethod.methodElement(),
-            MoreTypes.asDeclared(graph.componentTypeElement().asType()),
+            MoreTypes.asDeclared(toJavac(graph.componentTypeElement()).asType()),
             types)
         .addCode(
             getRequestRepresentation(request)

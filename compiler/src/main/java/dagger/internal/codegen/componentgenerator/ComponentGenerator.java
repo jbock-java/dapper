@@ -17,7 +17,6 @@
 package dagger.internal.codegen.componentgenerator;
 
 import static dagger.internal.codegen.writing.ComponentNames.getRootComponentClassName;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 
 import dagger.Component;
 import dagger.internal.codegen.base.Preconditions;
@@ -27,7 +26,6 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -35,23 +33,20 @@ import java.util.Optional;
 
 /** Generates the implementation of the abstract types annotated with {@link Component}. */
 final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
-  private final XProcessingEnv processingEnv;
   private final TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory;
 
   @Inject
   ComponentGenerator(
       XFiler filer,
       DaggerElements elements,
-      XProcessingEnv processingEnv,
       TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory) {
     super(filer, elements);
-    this.processingEnv = processingEnv;
     this.topLevelImplementationComponentFactory = topLevelImplementationComponentFactory;
   }
 
   @Override
   public XElement originatingElement(BindingGraph input) {
-    return toXProcessing(input.componentTypeElement(), processingEnv);
+    return input.componentTypeElement();
   }
 
   @Override

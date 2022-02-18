@@ -24,7 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.stream;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.BindingGraph.Edge;
 import static dagger.spi.model.BindingGraph.MissingBinding;
 import static java.util.Objects.requireNonNull;
@@ -33,8 +32,9 @@ import static java.util.stream.Collectors.toCollection;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.Node;
@@ -59,7 +59,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 
 /**
  * A graph that represents a single component or subcomponent within a fully validated top-level
@@ -67,29 +66,23 @@ import javax.lang.model.element.VariableElement;
  */
 public final class BindingGraph {
 
-  private final Supplier<List<BindingGraph>> subgraphs = memoize(() ->
-      topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
-          .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
-          .collect(toImmutableList()));
-
-  private final Supplier<Map<ComponentPath, ComponentDescriptor>> componentDescriptorsByPath = memoize(() ->
-      topLevelBindingGraph().componentNodes().stream()
-          .map(ComponentNodeImpl.class::cast)
-          .collect(
-              toImmutableMap(ComponentNode::componentPath, ComponentNodeImpl::componentDescriptor)));
-
   private final ComponentNode componentNode;
-  private final dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph;
+  private final TopLevelBindingGraph topLevelBindingGraph;
+
+  private Map<Key, BindingNode> contributionBindings;
+  private Set<ModuleDescriptor> inheritedModules;
+  private Set<ModuleDescriptor> ownedModules;
+  private Set<XTypeElement> bindingModules;
 
   private BindingGraph(
       ComponentNode componentNode,
-      dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph topLevelBindingGraph) {
+      TopLevelBindingGraph topLevelBindingGraph) {
     this.componentNode = requireNonNull(componentNode);
     this.topLevelBindingGraph = requireNonNull(topLevelBindingGraph);
   }
 
   private final Supplier<Set<ComponentRequirement>> componentRequirements = memoize(() -> {
-    Set<TypeElement> requiredModules =
+    Set<XTypeElement> requiredModules =
         stream(Traverser.forTree(BindingGraph::subgraphs).depthFirstPostOrder(this))
             .flatMap(graph -> graph.bindingModules.stream())
             .filter(ownedModuleTypes()::contains)
@@ -99,7 +92,7 @@ public final class BindingGraph {
         .filter(
             requirement ->
                 !requirement.kind().isModule()
-                    || requiredModules.contains(toJavac(requirement.typeElement())))
+                    || requiredModules.contains(requirement.typeElement()))
         .forEach(requirements::add);
     if (factoryMethod().isPresent()) {
       requirements.addAll(factoryMethodParameters().keySet());
@@ -322,16 +315,11 @@ public final class BindingGraph {
         contributionBindings.values().stream()
             .map(BindingNode::contributingModule)
             .flatMap(Optional::stream)
-            .map(DaggerTypeElement::java)
+            .map(DaggerTypeElement::xprocessing)
             .collect(toImmutableSet());
 
     return bindingGraph;
   }
-
-  private Map<Key, BindingNode> contributionBindings;
-  private Set<ModuleDescriptor> inheritedModules;
-  private Set<ModuleDescriptor> ownedModules;
-  private Set<TypeElement> bindingModules;
 
   /** Returns the {@link ComponentNode} for this graph. */
   public ComponentNode componentNode() {
@@ -371,8 +359,8 @@ public final class BindingGraph {
   }
 
   /** Returns the {@link TypeElement} for the component this graph represents. */
-  public TypeElement componentTypeElement() {
-    return componentPath().currentComponent().java();
+  public XTypeElement componentTypeElement() {
+    return componentPath().currentComponent().xprocessing();
   }
 
   /**
@@ -383,10 +371,9 @@ public final class BindingGraph {
    * subcomponents}, this set will be the transitive modules that are not owned by any of their
    * ancestors.
    */
-  public Set<TypeElement> ownedModuleTypes() {
+  public Set<XTypeElement> ownedModuleTypes() {
     return ownedModules.stream()
         .map(ModuleDescriptor::moduleElement)
-        .map(XConverters::toJavac)
         .collect(toImmutableSet());
   }
 
@@ -415,16 +402,16 @@ public final class BindingGraph {
 
   /**
    * Returns a map between the {@linkplain ComponentRequirement component requirement} and the
-   * corresponding {@link VariableElement} for each module parameter in the {@linkplain
+   * corresponding {@link XExecutableParameterElement} for each module parameter in the {@linkplain
    * BindingGraph#factoryMethod factory method}.
    */
   // TODO(dpb): Consider disallowing modules if none of their bindings are used.
-  public Map<ComponentRequirement, VariableElement> factoryMethodParameters() {
+  public Map<ComponentRequirement, XExecutableParameterElement> factoryMethodParameters() {
     return factoryMethod().get().getParameters().stream()
         .collect(
             toImmutableMap(
                 parameter -> ComponentRequirement.forModule(parameter.getType()),
-                XConverters::toJavac));
+                parameter -> parameter));
   }
 
   /**
@@ -444,9 +431,20 @@ public final class BindingGraph {
    * Returns all {@link ComponentDescriptor}s in the {@link TopLevelBindingGraph} mapped by the
    * component path.
    */
+  private final Supplier<Map<ComponentPath, ComponentDescriptor>> componentDescriptorsByPath = memoize(() ->
+      topLevelBindingGraph().componentNodes().stream()
+          .map(ComponentNodeImpl.class::cast)
+          .collect(
+              toImmutableMap(ComponentNode::componentPath, ComponentNodeImpl::componentDescriptor)));
+
   public Map<ComponentPath, ComponentDescriptor> componentDescriptorsByPath() {
     return componentDescriptorsByPath.get();
   }
+
+  private final Supplier<List<BindingGraph>> subgraphs = memoize(() ->
+      topLevelBindingGraph().subcomponentNodes(componentNode()).stream()
+          .map(subcomponent -> create(Optional.of(this), subcomponent, topLevelBindingGraph()))
+          .collect(toImmutableList()));
 
   public List<BindingGraph> subgraphs() {
     return subgraphs.get();
