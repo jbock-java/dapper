@@ -23,7 +23,7 @@ import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
+import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.ModuleValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
@@ -54,7 +54,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   @Inject
   ModuleProcessingStep(
       XMessager messager,
-      EnclosingTypeElementValidator elementValidator,
+      SuperficialValidator elementValidator,
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,

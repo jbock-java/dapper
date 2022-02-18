@@ -40,7 +40,7 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   @Inject
   BindsInstanceProcessingStep(
       BindsInstanceMethodValidator methodValidator,
-      EnclosingTypeElementValidator elementValidator,
+      SuperficialValidator elementValidator,
       BindsInstanceParameterValidator parameterValidator,
       XMessager messager) {
     super(elementValidator);

@@ -36,10 +36,10 @@ import java.util.Set;
  */
 public abstract class TypeCheckingProcessingStep<E extends XElement> extends XProcessingStep {
 
-  private final EnclosingTypeElementValidator elementValidator;
+  private final SuperficialValidator superficialValidator;
 
-  protected TypeCheckingProcessingStep(EnclosingTypeElementValidator elementValidator) {
-    this.elementValidator = elementValidator;
+  protected TypeCheckingProcessingStep(SuperficialValidator superficialValidator) {
+    this.superficialValidator = superficialValidator;
   }
 
   @Override
@@ -62,7 +62,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> extends XPr
                 // TODO(b/201479062): It's inefficient to require validation of the entire enclosing
                 //  type, we should try to remove this and handle any additional validation into the
                 //  steps that need it.
-                elementValidator.validateEnclosingType(element);
+                superficialValidator.throwIfNearestEnclosingTypeNotValid(element);
                 process((E) element, annotations);
               } catch (TypeNotPresentException e) {
                 deferredElements.add(element);

@@ -32,7 +32,7 @@ import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
-import dagger.internal.codegen.validation.EnclosingTypeElementValidator;
+import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
@@ -59,7 +59,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
   @Inject
   ComponentProcessingStep(
       XMessager messager,
-      EnclosingTypeElementValidator elementValidator,
+      SuperficialValidator elementValidator,
       ComponentValidator componentValidator,
       ComponentCreatorValidator creatorValidator,
       ComponentDescriptorValidator componentDescriptorValidator,

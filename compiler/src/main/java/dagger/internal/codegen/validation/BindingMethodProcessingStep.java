@@ -33,7 +33,7 @@ public final class BindingMethodProcessingStep
   @Inject
   BindingMethodProcessingStep(
       XMessager messager,
-      EnclosingTypeElementValidator elementValidator,
+      SuperficialValidator elementValidator,
       AnyBindingMethodValidator anyBindingMethodValidator) {
     super(elementValidator);
     this.messager = messager;
