@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static java.util.Objects.requireNonNull;
 
 import dagger.assisted.Assisted;
@@ -72,7 +73,7 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
 
   @Override
   protected CodeBlock methodCall() {
-    return CodeBlock.of("$N()", componentMethod.methodElement().getSimpleName());
+    return CodeBlock.of("$N()", getSimpleName(componentMethod.methodElement()));
   }
 
   @Override

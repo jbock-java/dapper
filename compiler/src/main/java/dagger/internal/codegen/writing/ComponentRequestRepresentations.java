@@ -36,6 +36,7 @@ import dagger.internal.codegen.binding.FrameworkTypeMapper;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreTypes;
@@ -174,10 +175,8 @@ public final class ComponentRequestRepresentations {
   public MethodSpec getComponentMethod(ComponentMethodDescriptor componentMethod) {
     Preconditions.checkArgument(componentMethod.dependencyRequest().isPresent());
     BindingRequest request = bindingRequest(componentMethod.dependencyRequest().get());
-    return MethodSpec.overriding(
-            componentMethod.methodElement(),
-            MoreTypes.asDeclared(toJavac(graph.componentTypeElement()).asType()),
-            types)
+    return MethodSpecs.overriding(
+            componentMethod.methodElement(), graph.componentTypeElement().getType())
         .addCode(
             getRequestRepresentation(request)
                 .getComponentMethodImplementation(componentMethod, componentImplementation))

@@ -19,6 +19,9 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Suppliers.memoizeInt;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.VOID;
 
@@ -32,6 +35,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
@@ -344,12 +348,12 @@ public final class ComponentDescriptor {
   /** A component method. */
   public static final class ComponentMethodDescriptor {
 
-    private final ExecutableElement methodElement;
+    private final XMethodElement methodElement;
     private final Optional<DependencyRequest> dependencyRequest;
     private final Optional<ComponentDescriptor> subcomponent;
 
     private ComponentMethodDescriptor(
-        ExecutableElement methodElement,
+        XMethodElement methodElement,
         Optional<DependencyRequest> dependencyRequest,
         Optional<ComponentDescriptor> subcomponent) {
       this.methodElement = methodElement;
@@ -358,7 +362,7 @@ public final class ComponentDescriptor {
     }
 
     /** The method itself. Note that this may be declared on a supertype of the component. */
-    public ExecutableElement methodElement() {
+    public XMethodElement methodElement() {
       return methodElement;
     }
 
@@ -383,9 +387,9 @@ public final class ComponentDescriptor {
     public TypeMirror resolvedReturnType(DaggerTypes types) {
       Preconditions.checkState(dependencyRequest().isPresent());
 
-      TypeMirror returnType = methodElement().getReturnType();
-      if (returnType.getKind().isPrimitive() || returnType.getKind().equals(VOID)) {
-        return returnType;
+      XType returnType = methodElement().getReturnType();
+      if (isPrimitive(returnType) || isVoid(returnType)) {
+        return toJavac(returnType);
       }
       return BindingRequest.bindingRequest(dependencyRequest().get())
           .requestedType(dependencyRequest().get().key().type().java(), types);
@@ -442,7 +446,7 @@ public final class ComponentDescriptor {
           throw new IllegalStateException("Missing required properties:" + missing);
         }
         return new ComponentMethodDescriptor(
-            methodElement.toJavac(),
+            methodElement,
             dependencyRequest,
             subcomponent);
       }

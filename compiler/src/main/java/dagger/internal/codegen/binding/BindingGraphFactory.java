@@ -163,7 +163,7 @@ public final class BindingGraphFactory implements ClearableCache {
                   .contains(childComponent)) {
                 explicitBindingsBuilder.add(
                     bindingFactory.subcomponentCreatorBinding(
-                        asMethod(toXProcessing(builderEntryPoint.methodElement(), processingEnv)),
+                        builderEntryPoint.methodElement(),
                         componentDescriptor.typeElement()));
               }
             });

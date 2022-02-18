@@ -60,6 +60,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
@@ -819,10 +820,10 @@ public final class ComponentImplementation {
     private void addInterfaceMethods() {
       // Each component method may have been declared by several supertypes. We want to implement
       // only one method for each distinct signature.
-      DeclaredType componentType = asDeclared(toJavac(graph.componentTypeElement()).asType());
+      XType componentType = graph.componentTypeElement().getType();
       Set<MethodSignature> signatures = new HashSet<>();
       for (ComponentMethodDescriptor method : graph.componentDescriptor().entryPointMethods()) {
-        if (signatures.add(MethodSignature.forComponentMethod(method, componentType, types))) {
+        if (signatures.add(MethodSignature.forComponentMethod(method, componentType))) {
           addMethod(COMPONENT_METHOD, bindingExpressionsProvider.get().getComponentMethod(method));
         }
       }

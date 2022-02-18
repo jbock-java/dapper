@@ -19,16 +19,14 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
 import jakarta.inject.Inject;
@@ -38,18 +36,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.lang.model.element.VariableElement;
 
 /** Validates the relationships between parent components and subcomponents. */
 final class ComponentHierarchyValidator {
-  private final XProcessingEnv processingEnv;
   private final CompilerOptions compilerOptions;
 
   @Inject
   ComponentHierarchyValidator(
-      XProcessingEnv processingEnv,
       CompilerOptions compilerOptions) {
-    this.processingEnv = processingEnv;
     this.compilerOptions = compilerOptions;
   }
 
@@ -102,9 +96,9 @@ final class ComponentHierarchyValidator {
       ValidationReport.Builder report,
       ComponentMethodDescriptor subcomponentMethodDescriptor,
       Map<XTypeElement, XTypeElement> existingModuleToOwners) {
-    for (VariableElement factoryMethodParameter :
+    for (XExecutableParameterElement factoryMethodParameter :
         subcomponentMethodDescriptor.methodElement().getParameters()) {
-      XTypeElement moduleType = toXProcessing(asTypeElement(factoryMethodParameter.asType()), processingEnv);
+      XTypeElement moduleType = factoryMethodParameter.getType().getTypeElement();
       if (existingModuleToOwners.containsKey(moduleType)) {
         /* Factory method tries to pass a module that is already present in the parent.
          * This is an error. */

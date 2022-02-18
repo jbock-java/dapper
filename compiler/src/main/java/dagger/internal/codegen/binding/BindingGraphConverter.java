@@ -19,7 +19,6 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
@@ -29,7 +28,7 @@ import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.extension.DaggerStreams;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.Edge;
@@ -56,20 +55,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.IntSupplier;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** Converts {@link BindingGraph}s to {@link dagger.spi.model.BindingGraph}s. */
 final class BindingGraphConverter {
-  private final XProcessingEnv processingEnv;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
   @Inject
   BindingGraphConverter(
-      XProcessingEnv processingEnv,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
-    this.processingEnv = processingEnv;
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }
 
@@ -176,7 +171,7 @@ final class BindingGraphConverter {
      * <ol>
      *   <li>If this component is installed in its parent by a subcomponent factory method, calls
      *       {@link #visitSubcomponentFactoryMethod(ComponentNode, ComponentNode,
-     *       ExecutableElement)}.
+     *       XMethodElement)}.
      *   <li>For each entry point in the component, calls {@link #visitEntryPoint(ComponentNode,
      *       DependencyRequest)}.
      *   <li>For each child component, calls {@code visitComponent(LegacyBindingGraph,
@@ -266,12 +261,11 @@ final class BindingGraphConverter {
     private void visitSubcomponentFactoryMethod(
         ComponentNode parentComponent,
         ComponentNode currentComponent,
-        ExecutableElement factoryMethod) {
+        XMethodElement factoryMethod) {
       network.addEdge(
           parentComponent,
           currentComponent,
-          new ChildFactoryMethodEdgeImpl(
-              DaggerExecutableElement.from(toXProcessing(factoryMethod, processingEnv))));
+          new ChildFactoryMethodEdgeImpl(DaggerExecutableElement.from(factoryMethod)));
     }
 
     /**
