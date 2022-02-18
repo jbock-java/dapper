@@ -32,7 +32,7 @@ import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 
 // TODO(gak): add tests for generation in the default package.
-public final class InjectConstructorFactoryGeneratorTest {
+final class InjectConstructorFactoryGeneratorTest {
   private static final JavaFileObject QUALIFIER_A =
       JavaFileObjects.forSourceLines("test.QualifierA",
           "package test;",
@@ -63,7 +63,7 @@ public final class InjectConstructorFactoryGeneratorTest {
           "@Scope @interface ScopeB {}");
 
   @Test
-  public void injectOnPrivateConstructor() {
+  void injectOnPrivateConstructor() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateConstructor",
         "package test;",
         "",
@@ -81,7 +81,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorOnInnerClass() {
+  void injectConstructorOnInnerClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -103,7 +103,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorOnAbstractClass() {
+  void injectConstructorOnAbstractClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.AbstractClass",
         "package test;",
         "",
@@ -121,7 +121,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorOnGenericClass() {
+  void injectConstructorOnGenericClass() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -168,7 +168,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void genericClassWithNoDependencies() {
+  void genericClassWithNoDependencies() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -213,7 +213,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void twoGenericTypes() {
+  void twoGenericTypes() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -263,7 +263,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void boundedGenerics() {
+  void boundedGenerics() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -320,7 +320,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void multipleSameTypesWithGenericsAndQualifiersAndLazies() {
+  void multipleSameTypesWithGenericsAndQualifiersAndLazies() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.GenericClass",
         "package test;",
         "",
@@ -413,7 +413,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void multipleInjectConstructors() {
+  void multipleInjectConstructors() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.TooManyInjectConstructors",
         "package test;",
         "",
@@ -426,18 +426,15 @@ public final class InjectConstructorFactoryGeneratorTest {
         "}");
     Compilation compilation = daggerCompiler().compile(file);
     assertThat(compilation).failed();
+    assertThat(compilation).hadErrorCount(1);
     assertThat(compilation)
         .hadErrorContaining("Types may only contain one injected constructor")
         .inFile(file)
-        .onLine(6);
-    assertThat(compilation)
-        .hadErrorContaining("Types may only contain one injected constructor")
-        .inFile(file)
-        .onLine(8);
+        .onLine(5);
   }
 
   @Test
-  public void multipleQualifiersOnInjectConstructorParameter() {
+  void multipleQualifiersOnInjectConstructorParameter() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleQualifierConstructorParam",
         "package test;",
         "",
@@ -456,7 +453,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorOnClassWithMultipleScopes() {
+  void injectConstructorOnClassWithMultipleScopes() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleScopeClass",
         "package test;",
         "",
@@ -480,7 +477,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorWithQualifier() {
+  void injectConstructorWithQualifier() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.MultipleScopeClass",
         "package test;",
         "",
@@ -505,7 +502,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorWithCheckedExceptionsError() {
+  void injectConstructorWithCheckedExceptionsError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.CheckedExceptionClass",
         "package test;",
         "",
@@ -523,7 +520,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructorWithCheckedExceptionsWarning() {
+  void injectConstructorWithCheckedExceptionsWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.CheckedExceptionClass",
         "package test;",
         "",
@@ -542,7 +539,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void privateInjectClassError() {
+  void privateInjectClassError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -562,7 +559,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void privateInjectClassWarning() {
+  void privateInjectClassWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -583,7 +580,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void nestedInPrivateInjectClassError() {
+  void nestedInPrivateInjectClassError() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -605,7 +602,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void nestedInPrivateInjectClassWarning() {
+  void nestedInPrivateInjectClassWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.OuterClass",
         "package test;",
         "",
@@ -628,7 +625,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void privateInjectFieldWarning() {
+  void privateInjectFieldWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectField",
         "package test;",
         "",
@@ -643,7 +640,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void privateInjectMethodWarning() {
+  void privateInjectMethodWarning() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.PrivateInjectMethod",
         "package test;",
         "",
@@ -658,7 +655,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void injectConstructor() {
+  void injectConstructor() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.InjectConstructor",
         "package test;",
         "",
@@ -704,7 +701,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void wildcardDependency() {
+  void wildcardDependency() {
     JavaFileObject file = JavaFileObjects.forSourceLines("test.InjectConstructor",
         "package test;",
         "",
@@ -752,7 +749,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void basicNameCollision() {
+  void basicNameCollision() {
     JavaFileObject factoryFile = JavaFileObjects.forSourceLines("other.pkg.Factory",
         "package other.pkg;",
         "",
@@ -804,7 +801,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void nestedNameCollision() {
+  void nestedNameCollision() {
     JavaFileObject factoryFile = JavaFileObjects.forSourceLines("other.pkg.Outer",
         "package other.pkg;",
         "",
@@ -859,7 +856,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void samePackageNameCollision() {
+  void samePackageNameCollision() {
     JavaFileObject samePackageInterface = JavaFileObjects.forSourceLines("test.CommonName",
         "package test;",
         "",
@@ -922,7 +919,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void noDeps() {
+  void noDeps() {
     JavaFileObject simpleType = JavaFileObjects.forSourceLines("test.SimpleType",
         "package test;",
         "",
@@ -966,7 +963,7 @@ public final class InjectConstructorFactoryGeneratorTest {
   }
 
   @Test
-  public void simpleComponentWithNesting() {
+  void simpleComponentWithNesting() {
     JavaFileObject nestedTypesFile = JavaFileObjects.forSourceLines("test.OuterType",
         "package test;",
         "",

@@ -22,6 +22,7 @@ import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConst
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
@@ -47,7 +48,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
@@ -96,7 +96,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
         TypeMirror type = binding.key().type().java();
         if (!type.getKind().equals(DECLARED)
             || injectValidatorWhenGeneratingCode
-            .validateType(toXProcessing(MoreTypes.asTypeElement(type), processingEnv))
+            .validate(toXProcessing(asTypeElement(type), processingEnv))
             .isClean()) {
           generator.generate(binding);
         }
@@ -217,17 +217,19 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       Optional<XType> resolvedType,
       boolean warnIfNotAlreadyGenerated) {
     XTypeElement typeElement = constructorElement.getEnclosingElement();
+
+    // Validating here shouldn't have a performance penalty because the validator caches its reports
+    ValidationReport report = injectValidator.validate(typeElement);
+    report.printMessagesTo(messager);
+    if (!report.isClean()) {
+      return Optional.empty();
+    }
+
     XType type = typeElement.getType();
     Key key = keyFactory.forInjectConstructorWithResolvedType(type);
     ProvisionBinding cachedBinding = provisionBindings.getBinding(key);
     if (cachedBinding != null) {
       return Optional.of(cachedBinding);
-    }
-
-    ValidationReport report = injectValidator.validateConstructor(constructorElement);
-    report.printMessagesTo(messager);
-    if (!report.isClean()) {
-      return Optional.empty();
     }
 
     ProvisionBinding binding = bindingFactory.injectionBinding(constructorElement, resolvedType);
