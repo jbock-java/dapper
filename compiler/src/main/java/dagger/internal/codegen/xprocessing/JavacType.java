@@ -3,6 +3,8 @@ package dagger.internal.codegen.xprocessing;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -51,6 +53,14 @@ abstract class JavacType implements XType {
       return ClassName.get("androidx.room.compiler.processing.error", "NotAType");
     }
     return TypeName.get(typeMirror);
+  }
+
+  @Override
+  public List<XType> getSuperTypes() {
+    List<? extends TypeMirror> superTypes = env.getTypeUtils().directSupertypes(typeMirror);
+    return superTypes.stream()
+        .map(env::wrap)
+        .collect(Collectors.toList());
   }
 
   /**

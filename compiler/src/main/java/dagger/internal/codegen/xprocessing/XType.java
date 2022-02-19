@@ -14,6 +14,11 @@ public interface XType {
 
   TypeName getTypeName();
 
+  /**
+   * The resolved types of the super classes/interfaces of this type.
+   */
+  List<XType> getSuperTypes();
+
   boolean isSameType(XType other);
 
   boolean isVoid();
