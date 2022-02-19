@@ -18,6 +18,7 @@ package dagger.internal.codegen.base;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -199,5 +200,11 @@ public final class Util {
       return ((Collection<E>) coll).stream();
     }
     return StreamSupport.stream(coll.spliterator(), false);
+  }
+
+  public static <E> List<E> reverse(List<E> input) {
+    ArrayList<E> result = new ArrayList<>(input);
+    Collections.reverse(result);
+    return result;
   }
 }
