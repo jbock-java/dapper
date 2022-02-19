@@ -18,11 +18,13 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAndCreatorAnnotations;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
@@ -36,6 +38,11 @@ import javax.lang.model.type.TypeMirror;
 
 /** Utility methods related to {@link Key}s. */
 public final class Keys {
+  public static boolean isValidMembersInjectionKey(Key key) {
+    return !key.qualifier().isPresent()
+        && !key.multibindingContributionIdentifier().isPresent()
+        && key.type().java().getKind().equals(TypeKind.DECLARED);
+  }
 
   /**
    * Returns {@code true} if this is valid as an implicit key (that is, if it's valid for a
@@ -53,7 +60,7 @@ public final class Keys {
    */
   public static boolean isValidImplicitProvisionKey(
       Optional<XAnnotation> qualifier, XType type, DaggerTypes types) {
-    return isValidImplicitProvisionKey(qualifier.map(XAnnotation::toJavac), type.toJavac(), types);
+    return isValidImplicitProvisionKey(qualifier.map(XConverters::toJavac), toJavac(type), types);
   }
 
   /**
@@ -89,12 +96,17 @@ public final class Keys {
       }
     }
 
+    // The "definedType" is the type we get from the element itself, as opposed to the type the user
+    // declared. This "definedType" includes any type parameters that appear on the element, whereas
+    // the "declaredType" may contain resolved or raw types as declared by the user.
+    DeclaredType definedType = asDeclared(declaredType.asElement().asType());
+
     // Also validate that the key is not the erasure of a generic type.
     // If it is, that means the user referred to Foo<T> as just 'Foo',
     // which we don't allow.  (This is a judgement call -- we *could*
     // allow it and instantiate the type bounds... but we don't.)
-    return declaredType.getTypeArguments().isEmpty()
-        || !types.isSameType(types.erasure(declaredType), declaredType);
+    return definedType.getTypeArguments().isEmpty()
+        || !types.isSameType(types.erasure(definedType), declaredType);
   }
 
   /**
@@ -102,9 +114,9 @@ public final class Keys {
    * component/subcomponent.
    */
   public static boolean isComponentOrCreator(Key key) {
-    return key.qualifier().isEmpty()
+    return !key.qualifier().isPresent()
         && key.type().java().getKind() == TypeKind.DECLARED
         && isAnyAnnotationPresent(
-        asTypeElement(key.type().java()), allComponentAndCreatorAnnotations());
+            asTypeElement(key.type().java()), allComponentAndCreatorAnnotations());
   }
 }
