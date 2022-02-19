@@ -16,16 +16,17 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.Util.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.base.SetMultimap;
+import dagger.internal.codegen.validation.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import io.jbock.javapoet.ClassName;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +35,7 @@ import java.util.Set;
  * A {@link XProcessingStep} that processes one element at a time and defers any for which {@link
  * TypeNotPresentException} is thrown.
  */
-public abstract class TypeCheckingProcessingStep<E extends XElement> extends XProcessingStep {
+public abstract class TypeCheckingProcessingStep<E extends XElement> implements XProcessingStep {
 
   private final SuperficialValidator superficialValidator;
 
@@ -50,7 +51,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> extends XPr
   @SuppressWarnings("unchecked") // Subclass must ensure all annotated targets are of valid type.
   @Override
   public Set<XElement> process(
-      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     Set<XElement> deferredElements = new LinkedHashSet<>();
     inverse(elementsByAnnotation)
         .forEach(
@@ -65,6 +66,16 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> extends XPr
                 superficialValidator.throwIfNearestEnclosingTypeNotValid(element);
                 process((E) element, annotations);
               } catch (TypeNotPresentException e) {
+                deferredElements.add(element);
+              } catch (ValidationException validationException) {
+                if (validationException.fromUnexpectedThrowable()) {
+                  // Rethrow since the exception was created from an unexpected throwable so
+                  // deferring to another round is unlikely to help.
+                  throw validationException;
+                }
+                // TODO(bcorso): Pass the ValidationException information to XProcessing so that we
+                // can include it in the error message once we've updated XProcessing to allow it.
+                // For now, we just return the element like normal.
                 deferredElements.add(element);
               }
             });
@@ -85,20 +96,25 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> extends XPr
     Map<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
-    Preconditions.checkState(
+    checkState(
         annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
         "Unexpected annotations for %s: %s",
         this.getClass().getCanonicalName(),
-        Util.difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
+        difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
-    Map<XElement, Set<ClassName>> builder = new LinkedHashMap<>();
+    SetMultimap<XElement, ClassName> builder = new SetMultimap<>();
     elementsByAnnotation.forEach(
         (annotationName, elementSet) ->
             elementSet.forEach(
-                element -> builder.merge(element, Set.of(annotationClassNames.get(annotationName)), Util::mutableUnion)));
-    return builder;
+                element -> builder.put(element, annotationClassNames.get(annotationName))));
+
+    return builder.asMap();
   }
 
   /** Returns the set of annotations processed by this processing step. */
   protected abstract Set<ClassName> annotationClassNames();
+
+  @Override
+  public void processOver(XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+  }
 }

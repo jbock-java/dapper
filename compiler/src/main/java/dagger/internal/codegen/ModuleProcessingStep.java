@@ -23,8 +23,8 @@ import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.ModuleValidator;
+import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.ModuleGenerator;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link Step} that validates module classes and generates factories for binding
+ * A {@code Step} that validates module classes and generates factories for binding
  * methods.
  */
 final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
@@ -75,7 +75,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   @Override
   public Set<XElement> process(
       XProcessingEnv env,
-      Map<String, Set<XElement>> elementsByAnnotation) {
+      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     moduleValidator.addKnownModules(
         elementsByAnnotation.values().stream()
             .flatMap(Set::stream)
