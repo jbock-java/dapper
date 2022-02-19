@@ -256,7 +256,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   @Override
   public Optional<ProvisionBinding> getOrFindProvisionBinding(Key key) {
     requireNonNull(key);
-    if (!isValidImplicitProvisionKey(key, types)) {
+    if (!isValidImplicitProvisionKey(key)) {
       return Optional.empty();
     }
     ProvisionBinding binding = provisionBindings.getBinding(key);

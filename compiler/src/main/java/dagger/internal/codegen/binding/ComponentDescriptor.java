@@ -270,7 +270,7 @@ public final class ComponentDescriptor {
     return childComponentsDeclaredByBuilderEntryPoints;
   }
 
-  private final Supplier<Map<TypeElement, ComponentDescriptor>>
+  private final Supplier<Map<XTypeElement, ComponentDescriptor>>
       childComponentsByBuilderType =
       Suppliers.memoize(
           () ->
@@ -278,11 +278,11 @@ public final class ComponentDescriptor {
                   .filter(child -> child.creatorDescriptor().isPresent())
                   .collect(
                       toImmutableMap(
-                          child -> child.creatorDescriptor().orElseThrow().typeElement().toJavac(),
+                          child -> child.creatorDescriptor().orElseThrow().typeElement(),
                           child -> child)));
 
   /** Returns the child component with the given builder type. */
-  ComponentDescriptor getChildComponentWithBuilderType(TypeElement builderType) {
+  ComponentDescriptor getChildComponentWithBuilderType(XTypeElement builderType) {
     return Objects.requireNonNull(
         childComponentsByBuilderType.get().get(builderType),
         () -> String.format("no child component found for builder type %s",

@@ -51,9 +51,9 @@ public final class Preconditions {
    */
   public static void checkArgument(
       boolean b, String errorMessageTemplate, Object p1) {
-    if (!b) {
-      throw new IllegalArgumentException(String.format(errorMessageTemplate, p1));
-    }
+      if (!b) {
+        throw new IllegalArgumentException(String.format(errorMessageTemplate, p1));
+      }
   }
 
   /**

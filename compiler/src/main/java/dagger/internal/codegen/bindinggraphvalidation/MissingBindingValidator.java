@@ -18,12 +18,15 @@ package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.DOUBLE_INDENT;
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.base.Verify.verify;
+import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
+import dagger.spi.BindingGraphPlugin;
+import dagger.spi.DiagnosticReporter;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.DependencyEdge;
@@ -31,14 +34,11 @@ import dagger.spi.model.BindingGraph.Edge;
 import dagger.spi.model.BindingGraph.MissingBinding;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.ComponentPath;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
 import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.lang.model.type.TypeKind;
 
 /** Reports errors for missing bindings. */
 final class MissingBindingValidator implements BindingGraphPlugin {
@@ -98,13 +98,10 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     Key key = missingBinding.key();
     StringBuilder errorMessage = new StringBuilder();
     // Wildcards should have already been checked by DependencyRequestValidator.
-    Preconditions.checkState(
-        !key.type().java().getKind().equals(TypeKind.WILDCARD),
-        "unexpected wildcard request: %s",
-        key);
+    verify(!isWildcard(key.type().xprocessing()), "unexpected wildcard request: %s", key);
     // TODO(ronshapiro): replace "provided" with "satisfied"?
     errorMessage.append(key).append(" cannot be provided without ");
-    if (isValidImplicitProvisionKey(key, types)) {
+    if (isValidImplicitProvisionKey(key)) {
       errorMessage.append("an @Inject constructor or ");
     }
     errorMessage.append("a @Provides-");

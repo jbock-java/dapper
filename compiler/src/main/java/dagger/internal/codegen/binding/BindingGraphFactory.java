@@ -38,10 +38,10 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
-import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
@@ -360,7 +360,8 @@ public final class BindingGraphFactory implements ClearableCache {
       Preconditions.checkArgument(subcomponentCreatorBinding.kind().equals(SUBCOMPONENT_CREATOR));
       Resolver owningResolver = getOwningResolver(subcomponentCreatorBinding).orElseThrow();
 
-      TypeElement builderType = MoreTypes.asTypeElement(subcomponentCreatorBinding.key().type().java());
+      XTypeElement builderType =
+          subcomponentCreatorBinding.key().type().xprocessing().getTypeElement();
       owningResolver.subcomponentsToResolve.add(
           owningResolver.componentDescriptor.getChildComponentWithBuilderType(builderType));
     }

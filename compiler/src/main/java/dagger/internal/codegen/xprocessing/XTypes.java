@@ -16,16 +16,27 @@
 
 package dagger.internal.codegen.xprocessing;
 
-// TODO(bcorso): Consider moving these methods into XProcessing library.
-
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.TypeKind;
 
+// TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@link XType} helper methods. */
 public final class XTypes {
+
+  /** Returns {@code true} if the given type is a raw type of a parameterized type. */
+  public static boolean isRawParameterizedType(XType type) {
+    return isDeclared(type)
+        && type.getTypeArguments().isEmpty()
+        && !type.getTypeElement().getType().getTypeArguments().isEmpty();
+  }
+
+  /** Returns the given {@code type} as an {@link XArrayType}. */
+  public static XArrayType asArray(XType type) {
+    return (XArrayType) type;
+  }
 
   /** Returns {@code true} if the raw type of {@code type} is equal to {@code className}. */
   public static boolean isTypeOf(XType type, ClassName className) {
@@ -37,14 +48,14 @@ public final class XTypes {
     return toJavac(type).getKind().equals(TypeKind.WILDCARD);
   }
 
-  /** Returns {@code true} if the given type is a primitive type. */
+  /** Returns {@code true} if the given type is a declared type. */
   public static boolean isDeclared(XType type) {
     return type.getTypeElement() != null;
   }
 
   /** Returns {@code true} if the given type is a type variable. */
   public static boolean isTypeVariable(XType type) {
-    return type.toJavac().getKind() == TypeKind.TYPEVAR;
+    return toJavac(type).getKind() == TypeKind.TYPEVAR;
   }
 
   /**
@@ -53,12 +64,12 @@ public final class XTypes {
    * <p>See {@link MoreTypes#equivalence()}.
    */
   public static boolean areEquivalentTypes(XType type1, XType type2) {
-    return MoreTypes.equivalence().equivalent(type1.toJavac(), type2.toJavac());
+    return MoreTypes.equivalence().equivalent(toJavac(type1), toJavac(type2));
   }
 
   /** Returns {@code true} if the given type is a primitive type. */
   public static boolean isPrimitive(XType type) {
-    return type.toJavac().getKind().isPrimitive();
+    return toJavac(type).getKind().isPrimitive();
   }
 
   /** Returns {@code true} if the given type has type parameters. */
@@ -66,6 +77,5 @@ public final class XTypes {
     return !type.getTypeArguments().isEmpty();
   }
 
-  private XTypes() {
-  }
+  private XTypes() {}
 }
