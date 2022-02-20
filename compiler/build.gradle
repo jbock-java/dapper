@@ -21,7 +21,6 @@ javadoc {
 repositories {
     mavenCentral()
     google()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1152' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -43,8 +42,8 @@ dependencies {
     implementation(graph)
     implementation(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
-    implementation('io.github.jbock-java:auto-value-annotations:1.8.2.1')
-    annotationProcessor('io.github.jbock-java:auto-value:1.8.2.3')
+    implementation('io.github.jbock-java:auto-value-annotations:1.8.2.2')
+    annotationProcessor('io.github.jbock-java:auto-value:1.8.2.2')
     testImplementation('androidx.room:room-compiler-processing:2.4.1')
     testImplementation(dapper)
     testImplementation(ac)
