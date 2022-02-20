@@ -16,9 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Module;
+import dagger.internal.codegen.base.Iterables;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;
@@ -26,87 +27,49 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
-import java.util.LinkedHashSet;
-import java.util.Objects;
+import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.element.Element;
 
 /**
- * An implementation of {@link dagger.spi.model.Binding} that also exposes {@link BindingDeclaration}s
- * associated with the binding.
+ * An implementation of {@link dagger.spi.model.Binding} that also exposes {@link
+ * BindingDeclaration}s associated with the binding.
  */
 // TODO(dpb): Consider a supertype of dagger.spi.model.Binding that
 // dagger.internal.codegen.binding.Binding
 // could also implement.
-public final class BindingNode implements dagger.spi.model.Binding {
-
+@AutoValue
+public abstract class BindingNode implements dagger.spi.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
       Set<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
-    return new BindingNode(
-        component,
-        delegate,
-        subcomponentDeclarations,
-        bindingDeclarationFormatter);
+    BindingNode node =
+        new AutoValue_BindingNode(
+            component,
+            delegate,
+            subcomponentDeclarations);
+    node.bindingDeclarationFormatter = checkNotNull(bindingDeclarationFormatter);
+    return node;
   }
 
-  private final ComponentPath componentPath;
-  private final dagger.internal.codegen.binding.Binding delegate;
-  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
-  private final BindingDeclarationFormatter bindingDeclarationFormatter;
+  private BindingDeclarationFormatter bindingDeclarationFormatter;
 
-  private BindingNode(
-      ComponentPath componentPath,
-      dagger.internal.codegen.binding.Binding delegate,
-      Set<SubcomponentDeclaration> subcomponentDeclarations,
-      BindingDeclarationFormatter bindingDeclarationFormatter) {
-    this.componentPath = requireNonNull(componentPath);
-    this.delegate = requireNonNull(delegate);
-    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
-    this.bindingDeclarationFormatter = requireNonNull(bindingDeclarationFormatter);
-  }
+  public abstract Binding delegate();
 
-  @Override
-  public ComponentPath componentPath() {
-    return componentPath;
-  }
-
-  public dagger.internal.codegen.binding.Binding delegate() {
-    return delegate;
-  }
-
-  public Set<SubcomponentDeclaration> subcomponentDeclarations() {
-    return subcomponentDeclarations;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    BindingNode that = (BindingNode) o;
-    return componentPath.equals(that.componentPath)
-        && delegate.equals(that.delegate)
-        && subcomponentDeclarations.equals(that.subcomponentDeclarations);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(componentPath, delegate, subcomponentDeclarations);
-  }
+  public abstract Set<SubcomponentDeclaration> subcomponentDeclarations();
 
   /**
-   * The {@link Element}s (other than the binding's {@link #bindingElement()}) that are associated
-   * with the binding.
+   * The elements (other than the binding's {@link #bindingElement()}) that are associated with the
+   * binding.
    *
    * <ul>
    *   <li>{@linkplain Module#subcomponents() module subcomponent} declarations
    * </ul>
    */
-  public Set<BindingDeclaration> associatedDeclarations() {
-    return new LinkedHashSet<>(subcomponentDeclarations());
+  public final Iterable<BindingDeclaration> associatedDeclarations() {
+    return Iterables.concat(subcomponentDeclarations());
   }
 
   @Override
@@ -145,7 +108,7 @@ public final class BindingNode implements dagger.spi.model.Binding {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return bindingDeclarationFormatter.format(delegate());
   }
 }

@@ -15,4 +15,18 @@ public final class ListMultimap<K, V> {
   public Map<K, List<V>> asMap() {
     return map;
   }
+
+  public Multiset<K> keys() {
+    Multiset<K> result = new Multiset<>();
+    map.forEach((k, values) -> result.add(k, values.size()));
+    return result;
+  }
+
+  public List<V> get(K key) {
+    return map.getOrDefault(key, List.of());
+  }
+
+  public ListMultimap<K, V> build() {
+    return this;
+  }
 }

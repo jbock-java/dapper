@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.extension;
 
+import dagger.internal.codegen.base.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
@@ -68,14 +69,15 @@ public final class DaggerStreams {
    * whose keys and values are the result of applying the provided mapping functions to the input
    * elements. Entries appear in the result {@code Map} in encounter order.
    */
-  public static <T, K, V> Collector<T, ?, Map<K, Set<V>>> toImmutableSetMultimap(
+  public static <T, K, V> Collector<T, ?, SetMultimap<K, V>> toImmutableSetMultimap(
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-    return Collectors.mapping(
+    return Collectors.collectingAndThen(
+        Collectors.mapping(
         value -> {
           Set<V> values = Set.of(valueMapper.apply(value));
           return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
         },
-        Collector.of(
+        Collector.<Map.Entry<K, Set<V>>, LinkedHashMap<K, Set<V>>>of(
             LinkedHashMap::new,
             (map, entry) ->
                 map.merge(entry.getKey(), entry.getValue(), Util::mutableUnion),
@@ -83,7 +85,7 @@ public final class DaggerStreams {
               right.forEach((k, v) ->
                   left.merge(k, v, Util::mutableUnion));
               return left;
-            }));
+            })), SetMultimap::new);
   }
 
 

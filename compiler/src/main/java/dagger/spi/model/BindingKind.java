@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,9 @@ public enum BindingKind {
    */
   COMPONENT_DEPENDENCY,
 
+  /** A binding for a {@link dagger.MembersInjector} of a type. */
+  MEMBERS_INJECTOR,
+
   /**
    * A binding for a subcomponent creator (a {@linkplain dagger.Subcomponent.Builder builder} or
    * {@linkplain dagger.Subcomponent.Factory factory}).
@@ -68,4 +71,8 @@ public enum BindingKind {
   // TODO(dpb,ronshapiro): This name is confusing and could use work. Not all usages of @Binds
   // bindings are simple delegations and we should have a name that better reflects that
   DELEGATE,
+
+  /** A binding for a members injection method on a component. */
+  MEMBERS_INJECTION,
+  ;
 }

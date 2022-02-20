@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
@@ -319,13 +320,13 @@ public final class ComponentDescriptorValidator {
       }
 
       // Validate that declared creator requirements (modules, dependencies) have unique types.
-      Map<Wrapper<TypeMirror>, Set<XElement>> declaredRequirementsByType =
+      SetMultimap<Wrapper<TypeMirror>, XElement> declaredRequirementsByType =
           creator.unvalidatedRequirementElements().entrySet().stream()
               .filter(entry -> creatorModuleAndDependencyRequirements.contains(entry.getKey()))
               .flatMap(entry -> entry.getValue().stream().map(value -> new SimpleImmutableEntry<>(entry.getKey(), value)))
               .collect(
                   toImmutableSetMultimap(entry -> entry.getKey().wrappedType(), Entry::getValue));
-      declaredRequirementsByType
+      declaredRequirementsByType.asMap()
           .forEach(
               (typeWrapper, elementsForType) -> {
                 if (elementsForType.size() > 1) {
