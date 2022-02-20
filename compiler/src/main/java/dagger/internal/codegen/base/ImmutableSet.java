@@ -71,4 +71,8 @@ public class ImmutableSet<T> extends AbstractSet<T> {
   public int size() {
     return delegate.size();
   }
+
+  public ImmutableList<T> asList() {
+    return ImmutableList.copyOf(delegate);
+  }
 }

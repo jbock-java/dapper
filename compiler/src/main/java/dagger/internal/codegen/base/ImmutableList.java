@@ -112,8 +112,4 @@ public class ImmutableList<T> extends AbstractList<T> {
   public static <E> ImmutableList<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
     return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8));
   }
-
-  public static <E> ImmutableList<E> asList(Collection<E> collection) {
-    return copyOf(collection);
-  }
 }
