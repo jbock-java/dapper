@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package dagger.spi;
+package dagger.spi.model;
 
-import dagger.spi.model.BindingGraph;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;

@@ -22,8 +22,8 @@ import static io.jbock.testing.compile.Compiler.javac;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.spi.model.BindingGraph;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.DiagnosticReporter;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.Compiler;
 import io.jbock.testing.compile.JavaFileObjects;

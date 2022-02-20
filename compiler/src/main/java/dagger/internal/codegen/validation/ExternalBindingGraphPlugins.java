@@ -27,7 +27,7 @@ import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticRe
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.spi.model.BindingGraph;
-import dagger.spi.BindingGraphPlugin;
+import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;

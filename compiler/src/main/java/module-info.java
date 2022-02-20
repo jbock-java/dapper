@@ -1,6 +1,8 @@
+import dagger.spi.model.BindingGraphPlugin;
+
 module dagger.compiler {
 
-  uses dagger.spi.BindingGraphPlugin;
+  uses BindingGraphPlugin;
 
   requires dagger;
   requires java.compiler;

@@ -25,7 +25,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.validation.BindingGraphValidator;
-import dagger.spi.BindingGraphPlugin;
+import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
 import java.lang.annotation.Retention;

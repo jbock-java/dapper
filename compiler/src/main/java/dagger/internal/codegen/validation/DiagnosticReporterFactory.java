@@ -27,7 +27,7 @@ import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
-import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.DiagnosticReporter;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.LinkedHashSet;

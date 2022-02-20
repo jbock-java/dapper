@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package dagger.spi;
+package dagger.spi.model;
 
-import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;

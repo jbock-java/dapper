@@ -17,8 +17,8 @@
 package dagger.internal.codegen;
 
 import dagger.spi.model.BindingGraph;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.DiagnosticReporter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
