@@ -8,4 +8,5 @@ module dagger.compiler {
   requires io.jbock.common.graph;
   requires io.jbock.auto.common;
   requires io.jbock.javapoet;
+  requires io.jbock.auto.value;
 }
