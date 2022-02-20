@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.extension;
 
+import dagger.internal.codegen.base.ImmutableList;
+import dagger.internal.codegen.base.ImmutableMap;
 import dagger.internal.codegen.base.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -39,8 +41,8 @@ public final class DaggerStreams {
    * List}, in encounter order.
    */
   // TODO(b/68008628): Use ImmutableList.toImmutableList().
-  public static <T> Collector<T, ?, List<T>> toImmutableList() {
-    return Collectors.toList();
+  public static <T> Collector<T, ?, ImmutableList<T>> toImmutableList() {
+    return Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf);
   }
 
   /**
@@ -57,11 +59,11 @@ public final class DaggerStreams {
    * and values are the result of applying the provided mapping functions to the input elements.
    * Entries appear in the result {@code Map} in encounter order.
    */
-  public static <T, K, V> Collector<T, ?, Map<K, V>> toImmutableMap(
+  public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(
       Function<? super T, K> keyMapper, Function<? super T, V> valueMapper) {
-    return Collectors.toMap(keyMapper, valueMapper, (v1, v2) -> {
+    return Collectors.collectingAndThen(Collectors.toMap(keyMapper, valueMapper, (v1, v2) -> {
       throw new IllegalStateException("found 2 values for the same key: " + v1 + ", " + v2);
-    }, LinkedHashMap::new);
+    }, LinkedHashMap::new), ImmutableMap::copyOf);
   }
 
   /**

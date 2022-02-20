@@ -131,13 +131,7 @@ public final class Util {
   }
 
   public static <E> E getOnlyElement(Collection<E> collection) {
-    if (collection.isEmpty()) {
-      throw new IllegalArgumentException("Expecting exactly one element but found empty list");
-    }
-    if (collection.size() >= 2) {
-      throw new IllegalArgumentException("Expecting exactly one element but found: " + collection);
-    }
-    return collection.iterator().next();
+    return Iterables.getOnlyElement(collection);
   }
 
   public static <E> E getOnlyElement(Collection<? extends E> collection, E defaultValue) {
@@ -149,9 +143,7 @@ public final class Util {
 
   public static <K, V1, V2>
   Map<K, V2> transformValues(Map<K, V1> fromMap, Function<? super V1, V2> function) {
-    LinkedHashMap<K, V2> result = new LinkedHashMap<>(Math.max(5, (int) (fromMap.size() * 1.5)));
-    fromMap.forEach((k, v) -> result.put(k, function.apply(v)));
-    return result;
+    return Maps.transformValues(fromMap, function);
   }
 
   public static <K, V>
@@ -181,18 +173,7 @@ public final class Util {
   }
 
   public static <E> List<List<E>> partition(List<E> list, int size) {
-    if (list.size() <= size) {
-      return List.of(list);
-    }
-    List<List<E>> result = new ArrayList<>();
-    List<E> current = null;
-    for (int i = 0; i < list.size(); i++) {
-      if (i % size == 0) {
-        result.add(current = new ArrayList<>(size));
-      }
-      current.add(list.get(i));
-    }
-    return result;
+    return Lists.partition(list, size);
   }
 
   public static <E> Stream<E> asStream(Iterable<E> coll) {
