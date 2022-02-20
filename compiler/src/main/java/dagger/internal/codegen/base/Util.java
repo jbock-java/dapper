@@ -80,22 +80,15 @@ public final class Util {
   }
 
   public static <E> Set<E> difference(Set<E> set1, Set<E> set2) {
-    return set1.stream()
-        .filter(e -> !set2.contains(e))
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return Sets.difference(set1, set2);
   }
 
   public static <E> Set<E> intersection(Set<E> set1, Set<E> set2) {
-    return set1.stream()
-        .filter(set2::contains)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return Sets.intersection(set1, set2);
   }
 
   public static <E> Set<E> union(Set<E> set1, Set<E> set2) {
-    Set<E> result = new LinkedHashSet<>(Math.max(4, (int) (1.5 * (set1.size() + set2.size()))));
-    result.addAll(set1);
-    result.addAll(set2);
-    return result;
+    return Sets.union(set1, set2);
   }
 
   public static <E> Set<E> mutableUnion(Set<E> set1, Set<E> set2) {
@@ -123,11 +116,7 @@ public final class Util {
 
   public static <K, V> Map<K, V> toMap(
       Collection<K> set, Function<? super K, V> function) {
-    LinkedHashMap<K, V> result = new LinkedHashMap<>(Math.max(4, (int) (1.5 * set.size())));
-    for (K k : set) {
-      result.put(k, function.apply(k));
-    }
-    return result;
+    return Maps.toMap(set, function);
   }
 
   public static <E> E getOnlyElement(Collection<E> collection) {
@@ -162,18 +151,7 @@ public final class Util {
 
   public static <K, V>
   Map<K, V> filterKeys(Map<K, V> fromMap, Predicate<K> predicate) {
-    LinkedHashMap<K, V> result = new LinkedHashMap<>();
-    fromMap.forEach((key, value) -> {
-      if (!predicate.test(key)) {
-        return;
-      }
-      result.put(key, value);
-    });
-    return result;
-  }
-
-  public static <E> List<List<E>> partition(List<E> list, int size) {
-    return Lists.partition(list, size);
+    return Maps.filterKeys(fromMap, predicate);
   }
 
   public static <E> Stream<E> asStream(Iterable<E> coll) {

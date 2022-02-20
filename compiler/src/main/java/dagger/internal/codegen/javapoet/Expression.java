@@ -76,6 +76,13 @@ public final class Expression {
   /** Returns a new expression that casts the current expression to {@code newType}. */
   // TODO(ronshapiro): consider overloads that take a Types and Elements and only cast if necessary,
   // or just embedding a Types/Elements instance in an Expression.
+  public Expression castTo(XType newType) {
+    return castTo(toJavac(newType));
+  }
+
+  /** Returns a new expression that casts the current expression to {@code newType}. */
+  // TODO(ronshapiro): consider overloads that take a Types and Elements and only cast if necessary,
+  // or just embedding a Types/Elements instance in an Expression.
   public Expression castTo(TypeMirror newType) {
     return create(newType, "($T) $L", newType, codeBlock);
   }

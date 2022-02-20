@@ -39,6 +39,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.base.Lists;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
@@ -930,7 +931,7 @@ public final class ComponentImplementation {
         Iterable<ParameterSpec> parameters,
         List<CodeBlock> statements,
         Function<String, MethodSpec.Builder> methodBuilderCreator) {
-      return Util.partition(statements, STATEMENTS_PER_METHOD).stream()
+      return Lists.partition(statements, STATEMENTS_PER_METHOD).stream()
           .map(
               partition ->
                   methodBuilderCreator

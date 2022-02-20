@@ -29,4 +29,8 @@ public final class ListMultimap<K, V> {
   public ListMultimap<K, V> build() {
     return this;
   }
+
+  public boolean containsKey(K key) {
+    return map.containsKey(key);
+  }
 }

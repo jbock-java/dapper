@@ -226,7 +226,7 @@ public final class BindingGraphFactory implements ClearableCache {
     return declarations.stream().collect(Collectors.groupingBy(
         BindingDeclaration::key,
         LinkedHashMap::new,
-        DaggerStreams.toImmutableSet()));
+        DaggerStreams.toSet()));
   }
 
   @Override

@@ -22,15 +22,32 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(map);
   }
 
+  public static <X, Y> Builder<X, Y> builder() {
+    return new Builder<>();
+  }
+
+  public static final class Builder<X, Y> {
+    private Map<X, Y> delegate = new LinkedHashMap<>();
+
+    public Builder<X, Y> put(X key, Y value) {
+      delegate.put(key, value);
+      return this;
+    }
+
+    public ImmutableMap<X, Y> build() {
+      return new ImmutableMap<>(delegate);
+    }
+  }
+
   public static <K, V> ImmutableMap<K, V> of() {
     return (ImmutableMap<K, V>) EMPTY;
   }
 
-  public static <K, V> Map<K, V> of(K k1, V v1) {
+  public static <K, V> ImmutableMap<K, V> of(K k1, V v1) {
     return new ImmutableMap<>(Map.of(k1, v1));
   }
 
-  public static <K, V> Map<K, V> of(
+  public static <K, V> ImmutableMap<K, V> of(
       K k1, V v1,
       K k2, V v2) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(3);
@@ -39,7 +56,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(result);
   }
 
-  public static <K, V> Map<K, V> of(
+  public static <K, V> ImmutableMap<K, V> of(
       K k1, V v1,
       K k2, V v2,
       K k3, V v3) {
@@ -50,7 +67,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(result);
   }
 
-  public static <K, V> Map<K, V> of(
+  public static <K, V> ImmutableMap<K, V> of(
       K k1, V v1,
       K k2, V v2,
       K k3, V v3,
@@ -63,7 +80,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(result);
   }
 
-  public static <K, V> Map<K, V> of(
+  public static <K, V> ImmutableMap<K, V> of(
       K k1, V v1,
       K k2, V v2,
       K k3, V v3,

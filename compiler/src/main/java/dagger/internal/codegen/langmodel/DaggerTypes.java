@@ -16,14 +16,13 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
@@ -57,20 +56,19 @@ public final class DaggerTypes implements Types {
   private final DaggerElements elements;
 
   public DaggerTypes(Types types, DaggerElements elements) {
-    this.types = requireNonNull(types);
-    this.elements = requireNonNull(elements);
+    this.types = checkNotNull(types);
+    this.elements = checkNotNull(elements);
   }
 
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreTypes?
-
   /**
    * Returns true if the raw type underlying the given {@link TypeMirror} represents the same raw
    * type as the given {@link Class} and throws an IllegalArgumentException if the {@link
    * TypeMirror} does not represent a type that can be referenced by a {@link Class}
    */
   public static boolean isTypeOf(final TypeName typeName, TypeMirror type) {
-    requireNonNull(typeName);
+    checkNotNull(typeName);
     return type.accept(new IsTypeOf(typeName), null);
   }
 
@@ -150,7 +148,7 @@ public final class DaggerTypes implements Types {
    * {@link Optional} is returned if there is no non-{@link Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
-    return MoreTypes.nonObjectSuperclass(types, elements, type);
+    return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orElse(null));
   }
 
   /**
@@ -171,7 +169,7 @@ public final class DaggerTypes implements Types {
    */
   public static XType unwrapType(XType type) {
     XType unwrapped = unwrapTypeOrDefault(type, null);
-    Preconditions.checkArgument(unwrapped != null, "%s is a raw type", type);
+    checkArgument(unwrapped != null, "%s is a raw type", type);
     return unwrapped;
   }
 
@@ -190,9 +188,9 @@ public final class DaggerTypes implements Types {
   }
 
   private static TypeMirror unwrapTypeOrDefault(TypeMirror type, TypeMirror defaultType) {
-    DeclaredType declaredType = asDeclared(type);
+    DeclaredType declaredType = MoreTypes.asDeclared(type);
     TypeElement typeElement = MoreElements.asType(declaredType.asElement());
-    Preconditions.checkArgument(
+    checkArgument(
         !typeElement.getTypeParameters().isEmpty(),
         "%s does not have a type parameter",
         typeElement.getQualifiedName());
@@ -229,6 +227,16 @@ public final class DaggerTypes implements Types {
    * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
    * Set.class}, this will return {@code Set<List<Number>>}.
    */
+  public DeclaredType wrapType(XType type, ClassName wrappingClassName) {
+    return wrapType(toJavac(type), wrappingClassName);
+  }
+
+  /**
+   * Returns {@code type} wrapped in {@code wrappingClass}.
+   *
+   * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
+   * Set.class}, this will return {@code Set<List<Number>>}.
+   */
   public DeclaredType wrapType(TypeMirror type, ClassName wrappingClassName) {
     return types.getDeclaredType(elements.getTypeElement(wrappingClassName.canonicalName()), type);
   }
@@ -245,8 +253,8 @@ public final class DaggerTypes implements Types {
    * @throws IllegalArgumentException if {@code} has more than one type argument.
    */
   public DeclaredType rewrapType(TypeMirror type, ClassName wrappingClassName) {
-    List<? extends TypeMirror> typeArguments = asDeclared(type).getTypeArguments();
-    TypeElement wrappingType = elements.getTypeElement(wrappingClassName);
+    List<? extends TypeMirror> typeArguments = MoreTypes.asDeclared(type).getTypeArguments();
+    TypeElement wrappingType = elements.getTypeElement(wrappingClassName.canonicalName());
     switch (typeArguments.size()) {
       case 0:
         return getDeclaredType(wrappingType);
@@ -255,6 +263,33 @@ public final class DaggerTypes implements Types {
       default:
         throw new IllegalArgumentException(type + " has more than 1 type argument");
     }
+  }
+
+  /**
+   * Returns a publicly accessible type based on {@code type}:
+   *
+   * <ul>
+   *   <li>If {@code type} is publicly accessible, returns it.
+   *   <li>If not, but {@code type}'s raw type is publicly accessible, returns the raw type.
+   *   <li>Otherwise returns {@link Object}.
+   * </ul>
+   */
+  public TypeMirror publiclyAccessibleType(TypeMirror type) {
+    return accessibleType(
+        type, Accessibility::isTypePubliclyAccessible, Accessibility::isRawTypePubliclyAccessible);
+  }
+
+  /**
+   * Returns an accessible type in {@code requestingClass}'s package based on {@code type}:
+   *
+   * <ul>
+   *   <li>If {@code type} is accessible from the package, returns it.
+   *   <li>If not, but {@code type}'s raw type is accessible from the package, returns the raw type.
+   *   <li>Otherwise returns {@link Object}.
+   * </ul>
+   */
+  public TypeMirror accessibleType(XType type, ClassName requestingClass) {
+    return accessibleType(toJavac(type), requestingClass);
   }
 
   /**
@@ -320,7 +355,7 @@ public final class DaggerTypes implements Types {
    * resolve type variables to concrete types, etc.
    */
   public ExecutableType resolveExecutableType(ExecutableElement element, TypeMirror containerType) {
-    return MoreTypes.asExecutable(asMemberOf(asDeclared(containerType), element));
+    return MoreTypes.asExecutable(asMemberOf(MoreTypes.asDeclared(containerType), element));
   }
 
   // Implementation of Types methods, delegating to types.
@@ -336,7 +371,7 @@ public final class DaggerTypes implements Types {
   }
 
   public boolean isSubtype(XType t1, XType t2) {
-    return isSubtype(t1.toJavac(), t2.toJavac());
+    return isSubtype(toJavac(t1), toJavac(t2));
   }
 
   @Override

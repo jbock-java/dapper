@@ -18,6 +18,7 @@ package dagger.internal.codegen.extension;
 
 import dagger.internal.codegen.base.ImmutableList;
 import dagger.internal.codegen.base.ImmutableMap;
+import dagger.internal.codegen.base.ImmutableSet;
 import dagger.internal.codegen.base.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -50,7 +51,11 @@ public final class DaggerStreams {
    * Set}, in encounter order.
    */
   // TODO(b/68008628): Use ImmutableSet.toImmutableSet().
-  public static <T> Collector<T, ?, Set<T>> toImmutableSet() {
+  public static <T> Collector<T, ?, ImmutableSet<T>> toImmutableSet() {
+    return Collectors.collectingAndThen(toSet(), ImmutableSet::copyOf);
+  }
+
+  public static <T> Collector<T, ?, Set<T>> toSet() {
     return Collectors.toCollection(LinkedHashSet::new);
   }
 

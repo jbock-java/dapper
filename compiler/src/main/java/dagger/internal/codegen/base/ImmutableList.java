@@ -41,7 +41,7 @@ public class ImmutableList<T> extends AbstractList<T> {
   public static final class Builder<T> {
     private final ImmutableList<T> list;
 
-    public Builder(ImmutableList<T> list) {
+    private Builder(ImmutableList<T> list) {
       this.list = list;
     }
 

@@ -2,6 +2,8 @@ package dagger.internal.codegen.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class Lists {
 
@@ -18,6 +20,10 @@ public final class Lists {
       current.add(list.get(i));
     }
     return result;
+  }
+
+  public static <X, Y> List<Y> transform(List<X> input, Function<X, Y> f) {
+    return input.stream().map(f).collect(Collectors.toList());
   }
 
   private Lists() {

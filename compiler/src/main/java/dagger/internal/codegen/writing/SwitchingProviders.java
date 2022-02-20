@@ -29,8 +29,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import dagger.internal.codegen.base.Lists;
 import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -240,7 +240,7 @@ final class SwitchingProviders {
     }
 
     private List<CodeBlock> switchCodeBlockPartitions() {
-      return Util.partition(List.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
+      return Lists.partition(List.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
           .stream()
           .map(
               partitionCases ->

@@ -15,14 +15,42 @@ public class ImmutableSet<T> extends AbstractSet<T> {
     this.delegate = delegate;
   }
 
-  public static <E> ImmutableSet<E> copyOf(Collection<? extends E> elements) {
+  public static <E> ImmutableSet<E> copyOf(Iterable<? extends E> elements) {
     if (elements instanceof ImmutableSet) {
       return (ImmutableSet<E>) elements;
     }
     if (elements instanceof Set) {
       return new ImmutableSet<>((Set<E>) elements);
     }
-    return new ImmutableSet<>(new LinkedHashSet<>(elements));
+    if (elements instanceof Collection) {
+      return new ImmutableSet<>(new LinkedHashSet<>((Collection<? extends E>) elements));
+    }
+    LinkedHashSet<E> result = new LinkedHashSet<>();
+    elements.forEach(result::add);
+    return new ImmutableSet<>(result);
+  }
+
+  public static <E> Builder<E> builder() {
+    return new Builder<>();
+  }
+
+  public static final class Builder<E> {
+    private final Set<E> delegate = new LinkedHashSet<>();
+
+    public Builder<E> add(E element) {
+      delegate.add(element);
+      return this;
+    }
+
+    public Builder<E> addAll(Collection<E> elements) {
+      delegate.addAll(elements);
+      return this;
+    }
+
+
+    public ImmutableSet build() {
+      return new ImmutableSet(delegate);
+    }
   }
 
   public static <E> ImmutableSet<E> of() {
