@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class ImmutableSet<T> extends AbstractSet<T> {
+public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollection<T> {
 
   private static final ImmutableSet<?> EMPTY = new ImmutableSet<>(Set.of());
   private final Set<T> delegate;

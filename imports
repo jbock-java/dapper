@@ -16,3 +16,8 @@ sed -i 's/^import static com.google.common.base./import static dagger.internal.c
 sed -i 's/^import static androidx.room.compiler.processing.compat.XConverters./import static dagger.internal.codegen.xprocessing.XConverters./g' "$INPUT"
 sed -i 's/^import static com.squareup.javapoet./import static io.jbock.javapoet./g' "$INPUT"
 sed -i 's/^import androidx.room.compiler.processing./import dagger.internal.codegen.xprocessing./g' "$INPUT"
+sed -i 's/^import com.google.common.collect./import dagger.internal.codegen.collect./g' "$INPUT"
+sed -i 's/^import com.google.auto.common./import io.jbock.auto.common./g' "$INPUT"
+sed -i 's/^import com.squareup.javapoet./import io.jbock.javapoet./g' "$INPUT"
+sed -i 's/^import javax.inject./import jakarta.inject./g' "$INPUT"
+

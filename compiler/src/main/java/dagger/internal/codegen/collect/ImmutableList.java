@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ImmutableList<T> extends AbstractList<T> {
+public class ImmutableList<T> extends AbstractList<T> implements ImmutableCollection<T> {
 
   private static final ImmutableList<?> EMPTY = new ImmutableList<>(List.of());
 
