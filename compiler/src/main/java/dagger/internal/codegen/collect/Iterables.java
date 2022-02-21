@@ -1,5 +1,6 @@
 package dagger.internal.codegen.collect;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,12 +49,9 @@ public class Iterables {
     return result;
   }
 
-  public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
-    if (iterable instanceof Collection) {
-      return (T[]) ((Collection<? extends T>) iterable).toArray();
-    }
-    ArrayList<T> result = new ArrayList<>();
-    iterable.forEach(result::add);
-    return (T[]) result.toArray(new Object[0]);
+  @SuppressWarnings("unchecked")
+  public static <T> T[] toArray(Collection<? extends T> iterable, Class<T> type) {
+    T[] o = (T[]) Array.newInstance(type, 0);
+    return iterable.toArray(o);
   }
 }

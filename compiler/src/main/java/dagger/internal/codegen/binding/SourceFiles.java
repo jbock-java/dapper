@@ -16,6 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
@@ -26,25 +30,34 @@ import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.asType;
 import static javax.lang.model.SourceVersion.isName;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
+import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeVariableName;
 import java.util.List;
-import java.util.Map;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
 
 /** Utilities for generating files. */
 public class SourceFiles {
+
+  private static final Joiner CLASS_FILE_NAME_JOINER = Joiner.on('_');
 
   /**
    * Generates names and keys for the factory class fields needed to hold the framework classes for
@@ -58,18 +71,18 @@ public class SourceFiles {
    *
    * @param binding must be an unresolved binding (type parameters must match its type element's)
    */
-  public static Map<DependencyRequest, FrameworkField>
+  public static ImmutableMap<DependencyRequest, FrameworkField>
   generateBindingFieldsForDependencies(Binding binding) {
-    Preconditions.checkArgument(binding.unresolved().isEmpty(), "binding must be unresolved: %s", binding);
+    checkArgument(!binding.unresolved().isPresent(), "binding must be unresolved: %s", binding);
 
     FrameworkTypeMapper frameworkTypeMapper =
-        FrameworkTypeMapper.forBindingType();
+        FrameworkTypeMapper.forBindingType(binding.bindingType());
 
-    return Util.toMap(
+    return Maps.toMap(
         binding.dependencies(),
         dependency ->
             FrameworkField.create(
-                frameworkTypeMapper.getFrameworkType().frameworkClassName(),
+                frameworkTypeMapper.getFrameworkType(dependency.kind()).frameworkClassName(),
                 TypeName.get(dependency.key().type().java()),
                 DependencyVariableNamer.name(dependency)));
   }
@@ -90,22 +103,42 @@ public class SourceFiles {
     }
   }
 
+  /**
+   * Returns a mapping of {@link DependencyRequest}s to {@link CodeBlock}s that {@linkplain
+   * #frameworkTypeUsageStatement(CodeBlock, RequestKind) use them}.
+   */
+  public static ImmutableMap<DependencyRequest, CodeBlock> frameworkFieldUsages(
+      ImmutableSet<DependencyRequest> dependencies,
+      ImmutableMap<DependencyRequest, FieldSpec> fields) {
+    return Maps.toMap(
+        dependencies,
+        dep -> frameworkTypeUsageStatement(CodeBlock.of("$N", fields.get(dep)), dep.kind()));
+  }
+
   /** Returns the generated factory or members injector name for a binding. */
   public static ClassName generatedClassNameForBinding(Binding binding) {
-    ContributionBinding contribution = (ContributionBinding) binding;
-    switch (contribution.kind()) {
-      case ASSISTED_INJECTION:
-      case INJECTION:
+    switch (binding.bindingType()) {
       case PROVISION:
-        return elementBasedClassName(
-            asExecutable(toJavac(binding.bindingElement().get())), "Factory");
+        ContributionBinding contribution = (ContributionBinding) binding;
+        switch (contribution.kind()) {
+          case ASSISTED_INJECTION:
+          case INJECTION:
+          case PROVISION:
+            return elementBasedClassName(
+                asExecutable(toJavac(binding.bindingElement().get())), "Factory");
 
-      case ASSISTED_FACTORY:
-        return siblingClassName(asType(toJavac(binding.bindingElement().get())), "_Impl");
+          case ASSISTED_FACTORY:
+            return siblingClassName(asType(toJavac(binding.bindingElement().get())), "_Impl");
 
-      default:
-        throw new AssertionError();
+          default:
+            throw new AssertionError();
+        }
+
+      case MEMBERS_INJECTION:
+        return membersInjectorNameForType(
+            ((MembersInjectionBinding) binding).membersInjectedType());
     }
+    throw new AssertionError();
   }
 
   /**
@@ -117,12 +150,11 @@ public class SourceFiles {
    */
   public static ClassName elementBasedClassName(ExecutableElement element, String suffix) {
     ClassName enclosingClassName =
-        ClassName.get(asType(element.getEnclosingElement()));
-    String simpleName = element.getSimpleName().toString();
+        ClassName.get(MoreElements.asType(element.getEnclosingElement()));
     String methodName =
         element.getKind().equals(ElementKind.CONSTRUCTOR)
             ? ""
-            : Character.toUpperCase(simpleName.charAt(0)) + simpleName.substring(1);
+            : LOWER_CAMEL.to(UPPER_CAMEL, element.getSimpleName().toString());
     return ClassName.get(
         enclosingClassName.packageName(),
         classFileName(enclosingClassName) + "_" + methodName + suffix);
@@ -130,14 +162,32 @@ public class SourceFiles {
 
   public static TypeName parameterizedGeneratedTypeNameForBinding(Binding binding) {
     ClassName className = generatedClassNameForBinding(binding);
-    List<TypeVariableName> typeParameters = bindingTypeElementTypeVariableNames(binding);
+    ImmutableList<TypeVariableName> typeParameters = bindingTypeElementTypeVariableNames(binding);
     return typeParameters.isEmpty()
         ? className
-        : ParameterizedTypeName.get(className, typeParameters.toArray(new TypeName[0]));
+        : ParameterizedTypeName.get(className, Iterables.toArray(typeParameters, TypeName.class));
+  }
+
+  public static ClassName membersInjectorNameForType(XTypeElement typeElement) {
+    return membersInjectorNameForType(toJavac(typeElement));
+  }
+
+  public static ClassName membersInjectorNameForType(TypeElement typeElement) {
+    return siblingClassName(typeElement, "_MembersInjector");
+  }
+
+  public static String memberInjectedFieldSignatureForVariable(VariableElement variableElement) {
+    return MoreElements.asType(variableElement.getEnclosingElement()).getQualifiedName()
+        + "."
+        + variableElement.getSimpleName();
   }
 
   public static String classFileName(ClassName className) {
-    return String.join("_", className.simpleNames());
+    return CLASS_FILE_NAME_JOINER.join(className.simpleNames());
+  }
+
+  public static ClassName generatedMonitoringModuleName(XTypeElement componentElement) {
+    return siblingClassName(toJavac(componentElement), "_MonitoringModule");
   }
 
   // TODO(ronshapiro): when JavaPoet migration is complete, replace the duplicated code
@@ -147,14 +197,14 @@ public class SourceFiles {
     return className.topLevelClassName().peerClass(classFileName(className) + suffix);
   }
 
-  public static List<TypeVariableName> bindingTypeElementTypeVariableNames(
+  public static ImmutableList<TypeVariableName> bindingTypeElementTypeVariableNames(
       Binding binding) {
     if (binding instanceof ContributionBinding) {
       ContributionBinding contributionBinding = (ContributionBinding) binding;
       if (!(contributionBinding.kind() == INJECTION
           || contributionBinding.kind() == ASSISTED_INJECTION)
           && !contributionBinding.requiresModuleInstance()) {
-        return List.of();
+        return ImmutableList.of();
       }
     }
     List<? extends TypeParameterElement> typeParameters =
@@ -178,10 +228,9 @@ public class SourceFiles {
    * readable.
    */
   public static String simpleVariableName(ClassName className) {
-    String simpleName = className.simpleName();
-    String candidateName = Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+    String candidateName = UPPER_CAMEL.to(LOWER_CAMEL, className.simpleName());
     String variableName = protectAgainstKeywords(candidateName);
-    Preconditions.checkState(isName(variableName), "'%s' was expected to be a valid variable name");
+    verify(isName(variableName), "'%s' was expected to be a valid variable name", variableName);
     return variableName;
   }
 
@@ -190,10 +239,11 @@ public class SourceFiles {
       case "package":
         return "pkg";
       case "boolean":
-      case "byte":
         return "b";
       case "double":
         return "d";
+      case "byte":
+        return "b";
       case "int":
         return "i";
       case "short":
