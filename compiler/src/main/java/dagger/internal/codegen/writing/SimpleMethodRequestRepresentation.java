@@ -31,6 +31,7 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
@@ -93,7 +94,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
         break;
       case METHOD:
         CodeBlock module = moduleReference(requestingClass).orElseGet(() ->
-            CodeBlock.of("$T", provisionBinding.bindingTypeElement().orElseThrow()));
+            CodeBlock.of("$T", toJavac(provisionBinding.bindingTypeElement().orElseThrow())));
         invocation = CodeBlock.of("$L.$L($L)", module, method.getSimpleName(), arguments);
         break;
       default:
@@ -121,8 +122,8 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
             shardImplementation::getUniqueFieldNameForAssistedParam,
             requestingClass,
             moduleReference(requestingClass),
-            compilerOptions
-        ));
+            compilerOptions,
+            KotlinMetadataUtil.instance()));
   }
 
   private Expression dependencyArgument(DependencyRequest dependency, ClassName requestingClass) {

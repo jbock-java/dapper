@@ -45,6 +45,7 @@ import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XConverters;
@@ -114,7 +115,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(getMethod(binding));
     addCreateMethod(binding, factoryBuilder);
 
-    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions));
+    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, KotlinMetadataUtil.instance()));
 
     return factoryBuilder;
   }
@@ -248,8 +249,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             param -> assistedParameters.get(param).name,
             generatedClassNameForBinding(binding),
             moduleParameter(binding).map(module -> CodeBlock.of("$N", module)),
-            compilerOptions
-        );
+            compilerOptions,
+            KotlinMetadataUtil.instance());
 
     getMethod.addStatement("return $L", invokeNewInstance);
     return getMethod.build();

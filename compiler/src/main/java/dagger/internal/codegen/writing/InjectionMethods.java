@@ -16,6 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
@@ -36,10 +39,15 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.spi.model.DependencyRequest;
@@ -50,11 +58,8 @@ import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeVariableName;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
@@ -93,7 +98,7 @@ final class InjectionMethods {
    */
   static final class ProvisionMethod {
     // These names are already defined in factories and shouldn't be used for the proxy method name.
-    private static final Set<String> BANNED_PROXY_NAMES = Set.of("get", "create");
+    private static final ImmutableSet<String> BANNED_PROXY_NAMES = ImmutableSet.of("get", "create");
 
     /**
      * Returns a method that invokes the binding's {@linkplain ProvisionBinding#bindingElement()
@@ -101,7 +106,8 @@ final class InjectionMethods {
      */
     static MethodSpec create(
         ProvisionBinding binding,
-        CompilerOptions compilerOptions) {
+        CompilerOptions compilerOptions,
+        KotlinMetadataUtil metadataUtil) {
       ExecutableElement element = asExecutable(toJavac(binding.bindingElement().get()));
       switch (element.getKind()) {
         case CONSTRUCTOR:
@@ -111,8 +117,8 @@ final class InjectionMethods {
               element,
               methodName(element),
               InstanceCastPolicy.IGNORE,
-              CheckNotNullPolicy.get(binding, compilerOptions)
-          );
+              CheckNotNullPolicy.get(binding, compilerOptions),
+              metadataUtil);
         default:
           throw new AssertionError(element);
       }
@@ -128,28 +134,30 @@ final class InjectionMethods {
         Function<VariableElement, String> uniqueAssistedParameterName,
         ClassName requestingClass,
         Optional<CodeBlock> moduleReference,
-        CompilerOptions compilerOptions) {
-      List<CodeBlock> arguments = new ArrayList<>();
+        CompilerOptions compilerOptions,
+        KotlinMetadataUtil metadataUtil) {
+      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
       moduleReference.ifPresent(arguments::add);
-      arguments.addAll(invokeArguments(binding, dependencyUsage, uniqueAssistedParameterName));
+      invokeArguments(binding, dependencyUsage, uniqueAssistedParameterName)
+          .forEach(arguments::add);
 
       ClassName enclosingClass = generatedClassNameForBinding(binding);
-      MethodSpec methodSpec = create(binding, compilerOptions);
-      return invokeMethod(methodSpec, arguments, enclosingClass, requestingClass);
+      MethodSpec methodSpec = create(binding, compilerOptions, metadataUtil);
+      return invokeMethod(methodSpec, arguments.build(), enclosingClass, requestingClass);
     }
 
-    static List<CodeBlock> invokeArguments(
+    static ImmutableList<CodeBlock> invokeArguments(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
         Function<VariableElement, String> uniqueAssistedParameterName) {
-      Map<XExecutableParameterElement, DependencyRequest> dependencyRequestMap =
+      ImmutableMap<XExecutableParameterElement, DependencyRequest> dependencyRequestMap =
           binding.provisionDependencies().stream()
               .collect(
                   toImmutableMap(
                       request -> asMethodParameter(request.requestElement().get().xprocessing()),
                       request -> request));
 
-      List<CodeBlock> arguments = new ArrayList<>();
+      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
       XExecutableElement method = asExecutable(binding.bindingElement().get());
       for (XExecutableParameterElement parameter : method.getParameters()) {
         if (isAssistedParameter(parameter)) {
@@ -162,7 +170,7 @@ final class InjectionMethods {
         }
       }
 
-      return arguments;
+      return arguments.build();
     }
 
     private static MethodSpec constructorProxy(ExecutableElement constructor) {
@@ -192,12 +200,14 @@ final class InjectionMethods {
           || !isElementAccessibleFrom(method, requestingClass.packageName())
           // This check should be removable once we drop support for -source 7
           || method.getParameters().stream()
-          .map(VariableElement::asType)
-          .anyMatch(type -> !isRawTypeAccessible(type, requestingClass.packageName()));
+              .map(VariableElement::asType)
+              .anyMatch(type -> !isRawTypeAccessible(type, requestingClass.packageName()));
     }
 
     /**
-     * Returns the name of the {@code static} method that wraps {@code method}.
+     * Returns the name of the {@code static} method that wraps {@code method}. For methods that are
+     * associated with {@code @Inject} constructors, the method will also inject all {@link
+     * InjectionSite}s.
      */
     private static String methodName(ExecutableElement method) {
       switch (method.getKind()) {
@@ -206,7 +216,7 @@ final class InjectionMethods {
         case METHOD:
           String methodName = method.getSimpleName().toString();
           return BANNED_PROXY_NAMES.contains(methodName)
-              ? "proxy" + Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1)
+              ? "proxy" + LOWER_CAMEL.to(UPPER_CAMEL, methodName)
               : methodName;
         default:
           throw new AssertionError(method);
@@ -228,7 +238,7 @@ final class InjectionMethods {
     CodeBlock checkForNull(CodeBlock maybeNull) {
       return this.equals(IGNORE)
           ? maybeNull
-          : CodeBlock.of("$T.checkNotNullFromProvides($L)", dagger.internal.Preconditions.class, maybeNull);
+          : CodeBlock.of("$T.checkNotNullFromProvides($L)", Preconditions.class, maybeNull);
     }
 
     static CheckNotNullPolicy get(ProvisionBinding binding, CompilerOptions compilerOptions) {
@@ -240,7 +250,8 @@ final class InjectionMethods {
       ExecutableElement method,
       String methodName,
       InstanceCastPolicy instanceCastPolicy,
-      CheckNotNullPolicy checkNotNullPolicy) {
+      CheckNotNullPolicy checkNotNullPolicy,
+      KotlinMetadataUtil metadataUtil) {
     MethodSpec.Builder builder =
         methodBuilder(methodName).addModifiers(PUBLIC, STATIC).varargs(method.isVarArgs());
 
@@ -273,10 +284,10 @@ final class InjectionMethods {
 
   private static CodeBlock invokeMethod(
       MethodSpec methodSpec,
-      List<CodeBlock> parameters,
+      ImmutableList<CodeBlock> parameters,
       ClassName enclosingClass,
       ClassName requestingClass) {
-    Preconditions.checkArgument(methodSpec.parameters.size() == parameters.size());
+    checkArgument(methodSpec.parameters.size() == parameters.size());
     CodeBlock parameterBlock = makeParametersCodeBlock(parameters);
     return enclosingClass.equals(requestingClass)
         ? CodeBlock.of("$L($L)", methodSpec.name, parameterBlock)
