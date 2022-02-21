@@ -21,6 +21,9 @@ function delete () {
 	sed -i "/${1}$/d" $INPUT
 }
 
+sed -i "s/^import com.google.common.base.Equivalence;/import io.jbock.auto.common.Equivalence;/" $INPUT
+sed -i "s/^import com.google.common.base.Supplier;/import java.util.function.Supplier;/" $INPUT
+
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
 replace androidx.room.compiler.processing.compat.XConverters dagger.internal.codegen.xprocessing.XConverters
@@ -30,8 +33,11 @@ replace com.google.common.collect. dagger.internal.codegen.collect.
 replace com.google.auto.common. io.jbock.auto.common.
 replace javax.inject. jakarta.inject.
 replace com.google.auto.value.AutoValue io.jbock.auto.value.AutoValue
+replace com.google.auto.value.extension.memoized.Memoized io.jbock.auto.value.extension.memoized.Memoized
 replace dagger.internal.codegen.xprocessing.XTypeKt. dagger.internal.codegen.xprocessing.XType.
 
+delete "import com.google.errorprone.annotations.CheckReturnValue;"
+delete "@CheckReturnValue"
 delete "import com.google.errorprone.annotations.CanIgnoreReturnValue;"
 delete "@CanIgnoreReturnValue"
 delete "import com.google.common.annotations.Beta;"
@@ -47,4 +53,3 @@ delete "import dagger.internal.codegen.base.SetType;"
 sed -i "s/<? extends @Nullable Object>/<?>/g" $INPUT
 sed -i "s/@CheckForNull //g" $INPUT
 sed -i "s/@Nullable //g" $INPUT
-

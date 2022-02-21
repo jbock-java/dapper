@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.extension.Optionals.emptiesLast;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.extension.Optionals.emptiesLast;
 import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XElements;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import java.util.Comparator;
@@ -45,13 +45,13 @@ public abstract class BindingDeclaration {
    */
   public static final Comparator<BindingDeclaration> COMPARATOR =
       comparing(
-          (BindingDeclaration declaration) ->
-              declaration.contributingModule().isPresent()
-                  ? declaration.contributingModule()
-                  : declaration.bindingTypeElement(),
-          emptiesLast(comparing(XTypeElement::getQualifiedName)))
+              (BindingDeclaration declaration) ->
+                  declaration.contributingModule().isPresent()
+                      ? declaration.contributingModule()
+                      : declaration.bindingTypeElement(),
+              emptiesLast(comparing(XTypeElement::getQualifiedName)))
           .thenComparing(
-              BindingDeclaration::bindingElement,
+              (BindingDeclaration declaration) -> declaration.bindingElement(),
               emptiesLast(
                   comparing((XElement element) -> toJavac(element).getSimpleName().toString())
                       .thenComparing((XElement element) -> toJavac(element).asType().toString())));
@@ -62,6 +62,12 @@ public abstract class BindingDeclaration {
   /**
    * The {@link XElement} that declares this binding. Absent for {@linkplain BindingKind binding
    * kinds} that are not always declared by exactly one element.
+   *
+   * <p>For example, consider {@link BindingKind#MULTIBOUND_SET}. A component with many
+   * {@code @IntoSet} bindings for the same key will have a synthetic binding that depends on all
+   * contributions, but with no identifiying binding element. A {@code @Multibinds} method will also
+   * contribute a synthetic binding, but since multiple {@code @Multibinds} methods can coexist in
+   * the same component (and contribute to one single binding), it has no binding element.
    */
   public abstract Optional<XElement> bindingElement();
 

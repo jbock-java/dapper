@@ -53,7 +53,7 @@ final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRep
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
     Expression expression =
-        FrameworkType.to(
+        FrameworkType.PROVIDER.to(
             requestKind,
             frameworkRequestRepresentation.getDependencyExpression(requestingClass),
             types);
@@ -66,7 +66,7 @@ final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRep
   Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     Expression expression =
-        FrameworkType.to(
+        FrameworkType.PROVIDER.to(
             requestKind,
             frameworkRequestRepresentation.getDependencyExpressionForComponentMethod(
                 componentMethod, component),

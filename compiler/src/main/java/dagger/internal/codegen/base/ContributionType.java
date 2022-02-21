@@ -30,12 +30,19 @@ public enum ContributionType {
   /** An object that is associated with a {@link ContributionType}. */
   public interface HasContributionType {
 
+    /** The contribution type of this object. */
+    ContributionType contributionType();
+  }
+
+  /** {@code true} if this is for a multibinding. */
+  public boolean isMultibinding() {
+    return !this.equals(UNIQUE);
   }
 
   /**
    * The contribution type from a binding element's annotations. Presumes a well-formed binding
    * element (at most one of @IntoSet, @IntoMap, @ElementsIntoSet and @Provides.type). {@code
-   * dagger.internal.codegen.validation.BindingMethodValidator} and {@link
+   * dagger.internal.codegen.validation.BindingMethodValidator} and {@code
    * dagger.internal.codegen.validation.BindsInstanceProcessingStep} validate correctness on their
    * own.
    */
@@ -51,7 +58,6 @@ public enum ContributionType {
    * own.
    */
   public static ContributionType fromBindingElement(Element element) {
-    // TODO(bcorso): Replace these class references with ClassName.
     return ContributionType.UNIQUE;
   }
 }

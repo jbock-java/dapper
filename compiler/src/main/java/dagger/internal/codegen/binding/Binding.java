@@ -16,18 +16,19 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Suppliers.memoize;
-import static dagger.internal.codegen.binding.FrameworkType.PROVIDER;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.Suppliers.memoize;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import java.util.function.Supplier;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 
 /**
@@ -43,12 +44,19 @@ public abstract class Binding extends BindingDeclaration {
    * #contributingModule()}.
    */
   public boolean requiresModuleInstance() {
-    if (bindingElement().isEmpty() || contributingModule().isEmpty()) {
+    if (!bindingElement().isPresent() || !contributingModule().isPresent()) {
       return false;
     }
     Set<Modifier> modifiers = toJavac(bindingElement().get()).getModifiers();
     return !modifiers.contains(ABSTRACT) && !modifiers.contains(STATIC);
   }
+
+  /**
+   * Returns {@code true} if this binding may provide {@code null} instead of an instance of {@link
+   * #key()}. Nullable bindings cannot be requested from {@code DependencyRequest#isNullable()
+   * non-nullable dependency requests}.
+   */
+  public abstract boolean isNullable();
 
   /** The kind of binding this instance represents. */
   public abstract BindingKind kind();
@@ -58,22 +66,39 @@ public abstract class Binding extends BindingDeclaration {
 
   /** The {@link FrameworkType} of this binding. */
   public final FrameworkType frameworkType() {
-    return PROVIDER;
+    return FrameworkType.forBindingType(bindingType());
   }
 
   /**
    * The explicit set of {@link DependencyRequest dependencies} required to satisfy this binding as
    * defined by the user-defined injection sites.
    */
-  public abstract Set<DependencyRequest> explicitDependencies();
-
-  private final Supplier<Set<DependencyRequest>> dependencies =
-      memoize(this::explicitDependencies);
+  public abstract ImmutableSet<DependencyRequest> explicitDependencies();
 
   /**
-   * The set of {@link DependencyRequest dependencies} required to satisfy this binding.
+   * The set of {@link DependencyRequest dependencies} that are added by the framework rather than a
+   * user-defined injection site. This returns an unmodifiable set.
    */
-  public final Set<DependencyRequest> dependencies() {
+  public ImmutableSet<DependencyRequest> implicitDependencies() {
+    return ImmutableSet.of();
+  }
+
+  private final Supplier<ImmutableSet<DependencyRequest>> dependencies =
+      memoize(
+          () -> {
+            ImmutableSet<DependencyRequest> implicitDependencies = implicitDependencies();
+            return ImmutableSet.copyOf(
+                implicitDependencies.isEmpty()
+                    ? explicitDependencies()
+                    : Sets.union(implicitDependencies, explicitDependencies()));
+          });
+
+  /**
+   * The set of {@link DependencyRequest dependencies} required to satisfy this binding. This is the
+   * union of {@link #explicitDependencies()} and {@link #implicitDependencies()}. This returns an
+   * unmodifiable set.
+   */
+  public final ImmutableSet<DependencyRequest> dependencies() {
     return dependencies.get();
   }
 

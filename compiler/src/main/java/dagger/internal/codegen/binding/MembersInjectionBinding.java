@@ -44,7 +44,7 @@ public abstract class MembersInjectionBinding extends Binding {
       ImmutableSet<DependencyRequest> dependencies,
       Optional<MembersInjectionBinding> unresolved,
       ImmutableSortedSet<InjectionSite> injectionSites) {
-    return new AutoValue_MembersInjectionBinding(key, dependencies, unresolved, injectionSites);
+    return new AutoValue_MembersInjectionBinding(key, false, dependencies, unresolved, injectionSites);
   }
 
   @Override

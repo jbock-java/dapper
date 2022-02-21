@@ -16,99 +16,54 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.spi.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.spi.model.BindingKind.PROVISION;
-import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 /** A value object representing the mechanism by which a {@link Key} can be provided. */
-public final class ProvisionBinding extends ContributionBinding {
-
-  private final Key key;
-  private final Optional<XElement> bindingElement;
-  private final Optional<XTypeElement> contributingModule;
-  private final BindingKind kind;
-  private final Set<DependencyRequest> provisionDependencies;
-  private final Optional<ProvisionBinding> unresolved;
-  private final Optional<Scope> scope;
-
-  private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(key(), bindingElement(),
-          contributingModule(), kind(),
-          provisionDependencies(),
-          unresolved(), scope()));
-
-  private final Supplier<Boolean> requiresModuleInstance = Suppliers.memoize(super::requiresModuleInstance);
-
-  ProvisionBinding(
-      Key key,
-      Optional<XElement> bindingElement,
-      Optional<XTypeElement> contributingModule,
-      BindingKind kind,
-      Set<DependencyRequest> provisionDependencies,
-      Optional<ProvisionBinding> unresolved,
-      Optional<Scope> scope) {
-    this.key = requireNonNull(key);
-    this.bindingElement = requireNonNull(bindingElement);
-    this.contributingModule = requireNonNull(contributingModule);
-    this.kind = requireNonNull(kind);
-    this.provisionDependencies = requireNonNull(provisionDependencies);
-    this.unresolved = requireNonNull(unresolved);
-    this.scope = requireNonNull(scope);
-  }
-
-  public ImmutableSortedSet<InjectionSite> injectionSites() {
-    return ImmutableSortedSet.of();
-  }
+@AutoValue
+public abstract class ProvisionBinding extends ContributionBinding {
 
   @Override
-  public Set<DependencyRequest> explicitDependencies() {
-    return provisionDependencies();
-  }
-
-  @Override
-  public Key key() {
-    return key;
-  }
-
-  @Override
-  public Optional<XElement> bindingElement() {
-    return bindingElement;
-  }
-
-  @Override
-  public Optional<XTypeElement> contributingModule() {
-    return contributingModule;
-  }
-
-  @Override
-  public BindingKind kind() {
-    return kind;
+  @Memoized
+  public ImmutableSet<DependencyRequest> explicitDependencies() {
+    return ImmutableSet.<DependencyRequest>builder()
+        .addAll(provisionDependencies())
+        .addAll(membersInjectionDependencies())
+        .build();
   }
 
   /**
    * Dependencies necessary to invoke an {@code @Inject} constructor or {@code @Provides} method.
    */
-  public Set<DependencyRequest> provisionDependencies() {
-    return provisionDependencies;
+  public abstract ImmutableSet<DependencyRequest> provisionDependencies();
+
+  @Memoized
+  ImmutableSet<DependencyRequest> membersInjectionDependencies() {
+    return injectionSites()
+        .stream()
+        .flatMap(i -> i.dependencies().stream())
+        .collect(toImmutableSet());
   }
+
+  /**
+   * {@link InjectionSite}s for all {@code @Inject} members if {@link #kind()} is {@link
+   * BindingKind#INJECTION}, otherwise empty.
+   */
+  public abstract ImmutableSortedSet<InjectionSite> injectionSites();
 
   @Override
   public BindingType bindingType() {
@@ -116,147 +71,67 @@ public final class ProvisionBinding extends ContributionBinding {
   }
 
   @Override
-  public Optional<ProvisionBinding> unresolved() {
-    return unresolved;
-  }
+  public abstract Optional<ProvisionBinding> unresolved();
 
   // TODO(ronshapiro): we should be able to remove this, but AutoValue barks on the Builder's scope
   // method, saying that the method doesn't correspond to a property of ProvisionBinding
   @Override
-  public Optional<Scope> scope() {
-    return scope;
-  }
+  public abstract Optional<Scope> scope();
 
   public static Builder builder() {
-    return new Builder()
-        .provisionDependencies(Set.of());
+    return new $AutoValue_ProvisionBinding.Builder()
+        .contributionType(ContributionType.UNIQUE)
+        .provisionDependencies(ImmutableSet.of())
+        .injectionSites(ImmutableSortedSet.of());
   }
 
-  public Builder toBuilder() {
-    return new Builder(this);
-  }
+  @Override
+  public abstract Builder toBuilder();
 
-  private static final Set<BindingKind> KINDS_TO_CHECK_FOR_NULL =
-      new LinkedHashSet<>(List.of(PROVISION, COMPONENT_PROVISION));
+  private static final ImmutableSet<BindingKind> KINDS_TO_CHECK_FOR_NULL =
+      ImmutableSet.of(PROVISION, COMPONENT_PROVISION);
 
   public boolean shouldCheckForNull(CompilerOptions compilerOptions) {
     return KINDS_TO_CHECK_FOR_NULL.contains(kind())
-        && contributedPrimitiveType().isEmpty()
+        && !contributedPrimitiveType().isPresent()
+        && !nullableType().isPresent()
         && compilerOptions.doCheckForNulls();
   }
 
   // Profiling determined that this method is called enough times that memoizing it had a measurable
   // performance improvement for large components.
+  @Memoized
   @Override
   public boolean requiresModuleInstance() {
-    return requiresModuleInstance.get();
+    return super.requiresModuleInstance();
   }
 
-
+  @Memoized
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ProvisionBinding that = (ProvisionBinding) o;
-    return hashCode() == that.hashCode()
-        && key.equals(that.key)
-        && bindingElement.equals(that.bindingElement)
-        && contributingModule.equals(that.contributingModule)
-        && kind == that.kind
-        && provisionDependencies.equals(that.provisionDependencies)
-        && unresolved.equals(that.unresolved)
-        && scope.equals(that.scope);
-  }
+  public abstract int hashCode();
 
+  // TODO(ronshapiro,dpb): simplify the equality semantics
   @Override
-  public int hashCode() {
-    return hash.getAsInt();
-  }
+  public abstract boolean equals(Object obj);
 
   /** A {@link ProvisionBinding} builder. */
-  static final class Builder {
-    private Key key;
-    private Optional<XElement> bindingElement = Optional.empty();
-    private Optional<XTypeElement> contributingModule = Optional.empty();
-    private BindingKind kind;
-    private Set<DependencyRequest> provisionDependencies;
-    private Optional<ProvisionBinding> unresolved = Optional.empty();
-    private Optional<Scope> scope = Optional.empty();
+  @AutoValue.Builder
+  public abstract static class Builder
+      extends ContributionBinding.Builder<ProvisionBinding, Builder> {
 
-    private Builder() {
-    }
-
-    private Builder(ProvisionBinding source) {
-      this.key = source.key();
-      this.bindingElement = source.bindingElement();
-      this.contributingModule = source.contributingModule();
-      this.kind = source.kind();
-      this.provisionDependencies = source.provisionDependencies();
-      this.unresolved = source.unresolved();
-      this.scope = source.scope();
-    }
-
-    Builder dependencies(Set<DependencyRequest> dependencies) {
+    @Override
+    public Builder dependencies(Iterable<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
     }
 
-    Builder dependencies(DependencyRequest... dependencies) {
-      return dependencies(new LinkedHashSet<>(List.of(dependencies)));
-    }
+    abstract Builder provisionDependencies(Iterable<DependencyRequest> provisionDependencies);
 
-    Builder clearBindingElement() {
-      return bindingElement(Optional.empty());
-    }
+    public abstract Builder injectionSites(ImmutableSortedSet<InjectionSite> injectionSites);
 
-    Builder key(Key key) {
-      this.key = key;
-      return this;
-    }
+    @Override
+    public abstract Builder unresolved(ProvisionBinding unresolved);
 
-    Builder bindingElement(XElement bindingElement) {
-      this.bindingElement = Optional.of(bindingElement);
-      return this;
-    }
-
-    Builder bindingElement(Optional<XElement> bindingElement) {
-      this.bindingElement = bindingElement;
-      return this;
-    }
-
-    Builder contributingModule(XTypeElement contributingModule) {
-      this.contributingModule = Optional.of(contributingModule);
-      return this;
-    }
-
-    Builder kind(BindingKind kind) {
-      this.kind = kind;
-      return this;
-    }
-
-    Builder provisionDependencies(Set<DependencyRequest> provisionDependencies) {
-      this.provisionDependencies = provisionDependencies;
-      return this;
-    }
-
-    Builder unresolved(ProvisionBinding unresolved) {
-      this.unresolved = Optional.of(unresolved);
-      return this;
-    }
-
-    Builder scope(Optional<Scope> scope) {
-      this.scope = scope;
-      return this;
-    }
-
-    ProvisionBinding build() {
-      return new ProvisionBinding(
-          this.key,
-          this.bindingElement,
-          this.contributingModule,
-          this.kind,
-          this.provisionDependencies,
-          this.unresolved,
-          this.scope);
-    }
+    public abstract Builder scope(Optional<Scope> scope);
   }
+
 }

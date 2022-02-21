@@ -19,11 +19,10 @@ package dagger.spi.model;
 import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
 import static java.util.stream.Collectors.joining;
 
+import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.collect.ImmutableMap;
 import io.jbock.javapoet.CodeBlock;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -41,7 +40,7 @@ final class MoreAnnotationMirrors {
 
   /**
    * Returns a String rendering of an {@link AnnotationMirror} that includes attributes in the order
-   * defined in the annotation type. This will produce the same output for {@linkplain
+   * defined in the annotation type. This will produce the same output for {@code
    * com.google.auto.common.AnnotationMirrors#equivalence() equal} {@link AnnotationMirror}s even if
    * default values are omitted or their attributes were written in different orders, e.g.
    * {@code @A(b = "b", c = "c")} and {@code @A(c = "c", b = "b", attributeWithDefaultValue =
@@ -50,22 +49,21 @@ final class MoreAnnotationMirrors {
   // TODO(ronshapiro): move this to auto-common
   private static String stableAnnotationMirrorToString(AnnotationMirror qualifier) {
     StringBuilder builder = new StringBuilder("@").append(qualifier.getAnnotationType());
-    Map<ExecutableElement, AnnotationValue> elementValues =
-        getAnnotationValuesWithDefaults(qualifier);
+    ImmutableMap<ExecutableElement, AnnotationValue> elementValues =
+        ImmutableMap.copyOf(getAnnotationValuesWithDefaults(qualifier));
     if (!elementValues.isEmpty()) {
-      Map<String, String> namedValues = new LinkedHashMap<>();
+      ImmutableMap.Builder<String, String> namedValuesBuilder = ImmutableMap.builder();
       elementValues.forEach(
           (key, value) ->
-              namedValues.put(
+              namedValuesBuilder.put(
                   key.getSimpleName().toString(), stableAnnotationValueToString(value)));
+      ImmutableMap<String, String> namedValues = namedValuesBuilder.build();
       builder.append('(');
       if (namedValues.size() == 1 && namedValues.containsKey("value")) {
         // Omit "value ="
         builder.append(namedValues.get("value"));
       } else {
-        builder.append(namedValues.entrySet().stream()
-            .map(e -> e.getKey() + "=" + e.getValue())
-            .collect(Collectors.joining(", ")));
+        builder.append(Joiner.on(", ").withKeyValueSeparator("=").join(namedValues));
       }
       builder.append(')');
     }

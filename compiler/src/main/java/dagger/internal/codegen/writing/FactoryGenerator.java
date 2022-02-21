@@ -16,20 +16,21 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameters;
-import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.DELEGATE;
-import static dagger.internal.codegen.binding.ContributionBinding.FactoryCreationStrategy.SINGLETON_INSTANCE;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.frameworkTypeUsageStatement;
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.parameterizedGeneratedTypeNameForBinding;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.spi.model.BindingKind.PROVISION;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
@@ -39,18 +40,23 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import dagger.internal.Factory;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import io.jbock.javapoet.ClassName;
@@ -61,47 +67,52 @@ import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.VariableElement;
 
 /**
- * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@code
+ * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@link
  * Inject} constructors.
  */
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
+  private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
+  private final KotlinMetadataUtil metadataUtil;
 
   @Inject
   FactoryGenerator(
       XFiler filer,
+      SourceVersion sourceVersion,
+      DaggerTypes types,
       DaggerElements elements,
-      CompilerOptions compilerOptions) {
-    super(filer, elements);
+      CompilerOptions compilerOptions,
+      KotlinMetadataUtil metadataUtil) {
+    super(filer, elements, sourceVersion);
+    this.types = types;
     this.compilerOptions = compilerOptions;
+    this.metadataUtil = metadataUtil;
   }
 
   @Override
   public XElement originatingElement(ProvisionBinding binding) {
     // we only create factories for bindings that have a binding element
-    return binding.bindingElement().orElseThrow();
+    return binding.bindingElement().get();
   }
 
   @Override
-  public List<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
+  public ImmutableList<TypeSpec.Builder> topLevelTypes(ProvisionBinding binding) {
     // We don't want to write out resolved bindings -- we want to write out the generic version.
-    Preconditions.checkArgument(!binding.unresolved().isPresent());
-    Preconditions.checkArgument(binding.bindingElement().isPresent());
+    checkArgument(!binding.unresolved().isPresent());
+    checkArgument(binding.bindingElement().isPresent());
 
-    if (binding.factoryCreationStrategy().equals(DELEGATE)) {
-      return List.of();
+    if (binding.kind() == BindingKind.DELEGATE) {
+      return ImmutableList.of();
     }
 
-    return List.of(factoryBuilder(binding));
+    return ImmutableList.of(factoryBuilder(binding));
   }
 
   private TypeSpec.Builder factoryBuilder(ProvisionBinding binding) {
@@ -115,13 +126,13 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(getMethod(binding));
     addCreateMethod(binding, factoryBuilder);
 
-    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, KotlinMetadataUtil.instance()));
+    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, metadataUtil));
 
     return factoryBuilder;
   }
 
   private void addConstructorAndFields(ProvisionBinding binding, TypeSpec.Builder factoryBuilder) {
-    if (binding.factoryCreationStrategy().equals(SINGLETON_INSTANCE)) {
+    if (FactoryCreationStrategy.of(binding) == FactoryCreationStrategy.SINGLETON_INSTANCE) {
       return;
     }
     // TODO(bcorso): Make the constructor private?
@@ -135,11 +146,11 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(constructor.build());
   }
 
-  private List<ParameterSpec> constructorParams(ProvisionBinding binding) {
-    List<ParameterSpec> params = new ArrayList<>();
+  private ImmutableList<ParameterSpec> constructorParams(ProvisionBinding binding) {
+    ImmutableList.Builder<ParameterSpec> params = ImmutableList.builder();
     moduleParameter(binding).ifPresent(params::add);
     frameworkFields(binding).values().forEach(field -> params.add(toParameter(field)));
-    return params;
+    return params.build();
   }
 
   private Optional<ParameterSpec> moduleParameter(ProvisionBinding binding) {
@@ -151,20 +162,20 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     return Optional.empty();
   }
 
-  private Map<DependencyRequest, FieldSpec> frameworkFields(ProvisionBinding binding) {
+  private ImmutableMap<DependencyRequest, FieldSpec> frameworkFields(ProvisionBinding binding) {
     UniqueNameSet uniqueFieldNames = new UniqueNameSet();
     // TODO(bcorso, dpb): Add a test for the case when a Factory parameter is named "module".
     moduleParameter(binding).ifPresent(module -> uniqueFieldNames.claim(module.name));
     // We avoid Maps.transformValues here because it would implicitly depend on the order in which
     // the transform function is evaluated on each entry in the map.
-    Map<DependencyRequest, FieldSpec> builder = new LinkedHashMap<>();
+    ImmutableMap.Builder<DependencyRequest, FieldSpec> builder = ImmutableMap.builder();
     generateBindingFieldsForDependencies(binding).forEach(
         (dependency, field) ->
             builder.put(dependency,
                 FieldSpec.builder(
                         field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
                     .build()));
-    return builder;
+    return builder.build();
   }
 
   private void addCreateMethod(ProvisionBinding binding, TypeSpec.Builder factoryBuilder) {
@@ -177,7 +188,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             .returns(parameterizedGeneratedTypeNameForBinding(binding))
             .addTypeVariables(bindingTypeElementTypeVariableNames(binding));
 
-    switch (binding.factoryCreationStrategy()) {
+    switch (FactoryCreationStrategy.of(binding)) {
       case SINGLETON_INSTANCE:
         FieldSpec.Builder instanceFieldBuilder =
             FieldSpec.builder(
@@ -205,9 +216,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         createMethodBuilder.addStatement(
             "return new $T($L)",
             parameterizedGeneratedTypeNameForBinding(binding),
-            makeParametersCodeBlock(params.stream()
-                .map(input -> CodeBlock.of("$N", input))
-                .collect(Collectors.toList())));
+            makeParametersCodeBlock(Lists.transform(params, input -> CodeBlock.of("$N", input))));
         break;
       default:
         throw new AssertionError();
@@ -217,12 +226,12 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
 
   private MethodSpec getMethod(ProvisionBinding binding) {
     UniqueNameSet uniqueFieldNames = new UniqueNameSet();
-    Map<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
+    ImmutableMap<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
     frameworkFields.values().forEach(field -> uniqueFieldNames.claim(field.name));
     Map<VariableElement, ParameterSpec> assistedParameters =
         assistedParameters(binding).stream()
             .collect(
-                DaggerStreams.toImmutableMap(
+                toImmutableMap(
                     XConverters::toJavac,
                     element ->
                         ParameterSpec.builder(
@@ -239,7 +248,6 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     if (factoryTypeName(binding).isPresent()) {
       getMethod.addAnnotation(Override.class);
     }
-
     CodeBlock invokeNewInstance =
         ProvisionMethod.invoke(
             binding,
@@ -250,9 +258,18 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             generatedClassNameForBinding(binding),
             moduleParameter(binding).map(module -> CodeBlock.of("$N", module)),
             compilerOptions,
-            KotlinMetadataUtil.instance());
+            metadataUtil);
 
-    getMethod.addStatement("return $L", invokeNewInstance);
+    if (binding.kind().equals(PROVISION)) {
+      binding
+          .nullableType()
+          .map(XType::getTypeElement)
+          .map(XTypeElement::getClassName)
+          .ifPresent(getMethod::addAnnotation);
+      getMethod.addStatement("return $L", invokeNewInstance);
+    } else {
+      getMethod.addStatement("return $L", invokeNewInstance);
+    }
     return getMethod.build();
   }
 
@@ -268,5 +285,30 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
 
   private static ParameterSpec toParameter(FieldSpec field) {
     return ParameterSpec.builder(field.type, field.name).build();
+  }
+
+  /** The strategy for getting an instance of a factory for a {@link Binding}. */
+  private enum FactoryCreationStrategy {
+    /** The factory class is a single instance. */
+    SINGLETON_INSTANCE,
+    /** The factory must be created by calling the constructor. */
+    CLASS_CONSTRUCTOR;
+
+    static FactoryCreationStrategy of(Binding binding) {
+      switch (binding.kind()) {
+        case DELEGATE:
+          throw new AssertionError("Delegate bindings don't have a factory.");
+        case PROVISION:
+          return binding.dependencies().isEmpty() && !binding.requiresModuleInstance()
+              ? SINGLETON_INSTANCE
+              : CLASS_CONSTRUCTOR;
+        case INJECTION:
+          return binding.dependencies().isEmpty()
+              ? SINGLETON_INSTANCE
+              : CLASS_CONSTRUCTOR;
+        default:
+          return CLASS_CONSTRUCTOR;
+      }
+    }
   }
 }
