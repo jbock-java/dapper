@@ -10,11 +10,17 @@ if [[ -z "$INPUT" ]]; then
 	die "usage: imports <filename>"
 fi
 
-function replace() {
+function replace () {
 	local A=$1
 	local B=$2
 	sed -i "s/^import static $A/import static $B/g" "$INPUT"
 	sed -i "s/^import $A/import $B/g" "$INPUT"
+}
+
+function delete () {
+	local P="/${1}$/d"
+	echo "$P"
+	sed -i "$P" $INPUT
 }
 
 replace com.google.auto.common. io.jbock.auto.common.
@@ -26,14 +32,4 @@ replace com.google.common.collect. dagger.internal.codegen.collect.
 replace com.google.auto.common. io.jbock.auto.common.
 replace javax.inject. jakarta.inject.
 
-
-#sed -i 's/^import static com.google.auto.common./import static io.jbock.auto.common./g' "$INPUT"
-#sed -i 's/^import static com.google.common.base./import static dagger.internal.codegen.base./g' "$INPUT"
-#sed -i 's/^import static androidx.room.compiler.processing.compat.XConverters./import static dagger.internal.codegen.xprocessing.XConverters./g' "$INPUT"
-#sed -i 's/^import static com.squareup.javapoet./import static io.jbock.javapoet./g' "$INPUT"
-#sed -i 's/^import androidx.room.compiler.processing./import dagger.internal.codegen.xprocessing./g' "$INPUT"
-#sed -i 's/^import com.google.common.collect./import dagger.internal.codegen.collect./g' "$INPUT"
-#sed -i 's/^import com.google.auto.common./import io.jbock.auto.common./g' "$INPUT"
-#sed -i 's/^import com.squareup.javapoet./import io.jbock.javapoet./g' "$INPUT"
-#sed -i 's/^import javax.inject./import jakarta.inject./g' "$INPUT"
-
+delete "import com.google.errorprone.annotations.CanIgnoreReturnValue;"
