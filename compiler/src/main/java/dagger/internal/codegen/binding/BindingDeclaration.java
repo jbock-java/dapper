@@ -63,7 +63,7 @@ public abstract class BindingDeclaration {
    * The {@link XElement} that declares this binding. Absent for {@linkplain BindingKind binding
    * kinds} that are not always declared by exactly one element.
    *
-   * <p>For example, consider {@link BindingKind#MULTIBOUND_SET}. A component with many
+   * <p>For example, consider {@code BindingKind#MULTIBOUND_SET}. A component with many
    * {@code @IntoSet} bindings for the same key will have a synthetic binding that depends on all
    * contributions, but with no identifiying binding element. A {@code @Multibinds} method will also
    * contribute a synthetic binding, but since multiple {@code @Multibinds} methods can coexist in
