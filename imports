@@ -30,6 +30,7 @@ replace androidx.room.compiler.processing.compat.XConverters dagger.internal.cod
 replace com.squareup.javapoet. io.jbock.javapoet.
 replace androidx.room.compiler.processing. dagger.internal.codegen.xprocessing.
 replace com.google.common.collect. dagger.internal.codegen.collect.
+replace com.google.common.graph. io.jbock.common.graph.
 replace com.google.auto.common. io.jbock.auto.common.
 replace javax.inject. jakarta.inject.
 replace com.google.auto.value.AutoValue io.jbock.auto.value.AutoValue

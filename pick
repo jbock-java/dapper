@@ -1,0 +1,19 @@
+#!/bin/bash
+
+die () {
+    echo "$*"
+    exit 1
+}
+
+REF_ID=$1
+if [[ -z "$REF_ID" ]]; then
+  die "usage: pick <ref-id>"
+fi
+
+git --git-dir ../dagger/.git --work-tree=../dagger checkout $REF_ID
+
+for S in `git --git-dir ../dagger/.git --work-tree=../dagger show --name-status | grep -E ^M | awk -F 'java/' '{print $2}'`; do
+  cp "../dagger/java/$S" "compiler/src/main/java/$S"
+  ./imports "compiler/src/main/java/$S"
+done
+
