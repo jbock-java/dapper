@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.extension.Optionals.emptiesLast;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XElements;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import java.util.Comparator;

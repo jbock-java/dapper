@@ -11,7 +11,7 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
   private static final ImmutableSet<?> EMPTY = new ImmutableSet<>(Set.of());
   private final Set<T> delegate;
 
-  private ImmutableSet(Set<T> delegate) {
+  ImmutableSet(Set<T> delegate) {
     this.delegate = delegate;
   }
 
@@ -91,16 +91,16 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
 
 
   @Override
-  public Iterator<T> iterator() {
+  public final Iterator<T> iterator() {
     return delegate.iterator();
   }
 
   @Override
-  public int size() {
+  public final int size() {
     return delegate.size();
   }
 
-  public ImmutableList<T> asList() {
+  public final ImmutableList<T> asList() {
     return ImmutableList.copyOf(delegate);
   }
 }

@@ -25,7 +25,6 @@ import static java.util.Objects.requireNonNull;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
@@ -91,7 +90,7 @@ public abstract class SourceFileGenerator<T> {
   private JavaFile buildJavaFile(T input, TypeSpec.Builder typeSpecBuilder) {
     typeSpecBuilder.addOriginatingElement(toJavac(originatingElement(input)));
     AnnotationSpec generatedAnnotation =
-        AnnotationSpec.builder(TypeNames.GENERATED)
+        AnnotationSpec.builder(Constants.GENERATED)
             .addMember("value", "$S", "dagger.internal.codegen.ComponentProcessor")
             .addMember("comments", "$S", GENERATED_COMMENTS)
             .build();

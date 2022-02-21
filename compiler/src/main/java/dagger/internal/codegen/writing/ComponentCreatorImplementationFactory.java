@@ -20,7 +20,6 @@ import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;

@@ -35,7 +35,6 @@ import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
@@ -47,6 +46,7 @@ import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleDescriptor;
 import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.javapoet.TypeNames;

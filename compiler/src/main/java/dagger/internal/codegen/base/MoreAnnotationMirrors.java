@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.base;
 
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
 import static dagger.internal.codegen.base.MoreAnnotationValues.asAnnotationValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValue;
 
+import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.Equivalence;
-import dagger.internal.codegen.collect.ImmutableList;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Name;

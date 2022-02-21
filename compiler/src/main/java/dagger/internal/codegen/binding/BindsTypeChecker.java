@@ -21,12 +21,14 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreTypes;
 import jakarta.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
@@ -78,10 +80,10 @@ public final class BindsTypeChecker {
   private ImmutableList<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
     ImmutableList.Builder<ExecutableElement> methodsForName = ImmutableList.builder();
     for (ExecutableElement method :
-        // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
-        // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
-        // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
-        // getLocalAndInheritedMethods ensures that the method will always be present.
+      // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
+      // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
+      // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
+      // getLocalAndInheritedMethods ensures that the method will always be present.
         elements.getLocalAndInheritedMethods(MoreTypes.asTypeElement(type))) {
       if (method.getSimpleName().contentEquals(methodName)) {
         methodsForName.add(method);
@@ -90,5 +92,21 @@ public final class BindsTypeChecker {
     ExecutableElement method = getOnlyElement(methodsForName.build());
     return ImmutableList.copyOf(
         MoreTypes.asExecutable(types.asMemberOf(type, method)).getParameterTypes());
+  }
+
+  private TypeMirror methodParameterType(DeclaredType type, String methodName) {
+    return getOnlyElement(methodParameterTypes(type, methodName));
+  }
+
+  private TypeElement setElement() {
+    return elements.getTypeElement(TypeNames.SET);
+  }
+
+  private TypeElement mapElement() {
+    return elements.getTypeElement(TypeNames.MAP);
+  }
+
+  private TypeMirror unboundedWildcard() {
+    return types.getWildcardType(null, null);
   }
 }

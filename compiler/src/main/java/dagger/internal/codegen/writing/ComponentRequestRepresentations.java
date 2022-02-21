@@ -21,7 +21,6 @@ import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Preconditions;
@@ -39,7 +38,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;

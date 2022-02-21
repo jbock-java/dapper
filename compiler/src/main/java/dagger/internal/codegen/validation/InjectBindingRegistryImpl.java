@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
+import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;

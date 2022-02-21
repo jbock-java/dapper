@@ -24,10 +24,10 @@ import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Item;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.spi.model.BindingGraphPlugin;
-import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.DiagnosticReporter;
 import jakarta.inject.Inject;
 
 /** Validates bindings from {@code @Inject}-annotated constructors. */

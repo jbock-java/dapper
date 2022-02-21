@@ -28,6 +28,7 @@ import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -388,7 +389,7 @@ final class BindingGraphConverter {
       return BindingNode.create(
           pathFromRootToAncestor(owningComponent),
           binding,
-          resolvedBindings.subcomponentDeclarations(),
+          ImmutableSet.copyOf(resolvedBindings.subcomponentDeclarations()),
           bindingDeclarationFormatter);
     }
 

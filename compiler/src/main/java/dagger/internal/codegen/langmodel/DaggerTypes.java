@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static dagger.internal.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
@@ -46,6 +46,7 @@ import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
@@ -62,6 +63,7 @@ public final class DaggerTypes implements Types {
 
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreTypes?
+
   /**
    * Returns true if the raw type underlying the given {@link TypeMirror} represents the same raw
    * type as the given {@link Class} and throws an IllegalArgumentException if the {@link
@@ -148,7 +150,7 @@ public final class DaggerTypes implements Types {
    * {@link Optional} is returned if there is no non-{@link Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
-    return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orElse(null));
+    return MoreTypes.nonObjectSuperclass(types, elements, type);
   }
 
   /**
@@ -345,6 +347,32 @@ public final class DaggerTypes implements Types {
           @Override
           public Void visitError(ErrorType errorType, Void p) {
             throw new TypeNotPresentException(type.toString(), null);
+          }
+        },
+        null);
+  }
+
+  public static boolean hasTypeVariable(TypeMirror type) {
+    return type.accept(
+        new SimpleTypeVisitor8<Boolean, Void>() {
+          @Override
+          public Boolean visitArray(ArrayType arrayType, Void p) {
+            return arrayType.getComponentType().accept(this, p);
+          }
+
+          @Override
+          public Boolean visitDeclared(DeclaredType declaredType, Void p) {
+            return declaredType.getTypeArguments().stream().anyMatch(type -> type.accept(this, p));
+          }
+
+          @Override
+          public Boolean visitTypeVariable(TypeVariable t, Void aVoid) {
+            return true;
+          }
+
+          @Override
+          protected Boolean defaultAction(TypeMirror e, Void aVoid) {
+            return false;
           }
         },
         null);

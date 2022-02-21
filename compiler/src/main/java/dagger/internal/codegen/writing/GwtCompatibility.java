@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Dagger Authors.
+ * Copyright (C) 2017 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.kotlin;
+package dagger.internal.codegen.writing;
 
-import jakarta.inject.Inject;
-import javax.lang.model.element.TypeElement;
+import dagger.internal.codegen.binding.Binding;
+import io.jbock.javapoet.AnnotationSpec;
+import java.util.Optional;
 
-/** Utility class for interacting with Kotlin Metadata. */
-public final class KotlinMetadataUtil {
+final class GwtCompatibility {
 
-  private static final KotlinMetadataUtil INSTANCE = new KotlinMetadataUtil();
-
-  public static KotlinMetadataUtil instance() {
-    return INSTANCE;
-  }
-
-  @Inject
-  KotlinMetadataUtil() {
-  }
-
-  public boolean isObjectClass(TypeElement asType) {
-    return false;
+  /**
+   * Returns a {@code @GwtIncompatible} annotation that is applied to {@code binding}'s {@link
+   * Binding#bindingElement()} or any enclosing type.
+   */
+  static Optional<AnnotationSpec> gwtIncompatibleAnnotation(Binding binding) {
+    return Optional.empty();
   }
 }

@@ -1,6 +1,5 @@
 package dagger.internal.codegen.collect;
 
-import dagger.internal.codegen.collect.ListMultimap;
 import java.util.function.Function;
 
 public class Multimaps {

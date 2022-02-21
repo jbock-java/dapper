@@ -38,7 +38,17 @@ public class Iterables {
   }
 
   public static <T> T getOnlyElement(Iterable<T> iterable) {
-    Iterator<T> it = iterable.iterator();
+    return getOnlyElement(iterable.iterator());
+  }
+
+  public static <E> E getOnlyElement(Iterable<? extends E> iterable, E defaultValue) {
+    if (!iterable.iterator().hasNext()) {
+      return defaultValue;
+    }
+    return getOnlyElement(iterable);
+  }
+
+  private static <T> T getOnlyElement(Iterator<T> it) {
     if (!it.hasNext()) {
       throw new IllegalArgumentException("Expecting exactly one element but was empty");
     }

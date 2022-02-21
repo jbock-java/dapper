@@ -16,9 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
 import dagger.Module;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
@@ -29,7 +30,6 @@ import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
 import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * An implementation of {@link dagger.spi.model.Binding} that also exposes {@link
@@ -43,7 +43,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
-      Set<SubcomponentDeclaration> subcomponentDeclarations,
+      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     BindingNode node =
         new AutoValue_BindingNode(
@@ -58,7 +58,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
 
   public abstract Binding delegate();
 
-  public abstract Set<SubcomponentDeclaration> subcomponentDeclarations();
+  public abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
   /**
    * The elements (other than the binding's {@link #bindingElement()}) that are associated with the
@@ -78,7 +78,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   }
 
   @Override
-  public Set<DependencyRequest> dependencies() {
+  public ImmutableSet<DependencyRequest> dependencies() {
     return delegate().dependencies();
   }
 

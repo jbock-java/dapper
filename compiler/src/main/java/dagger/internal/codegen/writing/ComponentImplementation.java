@@ -39,7 +39,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.base.Util;
@@ -54,6 +53,7 @@ import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescri
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.KeyVariableNamer;
 import dagger.internal.codegen.binding.MethodSignature;
+import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeSpecs;

@@ -16,21 +16,20 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.unwrapOptionalEquivalence;
 import static java.util.Arrays.asList;
 
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.xprocessing.XConverters;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.Equivalence;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;

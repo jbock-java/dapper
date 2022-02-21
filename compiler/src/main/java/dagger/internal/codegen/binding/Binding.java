@@ -16,12 +16,11 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Suppliers.memoize;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import java.util.function.Supplier;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Sets;
 import dagger.spi.model.BindingKind;
@@ -29,6 +28,7 @@ import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 
 /**

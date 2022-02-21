@@ -25,8 +25,6 @@ import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.spi.model.Key;
 import java.util.Optional;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 
 /**
  * Maintains the collection of provision bindings from {@code Inject} constructors and members

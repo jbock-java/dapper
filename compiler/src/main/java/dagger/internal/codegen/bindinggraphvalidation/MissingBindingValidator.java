@@ -17,23 +17,23 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.DOUBLE_INDENT;
-import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.base.Verify.verify;
+import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
-import dagger.spi.model.BindingGraphPlugin;
-import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.Edge;
 import dagger.spi.model.BindingGraph.MissingBinding;
 import dagger.spi.model.BindingGraph.Node;
+import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.ComponentPath;
+import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.List;

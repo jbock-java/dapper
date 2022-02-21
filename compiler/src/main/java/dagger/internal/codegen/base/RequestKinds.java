@@ -16,27 +16,27 @@
 
 package dagger.internal.codegen.base;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.isType;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.RequestKind.LAZY;
 import static dagger.spi.model.RequestKind.PROVIDER;
 import static dagger.spi.model.RequestKind.PROVIDER_OF_LAZY;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
+import static io.jbock.auto.common.MoreTypes.isType;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.collect.ImmutableMap;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.TypeName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@link RequestKind}s. */

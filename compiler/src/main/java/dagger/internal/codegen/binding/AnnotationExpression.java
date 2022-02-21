@@ -16,16 +16,16 @@
 
 package dagger.internal.codegen.binding;
 
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
-import static io.jbock.auto.common.MoreTypes.asArray;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
+import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
+import static io.jbock.auto.common.MoreTypes.asArray;
 import static java.util.stream.Collectors.toList;
 
+import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
-import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import java.util.List;

@@ -21,8 +21,6 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAss
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
-import static javax.lang.model.type.TypeKind.WILDCARD;
 
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -35,9 +33,6 @@ import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
 import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 
 /** Validation for dependency requests. */
 final class DependencyRequestValidator {

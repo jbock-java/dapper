@@ -455,4 +455,8 @@ public final class BindingGraph {
   public List<BindingNode> localBindingNodes() {
     return topLevelBindingGraph().bindingsByComponent().getOrDefault(componentPath(), List.of());
   }
+
+  public Optional<MembersInjectionBinding> membersInjectionBinding(Key key) {
+    return Optional.empty();
+  }
 }
