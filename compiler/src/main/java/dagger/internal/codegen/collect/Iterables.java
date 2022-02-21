@@ -49,6 +49,9 @@ public class Iterables {
   }
 
   public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
+    if (iterable instanceof Collection) {
+      return (T[]) ((Collection<? extends T>) iterable).toArray();
+    }
     ArrayList<T> result = new ArrayList<>();
     iterable.forEach(result::add);
     return (T[]) result.toArray(new Object[0]);
