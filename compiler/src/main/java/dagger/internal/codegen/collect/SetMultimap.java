@@ -1,5 +1,6 @@
-package dagger.internal.codegen.base;
+package dagger.internal.codegen.collect;
 
+import dagger.internal.codegen.base.Util;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;

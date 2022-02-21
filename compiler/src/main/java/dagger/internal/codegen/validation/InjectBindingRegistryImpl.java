@@ -16,7 +16,7 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;

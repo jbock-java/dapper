@@ -25,12 +25,12 @@ import static java.util.Comparator.comparing;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Formatter;
-import dagger.internal.codegen.base.ImmutableList;
-import dagger.internal.codegen.base.ImmutableSet;
-import dagger.internal.codegen.base.ListMultimap;
-import dagger.internal.codegen.base.Multimaps;
-import dagger.internal.codegen.base.Multiset;
-import dagger.internal.codegen.base.SetMultimap;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ListMultimap;
+import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.collect.Multiset;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;

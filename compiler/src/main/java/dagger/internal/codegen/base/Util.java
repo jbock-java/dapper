@@ -16,6 +16,9 @@
 
 package dagger.internal.codegen.base;
 
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

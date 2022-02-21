@@ -29,7 +29,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.base.Lists;
+import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;

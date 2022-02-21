@@ -17,7 +17,7 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.DOUBLE_INDENT;
-import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static javax.tools.Diagnostic.Kind.ERROR;

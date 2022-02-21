@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Iterables.getOnlyElement;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;

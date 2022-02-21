@@ -20,8 +20,8 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.stream.Collectors.toList;
 
-import dagger.internal.codegen.base.ImmutableSet;
-import dagger.internal.codegen.base.ImmutableSortedSet;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;

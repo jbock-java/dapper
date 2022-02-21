@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.Keys;
+import dagger.internal.codegen.collect.Keys;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.extension.DaggerStreams;

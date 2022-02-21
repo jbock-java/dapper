@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.Util.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import dagger.internal.codegen.base.SetMultimap;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.validation.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;

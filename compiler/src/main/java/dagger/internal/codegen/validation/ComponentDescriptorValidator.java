@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.SetMultimap;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.base;
+package dagger.internal.codegen.collect;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAndCreatorAnnotations;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;

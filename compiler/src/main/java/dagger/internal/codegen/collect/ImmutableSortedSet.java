@@ -1,10 +1,9 @@
-package dagger.internal.codegen.base;
+package dagger.internal.codegen.collect;
 
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 

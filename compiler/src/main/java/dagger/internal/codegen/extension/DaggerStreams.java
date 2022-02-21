@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.extension;
 
-import dagger.internal.codegen.base.ImmutableList;
-import dagger.internal.codegen.base.ImmutableMap;
-import dagger.internal.codegen.base.ImmutableSet;
-import dagger.internal.codegen.base.SetMultimap;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;

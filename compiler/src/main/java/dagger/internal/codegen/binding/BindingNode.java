@@ -19,7 +19,7 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Module;
-import dagger.internal.codegen.base.Iterables;
+import dagger.internal.codegen.collect.Iterables;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;

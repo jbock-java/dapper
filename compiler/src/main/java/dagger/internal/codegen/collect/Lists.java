@@ -1,4 +1,4 @@
-package dagger.internal.codegen.base;
+package dagger.internal.codegen.collect;
 
 import java.util.ArrayList;
 import java.util.List;
