@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.toCollection;
 import dagger.Subcomponent;
 import dagger.internal.codegen.base.TarjanSCCs;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -423,8 +424,8 @@ public final class BindingGraph {
    *   <li>bound instances
    * </ul>
    */
-  public Set<ComponentRequirement> componentRequirements() {
-    return componentRequirements.get();
+  public ImmutableSet<ComponentRequirement> componentRequirements() {
+    return ImmutableSet.copyOf(componentRequirements.get());
   }
 
   /**

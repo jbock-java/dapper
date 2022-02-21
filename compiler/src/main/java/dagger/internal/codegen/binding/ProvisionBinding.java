@@ -21,6 +21,8 @@ import static dagger.spi.model.BindingKind.PROVISION;
 import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -70,6 +72,10 @@ public final class ProvisionBinding extends ContributionBinding {
     this.provisionDependencies = requireNonNull(provisionDependencies);
     this.unresolved = requireNonNull(unresolved);
     this.scope = requireNonNull(scope);
+  }
+
+  public ImmutableSortedSet<InjectionSite> injectionSites() {
+    return ImmutableSortedSet.of();
   }
 
   @Override

@@ -31,6 +31,7 @@ import dagger.Subcomponent;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -50,7 +51,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -160,7 +160,7 @@ public final class ComponentDescriptor {
   }
 
   /** The non-abstract {@link #modules()} and the {@link #dependencies()}. */
-  public Set<ComponentRequirement> dependenciesAndConcreteModules() {
+  public ImmutableSet<ComponentRequirement> dependenciesAndConcreteModules() {
     return Stream.concat(
             moduleTypes().stream()
                 .filter(dep -> !dep.isAbstract())

@@ -37,6 +37,12 @@ public interface XTypeElement extends XMemberContainer {
   boolean isInterface();
 
   /**
+   * Returns {@code true} if this {@code XTypeElement} represents a Java
+   * annotation type.
+   */
+  boolean isAnnotationClass();
+
+  /**
    * Returns the list of constructors in this type element
    */
   List<XConstructorElement> getConstructors();

@@ -47,4 +47,10 @@ public class Iterables {
     }
     return result;
   }
+
+  public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
+    ArrayList<T> result = new ArrayList<>();
+    iterable.forEach(result::add);
+    return (T[]) result.toArray(new Object[0]);
+  }
 }

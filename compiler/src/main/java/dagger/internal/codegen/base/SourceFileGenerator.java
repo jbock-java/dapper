@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.lang.model.SourceVersion;
 
 /**
  * A template class that provides a framework for properly handling IO while generating source files
@@ -54,6 +55,10 @@ public abstract class SourceFileGenerator<T> {
   public SourceFileGenerator(XFiler filer, DaggerElements elements) {
     this.filer = requireNonNull(filer);
     this.elements = requireNonNull(elements);
+  }
+
+  public SourceFileGenerator(XFiler filer, DaggerElements elements, SourceVersion sourceVersion) {
+    this(filer, elements);
   }
 
   public SourceFileGenerator(SourceFileGenerator<T> delegate) {

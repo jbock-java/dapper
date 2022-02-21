@@ -14,6 +14,8 @@
 
 package dagger.internal.codegen.base;
 
+import java.util.Objects;
+
 public final class Preconditions {
   private Preconditions() {
   }
@@ -136,5 +138,13 @@ public final class Preconditions {
     if (!b) {
       throw new IllegalStateException(String.format(errorMessageTemplate, p1, p2, p3));
     }
+  }
+
+  public static <T> T checkNotNull(T obj) {
+    return Objects.requireNonNull(obj);
+  }
+
+  public static <T> T checkNotNull(T obj, String message) {
+    return Objects.requireNonNull(obj, message);
   }
 }

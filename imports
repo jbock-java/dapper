@@ -29,5 +29,22 @@ replace androidx.room.compiler.processing. dagger.internal.codegen.xprocessing.
 replace com.google.common.collect. dagger.internal.codegen.collect.
 replace com.google.auto.common. io.jbock.auto.common.
 replace javax.inject. jakarta.inject.
+replace com.google.auto.value.AutoValue io.jbock.auto.value.AutoValue
+replace dagger.internal.codegen.xprocessing.XTypeKt. dagger.internal.codegen.xprocessing.XType.
 
 delete "import com.google.errorprone.annotations.CanIgnoreReturnValue;"
+delete "@CanIgnoreReturnValue"
+delete "import com.google.common.annotations.Beta;"
+delete "@Beta"
+delete "import com.google.common.annotations.GwtCompatible;"
+delete "@GwtCompatible"
+delete "import javax.annotation.CheckForNull;"
+delete "import org.checkerframework.checker.nullness.qual.Nullable;"
+delete "@ElementTypesAreNonnullByDefault"
+delete "import dagger.internal.codegen.base.MapType;"
+delete "import dagger.internal.codegen.base.SetType;"
+
+sed -i "s/<? extends @Nullable Object>/<?>/g" $INPUT
+sed -i "s/@CheckForNull //g" $INPUT
+sed -i "s/@Nullable //g" $INPUT
+

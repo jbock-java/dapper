@@ -34,5 +34,12 @@ public enum FrameworkTypeMapper {
     return FOR_PROVIDER;
   }
 
+  public static FrameworkTypeMapper forBindingType(BindingType bindingType) {
+    return FOR_PROVIDER;
+  }
+
   public abstract FrameworkType getFrameworkType();
+  public FrameworkType getFrameworkType(RequestKind requestKind) {
+    return getFrameworkType();
+  }
 }
