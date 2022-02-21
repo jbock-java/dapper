@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.ClassName;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
@@ -40,10 +40,10 @@ abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentat
       FrameworkInstanceSupplier frameworkInstanceSupplier,
       DaggerTypes types,
       DaggerElements elements) {
-    this.binding = requireNonNull(binding);
-    this.frameworkInstanceSupplier = requireNonNull(frameworkInstanceSupplier);
-    this.types = requireNonNull(types);
-    this.elements = requireNonNull(elements);
+    this.binding = checkNotNull(binding);
+    this.frameworkInstanceSupplier = checkNotNull(frameworkInstanceSupplier);
+    this.types = checkNotNull(types);
+    this.elements = checkNotNull(elements);
   }
 
   /**
@@ -55,7 +55,7 @@ abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentat
     MemberSelect memberSelect = frameworkInstanceSupplier.memberSelect();
     TypeMirror expressionType =
         isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName())
-            || isInlinedFactoryCreation(memberSelect)
+                || isInlinedFactoryCreation(memberSelect)
             ? types.wrapType(binding.contributedType(), frameworkType().frameworkClassName())
             : rawFrameworkType();
     return Expression.create(expressionType, memberSelect.getExpressionFor(requestingClass));
@@ -71,7 +71,7 @@ abstract class FrameworkInstanceRequestRepresentation extends RequestRepresentat
    *
    * <p>This is used in {@link #getDependencyExpression(ClassName)} when determining the type of a
    * factory. Normally if the {@link ContributionBinding#contributedType()} is not accessible from
-   * the component, the type of the expression will be a raw {@code Provider}. However,
+   * the component, the type of the expression will be a raw {@link jakarta.inject.Provider}. However,
    * if the factory is created inline, even if contributed type is not accessible, javac will still
    * be able to determine the type that is returned from the {@code Foo_Factory.create()} method.
    */

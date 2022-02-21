@@ -17,28 +17,20 @@
 package dagger.spi.model;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.element.TypeElement;
 
 /** Wrapper type for a type element. */
-public final class DaggerTypeElement {
-
-  private final XTypeElement element;
-
-  private DaggerTypeElement(XTypeElement element) {
-    this.element = element;
+@AutoValue
+public abstract class DaggerTypeElement {
+  public static DaggerTypeElement from(XTypeElement typeElement) {
+    return new AutoValue_DaggerTypeElement(typeElement);
   }
 
-  public static DaggerTypeElement from(XTypeElement element) {
-    return new DaggerTypeElement(requireNonNull(element));
-  }
-
-  public XTypeElement xprocessing() {
-    return element;
-  }
+  public abstract XTypeElement xprocessing();
 
   public TypeElement java() {
     return toJavac(xprocessing());
@@ -49,20 +41,7 @@ public final class DaggerTypeElement {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DaggerTypeElement that = (DaggerTypeElement) o;
-    return element.equals(that.element);
-  }
-
-  @Override
-  public int hashCode() {
-    return element.hashCode();
-  }
-
-  @Override
-  public String toString() {
+  public final String toString() {
     return xprocessing().toString();
   }
 }

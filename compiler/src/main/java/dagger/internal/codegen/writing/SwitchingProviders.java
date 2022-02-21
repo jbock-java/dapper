@@ -16,47 +16,47 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Iterables.getLast;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.TypeSpec.classBuilder;
-import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.Lists;
-import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import dagger.spi.model.BindingKind;
-import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.javapoet.TypeVariableName;
-import jakarta.inject.Inject;
-import java.util.ArrayList;
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.Key;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import jakarta.inject.Inject;
 
 /**
  * Keeps track of all provider expression requests for a component.
  *
- * <p>The provider expression request will be satisfied by a single generated {@code Provider}
- * class that can provide instances for all types by switching on an id.
+ * <p>The provider expression request will be satisfied by a single generated {@code Provider} class
+ * that can provide instances for all types by switching on an id.
  */
 @PerComponentImplementation
 final class SwitchingProviders {
@@ -85,12 +85,10 @@ final class SwitchingProviders {
   private final UniqueNameSet switchingProviderNames = new UniqueNameSet();
 
   @Inject
-  SwitchingProviders(
-      ComponentImplementation componentImplementation,
-      DaggerTypes types) {
+  SwitchingProviders(ComponentImplementation componentImplementation, DaggerTypes types) {
     // Currently, the SwitchingProviders types are only added to the componentShard.
-    this.shardImplementation = requireNonNull(componentImplementation).getComponentShard();
-    this.types = requireNonNull(types);
+    this.shardImplementation = checkNotNull(componentImplementation).getComponentShard();
+    this.types = checkNotNull(types);
   }
 
   /** Returns the framework instance creation expression for an inner switching provider class. */
@@ -114,8 +112,7 @@ final class SwitchingProviders {
       shardImplementation.addTypeSupplier(switchingProviderBuilder::build);
       return switchingProviderBuilder;
     }
-    List<SwitchingProviderBuilder> values = List.copyOf(this.switchingProviderBuilders.values());
-    return values.get(values.size() - 1);
+    return getLast(switchingProviderBuilders.values());
   }
 
   // TODO(bcorso): Consider just merging this class with SwitchingProviders.
@@ -127,7 +124,7 @@ final class SwitchingProviders {
     private final ClassName switchingProviderType;
 
     SwitchingProviderBuilder(ClassName switchingProviderType) {
-      this.switchingProviderType = requireNonNull(switchingProviderType);
+      this.switchingProviderType = checkNotNull(switchingProviderType);
     }
 
     private CodeBlock getNewInstanceCodeBlock(
@@ -147,7 +144,7 @@ final class SwitchingProviders {
           //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
           (binding.scope().isPresent() || binding.kind().equals(BindingKind.ASSISTED_FACTORY))
               ? CodeBlock.of(
-              "$T", shardImplementation.accessibleType(binding.contributedType()))
+                  "$T", types.accessibleType(binding.contributedType(), switchingProviderType))
               : "",
           shardImplementation.componentFieldsByImplementation().values().stream()
               .map(field -> CodeBlock.of("$N", field))
@@ -198,11 +195,11 @@ final class SwitchingProviders {
       return builder.addMethod(constructor.build()).build();
     }
 
-    private List<MethodSpec> getMethods() {
-      List<CodeBlock> switchCodeBlockPartitions = switchCodeBlockPartitions();
+    private ImmutableList<MethodSpec> getMethods() {
+      ImmutableList<CodeBlock> switchCodeBlockPartitions = switchCodeBlockPartitions();
       if (switchCodeBlockPartitions.size() == 1) {
         // There are less than MAX_CASES_PER_SWITCH cases, so no need for extra get methods.
-        return List.of(
+        return ImmutableList.of(
             methodBuilder("get")
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressWarnings(UNCHECKED))
@@ -220,7 +217,7 @@ final class SwitchingProviders {
               .returns(T)
               .beginControlFlow("switch (id / $L)", MAX_CASES_PER_SWITCH);
 
-      List<MethodSpec> getMethods = new ArrayList<>();
+      ImmutableList.Builder<MethodSpec> getMethods = ImmutableList.builder();
       for (int i = 0; i < switchCodeBlockPartitions.size(); i++) {
         MethodSpec method =
             methodBuilder("get" + i)
@@ -235,12 +232,11 @@ final class SwitchingProviders {
 
       routerMethod.addStatement("default: throw new $T(id)", AssertionError.class).endControlFlow();
 
-      getMethods.add(routerMethod.build());
-      return getMethods;
+      return getMethods.add(routerMethod.build()).build();
     }
 
-    private List<CodeBlock> switchCodeBlockPartitions() {
-      return Lists.partition(List.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
+    private ImmutableList<CodeBlock> switchCodeBlockPartitions() {
+      return Lists.partition(ImmutableList.copyOf(switchCases.values()), MAX_CASES_PER_SWITCH)
           .stream()
           .map(
               partitionCases ->

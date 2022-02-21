@@ -16,58 +16,72 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.asType;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod.requiresInjectionMethod;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static io.jbock.auto.common.MoreElements.asExecutable;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreTypes;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.TypeName;
 import java.util.Optional;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
  * A binding expression that invokes methods or constructors directly (without attempting to scope)
- * {@link RequestKind#INSTANCE} requests.
+ * {@link dagger.spi.model.RequestKind#INSTANCE} requests.
  */
 final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   private final CompilerOptions compilerOptions;
   private final ProvisionBinding provisionBinding;
   private final ComponentRequestRepresentations componentRequestRepresentations;
+  private final MembersInjectionMethods membersInjectionMethods;
   private final ComponentRequirementExpressions componentRequirementExpressions;
-  private final ComponentImplementation.ShardImplementation shardImplementation;
+  private final SourceVersion sourceVersion;
+  private final KotlinMetadataUtil metadataUtil;
+  private final ShardImplementation shardImplementation;
 
   @AssistedInject
   SimpleMethodRequestRepresentation(
       @Assisted ProvisionBinding binding,
+      MembersInjectionMethods membersInjectionMethods,
       CompilerOptions compilerOptions,
       ComponentRequestRepresentations componentRequestRepresentations,
       ComponentRequirementExpressions componentRequirementExpressions,
+      SourceVersion sourceVersion,
+      KotlinMetadataUtil metadataUtil,
       ComponentImplementation componentImplementation) {
     this.compilerOptions = compilerOptions;
     this.provisionBinding = binding;
-    Preconditions.checkArgument(provisionBinding.bindingElement().isPresent());
+    this.metadataUtil = metadataUtil;
+    checkArgument(
+        provisionBinding.implicitDependencies().isEmpty(),
+        "framework deps are not currently supported");
+    checkArgument(provisionBinding.bindingElement().isPresent());
     this.componentRequestRepresentations = componentRequestRepresentations;
+    this.membersInjectionMethods = membersInjectionMethods;
     this.componentRequirementExpressions = componentRequirementExpressions;
+    this.sourceVersion = sourceVersion;
     this.shardImplementation = componentImplementation.shardImplementation(binding);
   }
 
@@ -93,8 +107,19 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
         invocation = CodeBlock.of("new $T($L)", constructorTypeName(requestingClass), arguments);
         break;
       case METHOD:
-        CodeBlock module = moduleReference(requestingClass).orElseGet(() ->
-            CodeBlock.of("$T", toJavac(provisionBinding.bindingTypeElement().orElseThrow())));
+        CodeBlock module;
+        Optional<CodeBlock> requiredModuleInstance = moduleReference(requestingClass);
+        if (requiredModuleInstance.isPresent()) {
+          module = requiredModuleInstance.get();
+        } else if (metadataUtil.isObjectClass(asType(method.getEnclosingElement()))) {
+          // Call through the singleton instance.
+          // See: https://kotlinlang.org/docs/reference/java-to-kotlin-interop.html#static-methods
+          module =
+              CodeBlock.of(
+                  "$T.INSTANCE", provisionBinding.bindingTypeElement().get().getClassName());
+        } else {
+          module = CodeBlock.of("$T", provisionBinding.bindingTypeElement().get().getClassName());
+        }
         invocation = CodeBlock.of("$L.$L($L)", module, method.getSimpleName(), arguments);
         break;
       default:
@@ -123,24 +148,41 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
             requestingClass,
             moduleReference(requestingClass),
             compilerOptions,
-            KotlinMetadataUtil.instance()));
+            metadataUtil),
+        requestingClass);
   }
 
   private Expression dependencyArgument(DependencyRequest dependency, ClassName requestingClass) {
-    return componentRequestRepresentations.getDependencyArgumentExpression(dependency, requestingClass);
+    return componentRequestRepresentations.getDependencyArgumentExpression(
+        dependency, requestingClass);
   }
 
-  private Expression injectMembers(CodeBlock instance) {
-    return Expression.create(simpleMethodReturnType(), instance);
+  private Expression injectMembers(CodeBlock instance, ClassName requestingClass) {
+    if (provisionBinding.injectionSites().isEmpty()) {
+      return Expression.create(simpleMethodReturnType(), instance);
+    }
+    if (sourceVersion.compareTo(SourceVersion.RELEASE_7) <= 0) {
+      // Java 7 type inference can't figure out that instance in
+      // injectParameterized(Parameterized_Factory.newParameterized()) is Parameterized<T> and not
+      // Parameterized<Object>
+      if (!MoreTypes.asDeclared(provisionBinding.key().type().java())
+          .getTypeArguments()
+          .isEmpty()) {
+        TypeName keyType = TypeName.get(provisionBinding.key().type().java());
+        instance = CodeBlock.of("($T) ($T) $L", keyType, rawTypeName(keyType), instance);
+      }
+    }
+    return membersInjectionMethods.getInjectExpression(
+        provisionBinding.key(), instance, requestingClass);
   }
 
   private Optional<CodeBlock> moduleReference(ClassName requestingClass) {
     return provisionBinding.requiresModuleInstance()
         ? provisionBinding
-        .contributingModule()
-        .map(XTypeElement::getType)
-        .map(ComponentRequirement::forModule)
-        .map(module -> componentRequirementExpressions.getExpression(module, requestingClass))
+            .contributingModule()
+            .map(XTypeElement::getType)
+            .map(ComponentRequirement::forModule)
+            .map(module -> componentRequirementExpressions.getExpression(module, requestingClass))
         : Optional.empty();
   }
 
@@ -149,7 +191,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     SimpleMethodRequestRepresentation create(ProvisionBinding binding);
   }
 }

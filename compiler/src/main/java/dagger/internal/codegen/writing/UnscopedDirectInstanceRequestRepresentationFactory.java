@@ -28,70 +28,83 @@ import jakarta.inject.Inject;
  * <p>Note that these binding expressions are for getting "direct" instances -- i.e. instances that
  * are created via constructors or modules (e.g. {@code new Foo()} or {@code
  * FooModule.provideFoo()}) as opposed to an instance created from calling a getter on a framework
- * type (e.g. {@code fooProvider.get()}). See {@link FrameworkInstanceRequestRepresentation} for binding
- * expressions that are created from framework types.
+ * type (e.g. {@code fooProvider.get()}). See {@link FrameworkInstanceRequestRepresentation} for
+ * binding expressions that are created from framework types.
  */
 final class UnscopedDirectInstanceRequestRepresentationFactory {
-  private final AssistedFactoryRequestRepresentation.Factory assistedFactoryBindingExpressionFactory;
+  private final AssistedFactoryRequestRepresentation.Factory
+      assistedFactoryRequestRepresentationFactory;
   private final ComponentInstanceRequestRepresentation.Factory
-      componentInstanceBindingExpressionFactory;
+      componentInstanceRequestRepresentationFactory;
   private final ComponentProvisionRequestRepresentation.Factory
-      componentProvisionBindingExpressionFactory;
+      componentProvisionRequestRepresentationFactory;
   private final ComponentRequirementRequestRepresentation.Factory
-      componentRequirementBindingExpressionFactory;
-  private final DelegateRequestRepresentation.Factory delegateBindingExpressionFactory;
-  private final SimpleMethodRequestRepresentation.Factory simpleMethodBindingExpressionFactory;
+      componentRequirementRequestRepresentationFactory;
+  private final DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory;
+  private final SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory;
   private final SubcomponentCreatorRequestRepresentation.Factory
-      subcomponentCreatorBindingExpressionFactory;
+      subcomponentCreatorRequestRepresentationFactory;
 
   @Inject
   UnscopedDirectInstanceRequestRepresentationFactory(
-      AssistedFactoryRequestRepresentation.Factory assistedFactoryBindingExpressionFactory,
-      ComponentInstanceRequestRepresentation.Factory componentInstanceBindingExpressionFactory,
-      ComponentProvisionRequestRepresentation.Factory componentProvisionBindingExpressionFactory,
-      ComponentRequirementRequestRepresentation.Factory componentRequirementBindingExpressionFactory,
-      DelegateRequestRepresentation.Factory delegateBindingExpressionFactory,
-      SimpleMethodRequestRepresentation.Factory simpleMethodBindingExpressionFactory,
-      SubcomponentCreatorRequestRepresentation.Factory subcomponentCreatorBindingExpressionFactory) {
-    this.assistedFactoryBindingExpressionFactory = assistedFactoryBindingExpressionFactory;
-    this.componentInstanceBindingExpressionFactory = componentInstanceBindingExpressionFactory;
-    this.componentProvisionBindingExpressionFactory = componentProvisionBindingExpressionFactory;
-    this.componentRequirementBindingExpressionFactory =
-        componentRequirementBindingExpressionFactory;
-    this.delegateBindingExpressionFactory = delegateBindingExpressionFactory;
-    this.simpleMethodBindingExpressionFactory = simpleMethodBindingExpressionFactory;
-    this.subcomponentCreatorBindingExpressionFactory = subcomponentCreatorBindingExpressionFactory;
+      ComponentImplementation componentImplementation,
+      AssistedFactoryRequestRepresentation.Factory assistedFactoryRequestRepresentationFactory,
+      ComponentInstanceRequestRepresentation.Factory componentInstanceRequestRepresentationFactory,
+      ComponentProvisionRequestRepresentation.Factory
+          componentProvisionRequestRepresentationFactory,
+      ComponentRequirementRequestRepresentation.Factory
+          componentRequirementRequestRepresentationFactory,
+      DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory,
+      SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory,
+      SubcomponentCreatorRequestRepresentation.Factory
+          subcomponentCreatorRequestRepresentationFactory) {
+    this.assistedFactoryRequestRepresentationFactory = assistedFactoryRequestRepresentationFactory;
+    this.componentInstanceRequestRepresentationFactory =
+        componentInstanceRequestRepresentationFactory;
+    this.componentProvisionRequestRepresentationFactory =
+        componentProvisionRequestRepresentationFactory;
+    this.componentRequirementRequestRepresentationFactory =
+        componentRequirementRequestRepresentationFactory;
+    this.delegateRequestRepresentationFactory = delegateRequestRepresentationFactory;
+    this.simpleMethodRequestRepresentationFactory = simpleMethodRequestRepresentationFactory;
+    this.subcomponentCreatorRequestRepresentationFactory =
+        subcomponentCreatorRequestRepresentationFactory;
   }
 
   /** Returns a direct, unscoped binding expression for a {@link RequestKind#INSTANCE} request. */
   RequestRepresentation create(ContributionBinding binding) {
     switch (binding.kind()) {
       case DELEGATE:
-        return delegateBindingExpressionFactory.create(binding, RequestKind.INSTANCE);
+        return delegateRequestRepresentationFactory.create(binding, RequestKind.INSTANCE);
 
       case COMPONENT:
-        return componentInstanceBindingExpressionFactory.create(binding);
+        return componentInstanceRequestRepresentationFactory.create(binding);
 
       case COMPONENT_DEPENDENCY:
-        return componentRequirementBindingExpressionFactory.create(
+        return componentRequirementRequestRepresentationFactory.create(
             binding, ComponentRequirement.forDependency(binding.key().type().xprocessing()));
 
       case COMPONENT_PROVISION:
-        return componentProvisionBindingExpressionFactory.create((ProvisionBinding) binding);
+        return componentProvisionRequestRepresentationFactory.create((ProvisionBinding) binding);
 
       case SUBCOMPONENT_CREATOR:
-        return subcomponentCreatorBindingExpressionFactory.create(binding);
+        return subcomponentCreatorRequestRepresentationFactory.create(binding);
 
       case BOUND_INSTANCE:
-        return componentRequirementBindingExpressionFactory.create(
+        return componentRequirementRequestRepresentationFactory.create(
             binding, ComponentRequirement.forBoundInstance(binding));
 
       case ASSISTED_FACTORY:
-        return assistedFactoryBindingExpressionFactory.create((ProvisionBinding) binding);
+        return assistedFactoryRequestRepresentationFactory.create((ProvisionBinding) binding);
 
       case INJECTION:
       case PROVISION:
-        return simpleMethodBindingExpressionFactory.create((ProvisionBinding) binding);
+        return simpleMethodRequestRepresentationFactory.create((ProvisionBinding) binding);
+
+      case ASSISTED_INJECTION:
+      case MEMBERS_INJECTOR:
+      case MEMBERS_INJECTION:
+        // Fall through
     }
     throw new AssertionError("Unexpected binding kind: " + binding.kind());
   }

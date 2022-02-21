@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
 import javax.tools.Diagnostic;
 
+// TODO(bcorso): Move this into dagger/spi?
 /**
- * An object that {@link BindingGraphPlugin}s can use to report diagnostics while visiting a {@link
+ * An object that {@code BindingGraphPlugin}s can use to report diagnostics while visiting a {@code
  * BindingGraph}.
  *
  * <p>Note: This API is still experimental and will change.
@@ -53,11 +54,33 @@ public interface DiagnosticReporter {
   void reportBinding(Diagnostic.Kind diagnosticKind, MaybeBinding binding, String message);
 
   /**
+   * Reports a diagnostic for a binding or missing binding. Includes information about how the
+   * binding is reachable from entry points.
+   */
+  void reportBinding(
+      Diagnostic.Kind diagnosticKind,
+      MaybeBinding binding,
+      String messageFormat,
+      Object firstArg,
+      Object... moreArgs);
+
+  /**
    * Reports a diagnostic for a dependency. Includes information about how the dependency is
    * reachable from entry points.
    */
   void reportDependency(
       Diagnostic.Kind diagnosticKind, DependencyEdge dependencyEdge, String message);
+
+  /**
+   * Reports a diagnostic for a dependency. Includes information about how the dependency is
+   * reachable from entry points.
+   */
+  void reportDependency(
+      Diagnostic.Kind diagnosticKind,
+      DependencyEdge dependencyEdge,
+      String messageFormat,
+      Object firstArg,
+      Object... moreArgs);
 
   /** Reports a diagnostic for a subcomponent factory method. */
   void reportSubcomponentFactoryMethod(

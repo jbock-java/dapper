@@ -16,41 +16,41 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XTypeElements.isNested;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
+import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XTypeElements.isNested;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableList;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XFiler;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
-import java.util.List;
 import java.util.Optional;
+import jakarta.inject.Inject;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
 
 /** Convenience methods for generating and using module constructor proxy methods. */
 public final class ModuleProxies {
 
   private final DaggerElements elements;
-
   @Inject
-  public ModuleProxies(DaggerElements elements) {
+  ModuleProxies(DaggerElements elements) {
     this.elements = elements;
   }
 
@@ -66,8 +66,9 @@ public final class ModuleProxies {
     ModuleConstructorProxyGenerator(
         XFiler filer,
         DaggerElements elements,
+        SourceVersion sourceVersion,
         ModuleProxies moduleProxies) {
-      super(filer, elements);
+      super(filer, elements, sourceVersion);
       this.moduleProxies = moduleProxies;
     }
 
@@ -77,11 +78,11 @@ public final class ModuleProxies {
     }
 
     @Override
-    public List<TypeSpec.Builder> topLevelTypes(XTypeElement moduleElement) {
+    public ImmutableList<TypeSpec.Builder> topLevelTypes(XTypeElement moduleElement) {
       ModuleKind.checkIsModule(moduleElement);
       return moduleProxies.nonPublicNullaryConstructor(moduleElement).isPresent()
-          ? List.of(buildProxy(moduleElement))
-          : List.of();
+          ? ImmutableList.of(buildProxy(moduleElement))
+          : ImmutableList.of();
     }
 
     private TypeSpec.Builder buildProxy(XTypeElement moduleElement) {

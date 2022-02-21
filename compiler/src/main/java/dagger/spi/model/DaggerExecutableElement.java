@@ -17,47 +17,27 @@
 package dagger.spi.model;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import io.jbock.auto.value.AutoValue;
 import javax.lang.model.element.ExecutableElement;
 
 /** Wrapper type for an executable element. */
-public final class DaggerExecutableElement {
-
-  private final XExecutableElement executableElement;
-
-  private DaggerExecutableElement(XExecutableElement executableElement) {
-    this.executableElement = executableElement;
-  }
-
+@AutoValue
+public abstract class DaggerExecutableElement {
   public static DaggerExecutableElement from(XExecutableElement executableElement) {
-    return new DaggerExecutableElement(requireNonNull(executableElement));
+    return new AutoValue_DaggerExecutableElement(checkNotNull(executableElement));
   }
 
-  public XExecutableElement xprocessing() {
-    return executableElement;
-  }
+  public abstract XExecutableElement xprocessing();
 
   public ExecutableElement java() {
     return toJavac(xprocessing());
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DaggerExecutableElement that = (DaggerExecutableElement) o;
-    return executableElement.equals(that.executableElement);
-  }
-
-  @Override
-  public int hashCode() {
-    return executableElement.hashCode();
-  }
-
-  @Override
-  public String toString() {
+  public final String toString() {
     return xprocessing().toString();
   }
 }

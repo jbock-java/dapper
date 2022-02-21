@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.internal.InstanceFactory;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import io.jbock.javapoet.CodeBlock;
 import java.util.function.Supplier;
 
 /**
@@ -29,17 +29,24 @@ import java.util.function.Supplier;
  */
 final class InstanceFactoryCreationExpression implements FrameworkInstanceCreationExpression {
 
+  private final boolean nullable;
   private final Supplier<CodeBlock> instanceExpression;
 
   InstanceFactoryCreationExpression(Supplier<CodeBlock> instanceExpression) {
-    this.instanceExpression = requireNonNull(instanceExpression);
+    this(false, instanceExpression);
+  }
+
+  InstanceFactoryCreationExpression(boolean nullable, Supplier<CodeBlock> instanceExpression) {
+    this.nullable = nullable;
+    this.instanceExpression = checkNotNull(instanceExpression);
   }
 
   @Override
   public CodeBlock creationExpression() {
     return CodeBlock.of(
-        "$T.create($L)",
+        "$T.$L($L)",
         InstanceFactory.class,
+        nullable ? "createNullable" : "create",
         instanceExpression.get());
   }
 }

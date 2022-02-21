@@ -52,7 +52,7 @@ final class ProviderInstanceSupplier implements FrameworkInstanceSupplier {
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     ProviderInstanceSupplier create(ProvisionBinding binding);
   }
 }

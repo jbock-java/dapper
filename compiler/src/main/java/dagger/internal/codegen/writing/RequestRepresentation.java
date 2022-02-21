@@ -16,12 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
-import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
-import dagger.internal.codegen.javapoet.Expression;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
+import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.javapoet.Expression;
 
 /** A factory of code expressions used to access a single request for a binding in a component. */
+// TODO(bcorso): Rename this to RequestExpression?
 abstract class RequestRepresentation {
 
   /**

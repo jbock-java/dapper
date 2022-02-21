@@ -20,32 +20,26 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.common.Equivalence;
+import dagger.internal.codegen.base.Preconditions;
 import io.jbock.javapoet.ClassName;
-import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 
 /** Wrapper type for an annotation. */
-public final class DaggerAnnotation {
-
-  private final XAnnotation annotation;
-  private final Equivalence.Wrapper<AnnotationMirror> annotationMirror;
-
-  private DaggerAnnotation(
-      XAnnotation annotation,
-      Equivalence.Wrapper<AnnotationMirror> annotationMirror) {
-    this.annotation = annotation;
-    this.annotationMirror = annotationMirror;
-  }
+@AutoValue
+public abstract class DaggerAnnotation {
+  private XAnnotation annotation;
 
   public static DaggerAnnotation from(XAnnotation annotation) {
-    return new DaggerAnnotation(
-        annotation, AnnotationMirrors.equivalence().wrap(Objects.requireNonNull(toJavac(annotation))));
+    Preconditions.checkNotNull(annotation);
+    DaggerAnnotation daggerAnnotation =
+        new AutoValue_DaggerAnnotation(AnnotationMirrors.equivalence().wrap(toJavac(annotation)));
+    daggerAnnotation.annotation = annotation;
+    return daggerAnnotation;
   }
 
-  Equivalence.Wrapper<AnnotationMirror> annotationMirror() {
-    return annotationMirror;
-  }
+  abstract Equivalence.Wrapper<AnnotationMirror> annotationMirror();
 
   public DaggerTypeElement annotationTypeElement() {
     return DaggerTypeElement.from(annotation.getType().getTypeElement());
@@ -63,21 +57,10 @@ public final class DaggerAnnotation {
     return toJavac(annotation);
   }
 
+  // TODO(b/204390647): We'll need to update to auto-common to 1.2 before using AnnotationMirrors.
+  @SuppressWarnings("AnnotationMirrorToString")
   @Override
-  public String toString() {
+  public final String toString() {
     return java().toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DaggerAnnotation that = (DaggerAnnotation) o;
-    return annotationMirror.equals(that.annotationMirror);
-  }
-
-  @Override
-  public int hashCode() {
-    return annotationMirror.hashCode();
   }
 }

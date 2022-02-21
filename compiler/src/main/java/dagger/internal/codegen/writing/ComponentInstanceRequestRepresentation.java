@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 
 /** A binding expression for the instance of the component itself, i.e. {@code this}. */
 final class ComponentInstanceRequestRepresentation extends RequestRepresentation {
@@ -46,7 +46,7 @@ final class ComponentInstanceRequestRepresentation extends RequestRepresentation
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     ComponentInstanceRequestRepresentation create(ContributionBinding binding);
   }
 }

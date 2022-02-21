@@ -1,6 +1,7 @@
 package dagger.internal.codegen.collect;
 
 import java.util.AbstractSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -15,14 +16,24 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
     this.delegate = delegate;
   }
 
+  public static <E> ImmutableSet<E> copyOf(E[] elements) {
+    return copyOf(Arrays.asList(elements));
+  }
+
   public static <E> ImmutableSet<E> copyOf(Iterable<? extends E> elements) {
     if (elements instanceof ImmutableSet) {
       return (ImmutableSet<E>) elements;
     }
     if (elements instanceof Set) {
+      if (((Set<? extends E>) elements).isEmpty()) {
+        return of();
+      }
       return new ImmutableSet<>((Set<E>) elements);
     }
     if (elements instanceof Collection) {
+      if (((Collection<? extends E>) elements).isEmpty()) {
+        return of();
+      }
       return new ImmutableSet<>(new LinkedHashSet<>((Collection<? extends E>) elements));
     }
     LinkedHashSet<E> result = new LinkedHashSet<>();
@@ -102,5 +113,9 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
 
   public final ImmutableList<T> asList() {
     return ImmutableList.copyOf(delegate);
+  }
+
+  public ImmutableSet<T> immutableCopy() {
+    return this;
   }
 }

@@ -16,34 +16,34 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.writing.AssistedInjectionParameters.assistedFactoryParameterSpecs;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static java.util.Objects.requireNonNull;
 
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.TypeSpec;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.TypeSpec;
 import java.util.Optional;
 
 /**
- * A {@link RequestRepresentation} for {@link
+ * A {@link dagger.internal.codegen.writing.RequestRepresentation} for {@link
  * dagger.assisted.AssistedFactory} methods.
  */
 final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
@@ -58,7 +58,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory) {
-    this.binding = requireNonNull(binding);
+    this.binding = checkNotNull(binding);
     this.graph = graph;
     this.componentImplementation = componentImplementation;
     this.simpleMethodRequestRepresentationFactory = simpleMethodRequestRepresentationFactory;
@@ -70,7 +70,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
     DependencyRequest assistedInjectionRequest = getOnlyElement(binding.provisionDependencies());
     // Get corresponding assisted injection binding.
     Optional<Binding> localBinding = graph.localContributionBinding(assistedInjectionRequest.key());
-    Preconditions.checkArgument(
+    checkArgument(
         localBinding.isPresent(),
         "assisted factory should have a dependency on an assisted injection binding");
     Expression assistedInjectionExpression =
@@ -115,7 +115,7 @@ final class AssistedFactoryRequestRepresentation extends RequestRepresentation {
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     AssistedFactoryRequestRepresentation create(ProvisionBinding binding);
   }
 }

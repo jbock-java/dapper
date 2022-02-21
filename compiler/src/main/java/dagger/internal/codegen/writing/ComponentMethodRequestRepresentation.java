@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -44,9 +44,9 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
       @Assisted ComponentMethodDescriptor componentMethod,
       ComponentImplementation componentImplementation,
       DaggerTypes types) {
-    super(componentImplementation.getComponentShard());
-    this.wrappedRequestRepresentation = requireNonNull(wrappedRequestRepresentation);
-    this.componentMethod = requireNonNull(componentMethod);
+    super(componentImplementation.getComponentShard(), types);
+    this.wrappedRequestRepresentation = checkNotNull(wrappedRequestRepresentation);
+    this.componentMethod = checkNotNull(componentMethod);
     this.componentImplementation = componentImplementation;
     this.types = types;
   }
@@ -56,7 +56,6 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     // There could be several methods on the component for the same request key and kind.
     // Only one should use the BindingMethodImplementation; the others can delegate that one.
-
     // Separately, the method might be defined on a supertype that is also a supertype of some
     // parent component. In that case, the same ComponentMethodDescriptor will be used to add a CMBE
     // for the parent and the child. Only the parent's should use the BindingMethodImplementation;
@@ -64,10 +63,10 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
     // componentName equals the component for this instance.
     return componentMethod.equals(this.componentMethod) && component.equals(componentImplementation)
         ? CodeBlock.of(
-        "return $L;",
-        wrappedRequestRepresentation
-            .getDependencyExpressionForComponentMethod(componentMethod, componentImplementation)
-            .codeBlock())
+            "return $L;",
+            wrappedRequestRepresentation
+                .getDependencyExpressionForComponentMethod(componentMethod, componentImplementation)
+                .codeBlock())
         : super.getComponentMethodImplementation(componentMethod, component);
   }
 
@@ -82,7 +81,7 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     ComponentMethodRequestRepresentation create(
         RequestRepresentation wrappedRequestRepresentation,
         ComponentMethodDescriptor componentMethod);

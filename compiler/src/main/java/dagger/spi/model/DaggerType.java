@@ -1,4 +1,5 @@
-/* Copyright (C) 2021 The Dagger Authors.
+/*
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +19,25 @@ package dagger.spi.model;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreTypes;
-import java.util.Objects;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.common.Equivalence;
+import dagger.internal.codegen.base.Preconditions;
 import javax.lang.model.type.TypeMirror;
 
 /** Wrapper type for a type. */
-public final class DaggerType {
-
-  private final XType type;
-  private final Equivalence.Wrapper<TypeMirror> typeMirror;
-
-  private DaggerType(
-      XType type,
-      Equivalence.Wrapper<TypeMirror> typeMirror) {
-    this.type = type;
-    this.typeMirror = typeMirror;
-  }
+@AutoValue
+public abstract class DaggerType {
+  private XType type;
 
   public static DaggerType from(XType type) {
-    Objects.requireNonNull(type);
-    return new DaggerType(
-        type, MoreTypes.equivalence().wrap(toJavac(type)));
+    Preconditions.checkNotNull(type);
+    DaggerType daggerType = new AutoValue_DaggerType(MoreTypes.equivalence().wrap(toJavac(type)));
+    daggerType.type = type;
+    return daggerType;
   }
 
-  Equivalence.Wrapper<TypeMirror> typeMirror() {
-    return typeMirror;
-  }
+  abstract Equivalence.Wrapper<TypeMirror> typeMirror();
 
   public XType xprocessing() {
     return type;
@@ -55,20 +48,7 @@ public final class DaggerType {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return type.toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DaggerType that = (DaggerType) o;
-    return typeMirror.equals(that.typeMirror);
-  }
-
-  @Override
-  public int hashCode() {
-    return typeMirror.hashCode();
   }
 }

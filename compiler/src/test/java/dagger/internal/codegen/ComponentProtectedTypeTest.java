@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+@Disabled("re-enable in 24d99a34e5, 7 Jan 2022")
 final class ComponentProtectedTypeTest {
 
   @EnumSource(CompilerMode.class)

@@ -7,15 +7,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class SetMultimap<K, V> {
+public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
 
-  private final LinkedHashMap<K, Set<V>> map;
+  private final Map<K, Set<V>> map;
 
   public SetMultimap() {
     this(new LinkedHashMap<>());
   }
 
-  public SetMultimap(LinkedHashMap<K, Set<V>> map) {
+  public SetMultimap(Map<K, Set<V>> map) {
     this.map = map;
   }
 
@@ -33,8 +33,8 @@ public final class SetMultimap<K, V> {
     return map;
   }
 
-  public Set<K> keySet() {
-    return map.keySet();
+  public ImmutableSet<K> keySet() {
+    return ImmutableSet.copyOf(map.keySet());
   }
 
   public Collection<V> values() {
@@ -43,5 +43,22 @@ public final class SetMultimap<K, V> {
 
   public SetMultimap<K, V> build() {
     return this;
+  }
+
+  @Override
+  public ImmutableSet<V> get(K key) {
+    return ImmutableSet.copyOf(map.getOrDefault(key, Set.of()));
+  }
+
+  @Override
+  public boolean containsKey(K key) {
+    return map.containsKey(key);
+  }
+
+  public boolean isEmpty() {
+    if (map.isEmpty()) {
+      return true;
+    }
+    return map.values().stream().allMatch(Set::isEmpty);
   }
 }

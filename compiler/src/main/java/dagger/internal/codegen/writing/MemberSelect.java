@@ -16,14 +16,14 @@
 
 package dagger.internal.codegen.writing;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 
 /**
- * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
+ * Represents a {@link com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
  */
 abstract class MemberSelect {
 
@@ -45,7 +45,7 @@ abstract class MemberSelect {
     LocalField(ShardImplementation owningShard, String fieldName) {
       super(owningShard.name(), false);
       this.owningShard = owningShard;
-      this.fieldName = requireNonNull(fieldName);
+      this.fieldName = checkNotNull(fieldName);
     }
 
     @Override

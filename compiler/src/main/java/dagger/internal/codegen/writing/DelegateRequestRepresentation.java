@@ -16,44 +16,49 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.requestType;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.spi.model.BindingKind.DELEGATE;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
+import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.RequestKind;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
-/** A {@link RequestRepresentation} for {@code @Binds} methods. */
+/** A {@link dagger.internal.codegen.writing.RequestRepresentation} for {@code @Binds} methods. */
 final class DelegateRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
   private final RequestKind requestKind;
   private final ComponentRequestRepresentations componentRequestRepresentations;
   private final DaggerTypes types;
+  private final BindsTypeChecker bindsTypeChecker;
 
   @AssistedInject
   DelegateRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted RequestKind requestKind,
       ComponentRequestRepresentations componentRequestRepresentations,
-      DaggerTypes types) {
-    this.binding = requireNonNull(binding);
-    this.requestKind = requireNonNull(requestKind);
+      DaggerTypes types,
+      DaggerElements elements) {
+    this.binding = checkNotNull(binding);
+    this.requestKind = checkNotNull(requestKind);
     this.componentRequestRepresentations = componentRequestRepresentations;
     this.types = types;
+    this.bindsTypeChecker = new BindsTypeChecker(types, elements);
   }
 
   /**
@@ -62,7 +67,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
    */
   static boolean isBindsScopeStrongerThanDependencyScope(
       ContributionBinding bindsBinding, BindingGraph graph) {
-    Preconditions.checkArgument(bindsBinding.kind().equals(DELEGATE));
+    checkArgument(bindsBinding.kind().equals(DELEGATE));
     Binding dependencyBinding =
         graph.contributionBinding(getOnlyElement(bindsBinding.dependencies()).key());
     ScopeKind bindsScope = ScopeKind.get(bindsBinding);
@@ -80,7 +85,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
     TypeMirror contributedType = binding.contributedType();
     switch (requestKind) {
       case INSTANCE:
-        return instanceRequiresCast(binding, delegateExpression, requestingClass, types)
+        return instanceRequiresCast(binding, delegateExpression, requestingClass, bindsTypeChecker)
             ? delegateExpression.castTo(contributedType)
             : delegateExpression;
       default:
@@ -93,11 +98,11 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
       ContributionBinding binding,
       Expression delegateExpression,
       ClassName requestingClass,
-      DaggerTypes types) {
+      BindsTypeChecker bindsTypeChecker) {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
-    return !types.isAssignable(
-        delegateExpression.type(), binding.contributedType())
+    return !bindsTypeChecker.isAssignable(
+            delegateExpression.type(), binding.contributedType(), binding.contributionType())
         && isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName());
   }
 
@@ -142,7 +147,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     DelegateRequestRepresentation create(ContributionBinding binding, RequestKind requestKind);
   }
 }

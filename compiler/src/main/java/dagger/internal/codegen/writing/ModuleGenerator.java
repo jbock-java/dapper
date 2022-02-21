@@ -19,11 +19,10 @@ package dagger.internal.codegen.writing;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
-import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
+import jakarta.inject.Qualifier;
 
 /** Qualifier for a {@link SourceFileGenerator} for modules. */
 @Qualifier
 @Retention(RUNTIME)
-public @interface ModuleGenerator {
-}
+public @interface ModuleGenerator {}

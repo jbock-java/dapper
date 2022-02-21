@@ -16,27 +16,27 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Suppliers.memoize;
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.COMPONENT_REQUIREMENT_FIELD;
-import static java.util.Objects.requireNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.binding.BindingGraph;
-import dagger.internal.codegen.binding.ComponentRequirement;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import java.util.function.Supplier;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeName;
-import jakarta.inject.Inject;
+import dagger.internal.codegen.binding.BindingGraph;
+import dagger.internal.codegen.binding.ComponentRequirement;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import jakarta.inject.Inject;
 
 /**
  * A central repository of expressions used to access any {@link ComponentRequirement} available to
@@ -45,7 +45,7 @@ import java.util.function.Supplier;
 @PerComponentImplementation
 public final class ComponentRequirementExpressions {
 
-  // TODO(dpb,ronshapiro): refactor this and ComponentBindingExpressions into a
+  // TODO(dpb,ronshapiro): refactor this and ComponentRequestRepresentations into a
   // HierarchicalComponentMap<K, V>, or perhaps this use a flattened ImmutableMap, built from its
   // parents? If so, maybe make ComponentRequirementExpression.Factory create it.
 
@@ -108,7 +108,7 @@ public final class ComponentRequirementExpressions {
   private ComponentRequirementExpression createExpression(ComponentRequirement requirement) {
     if (componentShard.componentDescriptor().hasCreator()
         || (graph.factoryMethod().isPresent()
-        && graph.factoryMethodParameters().containsKey(requirement))) {
+            && graph.factoryMethodParameters().containsKey(requirement))) {
       return new ComponentParameterField(requirement);
     } else if (requirement.kind().isModule()) {
       return new InstantiableModuleField(requirement);
@@ -123,7 +123,7 @@ public final class ComponentRequirementExpressions {
     private final Supplier<MemberSelect> field = memoize(this::createField);
 
     private AbstractField(ComponentRequirement componentRequirement) {
-      this.componentRequirement = requireNonNull(componentRequirement);
+      this.componentRequirement = checkNotNull(componentRequirement);
     }
 
     @Override
@@ -153,7 +153,7 @@ public final class ComponentRequirementExpressions {
 
     InstantiableModuleField(ComponentRequirement module) {
       super(module);
-      Preconditions.checkArgument(module.kind().isModule());
+      checkArgument(module.kind().isModule());
       this.moduleElement = module.typeElement();
     }
 

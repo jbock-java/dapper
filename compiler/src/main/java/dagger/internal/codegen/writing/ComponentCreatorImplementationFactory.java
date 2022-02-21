@@ -16,20 +16,35 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Sets;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
+import io.jbock.javapoet.TypeSpec;
+import dagger.internal.Preconditions;
 import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
@@ -37,21 +52,10 @@ import dagger.internal.codegen.binding.ComponentRequirement.NullPolicy;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.internal.codegen.xprocessing.XElements;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.FieldSpec;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
-import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import jakarta.inject.Inject;
 import javax.lang.model.element.Modifier;
 
 /** Factory for creating {@link ComponentCreatorImplementation} instances. */
@@ -89,7 +93,7 @@ final class ComponentCreatorImplementationFactory {
     private final TypeSpec.Builder classBuilder =
         classBuilder(componentImplementation.getCreatorName());
     private final UniqueNameSet fieldNames = new UniqueNameSet();
-    private Map<ComponentRequirement, FieldSpec> fields;
+    private ImmutableMap<ComponentRequirement, FieldSpec> fields;
 
     /** Builds the {@link ComponentCreatorImplementation}. */
     ComponentCreatorImplementation build() {
@@ -112,32 +116,32 @@ final class ComponentCreatorImplementationFactory {
      * The set of requirements that must be passed to the component's constructor in the order
      * they must be passed.
      */
-    final Set<ComponentRequirement> componentConstructorRequirements() {
+    final ImmutableSet<ComponentRequirement> componentConstructorRequirements() {
       return componentImplementation.graph().componentRequirements();
     }
 
     /** Returns the requirements that have setter methods on the creator type. */
-    abstract Set<ComponentRequirement> setterMethods();
+    abstract ImmutableSet<ComponentRequirement> setterMethods();
 
     /**
      * Returns the component requirements that have factory method parameters, mapped to the name
      * for that parameter.
      */
-    abstract Map<ComponentRequirement, String> factoryMethodParameters();
+    abstract ImmutableMap<ComponentRequirement, String> factoryMethodParameters();
 
     /**
      * The {@link ComponentRequirement}s that this creator allows users to set. Values are a status
      * for each requirement indicating what's needed for that requirement in the implementation
      * class currently being generated.
      */
-    abstract Map<ComponentRequirement, RequirementStatus> userSettableRequirements();
+    abstract ImmutableMap<ComponentRequirement, RequirementStatus> userSettableRequirements();
 
     /**
      * Component requirements that are both settable by the creator and needed to construct the
      * component.
      */
     private Set<ComponentRequirement> neededUserSettableRequirements() {
-      return Util.intersection(
+      return Sets.intersection(
           userSettableRequirements().keySet(), componentConstructorRequirements());
     }
 
@@ -167,11 +171,11 @@ final class ComponentCreatorImplementationFactory {
       classBuilder.addMethod(constructor.build());
     }
 
-    private Map<ComponentRequirement, FieldSpec> addFields() {
+    private ImmutableMap<ComponentRequirement, FieldSpec> addFields() {
       // Fields in an abstract creator class need to be visible from subclasses.
-      Map<ComponentRequirement, FieldSpec> result =
-          Util.toMap(
-              Util.intersection(neededUserSettableRequirements(), setterMethods()),
+      ImmutableMap<ComponentRequirement, FieldSpec> result =
+          Maps.toMap(
+              Sets.intersection(neededUserSettableRequirements(), setterMethods()),
               requirement ->
                   FieldSpec.builder(
                           requirement.type().getTypeName(),
@@ -183,13 +187,10 @@ final class ComponentCreatorImplementationFactory {
     }
 
     private void addSetterMethods() {
-      Set<ComponentRequirement> setterMethods = setterMethods();
-      userSettableRequirements().entrySet().stream().filter(e -> setterMethods.contains(e.getKey()))
-          .forEach(e -> {
-            ComponentRequirement requirement = e.getKey();
-            RequirementStatus status = e.getValue();
-            createSetterMethod(requirement, status).ifPresent(classBuilder::addMethod);
-          });
+      Maps.filterKeys(userSettableRequirements(), setterMethods()::contains)
+          .forEach(
+              (requirement, status) ->
+                  createSetterMethod(requirement, status).ifPresent(classBuilder::addMethod));
     }
 
     /** Creates a new setter method builder, with no method body, for the given requirement. */
@@ -226,7 +227,7 @@ final class ComponentCreatorImplementationFactory {
           fields.get(requirement),
           requirement.nullPolicy().equals(NullPolicy.ALLOW)
               ? CodeBlock.of("$N", parameter)
-              : CodeBlock.of("$T.checkNotNull($N)", dagger.internal.Preconditions.class, parameter));
+              : CodeBlock.of("$T.checkNotNull($N)", Preconditions.class, parameter));
       return maybeReturnThis(method);
     }
 
@@ -238,7 +239,7 @@ final class ComponentCreatorImplementationFactory {
           .addJavadoc(
               "@deprecated This module is declared, but an instance is not used in the component. "
                   + "This method is a no-op. For more, see https://dagger.dev/unused-modules.\n")
-          .addStatement("$T.checkNotNull($N)", dagger.internal.Preconditions.class, parameter);
+          .addStatement("$T.checkNotNull($N)", Preconditions.class, parameter);
       return maybeReturnThis(method);
     }
 
@@ -254,7 +255,7 @@ final class ComponentCreatorImplementationFactory {
     }
 
     private ParameterSpec parameter(MethodSpec method) {
-      return Util.getOnlyElement(method.parameters);
+      return getOnlyElement(method.parameters);
     }
 
     private MethodSpec maybeReturnThis(MethodSpec.Builder method) {
@@ -274,7 +275,7 @@ final class ComponentCreatorImplementationFactory {
           .returns(componentDescriptor().typeElement().getClassName())
           .addModifiers(PUBLIC);
 
-      Map<ComponentRequirement, String> factoryMethodParameters =
+      ImmutableMap<ComponentRequirement, String> factoryMethodParameters =
           factoryMethodParameters();
       userSettableRequirements()
           .keySet()
@@ -299,7 +300,7 @@ final class ComponentCreatorImplementationFactory {
         ComponentRequirement requirement, FieldSpec field, MethodSpec.Builder factoryMethod) {
       switch (requirement.nullPolicy()) {
         case NEW:
-          Preconditions.checkState(requirement.kind().isModule());
+          checkState(requirement.kind().isModule());
           factoryMethod
               .beginControlFlow("if ($N == null)", field)
               .addStatement("this.$N = $L", field, newModuleInstance(requirement))
@@ -310,7 +311,7 @@ final class ComponentCreatorImplementationFactory {
           // @BindsInstance requirements, but that's not easily proguardable.
           factoryMethod.addStatement(
               "$T.checkBuilderRequirement($N, $T.class)",
-              dagger.internal.Preconditions.class,
+              Preconditions.class,
               field,
               TypeNames.rawTypeName(field.type));
           break;
@@ -324,7 +325,7 @@ final class ComponentCreatorImplementationFactory {
       if (!requirement.nullPolicy().equals(NullPolicy.ALLOW)) {
         // Factory method parameters are always required unless they are a nullable
         // binds-instance (i.e. ALLOW)
-        factoryMethod.addStatement("$T.checkNotNull($L)", dagger.internal.Preconditions.class, parameter);
+        factoryMethod.addStatement("$T.checkNotNull($L)", Preconditions.class, parameter);
       }
     }
 
@@ -332,7 +333,7 @@ final class ComponentCreatorImplementationFactory {
     protected abstract MethodSpec.Builder factoryMethodBuilder();
 
     private CodeBlock componentConstructorArgs(
-        Map<ComponentRequirement, String> factoryMethodParameters) {
+        ImmutableMap<ComponentRequirement, String> factoryMethodParameters) {
       return Stream.concat(
               componentImplementation.creatorComponentFields().stream()
                   .map(field -> CodeBlock.of("$N", field)),
@@ -351,7 +352,7 @@ final class ComponentCreatorImplementationFactory {
     }
 
     private CodeBlock newModuleInstance(ComponentRequirement requirement) {
-      Preconditions.checkArgument(requirement.kind().isModule()); // this should be guaranteed to be true here
+      checkArgument(requirement.kind().isModule()); // this should be guaranteed to be true here
       return moduleProxies.newModuleInstance(
           requirement.typeElement(), componentImplementation.getCreatorName());
     }
@@ -366,8 +367,8 @@ final class ComponentCreatorImplementationFactory {
     }
 
     @Override
-    protected Map<ComponentRequirement, RequirementStatus> userSettableRequirements() {
-      return Util.toMap(creatorDescriptor.userSettableRequirements(), this::requirementStatus);
+    protected ImmutableMap<ComponentRequirement, RequirementStatus> userSettableRequirements() {
+      return Maps.toMap(creatorDescriptor.userSettableRequirements(), this::requirementStatus);
     }
 
     @Override
@@ -388,16 +389,14 @@ final class ComponentCreatorImplementationFactory {
     }
 
     @Override
-    protected Set<ComponentRequirement> setterMethods() {
-      return new LinkedHashSet<>(creatorDescriptor.setterMethods().keySet());
+    protected ImmutableSet<ComponentRequirement> setterMethods() {
+      return ImmutableSet.copyOf(creatorDescriptor.setterMethods().keySet());
     }
 
     @Override
-    protected Map<ComponentRequirement, String> factoryMethodParameters() {
-      return new LinkedHashMap<>(
-          Util.transformValues(
-              creatorDescriptor.factoryParameters(),
-              XElements::getSimpleName));
+    protected ImmutableMap<ComponentRequirement, String> factoryMethodParameters() {
+      return ImmutableMap.copyOf(
+          Maps.transformValues(creatorDescriptor.factoryParameters(), XElements::getSimpleName));
     }
 
     private XType creatorType() {
@@ -423,7 +422,7 @@ final class ComponentCreatorImplementationFactory {
      * Returns whether the given requirement is for a repeat of a module inherited from an ancestor
      * component. This creator is not allowed to set such a module.
      */
-    boolean isRepeatedModule(ComponentRequirement requirement) {
+    final boolean isRepeatedModule(ComponentRequirement requirement) {
       return !componentConstructorRequirements().contains(requirement)
           && !isOwnedModule(requirement);
     }
@@ -439,7 +438,7 @@ final class ComponentCreatorImplementationFactory {
     protected MethodSpec.Builder setterMethodBuilder(ComponentRequirement requirement) {
       XMethodElement supertypeMethod = creatorDescriptor.setterMethods().get(requirement);
       MethodSpec.Builder method = MethodSpecs.overriding(supertypeMethod, creatorType());
-      if (!supertypeMethod.getReturnType().isVoid()) {
+      if (!isVoid(supertypeMethod.getReturnType())) {
         // Take advantage of covariant returns so that we don't have to worry about type variables
         method.returns(componentImplementation.getCreatorName());
       }
@@ -454,8 +453,8 @@ final class ComponentCreatorImplementationFactory {
   private final class BuilderForGeneratedRootComponentBuilder extends Builder {
 
     @Override
-    protected Map<ComponentRequirement, RequirementStatus> userSettableRequirements() {
-      return Util.toMap(
+    protected ImmutableMap<ComponentRequirement, RequirementStatus> userSettableRequirements() {
+      return Maps.toMap(
           setterMethods(),
           requirement ->
               componentConstructorRequirements().contains(requirement)
@@ -476,13 +475,13 @@ final class ComponentCreatorImplementationFactory {
     }
 
     @Override
-    protected Set<ComponentRequirement> setterMethods() {
+    protected ImmutableSet<ComponentRequirement> setterMethods() {
       return componentDescriptor().dependenciesAndConcreteModules();
     }
 
     @Override
-    protected Map<ComponentRequirement, String> factoryMethodParameters() {
-      return Map.of();
+    protected ImmutableMap<ComponentRequirement, String> factoryMethodParameters() {
+      return ImmutableMap.of();
     }
 
     @Override

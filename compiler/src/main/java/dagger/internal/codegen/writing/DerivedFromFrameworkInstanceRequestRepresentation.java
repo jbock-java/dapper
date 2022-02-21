@@ -16,44 +16,52 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.instanceRequiresCast;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.RequestKind;
-import io.jbock.javapoet.ClassName;
 
 /** A binding expression that depends on a framework instance. */
 final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
   private final RequestRepresentation frameworkRequestRepresentation;
   private final RequestKind requestKind;
+  private final FrameworkType frameworkType;
   private final DaggerTypes types;
+  private final BindsTypeChecker bindsTypeChecker;
 
   @AssistedInject
   DerivedFromFrameworkInstanceRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted RequestRepresentation frameworkRequestRepresentation,
       @Assisted RequestKind requestKind,
-      DaggerTypes types) {
+      @Assisted FrameworkType frameworkType,
+      DaggerTypes types,
+      DaggerElements elements) {
     this.binding = binding;
-    this.frameworkRequestRepresentation = requireNonNull(frameworkRequestRepresentation);
+    this.frameworkRequestRepresentation = checkNotNull(frameworkRequestRepresentation);
     this.requestKind = requestKind;
+    this.frameworkType = checkNotNull(frameworkType);
     this.types = types;
+    this.bindsTypeChecker = new BindsTypeChecker(types, elements);
   }
 
   @Override
   Expression getDependencyExpression(ClassName requestingClass) {
     Expression expression =
-        FrameworkType.PROVIDER.to(
+        frameworkType.to(
             requestKind,
             frameworkRequestRepresentation.getDependencyExpression(requestingClass),
             types);
@@ -66,7 +74,7 @@ final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRep
   Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     Expression expression =
-        FrameworkType.PROVIDER.to(
+        frameworkType.to(
             requestKind,
             frameworkRequestRepresentation.getDependencyExpressionForComponentMethod(
                 componentMethod, component),
@@ -79,14 +87,15 @@ final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRep
   private boolean requiresTypeCast(Expression expression, ClassName requestingClass) {
     return binding.kind().equals(BindingKind.DELEGATE)
         && requestKind.equals(RequestKind.INSTANCE)
-        && instanceRequiresCast(binding, expression, requestingClass, types);
+        && instanceRequiresCast(binding, expression, requestingClass, bindsTypeChecker);
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     DerivedFromFrameworkInstanceRequestRepresentation create(
         ContributionBinding binding,
         RequestRepresentation frameworkRequestRepresentation,
-        RequestKind requestKind);
+        RequestKind requestKind,
+        FrameworkType frameworkType);
   }
 }

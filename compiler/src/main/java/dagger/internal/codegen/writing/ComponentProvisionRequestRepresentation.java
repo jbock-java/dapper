@@ -18,6 +18,8 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -27,8 +29,6 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.Expression;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 
 /** A binding expression for component provision methods. */
 final class ComponentProvisionRequestRepresentation extends RequestRepresentation {
@@ -64,7 +64,7 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
   private ComponentRequirement componentRequirement() {
     return bindingGraph
         .componentDescriptor()
-        .getDependencyThatDefinesMethod(binding.bindingElement().orElseThrow());
+        .getDependencyThatDefinesMethod(binding.bindingElement().get());
   }
 
   static CodeBlock maybeCheckForNull(
@@ -75,7 +75,7 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     ComponentProvisionRequestRepresentation create(ProvisionBinding binding);
   }
 }

@@ -16,17 +16,53 @@
 
 package dagger.internal.codegen.extension;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Lists.asList;
+
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /** Utilities for {@link Optional}s. */
 public final class Optionals {
+  /**
+   * A {@link Comparator} that puts empty {@link Optional}s before present ones, and compares
+   * present {@link Optional}s by their values.
+   */
+  public static <C extends Comparable<C>> Comparator<Optional<C>> optionalComparator() {
+    return Comparator.comparing((Optional<C> optional) -> optional.isPresent())
+        .thenComparing(Optional::get);
+  }
+
   public static <T> Comparator<Optional<T>> emptiesLast(Comparator<? super T> valueComparator) {
-    Objects.requireNonNull(valueComparator);
+    checkNotNull(valueComparator);
     return Comparator.comparing(o -> o.orElse(null), Comparator.nullsLast(valueComparator));
   }
 
-  private Optionals() {
+  /** Returns the first argument that is present, or empty if none are. */
+  @SafeVarargs
+  public static <T> Optional<T> firstPresent(
+      Optional<T> first, Optional<T> second, Optional<T>... rest) {
+    return asList(first, second, rest).stream()
+        .filter(Optional::isPresent)
+        .findFirst()
+        .orElse(Optional.empty());
   }
+
+  /**
+   * Walks a chain of present optionals as defined by successive calls to {@code nextFunction},
+   * returning the value of the final optional that is present. The first optional in the chain is
+   * the result of {@code nextFunction(start)}.
+   */
+  public static <T> T rootmostValue(T start, Function<T, Optional<T>> nextFunction) {
+    T current = start;
+    for (Optional<T> next = nextFunction.apply(start);
+        next.isPresent();
+        next = nextFunction.apply(current)) {
+      current = next.get();
+    }
+    return current;
+  }
+
+  private Optionals() {}
 }

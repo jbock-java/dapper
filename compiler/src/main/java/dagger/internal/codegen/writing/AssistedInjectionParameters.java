@@ -17,25 +17,25 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedFactoryMetadata;
-import dagger.internal.codegen.binding.Binding;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import dagger.spi.model.BindingKind;
+import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.javapoet.ParameterSpec;
-import java.util.ArrayList;
+import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
+import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedFactoryMetadata;
+import dagger.internal.codegen.binding.Binding;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.spi.model.BindingKind;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /** Utility class for generating unique assisted parameter names for a component shard. */
 final class AssistedInjectionParameters {
@@ -46,10 +46,9 @@ final class AssistedInjectionParameters {
    * of each parameter will be the name given in the {@link
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
-  public static List<ParameterSpec> assistedFactoryParameterSpecs(
-      Binding binding,
-      ShardImplementation shardImplementation) {
-    Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
+  public static ImmutableList<ParameterSpec> assistedFactoryParameterSpecs(
+      Binding binding, ShardImplementation shardImplementation) {
+    checkArgument(binding.kind() == BindingKind.ASSISTED_FACTORY);
     XTypeElement factory = asTypeElement(binding.bindingElement().get());
     AssistedFactoryMetadata metadata = AssistedFactoryMetadata.create(factory.getType());
     XMethodType factoryMethodType =
@@ -59,7 +58,7 @@ final class AssistedInjectionParameters {
         // names of the @AssistedInject constructor.
         metadata.assistedFactoryAssistedParameters().stream()
             .map(metadata.assistedInjectAssistedParametersMap()::get)
-            .collect(Collectors.toList()),
+            .collect(toImmutableList()),
         factoryMethodType.getParameterTypes(),
         shardImplementation);
   }
@@ -71,20 +70,20 @@ final class AssistedInjectionParameters {
    * of each parameter will be the name given in the {@link
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
-  public static List<ParameterSpec> assistedParameterSpecs(
+  public static ImmutableList<ParameterSpec> assistedParameterSpecs(
       Binding binding, ShardImplementation shardImplementation) {
-    Preconditions.checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
+    checkArgument(binding.kind() == BindingKind.ASSISTED_INJECTION);
     XConstructorElement constructor = asConstructor(binding.bindingElement().get());
     XConstructorType constructorType = constructor.asMemberOf(binding.key().type().xprocessing());
     return assistedParameterSpecs(
         constructor.getParameters(), constructorType.getParameterTypes(), shardImplementation);
   }
 
-  private static List<ParameterSpec> assistedParameterSpecs(
+  private static ImmutableList<ParameterSpec> assistedParameterSpecs(
       List<? extends XVariableElement> paramElements,
       List<XType> paramTypes,
       ShardImplementation shardImplementation) {
-    List<ParameterSpec> assistedParameterSpecs = new ArrayList<>();
+    ImmutableList.Builder<ParameterSpec> assistedParameterSpecs = ImmutableList.builder();
     for (int i = 0; i < paramElements.size(); i++) {
       XVariableElement paramElement = paramElements.get(i);
       XType paramType = paramTypes.get(i);
@@ -96,9 +95,8 @@ final class AssistedInjectionParameters {
                 .build());
       }
     }
-    return assistedParameterSpecs;
+    return assistedParameterSpecs.build();
   }
 
-  private AssistedInjectionParameters() {
-  }
+  private AssistedInjectionParameters() {}
 }

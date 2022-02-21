@@ -7,4 +7,10 @@ public class Verify {
       throw new IllegalArgumentException(String.format(errorMessageTemplate, p1));
     }
   }
+
+  public static void verify(boolean expression) {
+    if (!expression) {
+      throw new IllegalArgumentException();
+    }
+  }
 }

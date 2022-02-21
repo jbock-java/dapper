@@ -19,13 +19,13 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static java.util.stream.Collectors.joining;
 
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.spi.model.BindingGraph.SubcomponentCreatorBindingEdge;
 import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /** An implementation of {@link SubcomponentCreatorBindingEdge}. */
 public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCreatorBindingEdge {
@@ -38,12 +38,12 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
   }
 
   @Override
-  public Set<DaggerTypeElement> declaringModules() {
+  public ImmutableSet<DaggerTypeElement> declaringModules() {
     return subcomponentDeclarations.stream()
         .map(SubcomponentDeclaration::contributingModule)
         .flatMap(Optional::stream)
         .map(DaggerTypeElement::from)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+        .collect(DaggerStreams.toImmutableSet());
   }
 
   @Override

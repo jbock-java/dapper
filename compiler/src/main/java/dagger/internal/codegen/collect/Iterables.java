@@ -1,10 +1,13 @@
 package dagger.internal.codegen.collect;
 
+import dagger.internal.codegen.extension.DaggerStreams;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class Iterables {
@@ -63,5 +66,20 @@ public class Iterables {
   public static <T> T[] toArray(Collection<? extends T> iterable, Class<T> type) {
     T[] o = (T[]) Array.newInstance(type, 0);
     return iterable.toArray(o);
+  }
+
+  public static <T> T find(
+      Iterable<T> iterable, Predicate<? super T> predicate) {
+    return Iterators.find(iterable.iterator(), predicate);
+  }
+
+  public static <F, T> Iterable<T> transform(
+      Iterable<F> fromIterable, Function<? super F, ? extends T> function) {
+    return DaggerStreams.stream(fromIterable).map(function).collect(Collectors.toList());
+  }
+
+  public static <T> Iterable<T> filter(
+      Iterable<T> unfiltered, Predicate<? super T> retainIfTrue) {
+    return DaggerStreams.stream(unfiltered).filter(retainIfTrue).collect(Collectors.toList());
   }
 }

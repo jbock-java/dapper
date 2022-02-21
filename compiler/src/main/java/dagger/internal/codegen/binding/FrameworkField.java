@@ -17,16 +17,20 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.spi.model.BindingKind.MEMBERS_INJECTOR;
 
-import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.base.CaseFormat;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
+import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementKindVisitor8;
 
 /**
@@ -40,20 +44,13 @@ import javax.lang.model.util.ElementKindVisitor8;
  *   <li>{@code Provider<Map<SomeMapKey, MapValue>>}.
  * </ul>
  */
-public final class FrameworkField {
-
-  private final ParameterizedTypeName type;
-  private final String name;
-
-  private FrameworkField(ParameterizedTypeName type, String name) {
-    this.type = type;
-    this.name = name;
-  }
+@AutoValue
+public abstract class FrameworkField {
 
   /**
    * Creates a framework field.
    *
-   * @param frameworkClassName the name of the framework class (e.g., {@code Provider})
+   * @param frameworkClassName the name of the framework class (e.g., {@link jakarta.inject.Provider})
    * @param valueTypeName the name of the type parameter of the framework class (e.g., {@code Foo}
    *     for {@code Provider<Foo>}
    * @param fieldName the name of the field
@@ -61,31 +58,41 @@ public final class FrameworkField {
   public static FrameworkField create(
       ClassName frameworkClassName, TypeName valueTypeName, String fieldName) {
     String suffix = frameworkClassName.simpleName();
-    return new FrameworkField(
+    return new AutoValue_FrameworkField(
         ParameterizedTypeName.get(frameworkClassName, valueTypeName),
         fieldName.endsWith(suffix) ? fieldName : fieldName + suffix);
   }
 
   /**
    * A framework field for a {@link ContributionBinding}.
+   *
+   * @param frameworkClassName if present, the field will use this framework class instead of the normal
+   *     one for the binding's type.
    */
   public static FrameworkField forBinding(
-      ContributionBinding binding) {
+      ContributionBinding binding, Optional<ClassName> frameworkClassName) {
     return create(
-        TypeNames.PROVIDER,
-        TypeName.get(binding.key().type().java()),
+        frameworkClassName.orElse(binding.frameworkType().frameworkClassName()),
+        TypeName.get(fieldValueType(binding)),
         frameworkFieldName(binding));
+  }
+
+  private static TypeMirror fieldValueType(ContributionBinding binding) {
+    return binding.contributionType().isMultibinding()
+        ? binding.contributedType()
+        : binding.key().type().java();
   }
 
   private static String frameworkFieldName(ContributionBinding binding) {
     if (binding.bindingElement().isPresent()) {
-      return BINDING_ELEMENT_NAME.visit(toJavac(binding.bindingElement().get()), binding);
+      String name = BINDING_ELEMENT_NAME.visit(toJavac(binding.bindingElement().get()), binding);
+      return binding.kind().equals(MEMBERS_INJECTOR) ? name + "MembersInjector" : name;
     }
     return KeyVariableNamer.name(binding.key());
   }
 
   private static final ElementVisitor<String, Binding> BINDING_ELEMENT_NAME =
-      new ElementKindVisitor8<>() {
+      new ElementKindVisitor8<String, Binding>() {
 
         @Override
         protected String defaultAction(Element e, Binding p) {
@@ -104,8 +111,7 @@ public final class FrameworkField {
 
         @Override
         public String visitType(TypeElement e, Binding p) {
-          String name = e.getSimpleName().toString();
-          return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+          return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, e.getSimpleName().toString());
         }
 
         @Override
@@ -114,11 +120,7 @@ public final class FrameworkField {
         }
       };
 
-  public ParameterizedTypeName type() {
-    return type;
-  }
+  public abstract ParameterizedTypeName type();
 
-  public String name() {
-    return name;
-  }
+  public abstract String name();
 }

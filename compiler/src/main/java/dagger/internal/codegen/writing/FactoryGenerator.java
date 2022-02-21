@@ -19,6 +19,7 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameters;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
+import static dagger.internal.codegen.binding.SourceFiles.frameworkFieldUsages;
 import static dagger.internal.codegen.binding.SourceFiles.frameworkTypeUsageStatement;
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
@@ -29,6 +30,7 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
+import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.spi.model.BindingKind.PROVISION;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
@@ -51,6 +53,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -127,6 +130,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     addCreateMethod(binding, factoryBuilder);
 
     factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, metadataUtil));
+    gwtIncompatibleAnnotation(binding).ifPresent(factoryBuilder::addAnnotation);
 
     return factoryBuilder;
   }
@@ -267,6 +271,20 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
           .map(XTypeElement::getClassName)
           .ifPresent(getMethod::addAnnotation);
       getMethod.addStatement("return $L", invokeNewInstance);
+    } else if (!binding.injectionSites().isEmpty()) {
+      CodeBlock instance = CodeBlock.of("instance");
+      getMethod
+          .addStatement("$T $L = $L", providedTypeName, instance, invokeNewInstance)
+          .addCode(
+              InjectionSiteMethod.invokeAll(
+                  binding.injectionSites(),
+                  generatedClassNameForBinding(binding),
+                  instance,
+                  binding.key().type().java(),
+                  frameworkFieldUsages(binding.dependencies(), frameworkFields)::get,
+                  types,
+                  metadataUtil))
+          .addStatement("return $L", instance);
     } else {
       getMethod.addStatement("return $L", invokeNewInstance);
     }
@@ -303,9 +321,6 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
               ? SINGLETON_INSTANCE
               : CLASS_CONSTRUCTOR;
         case INJECTION:
-          return binding.dependencies().isEmpty()
-              ? SINGLETON_INSTANCE
-              : CLASS_CONSTRUCTOR;
         default:
           return CLASS_CONSTRUCTOR;
       }

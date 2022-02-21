@@ -97,30 +97,16 @@ class ComponentShardTest {
                     "")
                 .addLines(GeneratedLines.generatedAnnotations())
                 .addLines("final class DaggerTestComponent implements TestComponent {",
+                    "  private Provider<Binding7> binding7Provider;",
+                    "  private Provider<Binding6> binding6Provider;",
                     "  private Shard1 shard1;",
                     "  private Shard2 shard2;",
                     "  private final DaggerTestComponent testComponent = this;",
-                    "  private Provider<Binding7> binding7Provider;",
-                    "  private Provider<Binding6> binding6Provider;",
                     "",
                     "  private DaggerTestComponent() {",
                     "    initialize();",
                     "    shard1 = new Shard1();",
                     "    shard2 = new Shard2();",
-                    "  }")
-                .addLinesIn(
-                    DEFAULT_MODE,
-                    "  @SuppressWarnings(\"unchecked\")",
-                    "  private void initialize() {",
-                    "    this.binding7Provider = DoubleCheck.provider(Binding7_Factory.create());",
-                    "    this.binding6Provider = DoubleCheck.provider(Binding6_Factory.create(binding7Provider));",
-                    "  }")
-                .addLinesIn(
-                    FAST_INIT_MODE,
-                    "  @SuppressWarnings(\"unchecked\")",
-                    "  private void initialize() {",
-                    "    this.binding7Provider = DoubleCheck.provider(new SwitchingProvider<Binding7>(testComponent, 6));",
-                    "    this.binding6Provider = DoubleCheck.provider(new SwitchingProvider<Binding6>(testComponent, 5));",
                     "  }")
                 .addLines(
                     "  @Override",
@@ -191,9 +177,22 @@ class ComponentShardTest {
                     "  @Override",
                     "  public Provider<Binding7> providerBinding7() {",
                     "    return binding7Provider;",
-                    "  }",
-                    "",
-                    "  private final class Shard1 {",
+                    "  }")
+                .addLinesIn(
+                    FAST_INIT_MODE,
+                    "  @SuppressWarnings(\"unchecked\")",
+                    "  private void initialize() {",
+                    "    this.binding7Provider = DoubleCheck.provider(new SwitchingProvider<Binding7>(testComponent, 6));",
+                    "    this.binding6Provider = DoubleCheck.provider(new SwitchingProvider<Binding6>(testComponent, 5));",
+                    "  }")
+                .addLinesIn(
+                    DEFAULT_MODE,
+                    "  @SuppressWarnings(\"unchecked\")",
+                    "  private void initialize() {",
+                    "    this.binding7Provider = DoubleCheck.provider(Binding7_Factory.create());",
+                    "    this.binding6Provider = DoubleCheck.provider(Binding6_Factory.create(binding7Provider));",
+                    "  }")
+                .addLines("  private final class Shard1 {",
                     "    private Provider<Binding5> binding5Provider;",
                     "    private Provider<Binding2> binding2Provider;",
                     "    private Provider<Binding4> binding4Provider;",

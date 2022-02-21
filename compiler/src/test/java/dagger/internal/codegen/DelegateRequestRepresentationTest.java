@@ -338,7 +338,12 @@ class DelegateRequestRepresentationTest {
                 .addLines(
                     "final class DaggerTestComponent implements TestComponent {",
                     "  @SuppressWarnings(\"rawtypes\")",
-                    "  private Provider subtypeProvider;")
+                    "  private Provider subtypeProvider;",
+                    "",
+                    "  @Override",
+                    "  public Supertype supertype() {",
+                    "    return (Supertype) subtypeProvider.get();",
+                    "  }")
                 .addLinesIn(
                     DEFAULT_MODE,
                     "  @SuppressWarnings(\"unchecked\")",
@@ -351,12 +356,6 @@ class DelegateRequestRepresentationTest {
                     "  private void initialize() {",
                     "    this.subtypeProvider = DoubleCheck.provider(new SwitchingProvider<Object>(testComponent, 0));",
                     "  }")
-                .addLines(
-                    "  @Override",
-                    "  public Supertype supertype() {",
-                    "    return (Supertype) subtypeProvider.get();",
-                    "  }",
-                    "}")
                 .build());
   }
 
@@ -615,11 +614,6 @@ class DelegateRequestRepresentationTest {
                     FAST_INIT_MODE,
                     "  private Provider<String> provideStringProvider;",
                     "",
-                    "  @SuppressWarnings(\"unchecked\")",
-                    "  private void initialize() {",
-                    "    this.provideStringProvider = new SwitchingProvider<>(testComponent, 0);",
-                    "  }",
-                    "",
                     "  @Override",
                     "  public Provider<CharSequence> charSequence() {",
                     "    return ((Provider) provideStringProvider);",
@@ -628,6 +622,11 @@ class DelegateRequestRepresentationTest {
                     "  @Override",
                     "  public Provider<Object> object() {",
                     "    return ((Provider) provideStringProvider);",
+                    "  }",
+                    "",
+                    "  @SuppressWarnings(\"unchecked\")",
+                    "  private void initialize() {",
+                    "    this.provideStringProvider = new SwitchingProvider<>(testComponent, 0);",
                     "  }",
                     "",
                     "  private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -788,6 +787,11 @@ class DelegateRequestRepresentationTest {
                 .addLines("final class DaggerTestComponent implements TestComponent {",
                     "  private Provider<String> provideStringProvider;",
                     "  private Provider<Object> bindStringProvider;")
+                .addLines(
+                    "  @Override",
+                    "  public Provider<Object> object() {",
+                    "    return bindStringProvider;",
+                    "  }")
                 .addLinesIn(
                     DEFAULT_MODE,
                     "  @SuppressWarnings(\"unchecked\")",
@@ -801,11 +805,6 @@ class DelegateRequestRepresentationTest {
                     "  private void initialize() {",
                     "    this.provideStringProvider = SingleCheck.provider(new SwitchingProvider<String>(testComponent, 0));",
                     "    this.bindStringProvider = DoubleCheck.provider((Provider) provideStringProvider);",
-                    "  }")
-                .addLines(
-                    "  @Override",
-                    "  public Provider<Object> object() {",
-                    "    return bindStringProvider;",
                     "  }")
                 .addLinesIn(
                     FAST_INIT_MODE,

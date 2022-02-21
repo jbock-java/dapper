@@ -459,9 +459,25 @@ class SubcomponentValidationTest {
                 "package test;",
                 "")
             .addLines(GeneratedLines.generatedAnnotations())
-            .addLines("final class DaggerParentComponent implements ParentComponent {",
+            .addLines(
+                "final class DaggerParentComponent implements ParentComponent {",
                 "  private Provider<Dep1> dep1Provider;",
                 "  private Provider<Dep2> dep2Provider;")
+            .addLines(
+                "  @Override",
+                "  public Dep1 dep1() {",
+                "    return dep1Provider.get();",
+                "  }",
+                "",
+                "  @Override",
+                "  public Dep2 dep2() {",
+                "    return dep2Provider.get();",
+                "  }",
+                "",
+                "  @Override",
+                "  public ChildComponent childComponent() {",
+                "    return new ChildComponentImpl(parentComponent);",
+                "  }")
             .addLinesIn(
                 DEFAULT_MODE,
                 "  @SuppressWarnings(\"unchecked\")",
@@ -478,21 +494,6 @@ class SubcomponentValidationTest {
                 "    this.dep2Provider = DoubleCheck.provider(new SwitchingProvider<Dep2>(parentComponent, 1));",
                 "  }")
             .addLines(
-                "  @Override",
-                "  public Dep1 dep1() {",
-                "    return dep1Provider.get();",
-                "  }",
-                "",
-                "  @Override",
-                "  public Dep2 dep2() {",
-                "    return dep2Provider.get();",
-                "  }",
-                "",
-                "  @Override",
-                "  public ChildComponent childComponent() {",
-                "    return new ChildComponentImpl(parentComponent);",
-                "  }",
-                "",
                 "  private static final class ChildComponentImpl implements ChildComponent {",
                 "    private NeedsDep1 needsDep1() {",
                 "      return new NeedsDep1(parentComponent.dep1Provider.get());",

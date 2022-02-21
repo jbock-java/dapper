@@ -18,6 +18,7 @@ package dagger.internal.codegen.base;
 
 import static java.lang.Math.min;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.Set;
 public final class TarjanSCCs {
 
   /** Returns the set of strongly connected components in reverse topological order. */
-  public static <NodeT> Set<Set<NodeT>> compute(
+  public static <NodeT> ImmutableSet<ImmutableSet<NodeT>> compute(
       Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
     return new TarjanSCC<>(nodes, successorsFunction).compute();
   }
@@ -50,7 +51,7 @@ public final class TarjanSCCs {
     private final Set<NodeT> onStack;
     private final Map<NodeT, Integer> indexes;
     private final Map<NodeT, Integer> lowLinks;
-    private final List<Set<NodeT>> stronglyConnectedComponents = new ArrayList<>();
+    private final List<ImmutableSet<NodeT>> stronglyConnectedComponents = new ArrayList<>();
 
     TarjanSCC(Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
       this.nodes = nodes;
@@ -62,14 +63,14 @@ public final class TarjanSCCs {
       this.lowLinks = new HashMap<>(capacity);
     }
 
-    private Set<Set<NodeT>> compute() {
+    private ImmutableSet<ImmutableSet<NodeT>> compute() {
       Preconditions.checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
       for (NodeT node : nodes) {
         if (!indexes.containsKey(node)) {
           stronglyConnect(node);
         }
       }
-      return new LinkedHashSet<>(stronglyConnectedComponents);
+      return ImmutableSet.copyOf(new LinkedHashSet<>(stronglyConnectedComponents));
     }
 
     private void stronglyConnect(NodeT node) {
@@ -101,7 +102,7 @@ public final class TarjanSCCs {
           onStack.remove(currNode);
           scc.add(currNode);
         } while (!node.equals(currNode));
-        stronglyConnectedComponents.add(scc);
+        stronglyConnectedComponents.add(ImmutableSet.copyOf(scc));
       }
     }
   }

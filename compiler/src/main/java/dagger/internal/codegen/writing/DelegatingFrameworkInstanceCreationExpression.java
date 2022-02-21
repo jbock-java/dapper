@@ -16,18 +16,19 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.spi.model.DependencyRequest;
-import io.jbock.javapoet.CodeBlock;
 
 /** A framework instance creation expression for a {@link dagger.Binds @Binds} binding. */
 final class DelegatingFrameworkInstanceCreationExpression
@@ -41,8 +42,9 @@ final class DelegatingFrameworkInstanceCreationExpression
   DelegatingFrameworkInstanceCreationExpression(
       @Assisted ContributionBinding binding,
       ComponentImplementation componentImplementation,
-      ComponentRequestRepresentations componentRequestRepresentations) {
-    this.binding = requireNonNull(binding);
+      ComponentRequestRepresentations componentRequestRepresentations,
+      CompilerOptions compilerOptions) {
+    this.binding = checkNotNull(binding);
     this.componentImplementation = componentImplementation;
     this.componentRequestRepresentations = componentRequestRepresentations;
   }
@@ -60,7 +62,7 @@ final class DelegatingFrameworkInstanceCreationExpression
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     DelegatingFrameworkInstanceCreationExpression create(ContributionBinding binding);
   }
 }

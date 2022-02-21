@@ -16,15 +16,14 @@
 
 package dagger.internal.codegen.writing;
 
-import dagger.internal.codegen.binding.ComponentRequirement;
-import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
+import dagger.internal.codegen.binding.ComponentRequirement;
 
 /**
  * A factory for expressions of {@link ComponentRequirement}s in the generated component. This is
  * <em>not</em> a {@link RequestRepresentation}, since {@link ComponentRequirement}s do not have a
- * {@link Key}. See {@link ComponentRequirementRequestRepresentation} for binding
+ * {@link dagger.spi.model.Key}. See {@link ComponentRequirementRequestRepresentation} for binding
  * expressions that are themselves a component requirement.
  */
 interface ComponentRequirementExpression {

@@ -16,52 +16,65 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.auto.common.MoreElements.asExecutable;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreElements.asVariable;
 import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
 import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
+import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
+import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
+import static dagger.internal.codegen.javapoet.CodeBlocks.toConcatenatedCodeBlock;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypePubliclyAccessible;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
-import static io.jbock.auto.common.MoreElements.asExecutable;
-import static io.jbock.auto.common.MoreElements.asType;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.VOID;
 
-import dagger.internal.Preconditions;
-import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import io.jbock.auto.common.MoreElements;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
-import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
-import dagger.spi.model.DependencyRequest;
-import io.jbock.auto.common.MoreElements;
+import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeVariableName;
+import dagger.internal.Preconditions;
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.extension.DaggerCollectors;
+import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.DependencyRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Parameterizable;
 import javax.lang.model.element.TypeElement;
@@ -196,7 +209,8 @@ final class InjectionMethods {
     static boolean requiresInjectionMethod(
         ProvisionBinding binding, CompilerOptions compilerOptions, ClassName requestingClass) {
       ExecutableElement method = asExecutable(toJavac(binding.bindingElement().get()));
-      return binding.shouldCheckForNull(compilerOptions)
+      return !binding.injectionSites().isEmpty()
+          || binding.shouldCheckForNull(compilerOptions)
           || !isElementAccessibleFrom(method, requestingClass.packageName())
           // This check should be removable once we drop support for -source 7
           || method.getParameters().stream()
@@ -221,6 +235,143 @@ final class InjectionMethods {
         default:
           throw new AssertionError(method);
       }
+    }
+  }
+
+  /**
+   * A static method that injects one member of an instance of a type. Its first parameter is an
+   * instance of the type to be injected. The remaining parameters match the dependency requests for
+   * the injection site.
+   *
+   * <p>Example:
+   *
+   * <pre><code>
+   * class Foo {
+   *   {@literal @Inject} Bar bar;
+   *   {@literal @Inject} void setThings(Baz baz, Qux qux) {}
+   * }
+   *
+   * public static injectBar(Foo instance, Bar bar) { … }
+   * public static injectSetThings(Foo instance, Baz baz, Qux qux) { … }
+   * </code></pre>
+   */
+  static final class InjectionSiteMethod {
+    /**
+     * When a type has an inaccessible member from a supertype (e.g. an @Inject field in a parent
+     * that's in a different package), a method in the supertype's package must be generated to give
+     * the subclass's members injector a way to inject it. Each potentially inaccessible member
+     * receives its own method, as the subclass may need to inject them in a different order from
+     * the parent class.
+     */
+    static MethodSpec create(InjectionSite injectionSite, KotlinMetadataUtil metadataUtil) {
+      String methodName = methodName(injectionSite);
+      switch (injectionSite.kind()) {
+        case METHOD:
+          return methodProxy(
+              asExecutable(injectionSite.element()),
+              methodName,
+              InstanceCastPolicy.CAST_IF_NOT_PUBLIC,
+              CheckNotNullPolicy.IGNORE,
+              metadataUtil);
+        case FIELD:
+          Optional<AnnotationMirror> qualifier =
+              injectionSite.dependencies().stream()
+                  // methods for fields have a single dependency request
+                  .collect(DaggerCollectors.onlyElement())
+                  .key()
+                  .qualifier()
+                  .map(DaggerAnnotation::java);
+          return fieldProxy(asVariable(injectionSite.element()), methodName, qualifier);
+      }
+      throw new AssertionError(injectionSite);
+    }
+
+    /**
+     * Invokes each of the injection methods for {@code injectionSites}, with the dependencies
+     * transformed using the {@code dependencyUsage} function.
+     *
+     * @param instanceType the type of the {@code instance} parameter
+     */
+    static CodeBlock invokeAll(
+        ImmutableSet<InjectionSite> injectionSites,
+        ClassName generatedTypeName,
+        CodeBlock instanceCodeBlock,
+        TypeMirror instanceType,
+        Function<DependencyRequest, CodeBlock> dependencyUsage,
+        DaggerTypes types,
+        KotlinMetadataUtil metadataUtil) {
+      return injectionSites.stream()
+          .map(
+              injectionSite -> {
+                TypeMirror injectSiteType =
+                    types.erasure(injectionSite.element().getEnclosingElement().asType());
+
+                // If instance has been declared as Object because it is not accessible from the
+                // component, but the injectionSite is in a supertype of instanceType that is
+                // publicly accessible, the InjectionSiteMethod will request the actual type and not
+                // Object as the first parameter. If so, cast to the supertype which is accessible
+                // from within generatedTypeName
+                CodeBlock maybeCastedInstance =
+                    !types.isSubtype(instanceType, injectSiteType)
+                            && isTypeAccessibleFrom(injectSiteType, generatedTypeName.packageName())
+                        ? CodeBlock.of("($T) $L", injectSiteType, instanceCodeBlock)
+                        : instanceCodeBlock;
+                return CodeBlock.of(
+                    "$L;",
+                    invoke(
+                        injectionSite,
+                        generatedTypeName,
+                        maybeCastedInstance,
+                        dependencyUsage,
+                        metadataUtil));
+              })
+          .collect(toConcatenatedCodeBlock());
+    }
+
+    /**
+     * Invokes the injection method for {@code injectionSite}, with the dependencies transformed
+     * using the {@code dependencyUsage} function.
+     */
+    private static CodeBlock invoke(
+        InjectionSite injectionSite,
+        ClassName generatedTypeName,
+        CodeBlock instanceCodeBlock,
+        Function<DependencyRequest, CodeBlock> dependencyUsage,
+        KotlinMetadataUtil metadataUtil) {
+      ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
+      arguments.add(instanceCodeBlock);
+      if (!injectionSite.dependencies().isEmpty()) {
+        arguments.addAll(
+            injectionSite.dependencies().stream().map(dependencyUsage).collect(toList()));
+      }
+
+      ClassName enclosingClass =
+          membersInjectorNameForType(asType(injectionSite.element().getEnclosingElement()));
+      MethodSpec methodSpec = create(injectionSite, metadataUtil);
+      return invokeMethod(methodSpec, arguments.build(), enclosingClass, generatedTypeName);
+    }
+
+    /*
+     * TODO(ronshapiro): this isn't perfect, as collisions could still exist. Some examples:
+     *
+     *  - @Inject void members() {} will generate a method that conflicts with the instance
+     *    method `injectMembers(T)`
+     *  - Adding the index could conflict with another member:
+     *      @Inject void a(Object o) {}
+     *      @Inject void a(String s) {}
+     *      @Inject void a1(String s) {}
+     *
+     *    Here, Method a(String) will add the suffix "1", which will conflict with the method
+     *    generated for a1(String)
+     *  - Members named "members" or "methods" could also conflict with the {@code static} injection
+     *    method.
+     */
+    private static String methodName(InjectionSite injectionSite) {
+      int index = injectionSite.indexAmongAtInjectMembersWithSameSimpleName();
+      String indexString = index == 0 ? "" : String.valueOf(index + 1);
+      return "inject"
+          + LOWER_CAMEL.to(UPPER_CAMEL, injectionSite.element().getSimpleName().toString())
+          + indexString;
     }
   }
 
@@ -256,10 +407,16 @@ final class InjectionMethods {
         methodBuilder(methodName).addModifiers(PUBLIC, STATIC).varargs(method.isVarArgs());
 
     TypeElement enclosingType = asType(method.getEnclosingElement());
+    boolean isMethodInKotlinObject = metadataUtil.isObjectClass(enclosingType);
+    boolean isMethodInKotlinCompanionObject = metadataUtil.isCompanionObjectClass(enclosingType);
     UniqueNameSet parameterNameSet = new UniqueNameSet();
     CodeBlock instance;
-    if (method.getModifiers().contains(STATIC)) {
+    if (isMethodInKotlinCompanionObject || method.getModifiers().contains(STATIC)) {
       instance = CodeBlock.of("$T", rawTypeName(TypeName.get(enclosingType.asType())));
+    } else if (isMethodInKotlinObject) {
+      // Call through the singleton instance.
+      // See: https://kotlinlang.org/docs/reference/java-to-kotlin-interop.html#static-methods
+      instance = CodeBlock.of("$T.INSTANCE", rawTypeName(TypeName.get(enclosingType.asType())));
     } else {
       copyTypeParameters(builder, enclosingType);
       boolean useObject = instanceCastPolicy.useObjectType(enclosingType.asType());
@@ -280,6 +437,28 @@ final class InjectionMethods {
           .returns(TypeName.get(method.getReturnType()))
           .addStatement("return $L", invocation).build();
     }
+  }
+
+  private static MethodSpec fieldProxy(
+      VariableElement field, String methodName, Optional<AnnotationMirror> qualifierAnnotation) {
+    MethodSpec.Builder builder =
+        methodBuilder(methodName)
+            .addModifiers(PUBLIC, STATIC)
+            .addAnnotation(
+                AnnotationSpec.builder(TypeNames.INJECTED_FIELD_SIGNATURE)
+                    .addMember("value", "$S", memberInjectedFieldSignatureForVariable(field))
+                    .build());
+
+    qualifierAnnotation.map(AnnotationSpec::get).ifPresent(builder::addAnnotation);
+
+    TypeElement enclosingType = asType(field.getEnclosingElement());
+    copyTypeParameters(builder, enclosingType);
+
+    boolean useObject = !isRawTypePubliclyAccessible(enclosingType.asType());
+    UniqueNameSet parameterNameSet = new UniqueNameSet();
+    CodeBlock instance = copyInstance(builder, parameterNameSet, enclosingType.asType(), useObject);
+    CodeBlock argument = copyParameters(builder, parameterNameSet, ImmutableList.of(field));
+    return builder.addStatement("$L.$L = $L", instance, field.getSimpleName(), argument).build();
   }
 
   private static CodeBlock invokeMethod(

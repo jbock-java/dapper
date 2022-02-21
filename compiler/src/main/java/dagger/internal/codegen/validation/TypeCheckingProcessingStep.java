@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.Util.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import dagger.internal.codegen.collect.SetMultimap;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.validation.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -102,13 +102,13 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
         this.getClass().getCanonicalName(),
         difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
 
-    SetMultimap<XElement, ClassName> builder = new SetMultimap<>();
+    ImmutableSetMultimap.Builder<XElement, ClassName> builder = ImmutableSetMultimap.builder();
     elementsByAnnotation.forEach(
         (annotationName, elementSet) ->
             elementSet.forEach(
                 element -> builder.put(element, annotationClassNames.get(annotationName))));
 
-    return builder.asMap();
+    return builder.build().asMap();
   }
 
   /** Returns the set of annotations processed by this processing step. */

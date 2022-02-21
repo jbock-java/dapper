@@ -16,21 +16,22 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.PRIVATE_METHOD;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.PRIVATE_METHOD;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.spi.model.RequestKind;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -43,6 +44,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   private final ContributionBinding binding;
   private final BindingRequest request;
   private final RequestRepresentation wrappedRequestRepresentation;
+  private final CompilerOptions compilerOptions;
   private final DaggerTypes types;
   private String methodName;
 
@@ -52,12 +54,14 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
       @Assisted ContributionBinding binding,
       @Assisted RequestRepresentation wrappedRequestRepresentation,
       ComponentImplementation componentImplementation,
-      DaggerTypes types) {
-    super(componentImplementation.shardImplementation(binding));
-    this.binding = requireNonNull(binding);
-    this.request = requireNonNull(request);
-    this.wrappedRequestRepresentation = requireNonNull(wrappedRequestRepresentation);
+      DaggerTypes types,
+      CompilerOptions compilerOptions) {
+    super(componentImplementation.shardImplementation(binding), types);
+    this.binding = checkNotNull(binding);
+    this.request = checkNotNull(request);
+    this.wrappedRequestRepresentation = checkNotNull(wrappedRequestRepresentation);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
+    this.compilerOptions = compilerOptions;
     this.types = types;
   }
 
@@ -70,7 +74,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   protected TypeMirror returnType() {
     if (request.isRequestKind(RequestKind.INSTANCE)
         && binding.contributedPrimitiveType().isPresent()) {
-      return binding.contributedPrimitiveType().orElseThrow();
+      return binding.contributedPrimitiveType().get();
     }
 
     TypeMirror requestedType = request.requestedType(binding.contributedType(), types);
@@ -99,7 +103,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     PrivateMethodRequestRepresentation create(
         BindingRequest request,
         ContributionBinding binding,

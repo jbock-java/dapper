@@ -16,11 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.anonymousProvider;
 import static dagger.spi.model.RequestKind.INSTANCE;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -28,11 +30,9 @@ import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 
 /**
- * A {@code Provider} creation expression for an anonymous inner class whose
+ * A {@link jakarta.inject.Provider} creation expression for an anonymous inner class whose
  * {@code get()} method returns the expression for an instance binding request for its key.
  */
 final class AnonymousProviderCreationExpression
@@ -46,7 +46,7 @@ final class AnonymousProviderCreationExpression
       @Assisted ContributionBinding binding,
       ComponentRequestRepresentations componentRequestRepresentations,
       ComponentImplementation componentImplementation) {
-    this.binding = requireNonNull(binding);
+    this.binding = checkNotNull(binding);
     this.componentRequestRepresentations = componentRequestRepresentations;
     this.requestingClass = componentImplementation.name();
   }

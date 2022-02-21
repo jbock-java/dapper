@@ -63,15 +63,22 @@ final class DirectInstanceBindingRepresentation {
         unscopedDirectInstanceRequestRepresentationFactory;
   }
 
-  RequestRepresentation getRequestRepresentation(BindingRequest request) {
+  public RequestRepresentation getRequestRepresentation(BindingRequest request) {
     return reentrantComputeIfAbsent(
         requestRepresentations, request, this::getRequestRepresentationUncached);
   }
 
   private RequestRepresentation getRequestRepresentationUncached(BindingRequest request) {
-    return requiresMethodEncapsulation(binding)
-        ? wrapInMethod(unscopedDirectInstanceRequestRepresentationFactory.create(binding))
-        : unscopedDirectInstanceRequestRepresentationFactory.create(binding);
+    switch (request.requestKind()) {
+      case INSTANCE:
+        return requiresMethodEncapsulation(binding)
+            ? wrapInMethod(unscopedDirectInstanceRequestRepresentationFactory.create(binding))
+            : unscopedDirectInstanceRequestRepresentationFactory.create(binding);
+
+      default:
+        throw new AssertionError(
+            String.format("Invalid binding request kind: %s", request.requestKind()));
+    }
   }
 
   /**
@@ -134,14 +141,16 @@ final class DirectInstanceBindingRepresentation {
         // nested instance creation code in a single statement to satisfy all dependencies of a
         // binding request.
         return !binding.dependencies().isEmpty();
+      case MEMBERS_INJECTOR:
       case DELEGATE:
+      case MEMBERS_INJECTION:
         return false;
     }
     throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     DirectInstanceBindingRepresentation create(ProvisionBinding binding);
   }
 }

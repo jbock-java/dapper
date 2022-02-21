@@ -16,48 +16,38 @@
 
 package dagger.internal.codegen.base;
 
-import static dagger.internal.codegen.base.Suppliers.memoize;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.javapoet.ClassName;
-import java.util.List;
+import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-import javax.lang.model.element.AnnotationMirror;
 
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
-public final class ModuleAnnotation {
-  private static final Set<ClassName> MODULE_ANNOTATIONS =
-      Set.of(TypeNames.MODULE);
+@AutoValue
+public abstract class ModuleAnnotation {
+  private static final ImmutableSet<ClassName> MODULE_ANNOTATIONS =
+      ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE);
 
-  private final XAnnotation annotation;
-  private final ClassName className;
-
-  private ModuleAnnotation(
-      XAnnotation annotation,
-      ClassName className) {
-    this.annotation = annotation;
-    this.className = className;
-  }
+  private XAnnotation annotation;
 
   /** The annotation itself. */
-  public XAnnotation annotation() {
+  public final XAnnotation annotation() {
     return annotation;
   }
 
-  /** Returns the {@link ClassName} name of the annotation. */
-  public ClassName className() {
-    return className;
-  }
+  /** Returns the {@code ClassName} name of the annotation. */
+  public abstract ClassName className();
 
   /** The simple name of the annotation. */
   public String simpleName() {
@@ -66,52 +56,52 @@ public final class ModuleAnnotation {
 
   /**
    * The types specified in the {@code includes} attribute.
+   *
+   * @throws IllegalArgumentException if any of the values are error types
    */
-  private final Supplier<List<XTypeElement>> includesCache = memoize(() ->
-      annotation().getAsTypeList("includes").stream()
-          .map(XType::getTypeElement)
-          .collect(toImmutableList()));
-
-  public List<XTypeElement> includes() {
-    return includesCache.get();
+  @Memoized
+  public ImmutableList<XTypeElement> includes() {
+    return annotation.getAsTypeList("includes").stream()
+        .map(XType::getTypeElement)
+        .collect(toImmutableList());
   }
 
   /**
    * The types specified in the {@code subcomponents} attribute.
+   *
+   * @throws IllegalArgumentException if any of the values are error types
    */
-  private final Supplier<List<XTypeElement>> subcomponentsCache = memoize(() ->
-      annotation().getAsTypeList("subcomponents").stream()
-          .map(XType::getTypeElement)
-          .collect(toImmutableList()));
-
-  public List<XTypeElement> subcomponents() {
-    return subcomponentsCache.get();
+  @Memoized
+  public ImmutableList<XTypeElement> subcomponents() {
+    return annotation.getAsTypeList("subcomponents").stream()
+        .map(XType::getTypeElement)
+        .collect(toImmutableList());
   }
 
-  /** Returns {@code true} if the argument is a {@code @Module}. */
+  /** Returns {@code true} if the argument is a {@code @Module} or {@code @ProducerModule}. */
   public static boolean isModuleAnnotation(XAnnotation annotation) {
-    return isModuleAnnotation(annotation.toJavac());
+    return MODULE_ANNOTATIONS.contains(getClassName(annotation));
   }
 
-  /** Returns {@code true} if the argument is a {@code @Module}. */
-  public static boolean isModuleAnnotation(AnnotationMirror annotation) {
-    return MODULE_ANNOTATIONS.stream()
-        .map(ClassName::canonicalName)
-        .anyMatch(asTypeElement(annotation.getAnnotationType()).getQualifiedName()::contentEquals);
+  /** The module annotation types. */
+  public static ImmutableSet<ClassName> moduleAnnotations() {
+    return MODULE_ANNOTATIONS;
   }
 
   /**
    * Creates an object that represents a {@code @Module} or {@code @ProducerModule}.
    *
-   * @throws IllegalArgumentException if {@link #isModuleAnnotation(XAnnotation)} returns {@code
+   * @throws IllegalArgumentException if {@code #isModuleAnnotation(XAnnotation)} returns {@code
    *     false}
    */
   public static ModuleAnnotation moduleAnnotation(XAnnotation annotation) {
-    Preconditions.checkArgument(
+    checkArgument(
         isModuleAnnotation(annotation),
         "%s is not a Module or ProducerModule annotation",
         annotation);
-    return new ModuleAnnotation(annotation, getClassName(annotation));
+    ModuleAnnotation moduleAnnotation = new AutoValue_ModuleAnnotation(getClassName(annotation));
+    moduleAnnotation.annotation = annotation;
+    return moduleAnnotation;
   }
 
   /**
@@ -119,7 +109,7 @@ public final class ModuleAnnotation {
    * annotates {@code typeElement}.
    */
   public static Optional<ModuleAnnotation> moduleAnnotation(XElement element) {
-    return getAnyAnnotation(element, TypeNames.MODULE)
+    return getAnyAnnotation(element, TypeNames.MODULE, TypeNames.PRODUCER_MODULE)
         .map(ModuleAnnotation::moduleAnnotation);
   }
 }

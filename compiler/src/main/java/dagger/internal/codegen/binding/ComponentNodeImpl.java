@@ -16,34 +16,25 @@
 
 package dagger.internal.codegen.binding;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
+import io.jbock.auto.value.AutoValue;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.ComponentPath;
+import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
-import java.util.Objects;
-import java.util.Set;
 
-/** An implementation of {@link ComponentNode} that also exposes the {@link ComponentDescriptor}. */
-public final class ComponentNodeImpl implements ComponentNode {
-
-  private final ComponentPath componentPath;
-  private final ComponentDescriptor componentDescriptor;
-
-  ComponentNodeImpl(
-      ComponentPath componentPath,
-      ComponentDescriptor componentDescriptor) {
-    this.componentPath = requireNonNull(componentPath);
-    this.componentDescriptor = requireNonNull(componentDescriptor);
+/** An implementation of {@code ComponentNode} that also exposes the {@code ComponentDescriptor}. */
+@AutoValue
+public abstract class ComponentNodeImpl implements ComponentNode {
+  public static ComponentNode create(
+      ComponentPath componentPath, ComponentDescriptor componentDescriptor) {
+    return new AutoValue_ComponentNodeImpl(componentPath, componentDescriptor);
   }
 
   @Override
-  public ComponentPath componentPath() {
-    return componentPath;
-  }
-
-  @Override
-  public boolean isSubcomponent() {
+  public final boolean isSubcomponent() {
     return componentDescriptor().isSubcomponent();
   }
 
@@ -53,35 +44,21 @@ public final class ComponentNodeImpl implements ComponentNode {
   }
 
   @Override
-  public Set<Scope> scopes() {
-    return componentDescriptor().scopes();
-  }
-
-  public ComponentDescriptor componentDescriptor() {
-    return componentDescriptor;
-  }
-
-  public static ComponentNode create(
-      ComponentPath componentPath, ComponentDescriptor componentDescriptor) {
-    return new ComponentNodeImpl(componentPath, componentDescriptor);
+  public final ImmutableSet<DependencyRequest> entryPoints() {
+    return componentDescriptor().entryPointMethods().stream()
+        .map(method -> method.dependencyRequest().get())
+        .collect(toImmutableSet());
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ComponentNodeImpl that = (ComponentNodeImpl) o;
-    return componentPath.equals(that.componentPath)
-        && componentDescriptor.equals(that.componentDescriptor);
+  public ImmutableSet<Scope> scopes() {
+    return ImmutableSet.copyOf(componentDescriptor().scopes());
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(componentPath, componentDescriptor);
-  }
+  public abstract ComponentDescriptor componentDescriptor();
 
   @Override
-  public String toString() {
+  public final String toString() {
     return componentPath().toString();
   }
 }

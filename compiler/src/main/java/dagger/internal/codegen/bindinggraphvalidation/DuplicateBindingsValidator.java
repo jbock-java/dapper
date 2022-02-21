@@ -30,6 +30,7 @@ import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.ListMultimap;
 import dagger.internal.codegen.collect.Multimaps;
 import dagger.internal.codegen.collect.Multiset;
@@ -128,7 +129,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     ListMultimap<ComponentPath, Binding> bindingsByComponentPath =
         Multimaps.index(duplicateBindings, Binding::componentPath);
     SetMultimap<ComponentPath, Binding> mutuallyVisibleBindings =
-        new SetMultimap<>();
+        new ImmutableSetMultimap<>();
     bindingsByComponentPath
         .asMap()
         .forEach(

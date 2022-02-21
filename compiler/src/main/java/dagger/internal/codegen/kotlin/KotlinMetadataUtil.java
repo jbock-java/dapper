@@ -35,4 +35,8 @@ public final class KotlinMetadataUtil {
   public boolean isObjectClass(TypeElement asType) {
     return false;
   }
+
+  public boolean isCompanionObjectClass(TypeElement enclosingType) {
+    return false;
+  }
 }

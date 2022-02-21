@@ -16,17 +16,20 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static java.util.Objects.requireNonNull;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingType;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
@@ -37,29 +40,37 @@ import javax.lang.model.type.TypeMirror;
 
 /** Helper class for static member select creation. */
 final class StaticMemberSelects {
+  /** A {@link MemberSelect} for a factory of an empty map. */
+  static MemberSelect emptyMapFactory(Binding binding) {
+    BindingType bindingType = binding.bindingType();
+    ImmutableList<TypeMirror> typeParameters =
+        ImmutableList.copyOf(MoreTypes.asDeclared(binding.key().type().java()).getTypeArguments());
+    return new ParameterizedStaticMethod(
+        MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
+  }
 
   /**
    * Returns a {@link MemberSelect} for the instance of a {@code create()} method on a factory with
    * no arguments.
    */
   static MemberSelect factoryCreateNoArgumentMethod(Binding binding) {
-    Preconditions.checkArgument(
+    checkArgument(
         binding.bindingType().equals(BindingType.PROVISION),
         "Invalid binding type: %s",
         binding.bindingType());
-    Preconditions.checkArgument(
-        binding.dependencies().isEmpty() && binding.scope().isEmpty(),
+    checkArgument(
+        binding.dependencies().isEmpty() && !binding.scope().isPresent(),
         "%s should have no dependencies and be unscoped to create a no argument factory.",
         binding);
 
     ClassName factoryName = generatedClassNameForBinding(binding);
     TypeMirror keyType = binding.key().type().java();
     if (keyType.getKind().equals(DECLARED)) {
-      List<TypeVariableName> typeVariables = bindingTypeElementTypeVariableNames(binding);
+      ImmutableList<TypeVariableName> typeVariables = bindingTypeElementTypeVariableNames(binding);
       if (!typeVariables.isEmpty()) {
         List<? extends TypeMirror> typeArguments = MoreTypes.asDeclared(keyType).getTypeArguments();
         return new ParameterizedStaticMethod(
-            factoryName, List.copyOf(typeArguments), CodeBlock.of("create()"), FACTORY);
+            factoryName, ImmutableList.copyOf(typeArguments), CodeBlock.of("create()"), FACTORY);
       }
     }
     return new StaticMethod(factoryName, CodeBlock.of("create()"));
@@ -70,7 +81,7 @@ final class StaticMemberSelects {
 
     StaticMethod(ClassName owningClass, CodeBlock methodCodeBlock) {
       super(owningClass, true);
-      this.methodCodeBlock = requireNonNull(methodCodeBlock);
+      this.methodCodeBlock = checkNotNull(methodCodeBlock);
     }
 
     @Override
@@ -82,13 +93,13 @@ final class StaticMemberSelects {
   }
 
   private static final class ParameterizedStaticMethod extends MemberSelect {
-    private final List<TypeMirror> typeParameters;
+    private final ImmutableList<TypeMirror> typeParameters;
     private final CodeBlock methodCodeBlock;
     private final ClassName rawReturnType;
 
     ParameterizedStaticMethod(
         ClassName owningClass,
-        List<TypeMirror> typeParameters,
+        ImmutableList<TypeMirror> typeParameters,
         CodeBlock methodCodeBlock,
         ClassName rawReturnType) {
       super(owningClass, true);

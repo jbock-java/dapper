@@ -18,6 +18,7 @@ package dagger.internal.codegen.bindinggraphvalidation;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.validation.CompositeBindingGraphPlugin;
 import dagger.internal.codegen.validation.Validation;
@@ -39,7 +40,7 @@ public interface BindingGraphValidationModule {
       InjectBindingValidator validation5,
       MissingBindingValidator validation7,
       SubcomponentFactoryMethodValidator validation11) {
-    Set<BindingGraphPlugin> plugins = Set.of(
+    ImmutableSet<BindingGraphPlugin> plugins = ImmutableSet.of(
         validation1,
         validation3,
         validation4,

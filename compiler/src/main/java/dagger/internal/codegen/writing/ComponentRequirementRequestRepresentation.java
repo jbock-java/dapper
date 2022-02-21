@@ -16,19 +16,20 @@
 
 package dagger.internal.codegen.writing;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
+import io.jbock.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
-import io.jbock.javapoet.ClassName;
 
 /**
  * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of
- * {@linkplain dagger.Component#dependencies() component} dependencies.
+ * {@linkplain dagger.Component#dependencies() component} and {@linkplain
+ * dagger.producers.ProductionComponent#dependencies() production component dependencies}.
  */
 final class ComponentRequirementRequestRepresentation extends RequestRepresentation {
   private final ComponentRequirement componentRequirement;
@@ -39,7 +40,7 @@ final class ComponentRequirementRequestRepresentation extends RequestRepresentat
       @Assisted ContributionBinding binding,
       @Assisted ComponentRequirement componentRequirement,
       ComponentRequirementExpressions componentRequirementExpressions) {
-    this.componentRequirement = requireNonNull(componentRequirement);
+    this.componentRequirement = checkNotNull(componentRequirement);
     this.componentRequirementExpressions = componentRequirementExpressions;
   }
 

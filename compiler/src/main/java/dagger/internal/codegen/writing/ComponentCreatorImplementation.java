@@ -16,48 +16,29 @@
 
 package dagger.internal.codegen.writing;
 
-import static java.util.Objects.requireNonNull;
-
-import dagger.internal.codegen.binding.ComponentRequirement;
+import io.jbock.auto.value.AutoValue;
+import dagger.internal.codegen.collect.ImmutableMap;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeSpec;
-import java.util.Map;
+import dagger.internal.codegen.binding.ComponentRequirement;
 
 /** The implementation of a component creator type. */
-public final class ComponentCreatorImplementation {
-
-  private final TypeSpec spec;
-  private final ClassName name;
-  private final Map<ComponentRequirement, FieldSpec> fields;
-
-  ComponentCreatorImplementation(
-      TypeSpec spec,
-      ClassName name,
-      Map<ComponentRequirement, FieldSpec> fields) {
-    this.spec = requireNonNull(spec);
-    this.name = requireNonNull(name);
-    this.fields = requireNonNull(fields);
-  }
+@AutoValue
+public abstract class ComponentCreatorImplementation {
 
   /** Creates a new {@link ComponentCreatorImplementation}. */
   public static ComponentCreatorImplementation create(
-      TypeSpec spec, ClassName name, Map<ComponentRequirement, FieldSpec> fields) {
-    return new ComponentCreatorImplementation(spec, name, fields);
+      TypeSpec spec, ClassName name, ImmutableMap<ComponentRequirement, FieldSpec> fields) {
+    return new AutoValue_ComponentCreatorImplementation(spec, name, fields);
   }
 
   /** The type spec for the creator implementation. */
-  public TypeSpec spec() {
-    return spec;
-  }
+  public abstract TypeSpec spec();
 
   /** The name of the creator implementation class. */
-  public ClassName name() {
-    return name;
-  }
+  public abstract ClassName name();
 
   /** All fields that are present in this implementation. */
-  Map<ComponentRequirement, FieldSpec> fields() {
-    return fields;
-  }
+  abstract ImmutableMap<ComponentRequirement, FieldSpec> fields();
 }

@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 
 /**
@@ -42,6 +42,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
       injectionOrProvisionProviderCreationExpressionFactory;
+  private final MembersInjectorProviderCreationExpression.Factory
+      membersInjectorProviderCreationExpressionFactory;
 
   @Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
@@ -53,7 +55,9 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       DependencyMethodProviderCreationExpression.Factory
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
-          injectionOrProvisionProviderCreationExpressionFactory) {
+          injectionOrProvisionProviderCreationExpressionFactory,
+      MembersInjectorProviderCreationExpression.Factory
+          membersInjectorProviderCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.anonymousProviderCreationExpressionFactory = anonymousProviderCreationExpressionFactory;
@@ -63,10 +67,13 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
         injectionOrProvisionProviderCreationExpressionFactory;
+    this.membersInjectorProviderCreationExpressionFactory =
+        membersInjectorProviderCreationExpressionFactory;
   }
 
   /**
-   * Returns an unscoped creation expression for a {@code Provider}.
+   * Returns an unscoped creation expression for a {@link jakarta.inject.Provider} for provision
+   * bindings or a {@code dagger.producers.Producer} for production bindings.
    */
   FrameworkInstanceCreationExpression create(ContributionBinding binding) {
     switch (binding.kind()) {
@@ -81,11 +88,11 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case BOUND_INSTANCE:
         return instanceFactoryCreationExpression(
-            ComponentRequirement.forBoundInstance(binding));
+            binding, ComponentRequirement.forBoundInstance(binding));
 
       case COMPONENT_DEPENDENCY:
         return instanceFactoryCreationExpression(
-            ComponentRequirement.forDependency(binding.key().type().xprocessing()));
+            binding, ComponentRequirement.forDependency(binding.key().type().xprocessing()));
 
       case COMPONENT_PROVISION:
         return dependencyMethodProviderCreationExpressionFactory.create((ProvisionBinding) binding);
@@ -102,14 +109,18 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);
 
+      case MEMBERS_INJECTOR:
+        return membersInjectorProviderCreationExpressionFactory.create((ProvisionBinding) binding);
+
       default:
         throw new AssertionError(binding);
     }
   }
 
   private InstanceFactoryCreationExpression instanceFactoryCreationExpression(
-      ComponentRequirement componentRequirement) {
+      ContributionBinding binding, ComponentRequirement componentRequirement) {
     return new InstanceFactoryCreationExpression(
+        binding.nullableType().isPresent(),
         () ->
             componentRequirementExpressions.getExpressionDuringInitialization(
                 componentRequirement, componentImplementation.name()));

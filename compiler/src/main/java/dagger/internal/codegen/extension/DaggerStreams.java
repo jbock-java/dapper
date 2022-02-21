@@ -20,13 +20,15 @@ import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.SetMultimap;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -76,7 +78,7 @@ public final class DaggerStreams {
    * whose keys and values are the result of applying the provided mapping functions to the input
    * elements. Entries appear in the result {@code Map} in encounter order.
    */
-  public static <T, K, V> Collector<T, ?, SetMultimap<K, V>> toImmutableSetMultimap(
+  public static <T, K, V> Collector<T, ?, ImmutableSetMultimap<K, V>> toImmutableSetMultimap(
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
     return Collectors.collectingAndThen(
         Collectors.mapping(
@@ -92,7 +94,7 @@ public final class DaggerStreams {
               right.forEach((k, v) ->
                   left.merge(k, v, Util::mutableUnion));
               return left;
-            })), SetMultimap::new);
+            })), ImmutableSetMultimap::new);
   }
 
 
@@ -116,6 +118,14 @@ public final class DaggerStreams {
     return (iterable instanceof Collection)
         ? ((Collection<T>) iterable).stream()
         : StreamSupport.stream(iterable.spliterator(), false);
+  }
+
+  public static <E extends Enum<E>> Stream<E> valuesOf(Class<E> enumType) {
+    return EnumSet.allOf(enumType).stream();
+  }
+
+  public static <T> Function<Optional<T>, Stream<T>> presentValues() {
+    return Optional::stream;
   }
 
   private DaggerStreams() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,31 @@
 
 package dagger.spi.model;
 
-import static java.util.Objects.requireNonNull;
-
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
+import dagger.internal.codegen.base.Joiner;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 
 /**
- * A {@linkplain DaggerType type} and an optional {@linkplain jakarta.inject.Qualifier qualifier} that
+ * A {@code DaggerType type} and an optional {@code javax.inject.Qualifier qualifier} that
  * is the lookup key for a binding.
  */
-public final class Key {
-  private final Optional<DaggerAnnotation> qualifier;
-  private final DaggerType type;
-
-  private final int hashCode;
-
-  private Key(
-      Optional<DaggerAnnotation> qualifier,
-      DaggerType type) {
-    this.qualifier = requireNonNull(qualifier);
-    this.type = requireNonNull(type);
-    this.hashCode = Objects.hash(qualifier, type);
-  }
-
+@AutoValue
+public abstract class Key {
   /**
-   * A {@link jakarta.inject.Qualifier} annotation that provides a unique namespace prefix
-   * for the type of this key.
+   * A {@code jakarta.inject.Qualifier} annotation that provides a unique namespace prefix for the
+   * type of this key.
    */
-  public Optional<DaggerAnnotation> qualifier() {
-    return qualifier;
-  }
+  public abstract Optional<DaggerAnnotation> qualifier();
+
+  /** The type represented by this key. */
+  public abstract DaggerType type();
 
   /**
-   * The type represented by this key.
-   */
-  public DaggerType type() {
-    return type;
-  }
-
-  /**
-   * Distinguishes keys for multibinding contributions that share a {@link #type()} and {@link
+   * Distinguishes keys for multibinding contributions that share a {@code #type()} and {@code
    * #qualifier()}.
    *
    * <p>Each multibound map and set has a synthetic multibinding that depends on the specific
@@ -65,79 +48,52 @@ public final class Key {
    *
    * <p>Absent except for multibinding contributions.
    */
-  public Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier() {
-    return Optional.empty();
-  }
+  public abstract Optional<MultibindingContributionIdentifier> multibindingContributionIdentifier();
+
+  /** Returns a {@code Builder} that inherits the properties of this key. */
+  public abstract Builder toBuilder();
 
   // The main hashCode/equality bottleneck is in MoreTypes.equivalence(). It's possible that we can
   // avoid this by tuning that method. Perhaps we can also avoid the issue entirely by interning all
   // Keys
+  @Memoized
   @Override
-  public int hashCode() {
-    return hashCode;
-  }
+  public abstract int hashCode();
 
   @Override
-  public boolean equals(Object o) {
-    if (o == this) {
-      return true;
-    }
-    if (!(o instanceof Key)) {
-      return false;
-    }
-    Key that = (Key) o;
-    if (this.hashCode != that.hashCode) {
-      return false;
-    }
-    return Objects.equals(this.qualifier, that.qualifier)
-        && Objects.equals(this.type, that.type);
-  }
+  public abstract boolean equals(Object o);
 
   @Override
-  public String toString() {
-    return Stream.of(
+  public final String toString() {
+    return Joiner.on(' ')
+        .skipNulls()
+        .join(
             qualifier().map(MoreAnnotationMirrors::toStableString).orElse(null),
             type(),
-            multibindingContributionIdentifier().orElse(null))
-        .filter(Objects::nonNull)
-        .map(Objects::toString)
-        .collect(Collectors.joining(" "));
+            multibindingContributionIdentifier().orElse(null));
   }
 
-  /** Returns a builder for {@link Key}s. */
+  /** Returns a builder for {@code Key}s. */
   public static Builder builder(DaggerType type) {
-    return new Builder().type(type);
+    return new AutoValue_Key.Builder().type(type);
   }
 
-  /** A builder for {@link Key}s. */
-  public static final class Builder {
+  /** A builder for {@code Key}s. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder type(DaggerType type);
 
-    private Optional<DaggerAnnotation> wrappedQualifier = Optional.empty();
-    private DaggerType wrappedType;
+    public abstract Builder qualifier(Optional<DaggerAnnotation> qualifier);
 
-    private Builder() {
-    }
+    public abstract Builder qualifier(DaggerAnnotation qualifier);
 
-    public Builder type(DaggerType type) {
-      this.wrappedType = type;
-      return this;
-    }
+    public abstract Builder multibindingContributionIdentifier(
+        Optional<MultibindingContributionIdentifier> identifier);
 
-    public Builder qualifier(DaggerAnnotation qualifier) {
-      this.wrappedQualifier = Optional.of(qualifier);
-      return this;
-    }
+    public abstract Builder multibindingContributionIdentifier(
+        MultibindingContributionIdentifier identifier);
 
-    public Builder qualifier(Optional<DaggerAnnotation> qualifier) {
-      this.wrappedQualifier = qualifier;
-      return this;
-    }
-
-    public Key build() {
-      return new Key(
-          this.wrappedQualifier,
-          this.wrappedType);
-    }
+    public abstract Key build();
   }
 
   /**
@@ -147,5 +103,70 @@ public final class Key {
    * @see #multibindingContributionIdentifier()
    */
   public static final class MultibindingContributionIdentifier {
+    private final String module;
+    private final String bindingElement;
+
+    /**
+     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
+     * It is not part of a specified API and may change at any point.
+     */
+    @Deprecated
+    public MultibindingContributionIdentifier(
+        // TODO(ronshapiro): reverse the order of these parameters
+        ExecutableElement bindingMethod, TypeElement contributingModule) {
+      this(
+          bindingMethod.getSimpleName().toString(),
+          contributingModule.getQualifiedName().toString());
+    }
+
+    // TODO(ronshapiro,dpb): create KeyProxies so that these constructors don't need to be public.
+    @Deprecated
+    public MultibindingContributionIdentifier(String bindingElement, String module) {
+      this.module = module;
+      this.bindingElement = bindingElement;
+    }
+
+    /**
+     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
+     * It is not part of a specified API and may change at any point.
+     */
+    @Deprecated
+    public String module() {
+      return module;
+    }
+
+    /**
+     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.
+     * It is not part of a specified API and may change at any point.
+     */
+    @Deprecated
+    public String bindingElement() {
+      return bindingElement;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The returned string is human-readable and distinguishes the keys in the same way as the
+     * whole object.
+     */
+    @Override
+    public String toString() {
+      return String.format("%s#%s", module, bindingElement);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof MultibindingContributionIdentifier) {
+        MultibindingContributionIdentifier other = (MultibindingContributionIdentifier) obj;
+        return module.equals(other.module) && bindingElement.equals(other.bindingElement);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(module, bindingElement);
+    }
   }
 }

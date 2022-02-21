@@ -19,14 +19,15 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
 import static dagger.internal.codegen.javapoet.TypeNames.SINGLE_CHECK;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.Binding;
+import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.spi.model.BindingKind;
-import io.jbock.javapoet.CodeBlock;
 
 /**
  * An object that initializes a framework-type component field for a binding using instances created
@@ -39,13 +40,13 @@ final class SwitchingProviderInstanceSupplier implements FrameworkInstanceSuppli
   SwitchingProviderInstanceSupplier(
       @Assisted ProvisionBinding binding,
       SwitchingProviders switchingProviders,
+      BindingGraph graph,
       ComponentImplementation componentImplementation,
       UnscopedDirectInstanceRequestRepresentationFactory
           unscopedDirectInstanceRequestRepresentationFactory) {
     FrameworkInstanceCreationExpression frameworkInstanceCreationExpression =
         switchingProviders.newFrameworkInstanceCreationExpression(
             binding, unscopedDirectInstanceRequestRepresentationFactory.create(binding));
-    ;
     this.frameworkInstanceSupplier =
         new FrameworkFieldInitializer(
             componentImplementation, binding, scope(binding, frameworkInstanceCreationExpression));
@@ -60,7 +61,7 @@ final class SwitchingProviderInstanceSupplier implements FrameworkInstanceSuppli
       Binding binding, FrameworkInstanceCreationExpression unscoped) {
     // Caching assisted factory provider, so that there won't be new factory created for each
     // provider.get() call.
-    if (binding.scope().isEmpty() && !binding.kind().equals(BindingKind.ASSISTED_FACTORY)) {
+    if (!binding.scope().isPresent() && !binding.kind().equals(BindingKind.ASSISTED_FACTORY)) {
       return unscoped;
     }
     return () ->
@@ -73,7 +74,7 @@ final class SwitchingProviderInstanceSupplier implements FrameworkInstanceSuppli
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     SwitchingProviderInstanceSupplier create(ProvisionBinding binding);
   }
 }

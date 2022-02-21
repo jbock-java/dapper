@@ -63,7 +63,6 @@ public final class DaggerTypes implements Types {
 
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreTypes?
-
   /**
    * Returns true if the raw type underlying the given {@link TypeMirror} represents the same raw
    * type as the given {@link Class} and throws an IllegalArgumentException if the {@link
@@ -150,7 +149,7 @@ public final class DaggerTypes implements Types {
    * {@link Optional} is returned if there is no non-{@link Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
-    return MoreTypes.nonObjectSuperclass(types, elements, type);
+    return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orElse(null));
   }
 
   /**
@@ -229,16 +228,6 @@ public final class DaggerTypes implements Types {
    * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
    * Set.class}, this will return {@code Set<List<Number>>}.
    */
-  public DeclaredType wrapType(XType type, ClassName wrappingClassName) {
-    return wrapType(toJavac(type), wrappingClassName);
-  }
-
-  /**
-   * Returns {@code type} wrapped in {@code wrappingClass}.
-   *
-   * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
-   * Set.class}, this will return {@code Set<List<Number>>}.
-   */
   public DeclaredType wrapType(TypeMirror type, ClassName wrappingClassName) {
     return types.getDeclaredType(elements.getTypeElement(wrappingClassName.canonicalName()), type);
   }
@@ -279,19 +268,6 @@ public final class DaggerTypes implements Types {
   public TypeMirror publiclyAccessibleType(TypeMirror type) {
     return accessibleType(
         type, Accessibility::isTypePubliclyAccessible, Accessibility::isRawTypePubliclyAccessible);
-  }
-
-  /**
-   * Returns an accessible type in {@code requestingClass}'s package based on {@code type}:
-   *
-   * <ul>
-   *   <li>If {@code type} is accessible from the package, returns it.
-   *   <li>If not, but {@code type}'s raw type is accessible from the package, returns the raw type.
-   *   <li>Otherwise returns {@link Object}.
-   * </ul>
-   */
-  public TypeMirror accessibleType(XType type, ClassName requestingClass) {
-    return accessibleType(toJavac(type), requestingClass);
   }
 
   /**
@@ -350,6 +326,14 @@ public final class DaggerTypes implements Types {
           }
         },
         null);
+  }
+
+  public static boolean isFutureType(XType type) {
+    return false;
+  }
+
+  public static boolean isFutureType(TypeMirror type) {
+    return false;
   }
 
   public static boolean hasTypeVariable(TypeMirror type) {

@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -23,8 +25,6 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 
 /** A binding expression for a subcomponent creator that just invokes the constructor. */
 final class SubcomponentCreatorRequestRepresentation extends RequestRepresentation {
@@ -50,7 +50,7 @@ final class SubcomponentCreatorRequestRepresentation extends RequestRepresentati
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     SubcomponentCreatorRequestRepresentation create(ContributionBinding binding);
   }
 }

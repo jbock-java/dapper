@@ -1,15 +1,16 @@
 package dagger.internal.codegen.collect;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class ImmutableSortedSet<T> extends ImmutableSet<T> {
 
-  private static final ImmutableSortedSet<?> EMPTY = new ImmutableSortedSet<>(Set.of());
+  private static final ImmutableSortedSet<?> EMPTY = new ImmutableSortedSet<>(Collections.emptySortedSet());
 
-  private ImmutableSortedSet(Set<T> delegate) {
+  private ImmutableSortedSet(SortedSet<T> delegate) {
     super(delegate);
   }
 
@@ -17,8 +18,19 @@ public class ImmutableSortedSet<T> extends ImmutableSet<T> {
     return new Builder<>(Comparator.<E>naturalOrder());
   }
 
+  public static <E> ImmutableSortedSet<E> copyOf(
+      Comparator<E> comparator,
+      Iterable<? extends E> elements) {
+    if (elements instanceof ImmutableSortedSet) {
+      return (ImmutableSortedSet<E>) elements;
+    }
+    TreeSet<E> result = new TreeSet<>(comparator);
+    elements.forEach(result::add);
+    return new ImmutableSortedSet<>(result);
+  }
+
   public static final class Builder<E> {
-    private final Set<E> delegate;
+    private final TreeSet<E> delegate;
 
     public Builder(Comparator<E> comparator) {
       this.delegate = new TreeSet<>(comparator);

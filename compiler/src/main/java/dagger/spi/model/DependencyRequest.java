@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,103 +16,57 @@
 
 package dagger.spi.model;
 
-import static java.util.Objects.requireNonNull;
-
+import io.jbock.auto.value.AutoValue;
 import dagger.Provides;
-import java.util.Objects;
 import java.util.Optional;
-import javax.lang.model.element.Element;
+import jakarta.inject.Inject;
 
 /**
- * Represents a request for a {@link Key} at an injection point. For example, parameters to {@code
- * Inject} constructors, {@link Provides} methods, and component methods are all dependency
+ * Represents a request for a {@code Key} at an injection point. For example, parameters to {@code
+ * Inject} constructors, {@code Provides} methods, and component methods are all dependency
  * requests.
  *
  * <p id="synthetic">A dependency request is considered to be <em>synthetic</em> if it does not have
- * an {@link Element} in code that requests the key directly. For example, an {@link
+ * an {@code DaggerElement} in code that requests the key directly. For example, an {@code
  * java.util.concurrent.Executor} is required for all {@code @Produces} methods to run
  * asynchronously even though it is not directly specified as a parameter to the binding method.
  */
-public final class DependencyRequest {
-
-  private final RequestKind kind;
-  private final Key key;
-  private final Optional<DaggerElement> requestElement;
-
-  private DependencyRequest(
-      RequestKind kind,
-      Key key,
-      Optional<DaggerElement> requestElement) {
-    this.kind = requireNonNull(kind);
-    this.key = requireNonNull(key);
-    this.requestElement = requireNonNull(requestElement);
-  }
-
+@AutoValue
+public abstract class DependencyRequest {
   /** The kind of this request. */
-  public RequestKind kind() {
-    return kind;
-  }
+  public abstract RequestKind kind();
 
   /** The key of this request. */
-  public Key key() {
-    return key;
-  }
+  public abstract Key key();
 
   /**
    * The element that declares this dependency request. Absent for <a href="#synthetic">synthetic
    * </a> requests.
    */
-  public Optional<DaggerElement> requestElement() {
-    return requestElement;
-  }
+  public abstract Optional<DaggerElement> requestElement();
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DependencyRequest that = (DependencyRequest) o;
-    return kind == that.kind && key.equals(that.key) && requestElement.equals(that.requestElement);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(kind, key, requestElement);
-  }
+  /**
+   * Returns {@code true} if this request allows null objects. A request is nullable if it is
+   * has an annotation with "Nullable" as its simple name.
+   */
+  public abstract boolean isNullable();
 
   /** Returns a new builder of dependency requests. */
   public static DependencyRequest.Builder builder() {
-    return new Builder();
+    return new AutoValue_DependencyRequest.Builder().isNullable(false);
   }
 
-  /** A builder of {@link DependencyRequest}s. */
-  public static final class Builder {
-    private RequestKind kind;
-    private Key key;
-    private Optional<DaggerElement> requestElement = Optional.empty();
+  /** A builder of {@code DependencyRequest}s. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder kind(RequestKind kind);
 
-    private Builder() {
-    }
+    public abstract Builder key(Key key);
 
-    public Builder kind(RequestKind kind) {
-      this.kind = kind;
-      return this;
-    }
+    public abstract Builder requestElement(DaggerElement element);
 
-    public Builder key(Key key) {
-      this.key = key;
-      return this;
-    }
+    public abstract Builder isNullable(boolean isNullable);
 
-    public Builder requestElement(DaggerElement requestElement) {
-      this.requestElement = Optional.of(requestElement);
-      return this;
-    }
-
-    public DependencyRequest build() {
-      return new DependencyRequest(
-          this.kind,
-          this.key,
-          this.requestElement);
-    }
+    public abstract DependencyRequest build();
   }
 }

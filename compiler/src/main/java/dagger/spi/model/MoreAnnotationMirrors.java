@@ -31,7 +31,7 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 /** Utility class for qualifier transformations */
 final class MoreAnnotationMirrors {
   /**
-   * Returns a String rendering of an {@link AnnotationMirror} that includes attributes in the order
+   * Returns a String rendering of an {@code AnnotationMirror} that includes attributes in the order
    * defined in the annotation type.
    */
   public static String toStableString(DaggerAnnotation qualifier) {
@@ -39,9 +39,9 @@ final class MoreAnnotationMirrors {
   }
 
   /**
-   * Returns a String rendering of an {@link AnnotationMirror} that includes attributes in the order
+   * Returns a String rendering of an {@code AnnotationMirror} that includes attributes in the order
    * defined in the annotation type. This will produce the same output for {@code
-   * com.google.auto.common.AnnotationMirrors#equivalence() equal} {@link AnnotationMirror}s even if
+   * com.google.auto.common.AnnotationMirrors#equivalence() equal} {@code AnnotationMirror}s even if
    * default values are omitted or their attributes were written in different orders, e.g.
    * {@code @A(b = "b", c = "c")} and {@code @A(c = "c", b = "b", attributeWithDefaultValue =
    * "default value")}.
@@ -98,6 +98,5 @@ final class MoreAnnotationMirrors {
         null);
   }
 
-  private MoreAnnotationMirrors() {
-  }
+  private MoreAnnotationMirrors() {}
 }

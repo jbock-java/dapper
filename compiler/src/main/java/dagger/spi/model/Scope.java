@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,85 +17,76 @@
 package dagger.spi.model;
 
 import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.javapoet.TypeNames;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
-import jakarta.inject.Singleton;
 
-/** A representation of a {@link jakarta.inject.Scope}. */
-// TODO(ronshapiro): point to SimpleAnnotationMirror
-public final class Scope {
-
-  private final DaggerAnnotation scopeAnnotation;
-
-  private Scope(DaggerAnnotation scopeAnnotation) {
-    this.scopeAnnotation = requireNonNull(scopeAnnotation);
-  }
-
+/** A representation of a {@code jakarta.inject.Scope}. */
+@AutoValue
+public abstract class Scope {
   /**
-   * Creates a {@link Scope} object from the {@link jakarta.inject.Scope}-annotated annotation type.
+   * Creates a {@code Scope} object from the {@code jakarta.inject.Scope}-annotated annotation type.
    */
   public static Scope scope(DaggerAnnotation scopeAnnotation) {
-    Preconditions.checkArgument(isScope(scopeAnnotation));
-    return new Scope(scopeAnnotation);
+    checkArgument(isScope(scopeAnnotation));
+    return new AutoValue_Scope(scopeAnnotation);
   }
 
   /**
-   * Returns {@code true} if {@link #scopeAnnotation()} is a {@link jakarta.inject.Scope} annotation.
+   * Returns {@code true} if {@code #scopeAnnotation()} is a {@code jakarta.inject.Scope} annotation.
    */
   public static boolean isScope(DaggerAnnotation scopeAnnotation) {
     return isScope(scopeAnnotation.annotationTypeElement());
   }
 
   /**
-   * Returns {@code true} if {@code scopeAnnotationType} is a {@link jakarta.inject.Scope} annotation.
+   * Returns {@code true} if {@code scopeAnnotationType} is a {@code jakarta.inject.Scope} annotation.
    */
   public static boolean isScope(DaggerTypeElement scopeAnnotationType) {
     // TODO(bcorso): Replace Scope class reference with class name once auto-common is updated.
     return isAnnotationPresent(scopeAnnotationType.java(), jakarta.inject.Scope.class);
   }
 
-  /** The {@link DaggerAnnotation} that represents the scope annotation. */
-  public DaggerAnnotation scopeAnnotation() {
-    return scopeAnnotation;
-  }
+  private static final ClassName PRODUCTION_SCOPE =
+      ClassName.get("dagger.producers", "ProductionScope");
+  private static final ClassName SINGLETON = ClassName.get("javax.inject", "Singleton");
+  private static final ClassName REUSABLE = ClassName.get("dagger", "Reusable");
+  private static final ClassName SCOPE = ClassName.get("javax.inject", "Scope");
 
-  public ClassName className() {
+
+  /** The {@code DaggerAnnotation} that represents the scope annotation. */
+  public abstract DaggerAnnotation scopeAnnotation();
+
+  public final ClassName className() {
     return scopeAnnotation().className();
   }
 
-  /** Returns {@code true} if this scope is the {@link Singleton @Singleton} scope. */
-  public boolean isSingleton() {
-    return isScope(TypeNames.SINGLETON);
+  /** Returns {@code true} if this scope is the {@code jakarta.inject.Singleton @Singleton} scope. */
+  public final boolean isSingleton() {
+    return isScope(SINGLETON);
   }
 
-  /** Returns {@code true} if this scope is the {@code @Reusable} scope. */
-  public boolean isReusable() {
-    return isScope(TypeNames.REUSABLE);
+  /** Returns {@code true} if this scope is the {@code dagger.Reusable @Reusable} scope. */
+  public final boolean isReusable() {
+    return isScope(REUSABLE);
+  }
+
+  /**
+   * Returns {@code true} if this scope is the {@code
+   * dagger.producers.ProductionScope @ProductionScope} scope.
+   */
+  public final boolean isProductionScope() {
+    return isScope(PRODUCTION_SCOPE);
   }
 
   private boolean isScope(ClassName annotation) {
     return scopeAnnotation().className().equals(annotation);
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Scope scope = (Scope) o;
-    return scopeAnnotation.equals(scope.scopeAnnotation);
-  }
-
-  @Override
-  public int hashCode() {
-    return scopeAnnotation.hashCode();
-  }
-
   /** Returns a debug representation of the scope. */
   @Override
-  public String toString() {
+  public final String toString() {
     return scopeAnnotation().toString();
   }
 }

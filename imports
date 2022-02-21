@@ -13,16 +13,23 @@ fi
 function replace () {
 	local A=$1
 	local B=$2
-	sed -i "s/^import static $A/import static $B/g" "$INPUT"
-	sed -i "s/^import $A/import $B/g" "$INPUT"
+	sed -i .bak "s/^import static $A/import static $B/g" "$INPUT"
+	sed -i .bak "s/^import $A/import $B/g" "$INPUT"
 }
 
 function delete () {
-	sed -i "/${1}$/d" $INPUT
+	sed -i .bak "/${1}$/d" $INPUT
 }
 
-sed -i "s/^import com.google.common.base.Equivalence;/import io.jbock.auto.common.Equivalence;/" $INPUT
-sed -i "s/^import com.google.common.base.Supplier;/import java.util.function.Supplier;/" $INPUT
+function mysed () {
+  sed -i .bak "$1" $INPUT
+  rm ${INPUT}.bak
+}
+
+mysed "s/^import com.google.common.base.Equivalence/import io.jbock.auto.common.Equivalence/"
+mysed "s/^import com.google.common.base.Supplier;/import java.util.function.Supplier;/"
+mysed  "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
+mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static dagger.internal.codegen.base.Util.asStream;/"
 
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
@@ -38,24 +45,46 @@ replace com.google.auto.value.extension.memoized.Memoized io.jbock.auto.value.ex
 replace dagger.internal.codegen.xprocessing.XTypeKt dagger.internal.codegen.xprocessing.XType
 replace dagger.internal.codegen.xprocessing.XElementKt dagger.internal.codegen.xprocessing.XElement
 
-delete "import com.google.errorprone.annotations.CheckReturnValue;"
+delete "^import com.google.errorprone.annotations.CheckReturnValue;"
 delete "@CheckReturnValue"
-delete "import com.google.errorprone.annotations.CanIgnoreReturnValue;"
+delete "^import com.google.errorprone.annotations.CanIgnoreReturnValue;"
 delete "@CanIgnoreReturnValue"
-delete "import com.google.common.annotations.Beta;"
+delete "^import com.google.common.annotations.Beta;"
 delete "@Beta"
-delete "import com.google.common.annotations.GwtCompatible;"
+delete "^import com.google.common.annotations.GwtCompatible;"
 delete "@GwtCompatible"
-delete "import javax.annotation.CheckForNull;"
-delete "import org.checkerframework.checker.nullness.qual.Nullable;"
+delete "^import javax.annotation.CheckForNull;"
+delete "^import org.checkerframework.checker.nullness.qual.Nullable;"
 delete "@ElementTypesAreNonnullByDefault"
-delete "import dagger.internal.codegen.base.MapType;"
-delete "import dagger.internal.codegen.base.SetType;"
+delete "^import dagger.internal.codegen.base.MapType;"
+delete "^import dagger.internal.codegen.base.SetType;"
+delete "^import static dagger.spi.model.BindingKind.COMPONENT_PRODUCTION;"
+delete "^import static dagger.spi.model.BindingKind.OPTIONAL;"
+delete "^import static dagger.spi.model.BindingKind.PRODUCTION;"
+delete "^import static dagger.internal.codegen.binding.BindingType.PRODUCTION;"
+delete "^import dagger.BindsOptionalOf;"
+delete "^import dagger.internal.codegen.base.OptionalType;"
+delete "^import dagger.multibindings.Multibinds;"
+delete "^import static dagger.internal.codegen.binding.MapKeys.getMapKey;"
+delete "^import static dagger.internal.codegen.binding.MapKeys.mapKeyType;"
+delete "^import com.google.common.util.concurrent.FluentFuture;"
+delete "^import com.google.common.util.concurrent.ListenableFuture;"
+delete "^import static dagger.internal.codegen.base.Scopes.productionScope;"
+delete "^import dagger.producers.CancellationPolicy;"
+delete "^import dagger.producers.internal.ProductionExecutorModule;"
+delete "^import dagger.producers.Produced;"
+delete "^import dagger.producers.Producer;"
+delete "^import org.checkerframework.checker.nullness.compatqual.NullableDecl;"
+delete "^import com.google.errorprone.annotations.FormatMethod;"
+delete "@FormatMethod"
 
-sed -i "s/<? extends @Nullable Object>/<?>/g" $INPUT
-sed -i "s/@CheckForNull //g" $INPUT
-sed -i "s/@Nullable //g" $INPUT
-sed -i "s/XElementKt::/XElement::/g" $INPUT
-sed -i "s/com.google.auto.value.AutoValue/io.jbock.auto.value.AutoValue/g" $INPUT
-sed -i "s/{@link dagger.multibindings/{@code dagger.multibindings/g" $INPUT
-sed -i "s/{@link javax.inject./{@link jakarta.inject./g" $INPUT
+mysed "s/<? extends @Nullable Object>/<?>/g"
+mysed "s/@CheckForNull //g"
+mysed "s/@Nullable //g"
+mysed "s/@NullableDecl //g"
+mysed "s/XElementKt::/XElement::/g"
+mysed "s/com.google.auto.value.AutoValue/io.jbock.auto.value.AutoValue/g"
+mysed "s/{@link dagger.multibindings/{@code dagger.multibindings/g"
+mysed "s/{@link javax.inject./{@link jakarta.inject./g"
+mysed "s/{@linkplain/{@code/g"
+mysed "s/{@link/{@code/g"

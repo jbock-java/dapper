@@ -16,10 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.spi.model.BindingKind.INJECTION;
-import static java.util.Objects.requireNonNull;
 
+import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -27,11 +28,10 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Provider;
 
 /**
- * A {@code Provider} creation expression for an {@link jakarta.inject.Inject @Inject}-constructed
+ * A {@link Provider} creation expression for an {@link jakarta.inject.Inject @Inject}-constructed
  * class or a {@link dagger.Provides @Provides}-annotated module method.
  */
 // TODO(dpb): Resolve with ProducerCreationExpression.
@@ -47,7 +47,7 @@ final class InjectionOrProvisionProviderCreationExpression
       @Assisted ContributionBinding binding,
       ComponentImplementation componentImplementation,
       ComponentRequestRepresentations componentRequestRepresentations) {
-    this.binding = requireNonNull(binding);
+    this.binding = checkNotNull(binding);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.componentRequestRepresentations = componentRequestRepresentations;
   }
@@ -73,7 +73,7 @@ final class InjectionOrProvisionProviderCreationExpression
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     InjectionOrProvisionProviderCreationExpression create(ContributionBinding binding);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Dagger Authors.
+ * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+// TODO(bcorso): Move this into dagger/spi?
 /**
- * A pluggable visitor for {@link BindingGraph}.
+ * A pluggable visitor for {@code BindingGraph}.
  *
  * <p>Note: This is still experimental and will change.
  */
@@ -37,45 +38,41 @@ public interface BindingGraphPlugin {
   void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter);
 
   /**
-   * Initializes this plugin with a {@link Filer} that it can use to write Java or other files based
+   * Initializes this plugin with a {@code Filer} that it can use to write Java or other files based
    * on the binding graph. This will be called once per instance of this plugin, before any graph is
-   * {@linkplain #visitGraph(BindingGraph, DiagnosticReporter) visited}.
+   * {@code #visitGraph(BindingGraph, DiagnosticReporter) visited}.
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getFiler()
    */
-  default void initFiler(Filer filer) {
-  }
+  default void initFiler(Filer filer) {}
 
   /**
-   * Initializes this plugin with a {@link Types} instance. This will be called once per instance of
-   * this plugin, before any graph is {@linkplain #visitGraph(BindingGraph, DiagnosticReporter)
+   * Initializes this plugin with a {@code Types} instance. This will be called once per instance of
+   * this plugin, before any graph is {@code #visitGraph(BindingGraph, DiagnosticReporter)
    * visited}.
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getTypeUtils()
    */
-  default void initTypes(Types types) {
-  }
+  default void initTypes(Types types) {}
 
   /**
-   * Initializes this plugin with a {@link Elements} instance. This will be called once per instance
-   * of this plugin, before any graph is {@linkplain #visitGraph(BindingGraph, DiagnosticReporter)
+   * Initializes this plugin with a {@code Elements} instance. This will be called once per instance
+   * of this plugin, before any graph is {@code #visitGraph(BindingGraph, DiagnosticReporter)
    * visited}.
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getElementUtils()
    */
-  default void initElements(Elements elements) {
-  }
+  default void initElements(Elements elements) {}
 
   /**
    * Initializes this plugin with a filtered view of the options passed on the {@code javac}
-   * command-line for all keys from {@link #supportedOptions()}. This will be called once per
-   * instance of this plugin, before any graph is {@linkplain #visitGraph(BindingGraph,
+   * command-line for all keys from {@code #supportedOptions()}. This will be called once per
+   * instance of this plugin, before any graph is {@code #visitGraph(BindingGraph,
    * DiagnosticReporter) visited}.
    *
    * @see javax.annotation.processing.ProcessingEnvironment#getOptions()
    */
-  default void initOptions(Map<String, String> options) {
-  }
+  default void initOptions(Map<String, String> options) {}
 
   /**
    * Returns the annotation-processing options that this plugin uses to configure behavior.
@@ -87,8 +84,8 @@ public interface BindingGraphPlugin {
   }
 
   /**
-   * A distinguishing name of the plugin that will be used in diagnostics printed to the {@link
-   * Messager}. By default, the {@linkplain Class#getCanonicalName() fully qualified name} of the
+   * A distinguishing name of the plugin that will be used in diagnostics printed to the {@code
+   * Messager}. By default, the {@code Class#getCanonicalName() fully qualified name} of the
    * plugin is used.
    */
   default String pluginName() {

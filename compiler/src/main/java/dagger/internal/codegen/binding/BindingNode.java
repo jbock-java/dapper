@@ -18,9 +18,10 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import dagger.Module;
+import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
+import dagger.Module;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;
@@ -28,11 +29,11 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
-import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
+import javax.lang.model.element.Element;
 
 /**
- * An implementation of {@link dagger.spi.model.Binding} that also exposes {@link
+ * An implementation of {@code dagger.spi.model.Binding} that also exposes {@code
  * BindingDeclaration}s associated with the binding.
  */
 // TODO(dpb): Consider a supertype of dagger.spi.model.Binding that
@@ -61,11 +62,13 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   public abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
   /**
-   * The elements (other than the binding's {@link #bindingElement()}) that are associated with the
-   * binding.
+   * The {@code Element}s (other than the binding's {@code #bindingElement()}) that are associated
+   * with the binding.
    *
    * <ul>
-   *   <li>{@linkplain Module#subcomponents() module subcomponent} declarations
+   *   <li>{@code BindsOptionalOf optional binding} declarations
+   *   <li>{@code Module#subcomponents() module subcomponent} declarations
+   *   <li>{@code Multibinds multibinding} declarations
    * </ul>
    */
   public final Iterable<BindingDeclaration> associatedDeclarations() {
@@ -100,6 +103,16 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   @Override
   public Optional<Scope> scope() {
     return delegate().scope();
+  }
+
+  @Override
+  public boolean isNullable() {
+    return delegate().isNullable();
+  }
+
+  @Override
+  public boolean isProduction() {
+    return false;
   }
 
   @Override

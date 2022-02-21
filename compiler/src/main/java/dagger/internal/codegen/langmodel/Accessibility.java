@@ -16,17 +16,14 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.getPackage;
 import static io.jbock.auto.common.MoreTypes.asElement;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -48,7 +45,7 @@ import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
- * Utility methods for determining whether a {@linkplain TypeMirror type} or an {@linkplain Element
+ * Utility methods for determining whether a {@code TypeMirror type} or an {@code Element
  * element} is accessible given the rules outlined in <a
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.6">section 6.6 of the
  * Java Language Specification</a>.
@@ -69,37 +66,8 @@ public final class Accessibility {
   }
 
   /** Returns true if the given type can be referenced from code in the given package. */
-  public static boolean isTypeAccessibleFrom(XType type, String packageName) {
-    return isTypeAccessibleFrom(toJavac(type), packageName);
-  }
-
-  /** Returns true if the given type can be referenced from code in the given package. */
   public static boolean isTypeAccessibleFrom(TypeMirror type, String packageName) {
     return type.accept(new TypeAccessibilityVisitor(Optional.of(packageName)), null);
-  }
-
-  /**
-   * Returns true if the given type is protected and can be referenced from the given requesting
-   * element.
-   */
-  public static boolean isProtectedMemberOf(DeclaredType type, XTypeElement requestingElement) {
-    return isProtectedAccessibleFromElement(type.asElement(), requestingElement);
-  }
-
-  private static Boolean isProtectedAccessibleFromElement(
-      Element element, XTypeElement requestingElement) {
-    if (!element.getModifiers().contains(PROTECTED)) {
-      return false;
-    }
-    if (element.getEnclosingElement().equals(toJavac(requestingElement))) {
-      return true;
-    }
-    // Check if the element is protected member of the requesting element's super class.
-    if (requestingElement.getSuperType() != null) {
-      return isProtectedAccessibleFromElement(
-          element, requestingElement.getSuperType().getTypeElement());
-    }
-    return false;
   }
 
   private static final class TypeAccessibilityVisitor extends SimpleTypeVisitor8<Boolean, Void> {
@@ -272,6 +240,5 @@ public final class Accessibility {
         : isTypePubliclyAccessible(type);
   }
 
-  private Accessibility() {
-  }
+  private Accessibility() {}
 }

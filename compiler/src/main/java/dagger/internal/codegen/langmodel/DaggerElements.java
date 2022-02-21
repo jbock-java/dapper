@@ -16,28 +16,28 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.hasModifiers;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Lists.asList;
 import static java.util.Comparator.comparing;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.extension.DaggerStreams;
-import dagger.internal.codegen.xprocessing.XAnnotated;
-import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
-import io.jbock.common.graph.Traverser;
+import dagger.internal.codegen.collect.FluentIterable;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Iterables;
 import io.jbock.javapoet.ClassName;
+import dagger.Reusable;
+import dagger.internal.codegen.base.ClearableCache;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -51,7 +51,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
@@ -64,54 +63,50 @@ import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.NoType;
-import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.AbstractTypeVisitor8;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.SimpleElementVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 
-/** Extension of {@link Elements} that adds Dagger-specific methods. */
+/** Extension of {@code Elements} that adds Dagger-specific methods. */
+@Reusable
 public final class DaggerElements implements Elements, ClearableCache {
-  private final Map<TypeElement, Set<ExecutableElement>> getLocalAndInheritedMethodsCache =
+  private final Map<TypeElement, ImmutableSet<ExecutableElement>> getLocalAndInheritedMethodsCache =
       new HashMap<>();
   private final Elements elements;
   private final Types types;
 
   public DaggerElements(Elements elements, Types types) {
-    this.elements = requireNonNull(elements);
-    this.types = requireNonNull(types);
+    this.elements = checkNotNull(elements);
+    this.types = checkNotNull(types);
   }
 
   /**
-   * Returns {@code true} if {@code encloser} is equal to {@code enclosed} or recursively encloses
-   * it.
+   * Returns {@code true} if {@code encloser} is equal to or recursively encloses {@code enclosed}.
    */
-  public static boolean elementEncloses(TypeElement encloser, Element enclosed) {
-    for (Element element : GET_ENCLOSED_ELEMENTS.breadthFirst(encloser)) {
-      if (element.equals(enclosed)) {
+  public static boolean transitivelyEncloses(Element encloser, Element enclosed) {
+    Element current = enclosed;
+    while (current != null) {
+      if (current.equals(encloser)) {
         return true;
       }
+      current = current.getEnclosingElement();
     }
     return false;
   }
 
-  private static final Traverser<Element> GET_ENCLOSED_ELEMENTS =
-      Traverser.forTree(Element::getEnclosedElements);
-
-  public Set<ExecutableElement> getLocalAndInheritedMethods(TypeElement type) {
+  public ImmutableSet<ExecutableElement> getLocalAndInheritedMethods(TypeElement type) {
     return getLocalAndInheritedMethodsCache.computeIfAbsent(
-        type, k -> MoreElements.getLocalAndInheritedMethods(type, types, elements));
+        type, k -> ImmutableSet.copyOf(MoreElements.getLocalAndInheritedMethods(type, types, elements)));
   }
 
-  public Set<ExecutableElement> getUnimplementedMethods(TypeElement type) {
-    return getLocalAndInheritedMethods(type).stream()
+  public ImmutableSet<ExecutableElement> getUnimplementedMethods(TypeElement type) {
+    return FluentIterable.from(getLocalAndInheritedMethods(type))
         .filter(hasModifiers(ABSTRACT))
-        .collect(DaggerStreams.toImmutableSet());
+        .toSet();
   }
 
   @Override
@@ -124,23 +119,17 @@ public final class DaggerElements implements Elements, ClearableCache {
     return getTypeElement(className.canonicalName());
   }
 
-  /** Returns the argument or the closest enclosing element that is a {@link TypeElement}. */
+  /** Returns the argument or the closest enclosing element that is a {@code TypeElement}. */
   public static TypeElement closestEnclosingTypeElement(Element element) {
-    return element.accept(CLOSEST_ENCLOSING_TYPE_ELEMENT, null);
+    Element current = element;
+    while (current != null) {
+      if (MoreElements.isType(current)) {
+        return MoreElements.asType(current);
+      }
+      current = current.getEnclosingElement();
+    }
+    throw new IllegalStateException("There is no enclosing TypeElement for: " + element);
   }
-
-  private static final ElementVisitor<TypeElement, Void> CLOSEST_ENCLOSING_TYPE_ELEMENT =
-      new SimpleElementVisitor8<>() {
-        @Override
-        protected TypeElement defaultAction(Element element, Void p) {
-          return element.getEnclosingElement().accept(this, null);
-        }
-
-        @Override
-        public TypeElement visitType(TypeElement type, Void p) {
-          return type;
-        }
-      };
 
   /**
    * Compares elements according to their declaration order among siblings. Only valid to compare
@@ -158,7 +147,7 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /**
-   * Returns {@code true} iff the given element has an {@link AnnotationMirror} whose {@linkplain
+   * Returns {@code true} iff the given element has an {@code AnnotationMirror} whose {@code
    * AnnotationMirror#getAnnotationType() annotation type} has the same canonical name as any of
    * that of {@code annotationClasses}.
    */
@@ -172,8 +161,14 @@ public final class DaggerElements implements Elements, ClearableCache {
     return false;
   }
 
+  @SafeVarargs
+  public static boolean isAnyAnnotationPresent(
+      Element element, ClassName first, ClassName... otherAnnotations) {
+    return isAnyAnnotationPresent(element, asList(first, otherAnnotations));
+  }
+
   /**
-   * Returns {@code true} iff the given element has an {@link AnnotationMirror} whose {@linkplain
+   * Returns {@code true} iff the given element has an {@code AnnotationMirror} whose {@code
    * AnnotationMirror#getAnnotationType() annotation type} is equivalent to {@code annotationType}.
    */
   public static boolean isAnnotationPresent(Element element, TypeMirror annotationType) {
@@ -183,9 +178,9 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /**
-   * Returns {@code true} iff the given element has an {@link AnnotationMirror} whose {@link
+   * Returns {@code true} iff the given element has an {@code AnnotationMirror} whose {@code
    * AnnotationMirror#getAnnotationType() annotation type} has the same canonical name as that of
-   * {@code annotationClass}. This method is a safer alternative to calling {@link
+   * {@code annotationClass}. This method is a safer alternative to calling {@code
    * Element#getAnnotation} and checking for {@code null} as it avoids any interaction with
    * annotation proxies.
    */
@@ -193,35 +188,14 @@ public final class DaggerElements implements Elements, ClearableCache {
     return getAnnotationMirror(element, annotationName).isPresent();
   }
 
-  /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
-  public static boolean hasAnyAnnotation(XAnnotated annotated, ClassName... annotations) {
-    return hasAnyAnnotation(annotated, Arrays.asList(annotations));
-  }
-
-  /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
-  public static boolean hasAnyAnnotation(XAnnotated annotated, Collection<ClassName> annotations) {
-    return annotations.stream().anyMatch(annotated::hasAnnotation);
-  }
-
   /**
-   * Returns any annotation from {@code annotations} that annotates {@code annotated} or else {@code
-   * Optional.empty()}.
+   * Returns the annotation present on {@code element} whose type is {@code first} or within {@code
+   * rest}, checking each annotation type in order.
    */
-  public static Optional<XAnnotation> getAnyAnnotation(
-      XAnnotated annotated, ClassName... annotations) {
-    return getAnyAnnotation(annotated, Arrays.asList(annotations));
-  }
-
-  /**
-   * Returns any annotation from {@code annotations} that annotates {@code annotated} or else
-   * {@code Optional.empty()}.
-   */
-  public static Optional<XAnnotation> getAnyAnnotation(
-      XAnnotated annotated, Collection<ClassName> annotations) {
-    return annotations.stream()
-        .filter(annotated::hasAnnotation)
-        .map(annotated::getAnnotation)
-        .findFirst();
+  @SafeVarargs
+  public static Optional<AnnotationMirror> getAnyAnnotation(
+      Element element, ClassName first, ClassName... rest) {
+    return getAnyAnnotation(element, asList(first, rest));
   }
 
   /**
@@ -237,20 +211,20 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /** Returns the annotations present on {@code element} of all types. */
-  public static Set<AnnotationMirror> getAllAnnotations(
-      Element element, List<ClassName> annotations) {
-    return element.getAnnotationMirrors().stream()
-        .filter(hasAnnotationTypeIn(annotations))
-        .collect(toImmutableSet());
+  @SafeVarargs
+  public static ImmutableSet<AnnotationMirror> getAllAnnotations(
+      Element element, ClassName first, ClassName... rest) {
+    return ImmutableSet.copyOf(
+        Iterables.filter(
+            element.getAnnotationMirrors(), hasAnnotationTypeIn(asList(first, rest))::test));
   }
 
   // Note: This is similar to auto-common's MoreElements except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreElements?
-
   /**
-   * Returns an {@link AnnotationMirror} for the annotation of type {@code annotationClass} on
-   * {@code element}, or {@link Optional#empty()} if no such annotation exists. This method is a
-   * safer alternative to calling {@link Element#getAnnotation} as it avoids any interaction with
+   * Returns an {@code AnnotationMirror} for the annotation of type {@code annotationClass} on
+   * {@code element}, or {@code Optional#empty()} if no such annotation exists. This method is a
+   * safer alternative to calling {@code Element#getAnnotation} as it avoids any interaction with
    * annotation proxies.
    */
   public static Optional<AnnotationMirror> getAnnotationMirror(
@@ -273,6 +247,14 @@ public final class DaggerElements implements Elements, ClearableCache {
     return annotation ->
         annotationClassNames.contains(
             MoreTypes.asTypeElement(annotation.getAnnotationType()).getQualifiedName().toString());
+  }
+
+  public static ImmutableSet<String> suppressedWarnings(Element element) {
+    SuppressWarnings suppressedWarnings = element.getAnnotation(SuppressWarnings.class);
+    if (suppressedWarnings == null) {
+      return ImmutableSet.of();
+    }
+    return ImmutableSet.copyOf(suppressedWarnings.value());
   }
 
   /**
@@ -319,8 +301,8 @@ public final class DaggerElements implements Elements, ClearableCache {
     return t.accept(JVM_DESCRIPTOR_TYPE_VISITOR, null);
   }
 
-  private static final AbstractTypeVisitor8<String, Void> JVM_DESCRIPTOR_TYPE_VISITOR =
-      new AbstractTypeVisitor8<>() {
+  private static final SimpleTypeVisitor8<String, Void> JVM_DESCRIPTOR_TYPE_VISITOR =
+      new SimpleTypeVisitor8<String, Void>() {
 
         @Override
         public String visitArray(ArrayType arrayType, Void v) {
@@ -362,11 +344,6 @@ public final class DaggerElements implements Elements, ClearableCache {
         }
 
         @Override
-        public String visitNull(NullType nullType, Void v) {
-          return visitUnknown(nullType, null);
-        }
-
-        @Override
         public String visitPrimitive(PrimitiveType primitiveType, Void v) {
           switch (primitiveType.getKind()) {
             case BOOLEAN:
@@ -397,12 +374,7 @@ public final class DaggerElements implements Elements, ClearableCache {
         }
 
         @Override
-        public String visitUnion(UnionType unionType, Void v) {
-          return visitUnknown(unionType, null);
-        }
-
-        @Override
-        public String visitUnknown(TypeMirror typeMirror, Void v) {
+        public String defaultAction(TypeMirror typeMirror, Void v) {
           throw new IllegalArgumentException("Unsupported type: " + typeMirror);
         }
 
@@ -444,7 +416,7 @@ public final class DaggerElements implements Elements, ClearableCache {
         }
       };
 
-  /** Returns the type element or throws {@link TypeNotPresentException} if it is null. */
+  /** Returns the type element or throws {@code TypeNotPresentException} if it is null. */
   public static XTypeElement checkTypePresent(XProcessingEnv processingEnv, ClassName className) {
     XTypeElement type = processingEnv.findTypeElement(className);
     if (type == null) {
@@ -454,7 +426,7 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /**
-   * Invokes {@link Elements#getTypeElement(CharSequence)}, throwing {@link TypeNotPresentException}
+   * Invokes {@code Elements#getTypeElement(CharSequence)}, throwing {@code TypeNotPresentException}
    * if it is not accessible in the current compilation.
    */
   public TypeElement checkTypePresent(String typeName) {
@@ -474,6 +446,14 @@ public final class DaggerElements implements Elements, ClearableCache {
   public Map<? extends ExecutableElement, ? extends AnnotationValue> getElementValuesWithDefaults(
       AnnotationMirror a) {
     return elements.getElementValuesWithDefaults(a);
+  }
+
+  /** Returns a map of annotation values keyed by attribute name. */
+  public Map<String, ? extends AnnotationValue> getElementValuesWithDefaultsByName(
+      AnnotationMirror a) {
+    ImmutableMap.Builder<String, AnnotationValue> builder = ImmutableMap.builder();
+    getElementValuesWithDefaults(a).forEach((k, v) -> builder.put(k.getSimpleName().toString(), v));
+    return builder.build();
   }
 
   @Override

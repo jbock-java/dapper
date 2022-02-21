@@ -1,5 +1,6 @@
 package dagger.internal.codegen.collect;
 
+import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
 
   private final Map<X, Y> delegate;
 
-  private ImmutableMap(Map<X, Y> delegate) {
+  ImmutableMap(Map<X, Y> delegate) {
     this.delegate = delegate;
   }
 
@@ -98,5 +99,13 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
   @Override
   public Set<Entry<X, Y>> entrySet() {
     return delegate.entrySet();
+  }
+
+  final Map<X, Y> delegate() {
+    return delegate;
+  }
+
+  public ImmutableSetMultimap<X, Y> asMultimap() {
+    return new ImmutableSetMultimap<>(Util.transformValues(delegate, Set::of));
   }
 }

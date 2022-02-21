@@ -17,6 +17,7 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.writing.ProvisionBindingRepresentation.needsCaching;
 import static dagger.spi.model.BindingKind.DELEGATE;
 
@@ -25,6 +26,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
+import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.spi.model.RequestKind;
 import java.util.HashMap;
@@ -41,8 +43,9 @@ final class FrameworkInstanceBindingRepresentation {
   @AssistedInject
   FrameworkInstanceBindingRepresentation(
       @Assisted ProvisionBinding binding,
-      @Assisted FrameworkInstanceSupplier providerField,
       BindingGraph graph,
+      @Assisted FrameworkInstanceSupplier providerField,
+      ComponentImplementation componentImplementation,
       DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory,
       DerivedFromFrameworkInstanceRequestRepresentation.Factory
           derivedFromFrameworkInstanceRequestRepresentationFactory,
@@ -56,7 +59,7 @@ final class FrameworkInstanceBindingRepresentation {
             : providerInstanceRequestRepresentationFactory.create(binding, providerField);
   }
 
-  RequestRepresentation getRequestRepresentation(BindingRequest request) {
+  public RequestRepresentation getRequestRepresentation(BindingRequest request) {
     return reentrantComputeIfAbsent(
         requestRepresentations, request, this::getRequestRepresentationUncached);
   }
@@ -67,9 +70,10 @@ final class FrameworkInstanceBindingRepresentation {
       case LAZY:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceRequestRepresentationFactory.create(
-            binding, providerRequestRepresentation, request.requestKind());
+            binding, providerRequestRepresentation, request.requestKind(), FrameworkType.PROVIDER);
       case PROVIDER:
         return providerRequestRepresentation;
+
       default:
         throw new AssertionError(
             String.format("Invalid binding request kind: %s", request.requestKind()));
@@ -77,9 +81,8 @@ final class FrameworkInstanceBindingRepresentation {
   }
 
   @AssistedFactory
-  interface Factory {
+  static interface Factory {
     FrameworkInstanceBindingRepresentation create(
-        ProvisionBinding binding,
-        FrameworkInstanceSupplier providerField);
+        ProvisionBinding binding, FrameworkInstanceSupplier providerField);
   }
 }

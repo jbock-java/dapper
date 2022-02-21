@@ -16,12 +16,15 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.collect.Lists.asList;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.langmodel.DaggerElements.transitivelyEncloses;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
@@ -29,44 +32,41 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
 import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
-import jakarta.inject.Inject;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
+import jakarta.inject.Inject;
+import javax.lang.model.util.Elements;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
+import javax.lang.model.util.Types;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
 import javax.tools.Diagnostic;
 
 /**
- * Combines many {@link BindingGraphPlugin} implementations. This helps reduce spam by combining
+ * Combines many {@code BindingGraphPlugin} implementations. This helps reduce spam by combining
  * all of the messages that are reported on the root component.
  */
 public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
-  private final Set<BindingGraphPlugin> plugins;
+  private final ImmutableSet<BindingGraphPlugin> plugins;
   private final String pluginName;
   private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-  /** Factory class for {@link CompositeBindingGraphPlugin}. */
+  /** Factory class for {@code CompositeBindingGraphPlugin}. */
   public static final class Factory {
     private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
 
-    @Inject
-    Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
+    @Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
       this.messageGeneratorFactory = messageGeneratorFactory;
     }
 
     public CompositeBindingGraphPlugin create(
-        Set<BindingGraphPlugin> plugins, String pluginName) {
+        ImmutableSet<BindingGraphPlugin> plugins, String pluginName) {
       return new CompositeBindingGraphPlugin(plugins, pluginName, messageGeneratorFactory);
     }
   }
 
   private CompositeBindingGraphPlugin(
-      Set<BindingGraphPlugin> plugins,
+      ImmutableSet<BindingGraphPlugin> plugins,
       String pluginName,
       DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
     this.plugins = plugins;
@@ -144,15 +144,17 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     /** Reports all of the stored diagnostics. */
     void report() {
-      mergedDiagnosticKind.ifPresent(kind -> delegate.reportComponent(
-          kind,
-          graph.rootComponentNode(),
-          PackageNameCompressor.compressPackagesInMessage(messageBuilder.toString())));
+      if (mergedDiagnosticKind.isPresent()) {
+        delegate.reportComponent(
+            mergedDiagnosticKind.get(),
+            graph.rootComponentNode(),
+            PackageNameCompressor.compressPackagesInMessage(messageBuilder.toString()));
+      }
     }
 
     @Override
     public void reportComponent(Diagnostic.Kind diagnosticKind, ComponentNode componentNode,
-                                String message) {
+        String message) {
       addMessage(diagnosticKind, message);
       messageGenerator.appendComponentPathUnlessAtRoot(messageBuilder, componentNode);
     }
@@ -170,9 +172,19 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     @Override
     public void reportBinding(Diagnostic.Kind diagnosticKind, MaybeBinding binding,
-                              String message) {
+        String message) {
       addMessage(diagnosticKind,
           String.format("%s%s", message, messageGenerator.getMessage(binding)));
+    }
+
+    @Override
+    public void reportBinding(
+        Diagnostic.Kind diagnosticKind,
+        MaybeBinding binding,
+        String messageFormat,
+        Object firstArg,
+        Object... moreArgs) {
+      reportBinding(diagnosticKind, binding, formatMessage(messageFormat, firstArg, moreArgs));
     }
 
     @Override
@@ -183,13 +195,24 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     @Override
+    public void reportDependency(
+        Diagnostic.Kind diagnosticKind,
+        DependencyEdge dependencyEdge,
+        String messageFormat,
+        Object firstArg,
+        Object... moreArgs) {
+      reportDependency(
+          diagnosticKind, dependencyEdge, formatMessage(messageFormat, firstArg, moreArgs));
+    }
+
+    @Override
     public void reportSubcomponentFactoryMethod(
         Diagnostic.Kind diagnosticKind,
         ChildFactoryMethodEdge childFactoryMethodEdge,
         String message) {
       // TODO(erichang): This repeats some of the logic in DiagnosticReporterImpl. Remove when
       // merged.
-      if (elementEncloses(
+      if (transitivelyEncloses(
           graph.rootComponentNode().componentPath().currentComponent().java(),
           childFactoryMethodEdge.factoryMethod().java())) {
         // Let this pass through since it is not an error reported on the root component
@@ -198,7 +221,9 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
         addMessage(
             diagnosticKind,
             String.format(
-                "[%s] %s", elementToString(childFactoryMethodEdge.factoryMethod().java()), message));
+                "[%s] %s",
+                elementToString(childFactoryMethodEdge.factoryMethod().java()),
+                message));
       }
     }
 
@@ -215,9 +240,9 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
     /** Adds a message to the stored aggregated message. */
     private void addMessage(Diagnostic.Kind diagnosticKind, String message) {
-      requireNonNull(diagnosticKind);
-      requireNonNull(message);
-      requireNonNull(currentPluginName);
+      checkNotNull(diagnosticKind);
+      checkNotNull(message);
+      checkState(currentPluginName != null);
 
       // Add a separator if this isn't the first message
       if (mergedDiagnosticKind.isPresent()) {
@@ -231,13 +256,13 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
     }
 
     private static String formatMessage(String messageFormat, Object firstArg, Object[] moreArgs) {
-      return String.format(messageFormat, Stream.concat(Stream.of(firstArg), Arrays.stream(moreArgs)).toArray());
+      return String.format(messageFormat, asList(firstArg, moreArgs).toArray());
     }
 
     private void mergeDiagnosticKind(Diagnostic.Kind diagnosticKind) {
-      Preconditions.checkArgument(diagnosticKind != Diagnostic.Kind.MANDATORY_WARNING,
+      checkArgument(diagnosticKind != Diagnostic.Kind.MANDATORY_WARNING,
           "Dagger plugins should not be issuing mandatory warnings");
-      if (mergedDiagnosticKind.isEmpty()) {
+      if (!mergedDiagnosticKind.isPresent()) {
         mergedDiagnosticKind = Optional.of(diagnosticKind);
         return;
       }

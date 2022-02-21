@@ -16,14 +16,18 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.collect.ImmutableList;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
@@ -32,21 +36,17 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.FrameworkTypeMapper;
+import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import jakarta.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
@@ -54,12 +54,14 @@ import javax.lang.model.type.TypeMirror;
 public final class ComponentRequestRepresentations {
   // TODO(dpb,ronshapiro): refactor this and ComponentRequirementExpressions into a
   // HierarchicalComponentMap<K, V>, or perhaps this use a flattened ImmutableMap, built from its
-  // parents? If so, maybe make BindingExpression.Factory create it.
+  // parents? If so, maybe make RequestRepresentation.Factory create it.
 
   private final Optional<ComponentRequestRepresentations> parent;
   private final BindingGraph graph;
   private final ComponentImplementation componentImplementation;
   private final ComponentRequirementExpressions componentRequirementExpressions;
+  private final MembersInjectionBindingRepresentation.Factory
+      membersInjectionBindingRepresentationFactory;
   private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
   private final DaggerTypes types;
   private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
@@ -70,13 +72,16 @@ public final class ComponentRequestRepresentations {
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       ComponentRequirementExpressions componentRequirementExpressions,
+      MembersInjectionBindingRepresentation.Factory membersInjectionBindingRepresentationFactory,
       ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory,
       DaggerTypes types) {
     this.parent = parent;
     this.graph = graph;
     this.componentImplementation = componentImplementation;
-    this.componentRequirementExpressions = requireNonNull(componentRequirementExpressions);
+    this.membersInjectionBindingRepresentationFactory =
+        membersInjectionBindingRepresentationFactory;
     this.provisionBindingRepresentationFactory = provisionBindingRepresentationFactory;
+    this.componentRequirementExpressions = checkNotNull(componentRequirementExpressions);
     this.types = types;
   }
 
@@ -114,9 +119,9 @@ public final class ComponentRequestRepresentations {
     return makeParametersCodeBlock(getCreateMethodArgumentsCodeBlocks(binding, requestingClass));
   }
 
-  private List<CodeBlock> getCreateMethodArgumentsCodeBlocks(
+  private ImmutableList<CodeBlock> getCreateMethodArgumentsCodeBlocks(
       ContributionBinding binding, ClassName requestingClass) {
-    List<CodeBlock> arguments = new ArrayList<>();
+    ImmutableList.Builder<CodeBlock> arguments = ImmutableList.builder();
 
     if (binding.requiresModuleInstance()) {
       arguments.add(
@@ -131,15 +136,15 @@ public final class ComponentRequestRepresentations {
         .map(Expression::codeBlock)
         .forEach(arguments::add);
 
-    return arguments;
+    return arguments.build();
   }
 
   private static BindingRequest frameworkRequest(
       ContributionBinding binding, DependencyRequest dependency) {
     // TODO(bcorso): See if we can get rid of FrameworkTypeMatcher
     FrameworkType frameworkType =
-        FrameworkTypeMapper.forBindingType()
-            .getFrameworkType();
+        FrameworkTypeMapper.forBindingType(binding.bindingType())
+            .getFrameworkType(dependency.kind());
     return BindingRequest.bindingRequest(dependency.key(), frameworkType);
   }
 
@@ -171,7 +176,7 @@ public final class ComponentRequestRepresentations {
 
   /** Returns the implementation of a component method. */
   public MethodSpec getComponentMethod(ComponentMethodDescriptor componentMethod) {
-    Preconditions.checkArgument(componentMethod.dependencyRequest().isPresent());
+    checkArgument(componentMethod.dependencyRequest().isPresent());
     BindingRequest request = bindingRequest(componentMethod.dependencyRequest().get());
     return MethodSpecs.overriding(
             componentMethod.methodElement(), graph.componentTypeElement().getType())
@@ -189,16 +194,23 @@ public final class ComponentRequestRepresentations {
       return getBindingRepresentation(localBinding.get()).getRequestRepresentation(request);
     }
 
-    Preconditions.checkArgument(parent.isPresent(), "no expression found for %s", request);
+    checkArgument(parent.isPresent(), "no expression found for %s", request);
     return parent.get().getRequestRepresentation(request);
   }
 
-  BindingRepresentation getBindingRepresentation(Binding binding) {
+  private BindingRepresentation getBindingRepresentation(Binding binding) {
     return reentrantComputeIfAbsent(
         representations, binding, this::getBindingRepresentationUncached);
   }
 
   private BindingRepresentation getBindingRepresentationUncached(Binding binding) {
-    return provisionBindingRepresentationFactory.create((ProvisionBinding) binding);
+    switch (binding.bindingType()) {
+      case MEMBERS_INJECTION:
+        return membersInjectionBindingRepresentationFactory.create(
+            (MembersInjectionBinding) binding);
+      case PROVISION:
+        return provisionBindingRepresentationFactory.create((ProvisionBinding) binding);
+    }
+    throw new AssertionError();
   }
 }
