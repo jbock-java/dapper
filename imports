@@ -18,9 +18,7 @@ function replace () {
 }
 
 function delete () {
-	local P="/${1}$/d"
-	echo "$P"
-	sed -i "$P" $INPUT
+	sed -i "/${1}$/d" $INPUT
 }
 
 replace com.google.auto.common. io.jbock.auto.common.
