@@ -6,7 +6,12 @@ die () {
 }
 
 if [[ -z "$1" ]]; then
-  die "usage: pick<JavaClassSimpleName>"
+  die "usage: [internal] pick<JavaClassSimpleName>"
+fi
+
+if [[ "internal" == "$1" ]]; then
+  INTERNAL=1
+  shift
 fi
 
 isjava="^.*[.]java"
@@ -17,8 +22,13 @@ else
   FILE="${1}.java"
 fi
 
-SOURCE=$(find ../dagger/java/dagger -name $FILE | fgrep -F -v hilt)
-TARGET=$(find compiler/src/main/java -name $FILE)
+if [[ -n $INTERNAL ]]; then
+  SOURCE=$(find ../dagger/java/dagger/internal -name $FILE)
+  TARGET=$(find compiler/src/main/java/dagger/internal -name $FILE)
+else
+  SOURCE=$(find ../dagger/java/dagger -name $FILE | fgrep -F -v hilt)
+  TARGET=$(find compiler/src/main/java/dagger -name $FILE)
+fi
 
 one="^[[:space:]]*1[[:space:]]*$"
 nothing="^[[:space:]]*$"
