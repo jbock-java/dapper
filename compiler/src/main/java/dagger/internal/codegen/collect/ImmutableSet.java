@@ -53,7 +53,7 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
       return this;
     }
 
-    public Builder<E> addAll(Collection<E> elements) {
+    public Builder<E> addAll(Collection<? extends E> elements) {
       delegate.addAll(elements);
       return this;
     }

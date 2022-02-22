@@ -16,125 +16,81 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.base.Verify.verify;
+import static dagger.internal.codegen.binding.SourceFiles.classFileName;
+import static dagger.internal.codegen.collect.Collections2.transform;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.langmodel.DaggerElements.checkTypePresent;
+import static dagger.internal.codegen.langmodel.DaggerElements.getMethodDescriptor;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static java.util.Objects.requireNonNull;
+import static io.jbock.auto.common.MoreElements.asExecutable;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import dagger.Binds;
-import dagger.Module;
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XElements;
+import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import io.jbock.common.graph.Traverser;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /** Contains metadata that describes a module. */
-public final class ModuleDescriptor {
+@AutoValue
+public abstract class ModuleDescriptor {
 
-  private final XTypeElement moduleElement;
-  private final Set<ContributionBinding> bindings;
-  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
-  private final Set<DelegateDeclaration> delegateDeclarations;
-  private final ModuleKind kind;
+  public abstract XTypeElement moduleElement();
 
-  ModuleDescriptor(
-      XTypeElement moduleElement,
-      Set<ContributionBinding> bindings,
-      Set<SubcomponentDeclaration> subcomponentDeclarations,
-      Set<DelegateDeclaration> delegateDeclarations,
-      ModuleKind kind) {
-    this.moduleElement = requireNonNull(moduleElement);
-    this.bindings = requireNonNull(bindings);
-    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
-    this.delegateDeclarations = requireNonNull(delegateDeclarations);
-    this.kind = requireNonNull(kind);
-  }
+  public abstract ImmutableSet<ContributionBinding> bindings();
 
-  public XTypeElement moduleElement() {
-    return moduleElement;
-  }
+  /** The {@code Module#subcomponents() subcomponent declarations} contained in this module. */
+  abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
-  public Set<ContributionBinding> bindings() {
-    return bindings;
-  }
-
-  /** The {@link Module#subcomponents() subcomponent declarations} contained in this module. */
-  Set<SubcomponentDeclaration> subcomponentDeclarations() {
-    return subcomponentDeclarations;
-  }
-
-  /** The {@link Binds} method declarations that define delegate bindings. */
-  Set<DelegateDeclaration> delegateDeclarations() {
-    return delegateDeclarations;
-  }
+  /** The {@code Binds} method declarations that define delegate bindings. */
+  abstract ImmutableSet<DelegateDeclaration> delegateDeclarations();
 
   /** The kind of the module. */
-  public ModuleKind kind() {
-    return kind;
-  }
-
-  private final Supplier<Set<BindingDeclaration>> allBindingDeclarations = Suppliers.memoize(() -> {
-    Set<BindingDeclaration> result = new LinkedHashSet<>();
-    result.addAll(bindings());
-    result.addAll(delegateDeclarations());
-    result.addAll(subcomponentDeclarations());
-    return result;
-  });
+  public abstract ModuleKind kind();
 
   /** Returns all of the bindings declared in this module. */
-  public Set<BindingDeclaration> allBindingDeclarations() {
-    return allBindingDeclarations.get();
+  @Memoized
+  public ImmutableSet<BindingDeclaration> allBindingDeclarations() {
+    return ImmutableSet.<BindingDeclaration>builder()
+        .addAll(bindings())
+        .addAll(delegateDeclarations())
+        .addAll(subcomponentDeclarations())
+        .build();
   }
 
   /** Returns the keys of all bindings declared by this module. */
-  Set<Key> allBindingKeys() {
+  ImmutableSet<Key> allBindingKeys() {
     return allBindingDeclarations().stream().map(BindingDeclaration::key).collect(toImmutableSet());
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ModuleDescriptor that = (ModuleDescriptor) o;
-    return moduleElement.equals(that.moduleElement)
-        && bindings.equals(that.bindings)
-        && subcomponentDeclarations.equals(that.subcomponentDeclarations)
-        && delegateDeclarations.equals(that.delegateDeclarations)
-        && kind == that.kind;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(moduleElement,
-        bindings,
-        subcomponentDeclarations,
-        delegateDeclarations,
-        kind);
-  }
-
-  /** A {@link ModuleDescriptor} factory. */
+  /** A {@code ModuleDescriptor} factory. */
   @Singleton
   public static final class Factory implements ClearableCache {
     private final XProcessingEnv processingEnv;
@@ -163,8 +119,8 @@ public final class ModuleDescriptor {
     }
 
     public ModuleDescriptor createUncached(XTypeElement moduleElement) {
-      Set<ContributionBinding> bindings = new LinkedHashSet<>();
-      Set<DelegateDeclaration> delegates = new LinkedHashSet<>();
+      ImmutableSet.Builder<ContributionBinding> bindings = ImmutableSet.builder();
+      ImmutableSet.Builder<DelegateDeclaration> delegates = ImmutableSet.builder();
 
       methodsIn(elements.getAllMembers(toJavac(moduleElement))).stream()
           .map(method -> toXProcessing(method, processingEnv))
@@ -181,48 +137,104 @@ public final class ModuleDescriptor {
                 }
               });
 
-      return new ModuleDescriptor(
+      moduleElement.getEnclosedTypeElements().stream()
+          .filter(XTypeElement::isCompanionObject)
+          .collect(toOptional())
+          .ifPresent(companionModule -> collectCompanionModuleBindings(companionModule, bindings));
+
+      return new AutoValue_ModuleDescriptor(
           moduleElement,
-          bindings,
-          subcomponentDeclarationFactory.forModule(moduleElement),
-          delegates,
-          ModuleKind.forAnnotatedElement(moduleElement).orElseThrow());
+          bindings.build(),
+          ImmutableSet.copyOf(subcomponentDeclarationFactory.forModule(moduleElement)),
+          delegates.build(),
+          ModuleKind.forAnnotatedElement(moduleElement).get());
+    }
+
+    private void collectCompanionModuleBindings(
+        XTypeElement companionModule, ImmutableSet.Builder<ContributionBinding> bindings) {
+      ImmutableSet<String> bindingElementDescriptors =
+          bindings.build().stream()
+              .map(
+                  binding ->
+                      getMethodDescriptor(asExecutable(toJavac(binding.bindingElement().get()))))
+              .collect(toImmutableSet());
+
+      methodsIn(elements.getAllMembers(toJavac(companionModule))).stream()
+          .map(method -> toXProcessing(method, processingEnv))
+          .filter(XElement::isMethod)
+          .map(XElements::asMethod)
+          // Binding methods in companion objects with @JvmStatic are mirrored in the enclosing
+          // class, therefore we should ignore it or else it'll be a duplicate binding.
+          .filter(method -> !method.hasAnnotation(TypeNames.JVM_STATIC))
+          // Fallback strategy for de-duping contributing bindings in the companion module with
+          // @JvmStatic by comparing descriptors. Contributing bindings are the only valid bindings
+          // a companion module can declare. See: https://youtrack.jetbrains.com/issue/KT-35104
+          // TODO(danysantiago): Checks qualifiers too.
+          .filter(method -> !bindingElementDescriptors.contains(getMethodDescriptor(method)))
+          .forEach(
+              method -> {
+                if (method.hasAnnotation(TypeNames.PROVIDES)) {
+                  bindings.add(bindingFactory.providesMethodBinding(method, companionModule));
+                }
+              });
     }
 
     /** Returns all the modules transitively included by given modules, including the arguments. */
-    Set<ModuleDescriptor> transitiveModules(Set<XTypeElement> modules) {
+    ImmutableSet<ModuleDescriptor> transitiveModules(Collection<XTypeElement> modules) {
       // Traverse as a graph to automatically handle modules with cyclic includes.
-      Set<ModuleDescriptor> result = new LinkedHashSet<>();
-      Traverser.forGraph(
-              (ModuleDescriptor module) -> includedModules(module).stream().map(this::create).collect(Collectors.toList()))
-          .depthFirstPreOrder(modules.stream().map(this::create).collect(Collectors.toList()))
-          .forEach(result::add);
-      return result;
+      return ImmutableSet.copyOf(
+          Traverser.forGraph(
+                  (ModuleDescriptor module) -> transform(includedModules(module), this::create))
+              .depthFirstPreOrder(transform(modules, this::create)));
     }
 
-
-    private Set<XTypeElement> includedModules(ModuleDescriptor moduleDescriptor) {
-      return new LinkedHashSet<>(
+    private ImmutableSet<XTypeElement> includedModules(ModuleDescriptor moduleDescriptor) {
+      return ImmutableSet.copyOf(
           collectIncludedModules(new LinkedHashSet<>(), moduleDescriptor.moduleElement()));
     }
 
     private Set<XTypeElement> collectIncludedModules(
         Set<XTypeElement> includedModules, XTypeElement moduleElement) {
-
       XType superclass = moduleElement.getSuperType();
-
       if (superclass != null) {
-        Preconditions.checkState(isDeclared(superclass));
+        verify(isDeclared(superclass));
         if (!TypeName.OBJECT.equals(superclass.getTypeName())) {
           collectIncludedModules(includedModules, superclass.getTypeElement());
         }
       }
-
       moduleAnnotation(moduleElement)
           .ifPresent(
-              moduleAnnotation ->
-                  includedModules.addAll(moduleAnnotation.includes()));
+              moduleAnnotation -> {
+                includedModules.addAll(moduleAnnotation.includes());
+                includedModules.addAll(implicitlyIncludedModules(moduleElement));
+              });
       return includedModules;
+    }
+
+    private static final ClassName CONTRIBUTES_ANDROID_INJECTOR =
+        ClassName.get("dagger.android", "ContributesAndroidInjector");
+
+    // @ContributesAndroidInjector generates a module that is implicitly included in the enclosing
+    // module
+    private ImmutableSet<XTypeElement> implicitlyIncludedModules(XTypeElement module) {
+      if (processingEnv.findTypeElement(CONTRIBUTES_ANDROID_INJECTOR) == null) {
+        return ImmutableSet.of();
+      }
+      return module.getDeclaredMethods().stream()
+          .filter(method -> method.hasAnnotation(CONTRIBUTES_ANDROID_INJECTOR))
+          .map(
+              method ->
+                  checkTypePresent(processingEnv, implicitlyIncludedModuleName(module, method)))
+          .collect(toImmutableSet());
+    }
+
+    private ClassName implicitlyIncludedModuleName(XTypeElement module, XMethodElement method) {
+      return ClassName.get(
+          module.getPackageName(),
+          String.format(
+              "%s_%s",
+              classFileName(module.getClassName()),
+              LOWER_CAMEL.to(UPPER_CAMEL, getSimpleName(method))));
     }
 
     @Override

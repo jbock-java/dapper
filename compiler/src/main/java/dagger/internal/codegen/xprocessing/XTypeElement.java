@@ -68,4 +68,12 @@ public interface XTypeElement extends XMemberContainer {
   List<XTypeElement> getEnclosedTypeElements();
 
   List<XElement> getEnclosedElements();
+
+  default boolean isKotlinObject() {
+    return false;
+  }
+
+  default boolean isCompanionObject() {
+    return false;
+  }
 }

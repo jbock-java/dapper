@@ -36,6 +36,9 @@ import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.collect.ImmutableBiMap;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -114,7 +117,7 @@ public final class ComponentDescriptorFactory {
     for (ComponentRequirement componentDependency : componentDependencies) {
       for (ExecutableElement dependencyMethod :
           methodsIn(elements.getAllMembers(toJavac(componentDependency.typeElement())))) {
-        if (isComponentContributionMethod(elements, dependencyMethod)) {
+        if (isComponentContributionMethod(dependencyMethod)) {
           dependenciesByDependencyMethod.put(
               (XMethodElement) toXProcessing(dependencyMethod, processingEnv), componentDependency);
         }
@@ -176,17 +179,17 @@ public final class ComponentDescriptorFactory {
 
     Set<Scope> scopes = scopesOf(typeElement);
 
-    return new ComponentDescriptor(
+    return ComponentDescriptor.create(
         componentAnnotation,
         toXProcessing(typeElement.toJavac(), processingEnv),
-        componentDependencies,
-        transitiveModules,
-        dependenciesByDependencyMethod,
-        scopes,
-        subcomponentsFromModules,
-        subcomponentsByFactoryMethod,
-        subcomponentsByBuilderMethod,
-        componentMethodsBuilder,
+        ImmutableSet.copyOf(componentDependencies),
+        ImmutableSet.copyOf(transitiveModules),
+        ImmutableMap.copyOf(dependenciesByDependencyMethod),
+        ImmutableSet.copyOf(scopes),
+        ImmutableSet.copyOf(subcomponentsFromModules),
+        ImmutableBiMap.copyOf(subcomponentsByFactoryMethod),
+        ImmutableBiMap.copyOf(subcomponentsByBuilderMethod),
+        ImmutableSet.copyOf(componentMethodsBuilder),
         creatorDescriptor);
   }
 

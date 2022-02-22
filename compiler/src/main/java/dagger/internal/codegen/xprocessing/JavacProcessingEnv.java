@@ -64,7 +64,11 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   @Override
   public XTypeElement findTypeElement(String qName) {
-    return wrapTypeElement(delegate.getElementUtils().getTypeElement(qName));
+    TypeElement typeElement = delegate.getElementUtils().getTypeElement(qName);
+    if (typeElement == null) {
+      return null;
+    }
+    return wrapTypeElement(typeElement);
   }
 
   @Override

@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
+public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
 
   private static final ImmutableSetMultimap<?, ?> EMPTY = new ImmutableSetMultimap<>(Map.of());
 
@@ -84,5 +84,21 @@ public class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
     return new ImmutableSetMultimap<>(asMap().entrySet().stream()
         .filter(e -> predicate.test(e.getKey()))
         .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
+  }
+
+  @Override
+  public int hashCode() {
+    return asMap().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof ImmutableSetMultimap)) {
+      return false;
+    }
+    return asMap().equals(((ImmutableSetMultimap<?, ?>) obj).asMap());
   }
 }

@@ -125,7 +125,7 @@ public final class BindingGraphFactory implements ClearableCache {
       Map<String, Set<ProvisionBinding>> dedupeBindings = new HashMap<>();
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
-        if (isComponentContributionMethod(elements, method)) {
+        if (isComponentContributionMethod(method)) {
           ProvisionBinding binding =
               bindingFactory.componentDependencyMethodBinding(
                   componentDescriptor, asMethod(toXProcessing(method, processingEnv)));

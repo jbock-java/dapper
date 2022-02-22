@@ -10,6 +10,10 @@ public class ImmutableBiMap<X, Y> extends ImmutableMap<X, Y> {
     super(delegate);
   }
 
+  public static <A, B> ImmutableBiMap<A, B> copyOf(Map<A, B> map) {
+    return new ImmutableBiMap<>(map);
+  }
+
   public ImmutableBiMap<Y, X> inverse() {
     LinkedHashMap<Y, X> result = new LinkedHashMap<>();
     delegate().forEach((k, v) -> Preconditions.checkState(result.put(v, k) == null,

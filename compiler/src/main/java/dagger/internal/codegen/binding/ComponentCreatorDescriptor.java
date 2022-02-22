@@ -16,82 +16,51 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.Verify.verify;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
-import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Multimap;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.DependencyRequest;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * A descriptor for a component <i>creator</i> type: that is, a type annotated with
  * {@code @Component.Builder} (or one of the corresponding production or subcomponent versions).
  */
-public final class ComponentCreatorDescriptor {
-
-  private final Supplier<Map<ComponentRequirement, XElement>> requirementElements = Suppliers.memoize(() ->
-      flatten(unvalidatedRequirementElements()));
-  private final Supplier<Map<ComponentRequirement, XMethodElement>> setterMethods = Suppliers.memoize(() ->
-      flatten(unvalidatedSetterMethods()));
-  private final Supplier<Map<ComponentRequirement, XExecutableParameterElement>> factoryParameters = Suppliers.memoize(() ->
-      flatten(unvalidatedFactoryParameters()));
-
-  private final ComponentCreatorAnnotation annotation;
-  private final XTypeElement typeElement;
-  private final XMethodElement factoryMethod;
-  private final Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods;
-  private final Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters;
-
-  private ComponentCreatorDescriptor(
-      ComponentCreatorAnnotation annotation,
-      XTypeElement typeElement,
-      XMethodElement factoryMethod,
-      Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods,
-      Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters) {
-    this.annotation = requireNonNull(annotation);
-    this.typeElement = requireNonNull(typeElement);
-    this.factoryMethod = requireNonNull(factoryMethod);
-    this.unvalidatedSetterMethods = requireNonNull(unvalidatedSetterMethods);
-    this.unvalidatedFactoryParameters = requireNonNull(unvalidatedFactoryParameters);
-  }
+@AutoValue
+public abstract class ComponentCreatorDescriptor {
 
   /** Returns the annotation marking this creator. */
-  public ComponentCreatorAnnotation annotation() {
-    return annotation;
-  }
+  public abstract ComponentCreatorAnnotation annotation();
 
   /** The kind of this creator. */
-  public ComponentCreatorKind kind() {
+  public final ComponentCreatorKind kind() {
     return annotation().creatorKind();
   }
 
   /** The annotated creator type. */
-  public XTypeElement typeElement() {
-    return typeElement;
-  }
+  public abstract XTypeElement typeElement();
 
   /** The method that creates and returns a component instance. */
-  public XMethodElement factoryMethod() {
-    return factoryMethod;
-  }
+  public abstract XMethodElement factoryMethod();
 
   /**
    * Multimap of component requirements to setter methods that set that requirement.
@@ -99,9 +68,7 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  Map<ComponentRequirement, Set<XMethodElement>> unvalidatedSetterMethods() {
-    return unvalidatedSetterMethods;
-  }
+  abstract ImmutableSetMultimap<ComponentRequirement, XMethodElement> unvalidatedSetterMethods();
 
   /**
    * Multimap of component requirements to factory method parameters that set that requirement.
@@ -109,9 +76,8 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  Map<ComponentRequirement, Set<XExecutableParameterElement>> unvalidatedFactoryParameters() {
-    return unvalidatedFactoryParameters;
-  }
+  abstract ImmutableSetMultimap<ComponentRequirement, XExecutableParameterElement>
+      unvalidatedFactoryParameters();
 
   /**
    * Multimap of component requirements to elements (methods or parameters) that set that
@@ -120,94 +86,93 @@ public final class ComponentCreatorDescriptor {
    * <p>In a valid creator, there will be exactly one element per component requirement, so this
    * method should only be called when validating the descriptor.
    */
-  @SuppressWarnings(value = {"unchecked", "rawtypes"})
-  public Map<ComponentRequirement, Set<XElement>>
-  unvalidatedRequirementElements() {
+  public final ImmutableSetMultimap<ComponentRequirement, XElement>
+      unvalidatedRequirementElements() {
     // ComponentCreatorValidator ensures that there are either setter methods or factory method
     // parameters, but not both, so we can cheat a little here since we know that only one of
     // the two multimaps will be non-empty.
-    return unvalidatedSetterMethods().isEmpty()
-        ? (Map) unvalidatedFactoryParameters()
-        : (Map) unvalidatedSetterMethods();
+    return ImmutableSetMultimap.copyOf( // no actual copy
+        unvalidatedSetterMethods().isEmpty()
+            ? unvalidatedFactoryParameters()
+            : unvalidatedSetterMethods());
   }
 
   /**
    * Map of component requirements to elements (setter methods or factory method parameters) that
    * set them.
    */
-  Map<ComponentRequirement, XElement> requirementElements() {
-    return requirementElements.get();
+  @Memoized
+  ImmutableMap<ComponentRequirement, XElement> requirementElements() {
+    return flatten(unvalidatedRequirementElements());
   }
 
   /** Map of component requirements to setter methods for those requirements. */
-  public Map<ComponentRequirement, XMethodElement> setterMethods() {
-    return setterMethods.get();
+  @Memoized
+  public ImmutableMap<ComponentRequirement, XMethodElement> setterMethods() {
+    return flatten(unvalidatedSetterMethods());
   }
 
   /** Map of component requirements to factory method parameters for those requirements. */
-  public Map<ComponentRequirement, XExecutableParameterElement> factoryParameters() {
-    return factoryParameters.get();
+  @Memoized
+  public ImmutableMap<ComponentRequirement, XExecutableParameterElement> factoryParameters() {
+    return flatten(unvalidatedFactoryParameters());
   }
 
-  private static <K, V> Map<K, V> flatten(Map<K, Set<V>> multimap) {
-    return Util.transformValues(multimap, Util::getOnlyElement);
+  private static <K, V> ImmutableMap<K, V> flatten(Multimap<K, V> multimap) {
+    return ImmutableMap.copyOf(
+        Maps.transformValues(multimap.asMap(), values -> getOnlyElement(values)));
   }
 
   /** Returns the set of component requirements this creator allows the user to set. */
-  public Set<ComponentRequirement> userSettableRequirements() {
+  public final ImmutableSet<ComponentRequirement> userSettableRequirements() {
     // Note: they should have been validated at the point this is used, so this set is valid.
     return unvalidatedRequirementElements().keySet();
   }
 
   /** Returns the set of requirements for modules and component dependencies for this creator. */
-  public Set<ComponentRequirement> moduleAndDependencyRequirements() {
+  public final ImmutableSet<ComponentRequirement> moduleAndDependencyRequirements() {
     return userSettableRequirements().stream()
         .filter(requirement -> !requirement.isBoundInstance())
         .collect(toImmutableSet());
   }
 
   /** Returns the set of bound instance requirements for this creator. */
-  Set<ComponentRequirement> boundInstanceRequirements() {
+  final ImmutableSet<ComponentRequirement> boundInstanceRequirements() {
     return userSettableRequirements().stream()
         .filter(ComponentRequirement::isBoundInstance)
         .collect(toImmutableSet());
   }
 
   /** Returns the element in this creator that sets the given {@code requirement}. */
-  XElement elementForRequirement(ComponentRequirement requirement) {
+  final XElement elementForRequirement(ComponentRequirement requirement) {
     return requirementElements().get(requirement);
   }
 
-  /** Creates a new {@link ComponentCreatorDescriptor} for the given creator {@code type}. */
+  /** Creates a new {@code ComponentCreatorDescriptor} for the given creator {@code type}. */
   public static ComponentCreatorDescriptor create(
-      XTypeElement creator,
-      DaggerTypes types,
-      DependencyRequestFactory dependencyRequestFactory) {
+      XTypeElement creator, DaggerTypes types, DependencyRequestFactory dependencyRequestFactory) {
     XType componentType = creator.getEnclosingTypeElement().getType();
 
-    Map<ComponentRequirement, Set<XMethodElement>> setterMethods =
-        new LinkedHashMap<>();
-
+    ImmutableSetMultimap.Builder<ComponentRequirement, XMethodElement> setterMethods =
+        ImmutableSetMultimap.builder();
     XMethodElement factoryMethod = null;
     for (XMethodElement method : getAllUnimplementedMethods(creator)) {
       XMethodType resolvedMethodType = method.asMemberOf(creator.getType());
-
       if (types.isSubtype(componentType, resolvedMethodType.getReturnType())) {
-        Preconditions.checkState(factoryMethod == null); // validation should have ensured there's only 1.
+        verify(factoryMethod == null); // validation should have ensured there's only 1.
         factoryMethod = method;
       } else {
         XExecutableParameterElement parameter = getOnlyElement(method.getParameters());
         XType parameterType = getOnlyElement(resolvedMethodType.getParameterTypes());
-        setterMethods.merge(
+        setterMethods.put(
             requirement(method, parameter, parameterType, dependencyRequestFactory, method),
-            Set.of(method),
-            Util::mutableUnion);
+            method);
       }
     }
-    Preconditions.checkState(factoryMethod != null); // validation should have ensured this.
+    verify(factoryMethod != null); // validation should have ensured this.
 
-    Map<ComponentRequirement, Set<XExecutableParameterElement>> factoryParameters =
-        new LinkedHashMap<>();
+    ImmutableSetMultimap.Builder<ComponentRequirement, XExecutableParameterElement>
+        factoryParameters = ImmutableSetMultimap.builder();
 
     XMethodType resolvedFactoryMethodType = factoryMethod.asMemberOf(creator.getType());
     List<XExecutableParameterElement> parameters = factoryMethod.getParameters();
@@ -215,20 +180,20 @@ public final class ComponentCreatorDescriptor {
     for (int i = 0; i < parameters.size(); i++) {
       XExecutableParameterElement parameter = parameters.get(i);
       XType parameterType = parameterTypes.get(i);
-      factoryParameters.merge(
+      factoryParameters.put(
           requirement(
               factoryMethod,
               parameter,
               parameterType,
               dependencyRequestFactory,
               parameter),
-          Set.of(parameter),
-          Util::mutableUnion);
+          parameter);
     }
     // Validation should have ensured exactly one creator annotation is present on the type.
     ComponentCreatorAnnotation annotation = getOnlyElement(getCreatorAnnotations(creator));
-    return new ComponentCreatorDescriptor(
-        annotation, creator, factoryMethod, setterMethods, factoryParameters);  }
+    return new AutoValue_ComponentCreatorDescriptor(
+        annotation, creator, factoryMethod, setterMethods.build(), factoryParameters.build());
+  }
 
   private static ComponentRequirement requirement(
       XMethodElement method,
@@ -241,7 +206,7 @@ public final class ComponentCreatorDescriptor {
       DependencyRequest request =
           dependencyRequestFactory.forRequiredResolvedVariable(parameter, parameterType);
       return ComponentRequirement.forBoundInstance(
-          request.key(), elementForVariableName);
+          request.key(), request.isNullable(), elementForVariableName);
     }
 
     return moduleAnnotation(parameterType.getTypeElement()).isPresent()
