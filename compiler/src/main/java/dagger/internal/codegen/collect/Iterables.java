@@ -82,4 +82,8 @@ public class Iterables {
       Iterable<T> unfiltered, Predicate<? super T> retainIfTrue) {
     return DaggerStreams.stream(unfiltered).filter(retainIfTrue).collect(Collectors.toList());
   }
+
+  public static <T> Iterable<T> consumingIterable(Iterable<T> iterable) {
+    return () -> Iterators.consumingIterator(iterable.iterator());
+  }
 }

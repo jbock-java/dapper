@@ -26,4 +26,20 @@ public class Iterators {
     }
     throw new NoSuchElementException();
   }
+
+  public static <T> Iterator<T> consumingIterator(Iterator<T> iterator) {
+    return new Iterator<T>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public T next() {
+        T next = iterator.next();
+        iterator.remove();
+        return next;
+      }
+    };
+  }
 }
