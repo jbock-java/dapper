@@ -89,6 +89,8 @@ delete "^import dagger.producers.Producer;"
 delete "^import org.checkerframework.checker.nullness.compatqual.NullableDecl;"
 delete "^import static dagger.internal.codegen.base.ProducerAnnotations.productionImplementationQualifier;"
 delete "^import static dagger.internal.codegen.base.ProducerAnnotations.productionQualifier;"
+delete "^import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentProductionMethod;"
+delete "^import dagger.internal.codegen.binding.ProductionBinding.ProductionKind;"
 delete "^import com.google.errorprone.annotations.FormatMethod;"
 delete "@FormatMethod"
 
