@@ -1,0 +1,36 @@
+#!/bin/bash
+
+die () {
+    echo "$*"
+    exit 1
+}
+
+if [[ -z "$1" ]]; then
+  die "usage: pick<JavaClassSimpleName>"
+fi
+
+isjava="^.*[.]java"
+
+if [[ "$1" =~ $isjava ]]; then
+  FILE="${1}"
+else
+  FILE="${1}.java"
+fi
+
+SOURCE=$(find ../dagger/java/dagger/ -name $FILE | fgrep -F -v hilt)
+TARGET=$(find compiler/src/main/java/ -name $FILE)
+
+one="^[[:space:]]*1[[:space:]]*$"
+nothing="^[[:space:]]*$"
+
+if [[ "$SOURCE" =~ $nothing ]] || [[ ! $(echo "$SOURCE" | wc -l) =~ $one ]]; then
+  die "Bad source: $SOURCE" "file: $FILE"
+fi
+
+if [[ "$TARGET" =~ $nothing ]] || [[ ! $(echo "$TARGET" | wc -l) =~ $one ]]; then
+  die "Bad target: $TARGET" "file: $FILE"
+fi
+
+cp "$SOURCE" "$TARGET"
+./imports "$TARGET"
+
