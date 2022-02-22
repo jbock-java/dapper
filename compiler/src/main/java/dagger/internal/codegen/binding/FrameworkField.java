@@ -66,7 +66,7 @@ public abstract class FrameworkField {
   /**
    * A framework field for a {@code ContributionBinding}.
    *
-   * @param frameworkClass if present, the field will use this framework class instead of the normal
+   * @param frameworkClassName if present, the field will use this framework class instead of the normal
    *     one for the binding's type.
    */
   public static FrameworkField forBinding(
