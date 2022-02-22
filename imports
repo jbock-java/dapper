@@ -10,20 +10,26 @@ if [[ -z "$INPUT" ]]; then
 	die "usage: imports <filename>"
 fi
 
+unameOut="$(uname -s)"
+
+function mysed () {
+	if [[ "$unameOut" == "Darwin" ]]; then
+		sed -i .bak "$1" $INPUT
+		rm ${INPUT}.bak
+	else
+		sed -i "$1" $INPUT
+	fi
+}
+
 function replace () {
 	local A=$1
 	local B=$2
-	sed -i .bak "s/^import static $A/import static $B/g" "$INPUT"
-	sed -i .bak "s/^import $A/import $B/g" "$INPUT"
+	mysed "s/^import static $A/import static $B/g"
+	mysed "s/^import $A/import $B/g"
 }
 
 function delete () {
-	sed -i .bak "/${1}$/d" $INPUT
-}
-
-function mysed () {
-  sed -i .bak "$1" $INPUT
-  rm ${INPUT}.bak
+	mysed "/${1}$/d"
 }
 
 mysed "s/^import com.google.common.base.Equivalence/import io.jbock.auto.common.Equivalence/"

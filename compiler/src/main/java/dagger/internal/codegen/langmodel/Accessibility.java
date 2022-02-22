@@ -24,6 +24,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XType;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -63,6 +64,11 @@ public final class Accessibility {
   /** Returns true if the given type can be referenced from any package. */
   public static boolean isTypePubliclyAccessible(TypeMirror type) {
     return type.accept(new TypeAccessibilityVisitor(Optional.empty()), null);
+  }
+
+  /** Returns true if the given type can be referenced from code in the given package. */
+  public static boolean isTypeAccessibleFrom(XType type, String packageName) {
+    return isTypeAccessibleFrom(toJavac(type), packageName);
   }
 
   /** Returns true if the given type can be referenced from code in the given package. */

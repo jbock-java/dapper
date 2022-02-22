@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
@@ -39,7 +40,7 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.RequestKind;
 import javax.lang.model.type.TypeMirror;
 
-/** A {@link dagger.internal.codegen.writing.RequestRepresentation} for {@code @Binds} methods. */
+/** A {@code dagger.internal.codegen.writing.RequestRepresentation} for {@code @Binds} methods. */
 final class DelegateRequestRepresentation extends RequestRepresentation {
   private final ContributionBinding binding;
   private final RequestKind requestKind;
@@ -82,7 +83,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
             bindingRequest(getOnlyElement(binding.dependencies()).key(), requestKind),
             requestingClass);
 
-    TypeMirror contributedType = binding.contributedType();
+    TypeMirror contributedType = toJavac(binding.contributedType());
     switch (requestKind) {
       case INSTANCE:
         return instanceRequiresCast(binding, delegateExpression, requestingClass, bindsTypeChecker)
@@ -101,16 +102,17 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
       BindsTypeChecker bindsTypeChecker) {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
+    TypeMirror contributedType = toJavac(binding.contributedType());
     return !bindsTypeChecker.isAssignable(
-            delegateExpression.type(), binding.contributedType(), binding.contributionType())
-        && isTypeAccessibleFrom(binding.contributedType(), requestingClass.packageName());
+            delegateExpression.type(), contributedType, binding.contributionType())
+        && isTypeAccessibleFrom(contributedType, requestingClass.packageName());
   }
 
   /**
    * If {@code delegateExpression} can be assigned to {@code desiredType} safely, then {@code
    * delegateExpression} is returned unchanged. If the {@code delegateExpression} is already a raw
    * type, returns {@code delegateExpression} as well, as casting would have no effect. Otherwise,
-   * returns a {@link Expression#castTo(TypeMirror) casted} version of {@code delegateExpression}
+   * returns a {@code Expression#castTo(TypeMirror) casted} version of {@code delegateExpression}
    * to the raw type of {@code desiredType}.
    */
   // TODO(ronshapiro): this probably can be generalized for usage in InjectionMethods

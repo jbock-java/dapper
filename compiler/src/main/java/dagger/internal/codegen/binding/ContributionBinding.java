@@ -17,26 +17,25 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.unwrapOptionalEquivalence;
+import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static java.util.Arrays.asList;
 
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.ContributionType.HasContributionType;
-import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.Equivalence;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.xprocessing.XTypes;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.Equivalence;
-import io.jbock.auto.common.MoreElements;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.TypeMirror;
 
 /**
- * An abstract class for a value object representing the mechanism by which a {@link Key} can be
+ * An abstract class for a value object representing the mechanism by which a {@code Key} can be
  * contributed to a dependency graph.
  */
 public abstract class ContributionBinding extends Binding implements HasContributionType {
@@ -50,13 +49,12 @@ public abstract class ContributionBinding extends Binding implements HasContribu
     return unwrapOptionalEquivalence(wrappedMapKeyAnnotation());
   }
 
-  /** If {@link #bindingElement()} is a method that returns a primitive type, returns that type. */
-  public final Optional<TypeMirror> contributedPrimitiveType() {
+  /** If {@code #bindingElement()} is a method that returns a primitive type, returns that type. */
+  public final Optional<XType> contributedPrimitiveType() {
     return bindingElement()
-        .map(XConverters::toJavac)
-        .filter(bindingElement -> bindingElement.getKind() == ElementKind.METHOD)
-        .map(bindingElement -> MoreElements.asExecutable(bindingElement).getReturnType())
-        .filter(type -> type.getKind().isPrimitive());
+        .filter(XElement::isMethod)
+        .map(bindingElement -> asMethod(bindingElement).getReturnType())
+        .filter(XTypes::isPrimitive);
   }
 
   @Override
@@ -65,14 +63,14 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   }
 
   /**
-   * The {@link TypeMirror type} for the {@code Factory<T>} or {@code Producer<T>} which is created
-   * for this binding. Uses the binding's key, V in the case of {@code Map<K, FrameworkClass<V>>>},
-   * and E {@code Set<E>} for {@code dagger.multibindings.IntoSet @IntoSet} methods.
+   * The {@code XType type} for the {@code Factory<T>} or {@code Producer<T>} which is created for
+   * this binding. Uses the binding's key, V in the case of {@code Map<K, FrameworkClass<V>>>}, and
+   * E {@code Set<E>} for {@code dagger.multibindings.IntoSet @IntoSet} methods.
    */
-  public final TypeMirror contributedType() {
+  public final XType contributedType() {
     switch (contributionType()) {
       case UNIQUE:
-        return key().type().java();
+        return key().type().xprocessing();
     }
     throw new AssertionError();
   }
@@ -80,7 +78,7 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   public abstract Builder<?, ?> toBuilder();
 
   /**
-   * Base builder for {@code com.google.auto.value.AutoValue @AutoValue} subclasses of {@link
+   * Base builder for {@code io.jbock.auto.value.AutoValue @AutoValue} subclasses of {@code
    * ContributionBinding}.
    */
   public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {

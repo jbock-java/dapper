@@ -16,17 +16,18 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.common.graph.Traverser;
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.ClassName;
@@ -51,7 +52,7 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 
-/** Extension of {@link Types} that adds Dagger-specific methods. */
+/** Extension of {@code Types} that adds Dagger-specific methods. */
 public final class DaggerTypes implements Types {
   private final Types types;
   private final DaggerElements elements;
@@ -64,9 +65,9 @@ public final class DaggerTypes implements Types {
   // Note: This is similar to auto-common's MoreTypes except using ClassName rather than Class.
   // TODO(bcorso): Contribute a String version to auto-common's MoreTypes?
   /**
-   * Returns true if the raw type underlying the given {@link TypeMirror} represents the same raw
-   * type as the given {@link Class} and throws an IllegalArgumentException if the {@link
-   * TypeMirror} does not represent a type that can be referenced by a {@link Class}
+   * Returns true if the raw type underlying the given {@code TypeMirror} represents the same raw
+   * type as the given {@code Class} and throws an IllegalArgumentException if the {@code
+   * TypeMirror} does not represent a type that can be referenced by a {@code Class}
    */
   public static boolean isTypeOf(final TypeName typeName, TypeMirror type) {
     checkNotNull(typeName);
@@ -137,23 +138,23 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
-   * {@link Optional} is returned if there is no non-{@link Object} superclass.
+   * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
+   * {@code Optional} is returned if there is no non-{@code Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(XType type) {
     return isDeclared(type) ? nonObjectSuperclass(asDeclared(toJavac(type))) : Optional.empty();
   }
 
   /**
-   * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
-   * {@link Optional} is returned if there is no non-{@link Object} superclass.
+   * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
+   * {@code Optional} is returned if there is no non-{@code Object} superclass.
    */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
     return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orElse(null));
   }
 
   /**
-   * Returns the {@linkplain #directSupertypes(TypeMirror) supertype}s of a type in breadth-first
+   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first
    * order.
    */
   public Iterable<TypeMirror> supertypes(TypeMirror type) {
@@ -211,7 +212,7 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Returns {@code type}'s single type argument, if one exists, or {@link Object} if not.
+   * Returns {@code type}'s single type argument, if one exists, or {@code Object} if not.
    *
    * <p>For example, if {@code type} is {@code List<Number>} this will return {@code Number}.
    *
@@ -220,6 +221,16 @@ public final class DaggerTypes implements Types {
    */
   public TypeMirror unwrapTypeOrObject(TypeMirror type) {
     return unwrapTypeOrDefault(type, elements.getTypeElement(TypeName.OBJECT).asType());
+  }
+
+  /**
+   * Returns {@code type} wrapped in {@code wrappingClass}.
+   *
+   * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
+   * Set.class}, this will return {@code Set<List<Number>>}.
+   */
+  public DeclaredType wrapType(XType type, ClassName wrappingClassName) {
+    return wrapType(toJavac(type), wrappingClassName);
   }
 
   /**
@@ -238,7 +249,7 @@ public final class DaggerTypes implements Types {
    * <p>For example, if {@code type} is {@code List<Number>} and {@code wrappingClass} is {@code
    * Set.class}, this will return {@code Set<Number>}.
    *
-   * <p>If {@code type} has no type parameters, returns a {@link TypeMirror} for {@code
+   * <p>If {@code type} has no type parameters, returns a {@code TypeMirror} for {@code
    * wrappingClass} as a raw type.
    *
    * @throws IllegalArgumentException if {@code} has more than one type argument.
@@ -262,7 +273,7 @@ public final class DaggerTypes implements Types {
    * <ul>
    *   <li>If {@code type} is publicly accessible, returns it.
    *   <li>If not, but {@code type}'s raw type is publicly accessible, returns the raw type.
-   *   <li>Otherwise returns {@link Object}.
+   *   <li>Otherwise returns {@code Object}.
    * </ul>
    */
   public TypeMirror publiclyAccessibleType(TypeMirror type) {
@@ -276,7 +287,20 @@ public final class DaggerTypes implements Types {
    * <ul>
    *   <li>If {@code type} is accessible from the package, returns it.
    *   <li>If not, but {@code type}'s raw type is accessible from the package, returns the raw type.
-   *   <li>Otherwise returns {@link Object}.
+   *   <li>Otherwise returns {@code Object}.
+   * </ul>
+   */
+  public TypeMirror accessibleType(XType type, ClassName requestingClass) {
+    return accessibleType(toJavac(type), requestingClass);
+  }
+
+  /**
+   * Returns an accessible type in {@code requestingClass}'s package based on {@code type}:
+   *
+   * <ul>
+   *   <li>If {@code type} is accessible from the package, returns it.
+   *   <li>If not, but {@code type}'s raw type is accessible from the package, returns the raw type.
+   *   <li>Otherwise returns {@code Object}.
    * </ul>
    */
   public TypeMirror accessibleType(TypeMirror type, ClassName requestingClass) {
@@ -301,7 +325,7 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Throws {@link TypeNotPresentException} if {@code type} is an {@link
+   * Throws {@code TypeNotPresentException} if {@code type} is an {@code
    * javax.lang.model.type.ErrorType}.
    */
   public static void checkTypePresent(TypeMirror type) {
@@ -328,12 +352,15 @@ public final class DaggerTypes implements Types {
         null);
   }
 
+  private static final ImmutableSet<Class<?>> FUTURE_TYPES =
+      ImmutableSet.of();
+
   public static boolean isFutureType(XType type) {
-    return false;
+    return isFutureType(toJavac(type));
   }
 
   public static boolean isFutureType(TypeMirror type) {
-    return false;
+    return FUTURE_TYPES.stream().anyMatch(t -> MoreTypes.isTypeOf(t, type));
   }
 
   public static boolean hasTypeVariable(TypeMirror type) {

@@ -16,33 +16,33 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.RequestKinds.requestType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.RequestKinds.requestType;
 
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
+import io.jbock.auto.value.AutoValue;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
-import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 
 /**
  * A request for a binding, which may be in the form of a request for a dependency to pass to a
- * constructor or module method ({@link RequestKind}) or an internal request for a framework
- * instance ({@link FrameworkType}).
+ * constructor or module method ({@code RequestKind}) or an internal request for a framework
+ * instance ({@code FrameworkType}).
  */
 @AutoValue
 public abstract class BindingRequest {
-  /** Creates a {@link BindingRequest} for the given {@link DependencyRequest}. */
+  /** Creates a {@code BindingRequest} for the given {@code DependencyRequest}. */
   public static BindingRequest bindingRequest(DependencyRequest dependencyRequest) {
     return bindingRequest(dependencyRequest.key(), dependencyRequest.kind());
   }
 
   /**
-   * Creates a {@link BindingRequest} for a normal dependency request for the given {@link Key} and
-   * {@link RequestKind}.
+   * Creates a {@code BindingRequest} for a normal dependency request for the given {@code Key} and
+   * {@code RequestKind}.
    */
   public static BindingRequest bindingRequest(Key key, RequestKind requestKind) {
     // When there's a request that has a 1:1 mapping to a FrameworkType, the request should be
@@ -58,15 +58,15 @@ public abstract class BindingRequest {
   }
 
   /**
-   * Creates a {@link BindingRequest} for a request for a framework instance for the given {@link
-   * Key} with the given {@link FrameworkType}.
+   * Creates a {@code BindingRequest} for a request for a framework instance for the given {@code
+   * Key} with the given {@code FrameworkType}.
    */
   public static BindingRequest bindingRequest(Key key, FrameworkType frameworkType) {
     return new AutoValue_BindingRequest(
         key, frameworkType.requestKind(), Optional.of(frameworkType));
   }
 
-  /** Returns the {@link Key} for the requested binding. */
+  /** Returns the {@code Key} for the requested binding. */
   public abstract Key key();
 
   /** Returns the request kind associated with this request. */

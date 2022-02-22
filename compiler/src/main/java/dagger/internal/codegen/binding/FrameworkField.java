@@ -19,8 +19,9 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.BindingKind.MEMBERS_INJECTOR;
 
-import dagger.internal.codegen.base.CaseFormat;
+import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.value.AutoValue;
+import dagger.internal.codegen.base.CaseFormat;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
@@ -30,7 +31,6 @@ import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementKindVisitor8;
 
 /**
@@ -50,7 +50,7 @@ public abstract class FrameworkField {
   /**
    * Creates a framework field.
    *
-   * @param frameworkClassName the name of the framework class (e.g., {@link jakarta.inject.Provider})
+   * @param frameworkClassName the name of the framework class (e.g., {@code jakarta.inject.Provider})
    * @param valueTypeName the name of the type parameter of the framework class (e.g., {@code Foo}
    *     for {@code Provider<Foo>}
    * @param fieldName the name of the field
@@ -64,23 +64,23 @@ public abstract class FrameworkField {
   }
 
   /**
-   * A framework field for a {@link ContributionBinding}.
+   * A framework field for a {@code ContributionBinding}.
    *
-   * @param frameworkClassName if present, the field will use this framework class instead of the normal
+   * @param frameworkClass if present, the field will use this framework class instead of the normal
    *     one for the binding's type.
    */
   public static FrameworkField forBinding(
       ContributionBinding binding, Optional<ClassName> frameworkClassName) {
     return create(
         frameworkClassName.orElse(binding.frameworkType().frameworkClassName()),
-        TypeName.get(fieldValueType(binding)),
+        fieldValueType(binding).getTypeName(),
         frameworkFieldName(binding));
   }
 
-  private static TypeMirror fieldValueType(ContributionBinding binding) {
+  private static XType fieldValueType(ContributionBinding binding) {
     return binding.contributionType().isMultibinding()
         ? binding.contributedType()
-        : binding.key().type().java();
+        : binding.key().type().xprocessing();
   }
 
   private static String frameworkFieldName(ContributionBinding binding) {

@@ -57,7 +57,7 @@ final class ComponentProvisionRequestRepresentation extends RequestRepresentatio
             componentRequirementExpressions.getExpression(componentRequirement(), requestingClass),
             toJavac(binding.bindingElement().get()).getSimpleName());
     return Expression.create(
-        binding.contributedPrimitiveType().orElse(binding.key().type().java()),
+        binding.contributedPrimitiveType().orElse(binding.key().type().xprocessing()),
         maybeCheckForNull(binding, compilerOptions, invocation));
   }
 

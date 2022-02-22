@@ -18,16 +18,16 @@ package dagger.internal.codegen.javapoet;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.CodeBlock;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Encapsulates a {@link CodeBlock} for an <a
+ * Encapsulates a {@code CodeBlock} for an <a
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html">expression</a> and the
- * {@link TypeMirror} that it represents from the perspective of the compiler. Consider the
+ * {@code TypeMirror} that it represents from the perspective of the compiler. Consider the
  * following example:
  *
  * <pre><code>
@@ -35,7 +35,7 @@ import javax.lang.model.type.TypeMirror;
  *   private Provider fooImplProvider = DoubleCheck.provider(FooImpl_Factory.create());
  * </code></pre>
  *
- * <p>An {@code Expression} for {@code fooImplProvider.get()} would have a {@link #type()} of {@code
+ * <p>An {@code Expression} for {@code fooImplProvider.get()} would have a {@code #type()} of {@code
  * java.lang.Object} and not {@code FooImpl}.
  */
 public final class Expression {
@@ -47,18 +47,18 @@ public final class Expression {
     this.codeBlock = codeBlock;
   }
 
-  /** Creates a new {@link Expression} with a {@link TypeMirror} and {@link CodeBlock}. */
+  /** Creates a new {@code Expression} with a {@code TypeMirror} and {@code CodeBlock}. */
   public static Expression create(XType type, CodeBlock expression) {
     return create(toJavac(type), expression);
   }
 
-  /** Creates a new {@link Expression} with a {@link TypeMirror} and {@link CodeBlock}. */
+  /** Creates a new {@code Expression} with a {@code TypeMirror} and {@code CodeBlock}. */
   public static Expression create(TypeMirror type, CodeBlock expression) {
     return new Expression(type, expression);
   }
 
   /**
-   * Creates a new {@link Expression} with a {@link TypeMirror}, {@linkplain CodeBlock#of(String,
+   * Creates a new {@code Expression} with a {@code TypeMirror}, {@code CodeBlock#of(String,
    * Object[]) format, and arguments}.
    */
   public static Expression create(XType type, String format, Object... args) {
@@ -66,7 +66,7 @@ public final class Expression {
   }
 
   /**
-   * Creates a new {@link Expression} with a {@link TypeMirror}, {@linkplain CodeBlock#of(String,
+   * Creates a new {@code Expression} with a {@code TypeMirror}, {@code CodeBlock#of(String,
    * Object[]) format, and arguments}.
    */
   public static Expression create(TypeMirror type, String format, Object... args) {
@@ -88,7 +88,7 @@ public final class Expression {
   }
 
   /**
-   * Returns a new expression that {@link #castTo(TypeMirror)} casts the current expression to its
+   * Returns a new expression that {@code #castTo(TypeMirror)} casts the current expression to its
    * boxed type if this expression has a primitive type.
    */
   public Expression box(DaggerTypes types) {
@@ -97,7 +97,7 @@ public final class Expression {
         : this;
   }
 
-  /** The {@link TypeMirror type} to which the expression evaluates. */
+  /** The {@code TypeMirror type} to which the expression evaluates. */
   public TypeMirror type() {
     return type;
   }

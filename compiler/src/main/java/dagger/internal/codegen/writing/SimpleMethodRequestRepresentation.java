@@ -25,6 +25,7 @@ import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod.requiresInjectionMethod;
 
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
@@ -45,11 +46,10 @@ import java.util.Optional;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * A binding expression that invokes methods or constructors directly (without attempting to scope)
- * {@link dagger.spi.model.RequestKind#INSTANCE} requests.
+ * {@code dagger.spi.model.RequestKind#INSTANCE} requests.
  */
 final class SimpleMethodRequestRepresentation extends RequestRepresentation {
   private final CompilerOptions compilerOptions;
@@ -186,8 +186,10 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
         : Optional.empty();
   }
 
-  private TypeMirror simpleMethodReturnType() {
-    return provisionBinding.contributedPrimitiveType().orElse(provisionBinding.key().type().java());
+  private XType simpleMethodReturnType() {
+    return provisionBinding
+        .contributedPrimitiveType()
+        .orElse(provisionBinding.key().type().xprocessing());
   }
 
   @AssistedFactory

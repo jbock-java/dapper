@@ -17,6 +17,9 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static io.jbock.javapoet.MethodSpec.constructorBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedParameters;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.frameworkFieldUsages;
@@ -32,36 +35,21 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBloc
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
 import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.PROVISION;
-import static io.jbock.javapoet.MethodSpec.constructorBuilder;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.Factory;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.Binding;
-import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.Lists;
-import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
-import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.BindingKind;
-import dagger.spi.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.Lists;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
@@ -69,15 +57,28 @@ import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
+import dagger.internal.Factory;
+import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.Binding;
+import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
+import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.DependencyRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.VariableElement;
 
 /**
- * Generates {@link Factory} implementations from {@link ProvisionBinding} instances for {@link
+ * Generates {@code Factory} implementations from {@code ProvisionBinding} instances for {@code
  * Inject} constructors.
  */
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
@@ -292,7 +293,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   }
 
   private static TypeName providedTypeName(ProvisionBinding binding) {
-    return TypeName.get(binding.contributedType());
+    return binding.contributedType().getTypeName();
   }
 
   private static Optional<TypeName> factoryTypeName(ProvisionBinding binding) {
@@ -305,7 +306,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     return ParameterSpec.builder(field.type, field.name).build();
   }
 
-  /** The strategy for getting an instance of a factory for a {@link Binding}. */
+  /** The strategy for getting an instance of a factory for a {@code Binding}. */
   private enum FactoryCreationStrategy {
     /** The factory class is a single instance. */
     SINGLETON_INSTANCE,
@@ -321,6 +322,11 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
               ? SINGLETON_INSTANCE
               : CLASS_CONSTRUCTOR;
         case INJECTION:
+        case MULTIBOUND_SET:
+        case MULTIBOUND_MAP:
+          return binding.dependencies().isEmpty()
+              ? SINGLETON_INSTANCE
+              : CLASS_CONSTRUCTOR;
         default:
           return CLASS_CONSTRUCTOR;
       }
