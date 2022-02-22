@@ -34,7 +34,7 @@ function delete () {
 
 mysed "s/^import com.google.common.base.Equivalence/import io.jbock.auto.common.Equivalence/"
 mysed "s/^import com.google.common.base.Supplier;/import java.util.function.Supplier;/"
-mysed  "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
+mysed "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
 mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static dagger.internal.codegen.base.Util.asStream;/"
 
 replace com.google.auto.common. io.jbock.auto.common.
@@ -81,6 +81,8 @@ delete "^import dagger.producers.internal.ProductionExecutorModule;"
 delete "^import dagger.producers.Produced;"
 delete "^import dagger.producers.Producer;"
 delete "^import org.checkerframework.checker.nullness.compatqual.NullableDecl;"
+delete "^import static dagger.internal.codegen.base.ProducerAnnotations.productionImplementationQualifier;"
+delete "^import static dagger.internal.codegen.base.ProducerAnnotations.productionQualifier;"
 delete "^import com.google.errorprone.annotations.FormatMethod;"
 delete "@FormatMethod"
 
