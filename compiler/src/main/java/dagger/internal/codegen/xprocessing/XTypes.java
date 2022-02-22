@@ -18,12 +18,14 @@ package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.xprocessing.XArrayType;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XConverters;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.TypeKind;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-/** A utility class for {@link XType} helper methods. */
+/** A utility class for {@code XType} helper methods. */
 public final class XTypes {
 
   /** Returns {@code true} if the given type is a raw type of a parameterized type. */
@@ -33,7 +35,7 @@ public final class XTypes {
         && !type.getTypeElement().getType().getTypeArguments().isEmpty();
   }
 
-  /** Returns the given {@code type} as an {@link XArrayType}. */
+  /** Returns the given {@code type} as an {@code XArrayType}. */
   public static XArrayType asArray(XType type) {
     return (XArrayType) type;
   }
@@ -55,21 +57,19 @@ public final class XTypes {
 
   /** Returns {@code true} if the given type is a type variable. */
   public static boolean isTypeVariable(XType type) {
-    return toJavac(type).getKind() == TypeKind.TYPEVAR;
+    return XConverters.toJavac(type).getKind() == TypeKind.TYPEVAR;
   }
 
   /**
    * Returns {@code true} if {@code type1} is equivalent to {@code type2}.
-   *
-   * <p>See {@link MoreTypes#equivalence()}.
    */
   public static boolean areEquivalentTypes(XType type1, XType type2) {
-    return MoreTypes.equivalence().equivalent(toJavac(type1), toJavac(type2));
+    return type1.getTypeName().equals(type2.getTypeName());
   }
 
   /** Returns {@code true} if the given type is a primitive type. */
   public static boolean isPrimitive(XType type) {
-    return toJavac(type).getKind().isPrimitive();
+    return XConverters.toJavac(type).getKind().isPrimitive();
   }
 
   /** Returns {@code true} if the given type has type parameters. */

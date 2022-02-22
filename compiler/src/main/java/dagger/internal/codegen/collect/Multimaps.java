@@ -1,6 +1,7 @@
 package dagger.internal.codegen.collect;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Multimaps {
 
@@ -10,5 +11,10 @@ public class Multimaps {
       result.put(keyFunction.apply(v), v);
     }
     return result.build();
+  }
+
+  public static <K, V> ImmutableSetMultimap<K, V> filterKeys(
+      ImmutableSetMultimap<K, V> unfiltered, Predicate<? super K> keyPredicate) {
+    return unfiltered.filterKeys(keyPredicate);
   }
 }

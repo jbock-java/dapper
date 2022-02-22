@@ -35,6 +35,7 @@ import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import java.io.Writer;
@@ -174,7 +175,7 @@ public final class DaggerElements implements Elements, ClearableCache {
   public static boolean isAnnotationPresent(Element element, TypeMirror annotationType) {
     return element.getAnnotationMirrors().stream()
         .map(AnnotationMirror::getAnnotationType)
-        .anyMatch(candidate -> MoreTypes.equivalence().equivalent(candidate, annotationType));
+        .anyMatch(candidate -> TypeName.get(candidate).equals(TypeName.get(annotationType)));
   }
 
   /**
@@ -508,8 +509,8 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   @Override
-  public Name getName(CharSequence cs) {
-    return elements.getName(cs);
+  public Name getName(CharSequence cs) { // SUPPRESS_GET_NAME_CHECK: This is not xprocessing usage.
+    return elements.getName(cs); // SUPPRESS_GET_NAME_CHECK: This is not xprocessing usage.
   }
 
   @Override

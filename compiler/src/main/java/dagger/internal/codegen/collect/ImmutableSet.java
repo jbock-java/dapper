@@ -59,7 +59,7 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
     }
 
 
-    public ImmutableSet build() {
+    public ImmutableSet<E> build() {
       return new ImmutableSet(delegate);
     }
   }

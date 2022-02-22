@@ -18,21 +18,18 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.auto.common.Equivalence;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.auto.common.SuperficialValidation;
+import io.jbock.javapoet.TypeName;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
-import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for validating the type hierarchy of a given type. */
 final class TypeHierarchyValidator {
-  private TypeHierarchyValidator() {
-  }
+  private TypeHierarchyValidator() {}
 
   /**
    * Validate the type hierarchy of the given type including all super classes, interfaces, and
@@ -42,16 +39,16 @@ final class TypeHierarchyValidator {
    */
   public static void validateTypeHierarchy(XType type, DaggerTypes types) {
     Queue<XType> queue = new ArrayDeque<>();
-    Set<Equivalence.Wrapper<TypeMirror>> queued = new HashSet<>();
+    Set<TypeName> queued = new HashSet<>();
     queue.add(type);
-    queued.add(MoreTypes.equivalence().wrap(toJavac(type)));
+    queued.add(type.getTypeName());
     while (!queue.isEmpty()) {
       XType currType = queue.remove();
       if (!SuperficialValidation.validateType(toJavac(currType))) {
         throw new TypeNotPresentException(currType.toString(), null);
       }
       for (XType superType : currType.getSuperTypes()) {
-        if (queued.add(MoreTypes.equivalence().wrap(toJavac(superType)))) {
+        if (queued.add(superType.getTypeName())) {
           queue.add(superType);
         }
       }

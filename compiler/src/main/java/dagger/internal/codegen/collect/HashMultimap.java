@@ -1,6 +1,8 @@
 package dagger.internal.codegen.collect;
 
-import dagger.internal.codegen.collect.ListMultimap;
-
 public class HashMultimap<X, Y> extends ListMultimap<X, Y> {
+
+  public static <X, Y> HashMultimap<X, Y> create() {
+    return new HashMultimap<>();
+  }
 }

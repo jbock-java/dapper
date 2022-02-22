@@ -1,8 +1,10 @@
 package dagger.internal.codegen.collect;
 
+import dagger.internal.codegen.extension.DaggerStreams;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Sets {
@@ -28,5 +30,10 @@ public class Sets {
     result.addAll(set1);
     result.addAll(set2);
     return ImmutableSet.copyOf(result);
+  }
+
+  public static <E> Set<E> filter(
+      Set<E> unfiltered, Predicate<? super E> predicate) {
+    return unfiltered.stream().filter(predicate).collect(DaggerStreams.toImmutableSet());
   }
 }

@@ -16,6 +16,12 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Predicates.in;
+import static dagger.internal.codegen.collect.Collections2.transform;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 import static dagger.internal.codegen.base.Formatter.INDENT;
@@ -24,18 +30,26 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
-import static dagger.internal.codegen.xprocessing.XElement.isMethod;
-import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.collect.Sets;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
@@ -45,35 +59,20 @@ import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleDescriptor;
-import dagger.internal.codegen.binding.ModuleKind;
-import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
-import io.jbock.auto.common.Equivalence.Wrapper;
-import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
-import javax.lang.model.type.TypeMirror;
+import jakarta.inject.Inject;
 import javax.tools.Diagnostic;
 
 /**
@@ -112,17 +111,15 @@ public final class ComponentDescriptorValidator {
 
   private final class ComponentValidation {
     final ComponentDescriptor rootComponent;
-    final Map<ComponentDescriptor, ValidationReport.Builder> reports =
-        new LinkedHashMap<>();
+    final Map<ComponentDescriptor, ValidationReport.Builder> reports = new LinkedHashMap<>();
 
     ComponentValidation(ComponentDescriptor rootComponent) {
-      this.rootComponent = requireNonNull(rootComponent);
+      this.rootComponent = checkNotNull(rootComponent);
     }
 
     /** Returns a report that contains all validation messages found during traversal. */
     ValidationReport buildReport() {
-      ValidationReport.Builder report =
-          ValidationReport.about(rootComponent.typeElement().toJavac());
+      ValidationReport.Builder report = ValidationReport.about(rootComponent.typeElement());
       reports.values().forEach(subreport -> report.addSubreport(subreport.build()));
       return report.build();
     }
@@ -130,7 +127,7 @@ public final class ComponentDescriptorValidator {
     /** Returns the report builder for a (sub)component. */
     private ValidationReport.Builder report(ComponentDescriptor component) {
       return reentrantComputeIfAbsent(
-          reports, component, descriptor -> ValidationReport.about(descriptor.typeElement().toJavac()));
+          reports, component, descriptor -> ValidationReport.about(descriptor.typeElement()));
     }
 
     private void reportComponentItem(
@@ -164,13 +161,13 @@ public final class ComponentDescriptorValidator {
       if (dependencyStack.contains(dependency)) {
         // Current component has already appeared in the component chain.
         StringBuilder message = new StringBuilder();
-        message.append(component.typeElement().toJavac().getQualifiedName());
+        message.append(component.typeElement().getQualifiedName());
         message.append(" contains a cycle in its component dependencies:\n");
         dependencyStack.push(dependency);
         appendIndentedComponentsList(message, dependencyStack);
         dependencyStack.pop();
         reportComponentItem(
-            compilerOptions.scopeCycleValidationType().diagnosticKind().orElseThrow(),
+            compilerOptions.scopeCycleValidationType().diagnosticKind().get(),
             component,
             message.toString());
       } else if (compilerOptions.validateTransitiveComponentDependencies()
@@ -181,12 +178,10 @@ public final class ComponentDescriptorValidator {
             .ifPresent(
                 componentAnnotation -> {
                   dependencyStack.push(dependency);
-
                   for (XTypeElement nextDependency : componentAnnotation.dependencies()) {
                     validateComponentDependencyHierarchy(
                         component, nextDependency, dependencyStack);
                   }
-
                   dependencyStack.pop();
                 });
       }
@@ -197,13 +192,11 @@ public final class ComponentDescriptorValidator {
      * singleton components have no scoped dependencies.
      */
     private void validateDependencyScopes(ComponentDescriptor component) {
-      Set<ClassName> scopes =
+      ImmutableSet<ClassName> scopes =
           component.scopes().stream().map(Scope::className).collect(toImmutableSet());
-      Set<XTypeElement> scopedDependencies =
+      ImmutableSet<XTypeElement> scopedDependencies =
           scopedTypesIn(
-              component
-                  .dependencies()
-                  .stream()
+              component.dependencies().stream()
                   .map(ComponentRequirement::typeElement)
                   .collect(toImmutableSet()));
       if (!scopes.isEmpty()) {
@@ -233,7 +226,7 @@ public final class ComponentDescriptorValidator {
         // Scopeless components may not depend on scoped components.
         if (!scopedDependencies.isEmpty()) {
           StringBuilder message =
-              new StringBuilder(component.typeElement().toJavac().getQualifiedName())
+              new StringBuilder(component.typeElement().getQualifiedName())
                   .append(" (unscoped) cannot depend on scoped components:\n");
           appendIndentedComponentsList(message, scopedDependencies);
           reportComponentError(component, message.toString());
@@ -255,15 +248,22 @@ public final class ComponentDescriptorValidator {
     }
 
     private String abstractModuleHasInstanceBindingMethodsError(ModuleDescriptor module) {
-      Preconditions.checkArgument(module.kind() == ModuleKind.MODULE, module.kind());
+      String methodAnnotations;
+      switch (module.kind()) {
+        case MODULE:
+          methodAnnotations = "@Provides";
+          break;
+        default:
+          throw new AssertionError(module.kind());
+      }
       return String.format(
-          "%s is abstract and has instance @Provides methods. Consider making the methods static or "
+          "%s is abstract and has instance %s methods. Consider making the methods static or "
               + "including a non-abstract subclass of the module instead.",
-          module.moduleElement());
+          module.moduleElement(), methodAnnotations);
     }
 
     private void validateCreators(ComponentDescriptor component) {
-      if (component.creatorDescriptor().isEmpty()) {
+      if (!component.creatorDescriptor().isPresent()) {
         // If no builder, nothing to validate.
         return;
       }
@@ -281,17 +281,15 @@ public final class ComponentDescriptorValidator {
       // Requirements that the creator can set that don't match any requirements that the component
       // actually has.
       Set<ComponentRequirement> inapplicableRequirementsOnCreator =
-          Util.difference(
+          Sets.difference(
               creatorModuleAndDependencyRequirements, componentModuleAndDependencyRequirements);
 
       XType container = creator.typeElement().getType();
       if (!inapplicableRequirementsOnCreator.isEmpty()) {
         Collection<XElement> excessElements =
-            creator.unvalidatedRequirementElements().entrySet().stream()
-                .filter(e -> inapplicableRequirementsOnCreator.contains(e.getKey()))
-                .map(Entry::getValue)
-                .flatMap(Set::stream)
-                .collect(Collectors.toList());
+            Multimaps.filterKeys(
+                    ImmutableSetMultimap.copyOf(creator.unvalidatedRequirementElements()), in(inapplicableRequirementsOnCreator))
+                .values();
         String formatted =
             excessElements.stream()
                 .map(element -> formatElement(element, container))
@@ -302,13 +300,12 @@ public final class ComponentDescriptorValidator {
 
       // Component requirements that the creator must be able to set
       Set<ComponentRequirement> mustBePassed =
-          componentModuleAndDependencyRequirements.stream()
-              .filter(
-                  input -> input.nullPolicy().equals(NullPolicy.THROW))
-              .collect(Collectors.toCollection(LinkedHashSet::new));
+          Sets.filter(
+              componentModuleAndDependencyRequirements,
+              input -> input.nullPolicy().equals(NullPolicy.THROW));
       // Component requirements that the creator must be able to set, but can't
       Set<ComponentRequirement> missingRequirements =
-          Util.difference(mustBePassed, creatorModuleAndDependencyRequirements);
+          Sets.difference(mustBePassed, creatorModuleAndDependencyRequirements);
 
       if (!missingRequirements.isEmpty()) {
         report(component)
@@ -320,17 +317,20 @@ public final class ComponentDescriptorValidator {
       }
 
       // Validate that declared creator requirements (modules, dependencies) have unique types.
-      SetMultimap<Wrapper<TypeMirror>, XElement> declaredRequirementsByType =
-          creator.unvalidatedRequirementElements().entrySet().stream()
-              .filter(entry -> creatorModuleAndDependencyRequirements.contains(entry.getKey()))
-              .flatMap(entry -> entry.getValue().stream().map(value -> new SimpleImmutableEntry<>(entry.getKey(), value)))
+      ImmutableSetMultimap<TypeName, XElement> declaredRequirementsByType =
+          Multimaps.filterKeys(
+                  ImmutableSetMultimap.copyOf(creator.unvalidatedRequirementElements()),
+                  creatorModuleAndDependencyRequirements::contains)
+              .entries()
+              .stream()
               .collect(
-                  toImmutableSetMultimap(entry -> entry.getKey().wrappedType(), Entry::getValue));
-      declaredRequirementsByType.asMap()
+                  toImmutableSetMultimap(
+                      entry -> entry.getKey().type().getTypeName(), Entry::getValue));
+      declaredRequirementsByType
+          .asMap()
           .forEach(
-              (typeWrapper, elementsForType) -> {
+              (type, elementsForType) -> {
                 if (elementsForType.size() > 1) {
-                  TypeMirror type = typeWrapper.get();
                   // TODO(cgdecker): Attach this error message to the factory method rather than
                   // the component type if the elements are factory method parameters AND the
                   // factory method is defined by the factory type itself and not by a supertype.
@@ -339,8 +339,8 @@ public final class ComponentDescriptorValidator {
                           String.format(
                               messages.multipleSettersForModuleOrDependencyType(),
                               type,
-                              elementsForType.stream().map(
-                                  element -> formatElement(element, container)).collect(toList())),
+                              transform(
+                                  elementsForType, element -> formatElement(element, container))),
                           creator.typeElement());
                 }
               });
@@ -378,7 +378,7 @@ public final class ComponentDescriptorValidator {
     }
 
     private XType resolveParameterType(XExecutableParameterElement parameter, XType container) {
-      Preconditions.checkArgument(isMethod(parameter.getEnclosingMethodElement()));
+      checkArgument(isMethod(parameter.getEnclosingMethodElement()));
       XMethodElement method = asMethod(parameter.getEnclosingMethodElement());
       int parameterIndex = method.getParameters().indexOf(parameter);
 
@@ -393,14 +393,14 @@ public final class ComponentDescriptorValidator {
      * <p>As a side-effect, this means scoped components cannot have a dependency cycle between
      * themselves, since a component's presence within its own dependency path implies a cyclical
      * relationship between scopes. However, cycles in component dependencies are explicitly checked
-     * in {@link #validateComponentDependencyHierarchy(ComponentDescriptor)}.
+     * in {@code #validateComponentDependencyHierarchy(ComponentDescriptor)}.
      */
     private void validateDependencyScopeHierarchy(
         ComponentDescriptor component,
         XTypeElement dependency,
-        Deque<Set<Scope>> scopeStack,
+        Deque<ImmutableSet<Scope>> scopeStack,
         Deque<XTypeElement> scopedDependencyStack) {
-      Set<Scope> scopes = scopesOf(dependency);
+      ImmutableSet<Scope> scopes = scopesOf(dependency);
       if (stackOverlaps(scopeStack, scopes)) {
         scopedDependencyStack.push(dependency);
         // Current scope has already appeared in the component chain.
@@ -421,9 +421,10 @@ public final class ComponentDescriptorValidator {
           || scopedDependencyStack.isEmpty()) {
         // TODO(beder): transitively check scopes of production components too.
         rootComponentAnnotation(dependency)
+            .filter(componentAnnotation -> !componentAnnotation.isProduction())
             .ifPresent(
                 componentAnnotation -> {
-                  Set<XTypeElement> scopedDependencies =
+                  ImmutableSet<XTypeElement> scopedDependencies =
                       scopedTypesIn(componentAnnotation.dependencies());
                   if (!scopedDependencies.isEmpty()) {
                     // empty can be ignored (base-case)
@@ -440,9 +441,9 @@ public final class ComponentDescriptorValidator {
       }
     }
 
-    private <T> boolean stackOverlaps(Deque<Set<T>> stack, Set<T> set) {
-      for (Set<T> entry : stack) {
-        if (!Util.intersection(entry, set).isEmpty()) {
+    private <T> boolean stackOverlaps(Deque<ImmutableSet<T>> stack, ImmutableSet<T> set) {
+      for (ImmutableSet<T> entry : stack) {
+        if (!Sets.intersection(entry, set).isEmpty()) {
           return true;
         }
       }
@@ -457,7 +458,7 @@ public final class ComponentDescriptorValidator {
           message.append(getReadableSource(scope)).append(' ');
         }
         message
-            .append(stripCommonTypePrefixes(scopedComponent.getQualifiedName()))
+            .append(stripCommonTypePrefixes(scopedComponent.getQualifiedName().toString()))
             .append('\n');
       }
     }
@@ -466,7 +467,7 @@ public final class ComponentDescriptorValidator {
      * Returns a set of type elements containing only those found in the input set that have a
      * scoping annotation.
      */
-    private Set<XTypeElement> scopedTypesIn(Collection<XTypeElement> types) {
+    private ImmutableSet<XTypeElement> scopedTypesIn(Collection<XTypeElement> types) {
       return types.stream().filter(type -> !scopesOf(type).isEmpty()).collect(toImmutableSet());
     }
   }

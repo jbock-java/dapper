@@ -356,11 +356,11 @@ public final class DaggerTypes implements Types {
       ImmutableSet.of();
 
   public static boolean isFutureType(XType type) {
-    return isFutureType(toJavac(type));
+    return false;
   }
 
   public static boolean isFutureType(TypeMirror type) {
-    return FUTURE_TYPES.stream().anyMatch(t -> MoreTypes.isTypeOf(t, type));
+    return false;
   }
 
   public static boolean hasTypeVariable(TypeMirror type) {

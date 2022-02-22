@@ -1,9 +1,11 @@
 package dagger.internal.codegen.collect;
 
+import dagger.internal.codegen.extension.DaggerStreams;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +47,10 @@ public class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
     }
   }
 
+  public static <K, V> ImmutableSetMultimap<K, V> copyOf(Map<K, Set<V>> map) {
+    return new ImmutableSetMultimap<>(map);
+  }
+
   public static <K, V> ImmutableSetMultimap<K, V> copyOf(
       Multimap<? extends K, ? extends V> multimap) {
     if (multimap.isEmpty()) {
@@ -72,5 +78,11 @@ public class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
     ImmutableSetMultimap<V, K> result = new ImmutableSetMultimap<>();
     source.forEach((k, values) -> values.forEach(v -> result.put(v, k)));
     return result;
+  }
+
+  ImmutableSetMultimap<K, V> filterKeys(Predicate<? super K> predicate) {
+    return new ImmutableSetMultimap<>(asMap().entrySet().stream()
+        .filter(e -> predicate.test(e.getKey()))
+        .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 }
