@@ -17,8 +17,8 @@ else
   FILE="${1}.java"
 fi
 
-SOURCE=$(find ../dagger/java/dagger/ -name $FILE | fgrep -F -v hilt)
-TARGET=$(find compiler/src/main/java/ -name $FILE)
+SOURCE=$(find ../dagger/java/dagger -name $FILE | fgrep -F -v hilt)
+TARGET=$(find compiler/src/main/java -name $FILE)
 
 one="^[[:space:]]*1[[:space:]]*$"
 nothing="^[[:space:]]*$"
