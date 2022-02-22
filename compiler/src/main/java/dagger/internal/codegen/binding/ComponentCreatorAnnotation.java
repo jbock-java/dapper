@@ -16,20 +16,19 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.Ascii.toUpperCase;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.stream.Collectors.mapping;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableSet;
+import io.jbock.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.javapoet.ClassName;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Set;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.TypeElement;
 
@@ -39,6 +38,10 @@ public enum ComponentCreatorAnnotation {
   COMPONENT_FACTORY(TypeNames.COMPONENT_FACTORY),
   SUBCOMPONENT_BUILDER(TypeNames.SUBCOMPONENT_BUILDER),
   SUBCOMPONENT_FACTORY(TypeNames.SUBCOMPONENT_FACTORY),
+  PRODUCTION_COMPONENT_BUILDER(TypeNames.PRODUCTION_COMPONENT_BUILDER),
+  PRODUCTION_COMPONENT_FACTORY(TypeNames.PRODUCTION_COMPONENT_FACTORY),
+  PRODUCTION_SUBCOMPONENT_BUILDER(TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER),
+  PRODUCTION_SUBCOMPONENT_FACTORY(TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY),
   ;
 
   private final ClassName annotation;
@@ -47,7 +50,7 @@ public enum ComponentCreatorAnnotation {
 
   ComponentCreatorAnnotation(ClassName annotation) {
     this.annotation = annotation;
-    this.creatorKind = ComponentCreatorKind.valueOf(annotation.simpleName().toUpperCase(Locale.ROOT));
+    this.creatorKind = ComponentCreatorKind.valueOf(toUpperCase(annotation.simpleName()));
     this.componentAnnotation = annotation.enclosingClassName();
   }
 
@@ -66,6 +69,13 @@ public enum ComponentCreatorAnnotation {
     return componentAnnotation().simpleName().endsWith("Subcomponent");
   }
 
+  /**
+   * Returns {@code true} if the creator annotation is for a production component or subcomponent.
+   */
+  public final boolean isProductionCreatorAnnotation() {
+    return componentAnnotation().simpleName().startsWith("Production");
+  }
+
   /** The creator kind the annotation is associated with. */
   // TODO(dpb): Remove ComponentCreatorKind.
   public ComponentCreatorKind creatorKind() {
@@ -78,20 +88,39 @@ public enum ComponentCreatorAnnotation {
   }
 
   /** Returns all component creator annotations. */
-  public static Set<ClassName> allCreatorAnnotations() {
+  public static ImmutableSet<ClassName> allCreatorAnnotations() {
     return stream().collect(toAnnotationClasses());
   }
 
-  /** Returns all subcomponent creator annotations. */
-  public static Set<ClassName> subcomponentCreatorAnnotations() {
+  /** Returns all root component creator annotations. */
+  public static ImmutableSet<ClassName> rootComponentCreatorAnnotations() {
     return stream()
         .filter(
-            ComponentCreatorAnnotation::isSubcomponentCreatorAnnotation)
+            componentCreatorAnnotation ->
+                !componentCreatorAnnotation.isSubcomponentCreatorAnnotation())
+        .collect(toAnnotationClasses());
+  }
+
+  /** Returns all subcomponent creator annotations. */
+  public static ImmutableSet<ClassName> subcomponentCreatorAnnotations() {
+    return stream()
+        .filter(
+            componentCreatorAnnotation ->
+                componentCreatorAnnotation.isSubcomponentCreatorAnnotation())
+        .collect(toAnnotationClasses());
+  }
+
+  /** Returns all production component creator annotations. */
+  public static ImmutableSet<ClassName> productionCreatorAnnotations() {
+    return stream()
+        .filter(
+            componentCreatorAnnotation ->
+                componentCreatorAnnotation.isProductionCreatorAnnotation())
         .collect(toAnnotationClasses());
   }
 
   /** Returns the legal creator annotations for the given {@code componentAnnotation}. */
-  public static Set<ClassName> creatorAnnotationsFor(
+  public static ImmutableSet<ClassName> creatorAnnotationsFor(
       ComponentAnnotation componentAnnotation) {
     return stream()
         .filter(
@@ -104,23 +133,23 @@ public enum ComponentCreatorAnnotation {
   }
 
   /** Returns all creator annotations present on the given {@code type}. */
-  public static Set<ComponentCreatorAnnotation> getCreatorAnnotations(XTypeElement type) {
-    return getCreatorAnnotations(type.toJavac());
+  public static ImmutableSet<ComponentCreatorAnnotation> getCreatorAnnotations(XTypeElement type) {
+    return getCreatorAnnotations(toJavac(type));
   }
 
   /** Returns all creator annotations present on the given {@code type}. */
-  public static Set<ComponentCreatorAnnotation> getCreatorAnnotations(TypeElement type) {
+  public static ImmutableSet<ComponentCreatorAnnotation> getCreatorAnnotations(TypeElement type) {
     return stream()
         .filter(cca -> isAnnotationPresent(type, cca.annotation()))
         .collect(toImmutableSet());
   }
 
   private static Stream<ComponentCreatorAnnotation> stream() {
-    return Arrays.stream(ComponentCreatorAnnotation.values());
+    return valuesOf(ComponentCreatorAnnotation.class);
   }
 
-  private static Collector<ComponentCreatorAnnotation, ?, Set<ClassName>>
-  toAnnotationClasses() {
-    return mapping(ComponentCreatorAnnotation::annotation, Collectors.toCollection(LinkedHashSet::new));
+  private static Collector<ComponentCreatorAnnotation, ?, ImmutableSet<ClassName>>
+      toAnnotationClasses() {
+    return mapping(ComponentCreatorAnnotation::annotation, toImmutableSet());
   }
 }
