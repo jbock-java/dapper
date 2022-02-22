@@ -9,6 +9,12 @@ INPUT="$1"
 if [[ -z "$INPUT" ]]; then
 	die "usage: imports <filename>"
 fi
+if [[ -d "$INPUT" ]]; then
+	die "input must be a file"
+fi
+if [[ ! -f "$INPUT" ]]; then
+	die "input must exist"
+fi
 
 unameOut="$(uname -s)"
 
