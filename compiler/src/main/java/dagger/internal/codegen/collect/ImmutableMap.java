@@ -4,6 +4,7 @@ import dagger.internal.codegen.base.Util;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
@@ -107,5 +108,24 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
 
   public ImmutableSetMultimap<X, Y> asMultimap() {
     return new ImmutableSetMultimap<>(Util.transformValues(delegate, Set::of));
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    ImmutableMap<?, ?> that = (ImmutableMap<?, ?>) o;
+    return delegate.equals(that.delegate);
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(delegate);
+  }
+
+  @Override
+  public final String toString() {
+    return delegate.toString();
   }
 }

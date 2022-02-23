@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollection<T> {
@@ -117,5 +118,24 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
 
   public ImmutableSet<T> immutableCopy() {
     return this;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    ImmutableSet<?> that = (ImmutableSet<?>) o;
+    return delegate.equals(that.delegate);
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(super.hashCode(), delegate);
+  }
+  
+  @Override
+  public final String toString() {
+    return delegate.toString();
   }
 }

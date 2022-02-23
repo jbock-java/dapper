@@ -5,6 +5,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class ImmutableList<T> extends AbstractList<T> implements ImmutableCollection<T> {
 
@@ -112,5 +113,24 @@ public class ImmutableList<T> extends AbstractList<T> implements ImmutableCollec
 
   public static <E> ImmutableList<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
     return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8));
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    ImmutableList<?> that = (ImmutableList<?>) o;
+    return delegate.equals(that.delegate);
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(delegate);
+  }
+
+  @Override
+  public final String toString() {
+    return delegate.toString();
   }
 }
