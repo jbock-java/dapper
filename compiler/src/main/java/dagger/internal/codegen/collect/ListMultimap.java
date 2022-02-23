@@ -1,7 +1,6 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.binding.ImmutableMultiset;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
