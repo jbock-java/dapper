@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
+public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   private final Map<K, List<V>> map = new LinkedHashMap<>();
 
@@ -26,7 +26,7 @@ public class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   public static final class Builder<X, Y> implements ImmutableMultimap.Builder<X, Y> {
 
-    private final ListMultimap<X, Y> map = new ListMultimap<>();
+    private final ListMultimap<X, Y> map = new ImmutableListMultimap<>();
 
     @Override
     public ImmutableMultimap.Builder<X, Y> put(X x, Y y) {
@@ -64,5 +64,23 @@ public class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
   @Override
   public boolean containsKey(K key) {
     return map.containsKey(key);
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ListMultimap<?, ?> that = (ListMultimap<?, ?>) o;
+    return map.equals(that.map);
+  }
+
+  @Override
+  public final int hashCode() {
+    return map.hashCode();
+  }
+
+  @Override
+  public final String toString() {
+    return map.toString();
   }
 }

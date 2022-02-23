@@ -85,20 +85,4 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
         .filter(e -> predicate.test(e.getKey()))
         .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
-
-  @Override
-  public int hashCode() {
-    return asMap().hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj instanceof ImmutableSetMultimap)) {
-      return false;
-    }
-    return asMap().equals(((ImmutableSetMultimap<?, ?>) obj).asMap());
-  }
 }

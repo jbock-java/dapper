@@ -11,6 +11,6 @@ public class MultimapBuilder<K> {
   }
 
   public <V> ListMultimap<K, V> build() {
-    return new ListMultimap<>();
+    return new ImmutableListMultimap<>();
   }
 }

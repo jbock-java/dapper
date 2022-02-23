@@ -2,7 +2,7 @@ package dagger.internal.codegen.collect;
 
 import java.util.LinkedHashMap;
 
-public class Multiset<E> {
+public final class Multiset<E> {
 
   private final LinkedHashMap<E, Integer> map;
 
@@ -28,5 +28,23 @@ public class Multiset<E> {
 
   public int size() {
     return map.values().stream().mapToInt(Integer::intValue).sum();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Multiset<?> multiset = (Multiset<?>) o;
+    return map.equals(multiset.map);
+  }
+
+  @Override
+  public int hashCode() {
+    return map.hashCode();
+  }
+
+  @Override
+  public final String toString() {
+    return map.toString();
   }
 }

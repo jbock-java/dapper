@@ -4,6 +4,7 @@ import dagger.internal.codegen.base.Util;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,5 +61,23 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
       return true;
     }
     return map.values().stream().allMatch(Set::isEmpty);
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    SetMultimap<?, ?> that = (SetMultimap<?, ?>) o;
+    return map.equals(that.map);
+  }
+
+  @Override
+  public final int hashCode() {
+    return map.hashCode();
+  }
+
+  @Override
+  public final String toString() {
+    return map.toString();
   }
 }
