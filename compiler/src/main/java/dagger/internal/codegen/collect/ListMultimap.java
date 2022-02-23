@@ -1,6 +1,7 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.binding.ImmutableMultiset;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,8 +22,8 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
     return (Map<K, Collection<V>>) (Map<K, ?>) map;
   }
 
-  public Multiset<K> keys() {
-    Multiset<K> result = new Multiset<>();
+  public ImmutableMultiset<K> keys() {
+    ImmutableMultiset<K> result = new ImmutableMultiset<>();
     map.forEach((k, values) -> result.add(k, values.size()));
     return result;
   }

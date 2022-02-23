@@ -1,6 +1,7 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.extension.DaggerStreams;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -40,8 +41,8 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     return ImmutableSet.copyOf(map.keySet());
   }
 
-  public Collection<V> values() {
-    return map.values().stream().flatMap(Set::stream).collect(Collectors.toList());
+  public ImmutableCollection<V> values() {
+    return map.values().stream().flatMap(Set::stream).collect(DaggerStreams.toImmutableList());
   }
 
   public SetMultimap<K, V> build() {

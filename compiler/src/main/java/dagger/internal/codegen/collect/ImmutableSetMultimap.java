@@ -29,6 +29,13 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
       return this;
     }
 
+    public Builder<X, Y> putAll(X x, Iterable<Y> values) {
+      for (Y y : values) {
+        map.put(x, y);
+      }
+      return this;
+    }
+
     public ImmutableSetMultimap<X, Y> build() {
       return map;
     }

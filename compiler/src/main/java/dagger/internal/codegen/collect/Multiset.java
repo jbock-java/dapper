@@ -2,7 +2,7 @@ package dagger.internal.codegen.collect;
 
 import java.util.LinkedHashMap;
 
-public final class Multiset<E> {
+public class Multiset<E> {
 
   private final LinkedHashMap<E, Integer> map;
 
