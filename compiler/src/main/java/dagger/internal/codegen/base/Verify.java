@@ -19,4 +19,10 @@ public class Verify {
       throw new IllegalArgumentException();
     }
   }
+
+  public static void verifyNotNull(Object o) {
+    if (o == null) {
+      throw new NullPointerException();
+    }
+  }
 }

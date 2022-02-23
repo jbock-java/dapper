@@ -56,6 +56,10 @@ public final class Maps {
     return new HashMap<>(capacity(expectedSize));
   }
 
+  public static <K, V> LinkedHashMap<K, V> newLinkedHashMap() {
+    return new LinkedHashMap<>();
+  }
+
   static int capacity(int expectedSize) {
     if (expectedSize < 3) {
       return expectedSize + 1;

@@ -17,7 +17,10 @@
 package dagger.internal.codegen.kotlin;
 
 import jakarta.inject.Inject;
+import java.util.Map;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 /** Utility class for interacting with Kotlin Metadata. */
 public final class KotlinMetadataUtil {
@@ -37,6 +40,18 @@ public final class KotlinMetadataUtil {
   }
 
   public boolean isCompanionObjectClass(TypeElement enclosingType) {
+    return false;
+  }
+
+  public boolean hasMetadata(Element toJavac) {
+    return false;
+  }
+
+  public Map<Object, String> getAllMethodNamesBySignature(TypeElement toJavac) {
+    return Map.of();
+  }
+
+  public boolean isMissingSyntheticPropertyForAnnotations(VariableElement toJavac) {
     return false;
   }
 }

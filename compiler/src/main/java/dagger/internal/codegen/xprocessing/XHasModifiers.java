@@ -11,4 +11,6 @@ public interface XHasModifiers {
   boolean isProtected();
 
   boolean isStatic();
+
+  boolean isFinal();
 }

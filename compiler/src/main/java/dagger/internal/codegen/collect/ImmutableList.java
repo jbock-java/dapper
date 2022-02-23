@@ -4,6 +4,8 @@ import dagger.internal.codegen.base.Util;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -77,6 +79,14 @@ public class ImmutableList<T> extends AbstractList<T> implements ImmutableCollec
       return new ImmutableList<>((List<E>) elements);
     }
     return new ImmutableList<>(Util.listOf(elements));
+  }
+
+  public static <E> ImmutableList<E> sortedCopyOf(
+      Comparator<? super E> comparator, Iterable<? extends E> elements) {
+    ArrayList<E> result = new ArrayList<>();
+    elements.forEach(result::add);
+    result.sort(comparator);
+    return new ImmutableList<>(result);
   }
 
   public static <E> ImmutableList<E> of() {

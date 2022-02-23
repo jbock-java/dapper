@@ -13,6 +13,10 @@ public class Sets {
     return new HashSet<>();
   }
 
+  public static <E> LinkedHashSet<E> newLinkedHashSet() {
+    return new LinkedHashSet<>();
+  }
+
   public static <E> ImmutableSet<E> difference(Set<E> set1, Set<E> set2) {
     return ImmutableSet.copyOf(set1.stream()
         .filter(e -> !set2.contains(e))
