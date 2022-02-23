@@ -1,10 +1,13 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.base.Util;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
@@ -14,8 +17,8 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
     map.merge(key, List.of(value), Util::mutableConcat);
   }
 
-  public Map<K, List<V>> asMap() {
-    return map;
+  public Map<K, Collection<V>> asMap() {
+    return (Map<K, Collection<V>>) (Map<K, ?>) map;
   }
 
   public Multiset<K> keys() {
@@ -53,8 +56,13 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
   }
 
   @Override
-  public Collection<Map.Entry<K, V>> entries() {
-    return null;
+  public final Collection<Map.Entry<K, V>> entries() {
+    return asMap().entrySet().stream().<Map.Entry<K, V>>flatMap(entry -> {
+      if (entry.getValue().isEmpty()) {
+        return Stream.of();
+      }
+      return entry.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
+    }).collect(Collectors.toList());
   }
 
   public ListMultimap<K, V> build() {

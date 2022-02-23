@@ -42,6 +42,7 @@ mysed "s/^import com.google.common.base.Equivalence/import io.jbock.auto.common.
 mysed "s/^import com.google.common.base.Supplier;/import java.util.function.Supplier;/"
 mysed "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
 mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static dagger.internal.codegen.base.Util.asStream;/"
+mysed "s/^import static dagger.internal.codegen.binding.MapKeys.getMapKey;/import static dagger.internal.codegen.base.MapKeys.getMapKey;/"
 
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
@@ -104,3 +105,4 @@ mysed "s/{@link dagger.multibindings/{@code dagger.multibindings/g"
 mysed "s/{@link javax.inject./{@link jakarta.inject./g"
 mysed "s/{@linkplain/{@code/g"
 mysed "s/{@link/{@code/g"
+mysed "s/@param resolvedType the/@param resolvedEnclosingType the/"

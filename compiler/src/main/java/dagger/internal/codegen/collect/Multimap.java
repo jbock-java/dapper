@@ -23,5 +23,5 @@ public interface Multimap<K, V> {
 
   Collection<Map.Entry<K, V>> entries();
 
-  Map<K, ? extends Collection<V>> asMap();
+  Map<K, Collection<V>> asMap();
 }

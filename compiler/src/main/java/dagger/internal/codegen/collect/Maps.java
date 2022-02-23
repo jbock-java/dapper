@@ -68,4 +68,15 @@ public final class Maps {
     }
     return Integer.MAX_VALUE; // any large value
   }
+
+  public static <K, V>
+  Map<K, V> filterValues(Map<K, V> fromMap, Predicate<? super V> predicate) {
+    LinkedHashMap<K, V> result = new LinkedHashMap<>();
+    fromMap.forEach((key, v) -> {
+      if (predicate.test(v)) {
+        result.put(key, v);
+      }
+    });
+    return result;
+  }
 }

@@ -1,13 +1,10 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.extension.DaggerStreams;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
 
@@ -22,16 +19,6 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
 
   public static <X, Y> Builder<X, Y> builder() {
     return new Builder<>();
-  }
-
-  @Override
-  public Collection<Map.Entry<K, V>> entries() {
-    return asMap().entrySet().stream().<Map.Entry<K, V>>flatMap(entry -> {
-      if (entry.getValue().isEmpty()) {
-        return Stream.of();
-      }
-      return entry.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
-    }).collect(Collectors.toList());
   }
 
   public static final class Builder<X, Y> {
@@ -74,7 +61,7 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
   }
 
   public ImmutableSetMultimap<V, K> inverse() {
-    Map<K, Set<V>> source = asMap();
+    Map<K, Collection<V>> source = asMap();
     ImmutableSetMultimap<V, K> result = new ImmutableSetMultimap<>();
     source.forEach((k, values) -> values.forEach(v -> result.put(v, k)));
     return result;
@@ -83,6 +70,8 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
   ImmutableSetMultimap<K, V> filterKeys(Predicate<? super K> predicate) {
     return new ImmutableSetMultimap<>(asMap().entrySet().stream()
         .filter(e -> predicate.test(e.getKey()))
-        .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
+        .collect(DaggerStreams.toImmutableMap(
+            Map.Entry::getKey,
+            e -> ImmutableSet.copyOf(e.getValue()))));
   }
 }

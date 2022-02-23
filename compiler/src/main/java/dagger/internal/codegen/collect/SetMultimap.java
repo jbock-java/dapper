@@ -1,12 +1,13 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.base.Util;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
 
@@ -20,8 +21,9 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     this.map = map;
   }
 
-  public void put(K key, V value) {
-    map.merge(key, Set.of(value), Util::mutableUnion);
+  public boolean put(K key, V value) {
+    Set<V> newSet = map.merge(key, Set.of(value), Util::mutableUnion);
+    return newSet.size() != map.get(key).size();
   }
 
   public void putAll(K key, Iterable<? extends V> values) {
@@ -30,8 +32,8 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     }
   }
 
-  public Map<K, Set<V>> asMap() {
-    return map;
+  public Map<K, Collection<V>> asMap() {
+    return (Map<K, Collection<V>>) (Map<K, ?>) map;
   }
 
   public ImmutableSet<K> keySet() {
@@ -61,6 +63,16 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
       return true;
     }
     return map.values().stream().allMatch(Set::isEmpty);
+  }
+
+  @Override
+  public final Collection<Map.Entry<K, V>> entries() {
+    return asMap().entrySet().stream().<Map.Entry<K, V>>flatMap(entry -> {
+      if (entry.getValue().isEmpty()) {
+        return Stream.of();
+      }
+      return entry.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
+    }).collect(Collectors.toList());
   }
 
   @Override
