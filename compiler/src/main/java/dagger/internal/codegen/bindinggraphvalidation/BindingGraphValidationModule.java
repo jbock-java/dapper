@@ -16,16 +16,16 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.validation.CompositeBindingGraphPlugin;
 import dagger.internal.codegen.validation.Validation;
 import dagger.spi.model.BindingGraphPlugin;
 import java.util.Set;
 
-/** Binds the set of {@link BindingGraphPlugin}s used to implement Dagger validation. */
+/** Binds the set of {@code BindingGraphPlugin}s used to implement Dagger validation. */
 @Module
 public interface BindingGraphValidationModule {
 
@@ -48,7 +48,7 @@ public interface BindingGraphValidationModule {
         validation7,
         validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
-      return Set.of(factory.create(plugins, "Dagger/Validation"));
+      return ImmutableSet.of(factory.create(plugins, "Dagger/Validation"));
     } else {
       return plugins;
     }

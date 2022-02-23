@@ -24,8 +24,9 @@ import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Scopes;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Multimaps;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
 import dagger.spi.model.Binding;
@@ -35,8 +36,6 @@ import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
 import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.tools.Diagnostic;
@@ -70,16 +69,16 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
     DiagnosticMessageGenerator diagnosticMessageGenerator =
         diagnosticMessageGeneratorFactory.create(bindingGraph);
-    Map<ComponentNode, Set<Binding>> incompatibleBindings =
-        new LinkedHashMap<>();
-    for (Binding binding : bindingGraph.bindings()) {
+    ImmutableSetMultimap.Builder<ComponentNode, dagger.spi.model.Binding> incompatibleBindings =
+        ImmutableSetMultimap.builder();
+    for (dagger.spi.model.Binding binding : bindingGraph.bindings()) {
       binding
           .scope()
           .filter(scope -> !scope.isReusable())
           .ifPresent(
               scope -> {
                 ComponentNode componentNode =
-                    bindingGraph.componentNode(binding.componentPath()).orElseThrow();
+                    bindingGraph.componentNode(binding.componentPath()).get();
                 if (!componentNode.scopes().contains(scope)) {
                   // @Inject bindings in module or subcomponent binding graphs will appear at the
                   // properly scoped ancestor component, so ignore them here.
@@ -88,11 +87,11 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                       || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
-                  incompatibleBindings.merge(componentNode, Set.of(binding), Util::mutableUnion);
+                  incompatibleBindings.put(componentNode, binding);
                 }
               });
     }
-    incompatibleBindings
+    Multimaps.asMap(incompatibleBindings.build())
         .forEach((componentNode, bindings) ->
             report(componentNode, bindings, diagnosticReporter, diagnosticMessageGenerator));
   }
@@ -136,16 +135,18 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
         case PROVISION:
           message.append(
               methodSignatureFormatter.format(
-                  MoreElements.asExecutable(binding.bindingElement().orElseThrow().java())));
+                  MoreElements.asExecutable(binding.bindingElement().get().java())));
           break;
 
         case INJECTION:
           message
-              .append(getReadableSource(binding.scope().orElseThrow()))
+              .append(getReadableSource(binding.scope().get()))
               .append(" class ")
               .append(
-                  closestEnclosingTypeElement(binding.bindingElement().orElseThrow().java()).getQualifiedName())
+                  closestEnclosingTypeElement(
+                      binding.bindingElement().get().java()).getQualifiedName())
               .append(diagnosticMessageGenerator.getMessage(binding));
+
           break;
 
         default:

@@ -16,18 +16,20 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.binding.ComponentRequirement.componentCanMakeNewInstances;
+import static dagger.internal.codegen.collect.Sets.union;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.base.Joiner;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.ComponentNodeImpl;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.xprocessing.XExecutableType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
@@ -38,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /** Reports an error if a subcomponent factory method is missing required modules. */
 final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
@@ -66,7 +67,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         .flatMap(instancesOf(ChildFactoryMethodEdge.class))
         .forEach(
             edge -> {
-              Set<XTypeElement> missingModules = findMissingModules(edge, bindingGraph);
+              ImmutableSet<XTypeElement> missingModules = findMissingModules(edge, bindingGraph);
               if (!missingModules.isEmpty()) {
                 reportMissingModuleParameters(
                     edge, missingModules, bindingGraph, diagnosticReporter);
@@ -74,9 +75,9 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
             });
   }
 
-  private Set<XTypeElement> findMissingModules(
+  private ImmutableSet<XTypeElement> findMissingModules(
       ChildFactoryMethodEdge edge, BindingGraph graph) {
-    Set<XTypeElement> factoryMethodParameters =
+    ImmutableSet<XTypeElement> factoryMethodParameters =
         subgraphFactoryMethodParameters(edge, graph);
     ComponentNode child = (ComponentNode) graph.network().incidentNodes(edge).target();
     Set<XTypeElement> modulesOwnedByChild = ownedModules(child, graph);
@@ -84,11 +85,11 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         // bindings owned by child
         .filter(binding -> binding.componentPath().equals(child.componentPath()))
         // that require a module instance
-        .filter(Binding::requiresModuleInstance)
+        .filter(binding -> binding.requiresModuleInstance())
         .map(binding -> binding.contributingModule().get().xprocessing())
         .distinct()
         // module owned by child
-        .filter(modulesOwnedByChild::contains)
+        .filter(module -> modulesOwnedByChild.contains(module))
         // module not in the method parameters
         .filter(module -> !factoryMethodParameters.contains(module))
         // module doesn't have an accessible no-arg constructor
@@ -96,10 +97,9 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         .collect(toImmutableSet());
   }
 
-  private Set<XTypeElement> subgraphFactoryMethodParameters(
+  private ImmutableSet<XTypeElement> subgraphFactoryMethodParameters(
       ChildFactoryMethodEdge edge, BindingGraph bindingGraph) {
     ComponentNode parent = (ComponentNode) bindingGraph.network().incidentNodes(edge).source();
-    bindingGraph.network().incidentNodes(edge).source();
     XType parentType = parent.componentPath().currentComponent().xprocessing().getType();
     XExecutableType factoryMethodType = edge.factoryMethod().xprocessing().asMemberOf(parentType);
     return factoryMethodType.getParameterTypes().stream()
@@ -108,7 +108,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   }
 
   private Set<XTypeElement> ownedModules(ComponentNode component, BindingGraph graph) {
-    return Util.difference(
+    return Sets.difference(
         ((ComponentNodeImpl) component).componentDescriptor().moduleTypes(),
         inheritedModules(component, graph));
   }
@@ -121,16 +121,16 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private Function<ComponentNode, Set<XTypeElement>> uncachedInheritedModules(BindingGraph graph) {
     return componentNode ->
         componentNode.componentPath().atRoot()
-            ? Set.of()
+            ? ImmutableSet.of()
             : graph
             .componentNode(componentNode.componentPath().parent())
             .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
-            .orElseThrow();
+            .get();
   }
 
   private void reportMissingModuleParameters(
       ChildFactoryMethodEdge edge,
-      Set<XTypeElement> missingModules,
+      ImmutableSet<XTypeElement> missingModules,
       BindingGraph graph,
       DiagnosticReporter diagnosticReporter) {
     diagnosticReporter.reportSubcomponentFactoryMethod(
@@ -146,6 +146,6 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
             .currentComponent()
             .className()
             .canonicalName(),
-        missingModules.stream().map(XTypeElement::toString).collect(Collectors.joining(", ")));
+        Joiner.on(", ").join(missingModules));
   }
 }

@@ -42,4 +42,47 @@ public class Iterators {
       }
     };
   }
+
+  public static <T> Iterator<T> limit(Iterator<T> iterator, int limitSize) {
+    return new Iterator<T>() {
+      private int count;
+
+      @Override
+      public boolean hasNext() {
+        return count < limitSize && iterator.hasNext();
+      }
+
+      @Override
+      public T next() {
+        if (!hasNext()) {
+          throw new NoSuchElementException();
+        }
+        count++;
+        return iterator.next();
+      }
+
+      @Override
+      public void remove() {
+        iterator.remove();
+      }
+    };
+  }
+
+  public static int advance(Iterator<?> iterator, int numberToAdvance) {
+    int i;
+    for (i = 0; i < numberToAdvance && iterator.hasNext(); i++) {
+      iterator.next();
+    }
+    return i;
+  }
+
+  public static <T> int indexOf(Iterator<T> iterator, Predicate<? super T> predicate) {
+    for (int i = 0; iterator.hasNext(); i++) {
+      T current = iterator.next();
+      if (predicate.test(current)) {
+        return i;
+      }
+    }
+    return -1;
+  }
 }

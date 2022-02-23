@@ -303,7 +303,7 @@ class SubcomponentValidationTest {
     assertThat(compilation).failed();
     assertThat(compilation)
         .hadErrorContaining(
-            "Integer cannot be provided without an @Inject constructor or a "
+            "Integer cannot be provided without an @Inject constructor or an "
                 + "@Provides-annotated method")
         .inFile(componentFile)
         .onLineContaining("interface TestComponent");

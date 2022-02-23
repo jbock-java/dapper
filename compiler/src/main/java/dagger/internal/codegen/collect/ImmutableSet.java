@@ -54,8 +54,8 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
       return this;
     }
 
-    public Builder<E> addAll(Collection<? extends E> elements) {
-      delegate.addAll(elements);
+    public Builder<E> addAll(Iterable<? extends E> elements) {
+      elements.forEach(delegate::add);
       return this;
     }
 

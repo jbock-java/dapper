@@ -36,4 +36,8 @@ public class Sets {
       Set<E> unfiltered, Predicate<? super E> predicate) {
     return unfiltered.stream().filter(predicate).collect(DaggerStreams.toImmutableSet());
   }
+
+  public static <E> Set<E> newHashSetWithExpectedSize(int expectedSize) {
+    return new HashSet<E>(Maps.capacity(expectedSize));
+  }
 }

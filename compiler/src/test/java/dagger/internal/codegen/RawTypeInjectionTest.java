@@ -52,7 +52,7 @@ class RawTypeInjectionTest {
     Compilation compilation = daggerCompiler().compile(component, foo);
     assertThat(compilation).failed();
     assertThat(compilation)
-        .hadErrorContaining("Foo cannot be provided without a @Provides-annotated method.")
+        .hadErrorContaining("Foo cannot be provided without an @Provides-annotated method.")
         .inFile(component)
         .onLine(6);
   }
@@ -100,7 +100,7 @@ class RawTypeInjectionTest {
     Compilation compilation = daggerCompiler().compile(component, foo, module);
     assertThat(compilation).failed();
     assertThat(compilation)
-        .hadErrorContaining("Foo cannot be provided without a @Provides-annotated method.")
+        .hadErrorContaining("Foo cannot be provided without an @Provides-annotated method.")
         .inFile(component)
         .onLine(6);
   }
@@ -143,7 +143,7 @@ class RawTypeInjectionTest {
     Compilation compilation = daggerCompiler().compile(component, foo, bar);
     assertThat(compilation).failed();
     assertThat(compilation)
-        .hadErrorContaining("Foo cannot be provided without a @Provides-annotated method.")
+        .hadErrorContaining("Foo cannot be provided without an @Provides-annotated method.")
         .inFile(component)
         .onLine(6);
   }

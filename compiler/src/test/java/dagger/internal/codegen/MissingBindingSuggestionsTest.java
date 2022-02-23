@@ -218,7 +218,7 @@ public class MissingBindingSuggestionsTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m Baz cannot be provided without an "
-                    + "@Inject constructor or a @Provides-annotated method.",
+                    + "@Inject constructor or an @Provides-annotated method.",
                 "A binding for Baz exists in Child:",
                 "    Baz is injected at",
                 "        [Parent] Bar(baz)",
@@ -301,7 +301,7 @@ public class MissingBindingSuggestionsTest {
         .hadErrorContaining(
             message(
                 "\033[1;31m[Dagger/MissingBinding]\033[0m Baz cannot be provided without an "
-                    + "@Inject constructor or a @Provides-annotated method.",
+                    + "@Inject constructor or an @Provides-annotated method.",
                 "A binding for Baz exists in Child2:",
                 "    Baz is injected at",
                 "        [Parent] Bar(baz)",

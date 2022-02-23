@@ -16,17 +16,24 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.base.Formatter.DOUBLE_INDENT;
+import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
+import static dagger.internal.codegen.base.RequestKinds.canBeSatisfiedByProductionBinding;
 import static dagger.internal.codegen.base.Verify.verify;
-import static dagger.internal.codegen.collect.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.binding.DependencyRequestFormatter.DOUBLE_INDENT;
+import static dagger.internal.codegen.collect.Iterables.getLast;
+import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.Edge;
 import dagger.spi.model.BindingGraph.MissingBinding;
@@ -37,22 +44,21 @@ import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Key;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Reports errors for missing bindings. */
 final class MissingBindingValidator implements BindingGraphPlugin {
 
-  private final DaggerTypes types;
+  private final InjectBindingRegistry injectBindingRegistry;
   private final DependencyRequestFormatter dependencyRequestFormatter;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
 
   @Inject
   MissingBindingValidator(
-      DaggerTypes types,
+      InjectBindingRegistry injectBindingRegistry,
       DependencyRequestFormatter dependencyRequestFormatter,
       DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory) {
-    this.types = types;
+    this.injectBindingRegistry = injectBindingRegistry;
     this.dependencyRequestFormatter = dependencyRequestFormatter;
     this.diagnosticMessageGeneratorFactory = diagnosticMessageGeneratorFactory;
   }
@@ -89,10 +95,11 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     } else {
       diagnosticReporter.reportComponent(
           ERROR,
-          graph.componentNode(missingBinding.componentPath()).orElseThrow(),
+          graph.componentNode(missingBinding.componentPath()).get(),
           missingBindingErrorMessage(missingBinding, graph)
               + wrongComponentErrorMessage(missingBinding, alternativeComponents, graph));
-    }  }
+    }
+  }
 
   private String missingBindingErrorMessage(MissingBinding missingBinding, BindingGraph graph) {
     Key key = missingBinding.key();
@@ -104,8 +111,15 @@ final class MissingBindingValidator implements BindingGraphPlugin {
     if (isValidImplicitProvisionKey(key)) {
       errorMessage.append("an @Inject constructor or ");
     }
-    errorMessage.append("a @Provides-");
+    errorMessage.append("an @Provides-"); // TODO(dpb): s/an/a
+    if (allIncomingDependenciesCanUseProduction(missingBinding, graph)) {
+      errorMessage.append(" or @Produces-");
+    }
     errorMessage.append("annotated method.");
+    if (isValidMembersInjectionKey(key) && typeHasInjectionSites(key)) {
+      errorMessage.append(
+          " This type supports members injection but cannot be implicitly provided.");
+    }
     return errorMessage.toString();
   }
 
@@ -113,11 +127,11 @@ final class MissingBindingValidator implements BindingGraphPlugin {
       MissingBinding missingBinding,
       List<ComponentPath> alternativeComponentPath,
       BindingGraph graph) {
-    Set<DependencyEdge> entryPoints =
+    ImmutableSet<DependencyEdge> entryPoints =
         graph.entryPointEdgesDependingOnBinding(missingBinding);
     DiagnosticMessageGenerator generator = diagnosticMessageGeneratorFactory.create(graph);
-    List<DependencyEdge> dependencyTrace =
-        generator.dependencyTrace(missingBinding, entryPoints);
+    ImmutableList<DependencyEdge> dependencyTrace =
+        ImmutableList.copyOf(generator.dependencyTrace(missingBinding, entryPoints));
     StringBuilder message =
         graph.isFullBindingGraph()
             ? new StringBuilder()
@@ -137,7 +151,7 @@ final class MissingBindingValidator implements BindingGraphPlugin {
         hasSameComponentName = true;
         message.append("[").append(component).append("]");
       } else {
-        message.append(component.currentComponent().java().getQualifiedName());
+        message.append(currentComponentName);
       }
       message.append(":");
     }
@@ -156,12 +170,37 @@ final class MissingBindingValidator implements BindingGraphPlugin {
       message.append("\n").append(line.replace(DOUBLE_INDENT, DOUBLE_INDENT + componentName));
     }
     if (!dependencyTrace.isEmpty()) {
-      generator.appendComponentPathUnlessAtRoot(message, source(dependencyTrace.get(dependencyTrace.size() - 1), graph));
+      generator.appendComponentPathUnlessAtRoot(message, source(getLast(dependencyTrace), graph));
     }
     message.append(
         generator.getRequestsNotInTrace(
             dependencyTrace, generator.requests(missingBinding), entryPoints));
     return message.toString();
+  }
+
+  private boolean allIncomingDependenciesCanUseProduction(
+      MissingBinding missingBinding, BindingGraph graph) {
+    return graph.network().inEdges(missingBinding).stream()
+        .flatMap(instancesOf(DependencyEdge.class))
+        .allMatch(edge -> dependencyCanBeProduction(edge, graph));
+  }
+
+  // TODO(ronshapiro): merge with
+  // ProvisionDependencyOnProduerBindingValidator.dependencyCanUseProduction
+  private boolean dependencyCanBeProduction(DependencyEdge edge, BindingGraph graph) {
+    Node source = graph.network().incidentNodes(edge).source();
+    if (source instanceof ComponentNode) {
+      return canBeSatisfiedByProductionBinding(edge.dependencyRequest().kind());
+    }
+    if (source instanceof dagger.spi.model.Binding) {
+      return ((dagger.spi.model.Binding) source).isProduction();
+    }
+    throw new IllegalArgumentException(
+        "expected a dagger.spi.model.Binding or ComponentNode: " + source);
+  }
+
+  private boolean typeHasInjectionSites(Key key) {
+    return false;
   }
 
   private static String getComponentFromDependencyEdge(

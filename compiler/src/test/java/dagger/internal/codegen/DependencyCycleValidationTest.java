@@ -79,11 +79,6 @@ public class DependencyCycleValidationTest {
                 "        Outer.B(aParam)",
                 "    Outer.B is injected at",
                 "        Outer.C(bParam)",
-                "    Outer.C is injected at",
-                "        Outer.A(cParam)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    Outer.C is requested at",
                 "        Outer.CComponent.getC()"))
         .inFile(SIMPLE_CYCLIC_DEPENDENCY)
@@ -106,9 +101,6 @@ public class DependencyCycleValidationTest {
             "        Outer.B(aParam)",
             "    Outer.B is injected at",
             "        Outer.C(bParam)",
-            "    Outer.C is injected at",
-            "        Outer.A(cParam)",
-            "    ...",
             "",
             "======================",
             "Full classname legend:",
@@ -184,11 +176,6 @@ public class DependencyCycleValidationTest {
                 "    Outer.B is injected at",
                 "        Outer.C(bParam)",
                 "    Outer.C is injected at",
-                "        Outer.A(cParam)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
-                "    Outer.C is injected at",
                 "        Outer.D(cParam)",
                 "    Outer.D is requested at",
                 "        Outer.DComponent.getD()"))
@@ -244,11 +231,6 @@ public class DependencyCycleValidationTest {
                 "        Outer.B(aParam)",
                 "    Outer.B is injected at",
                 "        Outer.C(bParam)",
-                "    Outer.C is injected at",
-                "        Outer.A(cParam)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    Provider<Outer.C> is injected at",
                 "        Outer.D(cParam)",
                 "    Outer.D is requested at",
@@ -331,11 +313,6 @@ public class DependencyCycleValidationTest {
                 "        CycleModule.object(string)",
                 "    Object is injected at",
                 "        CycleModule.string(object)",
-                "    String is injected at",
-                "        CycleModule.object(string)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    String is requested at",
                 "        Grandchild.entry()"))
         .inFile(parent)
@@ -418,11 +395,6 @@ public class DependencyCycleValidationTest {
                 "        CycleModule.object(string)",
                 "    Object is injected at",
                 "        CycleModule.string(object)",
-                "    String is injected at",
-                "        CycleModule.object(string)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    String is requested at",
                 "        Child.entry() [Parent \u2192 Child]"))
         .inFile(parent)
@@ -474,11 +446,6 @@ public class DependencyCycleValidationTest {
                 "        TestModule.bindQualified(unqualified)",
                 "    @SomeQualifier Object is injected at",
                 "        TestModule.bindUnqualified(qualified)",
-                "    Object is injected at",
-                "        TestModule.bindQualified(unqualified)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    Object is requested at",
                 "        TestComponent.unqualified()"))
         .inFile(component)
@@ -519,11 +486,6 @@ public class DependencyCycleValidationTest {
                 "Found a dependency cycle:",
                 "    Object is injected at",
                 "        TestModule.bindToSelf(sameKey)",
-                "    Object is injected at",
-                "        TestModule.bindToSelf(sameKey)",
-                "    ...",
-                "",
-                "The cycle is requested via:",
                 "    Object is requested at",
                 "        TestComponent.selfReferential()"))
         .inFile(component)

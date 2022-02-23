@@ -5,6 +5,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -85,5 +86,38 @@ public class Iterables {
 
   public static <T> Iterable<T> consumingIterable(Iterable<T> iterable) {
     return () -> Iterators.consumingIterator(iterable.iterator());
+  }
+
+  public static <T> Iterable<T> limit(Iterable<T> iterable, int limitSize) {
+    return () -> Iterators.limit(iterable.iterator(), limitSize);
+  }
+
+  public static <T> Iterable<T> skip(Iterable<T> iterable, int numberToSkip) {
+    return () -> {
+      if (iterable instanceof List) {
+        List<T> list = (List<T>) iterable;
+        int toSkip = Math.min(list.size(), numberToSkip);
+        return list.subList(toSkip, list.size()).iterator();
+      }
+      Iterator<T> iterator = iterable.iterator();
+      Iterators.advance(iterator, numberToSkip);
+
+      /* return an iterator that does not support remove */
+      return new Iterator<T>() {
+        @Override
+        public boolean hasNext() {
+          return iterator.hasNext();
+        }
+
+        @Override
+        public T next() {
+          return iterator.next();
+        }
+      };
+    };
+  }
+
+  public static <T> int indexOf(Iterable<T> iterable, Predicate<? super T> predicate) {
+    return Iterators.indexOf(iterable.iterator(), predicate);
   }
 }
