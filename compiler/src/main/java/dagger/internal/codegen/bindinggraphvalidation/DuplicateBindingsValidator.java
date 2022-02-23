@@ -141,7 +141,9 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
                 mutuallyVisibleBindings.putAll(componentPath, bindingsInAncestor);
               }
             });
-    return valueSetsForEachKey(mutuallyVisibleBindings.build());
+    Set<Set<Binding>> result = valueSetsForEachKey(mutuallyVisibleBindings.build());
+    System.out.println(result.size());
+    return result;
   }
 
   private void reportDuplicateBindings(
