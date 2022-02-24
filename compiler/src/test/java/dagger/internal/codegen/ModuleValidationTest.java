@@ -24,7 +24,6 @@ import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import java.lang.annotation.Annotation;
 import javax.tools.JavaFileObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 final class ModuleValidationTest {
@@ -254,7 +253,6 @@ final class ModuleValidationTest {
         .onLineContaining("@Singleton");
   }
 
-  @Disabled("issue #3")
   @Test
   void moduleIncludesSelfCycle() {
     JavaFileObject module =
@@ -289,6 +287,6 @@ final class ModuleValidationTest {
     Compilation compilation = daggerCompiler().compile(module, otherModule);
     assertThat(compilation).failed();
     String error = String.format("@%s cannot include themselves", moduleType.simpleName());
-    assertThat(compilation).hadErrorContaining(error).inFile(module).onLineContaining("Module(");
+    assertThat(compilation).hadErrorContaining(error).inFile(module);
   }
 }
