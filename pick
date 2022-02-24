@@ -14,7 +14,7 @@ isjava="^.*[.]java"
 
 git --git-dir ../dagger/.git --work-tree=../dagger checkout $REF_ID
 
-for S in `git --git-dir ../dagger/.git --work-tree=../dagger show --name-status | grep -E ^M | awk -F 'java/' '{print $2}'`; do
+for S in `git --git-dir ../dagger/.git --work-tree=../dagger show --name-status -- java/dagger | grep -E ^M | awk -F 'java/' '{print $2}'`; do
   if [[ "$S" =~ $isjava ]]; then
     cp "../dagger/java/$S" "compiler/src/main/java/$S"
     ./imports "compiler/src/main/java/$S"
