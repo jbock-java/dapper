@@ -124,6 +124,16 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
   }
 
   @Override
+  public ImmutableSet<X> keySet() {
+    return ImmutableSet.copyOf(super.keySet());
+  }
+
+  @Override
+  public ImmutableList<Y> values() {
+    return ImmutableList.copyOf(super.values());
+  }
+
+  @Override
   public final int hashCode() {
     return Objects.hash(delegate);
   }

@@ -29,6 +29,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
+import static dagger.internal.codegen.langmodel.Accessibility.isProtectedMemberOf;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
@@ -67,6 +68,7 @@ import dagger.internal.codegen.collect.MultimapBuilder;
 import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -77,11 +79,13 @@ import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -335,15 +339,15 @@ public final class ComponentImplementation {
   }
 
   private static ImmutableMap<ComponentImplementation, FieldSpec>
-  createComponentFieldsByImplementation(
-      ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
+      createComponentFieldsByImplementation(
+          ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
     checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
     ImmutableList.Builder<ComponentImplementation> builder = ImmutableList.builder();
     for (ComponentImplementation curr = componentImplementation;
-         curr != null;
-         curr = curr.parent.orElse(null)) {
+        curr != null;
+        curr = curr.parent.orElse(null)) {
       builder.add(curr);
     }
     // For better readability when adding these fields/parameters to generated code, we collect the
@@ -366,7 +370,6 @@ public final class ComponentImplementation {
                   return field.build();
                 }));
   }
-
   /** Returns the shard representing the {@code ComponentImplementation} itself. */
   public ShardImplementation getComponentShard() {
     return componentShard;
@@ -446,6 +449,9 @@ public final class ComponentImplementation {
 
     private ShardImplementation(ClassName name) {
       this.name = name;
+      if (graph.componentDescriptor().isProduction()) {
+        claimMethodName(CANCELLATION_LISTENER_METHOD_NAME);
+      }
 
       // Build the map of constructor parameters for this shard and claim the field names to prevent
       // collisions between the constructor parameters and fields.
@@ -504,7 +510,6 @@ public final class ComponentImplementation {
 
     // TODO(ronshapiro): see if we can remove this method and instead inject it in the objects that
     // need it.
-
     /** Returns the binding graph for the component being generated. */
     public BindingGraph graph() {
       return graph;
@@ -528,20 +533,52 @@ public final class ComponentImplementation {
       return componentNames.getSubcomponentCreatorName(graph.componentPath(), creatorKey);
     }
 
-    /** Returns {@code true} if {@code type} is accessible from the generated component. */
+    /**
+     * Returns an accessible type for this shard implementation, returns Object if the type is not
+     * accessible.
+     *
+     * <p>This method checks accessibility for public types and package private types, and it also
+     * checks protected types' accessibility.
+     */
+    TypeMirror accessibleType(TypeMirror type) {
+      // Returns the original type if the type is accessible from this shard, or returns original
+      // type's raw type if only its raw type is accessible. Otherwise, returns Object.
+      TypeMirror castedType = types.accessibleType(type, name());
+      // Previous check marks protected type as inaccessible, so a second check is needed to check
+      // if the type is protected type and accessible.
+      if (TypeName.get(castedType).equals(TypeName.OBJECT) && isTypeAccessible(type)) {
+        castedType = type;
+      }
+      return castedType;
+    }
+
+    /**
+     * Returns {@code true} if {@code type} is accessible from the generated component.
+     *
+     * <p>This method checks accessibility for public types and package private types, and it also
+     * checks protected types' accessibility.
+     */
     boolean isTypeAccessible(TypeMirror type) {
-      return isTypeAccessibleFrom(type, name.packageName());
+      if (isTypeAccessibleFrom(type, name.packageName())) {
+        return true;
+      }
+      // Check if the type is protected and accessible from current component.
+      if (type instanceof DeclaredType
+          && isProtectedMemberOf(
+              MoreTypes.asDeclared(type),
+              getComponentImplementation().componentDescriptor().typeElement())) {
+        return true;
+      }
+      return false;
     }
 
     // TODO(dpb): Consider taking FieldSpec, and returning identical FieldSpec with unique name?
-
     /** Adds the given field to the component. */
     public void addField(FieldSpecKind fieldKind, FieldSpec fieldSpec) {
       fieldSpecsMap.put(fieldKind, fieldSpec);
     }
 
     // TODO(dpb): Consider taking MethodSpec, and returning identical MethodSpec with unique name?
-
     /** Adds the given method to the component. */
     public void addMethod(MethodSpecKind methodKind, MethodSpec methodSpec) {
       methodSpecsMap.put(methodKind, methodSpec);
@@ -625,8 +662,8 @@ public final class ComponentImplementation {
       String baseMethodName =
           bindingName
               + (request.isRequestKind(RequestKind.INSTANCE)
-              ? ""
-              : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
+                  ? ""
+                  : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
       return getUniqueMethodName(baseMethodName);
     }
 
@@ -657,6 +694,14 @@ public final class ComponentImplementation {
       }
 
       addConstructorAndInitializationMethods();
+
+      if (graph.componentDescriptor().isProduction()) {
+        if (isComponentShard() || !cancellations.isEmpty()) {
+          TypeSpecs.addSupertype(
+              builder, elements.getTypeElement(TypeNames.CANCELLATION_LISTENER.canonicalName()));
+          addCancellationListenerImplementation();
+        }
+      }
 
       modifiers().forEach(builder::addModifiers);
       fieldSpecsMap.asMap().values().forEach(builder::addFields);
@@ -833,7 +878,7 @@ public final class ComponentImplementation {
     /** Creates and adds the constructor and methods needed for initializing the component. */
     private void addConstructorAndInitializationMethods() {
       MethodSpec.Builder constructor = constructorBuilder().addModifiers(PRIVATE);
-      ImmutableList<ParameterSpec> parameters = ImmutableList.copyOf(constructorParameters.values());
+      ImmutableList<ParameterSpec> parameters = constructorParameters.values().asList();
 
       if (isComponentShard()) {
         // Add a constructor parameter and initialization for each component field. We initialize
@@ -895,7 +940,7 @@ public final class ComponentImplementation {
       } else {
         // This initialization is called from the componentShard, so we need to use those args.
         CodeBlock componentArgs =
-            parameterNames(ImmutableList.copyOf(componentShard.constructorParameters.values()));
+            parameterNames(componentShard.constructorParameters.values().asList());
         FieldSpec shardField = shardFieldsByImplementation.get(this);
         shardInitializations.add(CodeBlock.of("$N = new $T($L);", shardField, name, componentArgs));
       }
@@ -957,9 +1002,22 @@ public final class ComponentImplementation {
     }
 
     private Optional<CodeBlock> cancelParentStatement() {
-      return Optional.empty();
+      if (!shouldPropagateCancellationToParent()) {
+        return Optional.empty();
+      }
+      return Optional.of(
+          CodeBlock.builder()
+              .addStatement(
+                  "$L.$N($N)",
+                  parent.get().componentFieldReference(),
+                  CANCELLATION_LISTENER_METHOD_NAME,
+                  MAY_INTERRUPT_IF_RUNNING_PARAM)
+              .build());
     }
 
+    private boolean shouldPropagateCancellationToParent() {
+      return false;
+    }
 
     /**
      * Creates one or more methods, all taking the given {@code parameters}, which partition the
@@ -989,7 +1047,7 @@ public final class ComponentImplementation {
     if (graph.componentDescriptor().hasCreator()) {
       return graph.componentRequirements().asList();
     } else if (graph.factoryMethod().isPresent()) {
-      return ImmutableList.copyOf(graph.factoryMethodParameters().keySet());
+      return graph.factoryMethodParameters().keySet().asList();
     } else {
       throw new AssertionError(
           "Expected either a component creator or factory method but found neither.");

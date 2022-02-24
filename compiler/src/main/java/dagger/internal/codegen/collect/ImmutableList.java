@@ -24,6 +24,11 @@ public class ImmutableList<T> extends AbstractList<T> implements ImmutableCollec
   }
 
   @Override
+  public final ImmutableList<T> asList() {
+    return this;
+  }
+
+  @Override
   public T get(int index) {
     return delegate.get(index);
   }

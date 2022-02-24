@@ -112,6 +112,7 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
     return delegate.size();
   }
 
+  @Override
   public final ImmutableList<T> asList() {
     return ImmutableList.copyOf(delegate);
   }
