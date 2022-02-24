@@ -34,6 +34,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.HashMultimap;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableListMultimap;
 import dagger.internal.codegen.collect.ImmutableMap;
@@ -65,28 +66,34 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-/** A factory for {@link BindingGraph} objects. */
+/** A factory for {@code BindingGraph} objects. */
 @Singleton
 public final class BindingGraphFactory implements ClearableCache {
 
   private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final InjectBindingRegistry injectBindingRegistry;
+  private final KeyFactory keyFactory;
   private final BindingFactory bindingFactory;
+  private final ModuleDescriptor.Factory moduleDescriptorFactory;
   private final BindingGraphConverter bindingGraphConverter;
-  private final Map<Key, Set<Key>> keysMatchingRequestCache = new HashMap<>();
+  private final Map<Key, ImmutableSet<Key>> keysMatchingRequestCache = new HashMap<>();
 
   @Inject
   BindingGraphFactory(
       XProcessingEnv processingEnv,
       DaggerElements elements,
       InjectBindingRegistry injectBindingRegistry,
+      KeyFactory keyFactory,
       BindingFactory bindingFactory,
+      ModuleDescriptor.Factory moduleDescriptorFactory,
       BindingGraphConverter bindingGraphConverter) {
     this.processingEnv = processingEnv;
     this.elements = elements;
     this.injectBindingRegistry = injectBindingRegistry;
+    this.keyFactory = keyFactory;
     this.bindingFactory = bindingFactory;
+    this.moduleDescriptorFactory = moduleDescriptorFactory;
     this.bindingGraphConverter = bindingGraphConverter;
   }
 
@@ -107,8 +114,8 @@ public final class BindingGraphFactory implements ClearableCache {
       Optional<Resolver> parentResolver,
       ComponentDescriptor componentDescriptor,
       boolean createFullBindingGraph) {
-    Set<ContributionBinding> explicitBindingsBuilder = new LinkedHashSet<>();
-    Set<DelegateDeclaration> delegatesBuilder = new LinkedHashSet<>();
+    ImmutableSet.Builder<ContributionBinding> explicitBindingsBuilder = ImmutableSet.builder();
+    ImmutableSet.Builder<DelegateDeclaration> delegatesBuilder = ImmutableSet.builder();
 
     if (componentDescriptor.isRealComponent()) {
       // binding for the component itself
@@ -126,20 +133,18 @@ public final class BindingGraphFactory implements ClearableCache {
       // times assuming it is the exact same method. We do this by tracking a set of bindings
       // we've already added with the binding element removed since that is the only thing
       // allowed to differ.
-      Map<String, Set<ContributionBinding>> dedupeBindings = new HashMap<>();
+      HashMultimap<String, ContributionBinding> dedupeBindings = HashMultimap.create();
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(method)) {
           ContributionBinding binding =
               bindingFactory.componentDependencyMethodBinding(
                   componentDescriptor, asMethod(toXProcessing(method, processingEnv)));
-          int previousSize = dedupeBindings.getOrDefault(method.getSimpleName().toString(), Set.of()).size();
-          if (dedupeBindings.merge(
+          if (dedupeBindings.put(
               method.getSimpleName().toString(),
               // Remove the binding element since we know that will be different, but everything
               // else we want to be the same to consider it a duplicate.
-              Set.of(binding.toBuilder().clearBindingElement().build()),
-              Util::mutableUnion).size() > previousSize) {
+              binding.toBuilder().clearBindingElement().build())) {
             explicitBindingsBuilder.add(binding);
           }
         }
@@ -185,9 +190,9 @@ public final class BindingGraphFactory implements ClearableCache {
         new Resolver(
             parentResolver,
             componentDescriptor,
-            indexBindingDeclarationsByKey(explicitBindingsBuilder),
+            indexBindingDeclarationsByKey(explicitBindingsBuilder.build()),
             indexBindingDeclarationsByKey(subcomponentDeclarations),
-            indexBindingDeclarationsByKey(delegatesBuilder));
+            indexBindingDeclarationsByKey(delegatesBuilder.build()));
 
     componentDescriptor.entryPointMethods().stream()
         .map(method -> method.dependencyRequest().orElseThrow())
@@ -392,8 +397,8 @@ public final class BindingGraphFactory implements ClearableCache {
           requestKey, this::keysMatchingRequestUncached);
     }
 
-    private Set<Key> keysMatchingRequestUncached(Key requestKey) {
-      return Set.of(requestKey);
+    private ImmutableSet<Key> keysMatchingRequestUncached(Key requestKey) {
+      return ImmutableSet.of(requestKey);
     }
 
     private Set<ContributionBinding> createDelegateBindings(
