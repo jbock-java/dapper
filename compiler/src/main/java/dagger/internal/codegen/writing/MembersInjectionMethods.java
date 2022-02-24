@@ -76,14 +76,14 @@ final class MembersInjectionMethods {
   }
 
   /**
-   * Returns the members injection {@link Expression} for the given {@link Key}, creating it if
+   * Returns the members injection {@code Expression} for the given {@code Key}, creating it if
    * necessary.
    */
   Expression getInjectExpression(Key key, CodeBlock instance, ClassName requestingClass) {
     Binding binding =
-        graph.membersInjectionBinding(key).isPresent()
-            ? graph.membersInjectionBinding(key).get()
-            : graph.contributionBinding(key);
+        graph.localMembersInjectionBinding(key).isPresent()
+            ? graph.localMembersInjectionBinding(key).get()
+            : graph.localContributionBinding(key).get();
     Expression expression =
         reentrantComputeIfAbsent(
             injectMethodExpressions, key, k -> injectMethodExpression(binding));
