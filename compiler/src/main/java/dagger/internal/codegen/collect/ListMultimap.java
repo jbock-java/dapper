@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,5 +91,11 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
   @Override
   public final String toString() {
     return map.toString();
+  }
+
+  @Override
+  public final void forEach(BiConsumer<? super K, ? super V> action) {
+    asMap().forEach((key, valueCollection) ->
+        valueCollection.forEach(value -> action.accept(key, value)));
   }
 }

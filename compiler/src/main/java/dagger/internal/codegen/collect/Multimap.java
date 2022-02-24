@@ -2,6 +2,7 @@ package dagger.internal.codegen.collect;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public interface Multimap<K, V> {
 
@@ -24,4 +25,6 @@ public interface Multimap<K, V> {
   Collection<Map.Entry<K, V>> entries();
 
   Map<K, Collection<V>> asMap();
+
+  void forEach(BiConsumer<? super K, ? super V> action);
 }
