@@ -25,14 +25,14 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import io.jbock.javapoet.CodeBlock;
-import jakarta.inject.Provider;
 
 /**
- * A {@link Provider} creation expression for an {@link jakarta.inject.Inject @Inject}-constructed
- * class or a {@link dagger.Provides @Provides}-annotated module method.
+ * A {@code Provider} creation expression for an {@code jakarta.inject.Inject @Inject}-constructed
+ * class or a {@code dagger.Provides @Provides}-annotated module method.
  */
 // TODO(dpb): Resolve with ProducerCreationExpression.
 final class InjectionOrProvisionProviderCreationExpression
@@ -66,7 +66,7 @@ final class InjectionOrProvisionProviderCreationExpression
     if (binding.kind().equals(INJECTION)
         && binding.unresolved().isPresent()
         && binding.scope().isPresent()) {
-      return CodeBlocks.cast(createFactory, Provider.class);
+      return CodeBlocks.cast(createFactory, TypeNames.PROVIDER);
     } else {
       return createFactory;
     }

@@ -18,9 +18,9 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.langmodel.DaggerElements.DECLARATION_ORDER;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -29,6 +29,7 @@ import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.LinkedHashMultimap;
 import dagger.internal.codegen.collect.SetMultimap;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
@@ -149,7 +150,7 @@ final class InjectionSiteFactory {
     }
 
     private boolean shouldBeInjected(Element injectionSite) {
-      return isAnnotationPresent(injectionSite, Inject.class)
+      return isAnnotationPresent(injectionSite, TypeNames.INJECT)
           && !injectionSite.getModifiers().contains(PRIVATE)
           && !injectionSite.getModifiers().contains(STATIC);
     }

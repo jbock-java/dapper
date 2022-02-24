@@ -32,7 +32,6 @@ import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-import dagger.MembersInjector;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.Binding;
@@ -45,6 +44,7 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
@@ -55,8 +55,8 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -86,25 +86,25 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final CompilerOptions compilerOptions;
 
   final class BindingsCollection<B extends Binding> {
-    private final Class<?> factoryClass;
+    private final ClassName factoryClass;
     private final Map<Key, B> bindingsByKey = Maps.newLinkedHashMap();
     private final Deque<B> bindingsRequiringGeneration = new ArrayDeque<>();
     private final Set<Key> materializedBindingKeys = Sets.newLinkedHashSet();
 
-    BindingsCollection(Class<?> factoryClass) {
+    BindingsCollection(ClassName factoryClass) {
       this.factoryClass = factoryClass;
     }
 
     void generateBindings(SourceFileGenerator<B> generator) throws SourceFileGenerationException {
       for (B binding = bindingsRequiringGeneration.poll();
-           binding != null;
-           binding = bindingsRequiringGeneration.poll()) {
+          binding != null;
+          binding = bindingsRequiringGeneration.poll()) {
         checkState(!binding.unresolved().isPresent());
         TypeMirror type = binding.key().type().java();
         if (!type.getKind().equals(DECLARED)
             || injectValidatorWhenGeneratingCode
-            .validate(toXProcessing(asTypeElement(type), processingEnv))
-            .isClean()) {
+                .validate(toXProcessing(asTypeElement(type), processingEnv))
+                .isClean()) {
           generator.generate(binding);
         }
         materializedBindingKeys.add(binding.key());
@@ -143,7 +143,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
               String.format(
                   "Generating a %s for %s. "
                       + "Prefer to run the dagger processor over that class instead.",
-                  factoryClass.getSimpleName(),
+                  factoryClass.simpleName(),
                   types.erasure(binding.key().type().java()))); // erasure to strip <T> from msgs.
         }
       }
@@ -173,9 +173,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   }
 
   private final BindingsCollection<ProvisionBinding> provisionBindings =
-      new BindingsCollection<>(Provider.class);
+      new BindingsCollection<>(TypeNames.PROVIDER);
   private final BindingsCollection<MembersInjectionBinding> membersInjectionBindings =
-      new BindingsCollection<>(MembersInjector.class);
+      new BindingsCollection<>(TypeNames.MEMBERS_INJECTOR);
 
   @Inject
   InjectBindingRegistryImpl(

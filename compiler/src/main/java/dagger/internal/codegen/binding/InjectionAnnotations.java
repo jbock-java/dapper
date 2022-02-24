@@ -16,40 +16,65 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
+import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
-import static java.util.Objects.requireNonNull;
+import static io.jbock.auto.common.MoreElements.asType;
+import static io.jbock.auto.common.MoreElements.asVariable;
+import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
+import dagger.internal.codegen.collect.FluentIterable;
+import dagger.internal.codegen.collect.ImmutableCollection;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.extension.DaggerCollectors;
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.AnnotationMirrors;
+import io.jbock.auto.common.Equivalence;
+import io.jbock.auto.common.Equivalence.Wrapper;
 import io.jbock.auto.common.SuperficialValidation;
 import jakarta.inject.Inject;
-import jakarta.inject.Qualifier;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.ElementFilter;
 
 /** Utilities relating to annotations defined in the {@code javax.inject} package. */
 public final class InjectionAnnotations {
 
+  private static final Equivalence<AnnotationMirror> EQUIVALENCE = AnnotationMirrors.equivalence();
+
   private final XProcessingEnv processingEnv;
+  private final DaggerElements elements;
+  private final KotlinMetadataUtil kotlinMetadataUtil;
 
   @Inject
-  InjectionAnnotations(XProcessingEnv processingEnv) {
+  InjectionAnnotations(
+      XProcessingEnv processingEnv,
+      DaggerElements elements,
+      KotlinMetadataUtil kotlinMetadataUtil) {
     this.processingEnv = processingEnv;
+    this.elements = elements;
+    this.kotlinMetadataUtil = kotlinMetadataUtil;
   }
 
   public Optional<XAnnotation> getQualifier(XElement element) {
@@ -60,42 +85,103 @@ public final class InjectionAnnotations {
     if (!SuperficialValidation.validateElement(e)) {
       throw new TypeNotPresentException(e.toString(), null);
     }
-    requireNonNull(e);
-    Collection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
+    checkNotNull(e);
+    ImmutableCollection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
     switch (qualifierAnnotations.size()) {
       case 0:
         return Optional.empty();
       case 1:
-        return Optional.of(qualifierAnnotations.iterator().next());
+        return Optional.<AnnotationMirror>of(qualifierAnnotations.iterator().next());
       default:
         throw new IllegalArgumentException(
             e + " was annotated with more than one @Qualifier annotation");
     }
   }
 
-  public Set<XAnnotation> getQualifiers(XElement element) {
-    return getQualifiers(element.toJavac()).stream()
+  public ImmutableSet<XAnnotation> getQualifiers(XElement element) {
+    return getQualifiers(toJavac(element)).stream()
         .map(qualifier -> toXProcessing(qualifier, processingEnv))
         .collect(toImmutableSet());
   }
 
-  public Collection<? extends AnnotationMirror> getQualifiers(Element element) {
-    Set<? extends AnnotationMirror> qualifiers =
-        AnnotationMirrors.getAnnotatedAnnotations(element, Qualifier.class);
-    return List.copyOf(qualifiers);
+  public ImmutableCollection<? extends AnnotationMirror> getQualifiers(Element element) {
+    ImmutableSet<? extends AnnotationMirror> qualifiers =
+        DaggerElements.getAnnotatedAnnotations(element, TypeNames.QUALIFIER);
+    if (element.getKind() == ElementKind.FIELD
+        // static injected fields are not supported, no need to get qualifier from kotlin metadata
+        && !element.getModifiers().contains(STATIC)
+        && isAnnotationPresent(element, TypeNames.INJECT)
+        && kotlinMetadataUtil.hasMetadata(element)) {
+      return Stream.concat(
+              qualifiers.stream(), getQualifiersForKotlinProperty(asVariable(element)).stream())
+          .map(EQUIVALENCE::wrap) // Wrap in equivalence to deduplicate
+          .distinct()
+          .map(Wrapper::get)
+          .collect(DaggerStreams.toImmutableList());
+    } else {
+      return qualifiers.asList();
+    }
   }
 
-  /** Returns the constructors in {@code type} that are annotated with {@link Inject}. */
-  public static Set<XConstructorElement> injectedConstructors(XTypeElement type) {
+  /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
+  public static ImmutableSet<XConstructorElement> injectedConstructors(XTypeElement type) {
     return type.getConstructors().stream()
         .filter(constructor -> constructor.hasAnnotation(TypeNames.INJECT))
         .collect(toImmutableSet());
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
-  public static Set<ExecutableElement> injectedConstructors(TypeElement type) {
-    return constructorsIn(type.getEnclosedElements()).stream()
-        .filter(constructor -> isAnnotationPresent(constructor, Inject.class))
-        .collect(toImmutableSet());
+  public static ImmutableSet<ExecutableElement> injectedConstructors(TypeElement type) {
+    return FluentIterable.from(constructorsIn(type.getEnclosedElements()))
+        .filter(constructor -> isAnnotationPresent(constructor, TypeNames.INJECT))
+        .toSet();
+  }
+
+  /**
+   * Gets the qualifiers annotation of a Kotlin Property. Finding these annotations involve finding
+   * the synthetic method for annotations as described by the Kotlin metadata or finding the
+   * corresponding MembersInjector method for the field, which also contains the qualifier
+   * annotation.
+   */
+  private ImmutableCollection<? extends AnnotationMirror> getQualifiersForKotlinProperty(
+      VariableElement fieldElement) {
+    // TODO(bcorso): Consider moving this to KotlinMetadataUtil
+    if (kotlinMetadataUtil.isMissingSyntheticPropertyForAnnotations(fieldElement)) {
+      // If we detect that the synthetic method for annotations is missing, possibly due to the
+      // element being from a compiled class, then find the MembersInjector that was generated
+      // for the enclosing class and extract the qualifier information from it.
+      TypeElement membersInjector =
+          elements.getTypeElement(
+              membersInjectorNameForType(asType(fieldElement.getEnclosingElement())));
+      if (membersInjector != null) {
+        String memberInjectedFieldSignature = memberInjectedFieldSignatureForVariable(fieldElement);
+        // TODO(danysantiago): We have to iterate over all the injection methods for every qualifier
+        //  look up. Making this N^2 when looking through all the injected fields. :(
+        return ElementFilter.methodsIn(membersInjector.getEnclosedElements()).stream()
+            .filter(
+                method ->
+                    getAnnotationMirror(method, TypeNames.INJECTED_FIELD_SIGNATURE)
+                        .map(annotation -> getStringValue(annotation, "value"))
+                        .map(memberInjectedFieldSignature::equals)
+                        // If a method is not an @InjectedFieldSignature method then filter it out
+                        .orElse(false))
+            .collect(DaggerCollectors.toOptional())
+            .map(this::getQualifiers)
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        String.format(
+                            "No matching InjectedFieldSignature for %1$s. This likely means that "
+                                + "%1$s was compiled with an older, incompatible version of "
+                                + "Dagger. Please update all Dagger dependencies to the same "
+                                + "version.",
+                            memberInjectedFieldSignature)));
+      } else {
+        throw new IllegalStateException(
+            "No MembersInjector found for " + fieldElement.getEnclosingElement());
+      }
+    } else {
+      return kotlinMetadataUtil.getSyntheticPropertyAnnotations(fieldElement, TypeNames.QUALIFIER);
+    }
   }
 }

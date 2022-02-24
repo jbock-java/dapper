@@ -16,12 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static java.util.stream.Collectors.toList;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
@@ -29,7 +30,6 @@ import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
-import jakarta.inject.Inject;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -44,7 +44,7 @@ public abstract class MembersInjectionBinding extends Binding {
       ImmutableSet<DependencyRequest> dependencies,
       Optional<MembersInjectionBinding> unresolved,
       ImmutableSortedSet<InjectionSite> injectionSites) {
-    return new AutoValue_MembersInjectionBinding(key, false, dependencies, unresolved, injectionSites);
+    return new AutoValue_MembersInjectionBinding(key, dependencies, unresolved, injectionSites);
   }
 
   @Override
@@ -75,6 +75,11 @@ public abstract class MembersInjectionBinding extends Binding {
   @Override
   public BindingKind kind() {
     return BindingKind.MEMBERS_INJECTION;
+  }
+
+  @Override
+  public boolean isNullable() {
+    return false;
   }
 
   /**
@@ -119,7 +124,7 @@ public abstract class MembersInjectionBinding extends Binding {
     public abstract ImmutableSet<DependencyRequest> dependencies();
 
     /**
-     * Returns the index of {@link #element()} in its parents {@code @Inject} members that have the
+     * Returns the index of {@code #element()} in its parents {@code @Inject} members that have the
      * same simple name. This method filters out private elements so that the results will be
      * consistent independent of whether the build system uses header jars or not.
      */
@@ -129,7 +134,7 @@ public abstract class MembersInjectionBinding extends Binding {
           .getEnclosingElement()
           .getEnclosedElements()
           .stream()
-          .filter(element -> isAnnotationPresent(element, Inject.class))
+          .filter(element -> isAnnotationPresent(element, TypeNames.INJECT))
           .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE))
           .filter(element -> element.getSimpleName().equals(this.element().getSimpleName()))
           .collect(toList())

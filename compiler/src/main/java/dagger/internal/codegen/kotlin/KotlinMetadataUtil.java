@@ -16,8 +16,11 @@
 
 package dagger.internal.codegen.kotlin;
 
+import dagger.internal.codegen.collect.ImmutableList;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Map;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -53,5 +56,9 @@ public final class KotlinMetadataUtil {
 
   public boolean isMissingSyntheticPropertyForAnnotations(VariableElement toJavac) {
     return false;
+  }
+
+  public ImmutableList<? extends AnnotationMirror> getSyntheticPropertyAnnotations(VariableElement fieldElement, ClassName qualifier) {
+    return ImmutableList.of();
   }
 }

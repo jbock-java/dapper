@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (C) 2021 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,15 +45,14 @@ public abstract class Scope {
    * Returns {@code true} if {@code scopeAnnotationType} is a {@code jakarta.inject.Scope} annotation.
    */
   public static boolean isScope(DaggerTypeElement scopeAnnotationType) {
-    // TODO(bcorso): Replace Scope class reference with class name once auto-common is updated.
-    return isAnnotationPresent(scopeAnnotationType.java(), jakarta.inject.Scope.class);
+    return isAnnotationPresent(scopeAnnotationType.java(), SCOPE.canonicalName());
   }
 
   private static final ClassName PRODUCTION_SCOPE =
       ClassName.get("dagger.producers", "ProductionScope");
-  private static final ClassName SINGLETON = ClassName.get("javax.inject", "Singleton");
+  private static final ClassName SINGLETON = ClassName.get("jakarta.inject", "Singleton");
   private static final ClassName REUSABLE = ClassName.get("dagger", "Reusable");
-  private static final ClassName SCOPE = ClassName.get("javax.inject", "Scope");
+  private static final ClassName SCOPE = ClassName.get("jakarta.inject", "Scope");
 
 
   /** The {@code DaggerAnnotation} that represents the scope annotation. */

@@ -18,6 +18,7 @@ package dagger.internal.codegen.langmodel;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Lists.asList;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.hasModifiers;
@@ -248,6 +249,13 @@ public final class DaggerElements implements Elements, ClearableCache {
     return annotation ->
         annotationClassNames.contains(
             MoreTypes.asTypeElement(annotation.getAnnotationType()).getQualifiedName().toString());
+  }
+
+  public static ImmutableSet<? extends AnnotationMirror> getAnnotatedAnnotations(
+      Element element, ClassName annotationName) {
+    return element.getAnnotationMirrors().stream()
+        .filter(input -> isAnnotationPresent(input.getAnnotationType().asElement(), annotationName))
+        .collect(toImmutableSet());
   }
 
   public static ImmutableSet<String> suppressedWarnings(Element element) {

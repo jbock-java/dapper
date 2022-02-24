@@ -21,12 +21,11 @@ import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 
-import dagger.assisted.Assisted;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
@@ -149,7 +148,7 @@ public final class AssistedInjectionAnnotations {
 
   /** Returns {@code true} if this binding is uses assisted injection. */
   public static boolean isAssistedParameter(VariableElement param) {
-    return isAnnotationPresent(MoreElements.asVariable(param), Assisted.class);
+    return isAnnotationPresent(MoreElements.asVariable(param), TypeNames.ASSISTED);
   }
 
   /** Metadata about an {@code dagger.assisted.AssistedFactory} annotated type. */
