@@ -24,7 +24,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.validation.DaggerSuperficialValidation.ValidationException;
+import dagger.internal.codegen.binding.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;

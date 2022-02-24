@@ -27,6 +27,7 @@ import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.binding.DaggerSuperficialValidation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;

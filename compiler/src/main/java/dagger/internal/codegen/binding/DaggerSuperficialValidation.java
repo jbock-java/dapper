@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.collect.Lists.reverse;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
