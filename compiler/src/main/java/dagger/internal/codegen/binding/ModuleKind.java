@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -103,7 +104,7 @@ public enum ModuleKind {
   }
 
   /** Returns the kinds of modules that a module of this kind is allowed to include. */
-  public Set<ModuleKind> legalIncludedModuleKinds() {
-    return EnumSet.of(MODULE);
+  public ImmutableSet<ModuleKind> legalIncludedModuleKinds() {
+    return ImmutableSet.of(MODULE);
   }
 }

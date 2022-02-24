@@ -17,6 +17,7 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
@@ -46,7 +47,7 @@ public final class BindingMethodProcessingStep
   }
 
   @Override
-  protected void process(XMethodElement method, Set<ClassName> annotations) {
+  protected void process(XMethodElement method, ImmutableSet<ClassName> annotations) {
     Preconditions.checkArgument(
         anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",

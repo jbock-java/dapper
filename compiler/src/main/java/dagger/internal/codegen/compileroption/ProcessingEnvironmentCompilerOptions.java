@@ -16,6 +16,11 @@
 
 package dagger.internal.codegen.compileroption;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_UNDERSCORE;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.collect.Sets.immutableEnumSet;
 import static dagger.internal.codegen.compileroption.FeatureStatus.DISABLED;
 import static dagger.internal.codegen.compileroption.FeatureStatus.ENABLED;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS;
@@ -23,10 +28,14 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.EXPERIMENTAL_DAGGER_ERROR_MESSAGES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FAST_INIT;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FLOATING_BINDS_METHODS;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FORMAT_GENERATED_SOURCE;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.PLUGINS_VISIT_FULL_BINDING_GRAPHS;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_MULTIBINDING_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WRITE_PRODUCER_NAME_IN_TOKEN;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.KeyOnlyOption.HEADER_COMPILATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.KeyOnlyOption.USE_GRADLE_INCREMENTAL_PROCESSING;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.DISABLE_INTER_COMPONENT_SCOPE_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.EXPLICIT_BINDING_CONFLICTS_WITH_INJECT;
@@ -34,13 +43,18 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.MODULE_HAS_DIFFERENT_SCOPES_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.NULLABLE_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.PRIVATE_MEMBER_VALIDATION;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Validation.STATIC_MEMBER_VALIDATION;
 import static dagger.internal.codegen.compileroption.ValidationType.ERROR;
 import static dagger.internal.codegen.compileroption.ValidationType.NONE;
 import static dagger.internal.codegen.compileroption.ValidationType.WARNING;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.base.Ascii;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -48,47 +62,49 @@ import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
-/** {@link CompilerOptions} for the given {@link ProcessingEnvironment}. */
+/** {@code CompilerOptions} for the given processor. */
 public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions {
   // EnumOption<T> doesn't support integer inputs so just doing this as a 1-off for now.
   private static final String KEYS_PER_COMPONENT_SHARD = "dagger.keysPerComponentShard";
 
   private final XMessager messager;
   private final Map<String, String> options;
+  private final DaggerElements elements;
   private final Map<EnumOption<?>, Object> enumOptions = new HashMap<>();
-  private final Map<EnumOption<?>, Map<String, ? extends Enum<?>>> allCommandLineOptions =
+  private final Map<EnumOption<?>, ImmutableMap<String, ? extends Enum<?>>> allCommandLineOptions =
       new HashMap<>();
 
   @Inject
   ProcessingEnvironmentCompilerOptions(
-      XMessager messager,
-      @ProcessingOptions Map<String, String> options,
-      DaggerElements elements) {
+      XMessager messager, @ProcessingOptions Map<String, String> options, DaggerElements elements) {
     this.messager = messager;
     this.options = options;
+    this.elements = elements;
     checkValid();
+  }
+
+  @Override
+  public boolean usesProducers() {
+    return false;
+  }
+
+  @Override
+  public boolean headerCompilation() {
+    return isEnabled(HEADER_COMPILATION);
   }
 
   @Override
   public boolean experimentalMergedMode(TypeElement component) {
     boolean isExperimental = experimentalMergedModeInternal();
     if (isExperimental) {
-      Preconditions.checkState(
+      checkState(
           !fastInitInternal(component),
           "Both fast init and experimental merged mode were turned on, please specify exactly one"
               + " compilation mode.");
@@ -100,7 +116,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   public boolean fastInit(TypeElement component) {
     boolean isFastInit = fastInitInternal(component);
     if (isFastInit) {
-      Preconditions.checkState(
+      checkState(
           !experimentalMergedModeInternal(),
           "Both fast init and experimental merged mode were turned on, please specify exactly one"
               + " compilation mode.");
@@ -117,6 +133,16 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
+  public boolean formatGeneratedSource() {
+    return isEnabled(FORMAT_GENERATED_SOURCE);
+  }
+
+  @Override
+  public boolean writeProducerNameInToken() {
+    return isEnabled(WRITE_PRODUCER_NAME_IN_TOKEN);
+  }
+
+  @Override
   public Diagnostic.Kind nullableValidationKind() {
     return diagnosticKind(NULLABLE_VALIDATION);
   }
@@ -124,6 +150,11 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   @Override
   public Diagnostic.Kind privateMemberValidationKind() {
     return diagnosticKind(PRIVATE_MEMBER_VALIDATION);
+  }
+
+  @Override
+  public Diagnostic.Kind staticMemberValidationKind() {
+    return diagnosticKind(STATIC_MEMBER_VALIDATION);
   }
 
   @Override
@@ -172,9 +203,14 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
+  public boolean strictMultibindingValidation() {
+    return isEnabled(STRICT_MULTIBINDING_VALIDATION);
+  }
+
+  @Override
   public int keysPerComponentShard(XTypeElement component) {
     if (options.containsKey(KEYS_PER_COMPONENT_SHARD)) {
-      Preconditions.checkArgument(
+      checkArgument(
           component.getClassName().packageName().startsWith("dagger."),
           "Cannot set %s. It is only meant for internal testing.", KEYS_PER_COMPONENT_SHARD);
       return Integer.parseInt(options.get(KEYS_PER_COMPONENT_SHARD));
@@ -182,15 +218,23 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     return super.keysPerComponentShard(component);
   }
 
+  private boolean isEnabled(KeyOnlyOption keyOnlyOption) {
+    return options.containsKey(keyOnlyOption.toString());
+  }
+
   private boolean isEnabled(Feature feature) {
     return parseOption(feature).equals(ENABLED);
   }
 
   private Diagnostic.Kind diagnosticKind(Validation validation) {
-    return parseOption(validation).diagnosticKind().orElseThrow();
+    return parseOption(validation).diagnosticKind().get();
   }
 
-  private void checkValid() {
+  @SuppressWarnings("CheckReturnValue")
+  private ProcessingEnvironmentCompilerOptions checkValid() {
+    for (KeyOnlyOption keyOnlyOption : KeyOnlyOption.values()) {
+      isEnabled(keyOnlyOption);
+    }
     for (Feature feature : Feature.values()) {
       parseOption(feature);
     }
@@ -201,6 +245,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     noLongerRecognized(FLOATING_BINDS_METHODS);
     noLongerRecognized(EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS);
     noLongerRecognized(USE_GRADLE_INCREMENTAL_PROCESSING);
+    return this;
   }
 
   private void noLongerRecognized(CommandLineOption commandLineOption) {
@@ -216,11 +261,11 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     String toString();
 
     /**
-     * Returns all aliases besides {@link #toString()}, such as old names for an option, in order of
+     * Returns all aliases besides {@code #toString()}, such as old names for an option, in order of
      * precedence.
      */
-    default List<String> aliases() {
-      return List.of();
+    default ImmutableList<String> aliases() {
+      return ImmutableList.of();
     }
 
     /** All the command-line names for this option, in order of precedence. */
@@ -239,6 +284,12 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   enum KeyOnlyOption implements CommandLineOption {
+    HEADER_COMPILATION {
+      @Override
+      public String toString() {
+        return "experimental_turbine_hjar";
+      }
+    },
 
     USE_GRADLE_INCREMENTAL_PROCESSING {
       @Override
@@ -253,41 +304,41 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
    * or {@code -Akey=DISABLED}.
    */
   enum Feature implements EnumOption<FeatureStatus> {
-    FAST_INIT("fastInit"),
+    FAST_INIT,
 
-    EXPERIMENTAL_ANDROID_MODE("experimentalAndroidMode"),
+    EXPERIMENTAL_ANDROID_MODE,
 
-    FORMAT_GENERATED_SOURCE("formatGeneratedSource"),
+    FORMAT_GENERATED_SOURCE,
 
-    WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM("warnIfInjectionFactoryNotGeneratedUpstream"),
+    WRITE_PRODUCER_NAME_IN_TOKEN,
 
-    IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT("ignorePrivateAndStaticInjectionForComponent"),
+    WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM,
 
-    EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS("experimentalAheadOfTimeSubcomponents"),
+    IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT,
 
-    FORCE_USE_SERIALIZED_COMPONENT_IMPLEMENTATIONS("forceUseSerializedComponentImplementations"),
+    EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS,
 
-    EMIT_MODIFIABLE_METADATA_ANNOTATIONS("emitModifiableMetadataAnnotations", ENABLED),
+    FORCE_USE_SERIALIZED_COMPONENT_IMPLEMENTATIONS,
 
-    PLUGINS_VISIT_FULL_BINDING_GRAPHS("pluginsVisitFullBindingGraphs"),
+    EMIT_MODIFIABLE_METADATA_ANNOTATIONS(ENABLED),
 
-    FLOATING_BINDS_METHODS("floatingBindsMethods"),
+    PLUGINS_VISIT_FULL_BINDING_GRAPHS,
 
-    EXPERIMENTAL_DAGGER_ERROR_MESSAGES("experimentalDaggerErrorMessages"),
+    FLOATING_BINDS_METHODS,
 
-    STRICT_MULTIBINDING_VALIDATION("strictMultibindingValidation"),
+    EXPERIMENTAL_DAGGER_ERROR_MESSAGES,
 
-    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES("validateTransitiveComponentDependencies", ENABLED);
+    STRICT_MULTIBINDING_VALIDATION,
 
-    final String optionKey;
+    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES(ENABLED);
+
     final FeatureStatus defaultValue;
 
-    Feature(String optionKey) {
-      this(optionKey, DISABLED);
+    Feature() {
+      this(DISABLED);
     }
 
-    Feature(String optionKey, FeatureStatus defaultValue) {
-      this.optionKey = optionKey;
+    Feature(FeatureStatus defaultValue) {
       this.defaultValue = defaultValue;
     }
 
@@ -303,25 +354,25 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     @Override
     public String toString() {
-      return "dagger." + optionKey;
+      return optionName(this);
     }
   }
 
   /** The diagnostic kind or validation type for a kind of validation. */
   enum Validation implements EnumOption<ValidationType> {
-    DISABLE_INTER_COMPONENT_SCOPE_VALIDATION("disableInterComponentScopeValidation"),
+    DISABLE_INTER_COMPONENT_SCOPE_VALIDATION(),
 
-    NULLABLE_VALIDATION("nullableValidation", ERROR, WARNING),
+    NULLABLE_VALIDATION(ERROR, WARNING),
 
-    PRIVATE_MEMBER_VALIDATION("privateMemberValidation", ERROR, WARNING),
+    PRIVATE_MEMBER_VALIDATION(ERROR, WARNING),
 
-    STATIC_MEMBER_VALIDATION("staticMemberValidation", ERROR, WARNING),
+    STATIC_MEMBER_VALIDATION(ERROR, WARNING),
 
     /** Whether to validate full binding graphs for components, subcomponents, and modules. */
-    FULL_BINDING_GRAPH_VALIDATION("fullBindingGraphValidation", NONE, ERROR, WARNING) {
+    FULL_BINDING_GRAPH_VALIDATION(NONE, ERROR, WARNING) {
       @Override
-      public List<String> aliases() {
-        return List.of("dagger.moduleBindingValidation");
+      public ImmutableList<String> aliases() {
+        return ImmutableList.of("dagger.moduleBindingValidation");
       }
     },
 
@@ -329,27 +380,25 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
      * How to report conflicting scoped bindings when validating partial binding graphs associated
      * with modules.
      */
-    MODULE_HAS_DIFFERENT_SCOPES_VALIDATION("moduleHasDifferentScopesValidation", ERROR, WARNING),
+    MODULE_HAS_DIFFERENT_SCOPES_VALIDATION(ERROR, WARNING),
 
     /**
      * How to report that an explicit binding in a subcomponent conflicts with an {@code @Inject}
      * constructor used in an ancestor component.
      */
-    EXPLICIT_BINDING_CONFLICTS_WITH_INJECT("explicitBindingConflictsWithInject", WARNING, ERROR, NONE),
+    EXPLICIT_BINDING_CONFLICTS_WITH_INJECT(WARNING, ERROR, NONE),
     ;
 
-    final String optionKey;
     final ValidationType defaultType;
-    final Set<ValidationType> validTypes;
+    final ImmutableSet<ValidationType> validTypes;
 
-    Validation(String optionKey) {
-      this(optionKey, ERROR, WARNING, NONE);
+    Validation() {
+      this(ERROR, WARNING, NONE);
     }
 
-    Validation(String optionKey, ValidationType defaultType, ValidationType... moreValidTypes) {
-      this.optionKey = optionKey;
+    Validation(ValidationType defaultType, ValidationType... moreValidTypes) {
       this.defaultType = defaultType;
-      this.validTypes = EnumSet.of(defaultType, moreValidTypes);
+      this.validTypes = immutableEnumSet(defaultType, moreValidTypes);
     }
 
     @Override
@@ -364,20 +413,26 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     @Override
     public String toString() {
-      return "dagger." + optionKey;
+      return optionName(this);
     }
   }
 
+  private static String optionName(Enum<? extends EnumOption<?>> option) {
+    return "dagger." + UPPER_UNDERSCORE.to(LOWER_CAMEL, option.name());
+  }
+
   /** The supported command-line options. */
-  public static Set<String> supportedOptions() {
-    return Stream.of(
+  public static ImmutableSet<String> supportedOptions() {
+    // need explicit type parameter to avoid a runtime stream error
+    return ImmutableSet.<String>builder()
+        .addAll(
             Stream.<CommandLineOption[]>of(
                     KeyOnlyOption.values(), Feature.values(), Validation.values())
                 .flatMap(Arrays::stream)
-                .flatMap(CommandLineOption::allNames),
-            Stream.of(KEYS_PER_COMPONENT_SHARD))
-        .flatMap(Function.identity())
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+                .flatMap(CommandLineOption::allNames)
+                .collect(toImmutableSet()))
+        .add(KEYS_PER_COMPONENT_SHARD)
+        .build();
   }
 
   /**
@@ -396,8 +451,12 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     return value;
   }
 
+  private boolean isSetOnCommandLine(Feature feature) {
+    return getUsedNames(feature).count() > 0;
+  }
+
   private <T extends Enum<T>> T parseOptionUncached(EnumOption<T> option) {
-    Map<String, T> values = parseOptionWithAllNames(option);
+    ImmutableMap<String, T> values = parseOptionWithAllNames(option);
 
     // If no value is specified, return the default value.
     if (values.isEmpty()) {
@@ -405,13 +464,13 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     }
 
     // If all names have the same value, return that.
-    if (new HashSet<>(values.values()).size() == 1) {
+    if (values.asMultimap().inverse().keySet().size() == 1) {
       // Warn if an option was set with more than one name. That would be an error if the values
       // differed.
       if (values.size() > 1) {
         reportUseOfDifferentNamesForOption(Diagnostic.Kind.WARNING, option, values.keySet());
       }
-      return values.values().iterator().next();
+      return ImmutableList.copyOf(values.values()).get(0);
     }
 
     // If different names have different values, report an error and return the default
@@ -429,33 +488,33 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
             usedNames.stream().map(name -> "-A" + name).collect(joining(", ")), option));
   }
 
-  private <T extends Enum<T>> Map<String, T> parseOptionWithAllNames(
+  private <T extends Enum<T>> ImmutableMap<String, T> parseOptionWithAllNames(
       EnumOption<T> option) {
     @SuppressWarnings("unchecked") // map is covariant
-    Map<String, T> aliasValues =
-        (Map<String, T>)
+    ImmutableMap<String, T> aliasValues =
+        (ImmutableMap<String, T>)
             allCommandLineOptions.computeIfAbsent(option, this::parseOptionWithAllNamesUncached);
     return aliasValues;
   }
 
-  private <T extends Enum<T>> Map<String, T> parseOptionWithAllNamesUncached(
+  private <T extends Enum<T>> ImmutableMap<String, T> parseOptionWithAllNamesUncached(
       EnumOption<T> option) {
-    Map<String, T> values = new LinkedHashMap<>();
+    ImmutableMap.Builder<String, T> values = ImmutableMap.builder();
     getUsedNames(option)
         .forEach(
             name -> parseOptionWithName(option, name).ifPresent(value -> values.put(name, value)));
-    return values;
+    return values.build();
   }
 
   private <T extends Enum<T>> Optional<T> parseOptionWithName(EnumOption<T> option, String key) {
-    Preconditions.checkArgument(options.containsKey(key), "key %s not found", key);
+    checkArgument(options.containsKey(key), "key %s not found", key);
     String stringValue = options.get(key);
     if (stringValue == null) {
       messager.printMessage(Diagnostic.Kind.ERROR, "Processor option -A" + key + " needs a value");
     } else {
       try {
         T value =
-            Enum.valueOf(option.defaultValue().getDeclaringClass(), stringValue.toUpperCase(Locale.ROOT));
+            Enum.valueOf(option.defaultValue().getDeclaringClass(), Ascii.toUpperCase(stringValue));
         if (option.validValues().contains(value)) {
           return Optional.of(value);
         }
@@ -465,8 +524,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
       messager.printMessage(
           Diagnostic.Kind.ERROR,
           String.format(
-              "Processor option -A%s may only have the values %s "
-                  + "(case insensitive), found: %s",
+              "Processor option -A%s may only have the values %s (case insensitive), found: %s",
               key, option.validValues(), stringValue));
     }
     return Optional.empty();

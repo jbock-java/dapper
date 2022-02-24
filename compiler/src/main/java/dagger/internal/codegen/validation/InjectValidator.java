@@ -17,18 +17,21 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.Scopes.scopesOf;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
+import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -48,15 +51,13 @@ import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 
 /**
- * A {@linkplain ValidationReport validator} for {@code Inject}-annotated elements and the types
+ * A {@code ValidationReport validator} for {@code Inject}-annotated elements and the types
  * that contain them.
  */
 @Singleton
@@ -69,6 +70,7 @@ public final class InjectValidator implements ClearableCache {
   private final DependencyRequestValidator dependencyRequestValidator;
   private final Optional<Diagnostic.Kind> privateAndStaticInjectionDiagnosticKind;
   private final InjectionAnnotations injectionAnnotations;
+  private final KotlinMetadataUtil metadataUtil;
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
 
   @Inject
@@ -79,7 +81,8 @@ public final class InjectValidator implements ClearableCache {
       SuperficialInjectValidator superficialInjectValidator,
       DependencyRequestValidator dependencyRequestValidator,
       CompilerOptions compilerOptions,
-      InjectionAnnotations injectionAnnotations) {
+      InjectionAnnotations injectionAnnotations,
+      KotlinMetadataUtil metadataUtil) {
     this(
         processingEnv,
         types,
@@ -88,7 +91,8 @@ public final class InjectValidator implements ClearableCache {
         superficialInjectValidator,
         dependencyRequestValidator,
         Optional.empty(),
-        injectionAnnotations);
+        injectionAnnotations,
+        metadataUtil);
   }
 
   private InjectValidator(
@@ -99,7 +103,8 @@ public final class InjectValidator implements ClearableCache {
       SuperficialInjectValidator superficialInjectValidator,
       DependencyRequestValidator dependencyRequestValidator,
       Optional<Kind> privateAndStaticInjectionDiagnosticKind,
-      InjectionAnnotations injectionAnnotations) {
+      InjectionAnnotations injectionAnnotations,
+      KotlinMetadataUtil metadataUtil) {
     this.processingEnv = processingEnv;
     this.types = types;
     this.elements = elements;
@@ -108,6 +113,7 @@ public final class InjectValidator implements ClearableCache {
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.privateAndStaticInjectionDiagnosticKind = privateAndStaticInjectionDiagnosticKind;
     this.injectionAnnotations = injectionAnnotations;
+    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -131,7 +137,8 @@ public final class InjectValidator implements ClearableCache {
         superficialInjectValidator,
         dependencyRequestValidator,
         Optional.of(Diagnostic.Kind.ERROR),
-        injectionAnnotations);
+        injectionAnnotations,
+        metadataUtil);
   }
 
   public ValidationReport validate(XTypeElement typeElement) {
@@ -143,9 +150,11 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder builder = ValidationReport.about(typeElement);
     builder.addSubreport(validateMembersInjectionType(typeElement));
 
-    Set<XConstructorElement> injectConstructors = new LinkedHashSet<>();
-    injectConstructors.addAll(injectedConstructors(typeElement));
-    injectConstructors.addAll(assistedInjectedConstructors(typeElement));
+    ImmutableSet<XConstructorElement> injectConstructors =
+        ImmutableSet.<XConstructorElement>builder()
+            .addAll(injectedConstructors(typeElement))
+            .addAll(assistedInjectedConstructors(typeElement))
+            .build();
 
     switch (injectConstructors.size()) {
       case 0:
@@ -183,15 +192,14 @@ public final class InjectValidator implements ClearableCache {
     ClassName injectAnnotation =
         getAnyAnnotation(constructorElement, TypeNames.INJECT, TypeNames.ASSISTED_INJECT)
             .map(XAnnotations::getClassName)
-            .orElseThrow();
+            .get();
 
     if (constructorElement.isPrivate()) {
       builder.addError(
           "Dagger does not support injection into private constructors", constructorElement);
     }
 
-    for (XAnnotation qualifier :
-        injectionAnnotations.getQualifiers(constructorElement)) {
+    for (XAnnotation qualifier : injectionAnnotations.getQualifiers(constructorElement)) {
       builder.addError(
           String.format(
               "@Qualifier annotations are not allowed on @%s constructors",
@@ -240,7 +248,7 @@ public final class InjectValidator implements ClearableCache {
           constructorElement);
     }
 
-    if (toJavac(enclosingElement).getNestingKind().isNested() && !enclosingElement.isStatic()) {
+    if (enclosingElement.isNested() && !enclosingElement.isStatic()) {
       builder.addError(
           String.format(
               "@%s constructors are invalid on inner classes. "
@@ -249,7 +257,7 @@ public final class InjectValidator implements ClearableCache {
           constructorElement);
     }
 
-    Set<Scope> scopes = scopesOf(enclosingElement);
+    ImmutableSet<Scope> scopes = scopesOf(enclosingElement);
     if (injectAnnotation.equals(TypeNames.ASSISTED_INJECT)) {
       for (Scope scope : scopes) {
         builder.addError(
@@ -271,19 +279,62 @@ public final class InjectValidator implements ClearableCache {
 
   private ValidationReport validateField(XFieldElement fieldElement) {
     ValidationReport.Builder builder = ValidationReport.about(fieldElement);
-    builder.addItem(
-        "Field injection has been disabled",
-        privateMemberDiagnosticKind(),
-        fieldElement);
+    if (fieldElement.isFinal()) {
+      builder.addError("@Inject fields may not be final", fieldElement);
+    }
+
+    if (fieldElement.isPrivate()) {
+      builder.addItem(
+          "Dagger does not support injection into private fields",
+          privateMemberDiagnosticKind(),
+          fieldElement);
+    }
+
+    if (fieldElement.isStatic()) {
+      builder.addItem(
+          "Dagger does not support injection into static fields",
+          staticMemberDiagnosticKind(),
+          fieldElement);
+    }
+
+    validateDependencyRequest(builder, fieldElement);
+
     return builder.build();
   }
 
   private ValidationReport validateMethod(XMethodElement methodElement) {
     ValidationReport.Builder builder = ValidationReport.about(methodElement);
-    builder.addItem(
-        "Method injection has been disabled",
-        privateMemberDiagnosticKind(),
-        methodElement);
+    if (methodElement.isAbstract()) {
+      builder.addError("Methods with @Inject may not be abstract", methodElement);
+    }
+
+    if (methodElement.isPrivate()) {
+      builder.addItem(
+          "Dagger does not support injection into private methods",
+          privateMemberDiagnosticKind(),
+          methodElement);
+    }
+
+    if (methodElement.isStatic()) {
+      builder.addItem(
+          "Dagger does not support injection into static methods",
+          staticMemberDiagnosticKind(),
+          methodElement);
+    }
+
+    if (hasTypeParameters(methodElement)) {
+      builder.addError("Methods with @Inject may not declare type parameters", methodElement);
+    }
+
+    if (!methodElement.getThrownTypes().isEmpty()) {
+      builder.addError("Methods with @Inject may not throw checked exceptions. "
+          + "Please wrap your exceptions in a RuntimeException instead.", methodElement);
+    }
+
+    for (XExecutableParameterElement parameter : methodElement.getParameters()) {
+      validateDependencyRequest(builder, parameter);
+    }
+
     return builder.build();
   }
 
@@ -292,21 +343,33 @@ public final class InjectValidator implements ClearableCache {
     dependencyRequestValidator.validateDependencyRequest(builder, parameter, parameter.getType());
   }
 
-  public ValidationReport validateMembersInjectionType(XTypeElement typeElement) {
+  private ValidationReport validateMembersInjectionType(XTypeElement typeElement) {
     // TODO(beder): This element might not be currently compiled, so this error message could be
     // left in limbo. Find an appropriate way to display the error message in that case.
     ValidationReport.Builder builder = ValidationReport.about(typeElement);
+    boolean hasInjectedMembers = false;
     for (XFieldElement field : typeElement.getDeclaredFields()) {
       if (field.hasAnnotation(TypeNames.INJECT)) {
+        hasInjectedMembers = true;
         ValidationReport report = validateField(field);
-        builder.addSubreport(report);
+        if (!report.isClean()) {
+          builder.addSubreport(report);
+        }
       }
     }
     for (XMethodElement method : typeElement.getDeclaredMethods()) {
       if (method.hasAnnotation(TypeNames.INJECT)) {
+        hasInjectedMembers = true;
         ValidationReport report = validateMethod(method);
-        builder.addSubreport(report);
+        if (!report.isClean()) {
+          builder.addSubreport(report);
+        }
       }
+    }
+
+    if (hasInjectedMembers) {
+      checkInjectIntoPrivateClass(typeElement, builder);
+      checkInjectIntoKotlinObject(typeElement, builder);
     }
     if (typeElement.getSuperType() != null) {
       ValidationReport report = validateSupertype(typeElement.getSuperType().getTypeElement());
@@ -335,8 +398,19 @@ public final class InjectValidator implements ClearableCache {
     }
   }
 
+  private void checkInjectIntoKotlinObject(XTypeElement element, ValidationReport.Builder builder) {
+    if (element.isKotlinObject() || element.isCompanionObject()) {
+      builder.addError("Dagger does not support injection into Kotlin objects", element);
+    }
+  }
+
   private Diagnostic.Kind privateMemberDiagnosticKind() {
     return privateAndStaticInjectionDiagnosticKind.orElse(
         compilerOptions.privateMemberValidationKind());
+  }
+
+  private Diagnostic.Kind staticMemberDiagnosticKind() {
+    return privateAndStaticInjectionDiagnosticKind.orElse(
+        compilerOptions.staticMemberValidationKind());
   }
 }

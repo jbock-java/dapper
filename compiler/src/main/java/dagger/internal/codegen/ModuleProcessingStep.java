@@ -22,6 +22,7 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.ModuleValidator;
 import dagger.internal.codegen.validation.SuperficialValidator;
@@ -86,7 +87,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   }
 
   @Override
-  protected void process(XTypeElement module, Set<ClassName> annotations) {
+  protected void process(XTypeElement module, ImmutableSet<ClassName> annotations) {
     if (processedModuleElements.contains(module)) {
       return;
     }

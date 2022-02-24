@@ -20,6 +20,7 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assis
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -55,7 +56,7 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
 
   @Override
   protected void process(
-      XConstructorElement assistedInjectElement, Set<ClassName> annotations) {
+      XConstructorElement assistedInjectElement, ImmutableSet<ClassName> annotations) {
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 

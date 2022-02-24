@@ -163,6 +163,11 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   }
 
   @Override
+  public boolean isNested() {
+    return MoreElements.isType(typeElement.getEnclosingElement());
+  }
+
+  @Override
   public List<XConstructorElement> getConstructors() {
     return ElementFilter.constructorsIn(typeElement.getEnclosedElements()).stream()
         .map(c -> new JavacConstructorElement(c, env()))

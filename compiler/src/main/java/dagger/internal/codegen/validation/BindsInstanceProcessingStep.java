@@ -19,6 +19,7 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -55,7 +56,7 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   }
 
   @Override
-  protected void process(XElement element, Set<ClassName> annotations) {
+  protected void process(XElement element, ImmutableSet<ClassName> annotations) {
     if (isMethod(element)) {
       methodValidator.validate((XMethodElement) element).printMessagesTo(messager);
     } else if (isMethodParameter(element)) {

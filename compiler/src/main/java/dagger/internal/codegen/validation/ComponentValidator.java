@@ -48,6 +48,7 @@ import dagger.internal.codegen.binding.DependencyRequestFactory;
 import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XAnnotation;
@@ -465,7 +466,7 @@ public final class ComponentValidator implements ClearableCache {
           moduleValidator.validateReferencedModules(
               component,
               componentAnnotation().annotation(),
-              componentKind().legalModuleKinds(),
+              ImmutableSet.copyOf(componentKind().legalModuleKinds()),
               new HashSet<>()));
     }
 

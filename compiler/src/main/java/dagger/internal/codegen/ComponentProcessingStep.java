@@ -28,6 +28,7 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
@@ -84,7 +85,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
   }
 
   @Override
-  protected void process(XTypeElement element, Set<ClassName> annotations) {
+  protected void process(XTypeElement element, ImmutableSet<ClassName> annotations) {
     if (!disjoint(annotations, rootComponentAnnotations())) {
       processRootComponent(element);
     }

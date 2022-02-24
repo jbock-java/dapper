@@ -91,9 +91,9 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
    * @param annotations the subset of {@link XProcessingStep#annotations()} that annotate {@code
    *     element}
    */
-  protected abstract void process(E element, Set<ClassName> annotations);
+  protected abstract void process(E element, ImmutableSet<ClassName> annotations);
 
-  private Map<XElement, Set<ClassName>> inverse(
+  private Map<XElement, ImmutableSet<ClassName>> inverse(
       Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     Map<String, ClassName> annotationClassNames =
         annotationClassNames().stream()

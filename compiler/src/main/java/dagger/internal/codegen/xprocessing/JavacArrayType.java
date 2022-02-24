@@ -16,4 +16,9 @@ class JavacArrayType extends JavacType implements XArrayType {
   public List<XType> getTypeArguments() {
     return List.of();
   }
+
+  @Override
+  public XType getComponentType() {
+    return env().wrap(arrayType.getComponentType());
+  }
 }

@@ -16,12 +16,27 @@
 
 package dagger.internal.codegen.compileroption;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
 /** A collection of options that dictate how the compiler will run. */
 public abstract class CompilerOptions {
+  public abstract boolean usesProducers();
+
+  /**
+   * Returns true if the experimental Android mode is enabled.
+   *
+   * <p><b>Warning: Do Not use! This flag is for internal, experimental use only!</b>
+   *
+   * <p>Issues related to this flag will not be supported. This flag could break your build, cause
+   * memory leaks in your app, or cause other unknown issues at runtime.
+   */
+  public final boolean experimentalMergedMode(XTypeElement element) {
+    return experimentalMergedMode(toJavac(element));
+  }
 
   /**
    * Returns true if the experimental Android mode is enabled.
@@ -42,7 +57,7 @@ public abstract class CompilerOptions {
    * per-provision instantiation time.
    */
   public final boolean fastInit(XTypeElement element) {
-    return fastInit(element.toJavac());
+    return fastInit(toJavac(element));
   }
 
   /**
@@ -55,6 +70,10 @@ public abstract class CompilerOptions {
    */
   public abstract boolean fastInit(TypeElement element);
 
+  public abstract boolean formatGeneratedSource();
+
+  public abstract boolean writeProducerNameInToken();
+
   public abstract Diagnostic.Kind nullableValidationKind();
 
   public final boolean doCheckForNulls() {
@@ -62,6 +81,8 @@ public abstract class CompilerOptions {
   }
 
   public abstract Diagnostic.Kind privateMemberValidationKind();
+
+  public abstract Diagnostic.Kind staticMemberValidationKind();
 
   /**
    * If {@code true}, Dagger will generate factories and components even if some members-injected
@@ -90,6 +111,8 @@ public abstract class CompilerOptions {
 
   public abstract boolean warnIfInjectionFactoryNotGeneratedUpstream();
 
+  public abstract boolean headerCompilation();
+
   public abstract ValidationType fullBindingGraphValidationType();
 
   /**
@@ -109,4 +132,11 @@ public abstract class CompilerOptions {
   public int keysPerComponentShard(XTypeElement component) {
     return 3500;
   }
+
+  /**
+   * This option enables a fix to an issue where Dagger previously would erroneously allow
+   * multibinding contributions in a component to have dependencies on child components. This will
+   * eventually become the default and enforced.
+   */
+  public abstract boolean strictMultibindingValidation();
 }

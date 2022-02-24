@@ -23,6 +23,7 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -60,7 +61,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
   }
 
   @Override
-  protected void process(XExecutableParameterElement assisted, Set<ClassName> annotations) {
+  protected void process(XExecutableParameterElement assisted, ImmutableSet<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 

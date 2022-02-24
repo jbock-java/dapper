@@ -43,6 +43,12 @@ public interface XTypeElement extends XMemberContainer {
   boolean isAnnotationClass();
 
   /**
+   * Returns {@code true} if this {@code XTypeElement} is a nested class/interface.
+   */
+  boolean isNested();
+
+
+  /**
    * Returns the list of constructors in this type element
    */
   List<XConstructorElement> getConstructors();

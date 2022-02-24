@@ -16,79 +16,41 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XType.isArray;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
-import dagger.spi.model.DependencyRequest;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.xprocessing.XArrayType;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.MoreTypes;
 import java.util.Iterator;
-import java.util.Set;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.SimpleTypeVisitor9;
 
 /**
- * Suggests a variable name for a type based on a {@link Key}. Prefer {@link
- * DependencyVariableNamer} for cases where a specific {@link DependencyRequest} is present.
+ * Suggests a variable name for a type based on a {@code Key}. Prefer {@code
+ * DependencyVariableNamer} for cases where a specific {@code DependencyRequest} is present.
  */
 public final class KeyVariableNamer {
   /** Simple names that are very common. Inspired by https://errorprone.info/bugpattern/BadImport */
-  private static final Set<String> VERY_SIMPLE_NAMES =
-      Set.of(
+  private static final ImmutableSet<String> VERY_SIMPLE_NAMES =
+      ImmutableSet.of(
           "Builder",
           "Factory",
           "Component",
           "Subcomponent",
           "Injector");
 
-  private static final TypeVisitor<Void, StringBuilder> TYPE_NAMER =
-      new SimpleTypeVisitor9<>() {
-        @Override
-        public Void visitDeclared(DeclaredType declaredType, StringBuilder builder) {
-          TypeElement element = MoreTypes.asTypeElement(declaredType);
-          if (element.getNestingKind().isNested()
-              && VERY_SIMPLE_NAMES.contains(element.getSimpleName().toString())) {
-            builder.append(element.getEnclosingElement().getSimpleName());
-          }
-
-          builder.append(element.getSimpleName());
-          Iterator<? extends TypeMirror> argumentIterator =
-              declaredType.getTypeArguments().iterator();
-          if (argumentIterator.hasNext()) {
-            builder.append("Of");
-            TypeMirror first = argumentIterator.next();
-            first.accept(this, builder);
-            while (argumentIterator.hasNext()) {
-              builder.append("And");
-              argumentIterator.next().accept(this, builder);
-            }
-          }
-          return null;
-        }
-
-        @Override
-        public Void visitPrimitive(PrimitiveType type, StringBuilder builder) {
-          String str = type.toString();
-          builder.append(Character.toUpperCase(str.charAt(0))).append(str.substring(1));
-          return null;
-        }
-
-        @Override
-        public Void visitArray(ArrayType type, StringBuilder builder) {
-          type.getComponentType().accept(this, builder);
-          builder.append("Array");
-          return null;
-        }
-      };
-
-  private KeyVariableNamer() {
-  }
+  private KeyVariableNamer() {}
 
   public static String name(Key key) {
+    if (key.multibindingContributionIdentifier().isPresent()) {
+      return key.multibindingContributionIdentifier().get().bindingElement();
+    }
 
     StringBuilder builder = new StringBuilder();
 
@@ -97,8 +59,33 @@ public final class KeyVariableNamer {
       builder.append(key.qualifier().get().java().getAnnotationType().asElement().getSimpleName());
     }
 
-    key.type().java().accept(TYPE_NAMER, builder);
+    typeNamer(key.type().xprocessing(), builder);
+    return protectAgainstKeywords(UPPER_CAMEL.to(LOWER_CAMEL, builder.toString()));
+  }
 
-    return protectAgainstKeywords(Character.toLowerCase(builder.charAt(0)) + builder.substring(1));
+  private static void typeNamer(XType type, StringBuilder builder) {
+    if (isDeclared(type)) {
+      XTypeElement element = type.getTypeElement();
+      if (element.isNested() && VERY_SIMPLE_NAMES.contains(getSimpleName(element))) {
+        builder.append(getSimpleName(element.getEnclosingTypeElement()));
+      }
+
+      builder.append(getSimpleName(element));
+      Iterator<? extends XType> argumentIterator = type.getTypeArguments().iterator();
+      if (argumentIterator.hasNext()) {
+        builder.append("Of");
+        XType first = argumentIterator.next();
+        typeNamer(first, builder);
+        while (argumentIterator.hasNext()) {
+          builder.append("And");
+          typeNamer(argumentIterator.next(), builder);
+        }
+      }
+    } else if (isPrimitive(type)) {
+      builder.append(LOWER_CAMEL.to(UPPER_CAMEL, type.toString()));
+    } else if (isArray(type)) {
+      typeNamer(((XArrayType) type).getComponentType(), builder);
+      builder.append("Array");
+    }
   }
 }

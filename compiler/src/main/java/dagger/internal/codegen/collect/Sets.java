@@ -44,4 +44,13 @@ public class Sets {
   public static <E> Set<E> newHashSetWithExpectedSize(int expectedSize) {
     return new HashSet<E>(Maps.capacity(expectedSize));
   }
+
+  public static <E extends Enum<E>> ImmutableSet<E> immutableEnumSet(E anElement, E... otherElements) {
+    ImmutableSet.Builder<E> builder = ImmutableSet.builder();
+    builder.add(anElement);
+    for (E otherElement : otherElements) {
+      builder.add(otherElement);
+    }
+    return builder.build();
+  }
 }

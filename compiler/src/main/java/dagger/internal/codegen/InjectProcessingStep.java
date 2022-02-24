@@ -24,6 +24,7 @@ import static dagger.internal.codegen.xprocessing.XElements.asField;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 
 import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -60,7 +61,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   }
 
   @Override
-  protected void process(XElement injectElement, Set<ClassName> annotations) {
+  protected void process(XElement injectElement, ImmutableSet<ClassName> annotations) {
     // Only process an element once to avoid getting duplicate errors when an element is annotated
     // with multiple inject annotations.
     if (processedElements.contains(injectElement)) {
