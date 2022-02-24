@@ -16,12 +16,14 @@
 
 package dagger.internal.codegen.javapoet;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeSpec;
 import javax.lang.model.element.TypeElement;
 
-/** Convenience methods for use with JavaPoet's {@link TypeSpec}. */
+/** Convenience methods for use with JavaPoet's {@code TypeSpec}. */
 public final class TypeSpecs {
 
   /**
@@ -32,7 +34,7 @@ public final class TypeSpecs {
    */
   public static TypeSpec.Builder addSupertype(
       TypeSpec.Builder typeBuilder, XTypeElement supertype) {
-    return addSupertype(typeBuilder, supertype.toJavac());
+    return addSupertype(typeBuilder, toJavac(supertype));
   }
 
   /**
@@ -44,14 +46,17 @@ public final class TypeSpecs {
   public static TypeSpec.Builder addSupertype(TypeSpec.Builder typeBuilder, TypeElement supertype) {
     switch (supertype.getKind()) {
       case CLASS:
-        return typeBuilder.superclass(ClassName.get(supertype));
+        return typeBuilder
+            .superclass(ClassName.get(supertype))
+            .avoidClashesWithNestedClasses(supertype);
       case INTERFACE:
-        return typeBuilder.addSuperinterface(ClassName.get(supertype));
+        return typeBuilder
+            .addSuperinterface(ClassName.get(supertype))
+            .avoidClashesWithNestedClasses(supertype);
       default:
         throw new AssertionError(supertype + " is neither a class nor an interface.");
     }
   }
 
-  private TypeSpecs() {
-  }
+  private TypeSpecs() {}
 }
