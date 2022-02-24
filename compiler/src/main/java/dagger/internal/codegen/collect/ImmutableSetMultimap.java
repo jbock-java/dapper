@@ -51,12 +51,11 @@ public final class ImmutableSetMultimap<K, V> extends SetMultimap<K, V> {
       return of();
     }
 
-    if (multimap instanceof ImmutableSetMultimap) {
-      @SuppressWarnings("unchecked") // safe since multimap is not writable
-      ImmutableSetMultimap<K, V> kvMultimap = (ImmutableSetMultimap<K, V>) multimap;
+    if (multimap instanceof SetMultimap) {
+      @SuppressWarnings("unchecked")
+      ImmutableSetMultimap<K, V> kvMultimap = new ImmutableSetMultimap<>(Multimaps.asMap((SetMultimap<K, V>) multimap));
       return kvMultimap;
     }
-
     ImmutableSetMultimap<K, V> result = new ImmutableSetMultimap<>();
     multimap.entries().forEach(e -> result.put(e.getKey(), e.getValue()));
     return result;
