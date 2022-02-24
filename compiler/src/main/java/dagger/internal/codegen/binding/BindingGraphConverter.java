@@ -374,6 +374,7 @@ final class BindingGraphConverter {
       Set<BindingNode> bindingNodes = new LinkedHashSet<>();
       resolvedBindingsWithPath.resolvedBindings()
           .allBindings()
+          .asMap()
           .forEach(
               (component, bindings) -> {
                 for (Binding binding : bindings) {

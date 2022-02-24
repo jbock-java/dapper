@@ -34,6 +34,9 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableListMultimap;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Keys;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -323,7 +326,7 @@ public final class BindingGraphFactory implements ClearableCache {
 
       return ResolvedBindings.forContributionBindings(
           requestKey,
-          bindings.stream().collect(Collectors.groupingBy((ContributionBinding binding) -> getOwningComponent(requestKey, binding))),
+          ImmutableListMultimap.copyOf(bindings.stream().collect(Collectors.groupingBy((ContributionBinding binding) -> getOwningComponent(requestKey, binding)))),
           subcomponentDeclarations);
     }
 

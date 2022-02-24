@@ -82,21 +82,20 @@ public final class DaggerStreams {
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
     return Collectors.collectingAndThen(
         Collectors.mapping(
-        value -> {
-          Set<V> values = Set.of(valueMapper.apply(value));
-          return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
-        },
-        Collector.<Map.Entry<K, Set<V>>, LinkedHashMap<K, Set<V>>>of(
-            LinkedHashMap::new,
-            (map, entry) ->
-                map.merge(entry.getKey(), entry.getValue(), Util::mutableUnion),
-            (left, right) -> {
-              right.forEach((k, v) ->
-                  left.merge(k, v, Util::mutableUnion));
-              return left;
-            })), ImmutableSetMultimap::new);
+            value -> {
+              Set<V> values = Set.of(valueMapper.apply(value));
+              return new SimpleImmutableEntry<>(keyMapper.apply(value), values);
+            },
+            Collector.<Map.Entry<K, Set<V>>, LinkedHashMap<K, Set<V>>>of(
+                LinkedHashMap::new,
+                (map, entry) ->
+                    map.merge(entry.getKey(), entry.getValue(), Util::mutableUnion),
+                (left, right) -> {
+                  right.forEach((k, v) ->
+                      left.merge(k, v, Util::mutableUnion));
+                  return left;
+                })), ImmutableSetMultimap::new);
   }
-
 
   /**
    * Returns a function from {@link Object} to {@code Stream<T>}, which returns a stream containing

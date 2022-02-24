@@ -16,142 +16,142 @@
 
 package dagger.internal.codegen.binding;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 
-import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.extension.DaggerStreams;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
+import dagger.internal.codegen.collect.ImmutableCollection;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Multimap;
 import dagger.spi.model.Key;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 
 /**
  * The collection of bindings that have been resolved for a key. For valid graphs, contains exactly
  * one binding.
+ *
+ * <p>Separate {@code ResolvedBindings} instances should be used if a {@code
+ * MembersInjectionBinding} and a {@code ProvisionBinding} for the same key exist in the same
+ * component. (This will only happen if a type has an {@code @Inject} constructor and members, the
+ * component has a members injection method, and the type is also requested normally.)
  */
-final class ResolvedBindings {
-
-  private final Supplier<Set<ContributionBinding>> contributionBindings = Suppliers.memoize(() ->
-      allContributionBindings().values().stream()
-          .flatMap(Set::stream)
-          .collect(DaggerStreams.toImmutableSet()));
-
-  private final IntSupplier hash = Suppliers.memoizeInt(() -> Objects.hash(key(),
-      allContributionBindings(),
-      subcomponentDeclarations()));
-
-  private final Key key;
-  private final Map<TypeElement, Set<ContributionBinding>> allContributionBindings;
-  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
-
-  ResolvedBindings(
-      Key key,
-      Map<TypeElement, Set<ContributionBinding>> allContributionBindings,
-      Set<SubcomponentDeclaration> subcomponentDeclarations) {
-    this.key = requireNonNull(key);
-    this.allContributionBindings = requireNonNull(allContributionBindings);
-    this.subcomponentDeclarations = requireNonNull(subcomponentDeclarations);
-  }
-
-
-  /** The binding key for which the {@link #bindings()} have been resolved. */
-  Key key() {
-    return key;
-  }
+@AutoValue
+abstract class ResolvedBindings {
+  /** The binding key for which the {@code #bindings()} have been resolved. */
+  abstract Key key();
 
   /**
-   * The {@link ContributionBinding}s for {@link #key()} indexed by the component that owns the
+   * The {@code ContributionBinding}s for {@code #key()} indexed by the component that owns the
    * binding. Each key in the multimap is a part of the same component ancestry.
    */
-  Map<TypeElement, Set<ContributionBinding>> allContributionBindings() {
-    return allContributionBindings;
-  }
+  abstract ImmutableSetMultimap<TypeElement, ContributionBinding> allContributionBindings();
 
-  /** The subcomponent declarations for {@link #key()}. */
-  Set<SubcomponentDeclaration> subcomponentDeclarations() {
-    return subcomponentDeclarations;
-  }
+  /**
+   * The {@code MembersInjectionBinding}s for {@code #key()} indexed by the component that owns the
+   * binding.  Each key in the map is a part of the same component ancestry.
+   */
+  abstract ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings();
 
+  /** The subcomponent declarations for {@code #key()}. */
+  abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
+
+  // Computing the hash code is an expensive operation.
+  @Memoized
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ResolvedBindings that = (ResolvedBindings) o;
-    return key.equals(that.key)
-        && allContributionBindings.equals(that.allContributionBindings)
-        && subcomponentDeclarations.equals(that.subcomponentDeclarations);
-  }
+  public abstract int hashCode();
 
+  // Suppresses ErrorProne warning that hashCode was overridden w/o equals
   @Override
-  public int hashCode() {
-    return hash.getAsInt();
+  public abstract boolean equals(Object other);
+
+  /** All bindings for {@code #key()}, indexed by the component that owns the binding. */
+  final ImmutableSetMultimap<TypeElement, ? extends Binding> allBindings() {
+    return !allMembersInjectionBindings().isEmpty()
+        ? allMembersInjectionBindings().asMultimap()
+        : allContributionBindings();
   }
 
-  /** All bindings for {@link #key()}, indexed by the component that owns the binding. */
-  Map<TypeElement, Set<? extends Binding>> allBindings() {
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    Map<TypeElement, Set<? extends Binding>> contributionBindings = (Map) allContributionBindings();
-    return contributionBindings;
-  }
-
-  /** All bindings for {@link #key()}, regardless of which component owns them. */
-  Set<? extends Binding> bindings() {
-    return allBindings().values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+  /** All bindings for {@code #key()}, regardless of which component owns them. */
+  final ImmutableCollection<? extends Binding> bindings() {
+    return allBindings().values();
   }
 
   /**
-   * {@code true} if there are no {@link #bindings()} or {@link #subcomponentDeclarations()}.
+   * {@code true} if there are no {@code #bindings()}, {@code #multibindingDeclarations()}, {@code
+   * #optionalBindingDeclarations()}, or {@code #subcomponentDeclarations()}.
    */
-  boolean isEmpty() {
-    return allContributionBindings().isEmpty()
+  final boolean isEmpty() {
+    return allMembersInjectionBindings().isEmpty()
+        && allContributionBindings().isEmpty()
         && subcomponentDeclarations().isEmpty();
   }
 
-  /** All bindings for {@link #key()} that are owned by a component. */
-  Set<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
-    return allBindings().getOrDefault(component.typeElement().toJavac(), Set.of());
+  /** All bindings for {@code #key()} that are owned by a component. */
+  ImmutableSet<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
+    return allBindings().get(toJavac(component.typeElement()));
   }
 
   /**
    * All contribution bindings, regardless of owning component. Empty if this is a members-injection
    * binding.
    */
-  Set<ContributionBinding> contributionBindings() {
+  @Memoized
+  ImmutableSet<ContributionBinding> contributionBindings() {
     // TODO(ronshapiro): consider optimizing ImmutableSet.copyOf(Collection) for small immutable
     // collections so that it doesn't need to call toArray(). Even though this method is memoized,
     // toArray() can take ~150ms for large components, and there are surely other places in the
     // processor that can benefit from this.
-    return contributionBindings.get();
+    return ImmutableSet.copyOf(allContributionBindings().values());
   }
 
   /** The component that owns {@code binding}. */
-  TypeElement owningComponent(ContributionBinding binding) {
-    for (Map.Entry<TypeElement, Set<ContributionBinding>> entry : allContributionBindings.entrySet()) {
-      if (entry.getValue().contains(binding)) {
-        return entry.getKey();
-      }
-    }
-    throw new IllegalStateException(
-        String.format("binding is not resolved for %s: %s",
-            key(),
-            binding));
+  final TypeElement owningComponent(ContributionBinding binding) {
+    checkArgument(
+        contributionBindings().contains(binding),
+        "binding is not resolved for %s: %s",
+        key(),
+        binding);
+    return getOnlyElement(allContributionBindings().inverse().get(binding));
   }
 
-  /** Creates a {@link ResolvedBindings} for contribution bindings. */
+  /** Creates a {@code ResolvedBindings} for contribution bindings. */
   static ResolvedBindings forContributionBindings(
       Key key,
-      Map<TypeElement, List<ContributionBinding>> contributionBindings,
-      Set<SubcomponentDeclaration> subcomponentDeclarations) {
-    return new ResolvedBindings(
+      Multimap<TypeElement, ContributionBinding> contributionBindings,
+      Iterable<SubcomponentDeclaration> subcomponentDeclarations) {
+    return new AutoValue_ResolvedBindings(
         key,
-        Util.transformValues(contributionBindings, LinkedHashSet::new),
-        subcomponentDeclarations);
+        ImmutableSetMultimap.copyOf(contributionBindings),
+        ImmutableMap.of(),
+        ImmutableSet.copyOf(subcomponentDeclarations));
+  }
+
+  /**
+   * Creates a {@code ResolvedBindings} for members injection bindings.
+   */
+  static ResolvedBindings forMembersInjectionBinding(
+      Key key,
+      ComponentDescriptor owningComponent,
+      MembersInjectionBinding ownedMembersInjectionBinding) {
+    return new AutoValue_ResolvedBindings(
+        key,
+        ImmutableSetMultimap.of(),
+        ImmutableMap.of(toJavac(owningComponent.typeElement()), ownedMembersInjectionBinding),
+        ImmutableSet.of());
+  }
+
+  /**
+   * Creates a {@code ResolvedBindings} appropriate for when there are no bindings for the key.
+   */
+  static ResolvedBindings noBindings(Key key) {
+    return new AutoValue_ResolvedBindings(
+        key,
+        ImmutableSetMultimap.of(),
+        ImmutableMap.of(),
+        ImmutableSet.of());
   }
 }

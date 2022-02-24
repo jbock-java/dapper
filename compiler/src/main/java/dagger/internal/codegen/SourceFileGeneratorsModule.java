@@ -16,22 +16,42 @@
 
 package dagger.internal.codegen;
 
-import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.writing.FactoryGenerator;
+import dagger.internal.codegen.writing.MembersInjectorGenerator;
 import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.writing.ModuleProxies.ModuleConstructorProxyGenerator;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 
 @Module
-interface SourceFileGeneratorsModule {
+abstract class SourceFileGeneratorsModule {
 
-  @Binds
-  SourceFileGenerator<ProvisionBinding> factoryGenerator(FactoryGenerator generator);
+  @Provides
+  static SourceFileGenerator<ProvisionBinding> factoryGenerator(
+      FactoryGenerator generator, CompilerOptions compilerOptions) {
+    return hjarWrapper(generator, compilerOptions);
+  }
 
-  @Binds
+  @Provides
+  static SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator(
+      MembersInjectorGenerator generator, CompilerOptions compilerOptions) {
+    return hjarWrapper(generator, compilerOptions);
+  }
+
+  @Provides
   @ModuleGenerator
-  SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator(ModuleConstructorProxyGenerator generator);
+  static SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator(
+      ModuleConstructorProxyGenerator generator, CompilerOptions compilerOptions) {
+    return hjarWrapper(generator, compilerOptions);
+  }
+
+  private static <T> SourceFileGenerator<T> hjarWrapper(
+      SourceFileGenerator<T> generator, CompilerOptions compilerOptions) {
+    return generator;
+  }
 }

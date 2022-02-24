@@ -12,7 +12,15 @@ import java.util.stream.Stream;
 
 public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
-  private final Map<K, List<V>> map = new LinkedHashMap<>();
+  private final Map<K, List<V>> map;
+
+  ListMultimap() {
+    this.map = new LinkedHashMap<>();
+  }
+
+  ListMultimap(Map<K, List<V>> map) {
+    this.map = map;
+  }
 
   public void put(K key, V value) {
     map.merge(key, List.of(value), Util::mutableConcat);
