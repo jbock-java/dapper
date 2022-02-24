@@ -16,30 +16,33 @@
 
 package dagger.internal.codegen.binding;
 
-import static java.util.stream.Collectors.groupingBy;
-
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Multimaps;
 import dagger.spi.model.Key;
+import dagger.spi.model.RequestKind;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 // TODO(bcorso): Remove the LegacyBindingGraph after we've migrated to the new BindingGraph.
-
 /** The canonical representation of a full-resolved graph. */
 final class LegacyBindingGraph {
   private final ComponentDescriptor componentDescriptor;
-  private final Map<Key, ResolvedBindings> contributionBindings;
-  private final List<LegacyBindingGraph> subgraphs;
+  private final ImmutableMap<Key, ResolvedBindings> contributionBindings;
+  private final ImmutableMap<Key, ResolvedBindings> membersInjectionBindings;
+  private final ImmutableList<LegacyBindingGraph> subgraphs;
 
   LegacyBindingGraph(
       ComponentDescriptor componentDescriptor,
-      Map<Key, ResolvedBindings> contributionBindings,
-      List<LegacyBindingGraph> subgraphs) {
+      ImmutableMap<Key, ResolvedBindings> contributionBindings,
+      ImmutableMap<Key, ResolvedBindings> membersInjectionBindings,
+      ImmutableList<LegacyBindingGraph> subgraphs) {
     this.componentDescriptor = componentDescriptor;
     this.contributionBindings = contributionBindings;
+    this.membersInjectionBindings = membersInjectionBindings;
     this.subgraphs = checkForDuplicates(subgraphs);
   }
 
@@ -48,28 +51,28 @@ final class LegacyBindingGraph {
   }
 
   ResolvedBindings resolvedBindings(BindingRequest request) {
-    return contributionBindings.get(request.key());
+    return request.isRequestKind(RequestKind.MEMBERS_INJECTION)
+        ? membersInjectionBindings.get(request.key())
+        : contributionBindings.get(request.key());
   }
 
-  Collection<ResolvedBindings> resolvedBindings() {
+  Iterable<ResolvedBindings> resolvedBindings() {
     // Don't return an immutable collection - this is only ever used for looping over all bindings
     // in the graph. Copying is wasteful, especially if is a hashing collection, since the values
     // should all, by definition, be distinct.
-    return contributionBindings.values();
+    return Iterables.concat(membersInjectionBindings.values(), contributionBindings.values());
   }
 
-  List<LegacyBindingGraph> subgraphs() {
+  ImmutableList<LegacyBindingGraph> subgraphs() {
     return subgraphs;
   }
 
-  private static List<LegacyBindingGraph> checkForDuplicates(
-      List<LegacyBindingGraph> graphs) {
+  private static ImmutableList<LegacyBindingGraph> checkForDuplicates(
+      ImmutableList<LegacyBindingGraph> graphs) {
     Map<XTypeElement, Collection<LegacyBindingGraph>> duplicateGraphs =
-        graphs.stream()
-            .collect(groupingBy(graph -> graph.componentDescriptor().typeElement(), LinkedHashMap::new, Collectors.toList()))
-            .entrySet().stream()
-            .filter(overlapping -> overlapping.getValue().size() > 1)
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Maps.filterValues(
+            Multimaps.index(graphs, graph -> graph.componentDescriptor().typeElement()).asMap(),
+            overlapping -> overlapping.size() > 1);
     if (!duplicateGraphs.isEmpty()) {
       throw new IllegalArgumentException("Expected no duplicates: " + duplicateGraphs);
     }

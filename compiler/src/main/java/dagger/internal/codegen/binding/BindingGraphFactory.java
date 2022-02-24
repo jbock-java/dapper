@@ -34,7 +34,9 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableListMultimap;
+import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Keys;
 import dagger.internal.codegen.extension.DaggerStreams;
@@ -218,8 +220,9 @@ public final class BindingGraphFactory implements ClearableCache {
 
     return new LegacyBindingGraph(
         componentDescriptor,
-        new LinkedHashMap<>(requestResolver.getResolvedContributionBindings()),
-        List.copyOf(subgraphs));
+        ImmutableMap.copyOf(requestResolver.getResolvedContributionBindings()),
+        ImmutableMap.of(),
+        ImmutableList.copyOf(subgraphs));
   }
 
   /** Indexes {@code bindingDeclarations} by {@link BindingDeclaration#key()}. */

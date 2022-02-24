@@ -20,6 +20,7 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
@@ -40,6 +41,7 @@ public class ComponentProcessorHelper {
 
   private final InjectBindingRegistry injectBindingRegistry;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  private final SourceFileGenerator<MembersInjectionBinding> membersInjectionGenerator;
   private final List<JavacBasicAnnotationProcessor.Step> processingSteps;
   private final ValidationBindingGraphPlugins validationBindingGraphPlugins;
   private final ExternalBindingGraphPlugins externalBindingGraphPlugins;
@@ -50,6 +52,7 @@ public class ComponentProcessorHelper {
   ComponentProcessorHelper(
       InjectBindingRegistry injectBindingRegistry,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
+      SourceFileGenerator<MembersInjectionBinding> membersInjectionGenerator,
       List<JavacBasicAnnotationProcessor.Step> processingSteps,
       ValidationBindingGraphPlugins validationBindingGraphPlugins,
       ExternalBindingGraphPlugins externalBindingGraphPlugins,
@@ -57,6 +60,7 @@ public class ComponentProcessorHelper {
       XMessager messager) {
     this.injectBindingRegistry = injectBindingRegistry;
     this.factoryGenerator = factoryGenerator;
+    this.membersInjectionGenerator = membersInjectionGenerator;
     this.processingSteps = processingSteps;
     this.validationBindingGraphPlugins = validationBindingGraphPlugins;
     this.externalBindingGraphPlugins = externalBindingGraphPlugins;
@@ -82,7 +86,7 @@ public class ComponentProcessorHelper {
     if (!roundEnv.processingOver()) {
       try {
         injectBindingRegistry.generateSourcesForRequiredBindings(
-            factoryGenerator);
+            factoryGenerator, membersInjectionGenerator);
       } catch (SourceFileGenerationException e) {
         e.printMessageTo(messager);
       }
