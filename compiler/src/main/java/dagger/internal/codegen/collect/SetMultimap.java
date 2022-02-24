@@ -24,9 +24,9 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
   }
 
   public boolean put(K key, V value) {
-    Set<V> oldValue = map.getOrDefault(key, Set.of());
+    int oldSize = map.getOrDefault(key, Set.of()).size();
     Set<V> newSet = map.merge(key, Set.of(value), Util::mutableUnion);
-    return newSet.size() != oldValue.size();
+    return newSet.size() != oldSize;
   }
 
   public void putAll(K key, Iterable<? extends V> values) {
