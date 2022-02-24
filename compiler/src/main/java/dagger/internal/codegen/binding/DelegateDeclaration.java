@@ -16,114 +16,70 @@
 
 package dagger.internal.codegen.binding;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
+import static dagger.internal.codegen.base.MapKeys.getMapKey;
 
-import dagger.Binds;
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
+import io.jbock.auto.common.Equivalence;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.Binds;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.Key;
-import jakarta.inject.Inject;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.IntSupplier;
+import jakarta.inject.Inject;
+import javax.lang.model.element.AnnotationMirror;
 
-/** The declaration for a delegate binding established by a {@link Binds} method. */
-public final class DelegateDeclaration extends BindingDeclaration {
+/** The declaration for a delegate binding established by a {@code Binds} method. */
+@AutoValue
+public abstract class DelegateDeclaration extends BindingDeclaration
+    implements HasContributionType {
+  abstract DependencyRequest delegateRequest();
 
-  private final Key key;
-  private final Optional<XElement> bindingElement;
-  private final Optional<XTypeElement> contributingModule;
-  private final DependencyRequest delegateRequest;
-  private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(
-          key(),
-          bindingElement(),
-          contributingModule(),
-          delegateRequest()));
+  abstract Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey();
 
-  DelegateDeclaration(
-      Key key,
-      Optional<XElement> bindingElement,
-      Optional<XTypeElement> contributingModule,
-      DependencyRequest delegateRequest) {
-    this.key = requireNonNull(key);
-    this.bindingElement = requireNonNull(bindingElement);
-    this.contributingModule = requireNonNull(contributingModule);
-    this.delegateRequest = requireNonNull(delegateRequest);
-  }
+  @Memoized
+  @Override
+  public abstract int hashCode();
 
   @Override
-  public Key key() {
-    return key;
-  }
+  public abstract boolean equals(Object obj);
 
-  @Override
-  public Optional<XElement> bindingElement() {
-    return bindingElement;
-  }
-
-  @Override
-  public Optional<XTypeElement> contributingModule() {
-    return contributingModule;
-  }
-
-  DependencyRequest delegateRequest() {
-    return delegateRequest;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DelegateDeclaration that = (DelegateDeclaration) o;
-    return hashCode() == that.hashCode()
-        && key.equals(that.key)
-        && bindingElement.equals(that.bindingElement)
-        && contributingModule.equals(that.contributingModule)
-        && delegateRequest.equals(that.delegateRequest);
-  }
-
-  @Override
-  public int hashCode() {
-    return hash.getAsInt();
-  }
-
-  /** A {@link DelegateDeclaration} factory. */
+  /** A {@code DelegateDeclaration} factory. */
   public static final class Factory {
-    private final DaggerTypes types;
     private final KeyFactory keyFactory;
     private final DependencyRequestFactory dependencyRequestFactory;
 
     @Inject
     Factory(
-        DaggerTypes types,
         KeyFactory keyFactory,
         DependencyRequestFactory dependencyRequestFactory) {
-      this.types = types;
       this.keyFactory = keyFactory;
       this.dependencyRequestFactory = dependencyRequestFactory;
     }
 
     public DelegateDeclaration create(XMethodElement bindsMethod, XTypeElement contributingModule) {
-      Preconditions.checkArgument(bindsMethod.hasAnnotation(TypeNames.BINDS));
+      checkArgument(bindsMethod.hasAnnotation(TypeNames.BINDS));
       XMethodType resolvedMethod = bindsMethod.asMemberOf(contributingModule.getType());
       DependencyRequest delegateRequest =
           dependencyRequestFactory.forRequiredResolvedVariable(
-              Util.getOnlyElement(bindsMethod.getParameters()),
-              Util.getOnlyElement(resolvedMethod.getParameterTypes()));
-      return new DelegateDeclaration(
+              Iterables.getOnlyElement(bindsMethod.getParameters()),
+              Iterables.getOnlyElement(resolvedMethod.getParameterTypes()));
+      return new AutoValue_DelegateDeclaration(
+          ContributionType.fromBindingElement(bindsMethod),
           keyFactory.forBindsMethod(bindsMethod, contributingModule),
-          Optional.of(bindsMethod),
+          Optional.<XElement>of(bindsMethod),
           Optional.of(contributingModule),
-          delegateRequest);
+          delegateRequest,
+          wrapOptionalInEquivalence(getMapKey(toJavac(bindsMethod))));
     }
   }
 }
