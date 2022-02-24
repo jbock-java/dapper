@@ -26,7 +26,6 @@ import dagger.internal.codegen.validation.AnyBindingMethodValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.InjectValidator;
-import dagger.internal.codegen.validation.SuperficialInjectValidator;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import java.util.Set;
 
@@ -45,7 +44,6 @@ interface ProcessingRoundCacheModule {
       BindingGraphFactory bindingGraphFactory,
       ComponentValidator componentValidator,
       ComponentCreatorValidator componentCreatorValidator,
-      SuperficialInjectValidator superficialInjectValidator,
       SuperficialValidator superficialValidator,
       DaggerElements elements) {
     return Set.of(
@@ -55,7 +53,6 @@ interface ProcessingRoundCacheModule {
         bindingGraphFactory,
         componentValidator,
         componentCreatorValidator,
-        superficialInjectValidator,
         superficialValidator,
         elements);
   }

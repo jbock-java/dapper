@@ -16,9 +16,13 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Util.reverse;
+import static dagger.internal.codegen.collect.Lists.reverse;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.stream.Collectors.joining;
 
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreTypes;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +56,80 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 // TODO(bcorso): Consider contributing this to Auto-Common's SuperficialValidation.
 public final class DaggerSuperficialValidation {
   /**
-   * Returns true if all of the given elements return true from {@link #validateElement(Element)}.
+   * Validates the {@code XElement#getType()} type of the given element.
+   *
+   * <p>Validating the type also validates any types it references, such as any type arguments or
+   * type bounds. For an {@code ExecutableType}, the parameter and return types must be fully
+   * defined, as must types declared in a {@code throws} clause or in the bounds of any type
+   * parameters.
+   */
+  public static void validateTypeOf(XElement element) {
+    validateTypeOf(toJavac(element));
+  }
+
+  private static void validateTypeOf(Element element) {
+    try {
+      validateType(element.getKind() + " type", element.asType());
+    } catch (RuntimeException exception) {
+      throw ValidationException.from(exception)
+          .append(String.format("%s element: %s", element.getKind(), element));
+    }
+  }
+
+  /**
+   * Validates the {@code XElement#getSuperType()} type of the given element.
+   *
+   * <p>Validating the type also validates any types it references, such as any type arguments or
+   * type bounds.
+   */
+  public static void validateSuperTypeOf(XTypeElement element) {
+    validateSuperTypeOf(toJavac(element));
+  }
+
+  private static void validateSuperTypeOf(TypeElement element) {
+    try {
+      validateType("super type", element.getSuperclass());
+    } catch (RuntimeException exception) {
+      throw ValidationException.from(exception)
+          .append(String.format("%s element: %s", element.getKind(), element));
+    }
+  }
+
+  /**
+   * Validates the {@code XExecutableElement#getThrownTypes()} types of the given element.
+   *
+   * <p>Validating the type also validates any types it references, such as any type arguments or
+   * type bounds.
+   */
+  public static void validateThrownTypesOf(XExecutableElement element) {
+    validateThrownTypesOf(toJavac(element));
+  }
+
+  private static void validateThrownTypesOf(ExecutableElement element) {
+    try {
+      validateTypes("thrown type", element.getThrownTypes());
+    } catch (RuntimeException exception) {
+      throw ValidationException.from(exception)
+          .append(String.format("%s element: %s", element.getKind(), element));
+    }
+  }
+
+  /** Validate the annotations of the given element. */
+  public static void validateAnnotationsOf(XElement element) {
+    validateAnnotationsOf(toJavac(element));
+  }
+
+  private static void validateAnnotationsOf(Element element) {
+    try {
+      validateAnnotations(element.getAnnotationMirrors());
+    } catch (RuntimeException exception) {
+      throw ValidationException.from(exception)
+          .append(String.format("%s element: %s", element.getKind(), element));
+    }
+  }
+
+  /**
+   * Returns true if all of the given elements return true from {@code #validateElement(Element)}.
    */
   public static void validateElements(Iterable<? extends Element> elements) {
     for (Element element : elements) {
@@ -111,6 +188,16 @@ public final class DaggerSuperficialValidation {
           return null;
         }
       };
+
+  /**
+   * Returns true if all types referenced by the given element are defined. The exact meaning of
+   * this depends on the kind of element. For packages, it means that all annotations on the package
+   * are fully defined. For other element kinds, it means that types referenced by the element,
+   * anything it contains, and any of its annotations element are all defined.
+   */
+  public static void validateElement(XElement element) {
+    validateElement(toJavac(element));
+  }
 
   /**
    * Returns true if all types referenced by the given element are defined. The exact meaning of
@@ -199,7 +286,7 @@ public final class DaggerSuperficialValidation {
 
   /**
    * Returns true if the given type is fully defined. This means that the type itself is defined, as
-   * are any types it references, such as any type arguments or type bounds. For an {@link
+   * are any types it references, such as any type arguments or type bounds. For an {@code
    * ExecutableType}, the parameter and return types must be fully defined, as must types declared
    * in a {@code throws} clause or in the bounds of any type parameters.
    */
@@ -457,7 +544,7 @@ public final class DaggerSuperficialValidation {
       return fromUnexpectedThrowable;
     }
 
-    /** Appends the given message and returns this instance of {@link ValidationException} */
+    /** Appends the given message and returns this instance of {@code ValidationException} */
     public ValidationException append(String message) {
       messages.add(message);
       return this;
