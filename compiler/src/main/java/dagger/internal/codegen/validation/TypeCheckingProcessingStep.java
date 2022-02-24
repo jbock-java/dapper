@@ -17,24 +17,24 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.base.Util.difference;
+import static dagger.internal.codegen.collect.Sets.difference;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
+import dagger.internal.codegen.binding.DaggerSuperficialValidation.ValidationException;
+import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import io.jbock.javapoet.ClassName;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link XProcessingStep} that processes one element at a time and defers any for which {@link
+ * A {@code XProcessingStep} that processes one element at a time and defers any for which {@code
  * TypeNotPresentException} is thrown.
  */
 public abstract class TypeCheckingProcessingStep<E extends XElement> implements XProcessingStep {
@@ -46,15 +46,15 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
   }
 
   @Override
-  public final Set<String> annotations() {
+  public final ImmutableSet<String> annotations() {
     return annotationClassNames().stream().map(ClassName::canonicalName).collect(toImmutableSet());
   }
 
   @SuppressWarnings("unchecked") // Subclass must ensure all annotated targets are of valid type.
   @Override
-  public Set<XElement> process(
+  public ImmutableSet<XElement> process(
       XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
-    Set<XElement> deferredElements = new LinkedHashSet<>();
+    ImmutableSet.Builder<XElement> deferredElements = ImmutableSet.builder();
     inverse(elementsByAnnotation)
         .forEach(
             (element, annotations) -> {
@@ -81,21 +81,21 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
                 deferredElements.add(element);
               }
             });
-    return deferredElements;
+    return deferredElements.build();
   }
 
   /**
-   * Processes one element. If this method throws {@link TypeNotPresentException}, the element will
+   * Processes one element. If this method throws {@code TypeNotPresentException}, the element will
    * be deferred until the next round of processing.
    *
-   * @param annotations the subset of {@link XProcessingStep#annotations()} that annotate {@code
+   * @param annotations the subset of {@code XProcessingStep#annotations()} that annotate {@code
    *     element}
    */
   protected abstract void process(E element, ImmutableSet<ClassName> annotations);
 
-  private Map<XElement, ImmutableSet<ClassName>> inverse(
+  private ImmutableMap<XElement, ImmutableSet<ClassName>> inverse(
       Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
-    Map<String, ClassName> annotationClassNames =
+    ImmutableMap<String, ClassName> annotationClassNames =
         annotationClassNames().stream()
             .collect(toImmutableMap(ClassName::canonicalName, className -> className));
     checkState(
@@ -110,7 +110,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
             elementSet.forEach(
                 element -> builder.put(element, annotationClassNames.get(annotationName))));
 
-    return Maps.transformValues(builder.build().asMap(), ImmutableSet::copyOf);
+    return ImmutableMap.copyOf(Maps.transformValues(builder.build().asMap(), ImmutableSet::copyOf));
   }
 
   /** Returns the set of annotations processed by this processing step. */

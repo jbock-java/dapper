@@ -104,7 +104,6 @@ public final class BindingFactory {
     checkArgument(
         constructorElement.hasAnnotation(TypeNames.INJECT)
             || constructorElement.hasAnnotation(TypeNames.ASSISTED_INJECT));
-    checkArgument(!injectionAnnotations.getQualifier(constructorElement).isPresent());
 
     XConstructorType constructorType = constructorElement.getExecutableType();
     XType enclosingType = constructorElement.getEnclosingElement().getType();
@@ -138,7 +137,7 @@ public final class BindingFactory {
                 constructorElement.hasAnnotation(TypeNames.ASSISTED_INJECT)
                     ? ASSISTED_INJECTION
                     : INJECTION)
-            .scope(uniqueScopeOf(constructorElement.getEnclosingElement()));
+            .scope(injectionAnnotations.getScope(constructorElement));
 
     if (hasNonDefaultTypeParameters(enclosingType)) {
       builder.unresolved(injectionBinding(constructorElement, Optional.empty()));

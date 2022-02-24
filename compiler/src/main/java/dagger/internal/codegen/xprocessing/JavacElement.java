@@ -5,6 +5,7 @@ import io.jbock.javapoet.ClassName;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
@@ -73,6 +74,11 @@ class JavacElement implements XElement {
   @Override
   public final boolean hasAnnotation(ClassName className) {
     return DaggerElements.isAnnotationPresent(element, className);
+  }
+
+  @Override
+  public boolean hasAnyAnnotation(ClassName... annotations) {
+    return Stream.of(annotations).anyMatch(this::hasAnnotation);
   }
 
   @Override

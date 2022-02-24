@@ -20,6 +20,12 @@ public class Verify {
     }
   }
 
+  public static void verify(boolean expression, String errorMessage) {
+    if (!expression) {
+      throw new IllegalArgumentException(errorMessage);
+    }
+  }
+
   public static void verifyNotNull(Object o) {
     if (o == null) {
       throw new NullPointerException();

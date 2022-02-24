@@ -49,6 +49,7 @@ import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -60,7 +61,10 @@ import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
+import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Scope;
+import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
@@ -122,6 +126,11 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         classBuilder(generatedClassNameForBinding(binding))
             .addModifiers(PUBLIC, FINAL)
             .addTypeVariables(bindingTypeElementTypeVariableNames(binding));
+
+    if (binding.kind() == BindingKind.INJECTION
+        || binding.kind() == BindingKind.ASSISTED_INJECTION) {
+      factoryBuilder.addAnnotation(scopeMetadataAnnotation(binding));
+    }
 
     factoryTypeName(binding).ifPresent(factoryBuilder::addSuperinterface);
     addConstructorAndFields(binding, factoryBuilder);
@@ -288,6 +297,16 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
       getMethod.addStatement("return $L", invokeNewInstance);
     }
     return getMethod.build();
+  }
+
+  private AnnotationSpec scopeMetadataAnnotation(ProvisionBinding binding) {
+    AnnotationSpec.Builder builder = AnnotationSpec.builder(TypeNames.SCOPE_METADATA);
+    binding.scope()
+        .map(Scope::scopeAnnotation)
+        .map(DaggerAnnotation::className)
+        .map(ClassName::canonicalName)
+        .ifPresent(scopeCanonicalName -> builder.addMember("value", "$S", scopeCanonicalName));
+    return builder.build();
   }
 
   private static TypeName providedTypeName(ProvisionBinding binding) {

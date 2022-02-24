@@ -19,14 +19,27 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
 import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.TypeNames.DOUBLE_CHECK;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCED_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_OF_PRODUCER_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.MAP_PROVIDER_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
+import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.SET_OF_PRODUCED_PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.SET_PRODUCER;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.INJECTION;
-import static io.jbock.auto.common.MoreElements.asExecutable;
+import static dagger.spi.model.BindingKind.MULTIBOUND_MAP;
+import static dagger.spi.model.BindingKind.MULTIBOUND_SET;
 import static io.jbock.auto.common.MoreElements.asType;
 import static javax.lang.model.SourceVersion.isName;
 
@@ -36,6 +49,8 @@ import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
@@ -72,7 +87,7 @@ public class SourceFiles {
    * @param binding must be an unresolved binding (type parameters must match its type element's)
    */
   public static ImmutableMap<DependencyRequest, FrameworkField>
-  generateBindingFieldsForDependencies(Binding binding) {
+      generateBindingFieldsForDependencies(Binding binding) {
     checkArgument(!binding.unresolved().isPresent(), "binding must be unresolved: %s", binding);
 
     FrameworkTypeMapper frameworkTypeMapper =
@@ -93,8 +108,10 @@ public class SourceFiles {
       case LAZY:
         return CodeBlock.of("$T.lazy($L)", DOUBLE_CHECK, frameworkTypeMemberSelect);
       case INSTANCE:
+      case FUTURE:
         return CodeBlock.of("$L.get()", frameworkTypeMemberSelect);
       case PROVIDER:
+      case PRODUCER:
         return frameworkTypeMemberSelect;
       case PROVIDER_OF_LAZY:
         return CodeBlock.of("$T.create($L)", PROVIDER_OF_LAZY, frameworkTypeMemberSelect);
@@ -104,7 +121,7 @@ public class SourceFiles {
   }
 
   /**
-   * Returns a mapping of {@link DependencyRequest}s to {@link CodeBlock}s that {@linkplain
+   * Returns a mapping of {@code DependencyRequest}s to {@code CodeBlock}s that {@code
    * #frameworkTypeUsageStatement(CodeBlock, RequestKind) use them}.
    */
   public static ImmutableMap<DependencyRequest, CodeBlock> frameworkFieldUsages(
@@ -124,8 +141,8 @@ public class SourceFiles {
           case ASSISTED_INJECTION:
           case INJECTION:
           case PROVISION:
-            return elementBasedClassName(
-                asExecutable(toJavac(binding.bindingElement().get())), "Factory");
+          case PRODUCTION:
+            return factoryNameForElement(asExecutable(binding.bindingElement().get()));
 
           case ASSISTED_FACTORY:
             return siblingClassName(asType(toJavac(binding.bindingElement().get())), "_Impl");
@@ -142,10 +159,22 @@ public class SourceFiles {
   }
 
   /**
-   * Calculates an appropriate {@link ClassName} for a generated class that is based on {@code
+   * Returns the generated factory name for the given element.
+   *
+   * <p>This method is useful during validation before a {@code Binding} can be created. If a
+   * binding already exists for the given element, prefer to call {@code
+   * #generatedClassNameForBinding(Binding)} instead since this method does not validate that the
+   * given element is actually a binding element or not.
+   */
+  public static ClassName factoryNameForElement(XExecutableElement element) {
+    return elementBasedClassName(toJavac(element), "Factory");
+  }
+
+  /**
+   * Calculates an appropriate {@code ClassName} for a generated class that is based on {@code
    * element}, appending {@code suffix} at the end.
    *
-   * <p>This will always return a {@linkplain ClassName#topLevelClassName() top level class name},
+   * <p>This will always return a {@code ClassName#topLevelClassName() top level class name},
    * even if {@code element}'s enclosing class is a nested type.
    */
   public static ClassName elementBasedClassName(ExecutableElement element, String suffix) {
@@ -202,7 +231,7 @@ public class SourceFiles {
     if (binding instanceof ContributionBinding) {
       ContributionBinding contributionBinding = (ContributionBinding) binding;
       if (!(contributionBinding.kind() == INJECTION
-          || contributionBinding.kind() == ASSISTED_INJECTION)
+              || contributionBinding.kind() == ASSISTED_INJECTION)
           && !contributionBinding.requiresModuleInstance()) {
         return ImmutableList.of();
       }
@@ -213,7 +242,7 @@ public class SourceFiles {
   }
 
   /**
-   * Returns a name to be used for variables of the given {@linkplain TypeElement type}. Prefer
+   * Returns a name to be used for variables of the given {@code TypeElement type}. Prefer
    * semantically meaningful variable names, but if none can be derived, this will produce something
    * readable.
    */
@@ -223,14 +252,14 @@ public class SourceFiles {
   }
 
   /**
-   * Returns a name to be used for variables of the given {@linkplain ClassName}. Prefer
+   * Returns a name to be used for variables of the given {@code ClassName}. Prefer
    * semantically meaningful variable names, but if none can be derived, this will produce something
    * readable.
    */
   public static String simpleVariableName(ClassName className) {
     String candidateName = UPPER_CAMEL.to(LOWER_CAMEL, className.simpleName());
     String variableName = protectAgainstKeywords(candidateName);
-    verify(isName(variableName), "'%s' was expected to be a valid variable name", variableName);
+    verify(isName(variableName), "'%s' was expected to be a valid variable name");
     return variableName;
   }
 
@@ -263,6 +292,5 @@ public class SourceFiles {
     }
   }
 
-  private SourceFiles() {
-  }
+  private SourceFiles() {}
 }

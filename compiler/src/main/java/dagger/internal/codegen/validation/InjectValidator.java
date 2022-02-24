@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
+import static dagger.internal.codegen.binding.SourceFiles.factoryNameForElement;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
@@ -166,7 +167,7 @@ public final class InjectValidator implements ClearableCache {
   }
 
   private ValidationReport validateConstructor(XConstructorElement constructorElement) {
-    DaggerSuperficialValidation.validateElement(constructorElement);
+    DaggerSuperficialValidation.validateTypeOf(constructorElement);
     ValidationReport.Builder builder =
         ValidationReport.about(constructorElement.getEnclosingElement());
 
@@ -185,32 +186,40 @@ public final class InjectValidator implements ClearableCache {
           "Dagger does not support injection into private constructors", constructorElement);
     }
 
-    for (XAnnotation qualifier : injectionAnnotations.getQualifiers(constructorElement)) {
-      builder.addError(
+    // If this type has already been processed in a previous round or compilation unit then there
+    // is no reason to recheck for invalid scope annotations since it's already been checked.
+    // This allows us to skip superficial validation of constructor annotations in subsequent
+    // compilations where the annotation types may no longer be on the classpath.
+    if (!processedInPreviousRoundOrCompilationUnit(constructorElement)) {
+      DaggerSuperficialValidation.validateAnnotationsOf(constructorElement);
+      for (XAnnotation qualifier : injectionAnnotations.getQualifiers(constructorElement)) {
+        builder.addError(
+            String.format(
+                "@Qualifier annotations are not allowed on @%s constructors",
+                injectAnnotation.simpleName()),
+            constructorElement,
+            qualifier);
+      }
+
+      String scopeErrorMsg =
           String.format(
-              "@Qualifier annotations are not allowed on @%s constructors",
-              injectAnnotation.simpleName()),
-          constructorElement,
-          qualifier);
-    }
+              "@Scope annotations are not allowed on @%s constructors",
+              injectAnnotation.simpleName());
 
-    String scopeErrorMsg =
-        String.format(
-            "@Scope annotations are not allowed on @%s constructors",
-            injectAnnotation.simpleName());
+      if (injectAnnotation.equals(TypeNames.INJECT)) {
+        scopeErrorMsg += "; annotate the class instead";
+      }
 
-    if (injectAnnotation.equals(TypeNames.INJECT)) {
-      scopeErrorMsg += "; annotate the class instead";
-    }
-
-    for (Scope scope : scopesOf(constructorElement)) {
-      builder.addError(
-          scopeErrorMsg,
-          constructorElement,
-          toXProcessing(scope.scopeAnnotation().java(), processingEnv));
+      for (Scope scope : scopesOf(constructorElement)) {
+        builder.addError(
+            scopeErrorMsg,
+            constructorElement,
+            toXProcessing(scope.scopeAnnotation().java(), processingEnv));
+      }
     }
 
     for (XExecutableParameterElement parameter : constructorElement.getParameters()) {
+      DaggerSuperficialValidation.validateElement(parameter);
       validateDependencyRequest(builder, parameter);
     }
 
@@ -243,8 +252,8 @@ public final class InjectValidator implements ClearableCache {
           constructorElement);
     }
 
-    DaggerSuperficialValidation.validateAnnotationsOf(enclosingElement);
-    ImmutableSet<Scope> scopes = scopesOf(enclosingElement);
+    // Note: superficial validation of the annotations is done as part of getting the scopes.
+    ImmutableSet<Scope> scopes = injectionAnnotations.getScopes(constructorElement);
     if (injectAnnotation.equals(TypeNames.ASSISTED_INJECT)) {
       for (Scope scope : scopes) {
         builder.addError(
@@ -416,5 +425,9 @@ public final class InjectValidator implements ClearableCache {
   private Diagnostic.Kind staticMemberDiagnosticKind() {
     return privateAndStaticInjectionDiagnosticKind.orElse(
         compilerOptions.staticMemberValidationKind());
+  }
+
+  private boolean processedInPreviousRoundOrCompilationUnit(XConstructorElement injectConstructor) {
+    return processingEnv.findTypeElement(factoryNameForElement(injectConstructor)) != null;
   }
 }

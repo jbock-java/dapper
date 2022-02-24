@@ -17,9 +17,14 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.MoreAnnotationValues.getStringValue;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.binding.SourceFiles.factoryNameForElement;
 import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
@@ -30,6 +35,7 @@ import static io.jbock.auto.common.MoreElements.asVariable;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
+import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.collect.FluentIterable;
 import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableSet;
@@ -43,6 +49,8 @@ import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.DaggerAnnotation;
+import dagger.spi.model.Scope;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.Equivalence.Wrapper;
@@ -75,6 +83,61 @@ public final class InjectionAnnotations {
     this.processingEnv = processingEnv;
     this.elements = elements;
     this.kotlinMetadataUtil = kotlinMetadataUtil;
+  }
+
+  /**
+   * Returns the scope on the inject constructor's type if it exists.
+   *
+   * @throws IllegalArgumentException if the given constructor is not an inject constructor or there
+   *   are more than one scope annotations present.
+   */
+  public Optional<Scope> getScope(XConstructorElement injectConstructor) {
+    return getScopes(injectConstructor).stream().collect(toOptional());
+  }
+
+  /**
+   * Returns the scopes on the inject constructor's type, or an empty set if none exist.
+   *
+   * @throws IllegalArgumentException if the given constructor is not an inject constructor.
+   */
+  public ImmutableSet<Scope> getScopes(XConstructorElement injectConstructor) {
+    checkArgument(injectConstructor.hasAnyAnnotation(TypeNames.INJECT, TypeNames.ASSISTED_INJECT));
+    XTypeElement factory = processingEnv.findTypeElement(factoryNameForElement(injectConstructor));
+    if (factory != null && factory.hasAnnotation(TypeNames.SCOPE_METADATA)) {
+      String scopeName = factory.getAnnotation(TypeNames.SCOPE_METADATA).getAsString("value");
+      if (scopeName.isEmpty()) {
+        return ImmutableSet.of();
+      }
+      ImmutableSet<XAnnotation> scopeAnnotations =
+          injectConstructor.getEnclosingElement().getAllAnnotations().stream()
+              .filter(
+                  annotation ->
+                      scopeName.contentEquals(
+                          annotation.getType().getTypeElement().getQualifiedName()))
+              .collect(toImmutableSet());
+      checkState(
+          !scopeAnnotations.isEmpty(),
+          "Expected scope, %s, on inject type, %s.",
+          scopeName,
+          injectConstructor.getEnclosingElement());
+      checkState(
+          scopeAnnotations.size() == 1,
+          "Expected a single scope, %s, on inject type, %s, but found multiple: %s",
+          scopeName,
+          injectConstructor.getEnclosingElement(),
+          scopeAnnotations);
+      XAnnotation scopeAnnotation = getOnlyElement(scopeAnnotations);
+      // Do superficial validation before we convert to a Scope, otherwise the @Scope annotation may
+      // appear to be missing from the annotation if it's no longer on the classpath.
+      DaggerSuperficialValidation.strictValidateAnnotationOf(
+          injectConstructor.getEnclosingElement(), scopeAnnotation);
+      return ImmutableSet.of(Scope.scope(DaggerAnnotation.from(scopeAnnotation)));
+    }
+
+    // Fall back to validating all annotations if the ScopeMetadata isn't available.
+    DaggerSuperficialValidation
+        .strictValidateAnnotationsOf(injectConstructor.getEnclosingElement());
+    return Scopes.scopesOf(injectConstructor.getEnclosingElement());
   }
 
   public Optional<XAnnotation> getQualifier(XElement element) {

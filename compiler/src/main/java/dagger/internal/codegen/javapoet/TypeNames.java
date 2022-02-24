@@ -22,7 +22,7 @@ import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;
 
-/** Common names and convenience methods for JavaPoet {@link TypeName} usage. */
+/** Common names and convenience methods for JavaPoet {@code TypeName} usage. */
 public final class TypeNames {
 
   // Dagger Core classnames
@@ -70,6 +70,7 @@ public final class TypeNames {
   public static final ClassName PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName PROVIDER_OF_LAZY =
       ClassName.get("dagger.internal", "ProviderOfLazy");
+  public static final ClassName SCOPE_METADATA = ClassName.get("dagger.internal", "ScopeMetadata");
   public static final ClassName SET_FACTORY = ClassName.get("dagger.internal", "SetFactory");
   public static final ClassName SINGLE_CHECK = ClassName.get("dagger.internal", "SingleCheck");
   public static final ClassName LAZY = ClassName.get("dagger", "Lazy");
@@ -156,7 +157,7 @@ public final class TypeNames {
   public static final ClassName JVM_STATIC = ClassName.get("kotlin.jvm", "JvmStatic");
 
   /**
-   * {@link TypeName#VOID} is lowercase-v {@code void} whereas this represents the class, {@link
+   * {@code TypeName#VOID} is lowercase-v {@code void} whereas this represents the class, {@code
    * Void}.
    */
   public static final ClassName VOID_CLASS = ClassName.get(Void.class);
@@ -206,7 +207,7 @@ public final class TypeNames {
   }
 
   /**
-   * Returns the {@link TypeName} for the raw type of the given {@link TypeName}. If the argument
+   * Returns the {@code TypeName} for the raw type of the given {@code TypeName}. If the argument
    * isn't a parameterized type, it returns the argument unchanged.
    */
   public static TypeName rawTypeName(TypeName typeName) {
@@ -216,7 +217,7 @@ public final class TypeNames {
   }
 
   /**
-   * Returns the {@link TypeName} for the raw type of the given {@link TypeMirror}. If the argument
+   * Returns the {@code TypeName} for the raw type of the given {@code TypeMirror}. If the argument
    * isn't a parameterized type, it returns the argument unchanged.
    */
   public static TypeName rawTypeName(TypeMirror type) {
