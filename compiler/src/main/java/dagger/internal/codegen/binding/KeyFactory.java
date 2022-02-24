@@ -16,33 +16,47 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static io.jbock.auto.common.MoreTypes.isType;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
+import static dagger.internal.codegen.base.MapKeys.getMapKey;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.extension.Optionals.firstPresent;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
+import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static java.util.Arrays.asList;
 import static javax.lang.model.element.ElementKind.METHOD;
 
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.collect.ImmutableSet;
+import io.jbock.javapoet.ClassName;
+import dagger.Binds;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.FrameworkTypes;
+import dagger.internal.codegen.base.RequestKinds;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DaggerType;
 import dagger.spi.model.Key;
 import dagger.spi.model.Key.MultibindingContributionIdentifier;
-import io.jbock.auto.common.MoreTypes;
-import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
+import dagger.spi.model.RequestKind;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+import jakarta.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -181,9 +195,9 @@ public final class KeyFactory {
     return contributionType.equals(ContributionType.UNIQUE)
         ? key
         : key.toBuilder()
-        .multibindingContributionIdentifier(
-            new MultibindingContributionIdentifier(method, contributingModule))
-        .build();
+            .multibindingContributionIdentifier(
+                new MultibindingContributionIdentifier(method, contributingModule))
+            .build();
   }
 
   private TypeMirror bindingMethodKeyType(
@@ -196,6 +210,17 @@ public final class KeyFactory {
         return returnType;
     }
     throw new AssertionError();
+  }
+
+  /**
+   * Returns the key for a binding associated with a {@code DelegateDeclaration}.
+   *
+   * <p>If {@code delegateDeclaration} is {@code @IntoMap}, transforms the {@code Map<K, V>} key
+   * from {@code DelegateDeclaration#key()} to {@code Map<K, FrameworkType<V>>}. If {@code
+   * delegateDeclaration} is not a map contribution, its key is returned.
+   */
+  Key forDelegateBinding(DelegateDeclaration delegateDeclaration, ClassName frameworkType) {
+    return delegateDeclaration.key();
   }
 
   private Key forMethod(XMethodElement method, XType keyType) {

@@ -35,8 +35,7 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.collect.ImmutableListMultimap;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Keys;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
@@ -125,11 +124,11 @@ public final class BindingGraphFactory implements ClearableCache {
       // times assuming it is the exact same method. We do this by tracking a set of bindings
       // we've already added with the binding element removed since that is the only thing
       // allowed to differ.
-      Map<String, Set<ProvisionBinding>> dedupeBindings = new HashMap<>();
+      Map<String, Set<ContributionBinding>> dedupeBindings = new HashMap<>();
       for (ExecutableElement method : dependencyMethods) {
         // MembersInjection methods aren't "provided" explicitly, so ignore them.
         if (isComponentContributionMethod(method)) {
-          ProvisionBinding binding =
+          ContributionBinding binding =
               bindingFactory.componentDependencyMethodBinding(
                   componentDescriptor, asMethod(toXProcessing(method, processingEnv)));
           int previousSize = dedupeBindings.getOrDefault(method.getSimpleName().toString(), Set.of()).size();
@@ -301,7 +300,7 @@ public final class BindingGraphFactory implements ClearableCache {
       if (!subcomponentDeclarations.isEmpty()) {
         ProvisionBinding binding =
             bindingFactory.subcomponentCreatorBinding(
-                new LinkedHashSet<>(subcomponentDeclarations));
+                ImmutableSet.copyOf(subcomponentDeclarations));
         bindings.add(binding);
         addSubcomponentToOwningResolver(binding);
       }
@@ -433,7 +432,11 @@ public final class BindingGraphFactory implements ClearableCache {
         // binding declarations
         return bindingFactory.unresolvedDelegateBinding(delegateDeclaration);
       }
-      return bindingFactory.delegateBinding(delegateDeclaration);
+      // It doesn't matter which of these is selected, since they will later on produce a
+      // duplicate binding error.
+      ContributionBinding explicitDelegate =
+          resolvedDelegate.contributionBindings().iterator().next();
+      return bindingFactory.delegateBinding(delegateDeclaration, explicitDelegate);
     }
 
     /**
