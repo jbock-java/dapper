@@ -44,8 +44,4 @@ public class Sets {
   public static <E> Set<E> newHashSetWithExpectedSize(int expectedSize) {
     return new HashSet<E>(Maps.capacity(expectedSize));
   }
-
-  public static <E> Set<E> newLinkedHashSet() {
-    return new LinkedHashSet<>();
-  }
 }
