@@ -30,6 +30,7 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -59,6 +60,9 @@ final class DependencyRequestValidator {
     }
 
     new Validator(report, requestElement, requestType).validate();
+  }
+
+  public void checkNotProducer(ValidationReport.Builder builder, XElement parameter) {
   }
 
   private final class Validator {
