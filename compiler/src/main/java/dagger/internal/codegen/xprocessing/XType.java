@@ -39,4 +39,8 @@ public interface XType {
   static boolean isVoid(XType type) {
     return type.isVoid();
   }
+
+  static boolean isArray(XType type) {
+    return type.isArray();
+  }
 }

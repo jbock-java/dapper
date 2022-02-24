@@ -56,7 +56,7 @@ public final class Maps {
     return new HashMap<>(capacity(expectedSize));
   }
 
-  public static <K, V> HashMap<K, V> newLinkedHashMap() {
+  public static <K, V> LinkedHashMap<K, V> newLinkedHashMap() {
     return new LinkedHashMap<>();
   }
 

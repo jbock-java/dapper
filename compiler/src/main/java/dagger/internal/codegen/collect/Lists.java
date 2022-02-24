@@ -42,6 +42,11 @@ public final class Lists {
     return result;
   }
 
+  public static <E> List<E> reverse(List<E> input) {
+    ArrayList<E> result = new ArrayList<>(input);
+    Collections.reverse(result);
+    return result;
+  }
 
   private Lists() {
   }

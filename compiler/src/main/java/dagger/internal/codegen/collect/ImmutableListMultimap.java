@@ -20,5 +20,9 @@ public class ImmutableListMultimap<K, V> extends ListMultimap<K, V> {
     public ImmutableListMultimap<X, Y> build() {
       return map;
     }
+
+    public void putAll(Multimap<? extends X, ? extends Y> multimap) {
+      multimap.entries().stream().forEach(e -> put(e.getKey(), e.getValue()));
+    }
   }
 }

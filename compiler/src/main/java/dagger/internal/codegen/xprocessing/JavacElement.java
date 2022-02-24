@@ -56,6 +56,10 @@ class JavacElement implements XElement {
     return element.getModifiers().contains(Modifier.STATIC);
   }
 
+  public boolean isFinal() {
+    return element.getModifiers().contains(Modifier.FINAL);
+  }
+
   @Override
   public final boolean isPrivate() {
     return element.getModifiers().contains(Modifier.PRIVATE);

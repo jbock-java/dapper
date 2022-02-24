@@ -17,6 +17,7 @@
 package dagger.internal.codegen.base;
 
 import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.Sets;
 import java.util.ArrayList;
@@ -164,8 +165,6 @@ public final class Util {
   }
 
   public static <E> List<E> reverse(List<E> input) {
-    ArrayList<E> result = new ArrayList<>(input);
-    Collections.reverse(result);
-    return result;
+    return Lists.reverse(input);
   }
 }

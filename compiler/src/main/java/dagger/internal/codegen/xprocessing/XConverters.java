@@ -3,6 +3,7 @@ package dagger.internal.codegen.xprocessing;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -66,6 +67,10 @@ public class XConverters {
 
   public static VariableElement toJavac(XVariableElement element) {
     return element.toJavac();
+  }
+
+  public static AnnotationValue toJavac(XAnnotationValue xAnnotationValue) {
+    return xAnnotationValue.toJavac();
   }
 
   public static ExecutableType toJavac(XMethodType methodType) {
