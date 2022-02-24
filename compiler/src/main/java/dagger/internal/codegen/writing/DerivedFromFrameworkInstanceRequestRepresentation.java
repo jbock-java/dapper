@@ -19,7 +19,6 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.instanceRequiresCast;
 
-import io.jbock.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -32,6 +31,7 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.RequestKind;
+import io.jbock.javapoet.ClassName;
 
 /** A binding expression that depends on a framework instance. */
 final class DerivedFromFrameworkInstanceRequestRepresentation extends RequestRepresentation {

@@ -16,18 +16,18 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Ascii.toUpperCase;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.stream.Collectors.mapping;
 
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.ImmutableSet;
-import io.jbock.javapoet.ClassName;
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.javapoet.ClassName;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import javax.lang.model.element.TypeElement;

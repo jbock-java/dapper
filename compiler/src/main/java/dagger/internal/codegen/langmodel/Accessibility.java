@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.getPackage;
 import static io.jbock.auto.common.MoreTypes.asElement;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 

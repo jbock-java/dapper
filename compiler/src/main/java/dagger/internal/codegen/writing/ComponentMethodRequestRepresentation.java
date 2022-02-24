@@ -19,12 +19,12 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
-import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
 /**

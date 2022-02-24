@@ -16,20 +16,20 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.xprocessing.XElement.isMethod;
-import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.Predicates.in;
-import static dagger.internal.codegen.collect.Collections2.transform;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
 import static dagger.internal.codegen.base.Formatter.INDENT;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Predicates.in;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.collect.Collections2.transform;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
@@ -37,19 +37,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.ImmutableSetMultimap;
-import dagger.internal.codegen.collect.Multimaps;
-import dagger.internal.codegen.collect.Sets;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.TypeName;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentRequirement;
@@ -59,10 +46,24 @@ import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleDescriptor;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
+import jakarta.inject.Inject;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -72,7 +73,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
-import jakarta.inject.Inject;
 import javax.tools.Diagnostic;
 
 /**
@@ -288,7 +288,7 @@ public final class ComponentDescriptorValidator {
       if (!inapplicableRequirementsOnCreator.isEmpty()) {
         Collection<XElement> excessElements =
             Multimaps.filterKeys(
-                    ImmutableSetMultimap.copyOf(creator.unvalidatedRequirementElements()), in(inapplicableRequirementsOnCreator))
+                    creator.unvalidatedRequirementElements(), in(inapplicableRequirementsOnCreator))
                 .values();
         String formatted =
             excessElements.stream()
@@ -319,7 +319,7 @@ public final class ComponentDescriptorValidator {
       // Validate that declared creator requirements (modules, dependencies) have unique types.
       ImmutableSetMultimap<TypeName, XElement> declaredRequirementsByType =
           Multimaps.filterKeys(
-                  ImmutableSetMultimap.copyOf(creator.unvalidatedRequirementElements()),
+                  creator.unvalidatedRequirementElements(),
                   creatorModuleAndDependencyRequirements::contains)
               .entries()
               .stream()

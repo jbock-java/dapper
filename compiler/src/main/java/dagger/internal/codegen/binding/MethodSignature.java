@@ -19,58 +19,34 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static java.util.Objects.requireNonNull;
 
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.auto.common.Equivalence;
-import io.jbock.auto.common.MoreTypes;
-import java.util.List;
-import java.util.Objects;
-import javax.lang.model.type.TypeMirror;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.javapoet.TypeName;
 
 /** A class that defines proper {@code equals} and {@code hashcode} for a method signature. */
-public final class MethodSignature {
-  private final String name;
-  private final List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes;
-  private final List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes;
+@AutoValue
+public abstract class MethodSignature {
 
-  MethodSignature(
-      String name,
-      List<? extends Equivalence.Wrapper<? extends TypeMirror>> parameterTypes,
-      List<? extends Equivalence.Wrapper<? extends TypeMirror>> thrownTypes) {
-    this.name = requireNonNull(name);
-    this.parameterTypes = requireNonNull(parameterTypes);
-    this.thrownTypes = requireNonNull(thrownTypes);
-  }
+  abstract String name();
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    MethodSignature that = (MethodSignature) o;
-    return name.equals(that.name)
-        && parameterTypes.equals(that.parameterTypes)
-        && thrownTypes.equals(that.thrownTypes);
-  }
+  abstract ImmutableList<TypeName> parameterTypes();
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, parameterTypes, thrownTypes);
-  }
+  abstract ImmutableList<TypeName> thrownTypes();
 
   public static MethodSignature forComponentMethod(
       ComponentMethodDescriptor componentMethod, XType componentType) {
     XMethodType methodType = componentMethod.methodElement().asMemberOf(componentType);
-    return new MethodSignature(
+    return new AutoValue_MethodSignature(
         getSimpleName(componentMethod.methodElement()),
-        wrapInEquivalence(toJavac(methodType).getParameterTypes()),
-        wrapInEquivalence(toJavac(methodType).getThrownTypes()));
-  }
-
-  private static List<? extends Equivalence.Wrapper<? extends TypeMirror>>
-  wrapInEquivalence(List<? extends TypeMirror> types) {
-    return types.stream().map(MoreTypes.equivalence()::wrap).collect(toImmutableList());
+        toJavac(methodType).getParameterTypes().stream()
+            .map(TypeName::get)
+            .collect(toImmutableList()),
+        toJavac(methodType).getThrownTypes().stream()
+            .map(TypeName::get)
+            .collect(toImmutableList()));
   }
 }

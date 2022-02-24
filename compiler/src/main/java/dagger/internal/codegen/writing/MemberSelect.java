@@ -18,9 +18,9 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 
 /**
  * Represents a {@link com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.

@@ -19,12 +19,12 @@ package dagger.internal.codegen.writing;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 
-import io.jbock.javapoet.ClassName;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 

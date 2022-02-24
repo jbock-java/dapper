@@ -16,25 +16,25 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 
+import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
+import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedFactoryMetadata;
+import dagger.internal.codegen.binding.Binding;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import dagger.internal.codegen.collect.ImmutableList;
-import io.jbock.javapoet.ParameterSpec;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
-import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedFactoryMetadata;
-import dagger.internal.codegen.binding.Binding;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.spi.model.BindingKind;
+import io.jbock.javapoet.ParameterSpec;
 import java.util.List;
 
 /** Utility class for generating unique assisted parameter names for a component shard. */

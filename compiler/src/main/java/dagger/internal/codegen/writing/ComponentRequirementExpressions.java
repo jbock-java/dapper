@@ -23,20 +23,20 @@ import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecK
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import java.util.function.Supplier;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.FieldSpec;
-import io.jbock.javapoet.TypeName;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.TypeName;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import jakarta.inject.Inject;
+import java.util.function.Supplier;
 
 /**
  * A central repository of expressions used to access any {@link ComponentRequirement} available to

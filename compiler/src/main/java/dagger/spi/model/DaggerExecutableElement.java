@@ -16,8 +16,8 @@
 
 package dagger.spi.model;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import io.jbock.auto.value.AutoValue;

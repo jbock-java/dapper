@@ -19,9 +19,9 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.BindingKind.MEMBERS_INJECTOR;
 
+import dagger.internal.codegen.base.CaseFormat;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.value.AutoValue;
-import dagger.internal.codegen.base.CaseFormat;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;

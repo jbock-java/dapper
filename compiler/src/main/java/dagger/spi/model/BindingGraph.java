@@ -17,12 +17,12 @@
 package dagger.spi.model;
 
 import static dagger.internal.codegen.collect.Sets.intersection;
-import static io.jbock.common.graph.Graphs.inducedSubgraph;
-import static io.jbock.common.graph.Graphs.reachableNodes;
-import static io.jbock.common.graph.Graphs.transpose;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
+import static io.jbock.common.graph.Graphs.inducedSubgraph;
+import static io.jbock.common.graph.Graphs.reachableNodes;
+import static io.jbock.common.graph.Graphs.transpose;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
@@ -31,7 +31,6 @@ import io.jbock.common.graph.ImmutableNetwork;
 import io.jbock.common.graph.MutableNetwork;
 import io.jbock.common.graph.Network;
 import io.jbock.common.graph.NetworkBuilder;
-import dagger.Module;
 import java.util.Optional;
 import java.util.stream.Stream;
 

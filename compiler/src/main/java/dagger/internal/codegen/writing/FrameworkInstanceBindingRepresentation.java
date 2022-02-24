@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.writing.ProvisionBindingRepresentation.needsCaching;
 import static dagger.spi.model.BindingKind.DELEGATE;
 

@@ -17,13 +17,13 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static dagger.spi.model.BindingKind.INJECTION;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Item;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraphPlugin;

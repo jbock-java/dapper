@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.binding;
 
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
 import java.util.Collection;

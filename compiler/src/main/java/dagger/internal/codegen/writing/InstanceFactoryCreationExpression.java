@@ -18,9 +18,9 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import io.jbock.javapoet.CodeBlock;
 import dagger.internal.InstanceFactory;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import io.jbock.javapoet.CodeBlock;
 import java.util.function.Supplier;
 
 /**

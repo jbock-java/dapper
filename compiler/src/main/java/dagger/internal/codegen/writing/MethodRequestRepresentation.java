@@ -16,12 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
 /** A binding expression that wraps another in a nullary method on the component. */

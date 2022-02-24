@@ -16,31 +16,31 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.langmodel.DaggerElements.DECLARATION_ORDER;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.LinkedHashMultimap;
 import dagger.internal.codegen.collect.SetMultimap;
-import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
+import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.MoreTypes;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import jakarta.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

@@ -18,11 +18,11 @@ package dagger.spi.model;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XType;
+import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.auto.value.AutoValue;
-import io.jbock.auto.common.Equivalence;
-import dagger.internal.codegen.base.Preconditions;
 import javax.lang.model.type.TypeMirror;
 
 /** Wrapper type for a type. */

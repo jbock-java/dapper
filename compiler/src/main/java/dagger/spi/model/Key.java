@@ -16,9 +16,9 @@
 
 package dagger.spi.model;
 
+import dagger.internal.codegen.base.Joiner;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
-import dagger.internal.codegen.base.Joiner;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;

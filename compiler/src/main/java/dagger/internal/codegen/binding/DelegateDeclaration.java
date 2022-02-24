@@ -16,26 +16,25 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.MapKeys.getMapKey;
+import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.DependencyRequest;
+import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
-import io.jbock.auto.common.Equivalence;
-import dagger.internal.codegen.collect.Iterables;
-import dagger.Binds;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.ContributionType.HasContributionType;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.DependencyRequest;
-import java.util.Optional;
 import jakarta.inject.Inject;
+import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 
 /** The declaration for a delegate binding established by a {@code Binds} method. */

@@ -16,8 +16,8 @@
 
 package dagger.spi.model;
 
-import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 
 import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;

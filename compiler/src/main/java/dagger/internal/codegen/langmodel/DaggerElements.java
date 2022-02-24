@@ -16,28 +16,28 @@
 
 package dagger.internal.codegen.langmodel;
 
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.collect.Lists.asList;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.hasModifiers;
-import static dagger.internal.codegen.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.collect.Lists.asList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
+import dagger.Reusable;
+import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.collect.FluentIterable;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
-import dagger.internal.codegen.collect.FluentIterable;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.Iterables;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
-import dagger.Reusable;
-import dagger.internal.codegen.base.ClearableCache;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;

@@ -18,10 +18,10 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.SuperficialValidation;
 import io.jbock.javapoet.TypeName;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;

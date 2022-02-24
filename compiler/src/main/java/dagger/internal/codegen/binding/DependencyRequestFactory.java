@@ -16,14 +16,25 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
+import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
+import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
+import static dagger.spi.model.RequestKind.FUTURE;
+import static dagger.spi.model.RequestKind.INSTANCE;
+import static dagger.spi.model.RequestKind.MEMBERS_INJECTION;
 
-import dagger.internal.codegen.base.Preconditions;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -36,19 +47,18 @@ import dagger.spi.model.DaggerElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Factory for {@link DependencyRequest}s.
+ * Factory for {@code DependencyRequest}s.
  *
- * <p>Any factory method may throw {@link TypeNotPresentException} if a type is not available, which
+ * <p>Any factory method may throw {@code TypeNotPresentException} if a type is not available, which
  * may mean that the type will be generated in a later round of processing.
  */
 public final class DependencyRequestFactory {
@@ -66,48 +76,85 @@ public final class DependencyRequestFactory {
     this.injectionAnnotations = injectionAnnotations;
   }
 
-  Set<DependencyRequest> forRequiredResolvedXVariables(
+  ImmutableSet<DependencyRequest> forRequiredResolvedXVariables(
       List<? extends XVariableElement> variables, List<XType> resolvedTypes) {
     return forRequiredResolvedVariables(
         variables.stream().map(XConverters::toJavac).collect(toImmutableList()),
         resolvedTypes.stream().map(XConverters::toJavac).collect(toImmutableList()));
   }
 
-  Set<DependencyRequest> forRequiredResolvedVariables(
+  ImmutableSet<DependencyRequest> forRequiredResolvedVariables(
       List<? extends VariableElement> variables, List<? extends TypeMirror> resolvedTypes) {
-    Preconditions.checkState(resolvedTypes.size() == variables.size());
-    Set<DependencyRequest> builder = new LinkedHashSet<>();
+    checkState(resolvedTypes.size() == variables.size());
+    ImmutableSet.Builder<DependencyRequest> builder = ImmutableSet.builder();
     for (int i = 0; i < variables.size(); i++) {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
     }
-    return builder;
+    return builder.build();
   }
 
   DependencyRequest forRequiredResolvedVariable(
       XVariableElement variableElement, XType resolvedType) {
-    return forRequiredResolvedVariable(variableElement.toJavac(), resolvedType.toJavac());
+    return forRequiredResolvedVariable(toJavac(variableElement), toJavac(resolvedType));
   }
 
   DependencyRequest forRequiredResolvedVariable(
       VariableElement variableElement, TypeMirror resolvedType) {
-    requireNonNull(variableElement);
-    requireNonNull(resolvedType);
+    checkNotNull(variableElement);
+    checkNotNull(resolvedType);
     // Ban @Assisted parameters, they are not considered dependency requests.
-    Preconditions.checkArgument(!AssistedInjectionAnnotations.isAssistedParameter(variableElement));
+    checkArgument(!isAssistedParameter(toXProcessing(variableElement, processingEnv)));
     Optional<AnnotationMirror> qualifier = injectionAnnotations.getQualifier(variableElement);
     return newDependencyRequest(variableElement, resolvedType, qualifier);
   }
 
   public DependencyRequest forComponentProvisionMethod(
       XMethodElement provisionMethod, XMethodType provisionMethodType) {
-    requireNonNull(provisionMethod);
-    requireNonNull(provisionMethodType);
-    Preconditions.checkArgument(
+    checkNotNull(provisionMethod);
+    checkNotNull(provisionMethodType);
+    checkArgument(
         provisionMethod.getParameters().isEmpty(),
         "Component provision methods must be empty: %s",
         provisionMethod);
     Optional<XAnnotation> qualifier = injectionAnnotations.getQualifier(provisionMethod);
     return newDependencyRequest(provisionMethod, provisionMethodType.getReturnType(), qualifier);
+  }
+
+  public DependencyRequest forComponentProductionMethod(
+      XMethodElement productionMethod, XMethodType productionMethodType) {
+    checkNotNull(productionMethod);
+    checkNotNull(productionMethodType);
+    checkArgument(
+        productionMethod.getParameters().isEmpty(),
+        "Component production methods must be empty: %s",
+        productionMethod);
+    XType type = productionMethodType.getReturnType();
+    Optional<XAnnotation> qualifier = injectionAnnotations.getQualifier(productionMethod);
+    // Only a component production method can be a request for a ListenableFuture, so we
+    // special-case it here.
+    if (isTypeOf(type, TypeNames.LISTENABLE_FUTURE)) {
+      return DependencyRequest.builder()
+          .kind(FUTURE)
+          .key(keyFactory.forQualifiedType(qualifier, unwrapType(type)))
+          .requestElement(DaggerElement.from(productionMethod))
+          .build();
+    } else {
+      return newDependencyRequest(productionMethod, type, qualifier);
+    }
+  }
+
+  DependencyRequest forComponentMembersInjectionMethod(
+      XMethodElement membersInjectionMethod, XMethodType membersInjectionMethodType) {
+    checkNotNull(membersInjectionMethod);
+    checkNotNull(membersInjectionMethodType);
+    Optional<XAnnotation> qualifier = injectionAnnotations.getQualifier(membersInjectionMethod);
+    checkArgument(!qualifier.isPresent());
+    XType membersInjectedType = getOnlyElement(membersInjectionMethodType.getParameterTypes());
+    return DependencyRequest.builder()
+        .kind(MEMBERS_INJECTION)
+        .key(keyFactory.forMembersInjectedType(membersInjectedType))
+        .requestElement(DaggerElement.from(membersInjectionMethod))
+        .build();
   }
 
   private DependencyRequest newDependencyRequest(
@@ -123,6 +170,17 @@ public final class DependencyRequestFactory {
         .kind(requestKind)
         .key(keyFactory.forQualifiedType(qualifier, extractKeyType(type)))
         .requestElement(DaggerElement.from(toXProcessing(requestElement, processingEnv)))
+        .isNullable(allowsNull(requestKind, getNullableType(requestElement)))
         .build();
+  }
+
+  /**
+   * Returns {@code true} if a given request element allows null values. {@code
+   * RequestKind#INSTANCE} requests must be annotated with {@code @Nullable} in order to allow null
+   * values. All other request kinds implicitly allow null values because they are are wrapped
+   * inside {@code Provider}, {@code Lazy}, etc.
+   */
+  private boolean allowsNull(RequestKind kind, Optional<DeclaredType> nullableType) {
+    return nullableType.isPresent() || !kind.equals(INSTANCE);
   }
 }

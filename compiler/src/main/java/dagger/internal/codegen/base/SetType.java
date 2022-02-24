@@ -16,18 +16,18 @@
 
 package dagger.internal.codegen.base;
 
-import static io.jbock.auto.common.MoreTypes.isType;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
+import static io.jbock.auto.common.MoreTypes.isType;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.Key;
 import javax.lang.model.type.TypeMirror;
 
 /** Information about a {@code java.util.Set} {@code TypeMirror}. */

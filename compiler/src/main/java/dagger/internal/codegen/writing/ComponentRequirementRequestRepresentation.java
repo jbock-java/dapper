@@ -18,13 +18,13 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import io.jbock.javapoet.ClassName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
+import io.jbock.javapoet.ClassName;
 
 /**
  * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of

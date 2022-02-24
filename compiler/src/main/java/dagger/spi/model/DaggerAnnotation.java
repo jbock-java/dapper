@@ -18,11 +18,11 @@ package dagger.spi.model;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
-import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.common.Equivalence;
-import dagger.internal.codegen.base.Preconditions;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.element.AnnotationMirror;
 

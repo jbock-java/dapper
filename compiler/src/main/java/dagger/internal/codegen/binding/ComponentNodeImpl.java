@@ -18,12 +18,12 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
+import io.jbock.auto.value.AutoValue;
 
 /** An implementation of {@code ComponentNode} that also exposes the {@code ComponentDescriptor}. */
 @AutoValue

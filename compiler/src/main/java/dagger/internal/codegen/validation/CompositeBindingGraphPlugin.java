@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.collect.Lists.asList;
-import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.transitivelyEncloses;
 
@@ -32,13 +32,13 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
 import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Filer;
-import jakarta.inject.Inject;
-import javax.lang.model.util.Elements;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
-import javax.lang.model.util.Types;  // ALLOW_TYPES_ELEMENTS because of interface dependencies
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 /**

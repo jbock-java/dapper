@@ -16,18 +16,18 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import io.jbock.auto.value.AutoValue;
-import io.jbock.auto.value.extension.memoized.Memoized;
 import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Multimap;
 import dagger.spi.model.Key;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import javax.lang.model.element.TypeElement;
 
 /**

@@ -16,18 +16,18 @@
 
 package dagger.internal.codegen.langmodel;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static io.jbock.auto.common.MoreTypes.asDeclared;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
-import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.common.graph.Traverser;
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.ClassName;

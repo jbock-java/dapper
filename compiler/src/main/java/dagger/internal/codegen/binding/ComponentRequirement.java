@@ -16,27 +16,27 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XTypeElements.isNested;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static dagger.internal.codegen.base.Util.asStream;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.BindingKind;
+import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.BindingKind;
-import dagger.spi.model.Key;
 import java.util.Optional;
 
 /** A type that a component needs an instance of. */

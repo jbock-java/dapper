@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import io.jbock.javapoet.AnnotationSpec;
 import dagger.internal.codegen.binding.Binding;
+import io.jbock.javapoet.AnnotationSpec;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;

@@ -17,9 +17,7 @@
 package dagger.spi.model;
 
 import io.jbock.auto.value.AutoValue;
-import dagger.Provides;
 import java.util.Optional;
-import jakarta.inject.Inject;
 
 /**
  * Represents a request for a {@code Key} at an injection point. For example, parameters to {@code

@@ -27,7 +27,6 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Scope;
 import java.util.Optional;
-import java.util.Set;
 
 /** Common names and convenience methods for {@link Scope}s. */
 public final class Scopes {

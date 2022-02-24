@@ -18,10 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
-import dagger.Module;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;
@@ -29,6 +27,7 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
+import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 
 /**

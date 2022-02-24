@@ -21,17 +21,16 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.valuesOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
-import dagger.internal.codegen.collect.ImmutableMap;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.Key;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Information about an {@code Optional} {@code TypeMirror}.

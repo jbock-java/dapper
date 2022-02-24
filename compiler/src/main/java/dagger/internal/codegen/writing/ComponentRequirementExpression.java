@@ -16,9 +16,9 @@
 
 package dagger.internal.codegen.writing;
 
+import dagger.internal.codegen.binding.ComponentRequirement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import dagger.internal.codegen.binding.ComponentRequirement;
 
 /**
  * A factory for expressions of {@link ComponentRequirement}s in the generated component. This is

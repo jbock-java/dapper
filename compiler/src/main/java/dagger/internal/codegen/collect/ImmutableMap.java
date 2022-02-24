@@ -28,8 +28,12 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new Builder<>();
   }
 
-  public static final class Builder<X, Y> {
+  public static class Builder<X, Y> {
     private Map<X, Y> delegate = new LinkedHashMap<>();
+
+    Map<X, Y> delegate() {
+      return delegate;
+    }
 
     public Builder<X, Y> put(X key, Y value) {
       delegate.put(key, value);

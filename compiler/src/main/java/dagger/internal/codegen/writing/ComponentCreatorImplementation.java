@@ -16,12 +16,12 @@
 
 package dagger.internal.codegen.writing;
 
-import io.jbock.auto.value.AutoValue;
+import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.collect.ImmutableMap;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeSpec;
-import dagger.internal.codegen.binding.ComponentRequirement;
 
 /** The implementation of a component creator type. */
 @AutoValue

@@ -25,4 +25,3 @@
  */
 package dagger.spi.model;
 
-import dagger.internal.Beta;

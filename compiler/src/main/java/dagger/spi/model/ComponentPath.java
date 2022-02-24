@@ -20,9 +20,9 @@ import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.collect.Iterables.getLast;
 import static java.util.stream.Collectors.joining;
 
+import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
-import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.javapoet.ClassName;
 
 /** A path containing a component and all of its ancestor components. */

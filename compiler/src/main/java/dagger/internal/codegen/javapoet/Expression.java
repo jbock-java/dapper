@@ -18,10 +18,10 @@ package dagger.internal.codegen.javapoet;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.CodeBlock;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import javax.lang.model.type.TypeMirror;
 
 /**

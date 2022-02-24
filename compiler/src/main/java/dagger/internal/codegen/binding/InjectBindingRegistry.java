@@ -16,16 +16,13 @@
 
 package dagger.internal.codegen.binding;
 
+import dagger.internal.codegen.base.SourceFileGenerationException;
+import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.Component;
-import dagger.Provides;
-import dagger.internal.codegen.base.SourceFileGenerationException;
-import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.spi.model.Key;
 import java.util.Optional;
-import jakarta.inject.Inject;
 
 /**
  * Maintains the collection of provision bindings from {@code Inject} constructors and members

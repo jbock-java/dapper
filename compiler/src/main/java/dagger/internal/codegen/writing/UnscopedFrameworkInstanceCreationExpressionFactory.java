@@ -16,11 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
-import io.jbock.javapoet.CodeBlock;
 import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 
 /**

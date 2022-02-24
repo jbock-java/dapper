@@ -16,15 +16,15 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.RequestKinds.requestType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.xprocessing.XType;
-import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
+import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 import javax.lang.model.type.TypeMirror;
 

@@ -18,9 +18,6 @@ package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.xprocessing.XArrayType;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XConverters;
 import io.jbock.javapoet.ClassName;
 import javax.lang.model.type.TypeKind;
 
