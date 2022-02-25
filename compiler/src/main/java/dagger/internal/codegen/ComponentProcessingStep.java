@@ -19,8 +19,8 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
-import static dagger.internal.codegen.base.Util.union;
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.allCreatorAnnotations;
+import static dagger.internal.codegen.base.Util.union;
 import static java.util.Collections.disjoint;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -29,6 +29,7 @@ import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
@@ -60,6 +61,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
   @Inject
   ComponentProcessingStep(
       XMessager messager,
+      CompilerOptions compilerOptions,
       SuperficialValidator elementValidator,
       ComponentValidator componentValidator,
       ComponentCreatorValidator creatorValidator,
@@ -68,7 +70,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
       BindingGraphFactory bindingGraphFactory,
       SourceFileGenerator<BindingGraph> componentGenerator,
       BindingGraphValidator bindingGraphValidator) {
-    super(elementValidator, messager);
+    super(elementValidator, messager, compilerOptions);
     this.messager = messager;
     this.componentValidator = componentValidator;
     this.creatorValidator = creatorValidator;

@@ -21,6 +21,7 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assis
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -44,8 +45,9 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
   @Inject
   AssistedInjectProcessingStep(
       SuperficialValidator elementValidator,
-      XMessager messager) {
-    super(elementValidator, messager);
+      XMessager messager,
+      CompilerOptions compilerOptions) {
+    super(elementValidator, messager, compilerOptions);
     this.messager = messager;
   }
 

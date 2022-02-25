@@ -30,6 +30,7 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FLOATING_BINDS_METHODS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FORMAT_GENERATED_SOURCE;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.INCLUDE_STACKTRACE_WITH_DEFERRED_ERROR_MESSAGES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.PLUGINS_VISIT_FULL_BINDING_GRAPHS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_MULTIBINDING_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_SUPERFICIAL_VALIDATION;
@@ -160,6 +161,11 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
+  public boolean includeStacktraceWithDeferredErrorMessages() {
+    return isEnabled(INCLUDE_STACKTRACE_WITH_DEFERRED_ERROR_MESSAGES);
+  }
+
+  @Override
   public boolean ignorePrivateAndStaticInjectionForComponent() {
     return isEnabled(IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT);
   }
@@ -219,8 +225,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     if (options.containsKey(KEYS_PER_COMPONENT_SHARD)) {
       checkArgument(
           component.getClassName().packageName().startsWith("dagger."),
-          "Cannot set %s. It is only meant for internal testing.",
-          KEYS_PER_COMPONENT_SHARD);
+          "Cannot set %s. It is only meant for internal testing.", KEYS_PER_COMPONENT_SHARD);
       return Integer.parseInt(options.get(KEYS_PER_COMPONENT_SHARD));
     }
     return super.keysPerComponentShard(component);
@@ -319,6 +324,8 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM,
 
+    INCLUDE_STACKTRACE_WITH_DEFERRED_ERROR_MESSAGES,
+
     IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT,
 
     EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS,
@@ -337,7 +344,8 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     STRICT_SUPERFICIAL_VALIDATION(ENABLED),
 
-    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES(ENABLED);
+    VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES(ENABLED)
+    ;
 
     final FeatureStatus defaultValue;
 
@@ -434,10 +442,10 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     return ImmutableSet.<String>builder()
         .addAll(
             Stream.<CommandLineOption[]>of(
-                    KeyOnlyOption.values(), Feature.values(), Validation.values())
-                .flatMap(Arrays::stream)
-                .flatMap(CommandLineOption::allNames)
-                .collect(toImmutableSet()))
+                KeyOnlyOption.values(), Feature.values(), Validation.values())
+            .flatMap(Arrays::stream)
+            .flatMap(CommandLineOption::allNames)
+            .collect(toImmutableSet()))
         .add(KEYS_PER_COMPONENT_SHARD)
         .build();
   }
