@@ -32,6 +32,7 @@ import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
                 // TODO(bcorso): We should be able to remove this once we replace all calls to
                 // SuperficialValidation with DaggerSuperficialValidation.
                 deferredElements.add(element);
-                lastDeferredErrorMessages.add(typeNotPresentErrorMessage(element));
+                lastDeferredErrorMessages.add(typeNotPresentErrorMessage(element, e));
               } catch (ValidationException.UnexpectedException unexpectedException) {
                 // Rethrow since the exception was created from an unexpected throwable so
                 // deferring to another round is unlikely to help.
@@ -110,11 +111,16 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
     lastDeferredErrorMessages.clear();
   }
 
-  private String typeNotPresentErrorMessage(XElement element) {
+  private String typeNotPresentErrorMessage(XElement element, TypeNotPresentException exception) {
     return String.format(
-        "%s was unable to process '%s' because not all of its dependencies could be resolved. "
-            + "Check for compilation errors or a circular dependency with generated code.",
-        this.getClass().getSimpleName(), element);
+        "%1$s was unable to process '%2$s' because '%3$s' could not be resolved."
+            + "\n"
+            + "\nIf type '%3$s' is a generated type, check above for compilation errors that may "
+            + "have prevented the type from being generated. Otherwise, ensure that type '%3$s' is "
+            + "on your classpath.",
+        this.getClass().getSimpleName(),
+        element,
+        exception.typeName());
   }
 
   private String knownErrorTypeErrorMessage(
