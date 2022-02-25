@@ -26,9 +26,11 @@ import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.MoreTypes;
+import io.jbock.javapoet.ClassName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +64,26 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  */
 // TODO(bcorso): Consider contributing this to Auto-Common's SuperficialValidation.
 public final class DaggerSuperficialValidation {
+  /**
+   * Returns the type element with the given class name or throws {@code ValidationException} if it
+   * is not accessible in the current compilation.
+   */
+  public static XTypeElement requireTypeElement(XProcessingEnv processingEnv, ClassName className) {
+    return requireTypeElement(processingEnv, className.canonicalName());
+  }
+
+  /**
+   * Returns the type element with the given class name or throws {@code ValidationException} if it
+   * is not accessible in the current compilation.
+   */
+  public static XTypeElement requireTypeElement(XProcessingEnv processingEnv, String className) {
+    XTypeElement type = processingEnv.findTypeElement(className);
+    if (type == null) {
+      throw new ValidationException.KnownErrorType(className);
+    }
+    return type;
+  }
+
   /**
    * Validates the {@code XElement#getType()} type of the given element.
    *
@@ -654,9 +676,9 @@ public final class DaggerSuperficialValidation {
         Element errorElement = errorType.asElement();
         this.errorTypeName =
             isType(errorElement)
-                 ? asType(errorElement).getQualifiedName().toString()
-                 // Maybe this case should be handled by UnknownErrorType?
-                 : errorElement.getSimpleName().toString();
+                ? asType(errorElement).getQualifiedName().toString()
+                // Maybe this case should be handled by UnknownErrorType?
+                : errorElement.getSimpleName().toString();
       }
 
       private KnownErrorType(String errorTypeName) {
