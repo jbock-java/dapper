@@ -19,6 +19,8 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.ComponentCreatorAnnotation;
+import dagger.internal.codegen.base.ComponentKind;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;

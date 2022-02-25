@@ -22,7 +22,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.binding.DaggerSuperficialValidation.ValidationException;
+import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;

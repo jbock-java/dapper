@@ -18,11 +18,13 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Verify.verify;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 
+import dagger.internal.codegen.base.ComponentCreatorAnnotation;
+import dagger.internal.codegen.base.ComponentCreatorKind;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;

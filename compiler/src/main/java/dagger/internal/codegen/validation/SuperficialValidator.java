@@ -20,8 +20,8 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
 import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation.ValidationException;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.xprocessing.XElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

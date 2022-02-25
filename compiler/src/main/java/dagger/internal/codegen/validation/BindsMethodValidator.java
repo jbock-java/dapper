@@ -23,7 +23,7 @@ import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;

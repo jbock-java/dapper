@@ -18,8 +18,8 @@ package dagger.internal.codegen;
 
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_FACTORY;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.SUBCOMPONENT_FACTORY;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
 import io.jbock.testing.compile.Compilation;

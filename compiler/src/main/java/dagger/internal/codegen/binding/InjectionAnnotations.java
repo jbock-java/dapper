@@ -43,6 +43,7 @@ import static io.jbock.auto.common.MoreElements.asVariable;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.collect.FluentIterable;
 import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableList;

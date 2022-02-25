@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.binding;
+package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;

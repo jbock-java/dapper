@@ -17,7 +17,7 @@
 package dagger.internal.codegen;
 
 import static dagger.internal.codegen.Compilers.daggerCompiler;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.SUBCOMPONENT_BUILDER;
 import static dagger.internal.codegen.binding.ErrorMessages.creatorMessagesFor;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 

@@ -20,11 +20,11 @@ import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.COMPONENT_BUILDER;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.COMPONENT_FACTORY;
-import static dagger.internal.codegen.binding.ComponentCreatorKind.BUILDER;
-import static dagger.internal.codegen.binding.ComponentCreatorKind.FACTORY;
-import static dagger.internal.codegen.binding.ComponentKind.COMPONENT;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.COMPONENT_BUILDER;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.COMPONENT_FACTORY;
+import static dagger.internal.codegen.base.ComponentCreatorKind.BUILDER;
+import static dagger.internal.codegen.base.ComponentCreatorKind.FACTORY;
+import static dagger.internal.codegen.base.ComponentKind.COMPONENT;
 import static dagger.internal.codegen.binding.ErrorMessages.componentMessagesFor;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 

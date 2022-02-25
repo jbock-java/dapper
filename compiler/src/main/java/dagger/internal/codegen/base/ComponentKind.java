@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.binding;
+package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.collect.Sets.immutableEnumSet;
 import static dagger.internal.codegen.extension.DaggerStreams.stream;

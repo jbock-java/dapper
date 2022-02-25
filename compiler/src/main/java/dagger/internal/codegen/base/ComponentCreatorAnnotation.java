@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.binding;
+package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Ascii.toUpperCase;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
@@ -23,7 +23,6 @@ import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPrese
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.stream.Collectors.mapping;
 
-import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XTypeElement;

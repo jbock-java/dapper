@@ -29,7 +29,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.langmodel.Accessibility;

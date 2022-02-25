@@ -20,7 +20,7 @@ import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnot
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
 import static dagger.internal.codegen.base.Util.union;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.allCreatorAnnotations;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.allCreatorAnnotations;
 import static java.util.Collections.disjoint;
 
 import dagger.internal.codegen.base.SourceFileGenerator;

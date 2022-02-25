@@ -37,6 +37,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.MembersInjector;
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.Keys;
 import dagger.internal.codegen.collect.HashMultimap;
 import dagger.internal.codegen.collect.ImmutableList;

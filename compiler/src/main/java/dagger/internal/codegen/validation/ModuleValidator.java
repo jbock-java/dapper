@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnot
 import static dagger.internal.codegen.base.ModuleAnnotation.isModuleAnnotation;
 import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.getCreatorAnnotations;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
@@ -38,11 +38,11 @@ import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.Joiner;
 import dagger.internal.codegen.binding.BindingGraphFactory;
-import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
+import dagger.internal.codegen.base.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
-import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableListMultimap;
 import dagger.internal.codegen.collect.ImmutableSet;

@@ -24,7 +24,7 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
-import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.creatorAnnotationsFor;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;

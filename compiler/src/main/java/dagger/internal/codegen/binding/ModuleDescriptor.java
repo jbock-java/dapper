@@ -34,6 +34,8 @@ import static io.jbock.auto.common.MoreElements.asExecutable;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;

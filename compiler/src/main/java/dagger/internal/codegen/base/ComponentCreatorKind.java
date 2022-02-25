@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.binding;
+package dagger.internal.codegen.base;
 
 import java.util.Locale;
 
