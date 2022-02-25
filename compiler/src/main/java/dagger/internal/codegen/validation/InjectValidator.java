@@ -16,29 +16,18 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.factoryNameForElement;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 
-import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation;
-import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.Accessibility;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -48,13 +37,24 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import dagger.spi.model.Scope;
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.binding.DaggerSuperficialValidation;
+import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.langmodel.Accessibility;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XAnnotations;
+import dagger.spi.model.Scope;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 
@@ -219,7 +219,7 @@ public final class InjectValidator implements ClearableCache {
     }
 
     for (XExecutableParameterElement parameter : constructorElement.getParameters()) {
-      DaggerSuperficialValidation.validateElement(parameter);
+      DaggerSuperficialValidation.validateTypeOf(parameter);
       validateDependencyRequest(builder, parameter);
     }
 
@@ -274,7 +274,7 @@ public final class InjectValidator implements ClearableCache {
   }
 
   private ValidationReport validateField(XFieldElement fieldElement) {
-    DaggerSuperficialValidation.validateElement(fieldElement);
+    DaggerSuperficialValidation.validateTypeOf(fieldElement);
     ValidationReport.Builder builder = ValidationReport.about(fieldElement);
     if (fieldElement.isFinal()) {
       builder.addError("@Inject fields may not be final", fieldElement);
@@ -332,7 +332,7 @@ public final class InjectValidator implements ClearableCache {
     }
 
     for (XExecutableParameterElement parameter : methodElement.getParameters()) {
-      DaggerSuperficialValidation.validateElement(parameter);
+      DaggerSuperficialValidation.validateTypeOf(parameter);
       validateDependencyRequest(builder, parameter);
     }
 

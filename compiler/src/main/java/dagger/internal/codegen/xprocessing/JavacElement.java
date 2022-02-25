@@ -1,9 +1,11 @@
 package dagger.internal.codegen.xprocessing;
 
+import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import io.jbock.javapoet.ClassName;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Element;
@@ -86,6 +88,19 @@ class JavacElement implements XElement {
     return element.getAnnotationMirrors().stream()
         .map(mirror -> new JavacAnnotation(env, mirror))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Set<XAnnotation> getAnnotationsAnnotatedWith(ClassName annotationName) {
+    return getAllAnnotations().stream()
+        .filter(it -> {
+          XTypeElement typeElement = it.getType().getTypeElement();
+          if (typeElement == null) {
+            return false;
+          }
+          return typeElement.hasAnnotation(annotationName);
+        })
+        .collect(DaggerStreams.toSet());
   }
 
   @Override

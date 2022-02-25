@@ -24,6 +24,7 @@ import static dagger.internal.codegen.binding.SourceFiles.frameworkTypeUsageStat
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.parameterizedGeneratedTypeNameForBinding;
+import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
@@ -63,6 +64,7 @@ import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
 import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.ClassName;
@@ -128,8 +130,9 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             .addTypeVariables(bindingTypeElementTypeVariableNames(binding));
 
     if (binding.kind() == BindingKind.INJECTION
-        || binding.kind() == BindingKind.ASSISTED_INJECTION) {
+            || binding.kind() == BindingKind.ASSISTED_INJECTION) {
       factoryBuilder.addAnnotation(scopeMetadataAnnotation(binding));
+      factoryBuilder.addAnnotation(qualifierMetadataAnnotation(binding));
     }
 
     factoryTypeName(binding).ifPresent(factoryBuilder::addSuperinterface);
@@ -306,6 +309,19 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         .map(DaggerAnnotation::className)
         .map(ClassName::canonicalName)
         .ifPresent(scopeCanonicalName -> builder.addMember("value", "$S", scopeCanonicalName));
+    return builder.build();
+  }
+
+  private AnnotationSpec qualifierMetadataAnnotation(ProvisionBinding binding) {
+    AnnotationSpec.Builder builder = AnnotationSpec.builder(TypeNames.QUALIFIER_METADATA);
+    binding.provisionDependencies().stream()
+        .map(DependencyRequest::key)
+        .map(Key::qualifier)
+        .flatMap(presentValues())
+        .map(DaggerAnnotation::className)
+        .map(ClassName::canonicalName)
+        .distinct()
+        .forEach(qualifier -> builder.addMember("value", "$S", qualifier));
     return builder.build();
   }
 

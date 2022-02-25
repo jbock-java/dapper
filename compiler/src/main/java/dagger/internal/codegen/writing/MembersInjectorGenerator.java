@@ -24,6 +24,7 @@ import static dagger.internal.codegen.binding.SourceFiles.frameworkFieldUsages;
 import static dagger.internal.codegen.binding.SourceFiles.generateBindingFieldsForDependencies;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.binding.SourceFiles.parameterizedGeneratedTypeNameForBinding;
+import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
@@ -40,7 +41,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.MembersInjector;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.FrameworkField;
@@ -48,13 +48,17 @@ import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Key;
+import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
@@ -68,7 +72,7 @@ import java.util.Map.Entry;
 import javax.lang.model.SourceVersion;
 
 /**
- * Generates {@link MembersInjector} implementations from {@link MembersInjectionBinding} instances.
+ * Generates {@code MembersInjector} implementations from {@code MembersInjectionBinding} instances.
  */
 public final class MembersInjectorGenerator extends SourceFileGenerator<MembersInjectionBinding> {
   private final DaggerTypes types;
@@ -118,7 +122,8 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
     TypeSpec.Builder injectorTypeBuilder =
         classBuilder(generatedTypeName)
             .addModifiers(PUBLIC, FINAL)
-            .addTypeVariables(typeParameters);
+            .addTypeVariables(typeParameters)
+            .addAnnotation(qualifierMetadataAnnotation(binding));
 
     TypeName injectedTypeName = TypeName.get(binding.key().type().java());
     TypeName implementedType = membersInjectorOf(injectedTypeName);
@@ -221,5 +226,27 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
     gwtIncompatibleAnnotation(binding).ifPresent(injectorTypeBuilder::addAnnotation);
 
     return ImmutableList.of(injectorTypeBuilder);
+  }
+
+  private AnnotationSpec qualifierMetadataAnnotation(MembersInjectionBinding binding) {
+    AnnotationSpec.Builder builder = AnnotationSpec.builder(TypeNames.QUALIFIER_METADATA);
+    binding.injectionSites().stream()
+        // filter out non-local injection sites. Injection sites for super types will be in their
+        // own generated _MembersInjector class.
+        .filter(
+            injectionSite ->
+                injectionSite
+                    .element()
+                    .getEnclosingElement()
+                    .equals(toJavac(binding.membersInjectedType())))
+        .flatMap(injectionSite -> injectionSite.dependencies().stream())
+        .map(DependencyRequest::key)
+        .map(Key::qualifier)
+        .flatMap(presentValues())
+        .map(DaggerAnnotation::className)
+        .map(ClassName::canonicalName)
+        .distinct()
+        .forEach(qualifier -> builder.addMember("value", "$S", qualifier));
+    return builder.build();
   }
 }

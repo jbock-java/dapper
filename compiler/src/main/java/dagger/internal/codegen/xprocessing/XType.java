@@ -8,6 +8,12 @@ public interface XType {
 
   TypeMirror toJavac();
 
+  /**
+   * The XTypeElement that represents this type.
+   *
+   * Note that it might be null if the type is not backed by a type element (e.g. if it is a
+   * primitive, wildcard etc)
+   */
   XTypeElement getTypeElement();
 
   List<XType> getTypeArguments();

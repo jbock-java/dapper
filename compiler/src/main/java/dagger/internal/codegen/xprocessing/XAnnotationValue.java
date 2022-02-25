@@ -31,6 +31,9 @@ public interface XAnnotationValue {
   /**Returns the value a list of {@code XAnnotationValue}. */
   List<XAnnotationValue> asAnnotationValueList();
 
+  /**Returns the value a list of {@code String}. */
+  List<String> asStringList();
+
   /** Returns the value as a list of {@code XType}. */
   List<XType> asTypeList();
 

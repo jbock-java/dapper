@@ -9,8 +9,10 @@ public interface XAnnotation {
 
   XAnnotationValue getAnnotationValue(String methodName);
 
-  /** Returns the value of the given [methodName] as a list of [Byte]. */
+  /** Returns the value of the given methodName as a list of XAnnotationValue. */
   List<XAnnotationValue> getAsAnnotationValueList(String methodName);
+
+  List<String> getAsStringList(String methodName);
 
   /**
    * The {@code XType} representing the annotation class.

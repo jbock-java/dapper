@@ -56,6 +56,13 @@ class JavacAnnotationValue implements XAnnotationValue {
   }
 
   @Override
+  public List<String> asStringList() {
+    return asAnnotationValueList().stream()
+        .map(XAnnotationValue::asString)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<XType> asTypeList() {
     return asAnnotationValueList().stream().map(XAnnotationValue::asType).collect(Collectors.toList());
   }
