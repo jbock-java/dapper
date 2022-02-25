@@ -16,8 +16,14 @@
 
 package dagger.internal.codegen.binding;
 
-/** Whether a binding or declaration is for provision. */
+/** Whether a binding or declaration is for provision, production, or a {@code MembersInjector}. */
 public enum BindingType {
-  /** A binding with this type is a {@link ProvisionBinding}. */
-  PROVISION, MEMBERS_INJECTION
+  /** A binding with this type is a {@code ProvisionBinding}. */
+  PROVISION,
+
+  /** A binding with this type is a {@code MembersInjectionBinding}. */
+  MEMBERS_INJECTION,
+
+  /** A binding with this type is a {@code ProductionBinding}. */
+  PRODUCTION,
 }

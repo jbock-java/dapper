@@ -17,7 +17,6 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.writing.DelegateRequestRepresentation.isBindsScopeStrongerThanDependencyScope;
-import static dagger.internal.codegen.writing.StaticFactoryInstanceSupplier.usesStaticFactoryCreation;
 import static dagger.spi.model.BindingKind.DELEGATE;
 
 import dagger.assisted.Assisted;
@@ -25,10 +24,10 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindingRequest;
-import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
 import dagger.spi.model.RequestKind;
 
 /**
@@ -37,7 +36,7 @@ import dagger.spi.model.RequestKind;
  */
 final class ProvisionBindingRepresentation implements BindingRepresentation {
   private final BindingGraph graph;
-  private final boolean isFastInit;
+  private final CompilerMode compilerMode;
   private final ProvisionBinding binding;
   private final DirectInstanceBindingRepresentation directInstanceBindingRepresentation;
   private final FrameworkInstanceBindingRepresentation frameworkInstanceBindingRepresentation;
@@ -56,16 +55,20 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
       DaggerTypes types) {
     this.binding = binding;
     this.graph = graph;
-    this.isFastInit = componentImplementation.isFastInit();
+    this.compilerMode = componentImplementation.compilerMode();
     this.directInstanceBindingRepresentation =
         directInstanceBindingRepresentationFactory.create(binding);
     FrameworkInstanceSupplier frameworkInstanceSupplier = null;
-    if (usesSwitchingProvider(binding, isFastInit)) {
-      frameworkInstanceSupplier = switchingProviderInstanceSupplierFactory.create(binding);
-    } else if (usesStaticFactoryCreation(binding, isFastInit)) {
-      frameworkInstanceSupplier = staticFactoryInstanceSupplierFactory.create(binding);
-    } else {
-      frameworkInstanceSupplier = providerInstanceSupplierFactory.create(binding);
+    switch (FrameworkInstanceKind.from(binding, compilerMode)) {
+      case SWITCHING_PROVIDER:
+        frameworkInstanceSupplier = switchingProviderInstanceSupplierFactory.create(binding);
+        break;
+      case STATIC_FACTORY:
+        frameworkInstanceSupplier = staticFactoryInstanceSupplierFactory.create(binding);
+        break;
+      case PROVIDER_FIELD:
+        frameworkInstanceSupplier = providerInstanceSupplierFactory.create(binding);
+        break;
     }
     this.frameworkInstanceBindingRepresentation =
         frameworkInstanceBindingRepresentationFactory.create(binding, frameworkInstanceSupplier);
@@ -79,7 +82,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
   }
 
   private boolean usesDirectInstanceExpression(RequestKind requestKind) {
-    if (requestKind != RequestKind.INSTANCE) {
+    if (requestKind != RequestKind.INSTANCE && requestKind != RequestKind.FUTURE) {
       return false;
     }
 
@@ -90,7 +93,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     // form a loop. There are also difficulties introduced by manually created framework requests.
     // TODO(wanyingd): refactor framework instance so that we don't need to generate both direct
     // instance and framework instance representation for the same binding.
-    if (isFastInit && graph.topLevelBindingGraph().hasFrameworkRequest(binding)) {
+    if (compilerMode.isFastInit() && graph.topLevelBindingGraph().hasFrameworkRequest(binding)) {
       return false;
     }
 
@@ -113,31 +116,6 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
         // exists, in which case even if it's not scoped we might as well call Provider#get().
         return !needsCaching(binding, graph);
     }
-  }
-
-  public static boolean usesSwitchingProvider(ContributionBinding binding, boolean isFastInit) {
-    if (!isFastInit) {
-      return false;
-    }
-    switch (binding.kind()) {
-      case ASSISTED_INJECTION:
-      case BOUND_INSTANCE:
-      case COMPONENT:
-      case COMPONENT_DEPENDENCY:
-      case DELEGATE:
-      case MEMBERS_INJECTOR: // TODO(b/199889259): Consider optimizing this for fastInit mode.
-        // These binding kinds avoid SwitchingProvider when the backing instance already exists,
-        // e.g. a component provider can use FactoryInstance.create(this).
-        return false;
-      case INJECTION:
-      case PROVISION:
-      case ASSISTED_FACTORY:
-      case COMPONENT_PROVISION:
-      case SUBCOMPONENT_CREATOR:
-      case MEMBERS_INJECTION:
-        return true;
-    }
-    throw new AssertionError(String.format("No such binding kind: %s", binding.kind()));
   }
 
   /**

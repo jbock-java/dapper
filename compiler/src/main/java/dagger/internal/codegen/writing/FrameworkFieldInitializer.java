@@ -22,20 +22,21 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTY
 import static dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind.FRAMEWORK_FIELD;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
-import dagger.internal.DelegateFactory;
-import dagger.internal.codegen.binding.BindingType;
-import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.binding.FrameworkField;
-import dagger.internal.codegen.javapoet.AnnotationSpecs;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.spi.model.BindingKind;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
+import dagger.internal.DelegateFactory;
+import dagger.internal.codegen.binding.BindingType;
+import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.binding.FrameworkField;
+import dagger.internal.codegen.javapoet.AnnotationSpecs;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.writing.ComponentImplementation.CompilerMode;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.spi.model.BindingKind;
 import java.util.Optional;
 
 /**
@@ -54,17 +55,17 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
 
     /**
      * Returns the framework class to use for the field, if different from the one implied by the
-     * binding. This implementation returns {@link Optional#empty()}.
+     * binding. This implementation returns {@code Optional#empty()}.
      */
     default Optional<ClassName> alternativeFrameworkClass() {
       return Optional.empty();
     }
   }
 
-  private final boolean isFastInit;
   private final ShardImplementation shardImplementation;
   private final ContributionBinding binding;
   private final FrameworkInstanceCreationExpression frameworkInstanceCreationExpression;
+  private final CompilerMode compilerMode;
   private FieldSpec fieldSpec;
   private InitializationState fieldInitializationState = InitializationState.UNINITIALIZED;
 
@@ -73,13 +74,13 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
       ContributionBinding binding,
       FrameworkInstanceCreationExpression frameworkInstanceCreationExpression) {
     this.binding = checkNotNull(binding);
-    this.isFastInit = componentImplementation.isFastInit();
+    this.compilerMode = componentImplementation.compilerMode();
     this.shardImplementation = checkNotNull(componentImplementation).shardImplementation(binding);
     this.frameworkInstanceCreationExpression = checkNotNull(frameworkInstanceCreationExpression);
   }
 
   /**
-   * Returns the {@link MemberSelect} for the framework field, and adds the field and its
+   * Returns the {@code MemberSelect} for the framework field, and adds the field and its
    * initialization code to the component if it's needed and not already added.
    */
   @Override
@@ -114,7 +115,8 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
         // We were recursively invoked, so create a delegate factory instead to break the loop.
         // However, because SwitchingProvider takes no dependencies, even if they are recursively
         // invoked, we don't need to delegate it since there is no dependency cycle.
-        if (ProvisionBindingRepresentation.usesSwitchingProvider(binding, isFastInit)) {
+        if (FrameworkInstanceKind.from(binding, compilerMode)
+            .equals(FrameworkInstanceKind.SWITCHING_PROVIDER)) {
           break;
         }
 
@@ -190,14 +192,14 @@ class FrameworkFieldInitializer implements FrameworkInstanceSupplier {
     UNINITIALIZED,
 
     /**
-     * The field's dependencies are being set up. If the field is needed in this state, use a {@link
+     * The field's dependencies are being set up. If the field is needed in this state, use a {@code
      * DelegateFactory}.
      */
     INITIALIZING,
 
     /**
      * The field's dependencies are being set up, but the field can be used because it has already
-     * been set to a {@link DelegateFactory}.
+     * been set to a {@code DelegateFactory}.
      */
     DELEGATED,
 

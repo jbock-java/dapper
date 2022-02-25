@@ -23,7 +23,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 
 /**
- * Represents a {@link com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
+ * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
  */
 abstract class MemberSelect {
 

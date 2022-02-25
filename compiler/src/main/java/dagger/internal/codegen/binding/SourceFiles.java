@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.auto.common.MoreElements.asType;
 import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
 import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
@@ -34,33 +36,33 @@ import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER_OF_LAZY;
 import static dagger.internal.codegen.javapoet.TypeNames.SET_FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.SET_OF_PRODUCED_PRODUCER;
 import static dagger.internal.codegen.javapoet.TypeNames.SET_PRODUCER;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.MULTIBOUND_MAP;
 import static dagger.spi.model.BindingKind.MULTIBOUND_SET;
-import static io.jbock.auto.common.MoreElements.asType;
 import static javax.lang.model.SourceVersion.isName;
 
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.MoreElements;
 import dagger.internal.codegen.base.Joiner;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.RequestKind;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeVariableName;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.RequestKind;
 import java.util.List;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
@@ -136,6 +138,7 @@ public class SourceFiles {
   public static ClassName generatedClassNameForBinding(Binding binding) {
     switch (binding.bindingType()) {
       case PROVISION:
+      case PRODUCTION:
         ContributionBinding contribution = (ContributionBinding) binding;
         switch (contribution.kind()) {
           case ASSISTED_INJECTION:
@@ -224,6 +227,46 @@ public class SourceFiles {
   private static ClassName siblingClassName(TypeElement typeElement, String suffix) {
     ClassName className = ClassName.get(typeElement);
     return className.topLevelClassName().peerClass(classFileName(className) + suffix);
+  }
+
+  /**
+   * The {@code java.util.Set} factory class name appropriate for set bindings.
+   *
+   * <ul>
+   *   <li>{@code dagger.producers.internal.SetFactory} for provision bindings.
+   *   <li>{@code dagger.producers.internal.SetProducer} for production bindings for {@code Set<T>}.
+   *   <li>{@code dagger.producers.internal.SetOfProducedProducer} for production bindings for
+   *       {@code Set<Produced<T>>}.
+   * </ul>
+   */
+  public static ClassName setFactoryClassName(ContributionBinding binding) {
+    checkArgument(binding.kind().equals(MULTIBOUND_SET));
+    if (binding.bindingType().equals(BindingType.PROVISION)) {
+      return SET_FACTORY;
+    } else {
+      SetType setType = SetType.from(binding.key());
+      return setType.elementsAreTypeOf(TypeNames.PRODUCED)
+          ? SET_OF_PRODUCED_PRODUCER
+          : SET_PRODUCER;
+    }
+  }
+
+  /** The {@code java.util.Map} factory class name appropriate for map bindings. */
+  public static ClassName mapFactoryClassName(ContributionBinding binding) {
+    checkState(binding.kind().equals(MULTIBOUND_MAP), binding.kind());
+    MapType mapType = MapType.from(binding.key());
+    switch (binding.bindingType()) {
+      case PROVISION:
+        return mapType.valuesAreTypeOf(PROVIDER) ? MAP_PROVIDER_FACTORY : MAP_FACTORY;
+      case PRODUCTION:
+        return mapType.valuesAreFrameworkType()
+            ? mapType.valuesAreTypeOf(PRODUCER)
+                ? MAP_OF_PRODUCER_PRODUCER
+                : MAP_OF_PRODUCED_PRODUCER
+            : MAP_PRODUCER;
+      default:
+        throw new IllegalArgumentException(binding.bindingType().toString());
+    }
   }
 
   public static ImmutableList<TypeVariableName> bindingTypeElementTypeVariableNames(

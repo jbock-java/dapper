@@ -20,15 +20,21 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.SourceFiles.bindingTypeElementTypeVariableNames;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
+import static dagger.internal.codegen.binding.SourceFiles.setFactoryClassName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.FACTORY;
 import static dagger.internal.codegen.javapoet.TypeNames.MAP_FACTORY;
+import static dagger.internal.codegen.javapoet.TypeNames.PRODUCER;
+import static dagger.internal.codegen.javapoet.TypeNames.PRODUCERS;
 import static dagger.internal.codegen.javapoet.TypeNames.PROVIDER;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingType;
+import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import io.jbock.auto.common.MoreTypes;
@@ -40,17 +46,35 @@ import javax.lang.model.type.TypeMirror;
 
 /** Helper class for static member select creation. */
 final class StaticMemberSelects {
-  /** A {@link MemberSelect} for a factory of an empty map. */
+  /** A {@code MemberSelect} for a factory of an empty map. */
   static MemberSelect emptyMapFactory(Binding binding) {
     BindingType bindingType = binding.bindingType();
     ImmutableList<TypeMirror> typeParameters =
         ImmutableList.copyOf(MoreTypes.asDeclared(binding.key().type().java()).getTypeArguments());
-    return new ParameterizedStaticMethod(
-        MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
+    if (bindingType.equals(BindingType.PRODUCTION)) {
+      return new ParameterizedStaticMethod(
+          PRODUCERS, typeParameters, CodeBlock.of("emptyMapProducer()"), PRODUCER);
+    } else {
+      return new ParameterizedStaticMethod(
+          MAP_FACTORY, typeParameters, CodeBlock.of("emptyMapProvider()"), PROVIDER);
+    }
   }
 
   /**
-   * Returns a {@link MemberSelect} for the instance of a {@code create()} method on a factory with
+   * A static member select for an empty set factory. Calls {@code
+   * dagger.internal.SetFactory#empty()}, {@code dagger.producers.internal.SetProducer#empty()}, or
+   * {@code dagger.producers.internal.SetOfProducedProducer#empty()}, depending on the set bindings.
+   */
+  static MemberSelect emptySetFactory(ContributionBinding binding) {
+    return new ParameterizedStaticMethod(
+        setFactoryClassName(binding),
+        ImmutableList.of(toJavac(SetType.from(binding.key()).elementType())),
+        CodeBlock.of("empty()"),
+        FACTORY);
+  }
+
+  /**
+   * Returns a {@code MemberSelect} for the instance of a {@code create()} method on a factory with
    * no arguments.
    */
   static MemberSelect factoryCreateNoArgumentMethod(Binding binding) {
