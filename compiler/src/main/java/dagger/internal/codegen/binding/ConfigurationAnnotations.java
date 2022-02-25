@@ -17,15 +17,12 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.getTypeListValue;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.subcomponentCreatorAnnotations;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 
-import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -37,7 +34,6 @@ import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Utility methods related to dagger configuration annotations (e.g.: {@code Component} and {@code
@@ -55,12 +51,6 @@ public final class ConfigurationAnnotations {
 
   static boolean isSubcomponentCreator(XElement element) {
     return hasAnyAnnotation(element, subcomponentCreatorAnnotations());
-  }
-
-  // Dagger 1 support.
-  public static ImmutableList<TypeMirror> getModuleInjects(AnnotationMirror moduleAnnotation) {
-    checkNotNull(moduleAnnotation);
-    return getTypeListValue(moduleAnnotation, "injects");
   }
 
   /** Returns the first type that specifies this' nullability, or empty if none. */
