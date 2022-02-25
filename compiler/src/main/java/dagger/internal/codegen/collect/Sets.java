@@ -53,4 +53,10 @@ public class Sets {
     }
     return builder.build();
   }
+
+  public static <E extends Enum<E>> ImmutableSet<E> immutableEnumSet(Iterable<E> elements) {
+    ImmutableSet.Builder<E> builder = ImmutableSet.builder();
+    elements.forEach(builder::add);
+    return builder.build();
+  }
 }

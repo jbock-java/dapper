@@ -70,12 +70,16 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   @Override
   public final Collection<Map.Entry<K, V>> entries() {
-    return asMap().entrySet().stream().<Map.Entry<K, V>>flatMap(entry -> {
-      if (entry.getValue().isEmpty()) {
-        return Stream.of();
-      }
-      return entry.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
-    }).collect(Collectors.toList());
+    return asMap().entrySet().stream()
+        .<Map.Entry<K, V>>flatMap(
+            entry -> {
+              if (entry.getValue().isEmpty()) {
+                return Stream.of();
+              }
+              return entry.getValue().stream()
+                  .map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
+            })
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -98,7 +102,13 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   @Override
   public final void forEach(BiConsumer<? super K, ? super V> action) {
-    asMap().forEach((key, valueCollection) ->
-        valueCollection.forEach(value -> action.accept(key, value)));
+    asMap()
+        .forEach(
+            (key, valueCollection) -> valueCollection.forEach(value -> action.accept(key, value)));
+  }
+
+  public Set<V> replaceValues(K key, Iterable<? extends V> values) {
+    Set<V> result = map.put(key, ImmutableSet.copyOf(values));
+    return result == null ? Set.of() : result;
   }
 }
