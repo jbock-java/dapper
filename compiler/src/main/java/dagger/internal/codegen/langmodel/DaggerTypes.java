@@ -23,7 +23,6 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
 
-import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -47,7 +45,6 @@ import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
@@ -154,8 +151,7 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first
-   * order.
+   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first order.
    */
   public Iterable<TypeMirror> supertypes(TypeMirror type) {
     return Traverser.<TypeMirror>forGraph(this::directSupertypes).breadthFirst(type);
@@ -268,20 +264,6 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Returns a publicly accessible type based on {@code type}:
-   *
-   * <ul>
-   *   <li>If {@code type} is publicly accessible, returns it.
-   *   <li>If not, but {@code type}'s raw type is publicly accessible, returns the raw type.
-   *   <li>Otherwise returns {@code Object}.
-   * </ul>
-   */
-  public TypeMirror publiclyAccessibleType(TypeMirror type) {
-    return accessibleType(
-        type, Accessibility::isTypePubliclyAccessible, Accessibility::isRawTypePubliclyAccessible);
-  }
-
-  /**
    * Returns an accessible type in {@code requestingClass}'s package based on {@code type}:
    *
    * <ul>
@@ -352,49 +334,12 @@ public final class DaggerTypes implements Types {
         null);
   }
 
-  private static final ImmutableSet<Class<?>> FUTURE_TYPES =
-      ImmutableSet.of();
-
   public static boolean isFutureType(XType type) {
-    return false;
+    return isFutureType(toJavac(type));
   }
 
   public static boolean isFutureType(TypeMirror type) {
     return false;
-  }
-
-  public static boolean hasTypeVariable(TypeMirror type) {
-    return type.accept(
-        new SimpleTypeVisitor8<Boolean, Void>() {
-          @Override
-          public Boolean visitArray(ArrayType arrayType, Void p) {
-            return arrayType.getComponentType().accept(this, p);
-          }
-
-          @Override
-          public Boolean visitDeclared(DeclaredType declaredType, Void p) {
-            return declaredType.getTypeArguments().stream().anyMatch(type -> type.accept(this, p));
-          }
-
-          @Override
-          public Boolean visitTypeVariable(TypeVariable t, Void aVoid) {
-            return true;
-          }
-
-          @Override
-          protected Boolean defaultAction(TypeMirror e, Void aVoid) {
-            return false;
-          }
-        },
-        null);
-  }
-
-  /**
-   * Resolves the type of the given executable element as a member of the given type. This may
-   * resolve type variables to concrete types, etc.
-   */
-  public ExecutableType resolveExecutableType(ExecutableElement element, TypeMirror containerType) {
-    return MoreTypes.asExecutable(asMemberOf(MoreTypes.asDeclared(containerType), element));
   }
 
   // Implementation of Types methods, delegating to types.
