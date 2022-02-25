@@ -16,39 +16,41 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XType.isVoid;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
-import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
+import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.creatorAnnotationsFor;
+import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
+import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.collect.ImmutableBiMap;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.ImmutableBiMap;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.base.ComponentAnnotation;
-import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.Scope;
-import java.util.Optional;
 import jakarta.inject.Inject;
+import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
 
 /** A factory for {@code ComponentDescriptor}s. */
@@ -59,6 +61,7 @@ public final class ComponentDescriptorFactory {
   private final DependencyRequestFactory dependencyRequestFactory;
   private final ModuleDescriptor.Factory moduleDescriptorFactory;
   private final InjectionAnnotations injectionAnnotations;
+  private final DaggerSuperficialValidation superficialValidation;
 
   @Inject
   ComponentDescriptorFactory(
@@ -67,25 +70,29 @@ public final class ComponentDescriptorFactory {
       DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory,
       ModuleDescriptor.Factory moduleDescriptorFactory,
-      InjectionAnnotations injectionAnnotations) {
+      InjectionAnnotations injectionAnnotations,
+      DaggerSuperficialValidation superficialValidation) {
     this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.dependencyRequestFactory = dependencyRequestFactory;
     this.moduleDescriptorFactory = moduleDescriptorFactory;
     this.injectionAnnotations = injectionAnnotations;
+    this.superficialValidation = superficialValidation;
   }
 
   /** Returns a descriptor for a root component type. */
   public ComponentDescriptor rootComponentDescriptor(XTypeElement typeElement) {
-    Optional<ComponentAnnotation> annotation = rootComponentAnnotation(typeElement);
+    Optional<ComponentAnnotation> annotation =
+        rootComponentAnnotation(typeElement, superficialValidation);
     checkArgument(annotation.isPresent(), "%s must have a component annotation", typeElement);
     return create(typeElement, annotation.get());
   }
 
   /** Returns a descriptor for a subcomponent type. */
   public ComponentDescriptor subcomponentDescriptor(XTypeElement typeElement) {
-    Optional<ComponentAnnotation> annotation = subcomponentAnnotation(typeElement);
+    Optional<ComponentAnnotation> annotation =
+        subcomponentAnnotation(typeElement, superficialValidation);
     checkArgument(annotation.isPresent(), "%s must have a subcomponent annotation", typeElement);
     return create(typeElement, annotation.get());
   }
@@ -95,7 +102,7 @@ public final class ComponentDescriptorFactory {
    * bindings.
    */
   public ComponentDescriptor moduleComponentDescriptor(XTypeElement typeElement) {
-    Optional<ModuleAnnotation> annotation = moduleAnnotation(typeElement);
+    Optional<ModuleAnnotation> annotation = moduleAnnotation(typeElement, superficialValidation);
     checkArgument(annotation.isPresent(), "%s must have a module annotation", typeElement);
     return create(typeElement, ComponentAnnotation.fromModuleAnnotation(annotation.get()));
   }
@@ -203,7 +210,7 @@ public final class ComponentDescriptorFactory {
     XType returnType = resolvedComponentMethod.getReturnType();
     if (isDeclared(returnType) && !injectionAnnotations.getQualifier(componentMethod).isPresent()) {
       XTypeElement returnTypeElement = returnType.getTypeElement();
-      if (subcomponentAnnotation(returnTypeElement).isPresent()) {
+      if (returnTypeElement.hasAnyAnnotation(subcomponentAnnotations())) {
         // It's a subcomponent factory method. There is no dependency request, and there could be
         // any number of parameters. Just return the descriptor.
         return descriptor.subcomponent(subcomponentDescriptor(returnTypeElement)).build();

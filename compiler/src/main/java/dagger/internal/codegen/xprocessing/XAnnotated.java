@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
 import io.jbock.javapoet.ClassName;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,11 @@ public interface XAnnotated {
    * Returns true if this element has one of the annotations.
    */
   boolean hasAnyAnnotation(ClassName... annotations);
+
+  /**
+   * Returns true if this element has one of the annotations.
+   */
+  boolean hasAnyAnnotation(Collection<ClassName> annotations);
 
   XAnnotation getAnnotation(ClassName className);
 }

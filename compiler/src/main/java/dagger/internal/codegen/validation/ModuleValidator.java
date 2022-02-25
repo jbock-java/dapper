@@ -18,10 +18,10 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
+import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.base.ModuleAnnotation.isModuleAnnotation;
 import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
-import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
@@ -36,13 +36,14 @@ import static dagger.internal.codegen.xprocessing.XTypes.areEquivalentTypes;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.stream.Collectors.joining;
 
-import dagger.internal.codegen.base.Joiner;
-import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.base.ComponentCreatorAnnotation;
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.base.ModuleKind;
+import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
-import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableListMultimap;
 import dagger.internal.codegen.collect.ImmutableSet;
@@ -109,6 +110,7 @@ public final class ModuleValidator {
   private final BindingGraphFactory bindingGraphFactory;
   private final BindingGraphValidator bindingGraphValidator;
   private final InjectionAnnotations injectionAnnotations;
+  private final DaggerSuperficialValidation superficialValidation;
   private final XProcessingEnv processingEnv;
   private final Map<XTypeElement, ValidationReport> cache = new HashMap<>();
   private final Set<XTypeElement> knownModules = new HashSet<>();
@@ -121,6 +123,7 @@ public final class ModuleValidator {
       BindingGraphFactory bindingGraphFactory,
       BindingGraphValidator bindingGraphValidator,
       InjectionAnnotations injectionAnnotations,
+      DaggerSuperficialValidation superficialValidation,
       XProcessingEnv processingEnv) {
     this.anyBindingMethodValidator = anyBindingMethodValidator;
     this.methodSignatureFormatter = methodSignatureFormatter;
@@ -128,6 +131,7 @@ public final class ModuleValidator {
     this.bindingGraphFactory = bindingGraphFactory;
     this.bindingGraphValidator = bindingGraphValidator;
     this.injectionAnnotations = injectionAnnotations;
+    this.superficialValidation = superficialValidation;
     this.processingEnv = processingEnv;
   }
 
@@ -264,20 +268,19 @@ public final class ModuleValidator {
         + " is not a @Subcomponent or @ProductionSubcomponent";
   }
 
-  private static String moduleSubcomponentsIncludesCreator(
-      XTypeElement moduleSubcomponentsAttribute) {
+  private String moduleSubcomponentsIncludesCreator(XTypeElement moduleSubcomponentsAttribute) {
     XTypeElement subcomponentType = moduleSubcomponentsAttribute.getEnclosingTypeElement();
     ComponentCreatorAnnotation creatorAnnotation =
         getOnlyElement(getCreatorAnnotations(moduleSubcomponentsAttribute));
     return String.format(
         "%s is a @%s.%s. Did you mean to use %s?",
         moduleSubcomponentsAttribute.getQualifiedName(),
-        subcomponentAnnotation(subcomponentType).get().simpleName(),
+        subcomponentAnnotation(subcomponentType, superficialValidation).get().simpleName(),
         creatorAnnotation.creatorKind().typeName(),
         subcomponentType.getQualifiedName());
   }
 
-  private static void validateSubcomponentHasBuilder(
+  private void validateSubcomponentHasBuilder(
       XTypeElement subject,
       XTypeElement subcomponentAttribute,
       XAnnotation moduleAnnotation,
@@ -291,13 +294,13 @@ public final class ModuleValidator {
         moduleAnnotation);
   }
 
-  private static String moduleSubcomponentsDoesntHaveCreator(
+  private String moduleSubcomponentsDoesntHaveCreator(
       XTypeElement subcomponent, XAnnotation moduleAnnotation) {
     return String.format(
         "%1$s doesn't have a @%2$s.Builder or @%2$s.Factory, which is required when used with "
             + "@%3$s.subcomponents",
         subcomponent.getQualifiedName(),
-        subcomponentAnnotation(subcomponent).get().simpleName(),
+        subcomponentAnnotation(subcomponent, superficialValidation).get().simpleName(),
         getClassName(moduleAnnotation).simpleName());
   }
 
@@ -357,8 +360,8 @@ public final class ModuleValidator {
    * <p>Checks that the referenced modules are non-generic types annotated with {@code @Module} or
    * {@code @ProducerModule}.
    *
-   * <p>If the referenced module is in the {@code #addKnownModules(Collection) known modules set}
-   * and has errors, reports an error at that module's inclusion.
+   * <p>If the referenced module is in the {@code #addKnownModules(Collection) known modules
+   * set} and has errors, reports an error at that module's inclusion.
    *
    * @param annotatedType the annotated module or component
    * @param annotation the annotation specifying the referenced modules ({@code @Component},
@@ -371,6 +374,8 @@ public final class ModuleValidator {
       XAnnotation annotation,
       ImmutableSet<ModuleKind> validModuleKinds,
       Set<XTypeElement> visitedModules) {
+    superficialValidation.validateAnnotationOf(annotatedType, annotation);
+
     ValidationReport.Builder subreport = ValidationReport.about(annotatedType);
     // TODO(bcorso): Consider creating a DiagnosticLocation object to encapsulate the location in a
     // single object to avoid duplication across all reported errors

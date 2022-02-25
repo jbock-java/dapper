@@ -21,16 +21,16 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 
-import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.javapoet.ClassName;
+import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.Optional;
 
 /** A {@code @Module} or {@code @ProducerModule} annotation. */
@@ -88,13 +88,7 @@ public abstract class ModuleAnnotation {
     return MODULE_ANNOTATIONS;
   }
 
-  /**
-   * Creates an object that represents a {@code @Module} or {@code @ProducerModule}.
-   *
-   * @throws IllegalArgumentException if {@code #isModuleAnnotation(XAnnotation)} returns {@code
-   *     false}
-   */
-  public static ModuleAnnotation moduleAnnotation(XAnnotation annotation) {
+  private static ModuleAnnotation create(XAnnotation annotation) {
     checkArgument(
         isModuleAnnotation(annotation),
         "%s is not a Module or ProducerModule annotation",
@@ -108,8 +102,13 @@ public abstract class ModuleAnnotation {
    * Returns an object representing the {@code @Module} or {@code @ProducerModule} annotation if one
    * annotates {@code typeElement}.
    */
-  public static Optional<ModuleAnnotation> moduleAnnotation(XElement element) {
+  public static Optional<ModuleAnnotation> moduleAnnotation(
+      XElement element, DaggerSuperficialValidation superficialValidation) {
     return getAnyAnnotation(element, TypeNames.MODULE, TypeNames.PRODUCER_MODULE)
-        .map(ModuleAnnotation::moduleAnnotation);
+        .map(
+            annotation -> {
+              superficialValidation.validateAnnotationOf(element, annotation);
+              return create(annotation);
+            });
   }
 }

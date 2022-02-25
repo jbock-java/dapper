@@ -18,9 +18,10 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.anyComponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XMethodElements.getEnclosingTypeElement;
 
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -32,9 +33,14 @@ import java.util.List;
 import java.util.Optional;
 
 final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<XMethodElement> {
+  private final DaggerSuperficialValidation superficialValidation;
+
   @Inject
-  BindsInstanceMethodValidator(InjectionAnnotations injectionAnnotations) {
+  BindsInstanceMethodValidator(
+      InjectionAnnotations injectionAnnotations,
+      DaggerSuperficialValidation superficialValidation) {
     super(injectionAnnotations);
+    this.superficialValidation = superficialValidation;
   }
 
   @Override
@@ -60,9 +66,9 @@ final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<X
             "@BindsInstance methods should have exactly one parameter for the bound type");
       }
       XTypeElement enclosingTypeElement = getEnclosingTypeElement(method);
-      moduleAnnotation(enclosingTypeElement)
+      moduleAnnotation(enclosingTypeElement, superficialValidation)
           .ifPresent(moduleAnnotation -> report.addError(didYouMeanBinds(moduleAnnotation)));
-      anyComponentAnnotation(enclosingTypeElement)
+      anyComponentAnnotation(enclosingTypeElement, superficialValidation)
           .ifPresent(
               componentAnnotation ->
                   report.addError(

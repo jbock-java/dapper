@@ -3,6 +3,7 @@ package dagger.internal.codegen.xprocessing;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import io.jbock.javapoet.ClassName;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -81,6 +82,11 @@ class JavacElement implements XElement {
   @Override
   public boolean hasAnyAnnotation(ClassName... annotations) {
     return Stream.of(annotations).anyMatch(this::hasAnnotation);
+  }
+
+  @Override
+  public boolean hasAnyAnnotation(Collection<ClassName> annotations) {
+    return annotations.stream().anyMatch(this::hasAnnotation);
   }
 
   @Override

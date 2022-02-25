@@ -99,6 +99,7 @@ public abstract class ModuleDescriptor {
     private final BindingFactory bindingFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
     private final SubcomponentDeclaration.Factory subcomponentDeclarationFactory;
+    private final DaggerSuperficialValidation superficialValidation;
     private final Map<XTypeElement, ModuleDescriptor> cache = new HashMap<>();
 
     @Inject
@@ -107,12 +108,14 @@ public abstract class ModuleDescriptor {
         DaggerElements elements,
         BindingFactory bindingFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
-        SubcomponentDeclaration.Factory subcomponentDeclarationFactory) {
+        SubcomponentDeclaration.Factory subcomponentDeclarationFactory,
+        DaggerSuperficialValidation superficialValidation) {
       this.processingEnv = processingEnv;
       this.elements = elements;
       this.bindingFactory = bindingFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
       this.subcomponentDeclarationFactory = subcomponentDeclarationFactory;
+      this.superficialValidation = superficialValidation;
     }
 
     public ModuleDescriptor create(XTypeElement moduleElement) {
@@ -146,7 +149,7 @@ public abstract class ModuleDescriptor {
       return new AutoValue_ModuleDescriptor(
           moduleElement,
           bindings.build(),
-          ImmutableSet.copyOf(subcomponentDeclarationFactory.forModule(moduleElement)),
+          subcomponentDeclarationFactory.forModule(moduleElement),
           delegates.build(),
           ModuleKind.forAnnotatedElement(moduleElement).get());
     }
@@ -203,7 +206,7 @@ public abstract class ModuleDescriptor {
           collectIncludedModules(includedModules, superclass.getTypeElement());
         }
       }
-      moduleAnnotation(moduleElement)
+      moduleAnnotation(moduleElement, superficialValidation)
           .ifPresent(
               moduleAnnotation -> {
                 includedModules.addAll(moduleAnnotation.includes());

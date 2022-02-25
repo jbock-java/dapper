@@ -19,115 +19,71 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
-import static java.util.Objects.requireNonNull;
 
+import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import jakarta.inject.Inject;
-import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.IntSupplier;
 
 /**
- * A declaration for a subcomponent that is included in a module via {@link
+ * A declaration for a subcomponent that is included in a module via {@code
  * dagger.Module#subcomponents()}.
  */
-public final class SubcomponentDeclaration extends BindingDeclaration {
-  private final Optional<XElement> bindingElement;
-  private final Optional<XTypeElement> contributingModule;
-  private final Key key;
-  private final XTypeElement subcomponentType;
-  private final ModuleAnnotation moduleAnnotation;
-  private final IntSupplier hash = Suppliers.memoizeInt(() ->
-      Objects.hash(bindingElement(), contributingModule(), key(), subcomponentType(), moduleAnnotation()));
-
-  SubcomponentDeclaration(
-      Optional<XElement> bindingElement,
-      Optional<XTypeElement> contributingModule,
-      Key key,
-      XTypeElement subcomponentType,
-      ModuleAnnotation moduleAnnotation) {
-    this.bindingElement = requireNonNull(bindingElement);
-    this.contributingModule = requireNonNull(contributingModule);
-    this.key = requireNonNull(key);
-    this.subcomponentType = requireNonNull(subcomponentType);
-    this.moduleAnnotation = requireNonNull(moduleAnnotation);
-  }
-
-  @Override
-  public Optional<XElement> bindingElement() {
-    return bindingElement;
-  }
-
-  @Override
-  public Optional<XTypeElement> contributingModule() {
-    return contributingModule;
-  }
-
+@AutoValue
+public abstract class SubcomponentDeclaration extends BindingDeclaration {
   /**
-   * Key for the {@link dagger.Subcomponent.Builder} of {@link #subcomponentType()}.
+   * Key for the {@code dagger.Subcomponent.Builder} or {@code
+   * dagger.producers.ProductionSubcomponent.Builder} of {@code #subcomponentType()}.
    */
   @Override
-  public Key key() {
-    return key;
-  }
+  public abstract Key key();
 
   /**
-   * The type element that defines the {@link dagger.Subcomponent} for this declaration.
+   * The type element that defines the {@code dagger.Subcomponent} or {@code
+   * dagger.producers.ProductionSubcomponent} for this declaration.
    */
-  XTypeElement subcomponentType() {
-    return subcomponentType;
-  }
+  abstract XTypeElement subcomponentType();
 
   /** The module annotation. */
-  public ModuleAnnotation moduleAnnotation() {
-    return moduleAnnotation;
-  }
+  public abstract ModuleAnnotation moduleAnnotation();
+
+  @Memoized
+  @Override
+  public abstract int hashCode();
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    SubcomponentDeclaration that = (SubcomponentDeclaration) o;
-    return hashCode() == that.hashCode()
-        && bindingElement.equals(that.bindingElement)
-        && contributingModule.equals(that.contributingModule)
-        && key.equals(that.key)
-        && subcomponentType.equals(that.subcomponentType)
-        && moduleAnnotation.equals(that.moduleAnnotation);
-  }
+  public abstract boolean equals(Object obj);
 
-  @Override
-  public int hashCode() {
-    return hash.getAsInt();
-  }
-
-  /** A {@link SubcomponentDeclaration} factory. */
+  /** A {@code SubcomponentDeclaration} factory. */
   public static class Factory {
     private final KeyFactory keyFactory;
+    private final DaggerSuperficialValidation superficialValidation;
 
     @Inject
-    Factory(KeyFactory keyFactory) {
+    Factory(KeyFactory keyFactory, DaggerSuperficialValidation superficialValidation) {
       this.keyFactory = keyFactory;
+      this.superficialValidation = superficialValidation;
     }
 
-    Set<SubcomponentDeclaration> forModule(XTypeElement module) {
-      ModuleAnnotation moduleAnnotation = ModuleAnnotation.moduleAnnotation(module).get();
+    ImmutableSet<SubcomponentDeclaration> forModule(XTypeElement module) {
+      ModuleAnnotation moduleAnnotation =
+          ModuleAnnotation.moduleAnnotation(module, superficialValidation).get();
       XElement subcomponentAttribute =
           moduleAnnotation.annotation().getType().getTypeElement().getDeclaredMethods().stream()
               .filter(method -> getSimpleName(method).contentEquals("subcomponents"))
               .collect(toOptional())
-              .orElseThrow();
+              .get();
 
-      Set<SubcomponentDeclaration> declarations = new LinkedHashSet<>();
+      ImmutableSet.Builder<SubcomponentDeclaration> declarations = ImmutableSet.builder();
       for (XTypeElement subcomponent : moduleAnnotation.subcomponents()) {
         declarations.add(
-            new SubcomponentDeclaration(
+            new AutoValue_SubcomponentDeclaration(
                 Optional.of(subcomponentAttribute),
                 Optional.of(module),
                 keyFactory.forSubcomponentCreator(
@@ -135,7 +91,7 @@ public final class SubcomponentDeclaration extends BindingDeclaration {
                 subcomponent,
                 moduleAnnotation));
       }
-      return declarations;
+      return declarations.build();
     }
   }
 }
