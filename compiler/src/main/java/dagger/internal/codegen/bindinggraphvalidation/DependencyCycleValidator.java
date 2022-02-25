@@ -17,6 +17,8 @@
 package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
+import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.collect.Iterables.getLast;
 import static dagger.internal.codegen.collect.Iterables.limit;
 import static dagger.internal.codegen.collect.Iterables.skip;
@@ -27,16 +29,22 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XType;
+import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.RequestKind;
@@ -94,7 +102,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     }
 
     // If there's a path from the target back to the source, there's a cycle.
-    List<Node> cycleNodes =
+    ImmutableList<Node> cycleNodes =
         shortestPath(dependencyGraph, endpoints.target(), endpoints.source());
     if (cycleNodes.isEmpty()) {
       return Optional.empty();
@@ -137,7 +145,11 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     DependencyEdge dependencyToReport =
         chooseDependencyEdgeConnecting(previousNode, cycleStartNode, bindingGraph);
     diagnosticReporter.reportDependency(
-        ERROR, dependencyToReport, errorMessage(cycle.shift(cycleStartNode), bindingGraph));
+        ERROR,
+        dependencyToReport,
+        errorMessage(cycle.shift(cycleStartNode), bindingGraph)
+            // The actual dependency trace is included from the reportDependency call.
+            + "\n\nThe cycle is requested via:");
   }
 
   private ImmutableList<Node> shortestPathToCycleFromAnEntryPoint(
@@ -146,7 +158,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
     ComponentNode componentContainingCycle =
         bindingGraph.componentNode(someCycleNode.componentPath()).get();
     ImmutableList<Node> pathToCycle =
-        ImmutableList.copyOf(shortestPath(bindingGraph.network(), componentContainingCycle, someCycleNode));
+        shortestPath(bindingGraph.network(), componentContainingCycle, someCycleNode);
     return subpathToCycle(pathToCycle, cycle);
   }
 
@@ -176,12 +188,18 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
             .collect(toImmutableList())
             .reverse();
     dependencyRequestFormatter.formatIndentedList(message, cycleRequests, 0);
+    message
+        .append("\n")
+        .append(dependencyRequestFormatter.format(cycleRequests.get(0)))
+        .append("\n")
+        .append(Formatter.INDENT)
+        .append("...");
     return message.toString();
   }
 
   /**
-   * Returns one of the edges between two nodes that doesn't {@code
-   * #breaksCycle(DependencyEdge, BindingGraph) break} a cycle.
+   * Returns one of the edges between two nodes that doesn't {@code #breaksCycle(DependencyEdge,
+   * BindingGraph) break} a cycle.
    */
   private DependencyEdge nonCycleBreakingEdge(EndpointPair<Node> endpointPair, BindingGraph graph) {
     return graph.network().edgesConnecting(endpointPair.source(), endpointPair.target()).stream()
@@ -201,6 +219,14 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         edge.dependencyRequest().key().type().xprocessing(), edge.dependencyRequest().kind())) {
       return true;
     }
+    Node target = graph.network().incidentNodes(edge).target();
+    if (target instanceof Binding && ((Binding) target).kind().equals(BindingKind.OPTIONAL)) {
+      /* For @BindsOptionalOf bindings, unwrap the type inside the Optional. If the unwrapped type
+       * breaks the cycle, so does the optional binding. */
+      XType optionalValueType = OptionalType.from(edge.dependencyRequest().key()).valueType();
+      RequestKind requestKind = getRequestKind(optionalValueType);
+      return breaksCycle(extractKeyType(optionalValueType), requestKind);
+    }
     return false;
   }
 
@@ -212,6 +238,9 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         return true;
 
       case INSTANCE:
+        if (MapType.isMap(requestedType)) {
+          return MapType.from(requestedType).valuesAreTypeOf(TypeNames.PROVIDER);
+        }
         // fall through
 
       default:

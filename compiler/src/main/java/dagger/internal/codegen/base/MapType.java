@@ -106,12 +106,12 @@ public abstract class MapType {
 
   /** {@code true} if {@code type} is a {@code java.util.Map} type. */
   public static boolean isMap(XType type) {
-    return isTypeOf(type, TypeNames.MAP);
+    return false;
   }
 
   /** {@code true} if {@code key.type()} is a {@code java.util.Map} type. */
   public static boolean isMap(Key key) {
-    return isMap(key.type().xprocessing());
+    return false;
   }
 
   /**
