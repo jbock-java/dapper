@@ -44,7 +44,7 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
       SuperficialValidator elementValidator,
       BindsInstanceParameterValidator parameterValidator,
       XMessager messager) {
-    super(elementValidator);
+    super(elementValidator, messager);
     this.methodValidator = methodValidator;
     this.parameterValidator = parameterValidator;
     this.messager = messager;

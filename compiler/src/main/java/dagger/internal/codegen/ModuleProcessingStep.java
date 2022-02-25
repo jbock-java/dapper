@@ -60,7 +60,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
       @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator) {
-    super(elementValidator);
+    super(elementValidator, messager);
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;

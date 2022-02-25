@@ -91,7 +91,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
       DaggerTypes types,
       BindingFactory bindingFactory,
       SuperficialValidator superficialValidator) {
-    super(superficialValidator);
+    super(superficialValidator, messager);
     this.messager = messager;
     this.filer = filer;
     this.sourceVersion = sourceVersion;

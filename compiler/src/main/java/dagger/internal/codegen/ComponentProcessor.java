@@ -34,6 +34,7 @@ import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XProcessingEnvConfig;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Singleton;
@@ -55,15 +56,22 @@ import javax.lang.model.element.Element;
  * <p>TODO(gak): give this some better documentation
  */
 public class ComponentProcessor extends JavacBasicAnnotationProcessor {
+
+  private static XProcessingEnvConfig envConfig(Map<String, String> options) {
+    return new XProcessingEnvConfig.Builder().disableAnnotatedElementValidation(true).build();
+  }
+
   private final Optional<Set<BindingGraphPlugin>> testingPlugins;
 
   private ComponentProcessorHelper helper;
 
   public ComponentProcessor() {
+    super(ComponentProcessor::envConfig);
     this.testingPlugins = Optional.empty();
   }
 
   private ComponentProcessor(Iterable<BindingGraphPlugin> testingPlugins) {
+    super(ComponentProcessor::envConfig);
     this.testingPlugins = Optional.of(Util.setOf(testingPlugins));
   }
 
@@ -108,15 +116,15 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   @Singleton
   @Component(
       modules = {
-          BindingGraphValidationModule.class,
-          BindingMethodValidatorsModule.class,
-          ComponentGeneratorModule.class,
-          InjectBindingRegistryModule.class,
-          ProcessingEnvironmentModule.class,
-          ProcessingRoundCacheModule.class,
-          ProcessingStepsModule.class,
-          SourceFileGeneratorsModule.class,
-          SpiModule.class
+        BindingGraphValidationModule.class,
+        BindingMethodValidatorsModule.class,
+        ComponentGeneratorModule.class,
+        InjectBindingRegistryModule.class,
+        ProcessingEnvironmentModule.class,
+        ProcessingRoundCacheModule.class,
+        ProcessingStepsModule.class,
+        SourceFileGeneratorsModule.class,
+        SpiModule.class
       })
   interface ProcessorComponent {
     ComponentProcessorHelper helper();
@@ -186,9 +194,9 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
     }
 
     @Override
-    public Set<? extends Element> process(
-        Map<String, Set<Element>> elementsByAnnotation) {
-      return delegate.process(
+    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
+      return delegate
+          .process(
               xProcessingEnv,
               Util.transformValues(
                   elementsByAnnotation,

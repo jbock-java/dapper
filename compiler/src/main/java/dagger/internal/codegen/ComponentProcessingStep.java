@@ -44,8 +44,8 @@ import jakarta.inject.Inject;
 import java.util.Set;
 
 /**
- * A {@link JavacBasicAnnotationProcessor.Step} that is responsible for dealing with a component or production component
- * as part of the {@link ComponentProcessor}.
+ * A {@link JavacBasicAnnotationProcessor.Step} that is responsible for dealing with a component or
+ * production component as part of the {@link ComponentProcessor}.
  */
 final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
   private final XMessager messager;
@@ -68,7 +68,7 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
       BindingGraphFactory bindingGraphFactory,
       SourceFileGenerator<BindingGraph> componentGenerator,
       BindingGraphValidator bindingGraphValidator) {
-    super(elementValidator);
+    super(elementValidator, messager);
     this.messager = messager;
     this.componentValidator = componentValidator;
     this.creatorValidator = creatorValidator;

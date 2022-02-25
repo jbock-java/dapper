@@ -24,7 +24,7 @@ public interface XProcessingStep {
    * Unlike {@link #process}, the elements in {@code elementsByAnnotation} are not validated and are those
    * that have been kept being deferred.
    */
-  void processOver(XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation);
+  void processOver(XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
 
   /**
    * The set of annotation qualified names processed by this step.

@@ -25,8 +25,7 @@ import jakarta.inject.Inject;
 import java.util.Set;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
-public final class BindingMethodProcessingStep
-    extends TypeCheckingProcessingStep<XMethodElement> {
+public final class BindingMethodProcessingStep extends TypeCheckingProcessingStep<XMethodElement> {
 
   private final XMessager messager;
   private final AnyBindingMethodValidator anyBindingMethodValidator;
@@ -36,7 +35,7 @@ public final class BindingMethodProcessingStep
       XMessager messager,
       SuperficialValidator elementValidator,
       AnyBindingMethodValidator anyBindingMethodValidator) {
-    super(elementValidator);
+    super(elementValidator, messager);
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }

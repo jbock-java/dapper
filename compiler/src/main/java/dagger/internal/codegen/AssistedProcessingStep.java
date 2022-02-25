@@ -50,7 +50,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
       InjectionAnnotations injectionAnnotations,
       SuperficialValidator elementValidator,
       XMessager messager) {
-    super(elementValidator);
+    super(elementValidator, messager);
     this.injectionAnnotations = injectionAnnotations;
     this.messager = messager;
   }
@@ -61,7 +61,8 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
   }
 
   @Override
-  protected void process(XExecutableParameterElement assisted, ImmutableSet<ClassName> annotations) {
+  protected void process(
+      XExecutableParameterElement assisted, ImmutableSet<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 
