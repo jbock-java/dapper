@@ -18,12 +18,17 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
+import static dagger.internal.codegen.javapoet.TypeNames.listenableFutureOf;
+import static dagger.internal.codegen.javapoet.TypeNames.producedOf;
+import static dagger.internal.codegen.javapoet.TypeNames.producerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.spi.model.RequestKind.LAZY;
+import static dagger.spi.model.RequestKind.PRODUCED;
+import static dagger.spi.model.RequestKind.PRODUCER;
 import static dagger.spi.model.RequestKind.PROVIDER;
 import static dagger.spi.model.RequestKind.PROVIDER_OF_LAZY;
 import static io.jbock.auto.common.MoreTypes.asDeclared;
@@ -39,7 +44,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import javax.lang.model.type.TypeMirror;
 
-/** Utility methods for {@link RequestKind}s. */
+/** Utility methods for {@code RequestKind}s. */
 public final class RequestKinds {
 
   /** Returns the type of a request of this kind for a key with a given type. */
@@ -51,6 +56,9 @@ public final class RequestKinds {
 
       case PROVIDER_OF_LAZY:
         return types.wrapType(requestType(LAZY, type, types), TypeNames.PROVIDER);
+
+      case FUTURE:
+        return types.wrapType(type, TypeNames.LISTENABLE_FUTURE);
 
       default:
         return types.wrapType(type, frameworkClassName(requestKind));
@@ -72,6 +80,15 @@ public final class RequestKinds {
       case PROVIDER_OF_LAZY:
         return providerOf(lazyOf(keyType));
 
+      case PRODUCER:
+        return producerOf(keyType);
+
+      case PRODUCED:
+        return producedOf(keyType);
+
+      case FUTURE:
+        return listenableFutureOf(keyType);
+
       default:
         throw new AssertionError(requestKind);
     }
@@ -80,19 +97,21 @@ public final class RequestKinds {
   private static final ImmutableMap<RequestKind, ClassName> FRAMEWORK_CLASSES =
       ImmutableMap.of(
           PROVIDER, TypeNames.PROVIDER,
-          LAZY, TypeNames.LAZY);
+          LAZY, TypeNames.LAZY,
+          PRODUCER, TypeNames.PRODUCER,
+          PRODUCED, TypeNames.PRODUCED);
 
-  /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
+  /** Returns the {@code RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(XType type) {
     return getRequestKind(toJavac(type));
   }
 
-  /** Returns the {@link RequestKind} that matches the wrapping types (if any) of {@code type}. */
+  /** Returns the {@code RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(TypeMirror type) {
     checkTypePresent(type);
     if (!isType(type) // TODO(b/147320669): isType check can be removed once this bug is fixed.
-            || !type.getKind().equals(DECLARED)
-            || asDeclared(type).getTypeArguments().isEmpty()) {
+        || !type.getKind().equals(DECLARED)
+        || asDeclared(type).getTypeArguments().isEmpty()) {
       // If the type is not a declared type (i.e. class or interface) with type arguments, then we
       // know it can't be a parameterized type of one of the framework classes, so return INSTANCE.
       return RequestKind.INSTANCE;
@@ -110,9 +129,9 @@ public final class RequestKinds {
 
   /**
    * Unwraps the framework class(es) of {@code requestKind} from {@code type}. If {@code
-   * requestKind} is {@link RequestKind#INSTANCE}, this acts as an identity function.
+   * requestKind} is {@code RequestKind#INSTANCE}, this acts as an identity function.
    *
-   * @throws TypeNotPresentException if {@code type} is an {@link javax.lang.model.type.ErrorType},
+   * @throws TypeNotPresentException if {@code type} is an {@code javax.lang.model.type.ErrorType},
    *     which may mean that the type will be generated in a later round of processing
    * @throws IllegalArgumentException if {@code type} is not wrapped with {@code requestKind}'s
    *     framework class(es).
@@ -134,9 +153,9 @@ public final class RequestKinds {
 
   /**
    * Unwraps the framework class(es) of {@code requestKind} from {@code type}. If {@code
-   * requestKind} is {@link RequestKind#INSTANCE}, this acts as an identity function.
+   * requestKind} is {@code RequestKind#INSTANCE}, this acts as an identity function.
    *
-   * @throws TypeNotPresentException if {@code type} is an {@link javax.lang.model.type.ErrorType},
+   * @throws TypeNotPresentException if {@code type} is an {@code javax.lang.model.type.ErrorType},
    *     which may mean that the type will be generated in a later round of processing
    * @throws IllegalArgumentException if {@code type} is not wrapped with {@code requestKind}'s
    *     framework class(es).
@@ -159,13 +178,13 @@ public final class RequestKinds {
 
   /**
    * A dagger- or {@code javax.inject}-defined class for {@code requestKind} that that can wrap
-   * another type but share the same {@link dagger.spi.model.Key}.
+   * another type but share the same {@code dagger.spi.model.Key}.
    *
    * <p>For example, {@code Provider<String>} and {@code Lazy<String>} can both be requested if a
    * key exists for {@code String}; they all share the same key.
    *
    * <p>This concept is not well defined and should probably be removed and inlined into the cases
-   * that need it. For example, {@link RequestKind#PROVIDER_OF_LAZY} has <em>2</em> wrapping
+   * that need it. For example, {@code RequestKind#PROVIDER_OF_LAZY} has <em>2</em> wrapping
    * classes, and {@code RequestKind#FUTURE} is wrapped with a {@code ListenableFuture}, but for
    * historical/implementation reasons has not had an associated framework class.
    */
@@ -185,7 +204,12 @@ public final class RequestKinds {
       case PROVIDER:
       case LAZY:
       case PROVIDER_OF_LAZY:
+      case MEMBERS_INJECTION:
         return false;
+      case PRODUCER:
+      case PRODUCED:
+      case FUTURE:
+        return true;
     }
     throw new AssertionError();
   }

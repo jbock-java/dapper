@@ -22,12 +22,10 @@ import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 // Tests an invalid inject constructor that avoids validation in its own library by using
 // a dependency on jsr330 rather than Dagger gets validated when used in a component.
-@Disabled("ff5516ebb")
 final class InvalidInjectConstructorTest {
 
   @Test

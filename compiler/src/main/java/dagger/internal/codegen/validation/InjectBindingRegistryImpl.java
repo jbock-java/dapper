@@ -16,22 +16,34 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
-import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
+import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
+import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Sets;
+import io.jbock.javapoet.ClassName;
+import dagger.Component;
+import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.Binding;
@@ -40,29 +52,19 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XConstructorElement;
-import dagger.internal.codegen.xprocessing.XFieldElement;
-import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
@@ -197,7 +199,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     this.bindingFactory = bindingFactory;
     this.compilerOptions = compilerOptions;
   }
-
 
   // TODO(dpb): make the SourceFileGenerators fields so they don't have to be passed in
   @Override
@@ -343,24 +344,21 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       return Optional.of(binding);
     }
 
-    // ok, let's see if we can find an @Inject constructor
-    XTypeElement element = key.type().xprocessing().getTypeElement();
-    ImmutableSet<XConstructorElement> injectConstructors =
-        ImmutableSet.<XConstructorElement>builder()
-            .addAll(injectedConstructors(element))
-            .addAll(assistedInjectedConstructors(element))
-            .build();
-    switch (injectConstructors.size()) {
-      case 0:
-        // No constructor found.
-        return Optional.empty();
-      case 1:
-        return tryRegisterConstructor(
-            getOnlyElement(injectConstructors), Optional.of(key.type().xprocessing()), true);
-      default:
-        throw new IllegalStateException("Found multiple @Inject constructors: "
-            + injectConstructors);
+    XType type = key.type().xprocessing();
+    XTypeElement element = type.getTypeElement();
+
+    ValidationReport report = injectValidator.validate(element);
+    report.printMessagesTo(messager);
+    if (!report.isClean()) {
+      return Optional.empty();
     }
+
+    return Stream.concat(
+            injectedConstructors(element).stream(),
+            assistedInjectedConstructors(element).stream())
+        // We're guaranteed that there's at most 1 @Inject constructors from above validation.
+        .collect(toOptional())
+        .flatMap(constructor -> tryRegisterConstructor(constructor, Optional.of(type), true));
   }
 
   @Override
