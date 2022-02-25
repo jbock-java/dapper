@@ -40,6 +40,11 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
       return this;
     }
 
+    public Builder<X, Y> putAll(Map<? extends X, ? extends Y> map) {
+      map.forEach(this::put);
+      return this;
+    }
+
     public ImmutableMap<X, Y> build() {
       return new ImmutableMap<>(delegate);
     }
@@ -53,19 +58,14 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(Map.of(k1, v1));
   }
 
-  public static <K, V> ImmutableMap<K, V> of(
-      K k1, V v1,
-      K k2, V v2) {
+  public static <K, V> ImmutableMap<K, V> of(K k1, V v1, K k2, V v2) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(3);
     result.put(k1, v1);
     result.put(k2, v2);
     return new ImmutableMap<>(result);
   }
 
-  public static <K, V> ImmutableMap<K, V> of(
-      K k1, V v1,
-      K k2, V v2,
-      K k3, V v3) {
+  public static <K, V> ImmutableMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(5);
     result.put(k1, v1);
     result.put(k2, v2);
@@ -73,11 +73,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
     return new ImmutableMap<>(result);
   }
 
-  public static <K, V> ImmutableMap<K, V> of(
-      K k1, V v1,
-      K k2, V v2,
-      K k3, V v3,
-      K k4, V v4) {
+  public static <K, V> ImmutableMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(6);
     result.put(k1, v1);
     result.put(k2, v2);
@@ -87,11 +83,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
   }
 
   public static <K, V> ImmutableMap<K, V> of(
-      K k1, V v1,
-      K k2, V v2,
-      K k3, V v3,
-      K k4, V v4,
-      K k5, V v5) {
+      K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
     LinkedHashMap<K, V> result = new LinkedHashMap<>(8);
     result.put(k1, v1);
     result.put(k2, v2);

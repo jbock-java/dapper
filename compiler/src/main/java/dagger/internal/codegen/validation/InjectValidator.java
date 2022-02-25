@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
@@ -215,7 +214,7 @@ public final class InjectValidator implements ClearableCache {
         scopeErrorMsg += "; annotate the class instead";
       }
 
-      for (Scope scope : scopesOf(constructorElement)) {
+      for (Scope scope : injectionAnnotations.getScopes(constructorElement)) {
         builder.addError(
             scopeErrorMsg,
             constructorElement,

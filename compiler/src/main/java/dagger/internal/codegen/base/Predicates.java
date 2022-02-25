@@ -1,5 +1,6 @@
 package dagger.internal.codegen.base;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -18,8 +19,7 @@ public class Predicates {
     return t -> !predicate.test(t);
   }
 
-  public static <T> Predicate<T> and(
-      Iterable<? extends Predicate<? super T>> components) {
+  public static <T> Predicate<T> and(Iterable<? extends Predicate<? super T>> components) {
     return t -> {
       for (Predicate<? super T> p : components) {
         if (!p.test(t)) {
@@ -28,5 +28,10 @@ public class Predicates {
       }
       return true;
     };
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<T> and(Predicate<T>... components) {
+    return and(Arrays.asList(components));
   }
 }

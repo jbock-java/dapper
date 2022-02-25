@@ -16,57 +16,73 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.base.Functions.constant;
+import static dagger.internal.codegen.base.Predicates.and;
+import static dagger.internal.codegen.base.Predicates.in;
+import static dagger.internal.codegen.base.Predicates.not;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
-import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.base.Joiner;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.binding.ModuleDescriptor;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.LinkedHashMultimap;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.collect.SetMultimap;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
 import jakarta.inject.Inject;
-import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.Formatter;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /** Validates the relationships between parent components and subcomponents. */
 final class ComponentHierarchyValidator {
+  private static final Joiner COMMA_SEPARATED_JOINER = Joiner.on(", ");
+
   private final CompilerOptions compilerOptions;
+  private final InjectionAnnotations injectionAnnotations;
 
   @Inject
   ComponentHierarchyValidator(
-      CompilerOptions compilerOptions) {
+      CompilerOptions compilerOptions, InjectionAnnotations injectionAnnotations) {
     this.compilerOptions = compilerOptions;
+    this.injectionAnnotations = injectionAnnotations;
   }
 
   ValidationReport validate(ComponentDescriptor componentDescriptor) {
-    ValidationReport.Builder report =
-        ValidationReport.about(componentDescriptor.typeElement().toJavac());
+    ValidationReport.Builder report = ValidationReport.about(componentDescriptor.typeElement());
     validateSubcomponentMethods(
         report,
         componentDescriptor,
-        Util.toMap(componentDescriptor.moduleTypes(), module -> componentDescriptor.typeElement()));
-    validateRepeatedScopedDeclarations(report, componentDescriptor, new LinkedHashMap<>());
+        Maps.toMap(componentDescriptor.moduleTypes(), constant(componentDescriptor.typeElement())));
+    validateRepeatedScopedDeclarations(report, componentDescriptor, LinkedHashMultimap.create());
 
     if (compilerOptions.scopeCycleValidationType().diagnosticKind().isPresent()) {
       validateScopeHierarchy(
-          report, componentDescriptor, new LinkedHashMap<>());
+          report, componentDescriptor, LinkedHashMultimap.<ComponentDescriptor, Scope>create());
     }
+    validateProductionModuleUniqueness(report, componentDescriptor, LinkedHashMultimap.create());
     return report.build();
   }
 
   private void validateSubcomponentMethods(
       ValidationReport.Builder report,
       ComponentDescriptor componentDescriptor,
-      Map<XTypeElement, XTypeElement> existingModuleToOwners) {
+      ImmutableMap<XTypeElement, XTypeElement> existingModuleToOwners) {
     componentDescriptor
         .childComponentsDeclaredByFactoryMethods()
         .forEach(
@@ -80,22 +96,24 @@ final class ComponentHierarchyValidator {
                 validateFactoryMethodParameters(report, method, existingModuleToOwners);
               }
 
-              Set<XTypeElement> difference = Util.difference(childComponent.moduleTypes(), existingModuleToOwners.keySet());
-              Map<XTypeElement, XTypeElement> newExistingModuleToOwners = new LinkedHashMap<>(Math.max(16, (int) (1.5 * (existingModuleToOwners.size() + difference.size()))));
-              newExistingModuleToOwners.putAll(existingModuleToOwners);
-              difference.forEach(module ->
-                  newExistingModuleToOwners.put(childComponent.typeElement(), module));
               validateSubcomponentMethods(
                   report,
                   childComponent,
-                  newExistingModuleToOwners);
+                  new ImmutableMap.Builder<XTypeElement, XTypeElement>()
+                      .putAll(existingModuleToOwners)
+                      .putAll(
+                          Maps.toMap(
+                              Sets.difference(
+                                  childComponent.moduleTypes(), existingModuleToOwners.keySet()),
+                              constant(childComponent.typeElement())))
+                      .build());
             });
   }
 
   private void validateFactoryMethodParameters(
       ValidationReport.Builder report,
       ComponentMethodDescriptor subcomponentMethodDescriptor,
-      Map<XTypeElement, XTypeElement> existingModuleToOwners) {
+      ImmutableMap<XTypeElement, XTypeElement> existingModuleToOwners) {
     for (XExecutableParameterElement factoryMethodParameter :
         subcomponentMethodDescriptor.methodElement().getParameters()) {
       XTypeElement moduleType = factoryMethodParameter.getType().getTypeElement();
@@ -119,38 +137,73 @@ final class ComponentHierarchyValidator {
   private void validateScopeHierarchy(
       ValidationReport.Builder report,
       ComponentDescriptor subject,
-      Map<ComponentDescriptor, Set<Scope>> scopesByComponent) {
-    subject.scopes().forEach(scope ->
-        scopesByComponent.merge(subject, Set.of(scope), Util::mutableUnion));
+      SetMultimap<ComponentDescriptor, Scope> scopesByComponent) {
+    scopesByComponent.putAll(subject, subject.scopes());
 
     for (ComponentDescriptor childComponent : subject.childComponents()) {
       validateScopeHierarchy(report, childComponent, scopesByComponent);
     }
 
-    scopesByComponent.remove(subject);
+    scopesByComponent.removeAll(subject);
 
-    Predicate<Scope> subjectScopes = subject.scopes()::contains;
-    Map<ComponentDescriptor, Set<Scope>> overlappingScopes =
-        Util.filterValues(scopesByComponent, subjectScopes);
+    Predicate<Scope> subjectScopes =
+        subject.isProduction()
+            // TODO(beder): validate that @ProductionScope is only applied on production components
+            ? and(in(subject.scopes()), not(Scope::isProductionScope))
+            : in(subject.scopes());
+    SetMultimap<ComponentDescriptor, Scope> overlappingScopes =
+        Multimaps.filterValues(scopesByComponent, subjectScopes);
     if (!overlappingScopes.isEmpty()) {
       StringBuilder error =
           new StringBuilder()
               .append(subject.typeElement().getQualifiedName())
               .append(" has conflicting scopes:");
-      for (Map.Entry<ComponentDescriptor, Set<Scope>> entry : overlappingScopes.entrySet()) {
-        for (Scope scope : entry.getValue()) {
-          error
-              .append("\n  ")
-              .append(entry.getKey().typeElement().getQualifiedName())
-              .append(" also has ")
-              .append(getReadableSource(scope));
-        }
+      for (Map.Entry<ComponentDescriptor, Scope> entry : overlappingScopes.entries()) {
+        Scope scope = entry.getValue();
+        error
+            .append("\n  ")
+            .append(entry.getKey().typeElement().getQualifiedName())
+            .append(" also has ")
+            .append(getReadableSource(scope));
       }
       report.addItem(
           error.toString(),
-          compilerOptions.scopeCycleValidationType().diagnosticKind().orElseThrow(),
-          subject.typeElement().toJavac());
+          compilerOptions.scopeCycleValidationType().diagnosticKind().get(),
+          subject.typeElement());
     }
+  }
+
+  private void validateProductionModuleUniqueness(
+      ValidationReport.Builder report,
+      ComponentDescriptor componentDescriptor,
+      SetMultimap<ComponentDescriptor, ModuleDescriptor> producerModulesByComponent) {
+    ImmutableSet<ModuleDescriptor> producerModules = ImmutableSet.of();
+
+    producerModulesByComponent.putAll(componentDescriptor, producerModules);
+    for (ComponentDescriptor childComponent : componentDescriptor.childComponents()) {
+      validateProductionModuleUniqueness(report, childComponent, producerModulesByComponent);
+    }
+    producerModulesByComponent.removeAll(componentDescriptor);
+
+    SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules =
+        Multimaps.filterValues(producerModulesByComponent, producerModules::contains);
+    if (repeatedModules.isEmpty()) {
+      return;
+    }
+
+    StringBuilder error = new StringBuilder();
+    Formatter formatter = new Formatter(error);
+
+    formatter.format("%s repeats @ProducerModules:", componentDescriptor.typeElement());
+
+    for (Map.Entry<ComponentDescriptor, Collection<ModuleDescriptor>> entry :
+        repeatedModules.asMap().entrySet()) {
+      formatter.format("\n  %s also installs: ", entry.getKey().typeElement());
+      COMMA_SEPARATED_JOINER.appendTo(
+          error, Iterables.transform(entry.getValue(), m -> m.moduleElement()));
+    }
+
+    report.addError(error.toString());
   }
 
   private void validateRepeatedScopedDeclarations(
@@ -158,23 +211,23 @@ final class ComponentHierarchyValidator {
       ComponentDescriptor component,
       // TODO(ronshapiro): optimize ModuleDescriptor.hashCode()/equals. Otherwise this could be
       // quite costly
-      Map<ComponentDescriptor, Set<ModuleDescriptor>> modulesWithScopes) {
-    Set<ModuleDescriptor> modules =
+      SetMultimap<ComponentDescriptor, ModuleDescriptor> modulesWithScopes) {
+    ImmutableSet<ModuleDescriptor> modules =
         component.modules().stream().filter(this::hasScopedDeclarations).collect(toImmutableSet());
-    modules.forEach(module -> modulesWithScopes.merge(component, Set.of(module), Util::mutableUnion));
+    modulesWithScopes.putAll(component, modules);
     for (ComponentDescriptor childComponent : component.childComponents()) {
       validateRepeatedScopedDeclarations(report, childComponent, modulesWithScopes);
     }
-    modulesWithScopes.remove(component);
+    modulesWithScopes.removeAll(component);
 
-    Map<ComponentDescriptor, Set<ModuleDescriptor>> repeatedModules =
-        Util.filterValues(modulesWithScopes, modules::contains);
+    SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules =
+        Multimaps.filterValues(modulesWithScopes, modules::contains);
     if (repeatedModules.isEmpty()) {
       return;
     }
 
     report.addError(
-        repeatedModulesWithScopeError(component, repeatedModules));
+        repeatedModulesWithScopeError(component, ImmutableSetMultimap.copyOf(repeatedModules)));
   }
 
   private boolean hasScopedDeclarations(ModuleDescriptor module) {
@@ -183,13 +236,14 @@ final class ComponentHierarchyValidator {
 
   private String repeatedModulesWithScopeError(
       ComponentDescriptor component,
-      Map<ComponentDescriptor, Set<ModuleDescriptor>> repeatedModules) {
+      ImmutableSetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules) {
     StringBuilder error =
         new StringBuilder()
             .append(component.typeElement().getQualifiedName())
             .append(" repeats modules with scoped bindings or declarations:");
 
     repeatedModules
+        .asMap()
         .forEach(
             (conflictingComponent, conflictingModules) -> {
               error
@@ -201,15 +255,15 @@ final class ComponentHierarchyValidator {
                     .append("\n    - ")
                     .append(conflictingModule.moduleElement().getQualifiedName())
                     .append(" with scopes: ")
-                    .append(moduleScopes(conflictingModule).stream().map(Scope::toString).collect(Collectors.joining(", ")));
+                    .append(COMMA_SEPARATED_JOINER.join(moduleScopes(conflictingModule)));
               }
             });
     return error.toString();
   }
 
-  private Set<Scope> moduleScopes(ModuleDescriptor module) {
+  private ImmutableSet<Scope> moduleScopes(ModuleDescriptor module) {
     return module.allBindingDeclarations().stream()
-        .map(declaration -> uniqueScopeOf(declaration.bindingElement().get()))
+        .map(declaration -> injectionAnnotations.getScope(declaration.bindingElement().get()))
         .filter(scope -> scope.isPresent() && !scope.get().isReusable())
         .map(Optional::get)
         .collect(toImmutableSet());

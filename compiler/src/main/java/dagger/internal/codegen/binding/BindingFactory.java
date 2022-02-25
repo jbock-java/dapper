@@ -21,7 +21,6 @@ import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInE
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.base.Scopes.uniqueScopeOf;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
@@ -267,7 +266,7 @@ public final class BindingFactory {
             .key(keyFactory.forComponentMethod(dependencyMethod))
             .nullableType(getNullableType(dependencyMethod))
             .kind(COMPONENT_PROVISION)
-            .scope(uniqueScopeOf(dependencyMethod));
+            .scope(injectionAnnotations.getScope(dependencyMethod));
     return builder
         .contributionType(ContributionType.UNIQUE)
         .bindingElement(dependencyMethod)
@@ -340,7 +339,7 @@ public final class BindingFactory {
       case PROVISION:
         return buildDelegateBinding(
             ProvisionBinding.builder()
-                .scope(uniqueScopeOf(delegateDeclaration.bindingElement().get()))
+                .scope(injectionAnnotations.getScope(delegateDeclaration.bindingElement().get()))
                 .nullableType(actualBinding.nullableType()),
             delegateDeclaration,
             TypeNames.PROVIDER);
@@ -356,7 +355,8 @@ public final class BindingFactory {
    */
   public ContributionBinding unresolvedDelegateBinding(DelegateDeclaration delegateDeclaration) {
     return buildDelegateBinding(
-        ProvisionBinding.builder().scope(uniqueScopeOf(delegateDeclaration.bindingElement().get())),
+        ProvisionBinding.builder()
+            .scope(injectionAnnotations.getScope(delegateDeclaration.bindingElement().get())),
         delegateDeclaration,
         TypeNames.PROVIDER);
   }

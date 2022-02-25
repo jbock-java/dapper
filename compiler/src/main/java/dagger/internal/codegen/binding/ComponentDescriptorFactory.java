@@ -16,40 +16,39 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotation;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
-import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.binding.ComponentCreatorAnnotation.creatorAnnotationsFor;
 import static dagger.internal.codegen.binding.ComponentDescriptor.isComponentContributionMethod;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import dagger.internal.codegen.base.ComponentAnnotation;
-import dagger.internal.codegen.base.ModuleAnnotation;
-import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
-import dagger.internal.codegen.collect.ImmutableBiMap;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableBiMap;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.internal.codegen.base.ModuleAnnotation;
+import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.spi.model.Scope;
-import jakarta.inject.Inject;
 import java.util.Optional;
+import jakarta.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 
 /** A factory for {@code ComponentDescriptor}s. */
@@ -173,7 +172,7 @@ public final class ComponentDescriptorFactory {
                 ComponentCreatorDescriptor.create(
                     getOnlyElement(enclosedCreators), types, dependencyRequestFactory));
 
-    ImmutableSet<Scope> scopes = scopesOf(typeElement);
+    ImmutableSet<Scope> scopes = injectionAnnotations.getScopes(typeElement);
     if (componentAnnotation.isProduction()) {
       scopes =
           ImmutableSet.<Scope>builder().addAll(scopes).build();
@@ -219,7 +218,10 @@ public final class ComponentDescriptorFactory {
       case 0:
         checkArgument(!isVoid(returnType), "component method cannot be void: %s", componentMethod);
         descriptor.dependencyRequest(
-            dependencyRequestFactory.forComponentProvisionMethod(
+            componentAnnotation.isProduction()
+                ? dependencyRequestFactory.forComponentProductionMethod(
+                    componentMethod, resolvedComponentMethod)
+                : dependencyRequestFactory.forComponentProvisionMethod(
                     componentMethod, resolvedComponentMethod));
         break;
 

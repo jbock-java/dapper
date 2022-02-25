@@ -8,7 +8,8 @@ import java.util.function.Predicate;
 
 public class Multimaps {
 
-  public static <K, V> ImmutableListMultimap<K, V> index(Iterable<V> values, Function<? super V, K> keyFunction) {
+  public static <K, V> ImmutableListMultimap<K, V> index(
+      Iterable<V> values, Function<? super V, K> keyFunction) {
     ImmutableListMultimap.Builder<K, V> result = ImmutableListMultimap.builder();
     for (V v : values) {
       result.put(keyFunction.apply(v), v);
@@ -23,8 +24,7 @@ public class Multimaps {
 
   @SuppressWarnings("unchecked")
   // safe by specification of ListMultimap.asMap()
-  public static <K, V> Map<K, List<V>> asMap(
-      ListMultimap<K, V> multimap) {
+  public static <K, V> Map<K, List<V>> asMap(ListMultimap<K, V> multimap) {
     return (Map<K, List<V>>) (Map<K, ?>) multimap.asMap();
   }
 
@@ -36,8 +36,16 @@ public class Multimaps {
    */
   @SuppressWarnings("unchecked")
   // safe by specification of SetMultimap.asMap()
-  public static <K, V> Map<K, Set<V>> asMap(
-      SetMultimap<K, V> multimap) {
+  public static <K, V> Map<K, Set<V>> asMap(SetMultimap<K, V> multimap) {
     return (Map<K, Set<V>>) (Map<K, ?>) multimap.asMap();
+  }
+
+  public static <K, V> SetMultimap<K, V> filterValues(
+      SetMultimap<K, V> unfiltered, Predicate<? super V> valuePredicate) {
+    ImmutableSetMultimap.Builder<K, V> builder = ImmutableSetMultimap.builder();
+    unfiltered.entries().stream()
+        .filter(e -> valuePredicate.test(e.getValue()))
+        .forEach(e -> builder.put(e.getKey(), e.getValue()));
+    return builder.build();
   }
 }

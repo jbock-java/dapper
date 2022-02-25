@@ -111,4 +111,8 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     Set<V> result = map.put(key, ImmutableSet.copyOf(values));
     return result == null ? Set.of() : result;
   }
+
+  public void removeAll(K subject) {
+    map.remove(subject);
+  }
 }

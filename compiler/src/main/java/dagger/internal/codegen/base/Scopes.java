@@ -17,28 +17,11 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.DiagnosticFormatting.stripCommonTypePrefixes;
-import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
 
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.Sets;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Scope;
-import java.util.Optional;
 
 /** Common names and convenience methods for {@code Scope}s. */
 public final class Scopes {
-
-  /**
-   * Returns at most one associated scoped annotation from the source code element, throwing an
-   * exception if there are more than one.
-   */
-  public static Optional<Scope> uniqueScopeOf(XElement element) {
-    return scopesOf(element).stream().collect(toOptional());
-  }
 
   /**
    * Returns the readable source representation (name with @ prefix) of the scope's annotation type.
@@ -48,15 +31,5 @@ public final class Scopes {
    */
   public static String getReadableSource(Scope scope) {
     return stripCommonTypePrefixes(scope.toString());
-  }
-
-  /** Returns all of the associated scopes for a source code element. */
-  public static ImmutableSet<Scope> scopesOf(XElement element) {
-    return Sets.union(
-            getAnnotatedAnnotations(element, TypeNames.SCOPE))
-        .stream()
-        .map(DaggerAnnotation::from)
-        .map(Scope::scope)
-        .collect(toImmutableSet());
   }
 }
