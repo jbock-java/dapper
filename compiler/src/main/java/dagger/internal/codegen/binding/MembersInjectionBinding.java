@@ -16,13 +16,11 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static java.util.stream.Collectors.toList;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
-import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingKind;
@@ -130,11 +128,8 @@ public abstract class MembersInjectionBinding extends Binding {
      */
     @Memoized
     public int indexAmongAtInjectMembersWithSameSimpleName() {
-      return element()
-          .getEnclosingElement()
-          .getEnclosedElements()
-          .stream()
-          .filter(element -> isAnnotationPresent(element, TypeNames.INJECT))
+      return element().getEnclosingElement().getEnclosedElements().stream()
+          .filter(InjectionAnnotations::hasInjectAnnotation)
           .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE))
           .filter(element -> element.getSimpleName().equals(this.element().getSimpleName()))
           .collect(toList())

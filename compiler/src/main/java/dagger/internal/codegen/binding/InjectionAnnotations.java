@@ -27,7 +27,7 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
-import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
@@ -43,7 +43,9 @@ import static javax.lang.model.util.ElementFilter.constructorsIn;
 import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.collect.FluentIterable;
 import dagger.internal.codegen.collect.ImmutableCollection;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.extension.DaggerCollectors;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -65,6 +67,7 @@ import io.jbock.auto.common.SuperficialValidation;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -97,7 +100,7 @@ public final class InjectionAnnotations {
    * Returns the scope on the inject constructor's type if it exists.
    *
    * @throws IllegalArgumentException if the given constructor is not an inject constructor or there
-   *   are more than one scope annotations present.
+   *     are more than one scope annotations present.
    */
   public Optional<Scope> getScope(XConstructorElement injectConstructor) {
     return getScopes(injectConstructor).stream().collect(toOptional());
@@ -109,7 +112,7 @@ public final class InjectionAnnotations {
    * @throws IllegalArgumentException if the given constructor is not an inject constructor.
    */
   public ImmutableSet<Scope> getScopes(XConstructorElement injectConstructor) {
-    checkArgument(injectConstructor.hasAnyAnnotation(TypeNames.INJECT, TypeNames.ASSISTED_INJECT));
+    checkArgument(hasInjectOrAssistedInjectAnnotation(injectConstructor));
     XTypeElement factory = processingEnv.findTypeElement(factoryNameForElement(injectConstructor));
     if (factory != null && factory.hasAnnotation(TypeNames.SCOPE_METADATA)) {
       String scopeName = factory.getAnnotation(TypeNames.SCOPE_METADATA).getAsString("value");
@@ -143,8 +146,8 @@ public final class InjectionAnnotations {
     }
 
     // Fall back to validating all annotations if the ScopeMetadata isn't available.
-    DaggerSuperficialValidation
-        .strictValidateAnnotationsOf(injectConstructor.getEnclosingElement());
+    DaggerSuperficialValidation.strictValidateAnnotationsOf(
+        injectConstructor.getEnclosingElement());
     return Scopes.scopesOf(injectConstructor.getEnclosingElement());
   }
 
@@ -163,7 +166,7 @@ public final class InjectionAnnotations {
       }
     }
     checkNotNull(e);
-    ImmutableCollection<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
+    ImmutableList<? extends AnnotationMirror> qualifierAnnotations = getQualifiers(e);
     switch (qualifierAnnotations.size()) {
       case 0:
         return Optional.empty();
@@ -178,11 +181,10 @@ public final class InjectionAnnotations {
   private boolean isFromInjectType(Element element) {
     switch (element.getKind()) {
       case FIELD:
-        return isAnnotationPresent(element, TypeNames.INJECT);
+        return hasInjectAnnotation(element);
       case PARAMETER:
         // Handles both @Inject constructors and @Inject methods.
-        return isAnnotationPresent(element.getEnclosingElement(), TypeNames.INJECT)
-            || isAnnotationPresent(element.getEnclosingElement(), TypeNames.ASSISTED_INJECT);
+        return hasInjectOrAssistedInjectAnnotation(element.getEnclosingElement());
       default:
         return false;
     }
@@ -194,17 +196,18 @@ public final class InjectionAnnotations {
         .collect(toImmutableSet());
   }
 
-  public ImmutableCollection<? extends AnnotationMirror> getQualifiers(Element element) {
-    ImmutableSet<? extends AnnotationMirror> qualifiers =
+  public ImmutableList<? extends AnnotationMirror> getQualifiers(Element element) {
+    Set<? extends AnnotationMirror> qualifiers =
         isFromInjectType(element)
             ? getQualifiersForInjectType(toXProcessing(element, processingEnv)).stream()
                 .map(XConverters::toJavac)
                 .collect(toImmutableSet())
-            : DaggerElements.getAnnotatedAnnotations(element, TypeNames.QUALIFIER);
+            : Sets.union(
+                DaggerElements.getAnnotatedAnnotations(element, TypeNames.QUALIFIER));
     if (element.getKind() == ElementKind.FIELD
         // static injected fields are not supported, no need to get qualifier from kotlin metadata
         && !element.getModifiers().contains(STATIC)
-        && isAnnotationPresent(element, TypeNames.INJECT)
+        && hasInjectAnnotation(element)
         && kotlinMetadataUtil.hasMetadata(element)) {
       return Stream.concat(
               qualifiers.stream(), getQualifiersForKotlinProperty(asVariable(element)).stream())
@@ -213,7 +216,7 @@ public final class InjectionAnnotations {
           .map(Wrapper::get)
           .collect(DaggerStreams.toImmutableList());
     } else {
-      return qualifiers.asList();
+      return ImmutableList.copyOf(qualifiers);
     }
   }
 
@@ -248,14 +251,20 @@ public final class InjectionAnnotations {
       // even though we know it's a qualifier because the type is no longer on the classpath. Once
       // we fix issue #3136, the superficial validation above will fail in this case, but until then
       // keep the same behavior and return an empty set.
-      return qualifierAnnotation.getType().getTypeElement().hasAnnotation(TypeNames.QUALIFIER)
+      return qualifierAnnotation
+              .getType()
+              .getTypeElement()
+              .hasAnyAnnotation(TypeNames.QUALIFIER)
           ? ImmutableSet.of(qualifierAnnotation)
           : ImmutableSet.of();
     }
 
     // Fall back to validating all annotations if the ScopeMetadata isn't available.
     DaggerSuperficialValidation.strictValidateAnnotationsOf(element);
-    return ImmutableSet.copyOf(element.getAnnotationsAnnotatedWith(TypeNames.QUALIFIER));
+
+    return Sets.union(
+            element.getAnnotationsAnnotatedWith(TypeNames.QUALIFIER))
+        .immutableCopy();
   }
 
   private ClassName generatedClassNameForInjectType(XElement element) {
@@ -274,15 +283,37 @@ public final class InjectionAnnotations {
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
   public static ImmutableSet<XConstructorElement> injectedConstructors(XTypeElement type) {
     return type.getConstructors().stream()
-        .filter(constructor -> constructor.hasAnnotation(TypeNames.INJECT))
+        .filter(InjectionAnnotations::hasInjectAnnotation)
         .collect(toImmutableSet());
   }
 
   /** Returns the constructors in {@code type} that are annotated with {@code Inject}. */
   public static ImmutableSet<ExecutableElement> injectedConstructors(TypeElement type) {
     return FluentIterable.from(constructorsIn(type.getEnclosedElements()))
-        .filter(constructor -> isAnnotationPresent(constructor, TypeNames.INJECT))
+        .filter(InjectionAnnotations::hasInjectAnnotation)
         .toSet();
+  }
+
+  /** Returns true if the given element is annotated with {@code Inject}. */
+  public static boolean hasInjectAnnotation(XElement element) {
+    return element.hasAnyAnnotation(TypeNames.INJECT);
+  }
+
+  /** Returns true if the given element is annotated with {@code Inject}. */
+  public static boolean hasInjectAnnotation(Element element) {
+    return isAnyAnnotationPresent(element, TypeNames.INJECT);
+  }
+
+  /** Returns true if the given element is annotated with {@code Inject}. */
+  public static boolean hasInjectOrAssistedInjectAnnotation(XElement element) {
+    return element.hasAnyAnnotation(
+        TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+  }
+
+  /** Returns true if the given element is annotated with {@code Inject}. */
+  public static boolean hasInjectOrAssistedInjectAnnotation(Element element) {
+    return isAnyAnnotationPresent(
+        element, TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   /**
@@ -329,7 +360,10 @@ public final class InjectionAnnotations {
             "No MembersInjector found for " + fieldElement.getEnclosingElement());
       }
     } else {
-      return kotlinMetadataUtil.getSyntheticPropertyAnnotations(fieldElement, TypeNames.QUALIFIER);
+      return ImmutableSet.<AnnotationMirror>builder()
+          .addAll(
+              kotlinMetadataUtil.getSyntheticPropertyAnnotations(fieldElement, TypeNames.QUALIFIER))
+          .build();
     }
   }
 }

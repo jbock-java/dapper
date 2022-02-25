@@ -95,15 +95,13 @@ public final class BindingFactory {
    * Returns an {@code dagger.spi.model.BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
-   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class and the
-   *     binding should be for the parameterized type
+   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class
+   *     and the binding should be for the parameterized type
    */
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
       XConstructorElement constructorElement, Optional<XType> resolvedEnclosingType) {
-    checkArgument(
-        constructorElement.hasAnnotation(TypeNames.INJECT)
-            || constructorElement.hasAnnotation(TypeNames.ASSISTED_INJECT));
+    checkArgument(InjectionAnnotations.hasInjectOrAssistedInjectAnnotation(constructorElement));
 
     XConstructorType constructorType = constructorElement.getExecutableType();
     XType enclosingType = constructorElement.getEnclosingElement().getType();
@@ -180,11 +178,11 @@ public final class BindingFactory {
   public ProvisionBinding providesMethodBinding(
       XMethodElement providesMethod, XTypeElement contributedBy) {
     return setMethodBindingProperties(
-        ProvisionBinding.builder(),
-        providesMethod,
-        contributedBy,
-        keyFactory.forProvidesMethod(providesMethod, contributedBy),
-        this::providesMethodBinding)
+            ProvisionBinding.builder(),
+            providesMethod,
+            contributedBy,
+            keyFactory.forProvidesMethod(providesMethod, contributedBy),
+            this::providesMethodBinding)
         .kind(PROVISION)
         .scope(uniqueScopeOf(providesMethod))
         .nullableType(getNullableType(providesMethod))
@@ -192,12 +190,12 @@ public final class BindingFactory {
   }
 
   private <C extends ContributionBinding, B extends ContributionBinding.Builder<C, B>>
-  B setMethodBindingProperties(
-      B builder,
-      XMethodElement method,
-      XTypeElement contributedBy,
-      Key key,
-      BiFunction<XMethodElement, XTypeElement, C> create) {
+      B setMethodBindingProperties(
+          B builder,
+          XMethodElement method,
+          XTypeElement contributedBy,
+          Key key,
+          BiFunction<XMethodElement, XTypeElement, C> create) {
     XMethodType methodType = method.asMemberOf(contributedBy.getType());
     if (!types.isSameType(toJavac(methodType), toJavac(method.getExecutableType()))) {
       checkState(isTypeElement(method.getEnclosingElement()));
@@ -326,7 +324,6 @@ public final class BindingFactory {
   ContributionBinding delegateBinding(
       DelegateDeclaration delegateDeclaration, ContributionBinding actualBinding) {
     switch (actualBinding.bindingType()) {
-
       case PROVISION:
         return buildDelegateBinding(
             ProvisionBinding.builder()
@@ -403,7 +400,7 @@ public final class BindingFactory {
         dependencies,
         hasNonDefaultTypeParameters(type)
             ? Optional.of(
-            membersInjectionBinding(type.getTypeElement().getType(), Optional.empty()))
+                membersInjectionBinding(type.getTypeElement().getType(), Optional.empty()))
             : Optional.empty(),
         injectionSites);
   }

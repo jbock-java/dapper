@@ -16,19 +16,30 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.factoryNameForElement;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 
+import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.binding.DaggerSuperficialValidation;
+import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
+import dagger.internal.codegen.langmodel.Accessibility;
+import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -38,30 +49,19 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
-import dagger.internal.codegen.collect.ImmutableSet;
-import io.jbock.javapoet.ClassName;
-import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.binding.DaggerSuperficialValidation;
-import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.Accessibility;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.spi.model.Scope;
+import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 
 /**
- * A {@code ValidationReport validator} for {@code Inject}-annotated elements and the types
- * that contain them.
+ * A {@code ValidationReport validator} for {@code Inject}-annotated elements and the types that
+ * contain them.
  */
 @Singleton
 public final class InjectValidator implements ClearableCache {
@@ -164,8 +164,7 @@ public final class InjectValidator implements ClearableCache {
         builder.addError(
             String.format(
                 "Type %s may only contain one injected constructor. Found: %s",
-                typeElement,
-                injectConstructors),
+                typeElement, injectConstructors),
             typeElement);
     }
 
@@ -177,13 +176,16 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder builder =
         ValidationReport.about(constructorElement.getEnclosingElement());
 
-    if (constructorElement.hasAnnotation(TypeNames.INJECT)
+    if (InjectionAnnotations.hasInjectAnnotation(constructorElement)
         && constructorElement.hasAnnotation(TypeNames.ASSISTED_INJECT)) {
       builder.addError("Constructors cannot be annotated with both @Inject and @AssistedInject");
     }
 
     ClassName injectAnnotation =
-        getAnyAnnotation(constructorElement, TypeNames.INJECT, TypeNames.ASSISTED_INJECT)
+        getAnyAnnotation(
+                constructorElement,
+                TypeNames.INJECT,
+                TypeNames.ASSISTED_INJECT)
             .map(XAnnotations::getClassName)
             .get();
 
@@ -333,8 +335,10 @@ public final class InjectValidator implements ClearableCache {
 
     // No need to resolve thrown types since we're only checking existence.
     if (!methodElement.getThrownTypes().isEmpty()) {
-      builder.addError("Methods with @Inject may not throw checked exceptions. "
-          + "Please wrap your exceptions in a RuntimeException instead.", methodElement);
+      builder.addError(
+          "Methods with @Inject may not throw checked exceptions. "
+              + "Please wrap your exceptions in a RuntimeException instead.",
+          methodElement);
     }
 
     for (XExecutableParameterElement parameter : methodElement.getParameters()) {
@@ -369,7 +373,7 @@ public final class InjectValidator implements ClearableCache {
     ValidationReport.Builder builder = ValidationReport.about(typeElement);
     boolean hasInjectedMembers = false;
     for (XFieldElement field : typeElement.getDeclaredFields()) {
-      if (field.hasAnnotation(TypeNames.INJECT)) {
+      if (InjectionAnnotations.hasInjectAnnotation(field)) {
         hasInjectedMembers = true;
         ValidationReport report = validateField(field);
         if (!report.isClean()) {
@@ -378,7 +382,7 @@ public final class InjectValidator implements ClearableCache {
       }
     }
     for (XMethodElement method : typeElement.getDeclaredMethods()) {
-      if (method.hasAnnotation(TypeNames.INJECT)) {
+      if (InjectionAnnotations.hasInjectAnnotation(method)) {
         hasInjectedMembers = true;
         ValidationReport report = validateMethod(method);
         if (!report.isClean()) {

@@ -25,15 +25,13 @@ import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,7 +43,7 @@ import java.util.Set;
 // SuperficialInjectValidator rather than SuperficialValidator.
 final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   private final InjectBindingRegistry injectBindingRegistry;
-  private final Set<XElement> processedElements = new HashSet<>();
+  private final Set<XElement> processedElements = Sets.newHashSet();
 
   @Inject
   InjectProcessingStep(
@@ -56,8 +54,8 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   }
 
   @Override
-  public Set<ClassName> annotationClassNames() {
-    return new LinkedHashSet<>(List.of(TypeNames.INJECT, TypeNames.ASSISTED_INJECT));
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   @Override
@@ -75,6 +73,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
     } else if (isMethod(injectElement)) {
       injectBindingRegistry.tryRegisterInjectMethod(asMethod(injectElement));
     }
+
     processedElements.add(injectElement);
   }
 }

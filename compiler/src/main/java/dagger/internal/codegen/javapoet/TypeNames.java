@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.javapoet;
 
-
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;

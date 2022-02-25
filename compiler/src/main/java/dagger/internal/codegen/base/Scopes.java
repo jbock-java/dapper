@@ -22,13 +22,14 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
 
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Scope;
 import java.util.Optional;
 
-/** Common names and convenience methods for {@link Scope}s. */
+/** Common names and convenience methods for {@code Scope}s. */
 public final class Scopes {
 
   /**
@@ -43,7 +44,7 @@ public final class Scopes {
    * Returns the readable source representation (name with @ prefix) of the scope's annotation type.
    *
    * <p>It's readable source because it has had common package prefixes removed, e.g.
-   * {@code @jakarta.inject.Singleton} is returned as {@code @Singleton}.
+   * {@code @javax.inject.Singleton} is returned as {@code @Singleton}.
    */
   public static String getReadableSource(Scope scope) {
     return stripCommonTypePrefixes(scope.toString());
@@ -51,7 +52,9 @@ public final class Scopes {
 
   /** Returns all of the associated scopes for a source code element. */
   public static ImmutableSet<Scope> scopesOf(XElement element) {
-    return getAnnotatedAnnotations(element, TypeNames.SCOPE).stream()
+    return Sets.union(
+            getAnnotatedAnnotations(element, TypeNames.SCOPE))
+        .stream()
         .map(DaggerAnnotation::from)
         .map(Scope::scope)
         .collect(toImmutableSet());

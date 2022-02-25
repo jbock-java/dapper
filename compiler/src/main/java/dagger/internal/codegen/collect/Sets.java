@@ -1,6 +1,7 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.extension.DaggerStreams;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -29,7 +30,11 @@ public class Sets {
         .collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
-  public static <E> ImmutableSet<E> union(Set<E> set1, Set<E> set2) {
+  public static <E> ImmutableSet<E> union(Set<? extends E> set1) {
+    return ImmutableSet.copyOf(set1);
+  }
+
+  public static <E> ImmutableSet<E> union(Set<? extends E> set1, Set<? extends E> set2) {
     Set<E> result = new LinkedHashSet<>(Math.max(4, (int) (1.5 * (set1.size() + set2.size()))));
     result.addAll(set1);
     result.addAll(set2);

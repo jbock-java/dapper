@@ -27,7 +27,6 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XAnnotations.getClassName;
-import static dagger.internal.codegen.xprocessing.XElements.getAnnotatedAnnotations;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
@@ -38,6 +37,7 @@ import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
@@ -59,6 +59,7 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingGraph;
+import dagger.spi.model.Scope;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
@@ -353,8 +354,8 @@ public final class ModuleValidator {
    * <p>Checks that the referenced modules are non-generic types annotated with {@code @Module} or
    * {@code @ProducerModule}.
    *
-   * <p>If the referenced module is in the {@code #addKnownModules(Collection) known modules
-   * set} and has errors, reports an error at that module's inclusion.
+   * <p>If the referenced module is in the {@code #addKnownModules(Collection) known modules set}
+   * and has errors, reports an error at that module's inclusion.
    *
    * @param annotatedType the annotated module or component
    * @param annotation the annotation specifying the referenced modules ({@code @Component},
@@ -550,13 +551,13 @@ public final class ModuleValidator {
 
   private void validateNoScopeAnnotationsOnModuleElement(
       XTypeElement module, ModuleKind moduleKind, ValidationReport.Builder report) {
-    for (XAnnotation scope : getAnnotatedAnnotations(module, TypeNames.SCOPE)) {
+    for (Scope scope : Scopes.scopesOf(module)) {
       report.addError(
           String.format(
               "@%ss cannot be scoped. Did you mean to scope a method instead?",
               moduleKind.annotation().simpleName()),
           module,
-          scope);
+          scope.scopeAnnotation().xprocessing());
     }
   }
 
