@@ -18,6 +18,7 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
@@ -63,8 +64,12 @@ public final class ComponentRequestRepresentations {
   private final MembersInjectionBindingRepresentation.Factory
       membersInjectionBindingRepresentationFactory;
   private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
+  private final ExperimentalSwitchingProviderDependencyRepresentation.Factory
+      experimentalSwitchingProviderDependencyRepresentationFactory;
   private final DaggerTypes types;
   private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
+  private final Map<Binding, ExperimentalSwitchingProviderDependencyRepresentation>
+      experimentalSwitchingProviderDependencyRepresentations = new HashMap<>();
 
   @Inject
   ComponentRequestRepresentations(
@@ -74,6 +79,8 @@ public final class ComponentRequestRepresentations {
       ComponentRequirementExpressions componentRequirementExpressions,
       MembersInjectionBindingRepresentation.Factory membersInjectionBindingRepresentationFactory,
       ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory,
+      ExperimentalSwitchingProviderDependencyRepresentation.Factory
+          experimentalSwitchingProviderDependencyRepresentationFactory,
       DaggerTypes types) {
     this.parent = parent;
     this.graph = graph;
@@ -81,6 +88,8 @@ public final class ComponentRequestRepresentations {
     this.membersInjectionBindingRepresentationFactory =
         membersInjectionBindingRepresentationFactory;
     this.provisionBindingRepresentationFactory = provisionBindingRepresentationFactory;
+    this.experimentalSwitchingProviderDependencyRepresentationFactory =
+        experimentalSwitchingProviderDependencyRepresentationFactory;
     this.componentRequirementExpressions = checkNotNull(componentRequirementExpressions);
     this.types = types;
   }
@@ -215,5 +224,30 @@ public final class ComponentRequestRepresentations {
         return provisionBindingRepresentationFactory.create((ProvisionBinding) binding);
     }
     throw new AssertionError();
+  }
+
+  /**
+   * Returns an {@code ExperimentalSwitchingProviderDependencyRepresentation} for the requested
+   * binding to satisfy dependency requests on it from experimental switching providers. Cannot be
+   * used for Members Injection requests.
+   */
+  ExperimentalSwitchingProviderDependencyRepresentation
+      getExperimentalSwitchingProviderDependencyRepresentation(BindingRequest request) {
+    checkState(
+        componentImplementation.compilerMode().isExperimentalMergedMode(),
+        "Compiler mode should be experimentalMergedMode!");
+    Optional<Binding> localBinding = graph.localContributionBinding(request.key());
+
+    if (localBinding.isPresent()) {
+      return reentrantComputeIfAbsent(
+          experimentalSwitchingProviderDependencyRepresentations,
+          localBinding.get(),
+          binding ->
+              experimentalSwitchingProviderDependencyRepresentationFactory.create(
+                  (ProvisionBinding) binding));
+    }
+
+    checkArgument(parent.isPresent(), "no expression found for %s", request);
+    return parent.get().getExperimentalSwitchingProviderDependencyRepresentation(request);
   }
 }
