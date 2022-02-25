@@ -16,10 +16,10 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.collect.Lists.reverse;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static java.util.stream.Collectors.joining;
+import static io.jbock.auto.common.MoreElements.isType;
 
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
@@ -29,10 +29,12 @@ import io.jbock.auto.common.MoreTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
@@ -73,8 +75,7 @@ public final class DaggerSuperficialValidation {
     try {
       validateType(element.getKind() + " type", element.asType());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -92,8 +93,7 @@ public final class DaggerSuperficialValidation {
     try {
       validateType("super type", element.getSuperclass());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -111,8 +111,7 @@ public final class DaggerSuperficialValidation {
     try {
       validateTypes("thrown type", element.getThrownTypes());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -125,8 +124,7 @@ public final class DaggerSuperficialValidation {
     try {
       validateAnnotations(element.getAnnotationMirrors());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -192,8 +190,7 @@ public final class DaggerSuperficialValidation {
     try {
       strictValidateAnnotation(annotation);
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -278,8 +275,7 @@ public final class DaggerSuperficialValidation {
     try {
       element.accept(ELEMENT_VALIDATING_VISITOR, null);
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", element.getKind(), element));
+      throw ValidationException.from(exception).append(element);
     }
   }
 
@@ -359,7 +355,7 @@ public final class DaggerSuperficialValidation {
    * ExecutableType}, the parameter and return types must be fully defined, as must types declared
    * in a {@code throws} clause or in the bounds of any type parameters.
    */
-  public static void validateType(String desc, TypeMirror type) {
+  private static void validateType(String desc, TypeMirror type) {
     try {
       type.accept(TYPE_VALIDATING_VISITOR, null);
     } catch (RuntimeException e) {
@@ -368,7 +364,7 @@ public final class DaggerSuperficialValidation {
     }
   }
 
-  public static void validateAnnotations(Iterable<? extends AnnotationMirror> annotationMirrors) {
+  private static void validateAnnotations(Iterable<? extends AnnotationMirror> annotationMirrors) {
     for (AnnotationMirror annotationMirror : annotationMirrors) {
       validateAnnotation(annotationMirror);
     }
@@ -393,24 +389,20 @@ public final class DaggerSuperficialValidation {
       }
       validateAnnotationValues(annotationMirror.getElementValues());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          // Note: Calling #toString() directly on the annotation throws NPE (b/216180336).
-          .append("annotation: " + AnnotationMirrors.toString(annotationMirror));
+      throw ValidationException.from(exception).append(annotationMirror);
     }
   }
 
-  public static void validateAnnotation(AnnotationMirror annotationMirror) {
+  private static void validateAnnotation(AnnotationMirror annotationMirror) {
     try {
       validateType("annotation type", annotationMirror.getAnnotationType());
       validateAnnotationValues(annotationMirror.getElementValues());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception)
-          // Note: Calling #toString() directly on the annotation throws NPE (b/216180336).
-          .append("annotation: " + AnnotationMirrors.toString(annotationMirror));
+      throw ValidationException.from(exception).append(annotationMirror);
     }
   }
 
-  public static void validateAnnotationValues(
+  private static void validateAnnotationValues(
       Map<? extends ExecutableElement, ? extends AnnotationValue> valueMap) {
     valueMap.forEach(
         (method, annotationValue) -> {
@@ -622,6 +614,7 @@ public final class DaggerSuperficialValidation {
           : new ValidationException(throwable);
     }
 
+    private Optional<Element> lastReportedElement = Optional.empty();
     private final boolean fromUnexpectedThrowable;
     private final List<String> messages = new ArrayList<>();
 
@@ -640,8 +633,26 @@ public final class DaggerSuperficialValidation {
       return fromUnexpectedThrowable;
     }
 
+    /**
+     * Appends a message for the given element and returns this instance of {@code
+     * ValidationException}
+     */
+    private ValidationException append(Element element) {
+      lastReportedElement = Optional.of(element);
+      return append(getMessageForElement(element));
+    }
+
+    /**
+     * Appends a message for the given annotation mirror and returns this instance of {@code
+     * ValidationException}
+     */
+    private ValidationException append(AnnotationMirror annotationMirror) {
+      // Note: Calling #toString() directly on the annotation throws NPE (b/216180336).
+      return append(String.format("annotation: %s", AnnotationMirrors.toString(annotationMirror)));
+    }
+
     /** Appends the given message and returns this instance of {@code ValidationException} */
-    public ValidationException append(String message) {
+    private ValidationException append(String message) {
       messages.add(message);
       return this;
     }
@@ -650,11 +661,42 @@ public final class DaggerSuperficialValidation {
     public String getMessage() {
       return String.format(
           "\n  Validation trace:\n    => %s",
-          reverse(messages).stream().collect(joining("\n    => ")));
+          String.join("\n    => ", getMessageInternal().reverse()));
+    }
+
+    private ImmutableList<String> getMessageInternal() {
+      if (!lastReportedElement.isPresent()) {
+        return ImmutableList.copyOf(messages);
+      }
+      // Append any enclosing element information if needed.
+      List<String> newMessages = new ArrayList<>(messages);
+      Element element = lastReportedElement.get();
+      while (shouldAppendEnclosingElement(element)) {
+        element = element.getEnclosingElement();
+        newMessages.add(getMessageForElement(element));
+      }
+      return ImmutableList.copyOf(newMessages);
+    }
+
+    private static boolean shouldAppendEnclosingElement(Element element) {
+      return element.getEnclosingElement() != null
+          // We don't report enclosing elements for types because the type name should contain any
+          // enclosing type and package information we need.
+          && !isType(element)
+          && (isExecutable(element.getEnclosingElement()) || isType(element.getEnclosingElement()));
+    }
+
+    private static boolean isExecutable(Element element) {
+      return element.getKind() == ElementKind.METHOD
+          || element.getKind() == ElementKind.CONSTRUCTOR;
+    }
+
+    private String getMessageForElement(Element element) {
+      return String.format("%s element: %s", element.getKind(), element);
     }
   }
 
-  public static void validateAnnotationValue(
+  private static void validateAnnotationValue(
       AnnotationValue annotationValue, TypeMirror expectedType) {
     annotationValue.accept(VALUE_VALIDATING_VISITOR, expectedType);
   }
