@@ -21,7 +21,6 @@ import static dagger.internal.codegen.base.Verify.verifyNotNull;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -36,10 +35,13 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XElements;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
 import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +61,8 @@ public abstract class BindingElementValidator<E extends XElement> {
   // rather than inheritance. The web of inheritance makes it difficult to track what implementation
   // of a method is actually being used.
   protected BindingElementValidator(
-      AllowsScoping allowsScoping, InjectionAnnotations injectionAnnotations) {
+      AllowsScoping allowsScoping,
+      InjectionAnnotations injectionAnnotations) {
     this.allowsScoping = allowsScoping;
     this.injectionAnnotations = injectionAnnotations;
   }
@@ -135,6 +138,8 @@ public abstract class BindingElementValidator<E extends XElement> {
     private ValidationReport validate() {
       checkType();
       checkQualifiers();
+      checkMapKeys();
+      checkMultibindings();
       checkScopes();
       checkAdditionalProperties();
       return report.build();
@@ -238,14 +243,40 @@ public abstract class BindingElementValidator<E extends XElement> {
       }
     }
 
-    /** Adds an error if the element has more than one {@code Qualifier qualifier} annotation. */
+    /**
+     * Adds an error if the element has more than one {@code Qualifier qualifier} annotation.
+     */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
         for (XAnnotation qualifier : qualifiers) {
           report.addError(
-              bindingElements("may not use more than one @Qualifier"), element, qualifier);
+              bindingElements("may not use more than one @Qualifier"),
+              element,
+              qualifier);
         }
       }
+    }
+
+    /**
+     * Adds an error if an {@code dagger.multibindings.IntoMap @IntoMap} element doesn't have
+     * exactly one {@code dagger.MapKey @MapKey} annotation, or if an element that is {@code
+     * dagger.multibindings.IntoMap @IntoMap} has any.
+     */
+    private void checkMapKeys() {
+    }
+
+    /**
+     * Adds errors if:
+     *
+     * <ul>
+     *   <li>the element doesn't allow {@code MultibindingAnnotations multibinding annotations}
+     *       and has any
+     *   <li>the element does allow them but has more than one
+     *   <li>the element has a multibinding annotation and its {@code dagger.Provides} or {@code
+     *       dagger.producers.Produces} annotation has a {@code type} parameter.
+     * </ul>
+     */
+    private void checkMultibindings() {
     }
 
     /**
@@ -268,13 +299,13 @@ public abstract class BindingElementValidator<E extends XElement> {
       }
       verifyNotNull(error);
       for (Scope scope : scopes) {
-        report.addError(error, toJavac(element), scope.scopeAnnotation().java());
+        report.addError(error, element, scope.scopeAnnotation().xprocessing());
       }
     }
 
     /**
-     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes framework
-     * type}.
+     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes
+     * framework type}.
      */
     private void checkFrameworkType() {
       if (bindingElementType().filter(FrameworkTypes::isFrameworkType).isPresent()) {

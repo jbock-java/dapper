@@ -18,25 +18,19 @@ package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.langmodel.DaggerElements.transitivelyEncloses;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XAnnotationValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
+import io.jbock.auto.value.AutoValue;
 import io.jbock.common.graph.Traverser;
-import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.StreamSupport;
-import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 
 /** A collection of issues to report for source code. */
@@ -44,16 +38,16 @@ public final class ValidationReport {
   private static final Traverser<ValidationReport> SUBREPORTS =
       Traverser.forTree(report -> report.subreports);
 
-  private final Element subject;
-  private final Set<Item> items;
-  private final Set<ValidationReport> subreports;
+  private final XElement subject;
+  private final ImmutableSet<Item> items;
+  private final ImmutableSet<ValidationReport> subreports;
   private final boolean markedDirty;
   private boolean hasPrintedErrors;
 
   private ValidationReport(
-      Element subject,
-      Set<Item> items,
-      Set<ValidationReport> subreports,
+      XElement subject,
+      ImmutableSet<Item> items,
+      ImmutableSet<ValidationReport> subreports,
       boolean markedDirty) {
     this.subject = subject;
     this.items = items;
@@ -62,8 +56,9 @@ public final class ValidationReport {
   }
 
   /** Returns the items from this report and all transitive subreports. */
-  public Set<Item> allItems() {
-    return StreamSupport.stream(SUBREPORTS.depthFirstPreOrder(this).spliterator(), false)
+  public ImmutableSet<Item> allItems() {
+    return ImmutableSet.copyOf(SUBREPORTS.depthFirstPreOrder(this))
+        .stream()
         .flatMap(report -> report.items.stream())
         .collect(toImmutableSet());
   }
@@ -93,31 +88,20 @@ public final class ValidationReport {
   }
 
   /**
-   * Prints all messages to {@code messager} (and recurs for subreports). If a message's {@linkplain
+   * Prints all messages to {@code messager} (and recurs for subreports). If a message's {@code
    * Item#element() element} is contained within the report's subject, associates the message with
-   * the message's element. Otherwise, since {@link Diagnostic} reporting is expected to be
+   * the message's element. Otherwise, since {@code Diagnostic} reporting is expected to be
    * associated with elements that are currently being compiled, associates the message with the
    * subject itself and prepends a reference to the item's element.
    */
   public void printMessagesTo(XMessager messager) {
-    printMessagesTo(messager.toJavac());
-  }
-
-  /**
-   * Prints all messages to {@code messager} (and recurs for subreports). If a
-   * message's {@linkplain Item#element() element} is contained within the report's subject,
-   * associates the message with the message's element. Otherwise, since {@link Diagnostic}
-   * reporting is expected to be associated with elements that are currently being compiled,
-   * associates the message with the subject itself and prepends a reference to the item's element.
-   */
-  public void printMessagesTo(Messager messager) {
     if (hasPrintedErrors) {
       // Avoid printing the errors from this validation report more than once.
       return;
     }
     hasPrintedErrors = true;
     for (Item item : items) {
-      if (isEnclosedIn(subject, item.element())) {
+      if (transitivelyEncloses(subject, item.element())) {
         if (item.annotation().isPresent()) {
           if (item.annotationValue().isPresent()) {
             messager.printMessage(
@@ -143,128 +127,38 @@ public final class ValidationReport {
     }
   }
 
-  private static boolean isEnclosedIn(Element parent, Element child) {
-    Element current = child;
-    while (current != null) {
-      if (current.equals(parent)) {
-        return true;
-      }
-      current = current.getEnclosingElement();
-    }
-    return false;
-  }
-
-  /** Metadata about a {@link ValidationReport} item. */
-  public static final class Item {
-    private final String message;
-    private final Kind kind;
-    private final Element element;
-    private final Optional<AnnotationMirror> annotation;
-    private final Optional<AnnotationValue> annotationValue;
-
-    public Item(
-        String message,
-        Kind kind,
-        Element element,
-        Optional<AnnotationMirror> annotation,
-        Optional<AnnotationValue> annotationValue) {
-      this.message = message;
-      this.kind = kind;
-      this.element = element;
-      this.annotation = annotation;
-      this.annotationValue = annotationValue;
-    }
-
-    public String message() {
-      return message;
-    }
-
-    public Kind kind() {
-      return kind;
-    }
-
-    public Element element() {
-      return element;
-    }
-
-    public Optional<AnnotationMirror> annotation() {
-      return annotation;
-    }
-
-    public Optional<AnnotationValue> annotationValue() {
-      return annotationValue;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == this) return true;
-      if (obj == null || obj.getClass() != this.getClass()) return false;
-      var that = (Item) obj;
-      return Objects.equals(this.message, that.message) &&
-          Objects.equals(this.kind, that.kind) &&
-          Objects.equals(this.element, that.element) &&
-          Objects.equals(this.annotation, that.annotation) &&
-          Objects.equals(this.annotationValue, that.annotationValue);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(message, kind, element, annotation, annotationValue);
-    }
-
-    @Override
-    public String toString() {
-      return "Item[" +
-          "message=" + message + ", " +
-          "kind=" + kind + ", " +
-          "element=" + element + ", " +
-          "annotation=" + annotation + ", " +
-          "annotationValue=" + annotationValue + ']';
-    }
-  }
-
-  public static Builder about(Element subject) {
-    return new Builder(subject);
+  /** Metadata about a {@code ValidationReport} item. */
+  @AutoValue
+  public abstract static class Item {
+    public abstract String message();
+    public abstract Kind kind();
+    public abstract XElement element();
+    public abstract Optional<XAnnotation> annotation();
+    abstract Optional<XAnnotationValue> annotationValue();
   }
 
   public static Builder about(XElement subject) {
-    return new Builder(subject.toJavac());
+    return new Builder(subject);
   }
 
-  /** A {@link ValidationReport} builder. */
+  /** A {@code ValidationReport} builder. */
   public static final class Builder {
-    private final Element subject;
-    private final Set<Item> items = new LinkedHashSet<>();
-    private final Set<ValidationReport> subreports = new LinkedHashSet<>();
+    private final XElement subject;
+    private final ImmutableSet.Builder<Item> items = ImmutableSet.builder();
+    private final ImmutableSet.Builder<ValidationReport> subreports = ImmutableSet.builder();
     private boolean markedDirty;
 
-    private Builder(Element subject) {
+    private Builder(XElement subject) {
       this.subject = subject;
     }
 
     Builder addItems(Iterable<Item> newItems) {
-      newItems.forEach(items::add);
+      items.addAll(newItems);
       return this;
     }
 
     public Builder addError(String message) {
       return addError(message, subject);
-    }
-
-    public Builder addError(String message, Element element) {
-      return addItem(message, ERROR, element);
-    }
-
-    public Builder addError(String message, Element element, AnnotationMirror annotation) {
-      return addItem(message, ERROR, element, annotation);
-    }
-
-    public Builder addError(
-        String message,
-        Element element,
-        AnnotationMirror annotation,
-        AnnotationValue annotationValue) {
-      return addItem(message, ERROR, element, annotation, annotationValue);
     }
 
     public Builder addError(String message, XElement element) {
@@ -287,22 +181,6 @@ public final class ValidationReport {
       return addWarning(message, subject);
     }
 
-    Builder addWarning(String message, Element element) {
-      return addItem(message, WARNING, element);
-    }
-
-    Builder addWarning(String message, Element element, AnnotationMirror annotation) {
-      return addItem(message, WARNING, element, annotation);
-    }
-
-    Builder addWarning(
-        String message,
-        Element element,
-        AnnotationMirror annotation,
-        AnnotationValue annotationValue) {
-      return addItem(message, WARNING, element, annotation, annotationValue);
-    }
-
     Builder addWarning(String message, XElement element) {
       return addItem(message, WARNING, element);
     }
@@ -323,22 +201,6 @@ public final class ValidationReport {
       return addNote(message, subject);
     }
 
-    Builder addNote(String message, Element element) {
-      return addItem(message, NOTE, element);
-    }
-
-    Builder addNote(String message, Element element, AnnotationMirror annotation) {
-      return addItem(message, NOTE, element, annotation);
-    }
-
-    Builder addNote(
-        String message,
-        Element element,
-        AnnotationMirror annotation,
-        AnnotationValue annotationValue) {
-      return addItem(message, NOTE, element, annotation, annotationValue);
-    }
-
     Builder addNote(String message, XElement element) {
       return addItem(message, NOTE, element);
     }
@@ -353,34 +215,6 @@ public final class ValidationReport {
         XAnnotation annotation,
         XAnnotationValue annotationValue) {
       return addItem(message, NOTE, element, annotation, annotationValue);
-    }
-
-    Builder addItem(String message, Kind kind, Element element) {
-      return addItem(message, kind, element, Optional.empty(), Optional.empty());
-    }
-
-    Builder addItem(String message, Kind kind, Element element, AnnotationMirror annotation) {
-      return addItem(message, kind, element, Optional.of(annotation), Optional.empty());
-    }
-
-    Builder addItem(
-        String message,
-        Kind kind,
-        Element element,
-        AnnotationMirror annotation,
-        AnnotationValue annotationValue) {
-      return addItem(message, kind, element, Optional.of(annotation), Optional.of(annotationValue));
-    }
-
-    private Builder addItem(
-        String message,
-        Kind kind,
-        Element element,
-        Optional<AnnotationMirror> annotation,
-        Optional<AnnotationValue> annotationValue) {
-      items.add(
-          new Item(message, kind, element, annotation, annotationValue));
-      return this;
     }
 
     Builder addItem(String message, Kind kind, XElement element) {
@@ -407,17 +241,17 @@ public final class ValidationReport {
         Optional<XAnnotation> annotation,
         Optional<XAnnotationValue> annotationValue) {
       items.add(
-          new Item(
+          new AutoValue_ValidationReport_Item(
               message,
               kind,
-              element.toJavac(),
-              annotation.map(XAnnotation::toJavac),
-              annotationValue.map(XAnnotationValue::toJavac)));
+              element,
+              annotation,
+              annotationValue));
       return this;
     }
 
     /**
-     * If called, then {@link #isClean()} will return {@code false} even if there are no error items
+     * If called, then {@code #isClean()} will return {@code false} even if there are no error items
      * in the report.
      */
     void markDirty() {
@@ -430,7 +264,7 @@ public final class ValidationReport {
     }
 
     public ValidationReport build() {
-      return new ValidationReport(subject, items, subreports, markedDirty);
+      return new ValidationReport(subject, items.build(), subreports.build(), markedDirty);
     }
   }
 }

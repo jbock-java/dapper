@@ -27,9 +27,8 @@ import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import java.io.Writer;
@@ -79,6 +78,13 @@ public final class DaggerElements implements Elements, ClearableCache {
   /**
    * Returns {@code true} if {@code encloser} is equal to or recursively encloses {@code enclosed}.
    */
+  public static boolean transitivelyEncloses(XElement encloser, XElement enclosed) {
+    return transitivelyEncloses(toJavac(encloser), toJavac(enclosed));
+  }
+
+  /**
+   * Returns {@code true} if {@code encloser} is equal to or recursively encloses {@code enclosed}.
+   */
   public static boolean transitivelyEncloses(Element encloser, Element enclosed) {
     Element current = enclosed;
     while (current != null) {
@@ -92,8 +98,7 @@ public final class DaggerElements implements Elements, ClearableCache {
 
   public ImmutableSet<ExecutableElement> getLocalAndInheritedMethods(TypeElement type) {
     return getLocalAndInheritedMethodsCache.computeIfAbsent(
-        type,
-        k -> ImmutableSet.copyOf(MoreElements.getLocalAndInheritedMethods(type, types, elements)));
+        type, k -> ImmutableSet.copyOf(MoreElements.getLocalAndInheritedMethods(type, types, elements)));
   }
 
   @Override
@@ -351,20 +356,6 @@ public final class DaggerElements implements Elements, ClearableCache {
           return element.getSimpleName().toString();
         }
       };
-
-  /** Returns the type element or throws {@code TypeNotPresentException} if it is null. */
-  public static XTypeElement checkTypePresent(XProcessingEnv processingEnv, ClassName className) {
-    return checkTypePresent(processingEnv, className.canonicalName());
-  }
-
-  /** Returns the type element or throws {@code TypeNotPresentException} if it is null. */
-  public static XTypeElement checkTypePresent(XProcessingEnv processingEnv, String typeName) {
-    XTypeElement type = processingEnv.findTypeElement(typeName);
-    if (type == null) {
-      throw new TypeNotPresentException(typeName, null);
-    }
-    return type;
-  }
 
   @Override
   public PackageElement getPackageElement(CharSequence name) {

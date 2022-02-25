@@ -22,8 +22,9 @@ import static dagger.internal.codegen.langmodel.DaggerElements.transitivelyEnclo
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.xprocessing.XConverters;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
@@ -31,8 +32,6 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
 import dagger.spi.model.DiagnosticReporter;
 import jakarta.inject.Inject;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
 /** A factory for {@code DiagnosticReporter}s. */
@@ -61,7 +60,7 @@ final class DiagnosticReporterFactory {
    */
   final class DiagnosticReporterImpl implements DiagnosticReporter {
     private final String plugin;
-    private final TypeElement rootComponent;
+    private final XTypeElement rootComponent;
     private final boolean reportErrorsAsWarnings;
     private final ImmutableSet.Builder<Diagnostic.Kind> reportedDiagnosticKinds =
         ImmutableSet.builder();
@@ -70,7 +69,8 @@ final class DiagnosticReporterFactory {
     DiagnosticReporterImpl(BindingGraph graph, String plugin, boolean reportErrorsAsWarnings) {
       this.plugin = plugin;
       this.reportErrorsAsWarnings = reportErrorsAsWarnings;
-      this.rootComponent = graph.rootComponentNode().componentPath().currentComponent().java();
+      this.rootComponent =
+          graph.rootComponentNode().componentPath().currentComponent().xprocessing();
       this.diagnosticMessageGenerator = diagnosticMessageGeneratorFactory.create(graph);
     }
 
@@ -142,7 +142,7 @@ final class DiagnosticReporterFactory {
         Diagnostic.Kind diagnosticKind,
         ChildFactoryMethodEdge childFactoryMethodEdge,
         String message) {
-      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod().java());
+      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod().xprocessing());
     }
 
     @Override
@@ -160,10 +160,10 @@ final class DiagnosticReporterFactory {
       return String.format(messageFormat, asList(firstArg, moreArgs).toArray());
     }
 
-    void printMessage(
+    private void printMessage(
         Diagnostic.Kind diagnosticKind,
         CharSequence message,
-        Element elementToReport) {
+        XElement elementToReport) {
       if (diagnosticKind.equals(ERROR) && reportErrorsAsWarnings) {
         diagnosticKind = Diagnostic.Kind.WARNING;
       }
@@ -171,13 +171,16 @@ final class DiagnosticReporterFactory {
       StringBuilder fullMessage = new StringBuilder();
       appendBracketPrefix(fullMessage, plugin);
 
-      if (elementToReport != null && !transitivelyEncloses(rootComponent, elementToReport)) {
-        appendBracketPrefix(fullMessage, elementToString(elementToReport));
-        elementToReport = rootComponent;
+      if (elementToReport == null) {
+        messager.printMessage(diagnosticKind, fullMessage.append(message).toString());
+      } else {
+        if (!transitivelyEncloses(rootComponent, elementToReport)) {
+          appendBracketPrefix(fullMessage, elementToString(elementToReport));
+          elementToReport = rootComponent;
+        }
+        messager.printMessage(
+            diagnosticKind, fullMessage.append(message).toString(), elementToReport);
       }
-
-      XConverters.toJavac(messager)
-          .printMessage(diagnosticKind, fullMessage.append(message), elementToReport);
     }
 
     private void appendBracketPrefix(StringBuilder message, String prefix) {

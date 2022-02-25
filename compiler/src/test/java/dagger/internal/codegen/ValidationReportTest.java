@@ -20,8 +20,11 @@ import static io.jbock.common.truth.Truth.assertThat;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import static io.jbock.testing.compile.Compiler.javac;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.validation.ValidationReport.Builder;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import java.util.Set;
@@ -103,26 +106,29 @@ public class ValidationReportTest {
     assertThat(compilation).hadErrorContaining("simple error").inFile(TEST_CLASS_FILE).onLine(3);
   }
 
-  private static abstract class SimpleTestProcessor extends AbstractProcessor {
+  private abstract static class SimpleTestProcessor extends AbstractProcessor {
+    @SuppressWarnings("HidingField") // Subclasses should always use the XProcessing version.
+    protected XProcessingEnv processingEnv;
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-      return Set.of("*");
+      return ImmutableSet.of("*");
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+      processingEnv = XProcessingEnv.create(super.processingEnv);
       test();
       return false;
     }
 
-    protected final TypeElement getTypeElement(Class<?> clazz) {
+    protected final XTypeElement getTypeElement(Class<?> clazz) {
       return getTypeElement(clazz.getCanonicalName());
     }
 
-    protected final TypeElement getTypeElement(String canonicalName) {
-      return processingEnv.getElementUtils().getTypeElement(canonicalName);
+    protected final XTypeElement getTypeElement(String canonicalName) {
+      return processingEnv.requireTypeElement(canonicalName);
     }
 
     abstract void test();
-  }
-}
+  }}

@@ -4,6 +4,7 @@ import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.TypeName;
+import java.util.Objects;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -85,9 +86,21 @@ public abstract class XProcessingEnv {
    */
   public abstract XTypeElement findTypeElement(String qName);
 
+
+
   public XTypeElement findTypeElement(TypeName typeName) {
     return findTypeElement(typeName.toString());
   }
+
+  /**
+   * Returns the [XTypeElement] with the given qualified name or throws an exception if it does
+   * not exist.
+   */
+  public XTypeElement requireTypeElement(String qName) {
+    return Objects.requireNonNull(findTypeElement(qName),
+        () -> String.format("Cannot find required type element %s", qName));
+  }
+
 
   public abstract XFiler getFiler();
 }
