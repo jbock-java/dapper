@@ -97,7 +97,7 @@ public final class ComponentRequestRepresentations {
   }
 
   /**
-   * Equivalent to {@link #getDependencyExpression(BindingRequest, ClassName)} that is used only
+   * Equivalent to {@code #getDependencyExpression(BindingRequest, ClassName)} that is used only
    * when the request is for implementation of a component method.
    *
    * @throws IllegalStateException if there is no binding expression that satisfies the request
@@ -111,8 +111,8 @@ public final class ComponentRequestRepresentations {
   }
 
   /**
-   * Returns the {@link CodeBlock} for the method arguments used with the factory {@code create()}
-   * method for the given {@link ContributionBinding binding}.
+   * Returns the {@code CodeBlock} for the method arguments used with the factory {@code create()}
+   * method for the given {@code ContributionBinding binding}.
    */
   CodeBlock getCreateMethodArgumentsCodeBlock(
       ContributionBinding binding, ClassName requestingClass) {
@@ -152,8 +152,8 @@ public final class ComponentRequestRepresentations {
    * Returns an expression that evaluates to the value of a dependency request, for passing to a
    * binding method, an {@code @Inject}-annotated constructor or member, or a proxy for one.
    *
-   * <p>If the method is a generated static {@link InjectionMethods injection method}, each
-   * parameter will be {@link Object} if the dependency's raw type is inaccessible. If that is the
+   * <p>If the method is a generated static {@code InjectionMethods injection method}, each
+   * parameter will be {@code Object} if the dependency's raw type is inaccessible. If that is the
    * case for this dependency, the returned expression will use a cast to evaluate to the raw type.
    *
    * @param requestingClass the class that will contain the expression
@@ -186,9 +186,12 @@ public final class ComponentRequestRepresentations {
         .build();
   }
 
-  /** Returns the {@link RequestRepresentation} for the given {@link BindingRequest}. */
+  /** Returns the {@code RequestRepresentation} for the given {@code BindingRequest}. */
   RequestRepresentation getRequestRepresentation(BindingRequest request) {
-    Optional<Binding> localBinding = graph.localContributionBinding(request.key());
+    Optional<Binding> localBinding =
+        request.isRequestKind(RequestKind.MEMBERS_INJECTION)
+            ? graph.localMembersInjectionBinding(request.key())
+            : graph.localContributionBinding(request.key());
 
     if (localBinding.isPresent()) {
       return getBindingRepresentation(localBinding.get()).getRequestRepresentation(request);
