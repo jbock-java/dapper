@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.xprocessing;
 
+import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
@@ -25,19 +26,14 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableSet;
 import io.jbock.javapoet.ClassName;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 import javax.lang.model.element.ElementKind;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-
-/** A utility class for {@link XElement} helper methods. */
+/** A utility class for {@code XElement} helper methods. */
 public final class XElements {
 
   // TODO(bcorso): Replace usages with getJvmName() once it exists.
@@ -47,7 +43,7 @@ public final class XElements {
   }
 
   /**
-   * Returns the closest enclosing element that is a {@link XTypeElement} or throws an {@link
+   * Returns the closest enclosing element that is a {@code XTypeElement} or throws an {@code
    * IllegalStateException} if one doesn't exists.
    */
   public static XTypeElement closestEnclosingTypeElement(XElement element) {
@@ -80,42 +76,42 @@ public final class XElements {
   }
 
   public static XExecutableElement asExecutable(XElement element) {
-    Preconditions.checkState(isExecutable(element));
+    checkState(isExecutable(element));
     return (XExecutableElement) element;
   }
 
   public static XTypeElement asTypeElement(XElement element) {
-    Preconditions.checkState(isTypeElement(element));
+    checkState(isTypeElement(element));
     return (XTypeElement) element;
   }
 
   // TODO(bcorso): Rename this and the XElementKt.isMethodParameter to isExecutableParameter.
   public static XExecutableParameterElement asMethodParameter(XElement element) {
-    Preconditions.checkState(isMethodParameter(element));
+    checkState(isMethodParameter(element));
     return (XExecutableParameterElement) element;
   }
 
   public static XFieldElement asField(XElement element) {
-    Preconditions.checkState(isField(element));
+    checkState(isField(element));
     return (XFieldElement) element;
   }
 
   public static XVariableElement asVariable(XElement element) {
-    Preconditions.checkState(isVariableElement(element));
+    checkState(isVariableElement(element));
     return (XVariableElement) element;
   }
 
   public static XConstructorElement asConstructor(XElement element) {
-    Preconditions.checkState(isConstructor(element));
+    checkState(isConstructor(element));
     return (XConstructorElement) element;
   }
 
   public static XMethodElement asMethod(XElement element) {
-    Preconditions.checkState(isMethod(element));
+    checkState(isMethod(element));
     return (XMethodElement) element;
   }
 
-  public static Set<XAnnotation> getAnnotatedAnnotations(
+  public static ImmutableSet<XAnnotation> getAnnotatedAnnotations(
       XAnnotated annotated, ClassName annotationName) {
     return annotated.getAllAnnotations().stream()
         .filter(annotation -> annotation.getType().getTypeElement().hasAnnotation(annotationName))
@@ -124,7 +120,7 @@ public final class XElements {
 
   /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
   public static boolean hasAnyAnnotation(XAnnotated annotated, ClassName... annotations) {
-    return hasAnyAnnotation(annotated, new LinkedHashSet<>(Arrays.asList(annotations)));
+    return hasAnyAnnotation(annotated, ImmutableSet.copyOf(annotations));
   }
 
   /** Returns {@code true} if {@code annotated} is annotated with any of the given annotations. */
@@ -138,7 +134,7 @@ public final class XElements {
    */
   public static Optional<XAnnotation> getAnyAnnotation(
       XAnnotated annotated, ClassName... annotations) {
-    return getAnyAnnotation(annotated, Util.setOf(Arrays.asList(annotations)));
+    return getAnyAnnotation(annotated, ImmutableSet.copyOf(annotations));
   }
 
   /**
@@ -154,7 +150,7 @@ public final class XElements {
   }
 
   /** Returns all annotations from {@code annotations} that annotate {@code annotated}. */
-  public static Set<XAnnotation> getAllAnnotations(
+  public static ImmutableSet<XAnnotation> getAllAnnotations(
       XAnnotated annotated, Collection<ClassName> annotations) {
     return annotations.stream()
         .filter(annotated::hasAnnotation)
@@ -162,6 +158,5 @@ public final class XElements {
         .collect(toImmutableSet());
   }
 
-  private XElements() {
-  }
+  private XElements() {}
 }

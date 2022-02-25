@@ -20,11 +20,10 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.BindingGraph;
-import dagger.spi.model.DaggerTypeElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-/** Validates a {@link BindingGraph}. */
+/** Validates a {@code BindingGraph}. */
 @Singleton
 public final class BindingGraphValidator {
   private final ValidationBindingGraphPlugins validationPlugins;
@@ -44,7 +43,7 @@ public final class BindingGraphValidator {
   /** Returns {@code true} if validation or analysis is required on the full binding graph. */
   public boolean shouldDoFullBindingGraphValidation(XTypeElement component) {
     return requiresFullBindingGraphValidation()
-        || compilerOptions.pluginsVisitFullBindingGraphs(component.toJavac());
+        || compilerOptions.pluginsVisitFullBindingGraphs(component);
   }
 
   private boolean requiresFullBindingGraphValidation() {
@@ -67,12 +66,12 @@ public final class BindingGraphValidator {
 
   /** Returns {@code true} if external plugins report no errors. */
   private boolean visitExternalPlugins(BindingGraph graph) {
-    DaggerTypeElement component = graph.rootComponentNode().componentPath().currentComponent();
     if (graph.isFullBindingGraph()
         // TODO(b/135938915): Consider not visiting plugins if only
         // fullBindingGraphValidation is enabled.
         && !requiresFullBindingGraphValidation()
-        && !compilerOptions.pluginsVisitFullBindingGraphs(component.java())) {
+        && !compilerOptions.pluginsVisitFullBindingGraphs(
+            graph.rootComponentNode().componentPath().currentComponent().xprocessing())) {
       return true;
     }
 
