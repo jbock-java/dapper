@@ -131,6 +131,18 @@ public final class DaggerSuperficialValidation {
     }
   }
 
+  public static void validateAnnotationOf(XElement element, XAnnotation annotation) {
+    validateAnnotationOf(toJavac(element), toJavac(annotation));
+  }
+
+  public static void validateAnnotationOf(Element element, AnnotationMirror annotation) {
+    try {
+      validateAnnotation(annotation);
+    } catch (RuntimeException exception) {
+      throw ValidationException.from(exception).append(element);
+    }
+  }
+
   /**
    * Strictly validates the given annotation belonging to the given element.
    *
@@ -642,9 +654,9 @@ public final class DaggerSuperficialValidation {
         Element errorElement = errorType.asElement();
         this.errorTypeName =
             isType(errorElement)
-                ? asType(errorElement).getQualifiedName().toString()
-                // Maybe this case should be handled by UnknownErrorType?
-                : errorElement.getSimpleName().toString();
+                 ? asType(errorElement).getQualifiedName().toString()
+                 // Maybe this case should be handled by UnknownErrorType?
+                 : errorElement.getSimpleName().toString();
       }
 
       private KnownErrorType(String errorTypeName) {
