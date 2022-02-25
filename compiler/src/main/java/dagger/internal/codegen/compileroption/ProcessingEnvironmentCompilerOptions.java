@@ -55,6 +55,7 @@ import dagger.internal.codegen.base.Ascii;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -92,7 +93,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
   @Override
   public boolean usesProducers() {
-    return false;
+    return elements.getTypeElement(TypeNames.PRODUCES) != null;
   }
 
   @Override
@@ -212,7 +213,8 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     if (options.containsKey(KEYS_PER_COMPONENT_SHARD)) {
       checkArgument(
           component.getClassName().packageName().startsWith("dagger."),
-          "Cannot set %s. It is only meant for internal testing.", KEYS_PER_COMPONENT_SHARD);
+          "Cannot set %s. It is only meant for internal testing.",
+          KEYS_PER_COMPONENT_SHARD);
       return Integer.parseInt(options.get(KEYS_PER_COMPONENT_SHARD));
     }
     return super.keysPerComponentShard(component);
@@ -232,9 +234,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
   @SuppressWarnings("CheckReturnValue")
   private ProcessingEnvironmentCompilerOptions checkValid() {
-    for (KeyOnlyOption keyOnlyOption : KeyOnlyOption.values()) {
-      isEnabled(keyOnlyOption);
-    }
     for (Feature feature : Feature.values()) {
       parseOption(feature);
     }
@@ -470,7 +469,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
       if (values.size() > 1) {
         reportUseOfDifferentNamesForOption(Diagnostic.Kind.WARNING, option, values.keySet());
       }
-      return ImmutableList.copyOf(values.values()).get(0);
+      return values.values().asList().get(0);
     }
 
     // If different names have different values, report an error and return the default
@@ -480,7 +479,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   private void reportUseOfDifferentNamesForOption(
-      Diagnostic.Kind diagnosticKind, EnumOption<?> option, Set<String> usedNames) {
+      Diagnostic.Kind diagnosticKind, EnumOption<?> option, ImmutableSet<String> usedNames) {
     messager.printMessage(
         diagnosticKind,
         String.format(
