@@ -19,6 +19,9 @@ public interface XExecutableElement extends XElement {
    */
   boolean isVarArgs();
 
+  /** The type representation of the method where more type parameters might be resolved. */
+  XExecutableType getExecutableType();
+
   /**
    * Returns the method as if it is declared in {@code other}.
    *

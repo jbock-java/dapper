@@ -133,8 +133,8 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   }
 
   @Override
-  public XType getType() {
-    return env().wrap(typeElement.asType());
+  public JavacDeclaredType getType() {
+    return (JavacDeclaredType) env().wrap(typeElement.asType());
   }
 
   @Override

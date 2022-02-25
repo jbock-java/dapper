@@ -13,7 +13,7 @@ class JavacConstructorElement extends JavacExecutableElement implements XConstru
   }
 
   JavacConstructorElement(ExecutableElement element, XTypeElement containing, XProcessingEnv env) {
-    super(element, containing, env);
+    super(element, (JavacTypeElement) containing, env);
   }
 
   @Override

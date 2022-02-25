@@ -23,7 +23,7 @@ public interface XTypeElement extends XMemberContainer {
 
   ClassName getClassName();
 
-  XType getType();
+  JavacDeclaredType getType();
 
   XTypeElement getEnclosingTypeElement();
 

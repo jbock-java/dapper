@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.type.DeclaredType;
 
-class JavacDeclaredType extends JavacType {
+public class JavacDeclaredType extends JavacType {
 
   private final DeclaredType declaredType;
 
@@ -21,6 +21,10 @@ class JavacDeclaredType extends JavacType {
   }
 
   public DeclaredType toJavac() {
+    return declaredType;
+  }
+
+  DeclaredType typeMirror() {
     return declaredType;
   }
 }

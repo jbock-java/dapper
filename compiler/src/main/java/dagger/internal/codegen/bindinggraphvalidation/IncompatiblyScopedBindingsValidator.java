@@ -18,7 +18,8 @@ package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.base.Scopes.getReadableSource;
-import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
+import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -34,7 +35,6 @@ import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ComponentNode;
 import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
-import io.jbock.auto.common.MoreElements;
 import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
@@ -84,7 +84,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
                   // properly scoped ancestor component, so ignore them here.
                   if (binding.kind().equals(INJECTION)
                       && (bindingGraph.rootComponentNode().isSubcomponent()
-                      || !bindingGraph.rootComponentNode().isRealComponent())) {
+                          || !bindingGraph.rootComponentNode().isRealComponent())) {
                     return;
                   }
                   incompatibleBindings.put(componentNode, binding);
@@ -135,7 +135,7 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
         case PROVISION:
           message.append(
               methodSignatureFormatter.format(
-                  MoreElements.asExecutable(binding.bindingElement().get().java())));
+                  asExecutable(binding.bindingElement().get().xprocessing())));
           break;
 
         case INJECTION:
@@ -143,8 +143,8 @@ final class IncompatiblyScopedBindingsValidator implements BindingGraphPlugin {
               .append(getReadableSource(binding.scope().get()))
               .append(" class ")
               .append(
-                  closestEnclosingTypeElement(
-                      binding.bindingElement().get().java()).getQualifiedName())
+                  closestEnclosingTypeElement(binding.bindingElement().get().xprocessing())
+                      .getQualifiedName())
               .append(diagnosticMessageGenerator.getMessage(binding));
 
           break;

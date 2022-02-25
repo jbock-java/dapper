@@ -16,11 +16,19 @@
 
 package dagger.internal.codegen.xprocessing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
+import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.javapoet.ClassName;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-/** A utility class for {@link XAnnotation} helper methods. */
+/** A utility class for {@code XAnnotation} helper methods. */
 public final class XAnnotations {
+
+  /** Returns the string representation of the given annotation. */
+  public static String toString(XAnnotation annotation) {
+    return AnnotationMirrors.toString(toJavac(annotation));
+  }
 
   /** Returns the class name of the given annotation */
   public static ClassName getClassName(XAnnotation annotation) {

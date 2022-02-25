@@ -27,7 +27,7 @@ public abstract class XProcessingEnv {
 
   public abstract Types getTypeUtils();
 
-  XType wrap(TypeMirror typeMirror) {
+  JavacType wrap(TypeMirror typeMirror) {
     switch (typeMirror.getKind()) {
       case ARRAY:
         return new JavacArrayType(this, MoreTypes.asArray(typeMirror));
