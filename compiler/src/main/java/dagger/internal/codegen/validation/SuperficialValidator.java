@@ -34,16 +34,20 @@ import javax.lang.model.element.TypeElement;
 @Singleton
 public final class SuperficialValidator implements ClearableCache {
 
+  private final DaggerSuperficialValidation superficialValidation;
   private final Map<TypeElement, Optional<ValidationException>> validationExceptions =
       new HashMap<>();
 
   @Inject
-  SuperficialValidator() {}
+  SuperficialValidator(DaggerSuperficialValidation superficialValidation) {
+    this.superficialValidation = superficialValidation;
+  }
 
   public void throwIfNearestEnclosingTypeNotValid(XElement element) {
     Optional<ValidationException> validationException =
         validationExceptions.computeIfAbsent(
-            toJavac(closestEnclosingTypeElement(element)), this::validationExceptionsUncached);
+            toJavac(closestEnclosingTypeElement(element)),
+            this::validationExceptionsUncached);
 
     if (validationException.isPresent()) {
       throw validationException.get();
@@ -52,7 +56,7 @@ public final class SuperficialValidator implements ClearableCache {
 
   private Optional<ValidationException> validationExceptionsUncached(TypeElement element) {
     try {
-      DaggerSuperficialValidation.validateElement(element);
+      superficialValidation.validateElement(element);
     } catch (ValidationException validationException) {
       return Optional.of(validationException);
     }
