@@ -40,13 +40,11 @@ final class BindsMethodValidator extends BindingMethodValidator {
   @Inject
   BindsMethodValidator(
       XProcessingEnv processingEnv,
-      DaggerElements elements,
       DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
         processingEnv,
-        elements,
         types,
         TypeNames.BINDS,
         Set.of(TypeNames.MODULE),

@@ -16,49 +16,55 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Scopes.scopesOf;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.base.Verify.verifyNotNull;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XType.isArray;
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeVariable;
-import static java.util.Objects.requireNonNull;
 
+import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.FrameworkTypes;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
+import io.jbock.javapoet.ClassName;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /** A validator for elements that represent binding declarations. */
 public abstract class BindingElementValidator<E extends XElement> {
+  private static final ImmutableSet<ClassName> MULTIBINDING_ANNOTATIONS =
+      ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
+
   private final AllowsScoping allowsScoping;
   private final Map<E, ValidationReport> cache = new HashMap<>();
   private final InjectionAnnotations injectionAnnotations;
 
-  /**
-   * Creates a validator object.
-   */
+  /** Creates a validator object. */
   // TODO(bcorso): Consider reworking BindingElementValidator and all subclasses to use composition
   // rather than inheritance. The web of inheritance makes it difficult to track what implementation
   // of a method is actually being used.
   protected BindingElementValidator(
-      AllowsScoping allowsScoping,
-      InjectionAnnotations injectionAnnotations) {
+      AllowsScoping allowsScoping, InjectionAnnotations injectionAnnotations) {
     this.allowsScoping = allowsScoping;
     this.injectionAnnotations = injectionAnnotations;
   }
 
-  /** Returns a {@link ValidationReport} for {@code element}. */
+  /** Returns a {@code ValidationReport} for {@code element}. */
   final ValidationReport validate(E element) {
     return reentrantComputeIfAbsent(cache, element, this::validateUncached);
   }
@@ -68,8 +74,8 @@ public abstract class BindingElementValidator<E extends XElement> {
   }
 
   /**
-   * Returns an error message of the form "&lt;{@link #bindingElements()}&gt; <i>rule</i>", where
-   * <i>rule</i> comes from calling {@link String#format(String, Object...)} on {@code ruleFormat}
+   * Returns an error message of the form "&lt;{@code #bindingElements()}&gt; <i>rule</i>", where
+   * <i>rule</i> comes from calling {@code String#format(String, Object...)} on {@code ruleFormat}
    * and the other arguments.
    */
   protected final String bindingElements(String ruleFormat, Object... args) {
@@ -81,7 +87,7 @@ public abstract class BindingElementValidator<E extends XElement> {
    */
   protected abstract String bindingElements();
 
-  /** The verb describing the {@link ElementValidator#bindingElementType()} in error messages. */
+  /** The verb describing the {@code ElementValidator#bindingElementType()} in error messages. */
   // TODO(ronshapiro,dpb): improve the name of this method and it's documentation.
   protected abstract String bindingElementTypeVerb();
 
@@ -92,14 +98,32 @@ public abstract class BindingElementValidator<E extends XElement> {
         bindingElementTypeVerb());
   }
 
-  /*** Returns an {@link ElementValidator} for validating the given {@code element}. */
+  /**
+   * The error message when a the type for a binding element with {@code
+   * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a not set type.
+   */
+  protected String elementsIntoSetNotASetMessage() {
+    return bindingElements(
+        "annotated with @ElementsIntoSet must %s a Set", bindingElementTypeVerb());
+  }
+
+  /**
+   * The error message when a the type for a binding element with {@code
+   * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a raw set.
+   */
+  protected String elementsIntoSetRawSetMessage() {
+    return bindingElements(
+        "annotated with @ElementsIntoSet cannot %s a raw Set", bindingElementTypeVerb());
+  }
+
+  /*** Returns an {@code ElementValidator} for validating the given {@code element}. */
   protected abstract ElementValidator elementValidator(E element);
 
   /** Validator for a single binding element. */
   protected abstract class ElementValidator {
-    protected final E element;
+    private final E element;
     protected final ValidationReport.Builder report;
-    private final Set<XAnnotation> qualifiers;
+    private final ImmutableSet<XAnnotation> qualifiers;
 
     protected ElementValidator(E element) {
       this.element = element;
@@ -117,12 +141,11 @@ public abstract class BindingElementValidator<E extends XElement> {
     }
 
     /** Check any additional properties of the element. Does nothing by default. */
-    protected void checkAdditionalProperties() {
-    }
+    protected void checkAdditionalProperties() {}
 
     /**
-     * The type declared by this binding element. This may differ from a binding's {@link
-     * Key#type()}, for example in multibindings. An {@link Optional#empty()} return value indicates
+     * The type declared by this binding element. This may differ from a binding's {@code
+     * Key#type()}, for example in multibindings. An {@code Optional#empty()} return value indicates
      * that the contributed type is ambiguous or missing, i.e. a {@code @BindsInstance} method with
      * zero or many parameters.
      */
@@ -130,28 +153,44 @@ public abstract class BindingElementValidator<E extends XElement> {
     protected abstract Optional<XType> bindingElementType();
 
     /**
-     * Adds an error if the {@link #bindingElementType() binding element type} is not appropriate.
+     * Adds an error if the {@code #bindingElementType() binding element type} is not appropriate.
      *
      * <p>Adds an error if the type is not a primitive, array, declared type, or type variable.
+     *
+     * <p>If the binding is not a multibinding contribution, adds an error if the type is a
+     * framework type.
+     *
+     * <p>If the element has {@code dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code
+     * SET_VALUES}, adds an error if the type is not a {@code Set<T>} for some {@code T}
      */
     protected void checkType() {
-      // Validate that a unique binding is not attempting to bind a framework type.
-      checkFrameworkType();
+      switch (ContributionType.fromBindingElement(element)) {
+        case UNIQUE:
+          // Validate that a unique binding is not attempting to bind a framework type. This
+          // validation is only appropriate for unique bindings because multibindings may collect
+          // framework types.  E.g. Set<Provider<Foo>> is perfectly reasonable.
+          checkFrameworkType();
 
-      // Validate that a unique binding is not attempting to bind an unqualified assisted type.
-      checkAssistedType();
-      bindingElementType().ifPresent(this::checkKeyType);
+          // Validate that a unique binding is not attempting to bind an unqualified assisted type.
+          // This validation is only appropriate for unique bindings because multibindings may
+          // collect assisted types.
+          checkAssistedType();
+          // fall through
+
+          bindingElementType().ifPresent(this::checkKeyType);
+          break;
+      }
     }
 
     /**
      * Adds an error if {@code keyType} is not a primitive, declared type, array, or type variable.
      */
     protected void checkKeyType(XType keyType) {
-      if (keyType.isVoid()) {
+      if (isVoid(keyType)) {
         report.addError(bindingElements("must %s a value (not void)", bindingElementTypeVerb()));
       } else if (!(isPrimitive(keyType)
           || isDeclared(keyType)
-          || keyType.isArray()
+          || isArray(keyType)
           || isTypeVariable(keyType))) {
         report.addError(badTypeMessage());
       }
@@ -173,25 +212,48 @@ public abstract class BindingElementValidator<E extends XElement> {
     }
 
     /**
-     * Adds an error if the element has more than one {@linkplain jakarta.inject.Qualifier qualifier} annotation.
+     * Adds an error if the type for an element with {@code
+     * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is not a a
+     * {@code Set<T>} for a reasonable {@code T}.
      */
+    // TODO(gak): should we allow "covariant return" for set values?
+    protected void checkSetValuesType() {
+      bindingElementType().ifPresent(this::checkSetValuesType);
+    }
+
+    /** Adds an error if {@code type} is not a {@code Set<T>} for a reasonable {@code T}. */
+    protected final void checkSetValuesType(XType type) {
+      if (!SetType.isSet(type)) {
+        report.addError(elementsIntoSetNotASetMessage());
+      } else {
+        SetType setType = SetType.from(type);
+        if (setType.isRawType()) {
+          report.addError(elementsIntoSetRawSetMessage());
+        } else {
+          // TODO(bcorso): Use setType.elementType() once setType is fully converted to XProcessing.
+          // However, currently SetType returns TypeMirror instead of XType and we have no
+          // conversion from TypeMirror to XType, so we just get the type ourselves.
+          checkKeyType(getOnlyElement(type.getTypeArguments()));
+        }
+      }
+    }
+
+    /** Adds an error if the element has more than one {@code Qualifier qualifier} annotation. */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
         for (XAnnotation qualifier : qualifiers) {
           report.addError(
-              bindingElements("may not use more than one @Qualifier"),
-              element,
-              qualifier);
+              bindingElements("may not use more than one @Qualifier"), element, qualifier);
         }
       }
     }
 
     /**
      * Adds an error if the element has a scope but doesn't allow scoping, or if it has more than
-     * one {@linkplain Scope scope} annotation.
+     * one {@code Scope scope} annotation.
      */
     private void checkScopes() {
-      Set<Scope> scopes = scopesOf(element);
+      ImmutableSet<Scope> scopes = injectionAnnotations.getScopes(element);
       String error = null;
       switch (allowsScoping) {
         case ALLOWS_SCOPING:
@@ -204,20 +266,38 @@ public abstract class BindingElementValidator<E extends XElement> {
           error = bindingElements("cannot be scoped");
           break;
       }
-      requireNonNull(error);
+      verifyNotNull(error);
       for (Scope scope : scopes) {
-        report.addError(error, element.toJavac(), scope.scopeAnnotation().java());
+        report.addError(error, toJavac(element), scope.scopeAnnotation().java());
       }
     }
 
     /**
-     * Adds an error if the {@link #bindingElementType() type} is a {@linkplain FrameworkTypes
-     * framework type}.
+     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes framework
+     * type}.
      */
     private void checkFrameworkType() {
       if (bindingElementType().filter(FrameworkTypes::isFrameworkType).isPresent()) {
         report.addError(bindingElements("must not %s framework types", bindingElementTypeVerb()));
       }
+    }
+  }
+
+  /** Whether to check multibinding annotations. */
+  enum AllowsMultibindings {
+    /**
+     * This element disallows multibinding annotations, so don't bother checking for their validity.
+     * {@code MultibindingAnnotationsProcessingStep} will add errors if the element has any
+     * multibinding annotations.
+     */
+    NO_MULTIBINDINGS,
+
+    /** This element allows multibinding annotations, so validate them. */
+    ALLOWS_MULTIBINDINGS,
+    ;
+
+    private boolean allowsMultibindings() {
+      return this == ALLOWS_MULTIBINDINGS;
     }
   }
 
@@ -228,5 +308,6 @@ public abstract class BindingElementValidator<E extends XElement> {
 
     /** This element allows scoping, so validate that there's at most one scope annotation. */
     ALLOWS_SCOPING,
+    ;
   }
 }

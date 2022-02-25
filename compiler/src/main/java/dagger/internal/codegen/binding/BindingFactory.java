@@ -46,6 +46,8 @@ import static dagger.spi.model.BindingKind.PROVISION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 
 import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
@@ -60,6 +62,7 @@ import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.DaggerType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
@@ -135,7 +138,7 @@ public final class BindingFactory {
                 constructorElement.hasAnnotation(TypeNames.ASSISTED_INJECT)
                     ? ASSISTED_INJECTION
                     : INJECTION)
-            .scope(injectionAnnotations.getScope(constructorElement));
+            .scope(injectionAnnotations.getScope(constructorElement.getEnclosingElement()));
 
     if (hasNonDefaultTypeParameters(enclosingType)) {
       builder.unresolved(injectionBinding(constructorElement, Optional.empty()));
@@ -184,7 +187,7 @@ public final class BindingFactory {
             keyFactory.forProvidesMethod(providesMethod, contributedBy),
             this::providesMethodBinding)
         .kind(PROVISION)
-        .scope(uniqueScopeOf(providesMethod))
+        .scope(injectionAnnotations.getScope(providesMethod))
         .nullableType(getNullableType(providesMethod))
         .build();
   }
@@ -210,6 +213,16 @@ public final class BindingFactory {
             dependencyRequestFactory.forRequiredResolvedXVariables(
                 method.getParameters(), methodType.getParameterTypes()))
         .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
+  }
+
+  private static BindingKind bindingKindForMultibindingKey(Key key) {
+    if (SetType.isSet(key)) {
+      return BindingKind.MULTIBOUND_SET;
+    } else if (MapType.isMap(key)) {
+      return BindingKind.MULTIBOUND_MAP;
+    } else {
+      throw new IllegalArgumentException(String.format("key is not for a set or map: %s", key));
+    }
   }
 
   /** Returns a {@code dagger.spi.model.BindingKind#COMPONENT} binding for the component. */

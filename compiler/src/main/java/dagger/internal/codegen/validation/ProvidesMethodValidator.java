@@ -22,7 +22,6 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -35,13 +34,11 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
   @Inject
   ProvidesMethodValidator(
       XProcessingEnv processingEnv,
-      DaggerElements elements,
       DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
         processingEnv,
-        elements,
         types,
         TypeNames.PROVIDES,
         Set.of(TypeNames.MODULE),
@@ -64,7 +61,6 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
     }
 
     @Override
-    protected void checkAdditionalMethodProperties() {
-    }
+    protected void checkAdditionalMethodProperties() {}
   }
 }

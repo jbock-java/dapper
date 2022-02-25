@@ -24,6 +24,7 @@ import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.auto.common.MoreTypes;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +52,8 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
- * A fork of {@code com.google.auto.common.SuperficialValidation} that exposes validation for
- * things like annotations and annotation values.
+ * A fork of {@code com.google.auto.common.SuperficialValidation} that exposes validation for things
+ * like annotations and annotation values.
  */
 // TODO(bcorso): Consider contributing this to Auto-Common's SuperficialValidation.
 public final class DaggerSuperficialValidation {
@@ -120,7 +121,7 @@ public final class DaggerSuperficialValidation {
     validateAnnotationsOf(toJavac(element));
   }
 
-  private static void validateAnnotationsOf(Element element) {
+  public static void validateAnnotationsOf(Element element) {
     try {
       validateAnnotations(element.getAnnotationMirrors());
     } catch (RuntimeException exception) {
@@ -141,7 +142,23 @@ public final class DaggerSuperficialValidation {
    * validation fails.
    */
   public static void strictValidateAnnotationsOf(XElement element) {
-    element.getAllAnnotations()
+    strictValidateAnnotationsOf(toJavac(element));
+  }
+
+  /**
+   * Strictly validates the given annotation belonging to the given element.
+   *
+   * <p>This validation is considered "strict" because it will fail if an annotation's type is not
+   * valid. This fixes the bug described in b/213880825, but cannot be applied indiscriminately or
+   * it would break in many cases where we don't care about an annotation.
+   *
+   * <p>Note: This method does not actually check that the given annotation belongs to the given
+   * element. The element is only used to given better context to the error message in the case that
+   * validation fails.
+   */
+  public static void strictValidateAnnotationsOf(Element element) {
+    element
+        .getAnnotationMirrors()
         .forEach(annotation -> strictValidateAnnotationOf(element, annotation));
   }
 
@@ -157,11 +174,26 @@ public final class DaggerSuperficialValidation {
    * validation fails.
    */
   public static void strictValidateAnnotationOf(XElement element, XAnnotation annotation) {
+    strictValidateAnnotationOf(toJavac(element), toJavac(annotation));
+  }
+
+  /**
+   * Strictly validates the given annotation belonging to the given element.
+   *
+   * <p>This validation is considered "strict" because it will fail if an annotation's type is not
+   * valid. This fixes the bug described in b/213880825, but cannot be applied indiscriminately or
+   * it would break in many cases where we don't care about an annotation.
+   *
+   * <p>Note: This method does not actually check that the given annotation belongs to the given
+   * element. The element is only used to given better context to the error message in the case that
+   * validation fails.
+   */
+  public static void strictValidateAnnotationOf(Element element, AnnotationMirror annotation) {
     try {
-      strictValidateAnnotation(toJavac(annotation));
+      strictValidateAnnotation(annotation);
     } catch (RuntimeException exception) {
       throw ValidationException.from(exception)
-          .append(String.format("%s element: %s", toJavac(element).getKind(), element));
+          .append(String.format("%s element: %s", element.getKind(), element));
     }
   }
 
@@ -343,10 +375,10 @@ public final class DaggerSuperficialValidation {
   }
 
   /**
-   * This validation is the same as {@code #validateAnnotation(AnnotationMirror)} but also
-   * validates the annotation's kind directly to look for {@code TypeKind.ERROR} types.
+   * This validation is the same as {@code #validateAnnotation(AnnotationMirror)} but also validates
+   * the annotation's kind directly to look for {@code TypeKind.ERROR} types.
    *
-   * See b/213880825.
+   * <p>See b/213880825.
    */
   // TODO(bcorso): Merge this into the normal validateAnnotation() method. For now, this method is
   // separated to avoid breaking existing usages that aren't setup to handle this extra validation.
@@ -361,7 +393,9 @@ public final class DaggerSuperficialValidation {
       }
       validateAnnotationValues(annotationMirror.getElementValues());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception).append("annotation: " + annotationMirror);
+      throw ValidationException.from(exception)
+          // Note: Calling #toString() directly on the annotation throws NPE (b/216180336).
+          .append("annotation: " + AnnotationMirrors.toString(annotationMirror));
     }
   }
 
@@ -370,7 +404,9 @@ public final class DaggerSuperficialValidation {
       validateType("annotation type", annotationMirror.getAnnotationType());
       validateAnnotationValues(annotationMirror.getElementValues());
     } catch (RuntimeException exception) {
-      throw ValidationException.from(exception).append("annotation: " + annotationMirror);
+      throw ValidationException.from(exception)
+          // Note: Calling #toString() directly on the annotation throws NPE (b/216180336).
+          .append("annotation: " + AnnotationMirrors.toString(annotationMirror));
     }
   }
 

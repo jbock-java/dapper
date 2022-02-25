@@ -78,6 +78,7 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.VariableElement;
 
@@ -130,7 +131,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             .addTypeVariables(bindingTypeElementTypeVariableNames(binding));
 
     if (binding.kind() == BindingKind.INJECTION
-            || binding.kind() == BindingKind.ASSISTED_INJECTION) {
+        || binding.kind() == BindingKind.ASSISTED_INJECTION
+        || binding.kind() == BindingKind.PROVISION) {
       factoryBuilder.addAnnotation(scopeMetadataAnnotation(binding));
       factoryBuilder.addAnnotation(qualifierMetadataAnnotation(binding));
     }
@@ -152,12 +154,13 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     }
     // TODO(bcorso): Make the constructor private?
     MethodSpec.Builder constructor = constructorBuilder().addModifiers(PUBLIC);
-    constructorParams(binding).forEach(
-        param -> {
-          constructor.addParameter(param).addStatement("this.$1N = $1N", param);
-          factoryBuilder.addField(
-              FieldSpec.builder(param.type, param.name, PRIVATE, FINAL).build());
-        });
+    constructorParams(binding)
+        .forEach(
+            param -> {
+              constructor.addParameter(param).addStatement("this.$1N = $1N", param);
+              factoryBuilder.addField(
+                  FieldSpec.builder(param.type, param.name, PRIVATE, FINAL).build());
+            });
     factoryBuilder.addMethod(constructor.build());
   }
 
@@ -184,12 +187,17 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     // We avoid Maps.transformValues here because it would implicitly depend on the order in which
     // the transform function is evaluated on each entry in the map.
     ImmutableMap.Builder<DependencyRequest, FieldSpec> builder = ImmutableMap.builder();
-    generateBindingFieldsForDependencies(binding).forEach(
-        (dependency, field) ->
-            builder.put(dependency,
-                FieldSpec.builder(
-                        field.type(), uniqueFieldNames.getUniqueName(field.name()), PRIVATE, FINAL)
-                    .build()));
+    generateBindingFieldsForDependencies(binding)
+        .forEach(
+            (dependency, field) ->
+                builder.put(
+                    dependency,
+                    FieldSpec.builder(
+                            field.type(),
+                            uniqueFieldNames.getUniqueName(field.name()),
+                            PRIVATE,
+                            FINAL)
+                        .build()));
     return builder.build();
   }
 
@@ -304,7 +312,8 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
 
   private AnnotationSpec scopeMetadataAnnotation(ProvisionBinding binding) {
     AnnotationSpec.Builder builder = AnnotationSpec.builder(TypeNames.SCOPE_METADATA);
-    binding.scope()
+    binding
+        .scope()
         .map(Scope::scopeAnnotation)
         .map(DaggerAnnotation::className)
         .map(ClassName::canonicalName)
@@ -314,8 +323,10 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
 
   private AnnotationSpec qualifierMetadataAnnotation(ProvisionBinding binding) {
     AnnotationSpec.Builder builder = AnnotationSpec.builder(TypeNames.QUALIFIER_METADATA);
-    binding.provisionDependencies().stream()
-        .map(DependencyRequest::key)
+    // Collect all qualifiers on the binding itself or its dependencies
+    Stream.concat(
+            Stream.of(binding.key()),
+            binding.provisionDependencies().stream().map(DependencyRequest::key))
         .map(Key::qualifier)
         .flatMap(presentValues())
         .map(DaggerAnnotation::className)
@@ -357,9 +368,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
         case INJECTION:
         case MULTIBOUND_SET:
         case MULTIBOUND_MAP:
-          return binding.dependencies().isEmpty()
-              ? SINGLETON_INSTANCE
-              : CLASS_CONSTRUCTOR;
+          return binding.dependencies().isEmpty() ? SINGLETON_INSTANCE : CLASS_CONSTRUCTOR;
         default:
           return CLASS_CONSTRUCTOR;
       }

@@ -22,8 +22,8 @@ import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParamet
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -39,11 +39,10 @@ import java.util.Set;
 abstract class BindingMethodValidator extends BindingElementValidator<XMethodElement> {
 
   private final XProcessingEnv processingEnv;
-  private final DaggerElements elements;
   private final DaggerTypes types;
   private final DependencyRequestValidator dependencyRequestValidator;
   private final ClassName methodAnnotation;
-  private final Set<ClassName> enclosingElementAnnotations;
+  private final ImmutableSet<ClassName> enclosingElementAnnotations;
   private final Abstractness abstractness;
   private final ExceptionSuperclass exceptionSuperclass;
 
@@ -56,7 +55,6 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
    */
   protected BindingMethodValidator(
       XProcessingEnv processingEnv,
-      DaggerElements elements,
       DaggerTypes types,
       ClassName methodAnnotation,
       Set<ClassName> enclosingElementAnnotations,
@@ -67,10 +65,9 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
       InjectionAnnotations injectionAnnotations) {
     super(allowsScoping, injectionAnnotations);
     this.processingEnv = processingEnv;
-    this.elements = elements;
     this.types = types;
     this.methodAnnotation = methodAnnotation;
-    this.enclosingElementAnnotations = enclosingElementAnnotations;
+    this.enclosingElementAnnotations = ImmutableSet.copyOf(enclosingElementAnnotations);
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.abstractness = abstractness;
     this.exceptionSuperclass = exceptionSuperclass;
@@ -83,7 +80,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
 
   /**
    * Returns an error message of the form "@<i>annotation</i> methods <i>rule</i>", where
-   * <i>rule</i> comes from calling {@link String#format(String, Object...)} on {@code ruleFormat}
+   * <i>rule</i> comes from calling {@code String#format(String, Object...)} on {@code ruleFormat}
    * and the other arguments.
    */
   protected final String bindingMethods(String ruleFormat, Object... args) {
@@ -111,7 +108,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
 
     @Override
     protected final Optional<XType> bindingElementType() {
-      return Optional.of(element.getReturnType());
+      return Optional.of(method.getReturnType());
     }
 
     @Override
@@ -126,22 +123,26 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
     }
 
     /** Checks additional properties of the binding method. */
-    protected void checkAdditionalMethodProperties() {
-    }
+    protected void checkAdditionalMethodProperties() {}
 
     /**
      * Adds an error if the method is not declared in a class or interface annotated with one of the
-     * {@link #enclosingElementAnnotations}.
+     * {@code #enclosingElementAnnotations}.
      */
     private void checkEnclosingElement() {
       XTypeElement enclosingTypeElement = getEnclosingTypeElement(method);
-      if (!hasAnyAnnotation(enclosingTypeElement, enclosingElementAnnotations))
+      if (enclosingTypeElement.isCompanionObject()) {
+        // Binding method is in companion object, use companion object's enclosing class instead.
+        enclosingTypeElement = enclosingTypeElement.getEnclosingTypeElement();
+      }
+      if (!hasAnyAnnotation(enclosingTypeElement, enclosingElementAnnotations)) {
         report.addError(
             bindingMethods(
                 "can only be present within a @%s",
                 enclosingElementAnnotations.stream()
                     .map(ClassName::simpleName)
                     .collect(joining(" or @"))));
+      }
     }
 
     /** Adds an error if the method is generic. */
@@ -176,8 +177,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
     }
 
     /**
-     * Adds an error if the method declares throws anything but an {@link Error} or an appropriate
-     * subtype of {@link Exception}.
+     * Adds an error if the method declares throws anything but an {@code Error} or an appropriate
+     * subtype of {@code Exception}.
      */
     private void checkThrows() {
       exceptionSuperclass.checkThrows(BindingMethodValidator.this, method, report);
@@ -195,8 +196,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
      * more than one qualifier.
      */
     protected void checkParameter(XVariableElement parameter) {
-      dependencyRequestValidator.validateDependencyRequest(
-          report, parameter, parameter.getType());
+      dependencyRequestValidator.validateDependencyRequest(report, parameter, parameter.getType());
     }
   }
 
@@ -207,7 +207,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
   }
 
   /**
-   * The exception class that all {@code throws}-declared throwables must extend, other than {@link
+   * The exception class that all {@code throws}-declared throwables must extend, other than {@code
    * Error}.
    */
   protected enum ExceptionSuperclass {
@@ -225,6 +225,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
           ValidationReport.Builder report) {
         if (!element.getThrownTypes().isEmpty()) {
           report.addError(validator.bindingMethods("may not throw"));
+          return;
         }
       }
     },
@@ -247,6 +248,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
     },
     ;
 
+    @SuppressWarnings("Immutable")
     private final ClassName superclass;
 
     ExceptionSuperclass() {
@@ -258,10 +260,10 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
     }
 
     /**
-     * Adds an error if the method declares throws anything but an {@link Error} or an appropriate
-     * subtype of {@link Exception}.
+     * Adds an error if the method declares throws anything but an {@code Error} or an appropriate
+     * subtype of {@code Exception}.
      *
-     * <p>This method is overridden in {@link #NO_EXCEPTIONS}.
+     * <p>This method is overridden in {@code #NO_EXCEPTIONS}.
      */
     protected void checkThrows(
         BindingMethodValidator validator,
