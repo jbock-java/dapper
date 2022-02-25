@@ -19,41 +19,43 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.ALLOWS_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
-import static dagger.internal.codegen.validation.TypeHierarchyValidator.validateTypeHierarchy;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.binding.BindsTypeChecker;
+import dagger.internal.codegen.binding.DaggerSuperficialValidation;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import jakarta.inject.Inject;
-import java.util.Set;
 
-/** A validator for {@link dagger.Binds} methods. */
+/** A validator for {@code dagger.Binds} methods. */
 final class BindsMethodValidator extends BindingMethodValidator {
-  private final DaggerTypes types;
+  private final BindsTypeChecker bindsTypeChecker;
 
   @Inject
   BindsMethodValidator(
       XProcessingEnv processingEnv,
       DaggerTypes types,
+      BindsTypeChecker bindsTypeChecker,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
         processingEnv,
         types,
         TypeNames.BINDS,
-        Set.of(TypeNames.MODULE),
+        ImmutableSet.of(TypeNames.MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
         ALLOWS_SCOPING,
         injectionAnnotations);
-    this.types = types;
+    this.bindsTypeChecker = bindsTypeChecker;
   }
 
   @Override
@@ -83,17 +85,18 @@ final class BindsMethodValidator extends BindingMethodValidator {
     @Override
     protected void checkParameter(XVariableElement parameter) {
       super.checkParameter(parameter);
-      XType leftHandSide = boxIfNecessary(method.getReturnType());
-      XType rightHandSide = parameter.getType();
+      XType returnType = boxIfNecessary(method.getReturnType());
+      XType parameterType = parameter.getType();
+      ContributionType contributionType = ContributionType.fromBindingElement(method);
 
-      if (!types.isAssignable(rightHandSide.toJavac(), leftHandSide.toJavac())) {
+      if (!bindsTypeChecker.isAssignable(parameterType, returnType, contributionType)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.
         // If one of the types isn't valid it means we need to delay validation to the next round.
         // Note: BasicAnnotationProcessor only performs superficial validation on the referenced
         // types within the module. Thus, we're guaranteed that the types in the @Binds method are
         // valid, but it says nothing about their supertypes, which are needed for isAssignable.
-        validateTypeHierarchy(leftHandSide, types);
-        validateTypeHierarchy(rightHandSide, types);
+        DaggerSuperficialValidation.validateTypeHierarchyOf("return type", method, returnType);
+        DaggerSuperficialValidation.validateTypeHierarchyOf("parameter", parameter, parameterType);
         // TODO(ronshapiro): clarify this error message for @ElementsIntoSet cases, where the
         // right-hand-side might not be assignable to the left-hand-side, but still compatible with
         // Set.addAll(Collection<? extends E>)
