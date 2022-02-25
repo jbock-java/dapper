@@ -352,15 +352,15 @@ public final class ComponentImplementation {
   }
 
   private static ImmutableMap<ComponentImplementation, FieldSpec>
-  createComponentFieldsByImplementation(
-      ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
+      createComponentFieldsByImplementation(
+          ComponentImplementation componentImplementation, CompilerOptions compilerOptions) {
     checkArgument(
         componentImplementation.componentShard != null,
         "The component shard must be set before computing the component fields.");
     ImmutableList.Builder<ComponentImplementation> builder = ImmutableList.builder();
     for (ComponentImplementation curr = componentImplementation;
-         curr != null;
-         curr = curr.parent.orElse(null)) {
+        curr != null;
+        curr = curr.parent.orElse(null)) {
       builder.add(curr);
     }
     // For better readability when adding these fields/parameters to generated code, we collect the
@@ -383,7 +383,6 @@ public final class ComponentImplementation {
                   return field.build();
                 }));
   }
-
   /** Returns the shard representing the {@code ComponentImplementation} itself. */
   public ShardImplementation getComponentShard() {
     return componentShard;
@@ -524,7 +523,6 @@ public final class ComponentImplementation {
 
     // TODO(ronshapiro): see if we can remove this method and instead inject it in the objects that
     // need it.
-
     /** Returns the binding graph for the component being generated. */
     public BindingGraph graph() {
       return graph;
@@ -580,22 +578,20 @@ public final class ComponentImplementation {
       // Check if the type is protected and accessible from current component.
       if (type instanceof DeclaredType
           && isProtectedMemberOf(
-          MoreTypes.asDeclared(type),
-          getComponentImplementation().componentDescriptor().typeElement())) {
+              MoreTypes.asDeclared(type),
+              getComponentImplementation().componentDescriptor().typeElement())) {
         return true;
       }
       return false;
     }
 
     // TODO(dpb): Consider taking FieldSpec, and returning identical FieldSpec with unique name?
-
     /** Adds the given field to the component. */
     public void addField(FieldSpecKind fieldKind, FieldSpec fieldSpec) {
       fieldSpecsMap.put(fieldKind, fieldSpec);
     }
 
     // TODO(dpb): Consider taking MethodSpec, and returning identical MethodSpec with unique name?
-
     /** Adds the given method to the component. */
     public void addMethod(MethodSpecKind methodKind, MethodSpec methodSpec) {
       methodSpecsMap.put(methodKind, methodSpec);
@@ -679,8 +675,8 @@ public final class ComponentImplementation {
       String baseMethodName =
           bindingName
               + (request.isRequestKind(RequestKind.INSTANCE)
-              ? ""
-              : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
+                  ? ""
+                  : UPPER_UNDERSCORE.to(UPPER_CAMEL, request.kindName()));
       return getUniqueMethodName(baseMethodName);
     }
 
@@ -792,6 +788,7 @@ public final class ComponentImplementation {
         noArgFactoryMethod = true;
       }
       validateMethodNameDoesNotOverrideGeneratedCreator(creatorKind.methodName());
+      claimMethodName(creatorKind.methodName());
       MethodSpec creatorFactoryMethod =
           methodBuilder(creatorKind.methodName())
               .addModifiers(PUBLIC, STATIC)
@@ -801,6 +798,7 @@ public final class ComponentImplementation {
       addMethod(MethodSpecKind.BUILDER_METHOD, creatorFactoryMethod);
       if (noArgFactoryMethod && canInstantiateAllRequirements()) {
         validateMethodNameDoesNotOverrideGeneratedCreator("create");
+        claimMethodName("create");
         addMethod(
             MethodSpecKind.BUILDER_METHOD,
             methodBuilder("create")
