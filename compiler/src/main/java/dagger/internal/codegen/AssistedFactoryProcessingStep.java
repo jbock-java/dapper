@@ -44,7 +44,6 @@ import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -86,7 +85,6 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
   @Inject
   AssistedFactoryProcessingStep(
       XMessager messager,
-      CompilerOptions compilerOptions,
       XFiler filer,
       SourceVersion sourceVersion,
       DaggerElements elements,

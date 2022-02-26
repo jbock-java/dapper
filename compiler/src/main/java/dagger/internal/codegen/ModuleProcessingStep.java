@@ -16,13 +16,16 @@
 
 package dagger.internal.codegen;
 
-import static java.util.stream.Collectors.toList;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingFactory;
 import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.binding.DelegateDeclaration;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.ModuleValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -35,12 +38,11 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@code Step} that validates module classes and generates factories for binding
+ * A {@code ProcessingStep} that validates module classes and generates factories for binding
  * methods.
  */
 final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
@@ -49,7 +51,8 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
   private final SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator;
-  private final Set<XTypeElement> processedModuleElements = new LinkedHashSet<>();
+  private final DelegateDeclaration.Factory delegateDeclarationFactory;
+  private final Set<XTypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
   @Inject
   ModuleProcessingStep(
@@ -57,29 +60,30 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
-      @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator) {
+      @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator,
+      DelegateDeclaration.Factory delegateDeclarationFactory) {
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;
     this.factoryGenerator = factoryGenerator;
     this.moduleConstructorProxyGenerator = moduleConstructorProxyGenerator;
+    this.delegateDeclarationFactory = delegateDeclarationFactory;
   }
 
   @Override
-  public Set<ClassName> annotationClassNames() {
-    return Set.of(TypeNames.MODULE);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE);
   }
 
   @Override
   public ImmutableSet<XElement> process(
-      XProcessingEnv env,
-      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     moduleValidator.addKnownModules(
         elementsByAnnotation.values().stream()
             .flatMap(Set::stream)
             // This cast is safe because @Module has @Target(ElementType.TYPE)
             .map(XTypeElement.class::cast)
-            .collect(toList()));
+            .collect(toImmutableSet()));
     return super.process(env, elementsByAnnotation);
   }
 
@@ -88,10 +92,22 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
     if (processedModuleElements.contains(module)) {
       return;
     }
+    // For backwards compatibility, we allow a companion object to be annotated with @Module even
+    // though it's no longer required. However, we skip processing the companion object itself
+    // because it will now be processed when processing the companion object's enclosing class.
+    if (module.isCompanionObject()) {
+      // TODO(danysantiago): Be strict about annotating companion objects with @Module,
+      //  i.e. tell user to annotate parent instead.
+      return;
+    }
     ValidationReport report = moduleValidator.validate(module);
     report.printMessagesTo(messager);
     if (report.isClean()) {
       generateForMethodsIn(module);
+      module.getEnclosedTypeElements().stream()
+          .filter(XTypeElement::isCompanionObject)
+          .collect(toOptional())
+          .ifPresent(this::generateForMethodsIn);
     }
     processedModuleElements.add(module);
   }
@@ -108,5 +124,10 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   private <B extends ContributionBinding> void generate(
       SourceFileGenerator<B> generator, B binding) {
     generator.generate(binding, messager);
+  }
+
+  private ContributionBinding bindsMethodBinding(XTypeElement module, XMethodElement method) {
+    return bindingFactory.unresolvedDelegateBinding(
+        delegateDeclarationFactory.create(method, module));
   }
 }

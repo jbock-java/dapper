@@ -16,8 +16,10 @@
 
 package dagger.internal.codegen.validation;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.internal.codegen.collect.ImmutableMap;
 import io.jbock.javapoet.ClassName;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,12 +33,15 @@ import java.util.stream.Stream;
 public interface BindingMethodValidatorsModule {
 
   @Provides
-  static Map<ClassName, BindingMethodValidator> indexValidators(
+  static ImmutableMap<ClassName, BindingMethodValidator> indexValidators(
       ProvidesMethodValidator providesMethodValidator,
       BindsMethodValidator bindsMethodValidator) {
     Map<ClassName, BindingMethodValidator> result = new LinkedHashMap<>();
     Stream.of(providesMethodValidator, bindsMethodValidator).forEach(v ->
         result.put(v.methodAnnotation(), v));
-    return result;
+    return ImmutableMap.copyOf(result);
   }
+
+  @Binds
+  Map<ClassName, BindingMethodValidator> bindIndexValidators(ImmutableMap<ClassName, BindingMethodValidator> validators);
 }

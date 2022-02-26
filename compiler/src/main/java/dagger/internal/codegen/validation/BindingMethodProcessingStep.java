@@ -16,13 +16,13 @@
 
 package dagger.internal.codegen.validation;
 
-import dagger.internal.codegen.base.Preconditions;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
+
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
-import java.util.Set;
 
 /** A step that validates all binding methods that were not validated while processing modules. */
 public final class BindingMethodProcessingStep extends TypeCheckingProcessingStep<XMethodElement> {
@@ -32,20 +32,19 @@ public final class BindingMethodProcessingStep extends TypeCheckingProcessingSte
 
   @Inject
   BindingMethodProcessingStep(
-      XMessager messager,
-      AnyBindingMethodValidator anyBindingMethodValidator) {
+      XMessager messager, AnyBindingMethodValidator anyBindingMethodValidator) {
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }
 
   @Override
-  public Set<ClassName> annotationClassNames() {
+  public ImmutableSet<ClassName> annotationClassNames() {
     return anyBindingMethodValidator.methodAnnotations();
   }
 
   @Override
   protected void process(XMethodElement method, ImmutableSet<ClassName> annotations) {
-    Preconditions.checkArgument(
+    checkArgument(
         anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",
         method,

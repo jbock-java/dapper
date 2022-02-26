@@ -16,7 +16,9 @@ public interface XProcessingStep {
    *     is unable to process, possibly until a later processing round. These elements will be
    *     passed back to this step at the next round of processing.
    */
-  Set<XElement> process(XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
+  Set<XElement> process(
+      XProcessingEnv env,
+      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
 
   /**
    * An optional hook for logic to be executed in the last round of processing.
@@ -24,7 +26,9 @@ public interface XProcessingStep {
    * Unlike {@link #process}, the elements in {@code elementsByAnnotation} are not validated and are those
    * that have been kept being deferred.
    */
-  void processOver(XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
+  void processOver(
+      XProcessingEnv env,
+      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
 
   /**
    * The set of annotation qualified names processed by this step.

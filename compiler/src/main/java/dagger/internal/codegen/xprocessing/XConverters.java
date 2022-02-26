@@ -39,7 +39,8 @@ public class XConverters {
     if (element instanceof VariableElement) {
       return toXProcessing((VariableElement) element, env);
     }
-    throw new IllegalArgumentException("unexpected kind: " + element.getKind());
+    throw new IllegalStateException(
+        String.format("Don't know how to convert element of type '%s' to a XElement", element.getClass()));
   }
 
   /**

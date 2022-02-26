@@ -20,7 +20,7 @@ import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnot
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotations;
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.allCreatorAnnotations;
-import static dagger.internal.codegen.base.Util.union;
+import static dagger.internal.codegen.collect.Sets.union;
 import static java.util.Collections.disjoint;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -35,7 +35,6 @@ import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
@@ -43,8 +42,8 @@ import jakarta.inject.Inject;
 import java.util.Set;
 
 /**
- * A {@link JavacBasicAnnotationProcessor.Step} that is responsible for dealing with a component or
- * production component as part of the {@link ComponentProcessor}.
+ * A {@code ProcessingStep} that is responsible for dealing with a component or production component
+ * as part of the {@code ComponentProcessor}.
  */
 final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
   private final XMessager messager;
@@ -137,8 +136,8 @@ final class ComponentProcessingStep extends TypeCheckingProcessingStep<XTypeElem
   }
 
   private boolean validateFullBindingGraph(ComponentDescriptor componentDescriptor) {
-    XTypeElement component = componentDescriptor.typeElement();
-    if (!bindingGraphValidator.shouldDoFullBindingGraphValidation(component)) {
+    if (!bindingGraphValidator.shouldDoFullBindingGraphValidation(
+        componentDescriptor.typeElement())) {
       return true;
     }
     BindingGraph fullBindingGraph = bindingGraphFactory.create(componentDescriptor, true);

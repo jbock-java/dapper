@@ -82,4 +82,11 @@ public interface XTypeElement extends XMemberContainer {
   default boolean isCompanionObject() {
     return false;
   }
+
+  /**
+   * Returns true if this XTypeElement represents a Kotlin data class
+   */
+  default boolean isDataClass(){
+    return false;
+  }
 }

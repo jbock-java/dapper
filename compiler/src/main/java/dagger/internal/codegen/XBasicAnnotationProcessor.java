@@ -27,4 +27,8 @@ public interface XBasicAnnotationProcessor {
   XProcessingEnv getXProcessingEnv();
 
   void initialize(XProcessingEnv processingEnv);
+
+  final class CommonProcessorDelegate {
+
+  }
 }

@@ -16,14 +16,16 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XElements.hasAnyAnnotation;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
@@ -31,17 +33,15 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /** Validates any binding method. */
 @Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
-  private final Map<ClassName, BindingMethodValidator> validators;
+  private final ImmutableMap<ClassName, BindingMethodValidator> validators;
   private final Map<XMethodElement, ValidationReport> reports = new HashMap<>();
 
   @Inject
-  AnyBindingMethodValidator(
-      Map<ClassName, BindingMethodValidator> validators) {
+  AnyBindingMethodValidator(ImmutableMap<ClassName, BindingMethodValidator> validators) {
     this.validators = validators;
   }
 
@@ -51,12 +51,12 @@ public final class AnyBindingMethodValidator implements ClearableCache {
   }
 
   /** Returns the binding method annotations considered by this validator. */
-  Set<ClassName> methodAnnotations() {
+  ImmutableSet<ClassName> methodAnnotations() {
     return validators.keySet();
   }
 
   /**
-   * Returns {@code true} if {@code method} is annotated with at least one of {@link
+   * Returns {@code true} if {@code method} is annotated with at least one of {@code
    * #methodAnnotations()}.
    */
   boolean isBindingMethod(XExecutableElement method) {
@@ -67,13 +67,13 @@ public final class AnyBindingMethodValidator implements ClearableCache {
    * Returns a validation report for a method.
    *
    * <ul>
-   *   <li>Reports an error if {@code method} is annotated with more than one {@linkplain
+   *   <li>Reports an error if {@code method} is annotated with more than one {@code
    *       #methodAnnotations() binding method annotation}.
-   *   <li>Validates {@code method} with the {@link BindingMethodValidator} for the single
-   *       {@linkplain #methodAnnotations() binding method annotation}.
+   *   <li>Validates {@code method} with the {@code BindingMethodValidator} for the single
+   *       {@code #methodAnnotations() binding method annotation}.
    * </ul>
    *
-   * @throws IllegalArgumentException if {@code method} is not annotated by any {@linkplain
+   * @throws IllegalArgumentException if {@code method} is not annotated by any {@code
    *     #methodAnnotations() binding method annotation}
    */
   ValidationReport validate(XMethodElement method) {
@@ -81,7 +81,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
   }
 
   /**
-   * Returns {@code true} if {@code method} was already {@linkplain #validate(XMethodElement)
+   * Returns {@code true} if {@code method} was already {@code #validate(XMethodElement)
    * validated}.
    */
   boolean wasAlreadyValidated(XMethodElement method) {
@@ -90,7 +90,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
 
   private ValidationReport validateUncached(XMethodElement method) {
     ValidationReport.Builder report = ValidationReport.about(method);
-    Set<ClassName> bindingMethodAnnotations =
+    ImmutableSet<ClassName> bindingMethodAnnotations =
         methodAnnotations().stream().filter(method::hasAnnotation).collect(toImmutableSet());
     switch (bindingMethodAnnotations.size()) {
       case 0:

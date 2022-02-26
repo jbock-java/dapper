@@ -18,41 +18,32 @@ package dagger.internal.codegen;
 
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectAssistedParameters;
 
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 
-/** An annotation processor for {@link dagger.assisted.AssistedInject}-annotated elements. */
+/** An annotation processor for {@code dagger.assisted.AssistedInject}-annotated elements. */
 final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XConstructorElement> {
   private final XMessager messager;
 
   @Inject
-  AssistedInjectProcessingStep(
-      SuperficialValidator elementValidator,
-      XMessager messager,
-      CompilerOptions compilerOptions) {
+  AssistedInjectProcessingStep(XMessager messager) {
     this.messager = messager;
   }
 
   @Override
-  public Set<ClassName> annotationClassNames() {
-    return Set.of(TypeNames.ASSISTED_INJECT);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.ASSISTED_INJECT);
   }
 
   @Override
@@ -61,14 +52,12 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 
-  private static final class AssistedInjectValidator {
+  private final class AssistedInjectValidator {
     ValidationReport validate(XConstructorElement constructor) {
-      ExecutableElement javaConstructor = XConverters.toJavac(constructor);
-      Preconditions.checkState(javaConstructor.getKind() == ElementKind.CONSTRUCTOR);
       ValidationReport.Builder report = ValidationReport.about(constructor);
 
       XType assistedInjectType = constructor.getEnclosingElement().getType();
-      List<AssistedParameter> assistedParameters =
+      ImmutableList<AssistedParameter> assistedParameters =
           assistedInjectAssistedParameters(assistedInjectType);
 
       Set<AssistedParameter> uniqueAssistedParameters = new HashSet<>();

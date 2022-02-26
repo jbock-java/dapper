@@ -45,8 +45,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
   private final Set<XElement> processedElements = Sets.newHashSet();
 
   @Inject
-  InjectProcessingStep(
-      InjectBindingRegistry injectBindingRegistry) {
+  InjectProcessingStep(InjectBindingRegistry injectBindingRegistry) {
     this.injectBindingRegistry = injectBindingRegistry;
   }
 
