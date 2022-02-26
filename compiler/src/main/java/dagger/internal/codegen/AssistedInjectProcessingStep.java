@@ -47,7 +47,6 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<XCon
       SuperficialValidator elementValidator,
       XMessager messager,
       CompilerOptions compilerOptions) {
-    super(elementValidator, messager, compilerOptions);
     this.messager = messager;
   }
 

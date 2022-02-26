@@ -26,12 +26,9 @@ import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Sets;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Set;
@@ -49,11 +46,7 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<XElement> {
 
   @Inject
   InjectProcessingStep(
-      SuperficialValidator elementValidator,
-      XMessager messager,
-      CompilerOptions compilerOptions,
       InjectBindingRegistry injectBindingRegistry) {
-    super(elementValidator, messager, compilerOptions);
     this.injectBindingRegistry = injectBindingRegistry;
   }
 

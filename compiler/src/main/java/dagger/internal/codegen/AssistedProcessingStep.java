@@ -24,9 +24,7 @@ import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingType
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
@@ -49,10 +47,7 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<XExecutabl
   @Inject
   AssistedProcessingStep(
       InjectionAnnotations injectionAnnotations,
-      SuperficialValidator elementValidator,
-      XMessager messager,
-      CompilerOptions compilerOptions) {
-    super(elementValidator, messager, compilerOptions);
+      XMessager messager) {
     this.injectionAnnotations = injectionAnnotations;
     this.messager = messager;
   }

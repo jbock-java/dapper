@@ -20,7 +20,6 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
@@ -42,11 +41,8 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   @Inject
   BindsInstanceProcessingStep(
       BindsInstanceMethodValidator methodValidator,
-      SuperficialValidator elementValidator,
       BindsInstanceParameterValidator parameterValidator,
-      XMessager messager,
-      CompilerOptions compilerOptions) {
-    super(elementValidator, messager, compilerOptions);
+      XMessager messager) {
     this.methodValidator = methodValidator;
     this.parameterValidator = parameterValidator;
     this.messager = messager;

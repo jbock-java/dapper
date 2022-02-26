@@ -18,7 +18,6 @@ package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
@@ -34,10 +33,7 @@ public final class BindingMethodProcessingStep extends TypeCheckingProcessingSte
   @Inject
   BindingMethodProcessingStep(
       XMessager messager,
-      CompilerOptions compilerOptions,
-      SuperficialValidator elementValidator,
       AnyBindingMethodValidator anyBindingMethodValidator) {
-    super(elementValidator, messager, compilerOptions);
     this.messager = messager;
     this.anyBindingMethodValidator = anyBindingMethodValidator;
   }

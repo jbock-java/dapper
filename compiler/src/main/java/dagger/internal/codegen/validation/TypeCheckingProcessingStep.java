@@ -23,21 +23,22 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.ImmutableSetMultimap;
-import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Maps;
 import io.jbock.javapoet.ClassName;
+import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import jakarta.inject.Inject;
 
 /**
  * A {@code XProcessingStep} that processes one element at a time and defers any for which {@code
@@ -46,18 +47,9 @@ import java.util.Set;
 public abstract class TypeCheckingProcessingStep<E extends XElement> implements XProcessingStep {
 
   private final List<String> lastDeferredErrorMessages = new ArrayList<>();
-  private final SuperficialValidator superficialValidator;
-  private final XMessager messager;
-  private final CompilerOptions compilerOptions;
-
-  protected TypeCheckingProcessingStep(
-      SuperficialValidator superficialValidator,
-      XMessager messager,
-      CompilerOptions compilerOptions) {
-    this.superficialValidator = superficialValidator;
-    this.messager = messager;
-    this.compilerOptions = compilerOptions;
-  }
+  @Inject XMessager messager;
+  @Inject CompilerOptions compilerOptions;
+  @Inject SuperficialValidator superficialValidator;
 
   @Override
   public final ImmutableSet<String> annotations() {
