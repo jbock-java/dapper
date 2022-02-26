@@ -200,33 +200,6 @@ public final class DependencyRequestFactory {
         .build();
   }
 
-  DependencyRequest forProductionImplementationExecutor() {
-    return DependencyRequest.builder()
-        .kind(PROVIDER)
-        .key(keyFactory.forProductionImplementationExecutor())
-        .build();
-  }
-
-  DependencyRequest forProductionComponentMonitor() {
-    return DependencyRequest.builder()
-        .kind(PROVIDER)
-        .key(keyFactory.forProductionComponentMonitor())
-        .build();
-  }
-
-  /**
-   * Returns a synthetic request for the present value of an optional binding generated from a
-   * {@code dagger.BindsOptionalOf} declaration.
-   */
-  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
-    Optional<Key> key = keyFactory.unwrapOptional(requestKey);
-    checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
-    return DependencyRequest.builder()
-        .kind(kind)
-        .key(key.get())
-        .build();
-  }
-
   private DependencyRequest newDependencyRequest(
       XElement requestElement, XType type, Optional<XAnnotation> qualifier) {
     return newDependencyRequest(
