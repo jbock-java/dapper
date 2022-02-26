@@ -15,11 +15,7 @@ with some modifications:
 * no generating `@CanIgnoreReturnValue`
 * ignore `@Nullable` annotations
 
-Dapper was forked from dagger version `2.37`, which is the last dagger
-version that did not depend on the [xprocessing](https://github.com/google/dagger/issues/2926) kotlin library.
-
-In order to be modular, dapper uses `jakarta.inject` annotations, instead of `javax.inject`.
-It also requires Java Version 11 or higher.
+In order to be modular, dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
 
 For modular applications, add this to `module-info.java`:
 
