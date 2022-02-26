@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
 import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
+import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.binding.SourceFiles.memberInjectedFieldSignatureForVariable;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
@@ -36,6 +37,7 @@ import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFr
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.internal.codegen.xprocessing.XElements.asMethodParameter;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.auto.common.MoreElements.asType;
 import static io.jbock.auto.common.MoreElements.asVariable;
@@ -54,6 +56,7 @@ import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerCollectors;
+import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -113,7 +116,7 @@ final class InjectionMethods {
     private static final ImmutableSet<String> BANNED_PROXY_NAMES = ImmutableSet.of("get", "create");
 
     /**
-     * Returns a method that invokes the binding's {@linkplain ProvisionBinding#bindingElement()
+     * Returns a method that invokes the binding's {@code ProvisionBinding#bindingElement()
      * constructor} and injects the instance's members.
      */
     static MethodSpec create(
@@ -219,7 +222,7 @@ final class InjectionMethods {
 
     /**
      * Returns the name of the {@code static} method that wraps {@code method}. For methods that are
-     * associated with {@code @Inject} constructors, the method will also inject all {@link
+     * associated with {@code @Inject} constructors, the method will also inject all {@code
      * InjectionSite}s.
      */
     private static String methodName(ExecutableElement method) {
@@ -267,7 +270,7 @@ final class InjectionMethods {
       switch (injectionSite.kind()) {
         case METHOD:
           return methodProxy(
-              asExecutable(injectionSite.element()),
+              asExecutable(toJavac(injectionSite.element())),
               methodName,
               InstanceCastPolicy.CAST_IF_NOT_PUBLIC,
               CheckNotNullPolicy.IGNORE,
@@ -280,7 +283,7 @@ final class InjectionMethods {
                   .key()
                   .qualifier()
                   .map(DaggerAnnotation::java);
-          return fieldProxy(asVariable(injectionSite.element()), methodName, qualifier);
+          return fieldProxy(asVariable(toJavac(injectionSite.element())), methodName, qualifier);
       }
       throw new AssertionError(injectionSite);
     }
@@ -303,7 +306,7 @@ final class InjectionMethods {
           .map(
               injectionSite -> {
                 TypeMirror injectSiteType =
-                    types.erasure(injectionSite.element().getEnclosingElement().asType());
+                    types.erasure(toJavac(injectionSite.element()).getEnclosingElement().asType());
 
                 // If instance has been declared as Object because it is not accessible from the
                 // component, but the injectionSite is in a supertype of instanceType that is
@@ -344,8 +347,7 @@ final class InjectionMethods {
             injectionSite.dependencies().stream().map(dependencyUsage).collect(toList()));
       }
 
-      ClassName enclosingClass =
-          membersInjectorNameForType(asType(injectionSite.element().getEnclosingElement()));
+      ClassName enclosingClass = membersInjectorNameForType(injectionSite.enclosingTypeElement());
       MethodSpec methodSpec = create(injectionSite, metadataUtil);
       return invokeMethod(methodSpec, arguments.build(), enclosingClass, generatedTypeName);
     }
@@ -369,7 +371,7 @@ final class InjectionMethods {
       int index = injectionSite.indexAmongAtInjectMembersWithSameSimpleName();
       String indexString = index == 0 ? "" : String.valueOf(index + 1);
       return "inject"
-          + LOWER_CAMEL.to(UPPER_CAMEL, injectionSite.element().getSimpleName().toString())
+          + LOWER_CAMEL.to(UPPER_CAMEL, getSimpleName(injectionSite.element()))
           + indexString;
     }
   }
@@ -432,6 +434,8 @@ final class InjectionMethods {
     if (method.getReturnType().getKind().equals(VOID)) {
       return builder.addStatement("$L", invocation).build();
     } else {
+      getNullableType(method)
+          .ifPresent(annotation -> CodeBlocks.addAnnotation(builder, annotation));
       return builder
           .returns(TypeName.get(method.getReturnType()))
           .addStatement("return $L", invocation).build();

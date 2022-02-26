@@ -9,4 +9,6 @@ public interface XVariableElement extends XElement {
   XType getType();
 
   String getName();
+
+  XType asMemberOf(XType other);
 }

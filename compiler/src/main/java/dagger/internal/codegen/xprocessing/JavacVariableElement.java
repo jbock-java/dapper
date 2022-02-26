@@ -1,6 +1,8 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.auto.common.MoreTypes;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
 abstract class JavacVariableElement extends JavacElement implements XVariableElement {
 
@@ -32,5 +34,15 @@ abstract class JavacVariableElement extends JavacElement implements XVariableEle
 
   XTypeElement containing() {
     return containing;
+  }
+
+  @Override
+  public XType asMemberOf(XType other) {
+    if (containing.getType().isSameType(other)) {
+      return getType();
+    }
+    JavacDeclaredType otherDeclared = (JavacDeclaredType) other;
+    TypeMirror typeMirror = MoreTypes.asMemberOf(env.getTypeUtils(), otherDeclared.typeMirror(), element);
+    return env.wrap(typeMirror);
   }
 }

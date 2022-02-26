@@ -48,8 +48,10 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
+import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
@@ -97,8 +99,8 @@ public final class BindingFactory {
    * Returns an {@code dagger.spi.model.BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
-   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class
-   *     and the binding should be for the parameterized type
+   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class and the
+   *     binding should be for the parameterized type
    */
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
@@ -209,7 +211,7 @@ public final class BindingFactory {
         .contributingModule(contributedBy)
         .key(key)
         .dependencies(
-            dependencyRequestFactory.forRequiredResolvedXVariables(
+            dependencyRequestFactory.forRequiredResolvedVariables(
                 method.getParameters(), methodType.getParameterTypes()))
         .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
   }

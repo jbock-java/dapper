@@ -32,7 +32,6 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeNames.membersInjectorOf;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
@@ -215,10 +214,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
     injectorTypeBuilder.addMethod(injectMembersBuilder.build());
 
     for (InjectionSite injectionSite : binding.injectionSites()) {
-      if (injectionSite
-          .element()
-          .getEnclosingElement()
-          .equals(toJavac(binding.membersInjectedType()))) {
+      if (injectionSite.enclosingTypeElement().equals(binding.membersInjectedType())) {
         injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite, metadataUtil));
       }
     }
@@ -235,10 +231,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
         // own generated _MembersInjector class.
         .filter(
             injectionSite ->
-                injectionSite
-                    .element()
-                    .getEnclosingElement()
-                    .equals(toJavac(binding.membersInjectedType())))
+                injectionSite.enclosingTypeElement().equals(binding.membersInjectedType()))
         .flatMap(injectionSite -> injectionSite.dependencies().stream())
         .map(DependencyRequest::key)
         .map(Key::qualifier)

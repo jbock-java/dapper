@@ -25,13 +25,13 @@ import static dagger.internal.codegen.javapoet.TypeNames.MEMBERS_INJECTORS;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import io.jbock.auto.common.MoreTypes;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.CodeBlock;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 /** A {@code Provider<MembersInjector<Foo>>} creation expression. */
 final class MembersInjectorProviderCreationExpression
@@ -53,20 +53,21 @@ final class MembersInjectorProviderCreationExpression
 
   @Override
   public CodeBlock creationExpression() {
-    TypeMirror membersInjectedType =
-        getOnlyElement(MoreTypes.asDeclared(binding.key().type().java()).getTypeArguments());
+    XType membersInjectedType =
+        getOnlyElement(binding.key().type().xprocessing().getTypeArguments());
 
     boolean castThroughRawType = false;
     CodeBlock membersInjector;
     if (binding.injectionSites().isEmpty()) {
-      membersInjector = CodeBlock.of("$T.<$T>noOp()", MEMBERS_INJECTORS, membersInjectedType);
+      membersInjector =
+          CodeBlock.of("$T.<$T>noOp()", MEMBERS_INJECTORS, membersInjectedType.getTypeName());
     } else {
-      TypeElement injectedTypeElement = MoreTypes.asTypeElement(membersInjectedType);
+      XTypeElement injectedTypeElement = membersInjectedType.getTypeElement();
       while (!hasLocalInjectionSites(injectedTypeElement)) {
         // Cast through a raw type since we're going to be using the MembersInjector for the
         // parent type.
         castThroughRawType = true;
-        injectedTypeElement = MoreTypes.asTypeElement(injectedTypeElement.getSuperclass());
+        injectedTypeElement = injectedTypeElement.getSuperType().getTypeElement();
       }
 
       membersInjector =
@@ -91,11 +92,10 @@ final class MembersInjectorProviderCreationExpression
         : providerExpression;
   }
 
-  private boolean hasLocalInjectionSites(TypeElement injectedTypeElement) {
+  private boolean hasLocalInjectionSites(XTypeElement injectedTypeElement) {
     return binding.injectionSites().stream()
-        .anyMatch(
-            injectionSite ->
-                injectionSite.element().getEnclosingElement().equals(injectedTypeElement));
+        .map(InjectionSite::enclosingTypeElement)
+        .anyMatch(injectedTypeElement::equals);
   }
 
   @AssistedFactory

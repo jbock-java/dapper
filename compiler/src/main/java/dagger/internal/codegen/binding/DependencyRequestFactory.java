@@ -24,7 +24,6 @@ import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
@@ -79,15 +78,8 @@ public final class DependencyRequestFactory {
     this.injectionAnnotations = injectionAnnotations;
   }
 
-  ImmutableSet<DependencyRequest> forRequiredResolvedXVariables(
-      List<? extends XVariableElement> variables, List<XType> resolvedTypes) {
-    return forRequiredResolvedVariables(
-        variables.stream().map(XConverters::toJavac).collect(toImmutableList()),
-        resolvedTypes.stream().map(XConverters::toJavac).collect(toImmutableList()));
-  }
-
   ImmutableSet<DependencyRequest> forRequiredResolvedVariables(
-      List<? extends VariableElement> variables, List<? extends TypeMirror> resolvedTypes) {
+      List<? extends XVariableElement> variables, List<XType> resolvedTypes) {
     checkState(resolvedTypes.size() == variables.size());
     ImmutableSet.Builder<DependencyRequest> builder = ImmutableSet.builder();
     for (int i = 0; i < variables.size(); i++) {
