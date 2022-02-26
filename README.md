@@ -13,7 +13,7 @@ with some modifications:
 * remove guava special-casing and internal guava dependency
 * remove the `experimental_turbine_hjar` option
 * no generating `@CanIgnoreReturnValue`
-* ignore `@Nullable` annotations
+* ignore `@Nullable` annotations, dapper will never inject `null`
 
 In order to be modular, dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
 
