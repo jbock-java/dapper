@@ -67,6 +67,14 @@ public final class XElements {
     return Optional.empty();
   }
 
+  public static boolean isPackage(XElement element) {
+    return toJavac(element).getKind() == ElementKind.PACKAGE;
+  }
+
+  public static boolean isEnumEntry(XElement element) {
+    return element instanceof XEnumEntry;
+  }
+
   public static boolean isEnum(XElement element) {
     return toJavac(element).getKind() == ElementKind.ENUM;
   }
