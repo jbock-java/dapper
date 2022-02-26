@@ -463,6 +463,7 @@ public final class ComponentValidator implements ClearableCache {
           .map(method -> asMethod(toXProcessing(method, processingEnv)))
           .filter(method -> isEntryPoint(method, method.asMemberOf(component.getType())))
           .forEach(
+              // addMethodUnlessOverridden
               method -> {
                 String key = getSimpleName(method);
                 Set<XMethodElement> methods = entryPoints.get(key);

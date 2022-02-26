@@ -20,11 +20,8 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
 
 import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.common.graph.Traverser;
@@ -138,37 +135,16 @@ public final class DaggerTypes implements Types {
    * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
    * {@code Optional} is returned if there is no non-{@code Object} superclass.
    */
-  public Optional<DeclaredType> nonObjectSuperclass(XType type) {
-    return isDeclared(type) ? nonObjectSuperclass(asDeclared(toJavac(type))) : Optional.empty();
-  }
-
-  /**
-   * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
-   * {@code Optional} is returned if there is no non-{@code Object} superclass.
-   */
   public Optional<DeclaredType> nonObjectSuperclass(DeclaredType type) {
     return Optional.ofNullable(MoreTypes.nonObjectSuperclass(types, elements, type).orElse(null));
   }
 
   /**
-   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first order.
+   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first
+   * order.
    */
   public Iterable<TypeMirror> supertypes(TypeMirror type) {
     return Traverser.<TypeMirror>forGraph(this::directSupertypes).breadthFirst(type);
-  }
-
-  /**
-   * Returns {@code type}'s single type argument.
-   *
-   * <p>For example, if {@code type} is {@code List<Number>} this will return {@code Number}.
-   *
-   * @throws IllegalArgumentException if {@code type} is not a declared type or has zero or more
-   *     than one type arguments.
-   */
-  public static XType unwrapType(XType type) {
-    XType unwrapped = unwrapTypeOrDefault(type, null);
-    checkArgument(unwrapped != null, "%s is a raw type", type);
-    return unwrapped;
   }
 
   /**
@@ -193,18 +169,6 @@ public final class DaggerTypes implements Types {
         "%s does not have a type parameter",
         typeElement.getQualifiedName());
     return getOnlyElement(declaredType.getTypeArguments(), defaultType);
-  }
-
-  private static XType unwrapTypeOrDefault(XType type, XType defaultType) {
-    // Check the type parameters of the element's XType since the input XType could be raw.
-    checkArgument(isDeclared(type));
-    XTypeElement typeElement = type.getTypeElement();
-    checkArgument(
-        typeElement.getType().getTypeArguments().size() == 1,
-        "%s does not have exactly 1 type parameter. Found: %s",
-        typeElement.getQualifiedName(),
-        typeElement.getType().getTypeArguments());
-    return getOnlyElement(type.getTypeArguments(), defaultType);
   }
 
   /**

@@ -17,9 +17,12 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
+import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
+import static io.jbock.auto.common.MoreTypes.isType;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
@@ -72,17 +75,17 @@ public abstract class SetType {
 
   /** {@code true} if {@code type} is a {@code java.util.Set} type. */
   public static boolean isSet(XType type) {
-    return false;
+    return isTypeOf(type, TypeNames.SET);
   }
 
   /** {@code true} if {@code type} is a {@code java.util.Set} type. */
   public static boolean isSet(TypeMirror type) {
-    return false;
+    return isType(type) && isTypeOf(TypeNames.SET, type);
   }
 
   /** {@code true} if {@code key.type()} is a {@code java.util.Set} type. */
   public static boolean isSet(Key key) {
-    return false;
+    return isSet(key.type().xprocessing());
   }
 
   /**

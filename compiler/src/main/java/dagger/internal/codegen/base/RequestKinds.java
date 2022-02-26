@@ -26,6 +26,7 @@ import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 import static dagger.spi.model.RequestKind.LAZY;
 import static dagger.spi.model.RequestKind.PRODUCED;
 import static dagger.spi.model.RequestKind.PRODUCER;
@@ -110,8 +111,8 @@ public final class RequestKinds {
   public static RequestKind getRequestKind(TypeMirror type) {
     checkTypePresent(type);
     if (!isType(type) // TODO(b/147320669): isType check can be removed once this bug is fixed.
-        || !type.getKind().equals(DECLARED)
-        || asDeclared(type).getTypeArguments().isEmpty()) {
+            || !type.getKind().equals(DECLARED)
+            || asDeclared(type).getTypeArguments().isEmpty()) {
       // If the type is not a declared type (i.e. class or interface) with type arguments, then we
       // know it can't be a parameterized type of one of the framework classes, so return INSTANCE.
       return RequestKind.INSTANCE;

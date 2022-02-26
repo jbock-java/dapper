@@ -18,8 +18,8 @@ package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XType;
@@ -106,12 +106,12 @@ public abstract class MapType {
 
   /** {@code true} if {@code type} is a {@code java.util.Map} type. */
   public static boolean isMap(XType type) {
-    return false;
+    return isTypeOf(type, TypeNames.MAP);
   }
 
   /** {@code true} if {@code key.type()} is a {@code java.util.Map} type. */
   public static boolean isMap(Key key) {
-    return false;
+    return isMap(key.type().xprocessing());
   }
 
   /**

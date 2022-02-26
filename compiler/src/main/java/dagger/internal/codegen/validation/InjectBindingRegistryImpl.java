@@ -16,34 +16,21 @@
 
 package dagger.internal.codegen.validation;
 
-import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreTypes.asTypeElement;
+import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
+import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
-import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedInjectedConstructors;
 import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConstructors;
 import static dagger.internal.codegen.binding.SourceFiles.generatedClassNameForBinding;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
+import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
-import static javax.lang.model.type.TypeKind.DECLARED;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.nonObjectSuperclass;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 
-import dagger.internal.codegen.xprocessing.XConstructorElement;
-import dagger.internal.codegen.xprocessing.XFieldElement;
-import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.collect.Sets;
-import io.jbock.javapoet.ClassName;
-import dagger.Component;
-import dagger.Provides;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.Binding;
@@ -52,32 +39,38 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
+import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 /**
  * Maintains the collection of provision bindings from {@code Inject} constructors and members
- * injection bindings from {@code Inject} fields and methods known to the annotation processor.
- * Note that this registry <b>does not</b> handle any explicit bindings (those from {@code Provides}
+ * injection bindings from {@code Inject} fields and methods known to the annotation processor. Note
+ * that this registry <b>does not</b> handle any explicit bindings (those from {@code Provides}
  * methods, {@code Component} dependencies, etc.).
  */
 @Singleton
 final class InjectBindingRegistryImpl implements InjectBindingRegistry {
-  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final DaggerTypes types;
   private final XMessager messager;
@@ -102,11 +95,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
           binding != null;
           binding = bindingsRequiringGeneration.poll()) {
         checkState(!binding.unresolved().isPresent());
-        TypeMirror type = binding.key().type().java();
-        if (!type.getKind().equals(DECLARED)
-            || injectValidatorWhenGeneratingCode
-                .validate(toXProcessing(asTypeElement(type), processingEnv))
-                .isClean()) {
+        XType type = binding.key().type().xprocessing();
+        if (!isDeclared(type)
+            || injectValidatorWhenGeneratingCode.validate(type.getTypeElement()).isClean()) {
           generator.generate(binding);
         }
         materializedBindingKeys.add(binding.key());
@@ -181,7 +172,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
   @Inject
   InjectBindingRegistryImpl(
-      XProcessingEnv processingEnv,
       DaggerElements elements,
       DaggerTypes types,
       XMessager messager,
@@ -189,7 +179,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
       KeyFactory keyFactory,
       BindingFactory bindingFactory,
       CompilerOptions compilerOptions) {
-    this.processingEnv = processingEnv;
     this.elements = elements;
     this.types = types;
     this.messager = messager;
@@ -325,9 +314,9 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
 
     MembersInjectionBinding binding = bindingFactory.membersInjectionBinding(type, resolvedType);
     registerBinding(binding, warnIfNotAlreadyGenerated);
-    for (Optional<DeclaredType> supertype = types.nonObjectSuperclass(type);
-         supertype.isPresent();
-         supertype = types.nonObjectSuperclass(supertype.get())) {
+    for (Optional<XType> supertype = nonObjectSuperclass(type);
+        supertype.isPresent();
+        supertype = nonObjectSuperclass(supertype.get())) {
       getOrFindMembersInjectionBinding(keyFactory.forMembersInjectedType(supertype.get()));
     }
     return Optional.of(binding);
@@ -379,7 +368,8 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     if (!isValidMembersInjectionKey(key)) {
       return Optional.empty();
     }
-    Key membersInjectionKey = keyFactory.forMembersInjectedType(unwrapType(key.type().java()));
+    Key membersInjectionKey =
+        keyFactory.forMembersInjectedType(unwrapType(key.type().xprocessing()));
     return getOrFindMembersInjectionBinding(membersInjectionKey)
         .map(binding -> bindingFactory.membersInjectorBinding(key, binding));
   }

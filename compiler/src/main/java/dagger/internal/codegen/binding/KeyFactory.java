@@ -26,6 +26,7 @@ import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static javax.lang.model.element.ElementKind.METHOD;
 
 import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -184,6 +185,24 @@ public final class KeyFactory {
             .multibindingContributionIdentifier(
                 new MultibindingContributionIdentifier(method, contributingModule))
             .build();
+  }
+
+  /**
+   * Returns the key for a {@code Multibinds @Multibinds} method.
+   *
+   * <p>The key's type is either {@code Set<T>} or {@code Map<K, Provider<V>>}. The latter works
+   * even for maps used by {@code Producer}s.
+   */
+  Key forMultibindsMethod(XMethodElement method, XMethodType methodType) {
+    XType returnType = method.getReturnType();
+    TypeMirror keyType =
+        MapType.isMap(returnType)
+            ? mapOfFrameworkType(
+                MapType.from(returnType).keyType(),
+                TypeNames.PROVIDER,
+                MapType.from(returnType).valueType())
+            : toJavac(returnType);
+    return forMethod(toJavac(method), keyType);
   }
 
   private TypeMirror bindingMethodKeyType(

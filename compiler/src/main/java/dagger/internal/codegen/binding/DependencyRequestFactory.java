@@ -25,13 +25,15 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAss
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 import static dagger.spi.model.RequestKind.FUTURE;
 import static dagger.spi.model.RequestKind.INSTANCE;
 import static dagger.spi.model.RequestKind.MEMBERS_INJECTION;
+import static dagger.spi.model.RequestKind.PRODUCER;
+import static dagger.spi.model.RequestKind.PROVIDER;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -45,6 +47,7 @@ import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.DaggerElement;
 import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -91,6 +94,46 @@ public final class DependencyRequestFactory {
       builder.add(forRequiredResolvedVariable(variables.get(i), resolvedTypes.get(i)));
     }
     return builder.build();
+  }
+
+  /**
+   * Creates synthetic dependency requests for each individual multibinding contribution in {@code
+   * multibindingContributions}.
+   */
+  ImmutableSet<DependencyRequest> forMultibindingContributions(
+      Key multibindingKey, Iterable<ContributionBinding> multibindingContributions) {
+    ImmutableSet.Builder<DependencyRequest> requests = ImmutableSet.builder();
+    for (ContributionBinding multibindingContribution : multibindingContributions) {
+      requests.add(forMultibindingContribution(multibindingKey, multibindingContribution));
+    }
+    return requests.build();
+  }
+
+  /** Creates a synthetic dependency request for one individual {@code multibindingContribution}. */
+  private DependencyRequest forMultibindingContribution(
+      Key multibindingKey, ContributionBinding multibindingContribution) {
+    checkArgument(
+        multibindingContribution.key().multibindingContributionIdentifier().isPresent(),
+        "multibindingContribution's key must have a multibinding contribution identifier: %s",
+        multibindingContribution);
+    return DependencyRequest.builder()
+        .kind(multibindingContributionRequestKind(multibindingKey, multibindingContribution))
+        .key(multibindingContribution.key())
+        .build();
+  }
+
+  // TODO(b/28555349): support PROVIDER_OF_LAZY here too
+  private static final ImmutableSet<RequestKind> WRAPPING_MAP_VALUE_FRAMEWORK_TYPES =
+      ImmutableSet.of(PROVIDER, PRODUCER);
+
+  private RequestKind multibindingContributionRequestKind(
+      Key multibindingKey, ContributionBinding multibindingContribution) {
+    switch (multibindingContribution.contributionType()) {
+      case UNIQUE:
+        throw new IllegalArgumentException(
+            "multibindingContribution must be a multibinding: " + multibindingContribution);
+    }
+    throw new AssertionError(multibindingContribution.toString());
   }
 
   DependencyRequest forRequiredResolvedVariable(
@@ -154,6 +197,33 @@ public final class DependencyRequestFactory {
         .kind(MEMBERS_INJECTION)
         .key(keyFactory.forMembersInjectedType(membersInjectedType))
         .requestElement(DaggerElement.from(membersInjectionMethod))
+        .build();
+  }
+
+  DependencyRequest forProductionImplementationExecutor() {
+    return DependencyRequest.builder()
+        .kind(PROVIDER)
+        .key(keyFactory.forProductionImplementationExecutor())
+        .build();
+  }
+
+  DependencyRequest forProductionComponentMonitor() {
+    return DependencyRequest.builder()
+        .kind(PROVIDER)
+        .key(keyFactory.forProductionComponentMonitor())
+        .build();
+  }
+
+  /**
+   * Returns a synthetic request for the present value of an optional binding generated from a
+   * {@code dagger.BindsOptionalOf} declaration.
+   */
+  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
+    Optional<Key> key = keyFactory.unwrapOptional(requestKey);
+    checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
+    return DependencyRequest.builder()
+        .kind(kind)
+        .key(key.get())
         .build();
   }
 
