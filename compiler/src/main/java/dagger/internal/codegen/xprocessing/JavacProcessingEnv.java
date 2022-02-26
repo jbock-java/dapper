@@ -1,11 +1,14 @@
 package dagger.internal.codegen.xprocessing;
 
+import io.jbock.javapoet.TypeName;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
@@ -72,8 +75,22 @@ public class JavacProcessingEnv extends XProcessingEnv {
   }
 
   @Override
+  public XType getDeclaredType(XTypeElement type2, XType... types) {
+    JavacTypeElement type = (JavacTypeElement) type2;
+    TypeMirror[] args = Arrays.stream(types)
+        .map(XType::toJavac)
+        .toArray(TypeMirror[]::new);
+    return wrap(delegate.getTypeUtils().getDeclaredType(type.toJavac(), args));
+  }
+
+  @Override
   public XFiler getFiler() {
     return new JavacFiler(this, delegate.getFiler());
+  }
+
+  @Override
+  public XTypeElement requireTypeElement(TypeName typeName) {
+    return requireTypeElement(typeName.toString());
   }
 
   @Override

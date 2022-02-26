@@ -16,7 +16,11 @@
 
 package dagger.spi.model;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+
 import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
 import java.util.Objects;
@@ -105,6 +109,17 @@ public abstract class Key {
   public static final class MultibindingContributionIdentifier {
     private final String module;
     private final String bindingElement;
+
+    /**
+     * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}. It
+     *     is not part of a specified API and may change at any point.
+     */
+    @Deprecated
+    public MultibindingContributionIdentifier(
+        // TODO(ronshapiro): reverse the order of these parameters
+        XMethodElement bindingMethod, XTypeElement contributingModule) {
+      this(toJavac(bindingMethod), toJavac(contributingModule));
+    }
 
     /**
      * @deprecated This is only meant to be called from code in {@code dagger.internal.codegen}.

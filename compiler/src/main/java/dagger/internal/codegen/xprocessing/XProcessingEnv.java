@@ -1,8 +1,10 @@
 package dagger.internal.codegen.xprocessing;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ArrayTypeName;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import java.util.Objects;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -101,6 +103,10 @@ public abstract class XProcessingEnv {
         () -> String.format("Cannot find required type element %s", qName));
   }
 
+  /** Returns an XType for the given type element with the type arguments specified as in types. */
+  public abstract XType getDeclaredType(XTypeElement type, XType... types);
 
   public abstract XFiler getFiler();
+
+  public abstract XTypeElement requireTypeElement(TypeName typeName);
 }
