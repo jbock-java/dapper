@@ -6,6 +6,8 @@ public interface XElement extends XAnnotated, XHasModifiers {
 
   Element toJavac();
 
+  XElement getEnclosingElement();
+
   static boolean isTypeElement(XElement element) {
     return element instanceof XTypeElement;
   }

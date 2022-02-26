@@ -2,6 +2,7 @@ package dagger.internal.codegen.xprocessing;
 
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,16 @@ class JavacElement implements XElement {
   @Override
   public Element toJavac() {
     return element;
+  }
+
+  // TODO check source
+  @Override
+  public XElement getEnclosingElement() {
+    try {
+      return new DefaultJavacTypeElement(env, MoreElements.asType(element.getEnclosingElement()));
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   @Override
