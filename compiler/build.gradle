@@ -28,7 +28,6 @@ javadoc {
 repositories {
     mavenCentral()
     google()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1156' }
 }
 
 shadowJar {
