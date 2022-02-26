@@ -15,7 +15,7 @@ with some modifications:
 * no generating `@CanIgnoreReturnValue`
 * ignore `@Nullable` annotations, dapper will never inject `null`
 
-In order to be modular, dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
+Dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
 
 For modular applications, add this to `module-info.java`:
 
