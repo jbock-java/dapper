@@ -23,7 +23,6 @@ if ! ./gradlew clean -Pversion=${VERSION} dapper:publish; then
   die "build failed"
 fi
 
-
 if ! ./gradlew clean -Pversion=${VERSION} compiler:publish; then
   die "build failed"
 fi

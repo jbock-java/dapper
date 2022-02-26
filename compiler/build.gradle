@@ -1,10 +1,17 @@
 plugins {
     id('java')
     id('maven-publish')
+    id('com.github.johnrengelman.shadow') version('7.1.2')
     id('signing')
 }
 
 group = 'io.github.jbock-java'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 compileJava {
     options.encoding = 'UTF-8'
@@ -23,6 +30,11 @@ repositories {
     google()
 }
 
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
+}
+
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
@@ -30,6 +42,14 @@ tasks.withType(AbstractArchiveTask) {
 
 tasks.withType(GenerateModuleMetadata) {
     enabled = true
+}
+
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
+    relocate('io.jbock.auto.common', 'dapper.shadow.auto.common')
+    relocate('io.jbock.javapoet', 'dapper.shadow.javapoet')
+    relocate('io.jbock.common.graph', 'dapper.shadow.common.graph')
 }
 
 dependencies {
@@ -40,7 +60,7 @@ dependencies {
     implementation(javapoet)
     implementation(ac)
     implementation(graph)
-    implementation(dapper)
+    shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
     implementation('io.github.jbock-java:auto-value-annotations:1.8.2.2')
     annotationProcessor('io.github.jbock-java:auto-value:1.8.2.2')
@@ -86,7 +106,8 @@ artifacts {
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
             artifactId = 'dapper-compiler'
 
             artifact sourcesJar
@@ -135,5 +156,5 @@ signing {
     def signingKey = findProperty('signingKey')
     def signingPassword = findProperty('signingPassword')
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign publishing.publications.shadow
 }
