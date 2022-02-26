@@ -22,14 +22,23 @@ import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.SpiModule.TestingPlugins;
+import dagger.internal.codegen.base.ClearableCache;
+import dagger.internal.codegen.base.SourceFileGenerationException;
+import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.binding.MembersInjectionBinding;
+import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
 import dagger.internal.codegen.validation.BindingMethodProcessingStep;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
+import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
+import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -37,6 +46,7 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingEnvConfig;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.spi.model.BindingGraphPlugin;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
@@ -56,14 +66,19 @@ import javax.lang.model.element.Element;
  * <p>TODO(gak): give this some better documentation
  */
 public class ComponentProcessor extends JavacBasicAnnotationProcessor {
-
-  private static XProcessingEnvConfig envConfig(Map<String, String> options) {
+  private static XProcessingEnvConfig envConfig(Map<String, String> options)  {
     return new XProcessingEnvConfig.Builder().disableAnnotatedElementValidation(true).build();
   }
 
-  private final Optional<Set<BindingGraphPlugin>> testingPlugins;
+  private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
 
-  private ComponentProcessorHelper helper;
+  @Inject InjectBindingRegistry injectBindingRegistry;
+  @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
+  @Inject List<JavacBasicAnnotationProcessor.Step> processingSteps;
+  @Inject ValidationBindingGraphPlugins validationBindingGraphPlugins;
+  @Inject ExternalBindingGraphPlugins externalBindingGraphPlugins;
+  @Inject Set<ClearableCache> clearableCaches;
 
   public ComponentProcessor() {
     super(ComponentProcessor::envConfig);
@@ -72,25 +87,30 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
 
   private ComponentProcessor(Iterable<BindingGraphPlugin> testingPlugins) {
     super(ComponentProcessor::envConfig);
-    this.testingPlugins = Optional.of(Util.setOf(testingPlugins));
+    this.testingPlugins = Optional.of(ImmutableSet.copyOf(testingPlugins));
   }
 
   /**
-   * Creates a component processor that uses given {@link BindingGraphPlugin}s instead of loading
-   * them from a {@link java.util.ServiceLoader}.
+   * Creates a component processor that uses given {@code BindingGraphPlugin}s instead of loading
+   * them from a {@code java.util.ServiceLoader}.
    */
-  // visible for testing
   public static ComponentProcessor forTesting(BindingGraphPlugin... testingPlugins) {
     return forTesting(Arrays.asList(testingPlugins));
   }
 
   /**
-   * Creates a component processor that uses given {@link BindingGraphPlugin}s instead of loading
-   * them from a {@link java.util.ServiceLoader}.
+   * Creates a component processor that uses given {@code BindingGraphPlugin}s instead of loading
+   * them from a {@code java.util.ServiceLoader}.
    */
-  // visible for testing
   public static ComponentProcessor forTesting(Iterable<BindingGraphPlugin> testingPlugins) {
     return new ComponentProcessor(testingPlugins);
+  }
+
+  @Override
+  public void initialize(XProcessingEnv env) {
+    ProcessorComponent.factory()
+        .create(env, testingPlugins.orElse(ImmutableSet.of()))
+        .inject(this);
   }
 
   @Override
@@ -99,18 +119,20 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   }
 
   @Override
-  public Set<String> getSupportedOptions() {
-    return helper.getSupportedOptions();
+  public ImmutableSet<String> getSupportedOptions() {
+    return ImmutableSet.<String>builder()
+        .addAll(ProcessingEnvironmentCompilerOptions.supportedOptions())
+        .addAll(validationBindingGraphPlugins.allSupportedOptions())
+        .addAll(externalBindingGraphPlugins.allSupportedOptions())
+        .build();
   }
 
   @Override
-  public void initialize(XProcessingEnv env) {
-    helper = ProcessorComponent.factory().create(env, testingPlugins).helper();
-  }
+  public Iterable<? extends Step> steps() {
+    validationBindingGraphPlugins.initializePlugins();
+    externalBindingGraphPlugins.initializePlugins();
 
-  @Override
-  protected Iterable<? extends Step> steps() {
-    return helper.steps();
+    return processingSteps;
   }
 
   @Singleton
@@ -124,10 +146,9 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
         ProcessingRoundCacheModule.class,
         ProcessingStepsModule.class,
         SourceFileGeneratorsModule.class,
-        SpiModule.class
       })
   interface ProcessorComponent {
-    ComponentProcessorHelper helper();
+    void inject(ComponentProcessor processor);
 
     static Factory factory() {
       return DaggerComponentProcessor_ProcessorComponent.factory();
@@ -136,14 +157,13 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
     @Component.Factory
     interface Factory {
       ProcessorComponent create(
-          @BindsInstance XProcessingEnv processingEnvironment,
-          @BindsInstance @TestingPlugins Optional<Set<BindingGraphPlugin>> testingPlugins);
+          @BindsInstance XProcessingEnv xProcessingEnv,
+          @BindsInstance Set<BindingGraphPlugin> externalPlugins);
     }
   }
 
   @Module
   interface ProcessingStepsModule {
-
     @Provides
     static List<Step> processingSteps(
         XProcessingEnv xProcessingEnv,
@@ -171,8 +191,18 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   }
 
   @Override
-  protected void postRound(RoundEnvironment roundEnv) {
-    helper.postRound(roundEnv);
+  public void postRound(RoundEnvironment roundEnv) {
+    // TODO(bcorso): Add a way to determine if processing is over without converting to Javac here.
+
+    if (!roundEnv.processingOver()) {
+      try {
+        injectBindingRegistry.generateSourcesForRequiredBindings(
+            factoryGenerator, membersInjectorGenerator);
+      } catch (SourceFileGenerationException e) {
+        e.printMessageTo(getXProcessingEnv().getMessager());
+      }
+    }
+    clearableCaches.forEach(ClearableCache::clearCache);
   }
 
   private static final class DelegatingStep implements Step {
