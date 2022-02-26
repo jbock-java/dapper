@@ -17,6 +17,7 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.assisted.Assisted;
@@ -24,6 +25,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.CodeBlock;
 import javax.lang.model.type.TypeMirror;
 
@@ -36,19 +38,20 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
   private final RequestRepresentation wrappedRequestRepresentation;
   private final ComponentImplementation componentImplementation;
   private final ComponentMethodDescriptor componentMethod;
-  private final DaggerTypes types;
+  private final XProcessingEnv processingEnv;
 
   @AssistedInject
   ComponentMethodRequestRepresentation(
       @Assisted RequestRepresentation wrappedRequestRepresentation,
       @Assisted ComponentMethodDescriptor componentMethod,
       ComponentImplementation componentImplementation,
+      XProcessingEnv processingEnv,
       DaggerTypes types) {
     super(componentImplementation.getComponentShard(), types);
     this.wrappedRequestRepresentation = checkNotNull(wrappedRequestRepresentation);
     this.componentMethod = checkNotNull(componentMethod);
     this.componentImplementation = componentImplementation;
-    this.types = types;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -77,7 +80,7 @@ final class ComponentMethodRequestRepresentation extends MethodRequestRepresenta
 
   @Override
   protected TypeMirror returnType() {
-    return componentMethod.resolvedReturnType(types);
+    return toJavac(componentMethod.resolvedReturnType(processingEnv));
   }
 
   @AssistedFactory

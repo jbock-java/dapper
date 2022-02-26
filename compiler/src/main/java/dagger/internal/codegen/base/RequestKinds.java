@@ -26,6 +26,7 @@ import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.wrapType;
 import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 import static dagger.spi.model.RequestKind.LAZY;
 import static dagger.spi.model.RequestKind.PRODUCED;
@@ -38,7 +39,7 @@ import static javax.lang.model.type.TypeKind.DECLARED;
 
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.ClassName;
@@ -47,22 +48,21 @@ import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@code RequestKind}s. */
 public final class RequestKinds {
-
   /** Returns the type of a request of this kind for a key with a given type. */
-  public static TypeMirror requestType(
-      RequestKind requestKind, TypeMirror type, DaggerTypes types) {
+  public static XType requestType(
+      RequestKind requestKind, XType type, XProcessingEnv processingEnv) {
     switch (requestKind) {
       case INSTANCE:
         return type;
 
       case PROVIDER_OF_LAZY:
-        return types.wrapType(requestType(LAZY, type, types), TypeNames.PROVIDER);
+        return wrapType(TypeNames.PROVIDER, requestType(LAZY, type, processingEnv), processingEnv);
 
       case FUTURE:
-        return types.wrapType(type, TypeNames.LISTENABLE_FUTURE);
+        return wrapType(TypeNames.LISTENABLE_FUTURE, type, processingEnv);
 
       default:
-        return types.wrapType(type, frameworkClassName(requestKind));
+        return wrapType(frameworkClassName(requestKind), type, processingEnv);
     }
   }
 

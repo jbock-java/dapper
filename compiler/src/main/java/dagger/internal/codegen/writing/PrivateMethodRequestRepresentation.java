@@ -30,6 +30,8 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeName;
@@ -46,6 +48,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   private final BindingRequest request;
   private final RequestRepresentation wrappedRequestRepresentation;
   private final CompilerOptions compilerOptions;
+  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private String methodName;
 
@@ -55,6 +58,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
       @Assisted ContributionBinding binding,
       @Assisted RequestRepresentation wrappedRequestRepresentation,
       ComponentImplementation componentImplementation,
+      XProcessingEnv processingEnv,
       DaggerTypes types,
       CompilerOptions compilerOptions) {
     super(componentImplementation.shardImplementation(binding), types);
@@ -63,6 +67,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
     this.wrappedRequestRepresentation = checkNotNull(wrappedRequestRepresentation);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.compilerOptions = compilerOptions;
+    this.processingEnv = processingEnv;
     this.types = types;
   }
 
@@ -78,7 +83,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
       return toJavac(binding.contributedPrimitiveType().get());
     }
 
-    TypeMirror requestedType = request.requestedType(binding.contributedType(), types);
+    XType requestedType = request.requestedType(binding.contributedType(), processingEnv);
     return types.accessibleType(requestedType, shardImplementation.name());
   }
 

@@ -35,9 +35,9 @@ import dagger.internal.codegen.collect.ImmutableBiMap;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
@@ -52,7 +52,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * A component declaration.
@@ -338,15 +337,15 @@ public abstract class ComponentDescriptor {
      * ComponentDescriptor#typeElement() component type}. If there are no type variables in the
      * return type, this is the equivalent of {@code methodElement().getReturnType()}.
      */
-    public TypeMirror resolvedReturnType(DaggerTypes types) {
+    public XType resolvedReturnType(XProcessingEnv processingEnv) {
       checkState(dependencyRequest().isPresent());
 
       XType returnType = methodElement().getReturnType();
       if (isPrimitive(returnType) || isVoid(returnType)) {
-        return toJavac(returnType);
+        return returnType;
       }
       return BindingRequest.bindingRequest(dependencyRequest().get())
-          .requestedType(dependencyRequest().get().key().type().java(), types);
+          .requestedType(dependencyRequest().get().key().type().xprocessing(), processingEnv);
     }
 
     /** A {@code ComponentMethodDescriptor}builder for a method. */
