@@ -19,32 +19,49 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElement.isField;
+import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.asField;
+import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.RequestKind;
 import jakarta.inject.Inject;
-import java.util.Set;
+import java.util.Optional;
 
 /** Validation for dependency requests. */
 final class DependencyRequestValidator {
   private final XProcessingEnv processingEnv;
+  private final MembersInjectionValidator membersInjectionValidator;
   private final InjectionAnnotations injectionAnnotations;
+  private final KotlinMetadataUtil metadataUtil;
 
   @Inject
   DependencyRequestValidator(
       XProcessingEnv processingEnv,
-      InjectionAnnotations injectionAnnotations) {
+      MembersInjectionValidator membersInjectionValidator,
+      InjectionAnnotations injectionAnnotations,
+      KotlinMetadataUtil metadataUtil) {
     this.processingEnv = processingEnv;
+    this.membersInjectionValidator = membersInjectionValidator;
     this.injectionAnnotations = injectionAnnotations;
+    this.metadataUtil = metadataUtil;
   }
 
   /**
@@ -57,11 +74,38 @@ final class DependencyRequestValidator {
       // Don't validate assisted parameters. These are not dependency requests.
       return;
     }
+    if (missingQualifierMetadata(requestElement)) {
+      report.addError(
+          "Unable to read annotations on an injected Kotlin property. "
+          + "The Dagger compiler must also be applied to any project containing @Inject "
+          + "properties.",
+          requestElement);
+
+      // Skip any further validation if we don't have valid metadata for a type that needs it.
+      return;
+    }
 
     new Validator(report, requestElement, requestType).validate();
   }
 
-  public void checkNotProducer(ValidationReport.Builder builder, XElement parameter) {
+  /** Returns {@code true} if a kotlin inject field is missing metadata about its qualifiers. */
+  private boolean missingQualifierMetadata(XElement requestElement) {
+    if (isField(requestElement)) {
+      XFieldElement fieldElement = asField(requestElement);
+      // static/top-level injected fields are not supported,
+      // so no need to get qualifier from kotlin metadata
+      if (!fieldElement.isStatic()
+          && isTypeElement(fieldElement.getEnclosingElement())
+          && metadataUtil.hasMetadata(toJavac(fieldElement))
+          && metadataUtil.isMissingSyntheticPropertyForAnnotations(toJavac(fieldElement))) {
+        Optional<XTypeElement> membersInjector =
+            Optional.ofNullable(
+                processingEnv.findTypeElement(
+                    membersInjectorNameForType(asTypeElement(fieldElement.getEnclosingElement()))));
+        return !membersInjector.isPresent();
+      }
+    }
+    return false;
   }
 
   private final class Validator {
@@ -69,8 +113,7 @@ final class DependencyRequestValidator {
     private final XElement requestElement;
     private final XType requestType;
     private final XType keyType;
-    private final Set<XAnnotation> qualifiers;
-
+    private final ImmutableSet<XAnnotation> qualifiers;
 
     Validator(ValidationReport.Builder report, XElement requestElement, XType requestType) {
       this.report = report;
@@ -124,6 +167,25 @@ final class DependencyRequestValidator {
                 + keyType,
             requestElement);
       }
+      if (isTypeOf(keyType, TypeNames.MEMBERS_INJECTOR)) {
+        if (keyType.getTypeArguments().isEmpty()) {
+          report.addError("Cannot inject a raw MembersInjector", requestElement);
+        } else {
+          report.addSubreport(
+              membersInjectionValidator.validateMembersInjectionRequest(
+                  requestElement, keyType.getTypeArguments().get(0)));
+        }
+      }
     }
+  }
+
+  /**
+   * Adds an error if the given dependency request is for a {@code dagger.producers.Producer} or
+   * {@code dagger.producers.Produced}.
+   *
+   * <p>Only call this when processing a provision binding.
+   */
+  // TODO(dpb): Should we disallow Producer entry points in non-production components?
+  void checkNotProducer(ValidationReport.Builder report, XVariableElement requestElement) {
   }
 }
