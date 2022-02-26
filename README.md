@@ -6,17 +6,14 @@ with some modifications:
 
 * gradle project with JUnit 5 tests
 * full jpms support with module-name: `dagger`
-* removed the multibindings package including `@MapKey`, `@Multibinds`, `@IntoMap` and `@IntoSet`
+* remove special binding annotations `@MapKey`, `@Multibinds`, `@IntoMap`, `@IntoSet` and `@BindsOptional`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
-* remove `@BindsOptional`
-* disable members injection and method injection, remove `MembersInjector`
-* remove kotlin special-casing
+* remove kotlin special-casing and the dependency on `xprocessing`
 * remove gwt special-casing
-* remove guava special-casing
-* remove guava dependency
+* remove guava special-casing and internal guava dependency
 * remove the `experimental_turbine_hjar` option
 * no generating `@CanIgnoreReturnValue`
-* remove `@Nullable` support
+* ignore `@Nullable` annotations
 
 Dapper was forked from dagger version `2.37`, which is the last dagger
 version that did not depend on the [xprocessing](https://github.com/google/dagger/issues/2926) kotlin library.
