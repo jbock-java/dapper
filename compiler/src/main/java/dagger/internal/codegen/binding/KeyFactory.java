@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 
 import dagger.internal.codegen.base.ContributionType;
@@ -35,8 +34,6 @@ import dagger.spi.model.Key.MultibindingContributionIdentifier;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.type.TypeMirror;
 
 /** A factory for {@code Key}s. */
 public final class KeyFactory {
@@ -127,18 +124,8 @@ public final class KeyFactory {
     return Key.builder(DaggerType.from(type)).build();
   }
 
-  public Key forMembersInjectedType(TypeMirror type) {
-    return forMembersInjectedType(toXProcessing(type, processingEnv));
-  }
-
   public Key forMembersInjectedType(XType type) {
     return Key.builder(DaggerType.from(type)).build();
-  }
-
-  Key forQualifiedType(Optional<AnnotationMirror> qualifier, TypeMirror type) {
-    return forQualifiedType(
-        qualifier.map(annotation -> toXProcessing(annotation, processingEnv)),
-        toXProcessing(type, processingEnv));
   }
 
   Key forQualifiedType(Optional<XAnnotation> qualifier, XType type) {
