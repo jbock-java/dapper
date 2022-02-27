@@ -18,7 +18,7 @@ public interface XProcessingStep {
    */
   Set<XElement> process(
       XProcessingEnv env,
-      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
+      Map<String, Set<XElement>> elementsByAnnotation);
 
   /**
    * An optional hook for logic to be executed in the last round of processing.
@@ -28,7 +28,7 @@ public interface XProcessingStep {
    */
   void processOver(
       XProcessingEnv env,
-      Map<String, ? extends Set<? extends XElement>> elementsByAnnotation);
+      Map<String, Set<XElement>> elementsByAnnotation);
 
   /**
    * The set of annotation qualified names processed by this step.

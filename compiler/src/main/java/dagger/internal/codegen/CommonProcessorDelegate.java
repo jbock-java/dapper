@@ -1,13 +1,20 @@
 package dagger.internal.codegen;
 
+import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
+import static dagger.internal.codegen.xprocessing.XElement.isField;
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 
 import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.tools.Diagnostic;
 
 class CommonProcessorDelegate {
@@ -33,6 +41,41 @@ class CommonProcessorDelegate {
     this.processorClass = processorClass;
     this.env = env;
     this.steps = steps;
+  }
+
+  List<String> processLastRound() {
+    steps.stream()
+        .forEach(
+            step -> {
+              Map<String, Set<XElement>> stepDeferredElementsByAnnotation =
+                  getStepElementsByAnnotation(
+                      step,
+                      Util.union(
+                          deferredElementNames,
+                          elementsDeferredBySteps.getOrDefault(step, Set.of())));
+              Map<String, Set<XElement>> elementsByAnnotation =
+                  step.annotations().stream()
+                      .map(
+                          annotation -> {
+                            Set<XElement> annotatedElements =
+                                stepDeferredElementsByAnnotation.getOrDefault(annotation, Set.of());
+                            if (!annotatedElements.isEmpty()) {
+                              return new AbstractMap.SimpleImmutableEntry<>(
+                                  annotation, annotatedElements);
+                            } else {
+                              return null;
+                            }
+                          })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+              step.processOver(env, elementsByAnnotation);
+            });
+    // Return element names that were deferred until the last round, an error should be reported
+    // for these, failing compilation. Sadly we currently don't have the mechanism to know if
+    // the missing types were generated in the last round.
+    return elementsDeferredBySteps.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -75,6 +118,35 @@ class CommonProcessorDelegate {
                           putStepAnnotatedElements.accept(enclosedElement);
                         }));
     return elementsByAnnotation;
+  }
+
+  // TODO(b/201308409): Does not work with top-level KSP functions or properties whose
+  //  container are synthetic.
+  private XTypeElement getClosestEnclosingTypeElement(XElement element) {
+    if (isTypeElement(element)) {
+      return (XTypeElement) element;
+    }
+    if (isField(element)) {
+      return (XTypeElement) element.getEnclosingElement();
+    }
+    if (isMethod(element)) {
+      return (XTypeElement) element.getEnclosingElement();
+    }
+    if (isConstructor(element)) {
+      return ((XConstructorElement) element).getEnclosingElement();
+    }
+    if (isMethodParameter(element)) {
+      return (XTypeElement) element.getEnclosingElement();
+    }
+    // TODO enum entry
+    env.getMessager()
+        .printMessage(
+            Diagnostic.Kind.WARNING,
+            String.format(
+                "Unable to defer element '%s': Don't know how to find "
+                    + "closest enclosing type element.",
+                element));
+    return null;
   }
 
   void reportMissingElements(List<String> missingElementNames) {

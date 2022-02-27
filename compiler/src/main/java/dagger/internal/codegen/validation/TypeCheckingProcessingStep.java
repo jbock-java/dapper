@@ -23,22 +23,22 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XProcessingStep;
+import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Maps;
-import io.jbock.javapoet.ClassName;
-import dagger.internal.codegen.base.DaggerSuperficialValidation.ValidationException;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XProcessingStep;
+import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import jakarta.inject.Inject;
 
 /**
  * A {@code XProcessingStep} that processes one element at a time and defers any for which {@code
@@ -59,7 +59,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
   @SuppressWarnings("unchecked") // Subclass must ensure all annotated targets are of valid type.
   @Override
   public ImmutableSet<XElement> process(
-      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
     // We only really care about the deferred error messages from the final round of processing.
     // Thus, we can clear the values stored from the previous processing round since that clearly
     // wasn't the final round, and we replace it with any deferred error messages from this round.
@@ -99,7 +99,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
 
   @Override
   public void processOver(
-      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
     // We avoid doing any actual processing here since this is run in the same round as the last
     // call to process(). Instead, we just report the last deferred error messages, if any.
     lastDeferredErrorMessages.forEach(errorMessage -> messager.printMessage(ERROR, errorMessage));
