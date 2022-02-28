@@ -5,5 +5,5 @@ public interface XExecutableParameterElement extends XVariableElement {
   /**
    * The enclosing {@link XExecutableElement} this parameter belongs to.
    */
-  XExecutableElement getEnclosingMethodElement();
+  XExecutableElement getEnclosingElement();
 }

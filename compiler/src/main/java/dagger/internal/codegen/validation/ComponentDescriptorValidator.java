@@ -260,6 +260,9 @@ public final class ComponentDescriptorValidator {
         case MODULE:
           methodAnnotations = "@Provides";
           break;
+        case PRODUCER_MODULE:
+          methodAnnotations = "@Provides or @Produces";
+          break;
         default:
           throw new AssertionError(module.kind());
       }
@@ -385,8 +388,8 @@ public final class ComponentDescriptorValidator {
     }
 
     private XType resolveParameterType(XExecutableParameterElement parameter, XType container) {
-      checkArgument(isMethod(parameter.getEnclosingMethodElement()));
-      XMethodElement method = asMethod(parameter.getEnclosingMethodElement());
+      checkArgument(isMethod(parameter.getEnclosingElement()));
+      XMethodElement method = asMethod(parameter.getEnclosingElement());
       int parameterIndex = method.getParameters().indexOf(parameter);
 
       XMethodType methodType = method.asMemberOf(container);

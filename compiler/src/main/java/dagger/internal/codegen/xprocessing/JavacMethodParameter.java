@@ -16,7 +16,7 @@ class JavacMethodParameter extends JavacVariableElement implements XExecutablePa
   }
 
   @Override
-  public XExecutableElement getEnclosingMethodElement() {
+  public XExecutableElement getEnclosingElement() {
     return enclosingMethodElement;
   }
 }
