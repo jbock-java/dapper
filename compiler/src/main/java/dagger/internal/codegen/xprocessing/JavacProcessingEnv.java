@@ -6,13 +6,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-public class JavacProcessingEnv extends XProcessingEnv {
+public class JavacProcessingEnv implements XProcessingEnv {
 
   private static final Map<String, TypeKind> PRIMITIVE_TYPES = getPrimitiveTypes();
 
@@ -30,10 +34,11 @@ public class JavacProcessingEnv extends XProcessingEnv {
 
   public JavacProcessingEnv(ProcessingEnvironment delegate) {
     this.delegate = delegate;
-    this.typeElementStore = new XTypeElementStore(
-        qName -> delegate.getElementUtils().getTypeElement(qName),
-        it -> it.getQualifiedName().toString(),
-        it -> JavacTypeElement.create(this, it));
+    this.typeElementStore =
+        new XTypeElementStore(
+            qName -> delegate.getElementUtils().getTypeElement(qName),
+            it -> it.getQualifiedName().toString(),
+            it -> JavacTypeElement.create(this, it));
   }
 
   @Override
@@ -77,10 +82,29 @@ public class JavacProcessingEnv extends XProcessingEnv {
   @Override
   public XType getDeclaredType(XTypeElement type2, XType... types) {
     JavacTypeElement type = (JavacTypeElement) type2;
-    TypeMirror[] args = Arrays.stream(types)
-        .map(XType::toJavac)
-        .toArray(TypeMirror[]::new);
+    TypeMirror[] args = Arrays.stream(types).map(XType::toJavac).toArray(TypeMirror[]::new);
     return wrap(delegate.getTypeUtils().getDeclaredType(type.toJavac(), args));
+  }
+
+  XElement wrapAnnotatedElement(Element element, String annotationName) {
+    if (element instanceof VariableElement) {
+      return wrapVariableElement((VariableElement) element);
+    }
+    if (element instanceof TypeElement) {
+      return wrapTypeElement((TypeElement) element);
+    }
+    if (element instanceof ExecutableElement) {
+      wrapExecutableElement((ExecutableElement) element);
+    }
+    if (element instanceof PackageElement) {
+      throw new IllegalStateException(
+          String.format(
+              "Cannot get elements with annotation %s. Package "
+                  + "elements are not supported by XProcessing.",
+              annotationName));
+    }
+    throw new IllegalStateException(
+        String.format("Unsupported element %s with annotation %s", element, annotationName));
   }
 
   @Override
@@ -94,7 +118,7 @@ public class JavacProcessingEnv extends XProcessingEnv {
   }
 
   @Override
-  XTypeElement wrapTypeElement(TypeElement typeElement) {
+  public XTypeElement wrapTypeElement(TypeElement typeElement) {
     return typeElementStore.get(typeElement);
   }
 

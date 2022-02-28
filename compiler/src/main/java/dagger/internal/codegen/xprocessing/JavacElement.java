@@ -3,6 +3,7 @@ package dagger.internal.codegen.xprocessing;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import io.jbock.auto.common.MoreElements;
+import io.jbock.auto.common.SuperficialValidation;
 import io.jbock.javapoet.ClassName;
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +55,11 @@ class JavacElement implements XElement {
     } catch (IllegalArgumentException e) {
       return null;
     }
+  }
+
+  @Override
+  public boolean validate() {
+    return SuperficialValidation.validateElement(element);
   }
 
   @Override
@@ -110,13 +116,14 @@ class JavacElement implements XElement {
   @Override
   public Set<XAnnotation> getAnnotationsAnnotatedWith(ClassName annotationName) {
     return getAllAnnotations().stream()
-        .filter(it -> {
-          XTypeElement typeElement = it.getType().getTypeElement();
-          if (typeElement == null) {
-            return false;
-          }
-          return typeElement.hasAnnotation(annotationName);
-        })
+        .filter(
+            it -> {
+              XTypeElement typeElement = it.getType().getTypeElement();
+              if (typeElement == null) {
+                return false;
+              }
+              return typeElement.hasAnnotation(annotationName);
+            })
         .collect(DaggerStreams.toSet());
   }
 

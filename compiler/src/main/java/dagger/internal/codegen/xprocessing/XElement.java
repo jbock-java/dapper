@@ -31,4 +31,9 @@ public interface XElement extends XAnnotated, XHasModifiers {
   static boolean isMethodParameter(XElement element) {
     return element instanceof XExecutableParameterElement;
   }
+
+  /**
+   * Returns true if all types referenced by this element are valid, i.e. resolvable.
+   */
+  boolean validate();
 }
