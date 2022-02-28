@@ -75,7 +75,6 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  */
 @Reusable
 public final class DaggerSuperficialValidation {
-
   /**
    * Returns the type element with the given class name or throws {@code ValidationException} if it
    * is not accessible in the current compilation.
@@ -100,11 +99,7 @@ public final class DaggerSuperficialValidation {
 
   @Inject
   DaggerSuperficialValidation(CompilerOptions compilerOptions) {
-    this(compilerOptions.strictSuperficialValidation());
-  }
-
-  private DaggerSuperficialValidation(boolean isStrictValidationEnabled) {
-    this.isStrictValidationEnabled = isStrictValidationEnabled;
+    this.isStrictValidationEnabled = compilerOptions.strictSuperficialValidation();
   }
 
   /**

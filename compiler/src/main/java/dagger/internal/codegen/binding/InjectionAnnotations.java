@@ -284,10 +284,7 @@ public final class InjectionAnnotations {
     }
 
     // Fully validate each qualifier to ensure its values are also valid.
-    qualifiers.forEach(
-        qualifier -> {
-          superficialValidation.validateAnnotationOf(element, qualifier);
-        });
+    qualifiers.forEach(qualifier -> superficialValidation.validateAnnotationOf(element, qualifier));
 
     return qualifiers.asList();
   }
@@ -384,8 +381,7 @@ public final class InjectionAnnotations {
 
   private static boolean hasQualifierAnnotation(AnnotationMirror annotation) {
     return isAnyAnnotationPresent(
-        annotation.getAnnotationType().asElement(),
-        TypeNames.QUALIFIER);
+        annotation.getAnnotationType().asElement(), TypeNames.QUALIFIER);
   }
 
   private static boolean hasScopeAnnotation(XAnnotation annotation) {
@@ -407,12 +403,14 @@ public final class InjectionAnnotations {
 
   /** Returns true if the given element is annotated with {@code Inject}. */
   public static boolean hasInjectOrAssistedInjectAnnotation(XElement element) {
-    return element.hasAnyAnnotation(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+    return element.hasAnyAnnotation(
+        TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   /** Returns true if the given element is annotated with {@code Inject}. */
   public static boolean hasInjectOrAssistedInjectAnnotation(Element element) {
-    return isAnyAnnotationPresent(element, TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+    return isAnyAnnotationPresent(
+        element, TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   /**
