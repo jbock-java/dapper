@@ -27,6 +27,7 @@ import dagger.internal.codegen.XBasicAnnotationProcessor;
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.auto.common.MoreTypes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -68,9 +69,13 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
 
   private final Supplier<JavacProcessingEnv> xEnv =
       Suppliers.memoize(() -> new JavacProcessingEnv(processingEnv));
+
+  private final Supplier<CommonProcessorDelegate> commonDelegate =
+      Suppliers.memoize(() -> new CommonProcessorDelegate(getClass(), xEnv(), steps()));
+
   private Elements elements;
   private Messager messager;
-  private List<Step> steps;
+  private List<Step> legacySteps;
 
   protected JavacBasicAnnotationProcessor(
       Function<Map<String, String>, XProcessingEnvConfig> configFunction) {
@@ -79,6 +84,13 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
 
   JavacProcessingEnv xEnv() {
     return xEnv.get();
+  }
+
+  private final Supplier<List<XProcessingStep>> stepsCache =
+      Suppliers.memoize(() -> ImmutableList.copyOf(processingSteps()));
+
+  private List<XProcessingStep> steps() {
+    return stepsCache.get();
   }
 
   @Override
@@ -92,8 +104,8 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
     initialize(getXProcessingEnv());
     this.elements = processingEnv.getElementUtils();
     this.messager = processingEnv.getMessager();
-    this.steps = new ArrayList<>();
-    steps().forEach(step -> this.steps.add(step));
+    this.legacySteps = new ArrayList<>();
+    legacySteps().forEach(step -> this.legacySteps.add(step));
   }
 
   /**
@@ -108,7 +120,7 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
    * Creates {@linkplain Step processing steps} for this processor. {@link #processingEnv} is
    * guaranteed to be set when this method is invoked.
    */
-  protected abstract Iterable<? extends Step> steps();
+  protected abstract Iterable<? extends Step> legacySteps();
 
   /**
    * An optional hook for logic to be executed at the end of each round.
@@ -126,8 +138,8 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
   }
 
   private Set<TypeElement> getSupportedAnnotationTypeElements() {
-    Preconditions.checkState(steps != null);
-    return steps.stream()
+    Preconditions.checkState(legacySteps != null);
+    return legacySteps.stream()
         .flatMap(step -> getSupportedAnnotationTypeElements(step).stream())
         .collect(toUnmodifiableSet());
   }
@@ -145,15 +157,17 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
    */
   @Override
   public final Set<String> getSupportedAnnotationTypes() {
-    Preconditions.checkState(steps != null);
-    return steps.stream().flatMap(step -> step.annotations().stream()).collect(toUnmodifiableSet());
+    Preconditions.checkState(legacySteps != null);
+    return legacySteps.stream()
+        .flatMap(step -> step.annotations().stream())
+        .collect(toUnmodifiableSet());
   }
 
   @Override
   public final boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     Preconditions.checkState(elements != null);
     Preconditions.checkState(messager != null);
-    Preconditions.checkState(steps != null);
+    Preconditions.checkState(legacySteps != null);
 
     // If this is the last round, report all of the missing elements if there
     // were no errors raised in the round; otherwise reporting the missing
@@ -177,7 +191,7 @@ public abstract class JavacBasicAnnotationProcessor extends AbstractProcessor
 
   /** Processes the valid elements, including those previously deferred by each step. */
   private void process(Map<TypeElement, Set<Element>> validElements) {
-    for (Step step : steps) {
+    for (Step step : legacySteps) {
       Set<TypeElement> annotationTypes = getSupportedAnnotationTypeElements(step);
       Map<TypeElement, Set<Element>> stepElements = new LinkedHashMap<>();
       indexByAnnotation(elementsDeferredBySteps.getOrDefault(step, Set.of()), annotationTypes);

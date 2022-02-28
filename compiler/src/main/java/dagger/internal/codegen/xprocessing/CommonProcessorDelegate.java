@@ -1,4 +1,4 @@
-package dagger.internal.codegen;
+package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isField;

@@ -128,7 +128,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   }
 
   @Override
-  public Iterable<? extends Step> steps() {
+  public Iterable<? extends Step> legacySteps() {
     validationBindingGraphPlugins.initializePlugins();
     externalBindingGraphPlugins.initializePlugins();
 
