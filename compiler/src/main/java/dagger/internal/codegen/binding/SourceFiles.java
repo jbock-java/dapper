@@ -43,9 +43,8 @@ import static dagger.spi.model.BindingKind.MULTIBOUND_MAP;
 import static dagger.spi.model.BindingKind.MULTIBOUND_SET;
 import static javax.lang.model.SourceVersion.isName;
 
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.auto.common.MoreElements;
 import dagger.internal.codegen.base.Joiner;
@@ -60,6 +59,8 @@ import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeVariableName;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
@@ -206,6 +207,10 @@ public class SourceFiles {
 
   public static ClassName membersInjectorNameForType(TypeElement typeElement) {
     return siblingClassName(typeElement, "_MembersInjector");
+  }
+
+  public static String memberInjectedFieldSignatureForVariable(XFieldElement field) {
+    return memberInjectedFieldSignatureForVariable(toJavac(field));
   }
 
   public static String memberInjectedFieldSignatureForVariable(VariableElement variableElement) {
