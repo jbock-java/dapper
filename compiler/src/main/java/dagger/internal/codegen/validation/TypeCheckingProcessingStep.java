@@ -59,7 +59,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
   @SuppressWarnings("unchecked") // Subclass must ensure all annotated targets are of valid type.
   @Override
   public ImmutableSet<XElement> process(
-      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     // We only really care about the deferred error messages from the final round of processing.
     // Thus, we can clear the values stored from the previous processing round since that clearly
     // wasn't the final round, and we replace it with any deferred error messages from this round.
@@ -99,7 +99,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
 
   @Override
   public void processOver(
-      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     // We avoid doing any actual processing here since this is run in the same round as the last
     // call to process(). Instead, we just report the last deferred error messages, if any.
     lastDeferredErrorMessages.forEach(errorMessage -> messager.printMessage(ERROR, errorMessage));
@@ -120,9 +120,7 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
             + "\nIf type '%3$s' is a generated type, check above for compilation errors that may "
             + "have prevented the type from being generated. Otherwise, ensure that type '%3$s' is "
             + "on your classpath.",
-        this.getClass().getSimpleName(),
-        element,
-        exception.typeName());
+        this.getClass().getSimpleName(), element, exception.typeName());
   }
 
   private String knownErrorTypeErrorMessage(

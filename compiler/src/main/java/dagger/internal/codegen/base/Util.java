@@ -23,7 +23,6 @@ import dagger.internal.codegen.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,24 +80,12 @@ public final class Util {
     return result;
   }
 
-  public static <E> Set<E> difference(Set<E> set1, Set<E> set2) {
-    return Sets.difference(set1, set2);
-  }
-
-  public static <E> Set<E> intersection(Set<E> set1, Set<E> set2) {
-    return Sets.intersection(set1, set2);
-  }
-
-  public static <E> Set<E> union(Set<E> set1, Set<E> set2) {
-    return Sets.union(set1, set2);
-  }
-
   public static <E> Set<E> mutableUnion(Set<E> set1, Set<E> set2) {
     if (set1 instanceof HashSet) {
       set1.addAll(set2);
       return set1;
     }
-    return union(set1, set2);
+    return Sets.union(set1, set2);
   }
 
   public static <E> List<E> concat(List<E> list1, List<E> list2) {
@@ -116,11 +103,6 @@ public final class Util {
     return concat(list1, list2);
   }
 
-  public static <K, V> Map<K, V> toMap(
-      Collection<K> set, Function<? super K, V> function) {
-    return Maps.toMap(set, function);
-  }
-
   public static <E> E getOnlyElement(Collection<E> collection) {
     return Iterables.getOnlyElement(collection);
   }
@@ -135,20 +117,6 @@ public final class Util {
   public static <K, V1, V2>
   Map<K, V2> transformValues(Map<K, V1> fromMap, Function<? super V1, V2> function) {
     return Maps.transformValues(fromMap, function);
-  }
-
-  public static <K, V>
-  Map<K, Set<V>> filterValues(Map<K, Set<V>> fromMap, Predicate<V> predicate) {
-    LinkedHashMap<K, Set<V>> result = new LinkedHashMap<>();
-    fromMap.forEach((key, value) -> {
-      for (V v : value) {
-        if (!predicate.test(v)) {
-          return;
-        }
-        result.merge(key, Set.of(v), Util::mutableUnion);
-      }
-    });
-    return result;
   }
 
   public static <K, V>

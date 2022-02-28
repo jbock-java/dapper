@@ -55,6 +55,11 @@ class JavacRoundEnv implements XRoundEnv {
     return wrapAnnotatedElements(elements, annotationQualifiedName);
   }
 
+  @Override
+  public RoundEnvironment toJavac() {
+    return delegate;
+  }
+
   private Set<XElement> wrapAnnotatedElements(Set<Element> elements, String annotationName) {
     return elements.stream()
         .map(it -> env.wrapAnnotatedElement(it, annotationName))

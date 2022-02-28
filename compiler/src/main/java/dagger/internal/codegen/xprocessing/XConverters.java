@@ -2,6 +2,7 @@ package dagger.internal.codegen.xprocessing;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -92,5 +93,9 @@ public class XConverters {
 
   public static Filer toJavac(XFiler filer) {
     return filer.toJavac();
+  }
+
+  public static RoundEnvironment toJavac(XRoundEnv roundEnv) {
+    return roundEnv.toJavac();
   }
 }

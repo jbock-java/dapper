@@ -64,7 +64,7 @@ dependencies {
     annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.1')
     compileOnly('io.github.jbock-java:auto-value-annotations:1.8.2.2')
     annotationProcessor('io.github.jbock-java:auto-value:1.8.2.2')
-    testImplementation('androidx.room:room-compiler-processing:2.4.1')
+    testImplementation('androidx.room:room-compiler-processing:2.4.2')
     testImplementation(dapper)
     testImplementation(ac)
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')

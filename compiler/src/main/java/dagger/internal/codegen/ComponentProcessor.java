@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen;
 
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Module;
@@ -25,12 +23,13 @@ import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.base.Util;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
 import dagger.internal.codegen.validation.BindingMethodProcessingStep;
@@ -41,23 +40,18 @@ import dagger.internal.codegen.validation.InjectBindingRegistryModule;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XConverters;
-import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingEnvConfig;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
+import dagger.internal.codegen.xprocessing.XRoundEnv;
 import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 
 /**
  * The annotation processor responsible for generating the classes that drive the Dagger 2.0
@@ -66,7 +60,7 @@ import javax.lang.model.element.Element;
  * <p>TODO(gak): give this some better documentation
  */
 public class ComponentProcessor extends JavacBasicAnnotationProcessor {
-  private static XProcessingEnvConfig envConfig(Map<String, String> options)  {
+  private static XProcessingEnvConfig envConfig(Map<String, String> options) {
     return new XProcessingEnvConfig.Builder().disableAnnotatedElementValidation(true).build();
   }
 
@@ -75,7 +69,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   @Inject InjectBindingRegistry injectBindingRegistry;
   @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
   @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject List<JavacBasicAnnotationProcessor.Step> processingSteps;
+  @Inject ImmutableList<XProcessingStep> processingSteps;
   @Inject ValidationBindingGraphPlugins validationBindingGraphPlugins;
   @Inject ExternalBindingGraphPlugins externalBindingGraphPlugins;
   @Inject Set<ClearableCache> clearableCaches;
@@ -109,7 +103,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   @Override
   public void initialize(XProcessingEnv env) {
     ProcessorComponent.factory()
-        .create(env, testingPlugins.orElse(ImmutableSet.of()))
+        .create(env, testingPlugins.orElseGet(this::loadExternalPlugins))
         .inject(this);
   }
 
@@ -128,11 +122,15 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   }
 
   @Override
-  public Iterable<? extends Step> legacySteps() {
+  public Iterable<XProcessingStep> processingSteps() {
     validationBindingGraphPlugins.initializePlugins();
     externalBindingGraphPlugins.initializePlugins();
 
     return processingSteps;
+  }
+
+  private ImmutableSet<BindingGraphPlugin> loadExternalPlugins() {
+    return ImmutableSet.of();
   }
 
   @Singleton
@@ -158,15 +156,14 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
     interface Factory {
       ProcessorComponent create(
           @BindsInstance XProcessingEnv xProcessingEnv,
-          @BindsInstance Set<BindingGraphPlugin> externalPlugins);
+          @BindsInstance ImmutableSet<BindingGraphPlugin> externalPlugins);
     }
   }
 
   @Module
   interface ProcessingStepsModule {
     @Provides
-    static List<Step> processingSteps(
-        XProcessingEnv xProcessingEnv,
+    static ImmutableList<XProcessingStep> processingSteps(
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
@@ -174,69 +171,31 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
-        BindingMethodProcessingStep bindingMethodProcessingStep) {
-      return Stream.of(
-              injectProcessingStep,
-              assistedInjectProcessingStep,
-              assistedFactoryProcessingStep,
-              assistedProcessingStep,
-              bindsInstanceProcessingStep,
-              moduleProcessingStep,
-              componentProcessingStep,
-              bindingMethodProcessingStep)
-          // TODO(bcorso): Remove DelegatingStep once we've migrated to XBasicAnnotationProcessor.
-          .map(step -> DelegatingStep.create(xProcessingEnv, step))
-          .collect(Collectors.toList());
+        BindingMethodProcessingStep bindingMethodProcessingStep,
+        CompilerOptions compilerOptions) {
+      return ImmutableList.of(
+          injectProcessingStep,
+          assistedInjectProcessingStep,
+          assistedFactoryProcessingStep,
+          assistedProcessingStep,
+          bindsInstanceProcessingStep,
+          moduleProcessingStep,
+          componentProcessingStep,
+          bindingMethodProcessingStep);
     }
   }
 
   @Override
-  public void postRound(RoundEnvironment roundEnv) {
+  public void postRound(XProcessingEnv env, XRoundEnv roundEnv) {
     // TODO(bcorso): Add a way to determine if processing is over without converting to Javac here.
-
-    if (!roundEnv.processingOver()) {
+    if (!XConverters.toJavac(roundEnv).processingOver()) {
       try {
         injectBindingRegistry.generateSourcesForRequiredBindings(
             factoryGenerator, membersInjectorGenerator);
       } catch (SourceFileGenerationException e) {
-        e.printMessageTo(getXProcessingEnv().getMessager());
+        e.printMessageTo(env.getMessager());
       }
     }
     clearableCaches.forEach(ClearableCache::clearCache);
-  }
-
-  private static final class DelegatingStep implements Step {
-    static Step create(XProcessingEnv xProcessingEnvCache, XProcessingStep xProcessingStep) {
-      return new DelegatingStep(xProcessingEnvCache, xProcessingStep);
-    }
-
-    private final XProcessingEnv xProcessingEnv;
-    private final XProcessingStep delegate;
-
-    DelegatingStep(XProcessingEnv xProcessingEnv, XProcessingStep delegate) {
-      this.xProcessingEnv = xProcessingEnv;
-      this.delegate = delegate;
-    }
-
-    @Override
-    public Set<String> annotations() {
-      return delegate.annotations();
-    }
-
-    @Override
-    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
-      return delegate
-          .process(
-              xProcessingEnv,
-              Util.transformValues(
-                  elementsByAnnotation,
-                  javacElements ->
-                      javacElements.stream()
-                          .map(element -> XConverters.toXProcessing(element, xProcessingEnv))
-                          .collect(toImmutableSet())))
-          .stream()
-          .map(XElement::toJavac)
-          .collect(toImmutableSet());
-    }
   }
 }

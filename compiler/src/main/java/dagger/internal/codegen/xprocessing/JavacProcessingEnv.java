@@ -94,7 +94,7 @@ public class JavacProcessingEnv implements XProcessingEnv {
       return wrapTypeElement((TypeElement) element);
     }
     if (element instanceof ExecutableElement) {
-      wrapExecutableElement((ExecutableElement) element);
+      return wrapExecutableElement((ExecutableElement) element);
     }
     if (element instanceof PackageElement) {
       throw new IllegalStateException(

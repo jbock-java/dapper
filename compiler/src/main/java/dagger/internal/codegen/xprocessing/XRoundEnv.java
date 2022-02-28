@@ -1,6 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
 import java.util.Set;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 
 public interface XRoundEnv {
@@ -22,4 +23,6 @@ public interface XRoundEnv {
   static XRoundEnv create(XProcessingEnv processingEnv, RoundEnvironment roundEnvironment) {
     return new JavacRoundEnv((JavacProcessingEnv) processingEnv, roundEnvironment);
   }
+
+  RoundEnvironment toJavac();
 }

@@ -35,6 +35,12 @@ public class Sets {
   }
 
   public static <E> ImmutableSet<E> union(Set<? extends E> set1, Set<? extends E> set2) {
+    if (set2.isEmpty()) {
+      return ImmutableSet.copyOf(set1);
+    }
+    if (set1.isEmpty()) {
+      return ImmutableSet.copyOf(set2);
+    }
     Set<E> result = new LinkedHashSet<>(Math.max(4, (int) (1.5 * (set1.size() + set2.size()))));
     result.addAll(set1);
     result.addAll(set2);

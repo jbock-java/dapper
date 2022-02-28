@@ -77,7 +77,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
 
   @Override
   public ImmutableSet<XElement> process(
-      XProcessingEnv env, Map<String, Set<XElement>> elementsByAnnotation) {
+      XProcessingEnv env, Map<String, ? extends Set<? extends XElement>> elementsByAnnotation) {
     moduleValidator.addKnownModules(
         elementsByAnnotation.values().stream()
             .flatMap(Set::stream)

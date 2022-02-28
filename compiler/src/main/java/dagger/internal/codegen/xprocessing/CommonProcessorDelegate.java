@@ -7,17 +7,8 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 
 import dagger.internal.codegen.base.Util;
-import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.extension.DaggerStreams;
-import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XConstructorElement;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XExecutableElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XProcessingStep;
-import dagger.internal.codegen.xprocessing.XRoundEnv;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -49,118 +40,75 @@ class CommonProcessorDelegate {
   void processRound(XRoundEnv roundEnv) {
     Set<String> previousRoundDeferredElementNames = new LinkedHashSet<>(deferredElementNames);
     deferredElementNames.clear();
-    ImmutableMap<XProcessingStep, Set<String>> currentElementsDeferredByStep =
-        steps.stream()
-            .map(
-                step -> {
-                  // Previous round processor deferred elements, these need to be re-validated.
-                  Map<String, Set<XElement>> previousRoundDeferredElementsByAnnotation =
-                      getStepElementsByAnnotation(step, previousRoundDeferredElementNames);
-                  // Previous round step deferred elements, these don't need to be re-validated.
-                  Map<String, Set<XElement>> stepDeferredElementsByAnnotation =
-                      getStepElementsByAnnotation(
-                          step, elementsDeferredBySteps.getOrDefault(step, Set.of()));
-                  Set<XElement> deferredElements = new LinkedHashSet<>();
-                  ImmutableMap<String, Set<XElement>> elementsByAnnotation =
-                      step.annotations().stream()
-                          .map(
-                              annotation -> {
-                                Set<XElement> annotatedElements =
-                                    Util.union(
-                                        roundEnv.getElementsAnnotatedWith(annotation),
-                                        previousRoundDeferredElementsByAnnotation.getOrDefault(
-                                            annotation, Set.of()));
-                                // Split between valid and invalid elements. Unlike auto-common,
-                                // validation is only
-                                // done in the annotated element from the round and not in the
-                                // closest
-                                // enclosing
-                                // type element.
-                                Map<Boolean, List<XElement>> foobar =
-                                    annotatedElements.stream()
-                                        .collect(Collectors.partitioningBy(XElement::validate));
-                                List<XElement> validElements = foobar.get(true);
-                                List<XElement> invalidElements = foobar.get(false);
-                                deferredElements.addAll(invalidElements);
-                                Set<XElement> it =
-                                    Util.union(
-                                        new LinkedHashSet<>(validElements),
-                                        stepDeferredElementsByAnnotation.getOrDefault(
-                                            annotation, Set.of()));
-                                if (!it.isEmpty()) {
-                                  return new SimpleImmutableEntry<>(annotation, it);
-                                } else {
-                                  return null;
-                                }
-                              })
-                          .filter(Objects::nonNull)
-                          .collect(
-                              DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-                  // Store all processor deferred elements.
-                  deferredElementNames.addAll(
-                      deferredElements.stream()
-                          .map(
-                              it -> {
-                                XTypeElement el = getClosestEnclosingTypeElement(it);
-                                if (el == null) {
-                                  return null;
-                                }
-                                return el.getQualifiedName();
-                              })
-                          .filter(Objects::nonNull)
-                          .collect(Collectors.toList()));
-                  // Only process the step if there are annotated elements found for this step.
-                  if (!elementsByAnnotation.isEmpty()) {
-                    return new SimpleImmutableEntry<>(
-                        step,
-                        step.process(env, elementsByAnnotation).stream()
-                            .map(
-                                it -> {
-                                  XTypeElement el = getClosestEnclosingTypeElement(it);
-                                  if (el == null) {
-                                    return null;
-                                  }
-                                  return el.getQualifiedName();
-                                })
-                            .filter(Objects::nonNull)
-                            .collect(DaggerStreams.toImmutableSet()));
-                  } else {
-                    return new SimpleImmutableEntry<>(step, Set.<String>of());
-                  }
-                })
-            .collect(DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+    Map<XProcessingStep, Set<String>> currentElementsDeferredByStep = new LinkedHashMap<>();
+    for (XProcessingStep step : steps) {
+      // Previous round processor deferred elements, these need to be re-validated.
+      Map<String, Set<XElement>> previousRoundDeferredElementsByAnnotation =
+          getStepElementsByAnnotation(step, previousRoundDeferredElementNames);
+      // Previous round step deferred elements, these don't need to be re-validated.
+      Map<String, Set<XElement>> stepDeferredElementsByAnnotation =
+          getStepElementsByAnnotation(step, elementsDeferredBySteps.getOrDefault(step, Set.of()));
+      Set<XElement> deferredElements = new LinkedHashSet<>();
+      Map<String, Set<XElement>> elementsByAnnotation = new LinkedHashMap<>();
+      for (String annotation : step.annotations()) {
+        Set<XElement> annotatedElements =
+            Sets.union(
+                roundEnv.getElementsAnnotatedWith(annotation),
+                previousRoundDeferredElementsByAnnotation.getOrDefault(
+                    annotation, Set.of()));
+        // Split between valid and invalid elements. Unlike auto-common,
+        // validation is only done in the annotated element from the round
+        // and not in the closest enclosing type element.
+        Map<Boolean, List<XElement>> partition =
+            annotatedElements.stream()
+                .collect(Collectors.partitioningBy(XElement::validate));
+        deferredElements.addAll(partition.get(false));
+        Set<XElement> elements =
+            Sets.union(
+                new LinkedHashSet<>(partition.get(true)),
+                stepDeferredElementsByAnnotation.getOrDefault(annotation, Set.of()));
+        if (!elements.isEmpty()) {
+          elementsByAnnotation.put(annotation, elements);
+        }
+      }
+      // Store all processor deferred elements.
+      deferredElementNames.addAll(
+          deferredElements.stream()
+              .map(this::getClosestEnclosingTypeElementName)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList()));
+      // Only process the step if there are annotated elements found for this step.
+      if (!elementsByAnnotation.isEmpty()) {
+        currentElementsDeferredByStep.put(
+            step,
+            step.process(env, elementsByAnnotation).stream()
+                .map(this::getClosestEnclosingTypeElementName)
+                .filter(Objects::nonNull)
+                .collect(DaggerStreams.toImmutableSet()));
+      }
+    }
     // Store elements deferred by steps.
     elementsDeferredBySteps.clear();
     elementsDeferredBySteps.putAll(currentElementsDeferredByStep);
   }
 
   List<String> processLastRound() {
-    steps.stream()
-        .forEach(
-            step -> {
-              Map<String, Set<XElement>> stepDeferredElementsByAnnotation =
-                  getStepElementsByAnnotation(
-                      step,
-                      Util.union(
-                          deferredElementNames,
-                          elementsDeferredBySteps.getOrDefault(step, Set.of())));
-              Map<String, Set<XElement>> elementsByAnnotation =
-                  step.annotations().stream()
-                      .map(
-                          annotation -> {
-                            Set<XElement> annotatedElements =
-                                stepDeferredElementsByAnnotation.getOrDefault(annotation, Set.of());
-                            if (!annotatedElements.isEmpty()) {
-                              return new SimpleImmutableEntry<>(annotation, annotatedElements);
-                            } else {
-                              return null;
-                            }
-                          })
-                      .filter(Objects::nonNull)
-                      .collect(
-                          DaggerStreams.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-              step.processOver(env, elementsByAnnotation);
-            });
+    for (XProcessingStep step : steps) {
+      Map<String, Set<XElement>> stepDeferredElementsByAnnotation =
+          getStepElementsByAnnotation(
+              step,
+              Sets.union(
+                  deferredElementNames, elementsDeferredBySteps.getOrDefault(step, Set.of())));
+      Map<String, Set<XElement>> elementsByAnnotation = new LinkedHashMap<>();
+      for (String annotation : step.annotations()) {
+        Set<XElement> annotatedElements =
+            stepDeferredElementsByAnnotation.getOrDefault(annotation, Set.of());
+        if (!annotatedElements.isEmpty()) {
+          elementsByAnnotation.put(annotation, annotatedElements);
+        }
+      }
+      step.processOver(env, elementsByAnnotation);
+    }
     // Return element names that were deferred until the last round, an error should be reported
     // for these, failing compilation. Sadly we currently don't have the mechanism to know if
     // the missing types were generated in the last round.
@@ -182,33 +130,42 @@ class CommonProcessorDelegate {
     Set<String> stepAnnotations = step.annotations();
     Map<String, Set<XElement>> elementsByAnnotation = new LinkedHashMap<>();
     Consumer<XElement> putStepAnnotatedElements =
-        element ->
-            element.getAllAnnotations().stream()
-                .map(XAnnotation::getQualifiedName)
-                .forEach(
-                    annotationName -> {
-                      if (stepAnnotations.contains(annotationName)) {
-                        elementsByAnnotation.merge(
-                            annotationName, Set.of(element), Util::mutableUnion);
-                      }
-                    });
-    typeElementNames.stream()
-        .map(env::findTypeElement)
-        .filter(Objects::nonNull)
-        .forEach(
-            typeElement ->
-                typeElement.getEnclosedElements().stream()
-                    .filter(it -> !isTypeElement(it))
-                    .forEach(
-                        enclosedElement -> {
-                          if (enclosedElement instanceof XExecutableElement) {
-                            ((XExecutableElement) enclosedElement)
-                                .getParameters()
-                                .forEach(putStepAnnotatedElements);
-                          }
-                          putStepAnnotatedElements.accept(enclosedElement);
-                        }));
+        element -> {
+          for (XAnnotation annotation : element.getAllAnnotations()) {
+            String annotationName = annotation.getQualifiedName();
+            if (stepAnnotations.contains(annotationName)) {
+              elementsByAnnotation.merge(
+                  annotationName, Set.of(element), Util::mutableUnion);
+            }
+          }
+        };
+    for (String typeElementName : typeElementNames) {
+      XTypeElement typeElement = env.findTypeElement(typeElementName);
+      if (typeElement == null) {
+        continue;
+      }
+      for (XElement enclosedElement : typeElement.getEnclosedElements()) {
+        if (isTypeElement(enclosedElement)) {
+          continue;
+        }
+        if (enclosedElement instanceof XExecutableElement) {
+          ((XExecutableElement) enclosedElement)
+              .getParameters()
+              .forEach(putStepAnnotatedElements);
+        }
+        putStepAnnotatedElements.accept(enclosedElement);
+      }
+      putStepAnnotatedElements.accept(typeElement);
+    }
     return elementsByAnnotation;
+  }
+
+  private String getClosestEnclosingTypeElementName(XElement element) {
+    XTypeElement el = getClosestEnclosingTypeElement(element);
+    if (el == null) {
+      return null;
+    }
+    return el.getQualifiedName();
   }
 
   // TODO(b/201308409): Does not work with top-level KSP functions or properties whose

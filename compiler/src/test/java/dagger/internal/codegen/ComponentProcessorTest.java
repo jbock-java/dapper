@@ -1651,9 +1651,8 @@ class ComponentProcessorTest {
     assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent");
   }
 
-  @EnumSource(CompilerMode.class)
-  @ParameterizedTest
-  void componentSupertypeDependsOnGeneratedType(CompilerMode compilerMode) {
+  @Test
+  void componentSupertypeDependsOnGeneratedType() {
     JavaFileObject componentFile =
         JavaFileObjects.forSourceLines(
             "test.SimpleComponent",
@@ -1682,7 +1681,7 @@ class ComponentProcessorTest {
                 "final class GeneratedType {",
                 "  @Inject GeneratedType() {}",
                 "}"))
-            .withOptions(compilerMode.javacopts())
+            .withOptions(DEFAULT_MODE.javacopts())
             .compile(componentFile, interfaceFile);
     assertThat(compilation).succeeded();
     assertThat(compilation).generatedSourceFile("test.DaggerSimpleComponent");
@@ -2338,6 +2337,9 @@ class ComponentProcessorTest {
             "",
             "  @Inject",
             "  public Foo(GeneratedParam param) {}",
+            "",
+            "  @Inject",
+            "  public void init() {}",
             "}");
     JavaFileObject component =
         JavaFileObjects.forSourceLines(

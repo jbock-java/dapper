@@ -20,6 +20,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
@@ -43,7 +44,7 @@ public final class ExternalBindingGraphPlugins {
 
   @Inject
   ExternalBindingGraphPlugins(
-      Set<BindingGraphPlugin> plugins,
+      ImmutableSet<BindingGraphPlugin> plugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
       XFiler filer,
       DaggerTypes types,
