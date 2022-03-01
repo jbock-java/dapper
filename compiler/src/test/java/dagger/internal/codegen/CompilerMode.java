@@ -24,6 +24,9 @@ enum CompilerMode {
   DEFAULT_MODE,
   FAST_INIT_MODE("-Adagger.fastInit=enabled");
 
+  static final List<Object[]> TEST_PARAMETERS =
+      List.of(new Object[][] {{CompilerMode.DEFAULT_MODE}, {CompilerMode.FAST_INIT_MODE}});
+
   private final List<String> javacopts;
 
   CompilerMode(String... javacopts) {

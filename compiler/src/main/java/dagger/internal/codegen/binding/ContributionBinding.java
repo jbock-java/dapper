@@ -22,6 +22,7 @@ import static java.util.Arrays.asList;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -57,8 +58,23 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   }
 
   @Override
+  public boolean requiresModuleInstance() {
+    return !isContributingModuleKotlinObject() && super.requiresModuleInstance();
+  }
+
+  @Override
   public final boolean isNullable() {
     return nullableType().isPresent();
+  }
+
+  /**
+   * Returns {@code true} if the contributing module is a Kotlin object. Note that a companion
+   * object is also considered a Kotlin object.
+   */
+  private boolean isContributingModuleKotlinObject() {
+    return contributingModule().isPresent()
+        && (contributingModule().get().isKotlinObject()
+            || contributingModule().get().isCompanionObject());
   }
 
   /**
@@ -68,6 +84,9 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    */
   public final XType contributedType() {
     switch (contributionType()) {
+      case SET:
+        return SetType.from(key()).elementType();
+      case SET_VALUES:
       case UNIQUE:
         return key().type().xprocessing();
     }
@@ -97,7 +116,8 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public final B clearBindingElement() {
       return bindingElement(Optional.empty());
-    };
+    }
+    ;
 
     abstract B contributingModule(XTypeElement contributingModule);
 

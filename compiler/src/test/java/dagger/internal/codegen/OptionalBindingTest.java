@@ -24,9 +24,9 @@ import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 
-public class OptionalBindingTest {
+class OptionalBindingTest {
   @Test
-  public void provideExplicitOptionalInParent_AndBindsOptionalOfInChild() {
+  void provideExplicitOptionalInParent_AndBindsOptionalOfInChild() {
     JavaFileObject parent =
         JavaFileObjects.forSourceLines(
             "test.Parent",

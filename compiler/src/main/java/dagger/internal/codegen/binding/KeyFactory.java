@@ -17,9 +17,16 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
+import static io.jbock.auto.common.MoreTypes.isType;
 
 import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -46,8 +53,33 @@ public final class KeyFactory {
     this.injectionAnnotations = injectionAnnotations;
   }
 
+  private XType setOf(XType elementType) {
+    return processingEnv.getDeclaredType(
+        processingEnv.requireTypeElement(TypeNames.SET), elementType.boxed());
+  }
+
+  private XType mapOf(XType keyType, XType valueType) {
+    return processingEnv.getDeclaredType(
+        processingEnv.requireTypeElement(TypeNames.MAP), keyType.boxed(), valueType.boxed());
+  }
+
+  /** Returns {@code Map<KeyType, FrameworkType<ValueType>>}. */
+  private XType mapOfFrameworkType(XType keyType, ClassName frameworkClassName, XType valueType) {
+    return mapOf(
+        keyType,
+        processingEnv.getDeclaredType(
+            processingEnv.requireTypeElement(frameworkClassName), valueType.boxed()));
+  }
+
   Key forComponentMethod(XMethodElement componentMethod) {
     return forMethod(componentMethod, componentMethod.getReturnType());
+  }
+
+  Key forProductionComponentMethod(XMethodElement componentMethod) {
+    XType returnType = componentMethod.getReturnType();
+    XType keyType =
+        isFutureType(returnType) ? getOnlyElement(returnType.getTypeArguments()) : returnType;
+    return forMethod(componentMethod, keyType);
   }
 
   Key forSubcomponentCreatorMethod(
@@ -65,9 +97,19 @@ public final class KeyFactory {
     return forBindingMethod(method, contributingModule, Optional.of(TypeNames.PROVIDER));
   }
 
+  public Key forProducesMethod(XMethodElement method, XTypeElement contributingModule) {
+    return forBindingMethod(method, contributingModule, Optional.of(TypeNames.PRODUCER));
+  }
+
   /** Returns the key bound by a {@code Binds} method. */
   Key forBindsMethod(XMethodElement method, XTypeElement contributingModule) {
     checkArgument(method.hasAnnotation(TypeNames.BINDS));
+    return forBindingMethod(method, contributingModule, Optional.empty());
+  }
+
+  /** Returns the base key bound by a {@code BindsOptionalOf} method. */
+  Key forBindsOptionalOfMethod(XMethodElement method, XTypeElement contributingModule) {
+    checkArgument(method.hasAnnotation(TypeNames.BINDS_OPTIONAL_OF));
     return forBindingMethod(method, contributingModule, Optional.empty());
   }
 
@@ -78,6 +120,19 @@ public final class KeyFactory {
     XMethodType methodType = method.asMemberOf(contributingModule.getType());
     ContributionType contributionType = ContributionType.fromBindingElement(method);
     XType returnType = methodType.getReturnType();
+    if (frameworkClassName.isPresent()
+        && frameworkClassName.get().equals(TypeNames.PRODUCER)
+        && isType(toJavac(returnType))) {
+      if (isFutureType(methodType.getReturnType())) {
+        returnType = getOnlyElement(returnType.getTypeArguments());
+      } else if (contributionType.equals(ContributionType.SET_VALUES)
+          && SetType.isSet(returnType)) {
+        SetType setType = SetType.from(returnType);
+        if (isFutureType(setType.elementType())) {
+          returnType = setOf(unwrapType(setType.elementType()));
+        }
+      }
+    }
     XType keyType = bindingMethodKeyType(returnType, method, contributionType, frameworkClassName);
     Key key = forMethod(method, keyType);
     return contributionType.equals(ContributionType.UNIQUE)
@@ -88,6 +143,24 @@ public final class KeyFactory {
             .build();
   }
 
+  /**
+   * Returns the key for a {@code Multibinds @Multibinds} method.
+   *
+   * <p>The key's type is either {@code Set<T>} or {@code Map<K, Provider<V>>}. The latter works
+   * even for maps used by {@code Producer}s.
+   */
+  Key forMultibindsMethod(XMethodElement method, XMethodType methodType) {
+    XType returnType = method.getReturnType();
+    XType keyType =
+        MapType.isMap(returnType)
+            ? mapOfFrameworkType(
+                MapType.from(returnType).keyType(),
+                TypeNames.PROVIDER,
+                MapType.from(returnType).valueType())
+            : returnType;
+    return forMethod(method, keyType);
+  }
+
   private XType bindingMethodKeyType(
       XType returnType,
       XMethodElement method,
@@ -95,6 +168,12 @@ public final class KeyFactory {
       Optional<ClassName> frameworkClassName) {
     switch (contributionType) {
       case UNIQUE:
+        return returnType;
+      case SET:
+        return setOf(returnType);
+      case SET_VALUES:
+        // TODO(gak): do we want to allow people to use "covariant return" here?
+        checkArgument(SetType.isSet(returnType));
         return returnType;
     }
     throw new AssertionError();

@@ -120,4 +120,10 @@ public class Iterables {
   public static <T> int indexOf(Iterable<T> iterable, Predicate<? super T> predicate) {
     return Iterators.indexOf(iterable.iterator(), predicate);
   }
+
+  public static <T> T get(Iterable<T> iterable, int position) {
+    return (iterable instanceof List)
+        ? ((List<T>) iterable).get(position)
+        : Iterators.get(iterable.iterator(), position);
+  }
 }

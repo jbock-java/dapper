@@ -14,6 +14,13 @@ public class Verify {
     }
   }
 
+  public static void verify(
+      boolean expression, String errorMessageTemplate, Object p1, Object p2, Object p3) {
+    if (!expression) {
+      throw new IllegalArgumentException(String.format(errorMessageTemplate, p1, p2, p3));
+    }
+  }
+
   public static void verify(boolean expression) {
     if (!expression) {
       throw new IllegalArgumentException();
