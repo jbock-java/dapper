@@ -23,7 +23,6 @@ import static java.util.Comparator.comparing;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import java.util.Comparator;
 import java.util.Optional;
@@ -56,12 +55,12 @@ public abstract class BindingDeclaration {
                   comparing((XElement element) -> toJavac(element).getSimpleName().toString())
                       .thenComparing((XElement element) -> toJavac(element).asType().toString())));
 
-  /** The {@link Key} of this declaration. */
+  /** The {@code Key} of this declaration. */
   public abstract Key key();
 
   /**
-   * The {@link XElement} that declares this binding. Absent for {@linkplain BindingKind binding
-   * kinds} that are not always declared by exactly one element.
+   * The {@code XElement} that declares this binding. Absent for {@code BindingKind binding kinds}
+   * that are not always declared by exactly one element.
    *
    * <p>For example, consider {@code BindingKind#MULTIBOUND_SET}. A component with many
    * {@code @IntoSet} bindings for the same key will have a synthetic binding that depends on all
@@ -72,7 +71,7 @@ public abstract class BindingDeclaration {
   public abstract Optional<XElement> bindingElement();
 
   /**
-   * The type enclosing the {@link #bindingElement()}, or {@link Optional#empty()} if {@link
+   * The type enclosing the {@code #bindingElement()}, or {@code Optional#empty()} if {@code
    * #bindingElement()} is empty.
    */
   public final Optional<XTypeElement> bindingTypeElement() {
@@ -80,8 +79,8 @@ public abstract class BindingDeclaration {
   }
 
   /**
-   * The installed module class that contributed the {@link #bindingElement()}. May be a subclass of
-   * the class that contains {@link #bindingElement()}. Absent if {@link #bindingElement()} is
+   * The installed module class that contributed the {@code #bindingElement()}. May be a subclass of
+   * the class that contains {@code #bindingElement()}. Absent if {@code #bindingElement()} is
    * empty.
    */
   public abstract Optional<XTypeElement> contributingModule();

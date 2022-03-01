@@ -130,6 +130,8 @@ final class DirectInstanceBindingRepresentation {
       case COMPONENT_PROVISION:
       case SUBCOMPONENT_CREATOR:
       case COMPONENT_DEPENDENCY:
+      case MULTIBOUND_SET:
+      case MULTIBOUND_MAP:
       case BOUND_INSTANCE:
       case ASSISTED_FACTORY:
       case ASSISTED_INJECTION:
@@ -142,6 +144,9 @@ final class DirectInstanceBindingRepresentation {
         // binding request.
         return !binding.dependencies().isEmpty();
       case MEMBERS_INJECTOR:
+      case PRODUCTION:
+      case COMPONENT_PRODUCTION:
+      case OPTIONAL:
       case DELEGATE:
       case MEMBERS_INJECTION:
         return false;

@@ -22,6 +22,8 @@ public interface Multimap<K, V> {
 
   boolean isEmpty();
 
+  boolean put(K key, V value);
+
   Collection<Map.Entry<K, V>> entries();
 
   Map<K, Collection<V>> asMap();

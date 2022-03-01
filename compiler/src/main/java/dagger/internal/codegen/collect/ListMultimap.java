@@ -22,8 +22,9 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
     this.map = map;
   }
 
-  public void put(K key, V value) {
+  public boolean put(K key, V value) {
     map.merge(key, List.of(value), Util::mutableConcat);
+    return true;
   }
 
   public Map<K, Collection<V>> asMap() {
@@ -66,12 +67,16 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   @Override
   public final Collection<Map.Entry<K, V>> entries() {
-    return asMap().entrySet().stream().<Map.Entry<K, V>>flatMap(entry -> {
-      if (entry.getValue().isEmpty()) {
-        return Stream.of();
-      }
-      return entry.getValue().stream().map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
-    }).collect(Collectors.toList());
+    return asMap().entrySet().stream()
+        .<Map.Entry<K, V>>flatMap(
+            entry -> {
+              if (entry.getValue().isEmpty()) {
+                return Stream.of();
+              }
+              return entry.getValue().stream()
+                  .map(v -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), v));
+            })
+        .collect(Collectors.toList());
   }
 
   public ListMultimap<K, V> build() {
@@ -103,7 +108,8 @@ public abstract class ListMultimap<K, V> implements ImmutableMultimap<K, V> {
 
   @Override
   public final void forEach(BiConsumer<? super K, ? super V> action) {
-    asMap().forEach((key, valueCollection) ->
-        valueCollection.forEach(value -> action.accept(key, value)));
+    asMap()
+        .forEach(
+            (key, valueCollection) -> valueCollection.forEach(value -> action.accept(key, value)));
   }
 }

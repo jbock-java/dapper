@@ -48,7 +48,6 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.Iterables;
@@ -99,8 +98,8 @@ public final class BindingFactory {
    * Returns an {@code dagger.spi.model.BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
-   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class and the
-   *     binding should be for the parameterized type
+   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class
+   *     and the binding should be for the parameterized type
    */
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
@@ -216,6 +215,25 @@ public final class BindingFactory {
         .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
   }
 
+  /**
+   * Returns a {@code dagger.spi.model.BindingKind#MULTIBOUND_MAP} or {@code
+   * dagger.spi.model.BindingKind#MULTIBOUND_SET} binding given a set of multibinding contribution
+   * bindings.
+   *
+   * @param key a key that may be satisfied by a multibinding
+   */
+  public ContributionBinding syntheticMultibinding(
+      Key key, Iterable<ContributionBinding> multibindingContributions) {
+    ContributionBinding.Builder<?, ?> builder = ProvisionBinding.builder();
+    return builder
+        .contributionType(ContributionType.UNIQUE)
+        .key(key)
+        .dependencies(
+            dependencyRequestFactory.forMultibindingContributions(key, multibindingContributions))
+        .kind(bindingKindForMultibindingKey(key))
+        .build();
+  }
+
   private static BindingKind bindingKindForMultibindingKey(Key key) {
     if (SetType.isSet(key)) {
       return BindingKind.MULTIBOUND_SET;
@@ -224,6 +242,21 @@ public final class BindingFactory {
     } else {
       throw new IllegalArgumentException(String.format("key is not for a set or map: %s", key));
     }
+  }
+
+  private boolean multibindingRequiresProduction(
+      Key key, Iterable<ContributionBinding> multibindingContributions) {
+    if (MapType.isMap(key)) {
+      MapType mapType = MapType.from(key);
+      if (mapType.valuesAreTypeOf(TypeNames.PRODUCER)
+          || mapType.valuesAreTypeOf(TypeNames.PRODUCED)) {
+        return true;
+      }
+    } else if (SetType.isSet(key) && SetType.from(key).elementsAreTypeOf(TypeNames.PRODUCED)) {
+      return true;
+    }
+    return Iterables.any(
+        multibindingContributions, binding -> binding.bindingType().equals(BindingType.PRODUCTION));
   }
 
   /** Returns a {@code dagger.spi.model.BindingKind#COMPONENT} binding for the component. */

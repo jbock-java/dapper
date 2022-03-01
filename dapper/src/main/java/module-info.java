@@ -6,4 +6,5 @@ module dagger {
   exports dagger;
   exports dagger.internal;
   exports dagger.assisted;
+  exports dagger.multibindings;
 }

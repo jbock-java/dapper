@@ -165,19 +165,14 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     }
     ImmutableSet<Binding> bindings = ImmutableSet.copyOf(duplicateBindings.values());
     Binding oneBinding = bindings.asList().get(0);
-    String message = bindings.stream().anyMatch(binding -> binding.kind().isMultibinding())
-        ? incompatibleBindingsMessage(oneBinding, bindings, bindingGraph)
-        : duplicateBindingMessage(oneBinding, bindings, bindingGraph);
+    String message =
+        bindings.stream().anyMatch(binding -> binding.kind().isMultibinding())
+            ? incompatibleBindingsMessage(oneBinding, bindings, bindingGraph)
+            : duplicateBindingMessage(oneBinding, bindings, bindingGraph);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
-      diagnosticReporter.reportComponent(
-          ERROR,
-          bindingGraph.rootComponentNode(),
-          message);
+      diagnosticReporter.reportComponent(ERROR, bindingGraph.rootComponentNode(), message);
     } else {
-      diagnosticReporter.reportBinding(
-          ERROR,
-          oneBinding,
-          message);
+      diagnosticReporter.reportBinding(ERROR, oneBinding, message);
     }
   }
 
@@ -256,10 +251,7 @@ final class DuplicateBindingsValidator implements BindingGraphPlugin {
     Set<dagger.spi.model.Binding> uniqueBindings =
         Sets.filter(duplicateBindings, binding -> !binding.equals(multibinding));
     message.append('\n').append(INDENT).append("Unique bindings and declarations:");
-    formatDeclarations(
-        message,
-        2,
-        declarations(graph, uniqueBindings));
+    formatDeclarations(message, 2, Sets.filter(declarations(graph, uniqueBindings)));
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       message.append(String.format("\n%sin component: [%s]", INDENT, oneBinding.componentPath()));
     }

@@ -44,6 +44,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       injectionOrProvisionProviderCreationExpressionFactory;
   private final MembersInjectorProviderCreationExpression.Factory
       membersInjectorProviderCreationExpressionFactory;
+  private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
   @Inject
   UnscopedFrameworkInstanceCreationExpressionFactory(
@@ -57,7 +58,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       InjectionOrProvisionProviderCreationExpression.Factory
           injectionOrProvisionProviderCreationExpressionFactory,
       MembersInjectorProviderCreationExpression.Factory
-          membersInjectorProviderCreationExpressionFactory) {
+          membersInjectorProviderCreationExpressionFactory,
+      SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
     this.anonymousProviderCreationExpressionFactory = anonymousProviderCreationExpressionFactory;
@@ -69,10 +71,11 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         injectionOrProvisionProviderCreationExpressionFactory;
     this.membersInjectorProviderCreationExpressionFactory =
         membersInjectorProviderCreationExpressionFactory;
+    this.setFactoryCreationExpressionFactory = setFactoryCreationExpressionFactory;
   }
 
   /**
-   * Returns an unscoped creation expression for a {@link jakarta.inject.Provider} for provision
+   * Returns an unscoped creation expression for a {@code jakarta.inject.Provider} for provision
    * bindings or a {@code dagger.producers.Producer} for production bindings.
    */
   FrameworkInstanceCreationExpression create(ContributionBinding binding) {
@@ -105,6 +108,9 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       case INJECTION:
       case PROVISION:
         return injectionOrProvisionProviderCreationExpressionFactory.create(binding);
+
+      case MULTIBOUND_SET:
+        return setFactoryCreationExpressionFactory.create(binding);
 
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);

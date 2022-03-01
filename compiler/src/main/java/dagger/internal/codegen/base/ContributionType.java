@@ -17,17 +17,26 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.auto.common.MoreElements.isAnnotationPresent;
 
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.multibindings.ElementsIntoSet;
+import dagger.multibindings.IntoSet;
 import javax.lang.model.element.Element;
 
 /** Whether a binding or declaration is for a unique contribution or a map or set multibinding. */
 public enum ContributionType {
+  /** Represents map bindings. */
+  MAP,
+  /** Represents set bindings. */
+  SET,
+  /** Represents set values bindings. */
+  SET_VALUES,
   /** Represents a valid non-collection binding. */
   UNIQUE,
   ;
 
-  /** An object that is associated with a {@link ContributionType}. */
+  /** An object that is associated with a {@code ContributionType}. */
   public interface HasContributionType {
 
     /** The contribution type of this object. */
@@ -53,11 +62,17 @@ public enum ContributionType {
   /**
    * The contribution type from a binding element's annotations. Presumes a well-formed binding
    * element (at most one of @IntoSet, @IntoMap, @ElementsIntoSet and @Provides.type). {@code
-   * dagger.internal.codegen.validation.BindingMethodValidator} and {@link
+   * dagger.internal.codegen.validation.BindingMethodValidator} and {@code
    * dagger.internal.codegen.validation.BindsInstanceProcessingStep} validate correctness on their
    * own.
    */
   public static ContributionType fromBindingElement(Element element) {
+    // TODO(bcorso): Replace these class references with ClassName.
+    if (isAnnotationPresent(element, IntoSet.class)) {
+      return ContributionType.SET;
+    } else if (isAnnotationPresent(element, ElementsIntoSet.class)) {
+      return ContributionType.SET_VALUES;
+    }
     return ContributionType.UNIQUE;
   }
 }

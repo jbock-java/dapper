@@ -1,7 +1,6 @@
 package dagger.internal.codegen.collect;
 
 import dagger.internal.codegen.extension.DaggerStreams;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -19,15 +18,15 @@ public class Sets {
   }
 
   public static <E> ImmutableSet<E> difference(Set<E> set1, Set<E> set2) {
-    return ImmutableSet.copyOf(set1.stream()
-        .filter(e -> !set2.contains(e))
-        .collect(Collectors.toCollection(LinkedHashSet::new)));
+    return ImmutableSet.copyOf(
+        set1.stream()
+            .filter(e -> !set2.contains(e))
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
   public static <E> ImmutableSet<E> intersection(Set<E> set1, Set<E> set2) {
-    return ImmutableSet.copyOf(set1.stream()
-        .filter(set2::contains)
-        .collect(Collectors.toCollection(LinkedHashSet::new)));
+    return ImmutableSet.copyOf(
+        set1.stream().filter(set2::contains).collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
   public static <E> ImmutableSet<E> union(Set<? extends E> set1) {
@@ -47,16 +46,20 @@ public class Sets {
     return ImmutableSet.copyOf(result);
   }
 
-  public static <E> Set<E> filter(
-      Set<E> unfiltered, Predicate<? super E> predicate) {
+  public static <E> Set<E> filter(Set<E> unfiltered, Predicate<? super E> predicate) {
     return unfiltered.stream().filter(predicate).collect(DaggerStreams.toImmutableSet());
+  }
+
+  public static <E> Set<E> filter(Set<E> unfiltered) {
+    return unfiltered;
   }
 
   public static <E> Set<E> newHashSetWithExpectedSize(int expectedSize) {
     return new HashSet<E>(Maps.capacity(expectedSize));
   }
 
-  public static <E extends Enum<E>> ImmutableSet<E> immutableEnumSet(E anElement, E... otherElements) {
+  public static <E extends Enum<E>> ImmutableSet<E> immutableEnumSet(
+      E anElement, E... otherElements) {
     ImmutableSet.Builder<E> builder = ImmutableSet.builder();
     builder.add(anElement);
     for (E otherElement : otherElements) {
