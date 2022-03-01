@@ -6,7 +6,7 @@ with some modifications:
 
 * gradle project with JUnit 5 tests
 * full jpms support with module-name: `dagger`
-* remove special binding annotations `@MapKey`, `@Multibinds`, `@IntoMap`, `@IntoSet` and `@BindsOptional`
+* remove s`@MapKey`, `@IntoMap` and `@BindsOptional`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove kotlin special-casing and the dependency on `xprocessing`
 * remove gwt special-casing
