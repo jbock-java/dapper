@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.javapoet;
 
+
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
@@ -143,6 +144,7 @@ public final class TypeNames {
   public static final ClassName SCOPE = ClassName.get("jakarta.inject", "Scope");
   public static final ClassName INJECT = ClassName.get("jakarta.inject", "Inject");
   public static final ClassName QUALIFIER = ClassName.get("jakarta.inject", "Qualifier");
+  public static final ClassName COLLECTION = ClassName.get("java.util", "Collection");
   public static final ClassName LIST = ClassName.get("java.util", "List");
   public static final ClassName SET = ClassName.get("java.util", "Set");
   public static final ClassName IMMUTABLE_SET =

@@ -74,33 +74,32 @@ public class ImmutableSet<T> extends AbstractSet<T> implements ImmutableCollecti
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2) {
-    return new ImmutableSet<>(Set.of(e1, e2));
+    return copyOf(Arrays.asList(e1, e2));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3));
+    return copyOf(Arrays.asList(e1, e2, e3));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3, e4));
+    return copyOf(Arrays.asList(e1, e2, e3, e4));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5));
+    return copyOf(Arrays.asList(e1, e2, e3, e4, e5));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5, E e6) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6));
+    return copyOf(Arrays.asList(e1, e2, e3, e4, e5, e6));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7));
+    return copyOf(Arrays.asList(e1, e2, e3, e4, e5, e6, e7));
   }
 
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
-    return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8));
+    return copyOf(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8));
   }
-
 
   @Override
   public final Iterator<T> iterator() {

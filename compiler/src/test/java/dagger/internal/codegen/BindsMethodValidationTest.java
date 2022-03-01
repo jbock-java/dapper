@@ -58,7 +58,7 @@ class BindsMethodValidationTest {
   @Test
   void notInModule() {
     assertThatMethodInUnannotatedClass("@Binds abstract Object bindObject(String s);")
-        .hasError("within a @ProducerModule or @Module");
+        .hasError("within a @Module or @ProducerModule");
   }
 
   @Test

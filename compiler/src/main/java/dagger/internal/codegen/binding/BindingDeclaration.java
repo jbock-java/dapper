@@ -59,8 +59,8 @@ public abstract class BindingDeclaration {
   public abstract Key key();
 
   /**
-   * The {@code XElement} that declares this binding. Absent for {@code BindingKind binding kinds}
-   * that are not always declared by exactly one element.
+   * The {@code XElement} that declares this binding. Absent for {@code BindingKind binding
+   * kinds} that are not always declared by exactly one element.
    *
    * <p>For example, consider {@code BindingKind#MULTIBOUND_SET}. A component with many
    * {@code @IntoSet} bindings for the same key will have a synthetic binding that depends on all

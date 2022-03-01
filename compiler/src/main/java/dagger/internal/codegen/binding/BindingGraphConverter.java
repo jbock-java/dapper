@@ -16,20 +16,21 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.extension.DaggerGraphs.unreachableNodes;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static io.jbock.auto.common.MoreTypes.asTypeElement;
-import static java.util.Objects.requireNonNull;
 
-import dagger.internal.codegen.base.Preconditions;
-import dagger.internal.codegen.base.Suppliers;
 import dagger.internal.codegen.binding.BindingGraph.TopLevelBindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.extension.DaggerStreams;
+import dagger.internal.codegen.collect.Iterables;
+import dagger.internal.codegen.collect.Iterators;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -43,6 +44,8 @@ import dagger.spi.model.DaggerExecutableElement;
 import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import io.jbock.common.graph.ImmutableNetwork;
 import io.jbock.common.graph.MutableNetwork;
 import io.jbock.common.graph.Network;
@@ -52,32 +55,26 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.IntSupplier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
-/** Converts {@link BindingGraph}s to {@link dagger.spi.model.BindingGraph}s. */
+/** Converts {@code BindingGraph}s to {@code dagger.spi.model.BindingGraph}s. */
 final class BindingGraphConverter {
   private final XProcessingEnv processingEnv;
   private final BindingDeclarationFormatter bindingDeclarationFormatter;
 
   @Inject
   BindingGraphConverter(
-      XProcessingEnv processingEnv,
-      BindingDeclarationFormatter bindingDeclarationFormatter) {
+      XProcessingEnv processingEnv, BindingDeclarationFormatter bindingDeclarationFormatter) {
     this.processingEnv = processingEnv;
     this.bindingDeclarationFormatter = bindingDeclarationFormatter;
   }
 
   /**
-   * Creates the external {@link dagger.spi.model.BindingGraph} representing the given internal {@link
-   * BindingGraph}.
+   * Creates the external {@code dagger.spi.model.BindingGraph} representing the given internal
+   * {@code BindingGraph}.
    */
   BindingGraph convert(LegacyBindingGraph legacyBindingGraph, boolean isFullBindingGraph) {
     MutableNetwork<Node, Edge> network = asNetwork(legacyBindingGraph);
@@ -105,11 +102,10 @@ final class BindingGraphConverter {
 
   // TODO(dpb): Example of BindingGraph logic applied to derived networks.
   private ComponentNode rootComponentNode(Network<Node, Edge> network) {
-    return network.nodes().stream()
-        .flatMap(DaggerStreams.instancesOf(ComponentNode.class))
-        .filter(node -> node.componentPath().atRoot())
-        .findFirst()
-        .orElseThrow();
+    return (ComponentNode)
+        Iterables.find(
+            network.nodes(),
+            node -> node instanceof ComponentNode && node.componentPath().atRoot());
   }
 
   /**
@@ -117,38 +113,15 @@ final class BindingGraphConverter {
    * This is required so that binding nodes are not reused across different branches of the
    * graph since the ResolvedBindings class only contains the component and not the path.
    */
-  static final class ResolvedBindingsWithPath {
-    private final ResolvedBindings resolvedBindings;
-    private final ComponentPath componentPath;
-
-    private ResolvedBindingsWithPath(
-        ResolvedBindings resolvedBindings,
-        ComponentPath componentPath) {
-      this.resolvedBindings = requireNonNull(resolvedBindings);
-      this.componentPath = requireNonNull(componentPath);
-    }
-
-    ResolvedBindings resolvedBindings() {
-      return resolvedBindings;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ResolvedBindingsWithPath that = (ResolvedBindingsWithPath) o;
-      return resolvedBindings.equals(that.resolvedBindings)
-          && componentPath.equals(that.componentPath);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(resolvedBindings, componentPath);
-    }
+  @AutoValue
+  abstract static class ResolvedBindingsWithPath {
+    abstract ResolvedBindings resolvedBindings();
+    abstract ComponentPath componentPath();
 
     static ResolvedBindingsWithPath create(
         ResolvedBindings resolvedBindings, ComponentPath componentPath) {
-      return new ResolvedBindingsWithPath(resolvedBindings, componentPath);
+      return new AutoValue_BindingGraphConverter_ResolvedBindingsWithPath(
+          resolvedBindings, componentPath);
     }
   }
 
@@ -156,14 +129,14 @@ final class BindingGraphConverter {
     /** The path from the root graph to the currently visited graph. */
     private final Deque<LegacyBindingGraph> bindingGraphPath = new ArrayDeque<>();
 
-    /** The {@link ComponentPath} for each component in {@link #bindingGraphPath}. */
+    /** The {@code ComponentPath} for each component in {@code #bindingGraphPath}. */
     private final Deque<ComponentPath> componentPaths = new ArrayDeque<>();
 
     private final MutableNetwork<Node, Edge> network =
         NetworkBuilder.directed().allowsParallelEdges(true).allowsSelfLoops(true).build();
     private final Set<BindingNode> bindings = new HashSet<>();
 
-    private final Map<ResolvedBindingsWithPath, Set<BindingNode>> resolvedBindingsMap =
+    private final Map<ResolvedBindingsWithPath, ImmutableSet<BindingNode>> resolvedBindingsMap =
         new HashMap<>();
 
     private void visitRootComponent(LegacyBindingGraph graph) {
@@ -177,11 +150,11 @@ final class BindingGraphConverter {
      *
      * <ol>
      *   <li>If this component is installed in its parent by a subcomponent factory method, calls
-     *       {@link #visitSubcomponentFactoryMethod(ComponentNode, ComponentNode,
-     *       XMethodElement)}.
-     *   <li>For each entry point in the component, calls {@link #visitEntryPoint(ComponentNode,
+     *       {@code #visitSubcomponentFactoryMethod(ComponentNode, ComponentNode,
+     *       ExecutableElement)}.
+     *   <li>For each entry point in the component, calls {@code #visitEntryPoint(ComponentNode,
      *       DependencyRequest)}.
-     *   <li>For each child component, calls {@code visitComponent(LegacyBindingGraph,
+     *   <li>For each child component, calls {@code #visitComponent(LegacyBindingGraph,
      *       ComponentNode)}, updating the traversal state.
      * </ol>
      *
@@ -204,7 +177,7 @@ final class BindingGraphConverter {
 
       for (ComponentMethodDescriptor entryPointMethod :
           graph.componentDescriptor().entryPointMethods()) {
-        visitEntryPoint(currentComponent, entryPointMethod.dependencyRequest().orElseThrow());
+        visitEntryPoint(currentComponent, entryPointMethod.dependencyRequest().get());
       }
 
       for (ResolvedBindings resolvedBindings : graph.resolvedBindings()) {
@@ -227,9 +200,7 @@ final class BindingGraphConverter {
       }
 
       if (bindingGraphPath.size() > 1) {
-        Iterator<LegacyBindingGraph> it = bindingGraphPath.descendingIterator();
-        it.next();
-        LegacyBindingGraph parent = it.next();
+        LegacyBindingGraph parent = Iterators.get(bindingGraphPath.descendingIterator(), 1);
         parent
             .componentDescriptor()
             .getFactoryMethodForChildComponent(graph.componentDescriptor())
@@ -243,8 +214,8 @@ final class BindingGraphConverter {
         visitComponent(child, currentComponent);
       }
 
-      Preconditions.checkState(bindingGraphPath.removeLast().equals(graph));
-      Preconditions.checkState(componentPaths.removeLast().equals(graphPath));
+      verify(bindingGraphPath.removeLast().equals(graph));
+      verify(componentPaths.removeLast().equals(graphPath));
     }
 
     /**
@@ -304,7 +275,7 @@ final class BindingGraphConverter {
      */
     private LegacyBindingGraph graphForAncestor(TypeElement ancestor) {
       for (LegacyBindingGraph graph : bindingGraphPath) {
-        if (graph.componentDescriptor().typeElement().toJavac().equals(ancestor)) {
+        if (toJavac(graph.componentDescriptor().typeElement()).equals(ancestor)) {
           return graph;
         }
       }
@@ -314,8 +285,8 @@ final class BindingGraphConverter {
     }
 
     /**
-     * Adds a {@link dagger.spi.model.BindingGraph.DependencyEdge} from a node to the binding(s) that
-     * satisfy a dependency request.
+     * Adds a {@code dagger.spi.model.BindingGraph.DependencyEdge} from a node to the binding(s)
+     * that satisfy a dependency request.
      */
     private void addDependencyEdges(Node source, DependencyRequest dependencyRequest) {
       ResolvedBindings dependencies = resolvedDependencies(source, dependencyRequest);
@@ -343,7 +314,7 @@ final class BindingGraphConverter {
         Node source, Node dependency, DependencyRequest dependencyRequest) {
       // An iterative approach is used instead of a Stream because this method is called in a hot
       // loop, and the Stream calculates the size of network.edgesConnecting(), which is slow. This
-      // seems to be because calculating the edges connecting two nodes in a Network that supports
+      // seems to be because caculating the edges connecting two nodes in a Network that supports
       // parallel edges is must check the equality of many nodes, and BindingNode's equality
       // semantics drag in the equality of many other expensive objects
       for (Edge edge : network.edgesConnecting(source, dependency)) {
@@ -362,16 +333,16 @@ final class BindingGraphConverter {
           .resolvedBindings(bindingRequest(dependencyRequest));
     }
 
-    private Set<BindingNode> bindingNodes(ResolvedBindings resolvedBindings) {
+    private ImmutableSet<BindingNode> bindingNodes(ResolvedBindings resolvedBindings) {
       ResolvedBindingsWithPath resolvedBindingsWithPath =
           ResolvedBindingsWithPath.create(resolvedBindings, componentPath());
       return resolvedBindingsMap.computeIfAbsent(
           resolvedBindingsWithPath, this::uncachedBindingNodes);
     }
 
-    private Set<BindingNode> uncachedBindingNodes(
+    private ImmutableSet<BindingNode> uncachedBindingNodes(
         ResolvedBindingsWithPath resolvedBindingsWithPath) {
-      Set<BindingNode> bindingNodes = new LinkedHashSet<>();
+      ImmutableSet.Builder<BindingNode> bindingNodes = ImmutableSet.builder();
       resolvedBindingsWithPath.resolvedBindings()
           .allBindings()
           .asMap()
@@ -382,7 +353,7 @@ final class BindingGraphConverter {
                       bindingNode(resolvedBindingsWithPath.resolvedBindings(), binding, component));
                 }
               });
-      return bindingNodes;
+      return bindingNodes.build();
     }
 
     private BindingNode bindingNode(
@@ -390,7 +361,8 @@ final class BindingGraphConverter {
       return BindingNode.create(
           pathFromRootToAncestor(owningComponent),
           binding,
-          ImmutableSet.copyOf(resolvedBindings.subcomponentDeclarations()),
+          resolvedBindings.multibindingDeclarations(),
+          resolvedBindings.subcomponentDeclarations(),
           bindingDeclarationFormatter);
     }
 
@@ -398,7 +370,7 @@ final class BindingGraphConverter {
       // Put all missing binding nodes in the root component. This simplifies the binding graph
       // and produces better error messages for users since all dependents point to the same node.
       return MissingBindingImpl.create(
-          ComponentPath.create(List.of(componentPath().rootComponent())),
+          ComponentPath.create(ImmutableList.of(componentPath().rootComponent())),
           dependencies.key());
     }
 
@@ -414,44 +386,17 @@ final class BindingGraphConverter {
     }
   }
 
-  static final class MissingBindingImpl extends MissingBinding {
-    private final ComponentPath componentPath;
-    private final Key key;
-    private final IntSupplier hash = Suppliers.memoizeInt(() ->
-        Objects.hash(componentPath(), key()));
-
-    MissingBindingImpl(ComponentPath componentPath, Key key) {
-      this.componentPath = requireNonNull(componentPath);
-      this.key = requireNonNull(key);
-    }
-
+  @AutoValue
+  abstract static class MissingBindingImpl extends MissingBinding {
     static MissingBinding create(ComponentPath component, Key key) {
-      return new MissingBindingImpl(component, key);
+      return new AutoValue_BindingGraphConverter_MissingBindingImpl(component, key);
     }
 
+    @Memoized
     @Override
-    public ComponentPath componentPath() {
-      return componentPath;
-    }
+    public abstract int hashCode();
 
     @Override
-    public Key key() {
-      return key;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      MissingBindingImpl that = (MissingBindingImpl) o;
-      return this.hashCode() == that.hashCode()
-          && componentPath.equals(that.componentPath)
-          && key.equals(that.key);
-    }
-
-    @Override
-    public int hashCode() {
-      return hash.getAsInt();
-    }
+    public abstract boolean equals(Object o);
   }
 }

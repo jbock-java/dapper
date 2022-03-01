@@ -22,10 +22,8 @@ import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled("todo")
 class SetBindingRequestFulfillmentTest {
 
   @Test
@@ -89,10 +87,7 @@ class SetBindingRequestFulfillmentTest {
                 "final class DaggerTestComponent implements TestComponent {",
                 "  @Override",
                 "  public Set<String> strings() {",
-                "    return SetBuilder.<String>newSetBuilder(2)",
-                "        .addAll(EmptySetModule_EmptySetFactory.emptySet())",
-                "        .add(SetModule_StringFactory.string())",
-                "        .build();",
+                "    return SetBuilder.<String>newSetBuilder(2).addAll(EmptySetModule_EmptySetFactory.emptySet()).add(SetModule_StringFactory.string()).build();",
                 "  }",
                 "",
                 "  @Override",
@@ -178,16 +173,12 @@ class SetBindingRequestFulfillmentTest {
             .addLines(
                 "final class DaggerTestComponent implements TestComponent {",
                 "  private Set setOfInaccessible2() {",
-                "    return SetBuilder.newSetBuilder(1)",
-                "        .addAll(TestModule_EmptySetFactory.emptySet())",
-                "        .build();",
+                "    return SetBuilder.newSetBuilder(1).addAll(TestModule_EmptySetFactory.emptySet()).build();",
                 "  }",
                 "",
                 "  @Override",
                 "  public UsesInaccessible usesInaccessible() {",
-                "    return UsesInaccessible_Factory.newInstance(",
-                "        (Set) Collections.emptySet(),",
-                "        (Set) setOfInaccessible2());",
+                "    return UsesInaccessible_Factory.newInstance((Set) Collections.emptySet(), (Set) setOfInaccessible2());",
                 "  }",
                 "}")
             .build();
@@ -221,7 +212,6 @@ class SetBindingRequestFulfillmentTest {
             "import dagger.Module;",
             "import dagger.Provides;",
             "import dagger.multibindings.IntoSet;",
-            "import dagger.multibindings.StringKey;",
             "",
             "@Module",
             "class ParentModule {",
@@ -253,7 +243,8 @@ class SetBindingRequestFulfillmentTest {
                 "final class DaggerParent implements Parent {",
                 "  private final DaggerParent parent = this;",
                 "",
-                "  private DaggerParent() {}",
+                "  private DaggerParent() {",
+                "  }",
                 "",
                 "  public static Builder builder() {",
                 "    return new Builder();",
@@ -269,7 +260,8 @@ class SetBindingRequestFulfillmentTest {
                 "  }",
                 "",
                 "  static final class Builder {",
-                "    private Builder() {}",
+                "    private Builder() {",
+                "    }",
                 "",
                 "    @Deprecated",
                 "    public Builder parentModule(ParentModule parentModule) {",
@@ -293,8 +285,7 @@ class SetBindingRequestFulfillmentTest {
                 "",
                 "    @Override",
                 "    public Set<Object> objectSet() {",
-                "      return Collections.<Object>singleton(",
-                "          ParentModule_ParentObjectFactory.parentObject());",
+                "      return Collections.<Object>singleton(ParentModule_ParentObjectFactory.parentObject());",
                 "    }",
                 "  }",
                 "}")

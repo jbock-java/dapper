@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.base.RequestKinds.frameworkClassName;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullableType;
@@ -33,7 +32,6 @@ import static dagger.spi.model.RequestKind.MEMBERS_INJECTION;
 import static dagger.spi.model.RequestKind.PRODUCER;
 import static dagger.spi.model.RequestKind.PROVIDER;
 
-import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
@@ -109,6 +107,9 @@ public final class DependencyRequestFactory {
   private RequestKind multibindingContributionRequestKind(
       Key multibindingKey, ContributionBinding multibindingContribution) {
     switch (multibindingContribution.contributionType()) {
+      case SET:
+      case SET_VALUES:
+        return INSTANCE;
       case UNIQUE:
         throw new IllegalArgumentException(
             "multibindingContribution must be a multibinding: " + multibindingContribution);

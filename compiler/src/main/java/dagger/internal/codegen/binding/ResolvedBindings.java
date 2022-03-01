@@ -56,6 +56,9 @@ abstract class ResolvedBindings {
    */
   abstract ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings();
 
+  /** The multibinding declarations for {@code #key()}. */
+  abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
+
   /** The subcomponent declarations for {@code #key()}. */
   abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
@@ -87,6 +90,7 @@ abstract class ResolvedBindings {
   final boolean isEmpty() {
     return allMembersInjectionBindings().isEmpty()
         && allContributionBindings().isEmpty()
+        && multibindingDeclarations().isEmpty()
         && subcomponentDeclarations().isEmpty();
   }
 
@@ -122,11 +126,13 @@ abstract class ResolvedBindings {
   static ResolvedBindings forContributionBindings(
       Key key,
       Multimap<TypeElement, ContributionBinding> contributionBindings,
+      Iterable<MultibindingDeclaration> multibindings,
       Iterable<SubcomponentDeclaration> subcomponentDeclarations) {
     return new AutoValue_ResolvedBindings(
         key,
         ImmutableSetMultimap.copyOf(contributionBindings),
         ImmutableMap.of(),
+        ImmutableSet.copyOf(multibindings),
         ImmutableSet.copyOf(subcomponentDeclarations));
   }
 
@@ -141,6 +147,7 @@ abstract class ResolvedBindings {
         key,
         ImmutableSetMultimap.of(),
         ImmutableMap.of(toJavac(owningComponent.typeElement()), ownedMembersInjectionBinding),
+        ImmutableSet.of(),
         ImmutableSet.of());
   }
 
@@ -152,6 +159,7 @@ abstract class ResolvedBindings {
         key,
         ImmutableSetMultimap.of(),
         ImmutableMap.of(),
+        ImmutableSet.of(),
         ImmutableSet.of());
   }
 }

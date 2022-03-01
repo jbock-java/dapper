@@ -28,7 +28,7 @@ import jakarta.inject.Inject;
  * <p>Note that these binding expressions are for getting "direct" instances -- i.e. instances that
  * are created via constructors or modules (e.g. {@code new Foo()} or {@code
  * FooModule.provideFoo()}) as opposed to an instance created from calling a getter on a framework
- * type (e.g. {@code fooProvider.get()}). See {@link FrameworkInstanceRequestRepresentation} for
+ * type (e.g. {@code fooProvider.get()}). See {@code FrameworkInstanceRequestRepresentation} for
  * binding expressions that are created from framework types.
  */
 final class UnscopedDirectInstanceRequestRepresentationFactory {
@@ -41,6 +41,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
   private final ComponentRequirementRequestRepresentation.Factory
       componentRequirementRequestRepresentationFactory;
   private final DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory;
+  private final SetRequestRepresentation.Factory setRequestRepresentationFactory;
   private final SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory;
   private final SubcomponentCreatorRequestRepresentation.Factory
       subcomponentCreatorRequestRepresentationFactory;
@@ -55,6 +56,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
       ComponentRequirementRequestRepresentation.Factory
           componentRequirementRequestRepresentationFactory,
       DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory,
+      SetRequestRepresentation.Factory setRequestRepresentationFactory,
       SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory,
       SubcomponentCreatorRequestRepresentation.Factory
           subcomponentCreatorRequestRepresentationFactory) {
@@ -66,12 +68,13 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
     this.componentRequirementRequestRepresentationFactory =
         componentRequirementRequestRepresentationFactory;
     this.delegateRequestRepresentationFactory = delegateRequestRepresentationFactory;
+    this.setRequestRepresentationFactory = setRequestRepresentationFactory;
     this.simpleMethodRequestRepresentationFactory = simpleMethodRequestRepresentationFactory;
     this.subcomponentCreatorRequestRepresentationFactory =
         subcomponentCreatorRequestRepresentationFactory;
   }
 
-  /** Returns a direct, unscoped binding expression for a {@link RequestKind#INSTANCE} request. */
+  /** Returns a direct, unscoped binding expression for a {@code RequestKind#INSTANCE} request. */
   RequestRepresentation create(ContributionBinding binding) {
     switch (binding.kind()) {
       case DELEGATE:
@@ -90,6 +93,9 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
       case SUBCOMPONENT_CREATOR:
         return subcomponentCreatorRequestRepresentationFactory.create(binding);
 
+      case MULTIBOUND_SET:
+        return setRequestRepresentationFactory.create((ProvisionBinding) binding);
+
       case BOUND_INSTANCE:
         return componentRequirementRequestRepresentationFactory.create(
             binding, ComponentRequirement.forBoundInstance(binding));
@@ -104,6 +110,8 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
       case ASSISTED_INJECTION:
       case MEMBERS_INJECTOR:
       case MEMBERS_INJECTION:
+      case COMPONENT_PRODUCTION:
+      case PRODUCTION:
         // Fall through
     }
     throw new AssertionError("Unexpected binding kind: " + binding.kind());

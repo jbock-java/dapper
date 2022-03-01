@@ -18,8 +18,10 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
+import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
+import dagger.Module;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;
@@ -27,7 +29,6 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
-import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 
 /**
@@ -42,12 +43,14 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   public static BindingNode create(
       ComponentPath component,
       Binding delegate,
+      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
       ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     BindingNode node =
         new AutoValue_BindingNode(
             component,
             delegate,
+            multibindingDeclarations,
             subcomponentDeclarations);
     node.bindingDeclarationFormatter = checkNotNull(bindingDeclarationFormatter);
     return node;
@@ -56,6 +59,8 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   private BindingDeclarationFormatter bindingDeclarationFormatter;
 
   public abstract Binding delegate();
+
+  public abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
 
   public abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
@@ -70,7 +75,8 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
    * </ul>
    */
   public final Iterable<BindingDeclaration> associatedDeclarations() {
-    return Iterables.concat(subcomponentDeclarations());
+    return Iterables.concat(
+        multibindingDeclarations(), subcomponentDeclarations());
   }
 
   @Override
