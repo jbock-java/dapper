@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.ALLOWS_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.ALLOWS_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_ABSTRACT;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
@@ -23,13 +24,13 @@ import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import jakarta.inject.Inject;
@@ -41,20 +42,19 @@ final class BindsMethodValidator extends BindingMethodValidator {
 
   @Inject
   BindsMethodValidator(
-      XProcessingEnv processingEnv,
       DaggerTypes types,
       BindsTypeChecker bindsTypeChecker,
       DependencyRequestValidator dependencyRequestValidator,
       DaggerSuperficialValidation superficialValidation,
       InjectionAnnotations injectionAnnotations) {
     super(
-        processingEnv,
         types,
         TypeNames.BINDS,
-        ImmutableSet.of(TypeNames.MODULE),
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
+        ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
         injectionAnnotations);
     this.bindsTypeChecker = bindsTypeChecker;
@@ -91,6 +91,10 @@ final class BindsMethodValidator extends BindingMethodValidator {
       XType returnType = boxIfNecessary(method.getReturnType());
       XType parameterType = parameter.getType();
       ContributionType contributionType = ContributionType.fromBindingElement(method);
+      if (contributionType.equals(ContributionType.SET_VALUES) && !SetType.isSet(returnType)) {
+        report.addError(
+            "@Binds @ElementsIntoSet methods must return a Set and take a Set parameter");
+      }
 
       if (!bindsTypeChecker.isAssignable(parameterType, returnType, contributionType)) {
         // Validate the type hierarchy of both sides to make sure they're both valid.

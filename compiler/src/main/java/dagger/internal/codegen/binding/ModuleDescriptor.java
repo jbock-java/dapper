@@ -67,6 +67,9 @@ public abstract class ModuleDescriptor {
 
   public abstract ImmutableSet<ContributionBinding> bindings();
 
+  /** The multibinding declarations contained in this module. */
+  abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
+
   /** The {@code Module#subcomponents() subcomponent declarations} contained in this module. */
   abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
@@ -82,6 +85,7 @@ public abstract class ModuleDescriptor {
     return ImmutableSet.<BindingDeclaration>builder()
         .addAll(bindings())
         .addAll(delegateDeclarations())
+        .addAll(multibindingDeclarations())
         .addAll(subcomponentDeclarations())
         .build();
   }
@@ -97,6 +101,7 @@ public abstract class ModuleDescriptor {
     private final XProcessingEnv processingEnv;
     private final DaggerElements elements;
     private final BindingFactory bindingFactory;
+    private final MultibindingDeclaration.Factory multibindingDeclarationFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
     private final SubcomponentDeclaration.Factory subcomponentDeclarationFactory;
     private final DaggerSuperficialValidation superficialValidation;
@@ -107,12 +112,14 @@ public abstract class ModuleDescriptor {
         XProcessingEnv processingEnv,
         DaggerElements elements,
         BindingFactory bindingFactory,
+        MultibindingDeclaration.Factory multibindingDeclarationFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
         SubcomponentDeclaration.Factory subcomponentDeclarationFactory,
         DaggerSuperficialValidation superficialValidation) {
       this.processingEnv = processingEnv;
       this.elements = elements;
       this.bindingFactory = bindingFactory;
+      this.multibindingDeclarationFactory = multibindingDeclarationFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
       this.subcomponentDeclarationFactory = subcomponentDeclarationFactory;
       this.superficialValidation = superficialValidation;
@@ -125,6 +132,8 @@ public abstract class ModuleDescriptor {
     public ModuleDescriptor createUncached(XTypeElement moduleElement) {
       ImmutableSet.Builder<ContributionBinding> bindings = ImmutableSet.builder();
       ImmutableSet.Builder<DelegateDeclaration> delegates = ImmutableSet.builder();
+      ImmutableSet.Builder<MultibindingDeclaration> multibindingDeclarations =
+          ImmutableSet.builder();
 
       methodsIn(elements.getAllMembers(toJavac(moduleElement))).stream()
           .map(method -> toXProcessing(method, processingEnv))
@@ -139,6 +148,11 @@ public abstract class ModuleDescriptor {
                   delegates.add(
                       bindingDelegateDeclarationFactory.create(moduleMethod, moduleElement));
                 }
+                if (moduleMethod.hasAnnotation(TypeNames.MULTIBINDS)) {
+                  multibindingDeclarations.add(
+                      multibindingDeclarationFactory.forMultibindsMethod(
+                          moduleMethod, moduleElement));
+                }
               });
 
       moduleElement.getEnclosedTypeElements().stream()
@@ -149,6 +163,7 @@ public abstract class ModuleDescriptor {
       return new AutoValue_ModuleDescriptor(
           moduleElement,
           bindings.build(),
+          multibindingDeclarations.build(),
           subcomponentDeclarationFactory.forModule(moduleElement),
           delegates.build(),
           ModuleKind.forAnnotatedElement(moduleElement).get());

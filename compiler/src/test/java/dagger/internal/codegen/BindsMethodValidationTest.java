@@ -58,7 +58,7 @@ class BindsMethodValidationTest {
   @Test
   void notInModule() {
     assertThatMethodInUnannotatedClass("@Binds abstract Object bindObject(String s);")
-        .hasError("within a @Module");
+        .hasError("within a @ProducerModule or @Module");
   }
 
   @Test
@@ -75,7 +75,7 @@ class BindsMethodValidationTest {
   @Test
   void tooManyQualifiersOnMethod() {
     assertThatMethod(
-        "@Binds @Qualifier1 @Qualifier2 abstract String tooManyQualifiers(String impl);")
+            "@Binds @Qualifier1 @Qualifier2 abstract String tooManyQualifiers(String impl);")
         .importing(Qualifier1.class, Qualifier2.class)
         .hasError("more than one @Qualifier");
   }
@@ -83,7 +83,7 @@ class BindsMethodValidationTest {
   @Test
   void tooManyQualifiersOnParameter() {
     assertThatMethod(
-        "@Binds abstract String tooManyQualifiers(@Qualifier1 @Qualifier2 String impl);")
+            "@Binds abstract String tooManyQualifiers(@Qualifier1 @Qualifier2 String impl);")
         .importing(Qualifier1.class, Qualifier2.class)
         .hasError("more than one @Qualifier");
   }
@@ -99,11 +99,9 @@ class BindsMethodValidationTest {
 
   @Qualifier
   @Retention(RUNTIME)
-  public @interface Qualifier1 {
-  }
+  public @interface Qualifier1 {}
 
   @Qualifier
   @Retention(RUNTIME)
-  public @interface Qualifier2 {
-  }
+  public @interface Qualifier2 {}
 }

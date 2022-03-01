@@ -37,6 +37,7 @@ import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
+import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XConverters;
@@ -168,6 +169,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
         AssistedProcessingStep assistedProcessingStep,
+        MultibindingAnnotationsProcessingStep multibindingAnnotationsProcessingStep,
         BindsInstanceProcessingStep bindsInstanceProcessingStep,
         ModuleProcessingStep moduleProcessingStep,
         ComponentProcessingStep componentProcessingStep,
@@ -178,6 +180,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
           assistedInjectProcessingStep,
           assistedFactoryProcessingStep,
           assistedProcessingStep,
+          multibindingAnnotationsProcessingStep,
           bindsInstanceProcessingStep,
           moduleProcessingStep,
           componentProcessingStep,

@@ -52,6 +52,10 @@ public abstract class BindingElementValidator<E extends XElement> {
   private static final ImmutableSet<ClassName> MULTIBINDING_ANNOTATIONS =
       ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
 
+  // TODO(bcorso): Inject this directly into InjectionAnnotations instead of using field injection.
+  @Inject XProcessingEnv processingEnv;
+
+  private final AllowsMultibindings allowsMultibindings;
   private final AllowsScoping allowsScoping;
   private final Map<E, ValidationReport> cache = new HashMap<>();
   private final InjectionAnnotations injectionAnnotations;
@@ -61,8 +65,10 @@ public abstract class BindingElementValidator<E extends XElement> {
   // rather than inheritance. The web of inheritance makes it difficult to track what implementation
   // of a method is actually being used.
   protected BindingElementValidator(
+      AllowsMultibindings allowsMultibindings,
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
+    this.allowsMultibindings = allowsMultibindings;
     this.allowsScoping = allowsScoping;
     this.injectionAnnotations = injectionAnnotations;
   }
@@ -138,7 +144,6 @@ public abstract class BindingElementValidator<E extends XElement> {
     private ValidationReport validate() {
       checkType();
       checkQualifiers();
-      checkMapKeys();
       checkMultibindings();
       checkScopes();
       checkAdditionalProperties();
@@ -182,8 +187,13 @@ public abstract class BindingElementValidator<E extends XElement> {
           checkAssistedType();
           // fall through
 
+        case SET:
+        case MAP:
           bindingElementType().ifPresent(this::checkKeyType);
           break;
+
+        case SET_VALUES:
+          checkSetValuesType();
       }
     }
 
@@ -243,40 +253,50 @@ public abstract class BindingElementValidator<E extends XElement> {
       }
     }
 
-    /**
-     * Adds an error if the element has more than one {@code Qualifier qualifier} annotation.
-     */
+    /** Adds an error if the element has more than one {@code Qualifier qualifier} annotation. */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
         for (XAnnotation qualifier : qualifiers) {
           report.addError(
-              bindingElements("may not use more than one @Qualifier"),
-              element,
-              qualifier);
+              bindingElements("may not use more than one @Qualifier"), element, qualifier);
         }
       }
-    }
-
-    /**
-     * Adds an error if an {@code dagger.multibindings.IntoMap @IntoMap} element doesn't have
-     * exactly one {@code dagger.MapKey @MapKey} annotation, or if an element that is {@code
-     * dagger.multibindings.IntoMap @IntoMap} has any.
-     */
-    private void checkMapKeys() {
     }
 
     /**
      * Adds errors if:
      *
      * <ul>
-     *   <li>the element doesn't allow {@code MultibindingAnnotations multibinding annotations}
-     *       and has any
+     *   <li>the element doesn't allow {@code MultibindingAnnotations multibinding annotations} and
+     *       has any
      *   <li>the element does allow them but has more than one
      *   <li>the element has a multibinding annotation and its {@code dagger.Provides} or {@code
      *       dagger.producers.Produces} annotation has a {@code type} parameter.
      * </ul>
      */
     private void checkMultibindings() {
+      ImmutableSet<XAnnotation> multibindingAnnotations =
+          XElements.getAllAnnotations(element, MULTIBINDING_ANNOTATIONS);
+
+      switch (allowsMultibindings) {
+        case NO_MULTIBINDINGS:
+          for (XAnnotation annotation : multibindingAnnotations) {
+            report.addError(
+                bindingElements("cannot have multibinding annotations"), element, annotation);
+          }
+          break;
+
+        case ALLOWS_MULTIBINDINGS:
+          if (multibindingAnnotations.size() > 1) {
+            for (XAnnotation annotation : multibindingAnnotations) {
+              report.addError(
+                  bindingElements("cannot have more than one multibinding annotation"),
+                  element,
+                  annotation);
+            }
+          }
+          break;
+      }
     }
 
     /**
@@ -304,8 +324,8 @@ public abstract class BindingElementValidator<E extends XElement> {
     }
 
     /**
-     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes
-     * framework type}.
+     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes framework
+     * type}.
      */
     private void checkFrameworkType() {
       if (bindingElementType().filter(FrameworkTypes::isFrameworkType).isPresent()) {

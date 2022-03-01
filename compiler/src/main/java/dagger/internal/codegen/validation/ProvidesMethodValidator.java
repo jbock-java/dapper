@@ -16,37 +16,40 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.validation.BindingElementValidator.AllowsMultibindings.ALLOWS_MULTIBINDINGS;
 import static dagger.internal.codegen.validation.BindingElementValidator.AllowsScoping.ALLOWS_SCOPING;
 import static dagger.internal.codegen.validation.BindingMethodValidator.Abstractness.MUST_BE_CONCRETE;
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.RUNTIME_EXCEPTION;
 
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import jakarta.inject.Inject;
-import java.util.Set;
 
-/** A validator for {@link dagger.Provides} methods. */
+/** A validator for {@code dagger.Provides} methods. */
 final class ProvidesMethodValidator extends BindingMethodValidator {
+
+  private final DependencyRequestValidator dependencyRequestValidator;
 
   @Inject
   ProvidesMethodValidator(
-      XProcessingEnv processingEnv,
       DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
-        processingEnv,
         types,
         TypeNames.PROVIDES,
-        Set.of(TypeNames.MODULE),
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_CONCRETE,
         RUNTIME_EXCEPTION,
+        ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
         injectionAnnotations);
+    this.dependencyRequestValidator = dependencyRequestValidator;
   }
 
   @Override
@@ -55,12 +58,15 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
   }
 
   private class Validator extends MethodValidator {
-
     Validator(XMethodElement method) {
       super(method);
     }
 
+    /** Adds an error if a {@code dagger.Provides @Provides} method depends on a producer type. */
     @Override
-    protected void checkAdditionalMethodProperties() {}
+    protected void checkParameter(XVariableElement parameter) {
+      super.checkParameter(parameter);
+      dependencyRequestValidator.checkNotProducer(report, parameter);
+    }
   }
 }

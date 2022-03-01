@@ -25,7 +25,7 @@ import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled
+@Disabled("todo")
 class SetBindingRequestFulfillmentTest {
 
   @Test
@@ -71,7 +71,7 @@ class SetBindingRequestFulfillmentTest {
             "",
             "import dagger.Component;",
             "import java.util.Set;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "",
             "@Component(modules = {EmptySetModule.class, SetModule.class})",
             "interface TestComponent {",
@@ -123,7 +123,7 @@ class SetBindingRequestFulfillmentTest {
             "package other;",
             "",
             "import java.util.Set;",
-            "import javax.inject.Inject;",
+            "import jakarta.inject.Inject;",
             "",
             "public class UsesInaccessible {",
             "  @Inject UsesInaccessible(Set<Inaccessible> set1, Set<Inaccessible2> set2) {}",
@@ -157,7 +157,7 @@ class SetBindingRequestFulfillmentTest {
             "",
             "import dagger.Component;",
             "import java.util.Set;",
-            "import javax.inject.Provider;",
+            "import jakarta.inject.Provider;",
             "import other.TestModule;",
             "import other.UsesInaccessible;",
             "",

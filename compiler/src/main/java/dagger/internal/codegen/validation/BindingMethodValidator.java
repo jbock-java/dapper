@@ -27,18 +27,15 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import io.jbock.javapoet.ClassName;
 import java.util.Optional;
-import java.util.Set;
 
 /** A validator for methods that represent binding declarations. */
 abstract class BindingMethodValidator extends BindingElementValidator<XMethodElement> {
 
-  private final XProcessingEnv processingEnv;
   private final DaggerTypes types;
   private final DependencyRequestValidator dependencyRequestValidator;
   private final ClassName methodAnnotation;
@@ -50,21 +47,49 @@ abstract class BindingMethodValidator extends BindingElementValidator<XMethodEle
    * Creates a validator object.
    *
    * @param methodAnnotation the annotation on a method that identifies it as a binding method
+   * @param enclosingElementAnnotation the method must be declared in a class or interface annotated
+   *     with this annotation
+   */
+  protected BindingMethodValidator(
+      DaggerTypes types,
+      DependencyRequestValidator dependencyRequestValidator,
+      ClassName methodAnnotation,
+      ClassName enclosingElementAnnotation,
+      Abstractness abstractness,
+      ExceptionSuperclass exceptionSuperclass,
+      AllowsMultibindings allowsMultibindings,
+      AllowsScoping allowsScoping,
+      InjectionAnnotations injectionAnnotations) {
+    this(
+        types,
+        methodAnnotation,
+        ImmutableSet.of(enclosingElementAnnotation),
+        dependencyRequestValidator,
+        abstractness,
+        exceptionSuperclass,
+        allowsMultibindings,
+        allowsScoping,
+        injectionAnnotations);
+  }
+
+  /**
+   * Creates a validator object.
+   *
+   * @param methodAnnotation the annotation on a method that identifies it as a binding method
    * @param enclosingElementAnnotations the method must be declared in a class or interface
    *     annotated with one of these annotations
    */
   protected BindingMethodValidator(
-      XProcessingEnv processingEnv,
       DaggerTypes types,
       ClassName methodAnnotation,
-      Set<ClassName> enclosingElementAnnotations,
+      Iterable<ClassName> enclosingElementAnnotations,
       DependencyRequestValidator dependencyRequestValidator,
       Abstractness abstractness,
       ExceptionSuperclass exceptionSuperclass,
+      AllowsMultibindings allowsMultibindings,
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
-    super(allowsScoping, injectionAnnotations);
-    this.processingEnv = processingEnv;
+    super(allowsMultibindings, allowsScoping, injectionAnnotations);
     this.types = types;
     this.methodAnnotation = methodAnnotation;
     this.enclosingElementAnnotations = ImmutableSet.copyOf(enclosingElementAnnotations);
