@@ -6,7 +6,7 @@ with some modifications:
 
 * gradle project with JUnit 5 tests
 * full jpms support with module-name: `dagger`
-* remove s`@MapKey`, `@IntoMap` and `@BindsOptional`
+* remove `@BindsOptional`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove kotlin special-casing and the dependency on `xprocessing`
 * remove gwt special-casing
@@ -26,8 +26,8 @@ requires dagger;
 For gradle build, add this to `build.gradle`:
 
 ````groovy
-implementation('io.github.jbock-java:dapper:1.2.1')
-annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
+implementation('io.github.jbock-java:dapper:2.41.1')
+annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.1')
 ````
 
 See also:
