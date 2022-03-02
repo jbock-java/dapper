@@ -43,16 +43,21 @@ public interface XProcessingEnv {
   default XVariableElement wrapVariableElement(VariableElement element) {
     Element enclosingElement = element.getEnclosingElement();
     if (enclosingElement instanceof ExecutableElement) {
-      XExecutableElement executableElement = wrapExecutableElement((ExecutableElement) enclosingElement);
+      XExecutableElement executableElement =
+          wrapExecutableElement((ExecutableElement) enclosingElement);
       return executableElement.getParameters().stream()
           .filter(param -> param.toJavac().equals(element))
           .findFirst()
-          .orElseThrow(() -> new IllegalStateException(String.format("Unable to create variable element for %s", element)));
+          .orElseThrow(
+              () ->
+                  new IllegalStateException(
+                      String.format("Unable to create variable element for %s", element)));
     }
     if (enclosingElement instanceof TypeElement) {
       return new JavacFieldElement(this, wrapTypeElement((TypeElement) enclosingElement), element);
     }
-    throw new IllegalStateException(String.format("Unsupported enclosing type %s for %s", enclosingElement, element));
+    throw new IllegalStateException(
+        String.format("Unsupported enclosing type %s for %s", enclosingElement, element));
   }
 
   default XExecutableElement wrapExecutableElement(ExecutableElement element) {
@@ -63,13 +68,15 @@ public interface XProcessingEnv {
     if (element.getKind() == ElementKind.METHOD) {
       return new JavacMethodElement(element, wrapTypeElement(enclosingType), this);
     }
-    throw new IllegalStateException(String.format("Unsupported kind %s of executable element %s", element.getKind(), element));
+    throw new IllegalStateException(
+        String.format("Unsupported kind %s of executable element %s", element.getKind(), element));
   }
 
   ProcessingEnvironment toJavac();
 
   /**
-   * Looks for the {@code XType} with the given qualified name and returns {@code null} if it does not exist.
+   * Looks for the {@code XType} with the given qualified name and returns {@code null} if it does
+   * not exist.
    */
   XType findType(String qName);
 
@@ -81,24 +88,22 @@ public interface XProcessingEnv {
   }
 
   /**
-   * Looks for the {@code XTypeElement} with the given qualified name and returns {@code null} if it does not
-   * exist.
+   * Looks for the {@code XTypeElement} with the given qualified name and returns {@code null} if it
+   * does not exist.
    */
   XTypeElement findTypeElement(String qName);
-
-
 
   default XTypeElement findTypeElement(TypeName typeName) {
     return findTypeElement(typeName.toString());
   }
 
   /**
-   * Returns the [XTypeElement] with the given qualified name or throws an exception if it does
-   * not exist.
+   * Returns the [XTypeElement] with the given qualified name or throws an exception if it does not
+   * exist.
    */
   default XTypeElement requireTypeElement(String qName) {
-    return Objects.requireNonNull(findTypeElement(qName),
-        () -> String.format("Cannot find required type element %s", qName));
+    return Objects.requireNonNull(
+        findTypeElement(qName), () -> String.format("Cannot find required type element %s", qName));
   }
 
   /** Returns an XType for the given type element with the type arguments specified as in types. */
@@ -107,4 +112,23 @@ public interface XProcessingEnv {
   XFiler getFiler();
 
   XTypeElement requireTypeElement(TypeName typeName);
+
+  /**
+   * Returns the XType with the given qualified name or throws an exception if it does not exist.
+   */
+  default XType requireType(String qName) {
+    XType result = findType(qName);
+    if (result == null) {
+      throw new IllegalStateException(String.format("cannot find required type %s", qName));
+    }
+    return result;
+  }
+
+  default XType requireType(TypeName typeName) {
+    XType result = findType(typeName);
+    if (result == null) {
+      throw new IllegalStateException(String.format("cannot find required type %s", typeName));
+    }
+    return result;
+  }
 }

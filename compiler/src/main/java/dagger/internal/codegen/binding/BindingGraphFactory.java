@@ -426,10 +426,10 @@ public final class BindingGraphFactory implements ClearableCache {
 
     /**
      * Returns true if this binding graph resolution is for a subcomponent and the {@code @Inject}
-     * binding's scope correctly matches one of the components in the current component ancestry.
-     * If not, it means the binding is not owned by any of the currently known components, and will
-     * be owned by a future ancestor (or, if never owned, will result in an incompatibly scoped
-     * binding error at the root component).
+     * binding's scope correctly matches one of the components in the current component ancestry. If
+     * not, it means the binding is not owned by any of the currently known components, and will be
+     * owned by a future ancestor (or, if never owned, will result in an incompatibly scoped binding
+     * error at the root component).
      */
     private boolean isCorrectlyScopedInSubcomponent(ProvisionBinding binding) {
       checkArgument(binding.kind() == INJECTION || binding.kind() == ASSISTED_INJECTION);
@@ -498,6 +498,13 @@ public final class BindingGraphFactory implements ClearableCache {
     private ImmutableSet<Key> keysMatchingRequestUncached(Key requestKey) {
       ImmutableSet.Builder<Key> keys = ImmutableSet.builder();
       keys.add(requestKey);
+      keyFactory.unwrapSetKey(requestKey, TypeNames.PRODUCED).ifPresent(keys::add);
+      keyFactory
+          .rewrapMapKey(requestKey, TypeNames.PRODUCER, TypeNames.PROVIDER)
+          .ifPresent(keys::add);
+      keyFactory
+          .rewrapMapKey(requestKey, TypeNames.PROVIDER, TypeNames.PRODUCER)
+          .ifPresent(keys::add);
       keys.addAll(keyFactory.implicitFrameworkMapKeys(requestKey));
       return keys.build();
     }
@@ -662,7 +669,7 @@ public final class BindingGraphFactory implements ClearableCache {
           .anyMatch(
               declaration ->
                   declaration.contributingModule().equals(binding.contributingModule())
-                  && declaration.bindingElement().equals(binding.bindingElement()));
+                      && declaration.bindingElement().equals(binding.bindingElement()));
     }
 
     /** Returns the resolver lineage from parent to child. */
@@ -893,8 +900,7 @@ public final class BindingGraphFactory implements ClearableCache {
        * this component's modules that matches the key.
        */
       private boolean hasLocalMultibindingContributions(Key requestKey) {
-        return keysMatchingRequest(requestKey)
-            .stream()
+        return keysMatchingRequest(requestKey).stream()
             .anyMatch(key -> !getLocalExplicitMultibindings(key).isEmpty());
       }
     }
@@ -911,9 +917,7 @@ public final class BindingGraphFactory implements ClearableCache {
     for (T declaration : declarations) {
       if (declaration.key().multibindingContributionIdentifier().isPresent()) {
         builder.put(
-            declaration
-                .key()
-                .toBuilder()
+            declaration.key().toBuilder()
                 .multibindingContributionIdentifier(Optional.empty())
                 .build(),
             declaration);

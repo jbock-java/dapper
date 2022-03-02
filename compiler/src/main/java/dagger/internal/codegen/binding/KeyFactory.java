@@ -18,7 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
+import static dagger.internal.codegen.binding.MapKeys.getMapKey;
+import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
@@ -182,6 +183,31 @@ public final class KeyFactory {
         return returnType;
       case SET:
         return setOf(returnType);
+      case MAP:
+        Optional<XType> mapKeyType =
+            getMapKey(method)
+                .map(annotation -> toXProcessing(annotation, processingEnv))
+                .map(annotation -> toXProcessing(mapKeyType(annotation), processingEnv));
+        // TODO(bcorso): We've added a special checkState here since a number of people have run
+        // into this particular case, but technically it shouldn't be necessary if we are properly
+        // doing superficial validation and deferring on unresolvable types. We should revisit
+        // whether this is necessary once we're able to properly defer this case.
+        checkState(
+            mapKeyType.isPresent(),
+            "Missing map key annotation for method: %s#%s. That method was annotated with: %s. If a"
+                + " map key annotation is included in that list, it means Dagger wasn't able to"
+                + " detect that it was a map key because the dependency is missing from the"
+                + " classpath of the current build. To fix, add a dependency for the map key to the"
+                + " current build. For more details, see"
+                + " https://github.com/google/dagger/issues/3133#issuecomment-1002790894.",
+            method.getEnclosingElement(),
+            method,
+            method.getAllAnnotations().stream()
+                .map(XAnnotations::toString)
+                .collect(toImmutableList()));
+        return frameworkClassName.isPresent()
+            ? mapOfFrameworkType(mapKeyType.get(), frameworkClassName.get(), returnType)
+            : mapOf(mapKeyType.get(), returnType);
       case SET_VALUES:
         // TODO(gak): do we want to allow people to use "covariant return" here?
         checkArgument(SetType.isSet(returnType));
@@ -198,7 +224,9 @@ public final class KeyFactory {
    * delegateDeclaration} is not a map contribution, its key is returned.
    */
   Key forDelegateBinding(DelegateDeclaration delegateDeclaration, ClassName frameworkType) {
-    return delegateDeclaration.key();
+    return delegateDeclaration.contributionType().equals(ContributionType.MAP)
+        ? wrapMapValue(delegateDeclaration.key(), frameworkType)
+        : delegateDeclaration.key();
   }
 
   private Key forMethod(XMethodElement method, XType keyType) {
@@ -282,6 +310,12 @@ public final class KeyFactory {
       }
     }
     return key;
+  }
+
+  /** Converts a {@code Key} of type {@code Map<K, V>} to {@code Map<K, Provider<V>>}. */
+  private Key wrapMapValue(Key key, ClassName newWrappingClassName) {
+    checkArgument(FrameworkTypes.isFrameworkType(processingEnv.requireType(newWrappingClassName)));
+    return wrapMapKey(key, newWrappingClassName).get();
   }
 
   /**
