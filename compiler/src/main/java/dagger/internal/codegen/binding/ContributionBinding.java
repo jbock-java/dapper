@@ -22,6 +22,7 @@ import static java.util.Arrays.asList;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
+import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
@@ -84,6 +85,8 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    */
   public final XType contributedType() {
     switch (contributionType()) {
+      case MAP:
+        return MapType.from(key()).unwrappedFrameworkValueType();
       case SET:
         return SetType.from(key()).elementType();
       case SET_VALUES:

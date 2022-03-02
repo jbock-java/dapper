@@ -50,8 +50,8 @@ public abstract class MultibindingDeclaration extends BindingDeclaration
   public abstract Key key();
 
   /**
-   * {@code ContributionType#SET} if the declared type is a {@code Set}, or {@code
-   * ContributionType#MAP} if it is a {@code Map}.
+   * {@code ContributionType#SET} if the declared type is a {@code Set}, or
+   * {@code ContributionType#MAP} if it is a {@code Map}.
    */
   @Override
   public abstract ContributionType contributionType();

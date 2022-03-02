@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;

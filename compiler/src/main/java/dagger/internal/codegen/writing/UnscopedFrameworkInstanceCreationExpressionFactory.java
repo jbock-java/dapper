@@ -42,6 +42,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       dependencyMethodProviderCreationExpressionFactory;
   private final InjectionOrProvisionProviderCreationExpression.Factory
       injectionOrProvisionProviderCreationExpressionFactory;
+  private final MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory;
   private final MembersInjectorProviderCreationExpression.Factory
       membersInjectorProviderCreationExpressionFactory;
   private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
@@ -57,6 +58,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
           dependencyMethodProviderCreationExpressionFactory,
       InjectionOrProvisionProviderCreationExpression.Factory
           injectionOrProvisionProviderCreationExpressionFactory,
+      MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory,
       MembersInjectorProviderCreationExpression.Factory
           membersInjectorProviderCreationExpressionFactory,
       SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory) {
@@ -69,6 +71,7 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
         dependencyMethodProviderCreationExpressionFactory;
     this.injectionOrProvisionProviderCreationExpressionFactory =
         injectionOrProvisionProviderCreationExpressionFactory;
+    this.mapFactoryCreationExpressionFactory = mapFactoryCreationExpressionFactory;
     this.membersInjectorProviderCreationExpressionFactory =
         membersInjectorProviderCreationExpressionFactory;
     this.setFactoryCreationExpressionFactory = setFactoryCreationExpressionFactory;
@@ -111,6 +114,9 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case MULTIBOUND_SET:
         return setFactoryCreationExpressionFactory.create(binding);
+
+      case MULTIBOUND_MAP:
+        return mapFactoryCreationExpressionFactory.create(binding);
 
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);

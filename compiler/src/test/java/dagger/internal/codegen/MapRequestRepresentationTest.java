@@ -25,14 +25,12 @@ import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.Compiler;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class MapRequestRepresentationTest {
 
   private final CompilerMode compilerMode = DEFAULT_MODE;
 
-  @Disabled
   @Test
   void mapBindings() {
     JavaFileObject mapModuleFile =
@@ -110,8 +108,7 @@ class MapRequestRepresentationTest {
                 DEFAULT_MODE,
                 "  @Override",
                 "  public Map<Integer, Integer> ints() {",
-                "    return Collections.<Integer, Integer>",
-                "        singletonMap(0, MapModule.provideInt());",
+                "    return Collections.<Integer, Integer>singletonMap(0, MapModule.provideInt());",
                 "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -120,25 +117,22 @@ class MapRequestRepresentationTest {
                 "    return Collections.<Integer, Integer>singletonMap(0,"
                     + " provideIntProvider.get());",
                 "  }")
-            .addLines(
-                "  @Override",
-                "  public Map<Integer, Provider<Integer>> providerInts() {",
-                "    return Collections.<Integer, Provider<Integer>>singletonMap(")
+            .addLines( //
+                "  @Override", //
+                "  public Map<Integer, Provider<Integer>> providerInts() {")
             .addLinesIn(
                 DEFAULT_MODE, //
-                "        0, MapModule_ProvideIntFactory.create());")
-            .addLinesIn(FAST_INIT_MODE, "        0, provideIntProvider;")
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, MapModule_ProvideIntFactory.create());")
+            .addLinesIn(
+                FAST_INIT_MODE, //
+                "    return Collections.<Integer, Provider<Integer>>singletonMap(0, provideIntProvider;")
             .addLinesIn(
                 DEFAULT_MODE,
                 "  }",
                 "",
                 "  @Override",
                 "  public Map<Long, Long> longs() {",
-                "    return MapBuilder.<Long, Long>newMapBuilder(3)",
-                "        .put(0L, MapModule.provideLong0())",
-                "        .put(1L, MapModule.provideLong1())",
-                "        .put(2L, MapModule.provideLong2())",
-                "        .build();",
+                "    return MapBuilder.<Long, Long>newMapBuilder(3).put(0L, MapModule.provideLong0()).put(1L, MapModule.provideLong1()).put(2L, MapModule.provideLong2()).build();",
                 "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
@@ -152,22 +146,20 @@ class MapRequestRepresentationTest {
                 "        .put(2L, provideLong2Provider.get())",
                 "        .build();",
                 "  }")
-            .addLines(
-                "  @Override",
-                "  public Map<Long, Provider<Long>> providerLongs() {",
-                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3)")
+            .addLines( //
+                "  @Override", //
+                "  public Map<Long, Provider<Long>> providerLongs() {")
             .addLinesIn(
-                DEFAULT_MODE,
-                "        .put(0L, MapModule_ProvideLong0Factory.create())",
-                "        .put(1L, MapModule_ProvideLong1Factory.create())",
-                "        .put(2L, MapModule_ProvideLong2Factory.create())")
+                DEFAULT_MODE, //
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3).put(0L, MapModule_ProvideLong0Factory.create()).put(1L, MapModule_ProvideLong1Factory.create()).put(2L, MapModule_ProvideLong2Factory.create()).build();")
             .addLinesIn(
                 FAST_INIT_MODE,
+                "    return MapBuilder.<Long, Provider<Long>>newMapBuilder(3)",
                 "        .put(0L, provideLong0Provider)",
                 "        .put(1L, provideLong1Provider)",
-                "        .put(2L, provideLong2Provider)")
+                "        .put(2L, provideLong2Provider).build();")
             .addLines( //
-                "        .build();", "  }")
+                "  }")
             .addLinesIn(
                 FAST_INIT_MODE,
                 "  private static final class SwitchingProvider<T> implements Provider<T> {",
@@ -261,7 +253,6 @@ class MapRequestRepresentationTest {
         .containsLines(generatedComponent);
   }
 
-  @Disabled
   @Test
   void subcomponentOmitsInheritedBindings() {
     JavaFileObject parent =
@@ -314,9 +305,7 @@ class MapRequestRepresentationTest {
                 "  private static final class ChildImpl implements Child {",
                 "    @Override",
                 "    public Map<String, Object> objectMap() {",
-                "      return Collections.<String, Object>singletonMap(",
-                "          \"parent key\",",
-                "          ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
+                "      return Collections.<String, Object>singletonMap(\"parent key\", ParentModule_ParentKeyObjectFactory.parentKeyObject(parent.parentModule));",
                 "    }",
                 "  }",
                 "}")
