@@ -151,11 +151,6 @@ final class MembersInjectionMethods {
                 .addModifiers(PRIVATE)
                 .returns(membersInjectedTypeName)
                 .addParameter(parameter);
-    TypeElement canIgnoreReturnValue =
-        elements.getTypeElement("com.google.errorprone.annotations.CanIgnoreReturnValue");
-    if (canIgnoreReturnValue != null) {
-      methodBuilder.addAnnotation(ClassName.get(canIgnoreReturnValue));
-    }
     CodeBlock instance = CodeBlock.of("$N", parameter);
     methodBuilder.addCode(
         InjectionSiteMethod.invokeAll(

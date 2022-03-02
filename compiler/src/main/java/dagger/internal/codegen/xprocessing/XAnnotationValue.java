@@ -42,4 +42,7 @@ public interface XAnnotationValue {
 
   /** Returns the value as a {@code String}. */
   String asString();
+
+  /** Returns the value as a {@code Boolean}. */
+  boolean asBoolean();
 }

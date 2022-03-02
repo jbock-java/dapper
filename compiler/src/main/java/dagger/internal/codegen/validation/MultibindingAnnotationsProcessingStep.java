@@ -27,7 +27,8 @@ import jakarta.inject.Inject;
 
 /**
  * Processing step that verifies that {@code dagger.multibindings.IntoSet}, {@code
- * dagger.multibindings.ElementsIntoSet} are not present on non-binding methods.
+ * dagger.multibindings.ElementsIntoSet} and {@code dagger.multibindings.IntoMap} are not present on
+ * non-binding methods.
  */
 public final class MultibindingAnnotationsProcessingStep
     extends TypeCheckingProcessingStep<XExecutableElement> {
@@ -43,7 +44,7 @@ public final class MultibindingAnnotationsProcessingStep
 
   @Override
   public ImmutableSet<ClassName> annotationClassNames() {
-    return ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET);
+    return ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
   }
 
   @Override

@@ -52,7 +52,7 @@ abstract class ResolvedBindings {
 
   /**
    * The {@code MembersInjectionBinding}s for {@code #key()} indexed by the component that owns the
-   * binding.  Each key in the map is a part of the same component ancestry.
+   * binding. Each key in the map is a part of the same component ancestry.
    */
   abstract ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings();
 
@@ -136,9 +136,7 @@ abstract class ResolvedBindings {
         ImmutableSet.copyOf(subcomponentDeclarations));
   }
 
-  /**
-   * Creates a {@code ResolvedBindings} for members injection bindings.
-   */
+  /** Creates a {@code ResolvedBindings} for members injection bindings. */
   static ResolvedBindings forMembersInjectionBinding(
       Key key,
       ComponentDescriptor owningComponent,
@@ -151,15 +149,9 @@ abstract class ResolvedBindings {
         ImmutableSet.of());
   }
 
-  /**
-   * Creates a {@code ResolvedBindings} appropriate for when there are no bindings for the key.
-   */
+  /** Creates a {@code ResolvedBindings} appropriate for when there are no bindings for the key. */
   static ResolvedBindings noBindings(Key key) {
     return new AutoValue_ResolvedBindings(
-        key,
-        ImmutableSetMultimap.of(),
-        ImmutableMap.of(),
-        ImmutableSet.of(),
-        ImmutableSet.of());
+        key, ImmutableSetMultimap.of(), ImmutableMap.of(), ImmutableSet.of(), ImmutableSet.of());
   }
 }

@@ -43,7 +43,6 @@ mysed "s/^import com.google.common.base.Supplier;/import java.util.function.Supp
 mysed "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
 mysed "s/^import com.google.common.base.Predicate;/import java.util.function.Predicate;/"
 mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static dagger.internal.codegen.base.Util.asStream;/"
-mysed "s/^import static dagger.internal.codegen.binding.MapKeys.getMapKey;/import static dagger.internal.codegen.base.MapKeys.getMapKey;/"
 
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
@@ -78,9 +77,6 @@ delete "^import static dagger.producers.CancellationPolicy.Propagation.PROPAGATE
 delete "^import dagger.BindsOptionalOf;"
 delete "^import dagger.internal.codegen.base.OptionalType;"
 delete "^import dagger.multibindings.Multibinds;"
-delete "^import static dagger.internal.codegen.binding.MapKeys.getMapKey;"
-delete "^import static dagger.internal.codegen.binding.MapKeys.getMapKeys;"
-delete "^import static dagger.internal.codegen.binding.MapKeys.mapKeyType;"
 delete "^import com.google.common.util.concurrent.FluentFuture;"
 delete "^import com.google.common.util.concurrent.ListenableFuture;"
 delete "^import static dagger.internal.codegen.base.Scopes.productionScope;"

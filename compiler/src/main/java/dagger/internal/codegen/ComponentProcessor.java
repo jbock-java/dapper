@@ -165,6 +165,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   interface ProcessingStepsModule {
     @Provides
     static ImmutableList<XProcessingStep> processingSteps(
+        MapKeyProcessingStep mapKeyProcessingStep,
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,
         AssistedFactoryProcessingStep assistedFactoryProcessingStep,
@@ -176,6 +177,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
         BindingMethodProcessingStep bindingMethodProcessingStep,
         CompilerOptions compilerOptions) {
       return ImmutableList.of(
+          mapKeyProcessingStep,
           injectProcessingStep,
           assistedInjectProcessingStep,
           assistedFactoryProcessingStep,

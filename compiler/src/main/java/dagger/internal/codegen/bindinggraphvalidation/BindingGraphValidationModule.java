@@ -38,15 +38,20 @@ public interface BindingGraphValidationModule {
       DuplicateBindingsValidator validation3,
       IncompatiblyScopedBindingsValidator validation4,
       InjectBindingValidator validation5,
+      MapMultibindingValidator validation6,
       MissingBindingValidator validation7,
+      SetMultibindingValidator validation10,
       SubcomponentFactoryMethodValidator validation11) {
-    ImmutableSet<BindingGraphPlugin> plugins = ImmutableSet.of(
-        validation1,
-        validation3,
-        validation4,
-        validation5,
-        validation7,
-        validation11);
+    ImmutableSet<BindingGraphPlugin> plugins =
+        ImmutableSet.of(
+            validation1,
+            validation3,
+            validation4,
+            validation5,
+            validation6,
+            validation7,
+            validation10,
+            validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       return ImmutableSet.of(factory.create(plugins, "Dagger/Validation"));
     } else {

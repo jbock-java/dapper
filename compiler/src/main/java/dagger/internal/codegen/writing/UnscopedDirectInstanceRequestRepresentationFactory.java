@@ -41,6 +41,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
   private final ComponentRequirementRequestRepresentation.Factory
       componentRequirementRequestRepresentationFactory;
   private final DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory;
+  private final MapRequestRepresentation.Factory mapRequestRepresentationFactory;
   private final SetRequestRepresentation.Factory setRequestRepresentationFactory;
   private final SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory;
   private final SubcomponentCreatorRequestRepresentation.Factory
@@ -56,6 +57,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
       ComponentRequirementRequestRepresentation.Factory
           componentRequirementRequestRepresentationFactory,
       DelegateRequestRepresentation.Factory delegateRequestRepresentationFactory,
+      MapRequestRepresentation.Factory mapRequestRepresentationFactory,
       SetRequestRepresentation.Factory setRequestRepresentationFactory,
       SimpleMethodRequestRepresentation.Factory simpleMethodRequestRepresentationFactory,
       SubcomponentCreatorRequestRepresentation.Factory
@@ -68,6 +70,7 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
     this.componentRequirementRequestRepresentationFactory =
         componentRequirementRequestRepresentationFactory;
     this.delegateRequestRepresentationFactory = delegateRequestRepresentationFactory;
+    this.mapRequestRepresentationFactory = mapRequestRepresentationFactory;
     this.setRequestRepresentationFactory = setRequestRepresentationFactory;
     this.simpleMethodRequestRepresentationFactory = simpleMethodRequestRepresentationFactory;
     this.subcomponentCreatorRequestRepresentationFactory =
@@ -95,6 +98,9 @@ final class UnscopedDirectInstanceRequestRepresentationFactory {
 
       case MULTIBOUND_SET:
         return setRequestRepresentationFactory.create((ProvisionBinding) binding);
+
+      case MULTIBOUND_MAP:
+        return mapRequestRepresentationFactory.create((ProvisionBinding) binding);
 
       case BOUND_INSTANCE:
         return componentRequirementRequestRepresentationFactory.create(

@@ -18,22 +18,20 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.value.AutoValue;
-import io.jbock.auto.value.extension.memoized.Memoized;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import jakarta.inject.Inject;
+import java.util.Optional;
 
 /**
  * A declaration that a multibinding with a certain key is available to be injected in a component
@@ -52,8 +50,8 @@ public abstract class MultibindingDeclaration extends BindingDeclaration
   public abstract Key key();
 
   /**
-   * {@code ContributionType#SET} if the declared type is a {@code Set}, or
-   * {@code ContributionType#MAP} if it is a {@code Map}.
+   * {@code ContributionType#SET} if the declared type is a {@code Set}, or {@code
+   * ContributionType#MAP} if it is a {@code Map}.
    */
   @Override
   public abstract ContributionType contributionType();
