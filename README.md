@@ -8,10 +8,9 @@ with some modifications:
 * full jpms support with module-name: `dagger`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove kotlin special-casing and the dependency on `xprocessing`
-* remove gwt special-casing
-* remove guava special-casing and internal guava dependency
-* remove the `experimental_turbine_hjar` option
-* no generating `@CanIgnoreReturnValue`
+* remove gwt special-casing and guava special casing, like support for `c.g.c.b.Optional`
+* remove internal guava dependency
+* remove the `experimental_turbine_hjar` compiler option
 
 Dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
 
