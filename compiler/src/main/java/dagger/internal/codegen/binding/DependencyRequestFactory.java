@@ -34,6 +34,7 @@ import static dagger.spi.model.RequestKind.PRODUCER;
 import static dagger.spi.model.RequestKind.PROVIDER;
 
 import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
@@ -183,6 +184,21 @@ public final class DependencyRequestFactory {
         .kind(MEMBERS_INJECTION)
         .key(keyFactory.forMembersInjectedType(membersInjectedType))
         .requestElement(DaggerElement.from(membersInjectionMethod))
+        .build();
+  }
+
+  /**
+   * Returns a synthetic request for the present value of an optional binding generated from a
+   * {@code dagger.BindsOptionalOf} declaration.
+   */
+  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
+    Optional<Key> key = keyFactory.unwrapOptional(requestKey);
+    checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
+    return DependencyRequest.builder()
+        .kind(kind)
+        .key(key.get())
+        .isNullable(
+            allowsNull(getRequestKind(OptionalType.from(requestKey).valueType()), Optional.empty()))
         .build();
   }
 

@@ -41,6 +41,7 @@ import static dagger.spi.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.MEMBERS_INJECTOR;
+import static dagger.spi.model.BindingKind.OPTIONAL;
 import static dagger.spi.model.BindingKind.PROVISION;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 
@@ -48,6 +49,7 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
+import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.Iterables;
@@ -408,6 +410,39 @@ public final class BindingFactory {
         .dependencies(delegateDeclaration.delegateRequest())
         .wrappedMapKeyAnnotation(delegateDeclaration.wrappedMapKey())
         .kind(DELEGATE)
+        .build();
+  }
+
+  /**
+   * Returns an {@code dagger.spi.model.BindingKind#OPTIONAL} binding for {@code key}.
+   *
+   * @param requestKind the kind of request for the optional binding
+   * @param underlyingKeyBindings the possibly empty set of bindings that exist in the component for
+   *     the underlying (non-optional) key
+   */
+  ContributionBinding syntheticOptionalBinding(
+      Key key,
+      RequestKind requestKind,
+      ImmutableCollection<? extends Binding> underlyingKeyBindings) {
+    if (underlyingKeyBindings.isEmpty()) {
+      return ProvisionBinding.builder()
+          .contributionType(ContributionType.UNIQUE)
+          .key(key)
+          .kind(OPTIONAL)
+          .build();
+    }
+
+    boolean requiresProduction =
+        underlyingKeyBindings.stream()
+                .anyMatch(binding -> binding.bindingType() == BindingType.PRODUCTION)
+            || requestKind.equals(RequestKind.PRODUCER) // handles producerFromProvider cases
+            || requestKind.equals(RequestKind.PRODUCED); // handles producerFromProvider cases
+
+    return ProvisionBinding.builder()
+        .contributionType(ContributionType.UNIQUE)
+        .key(key)
+        .kind(OPTIONAL)
+        .dependencies(dependencyRequestFactory.forSyntheticPresentOptionalBinding(key, requestKind))
         .build();
   }
 

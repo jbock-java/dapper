@@ -16,42 +16,43 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XElement.isMethod;
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XElement.isMethod;
-import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
-import static javax.lang.model.type.TypeKind.VOID;
 
-import dagger.internal.codegen.base.ComponentAnnotation;
-import dagger.internal.codegen.base.Suppliers;
-import dagger.internal.codegen.collect.ImmutableBiMap;
-import dagger.internal.codegen.collect.ImmutableMap;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.Scope;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
+import java.util.function.Supplier;
+import dagger.internal.codegen.base.Suppliers;
+import dagger.internal.codegen.collect.ImmutableBiMap;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Maps;
 import io.jbock.javapoet.TypeName;
+import dagger.Component;
+import dagger.Module;
+import dagger.Subcomponent;
+import dagger.internal.codegen.base.ComponentAnnotation;
+import dagger.spi.model.DependencyRequest;
+import dagger.spi.model.Scope;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.lang.model.element.ExecutableElement;
 
 /**
  * A component declaration.
@@ -380,18 +381,10 @@ public abstract class ComponentDescriptor {
    * method.
    */
   static boolean isComponentContributionMethod(XMethodElement method) {
-    return isComponentContributionMethod(toJavac(method));
-  }
-
-  /**
-   * Returns {@code true} if a method could be a component entry point but not a members-injection
-   * method.
-   */
-  static boolean isComponentContributionMethod(ExecutableElement method) {
     return method.getParameters().isEmpty()
-        && !method.getReturnType().getKind().equals(VOID)
-        && !isTypeOf(TypeName.OBJECT, method.getEnclosingElement().asType())
-        && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(method.getSimpleName().toString());
+        && !isVoid(method.getReturnType())
+        && !method.getEnclosingElement().getClassName().equals(TypeName.OBJECT)
+        && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(getSimpleName(method));
   }
 
   /** Returns {@code true} if a method could be a component production entry point. */

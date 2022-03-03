@@ -16,44 +16,49 @@
 
 package dagger.internal.codegen.binding;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static io.jbock.auto.common.MoreTypes.isType;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.Optionals.firstPresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
-import static io.jbock.auto.common.MoreTypes.isType;
 import static java.util.Arrays.asList;
 
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.FrameworkTypes;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.base.OptionalType;
 import dagger.internal.codegen.xprocessing.XAnnotation;
-import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableSet;
+import io.jbock.javapoet.ClassName;
+import dagger.Binds;
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.FrameworkTypes;
+import dagger.internal.codegen.base.MapType;
+import dagger.internal.codegen.base.RequestKinds;
+import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DaggerType;
 import dagger.spi.model.Key;
 import dagger.spi.model.Key.MultibindingContributionIdentifier;
-import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
+import dagger.spi.model.RequestKind;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import jakarta.inject.Inject;
 
 /** A factory for {@code Key}s. */
 public final class KeyFactory {
@@ -396,5 +401,20 @@ public final class KeyFactory {
       }
     }
     return Optional.empty();
+  }
+
+  /**
+   * If {@code key}'s type is {@code Optional<T>} for some {@code T}, returns a key with the same
+   * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, XType)}
+   * extracted} from {@code T}.
+   */
+  Optional<Key> unwrapOptional(Key key) {
+    if (!OptionalType.isOptional(key)) {
+      return Optional.empty();
+    }
+
+    XType optionalValueType = OptionalType.from(key).valueType();
+    return Optional.of(
+        key.toBuilder().type(DaggerType.from(extractKeyType(optionalValueType))).build());
   }
 }

@@ -109,14 +109,13 @@ final class BindingGraphConverter {
   }
 
   /**
-   * Used as a cache key to make sure resolved bindings are cached per component path. This is
-   * required so that binding nodes are not reused across different branches of the graph since the
-   * ResolvedBindings class only contains the component and not the path.
+   * Used as a cache key to make sure resolved bindings are cached per component path.
+   * This is required so that binding nodes are not reused across different branches of the
+   * graph since the ResolvedBindings class only contains the component and not the path.
    */
   @AutoValue
   abstract static class ResolvedBindingsWithPath {
     abstract ResolvedBindings resolvedBindings();
-
     abstract ComponentPath componentPath();
 
     static ResolvedBindingsWithPath create(
@@ -259,9 +258,9 @@ final class BindingGraphConverter {
      * Returns the subpath from the root component to the matching {@code ancestor} of the current
      * component.
      */
-    private ComponentPath pathFromRootToAncestor(TypeElement ancestor) {
+    private ComponentPath pathFromRootToAncestor(XTypeElement ancestor) {
       for (ComponentPath componentPath : componentPaths) {
-        if (componentPath.currentComponent().java().equals(ancestor)) {
+        if (componentPath.currentComponent().xprocessing().equals(ancestor)) {
           return componentPath;
         }
       }
@@ -344,8 +343,7 @@ final class BindingGraphConverter {
     private ImmutableSet<BindingNode> uncachedBindingNodes(
         ResolvedBindingsWithPath resolvedBindingsWithPath) {
       ImmutableSet.Builder<BindingNode> bindingNodes = ImmutableSet.builder();
-      resolvedBindingsWithPath
-          .resolvedBindings()
+      resolvedBindingsWithPath.resolvedBindings()
           .allBindings()
           .asMap()
           .forEach(
@@ -359,11 +357,12 @@ final class BindingGraphConverter {
     }
 
     private BindingNode bindingNode(
-        ResolvedBindings resolvedBindings, Binding binding, TypeElement owningComponent) {
+        ResolvedBindings resolvedBindings, Binding binding, XTypeElement owningComponent) {
       return BindingNode.create(
           pathFromRootToAncestor(owningComponent),
           binding,
           resolvedBindings.multibindingDeclarations(),
+          resolvedBindings.optionalBindingDeclarations(),
           resolvedBindings.subcomponentDeclarations(),
           bindingDeclarationFormatter);
     }

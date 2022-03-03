@@ -642,7 +642,7 @@ class DuplicateBindingsValidationTest {
         .hadErrorContaining("String is bound multiple times")
         .inFile(parent)
         .onLineContaining("interface Parent");
-    assertThat(compilation).hadErrorCount(2);
+    assertThat(compilation).hadErrorCount(1);
   }
 
   private String fullBindingGraphValidationOption(boolean fullBindingGraphValidation) {

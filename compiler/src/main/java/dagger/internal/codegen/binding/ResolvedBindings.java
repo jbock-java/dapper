@@ -18,17 +18,16 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Multimap;
 import dagger.spi.model.Key;
-import io.jbock.auto.value.AutoValue;
-import io.jbock.auto.value.extension.memoized.Memoized;
-import javax.lang.model.element.TypeElement;
 
 /**
  * The collection of bindings that have been resolved for a key. For valid graphs, contains exactly
@@ -48,19 +47,22 @@ abstract class ResolvedBindings {
    * The {@code ContributionBinding}s for {@code #key()} indexed by the component that owns the
    * binding. Each key in the multimap is a part of the same component ancestry.
    */
-  abstract ImmutableSetMultimap<TypeElement, ContributionBinding> allContributionBindings();
+  abstract ImmutableSetMultimap<XTypeElement, ContributionBinding> allContributionBindings();
 
   /**
    * The {@code MembersInjectionBinding}s for {@code #key()} indexed by the component that owns the
    * binding. Each key in the map is a part of the same component ancestry.
    */
-  abstract ImmutableMap<TypeElement, MembersInjectionBinding> allMembersInjectionBindings();
+  abstract ImmutableMap<XTypeElement, MembersInjectionBinding> allMembersInjectionBindings();
 
   /** The multibinding declarations for {@code #key()}. */
   abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
 
   /** The subcomponent declarations for {@code #key()}. */
   abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
+
+  /** The optional binding declarations for {@code #key()}. */
+  abstract ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations();
 
   // Computing the hash code is an expensive operation.
   @Memoized
@@ -72,7 +74,7 @@ abstract class ResolvedBindings {
   public abstract boolean equals(Object other);
 
   /** All bindings for {@code #key()}, indexed by the component that owns the binding. */
-  final ImmutableSetMultimap<TypeElement, ? extends Binding> allBindings() {
+  final ImmutableSetMultimap<XTypeElement, ? extends Binding> allBindings() {
     return !allMembersInjectionBindings().isEmpty()
         ? allMembersInjectionBindings().asMultimap()
         : allContributionBindings();
@@ -91,12 +93,13 @@ abstract class ResolvedBindings {
     return allMembersInjectionBindings().isEmpty()
         && allContributionBindings().isEmpty()
         && multibindingDeclarations().isEmpty()
+        && optionalBindingDeclarations().isEmpty()
         && subcomponentDeclarations().isEmpty();
   }
 
   /** All bindings for {@code #key()} that are owned by a component. */
   ImmutableSet<? extends Binding> bindingsOwnedBy(ComponentDescriptor component) {
-    return allBindings().get(toJavac(component.typeElement()));
+    return allBindings().get(component.typeElement());
   }
 
   /**
@@ -113,7 +116,7 @@ abstract class ResolvedBindings {
   }
 
   /** The component that owns {@code binding}. */
-  final TypeElement owningComponent(ContributionBinding binding) {
+  final XTypeElement owningComponent(ContributionBinding binding) {
     checkArgument(
         contributionBindings().contains(binding),
         "binding is not resolved for %s: %s",
@@ -125,18 +128,22 @@ abstract class ResolvedBindings {
   /** Creates a {@code ResolvedBindings} for contribution bindings. */
   static ResolvedBindings forContributionBindings(
       Key key,
-      Multimap<TypeElement, ContributionBinding> contributionBindings,
+      Multimap<XTypeElement, ContributionBinding> contributionBindings,
       Iterable<MultibindingDeclaration> multibindings,
-      Iterable<SubcomponentDeclaration> subcomponentDeclarations) {
+      Iterable<SubcomponentDeclaration> subcomponentDeclarations,
+      Iterable<OptionalBindingDeclaration> optionalBindingDeclarations) {
     return new AutoValue_ResolvedBindings(
         key,
         ImmutableSetMultimap.copyOf(contributionBindings),
         ImmutableMap.of(),
         ImmutableSet.copyOf(multibindings),
-        ImmutableSet.copyOf(subcomponentDeclarations));
+        ImmutableSet.copyOf(subcomponentDeclarations),
+        ImmutableSet.copyOf(optionalBindingDeclarations));
   }
 
-  /** Creates a {@code ResolvedBindings} for members injection bindings. */
+  /**
+   * Creates a {@code ResolvedBindings} for members injection bindings.
+   */
   static ResolvedBindings forMembersInjectionBinding(
       Key key,
       ComponentDescriptor owningComponent,
@@ -144,14 +151,22 @@ abstract class ResolvedBindings {
     return new AutoValue_ResolvedBindings(
         key,
         ImmutableSetMultimap.of(),
-        ImmutableMap.of(toJavac(owningComponent.typeElement()), ownedMembersInjectionBinding),
+        ImmutableMap.of(owningComponent.typeElement(), ownedMembersInjectionBinding),
+        ImmutableSet.of(),
         ImmutableSet.of(),
         ImmutableSet.of());
   }
 
-  /** Creates a {@code ResolvedBindings} appropriate for when there are no bindings for the key. */
+  /**
+   * Creates a {@code ResolvedBindings} appropriate for when there are no bindings for the key.
+   */
   static ResolvedBindings noBindings(Key key) {
     return new AutoValue_ResolvedBindings(
-        key, ImmutableSetMultimap.of(), ImmutableMap.of(), ImmutableSet.of(), ImmutableSet.of());
+        key,
+        ImmutableSetMultimap.of(),
+        ImmutableMap.of(),
+        ImmutableSet.of(),
+        ImmutableSet.of(),
+        ImmutableSet.of());
   }
 }

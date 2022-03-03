@@ -18,10 +18,8 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 
-import io.jbock.auto.value.AutoValue;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
-import dagger.Module;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DaggerElement;
@@ -29,6 +27,7 @@ import dagger.spi.model.DaggerTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
+import io.jbock.auto.value.AutoValue;
 import java.util.Optional;
 
 /**
@@ -44,6 +43,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
       ComponentPath component,
       Binding delegate,
       ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
+      ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
       ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
       BindingDeclarationFormatter bindingDeclarationFormatter) {
     BindingNode node =
@@ -51,6 +51,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
             component,
             delegate,
             multibindingDeclarations,
+            optionalBindingDeclarations,
             subcomponentDeclarations);
     node.bindingDeclarationFormatter = checkNotNull(bindingDeclarationFormatter);
     return node;
@@ -61,6 +62,8 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
   public abstract Binding delegate();
 
   public abstract ImmutableSet<MultibindingDeclaration> multibindingDeclarations();
+
+  public abstract ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations();
 
   public abstract ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations();
 
@@ -76,7 +79,7 @@ public abstract class BindingNode implements dagger.spi.model.Binding {
    */
   public final Iterable<BindingDeclaration> associatedDeclarations() {
     return Iterables.concat(
-        multibindingDeclarations(), subcomponentDeclarations());
+        multibindingDeclarations(), optionalBindingDeclarations(), subcomponentDeclarations());
   }
 
   @Override
