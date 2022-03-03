@@ -6,14 +6,12 @@ with some modifications:
 
 * gradle project with JUnit 5 tests
 * full jpms support with module-name: `dagger`
-* remove `@BindsOptional`
 * removed the producers extension and all producers annotations like `@ProductionComponent`
 * remove kotlin special-casing and the dependency on `xprocessing`
 * remove gwt special-casing
 * remove guava special-casing and internal guava dependency
 * remove the `experimental_turbine_hjar` option
 * no generating `@CanIgnoreReturnValue`
-* ignore `@Nullable` annotations, dapper will never inject `null`
 
 Dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
 
