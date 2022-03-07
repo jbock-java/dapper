@@ -36,11 +36,11 @@ class JavacAnnotationValue implements XAnnotationValue {
             () -> UNWRAP_VISITOR.visit(annotationValue, new VisitorData(env, method))));
   }
 
-  public String name() {
+  public String getName() {
     return method.getSimpleName().toString();
   }
 
-  public Object value() {
+  public Object getValue() {
     return valueProvider.get();
   }
 
@@ -49,9 +49,19 @@ class JavacAnnotationValue implements XAnnotationValue {
   }
 
   @Override
+  public XAnnotation asAnnotation() {
+    return (XAnnotation) getValue();
+  }
+
+  @Override
+  public XEnumEntry asEnum() {
+    return (XEnumEntry) getValue();
+  }
+
+  @Override
   @SuppressWarnings("unchecked") // Values in a list are always wrapped in XAnnotationValue
   public List<XAnnotationValue> asAnnotationValueList() {
-    return (List<XAnnotationValue>) value();
+    return (List<XAnnotationValue>) getValue();
   }
 
   @Override
@@ -76,6 +86,31 @@ class JavacAnnotationValue implements XAnnotationValue {
   @Override
   public String asString() {
     return (String) valueProvider.get();
+  }
+
+  @Override
+  public Byte asByte() {
+    return (Byte) valueProvider.get();
+  }
+
+  @Override
+  public Double asDouble() {
+    return (Double) valueProvider.get();
+  }
+
+  @Override
+  public Float asFloat() {
+    return (Float) valueProvider.get();
+  }
+
+  @Override
+  public Long asLong() {
+    return (Long) valueProvider.get();
+  }
+
+  @Override
+  public Short asShort() {
+    return (Short) valueProvider.get();
   }
 
   @Override

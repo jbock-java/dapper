@@ -60,15 +60,15 @@ public interface XAnnotation {
     XAnnotationValue argument = annotation.getAnnotationValue(methodName);
 
     Object value;
-    if (argument.value() instanceof List) {
+    if (argument.getValue() instanceof List) {
       // If the argument is for a list, unwrap each item in the list
       value =
-          ((List<Object>) argument.value())
+          ((List<Object>) argument.getValue())
               .stream()
-                  .map(it -> XAnnotationValue.class.cast(it).value())
+                  .map(it -> XAnnotationValue.class.cast(it).getValue())
                   .collect(Collectors.toList());
     } else {
-      value = argument.value();
+      value = argument.getValue();
     }
 
     if (!clazz.isInstance(value)) {

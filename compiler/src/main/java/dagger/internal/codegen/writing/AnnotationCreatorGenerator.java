@@ -16,34 +16,33 @@
 
 package dagger.internal.codegen.writing;
 
-import static io.jbock.javapoet.MethodSpec.constructorBuilder;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.binding.AnnotationExpression.createMethodName;
 import static dagger.internal.codegen.binding.AnnotationExpression.getAnnotationCreatorClassName;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static io.jbock.javapoet.MethodSpec.constructorBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.xprocessing.XConverters;
-import dagger.internal.codegen.collect.ImmutableList;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.langmodel.DaggerElements;
+import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import jakarta.inject.Inject;
 import javax.lang.model.SourceVersion;
 
 /**
@@ -89,8 +88,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<XTypeElement
 
   @Override
   public ImmutableList<TypeSpec.Builder> topLevelTypes(XTypeElement annotationType) {
-    ClassName generatedTypeName =
-        getAnnotationCreatorClassName(XConverters.toJavac(annotationType));
+    ClassName generatedTypeName = getAnnotationCreatorClassName(annotationType);
     TypeSpec.Builder annotationCreatorBuilder =
         classBuilder(generatedTypeName)
             .addModifiers(PUBLIC, FINAL)
@@ -105,7 +103,7 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<XTypeElement
 
   private MethodSpec buildCreateMethod(
       ClassName generatedTypeName, XTypeElement annotationElement) {
-    String createMethodName = createMethodName(XConverters.toJavac(annotationElement));
+    String createMethodName = createMethodName(annotationElement);
     MethodSpec.Builder createMethod =
         methodBuilder(createMethodName)
             .addAnnotation(AUTO_ANNOTATION)

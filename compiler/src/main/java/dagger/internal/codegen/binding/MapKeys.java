@@ -20,42 +20,35 @@ import static dagger.internal.codegen.base.MapKeyAccessibility.isMapKeyPubliclyA
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.SourceFiles.elementBasedClassName;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotatedAnnotations;
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
 import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.MapKey;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.MapKeyAccessibility;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotationValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.TypeName;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.type.TypeMirror;
 
 /** Methods for extracting {@code MapKey} annotations and key code blocks from binding elements. */
 public final class MapKeys {
@@ -66,26 +59,8 @@ public final class MapKeys {
    * @throws IllegalArgumentException if the element is annotated with more than one {@code MapKey}
    *     annotation
    */
-  static Optional<AnnotationMirror> getMapKey(XElement bindingElement) {
-    return getMapKey(toJavac(bindingElement));
-  }
-
-  /**
-   * If {@code bindingElement} is annotated with a {@code MapKey} annotation, returns it.
-   *
-   * @throws IllegalArgumentException if the element is annotated with more than one {@code MapKey}
-   *     annotation
-   */
-  static Optional<AnnotationMirror> getMapKey(Element bindingElement) {
-    ImmutableSet<? extends AnnotationMirror> mapKeys = getMapKeys(bindingElement);
-    return mapKeys.isEmpty()
-        ? Optional.empty()
-        : Optional.<AnnotationMirror>of(getOnlyElement(mapKeys));
-  }
-
-  /** Returns all of the {@code MapKey} annotations that annotate {@code bindingElement}. */
-  public static ImmutableSet<? extends AnnotationMirror> getMapKeys(Element bindingElement) {
-    return ImmutableSet.copyOf(getAnnotatedAnnotations(bindingElement, MapKey.class));
+  static Optional<XAnnotation> getMapKey(XElement bindingElement) {
+    return getMapKeys(bindingElement).stream().collect(toOptional());
   }
 
   /** Returns all of the {@code MapKey} annotations that annotate {@code bindingElement}. */
@@ -100,19 +75,19 @@ public final class MapKeys {
    * @throws IllegalArgumentException if {@code mapKey}'s type is not annotated with {@code
    *     MapKey @MapKey} at all.
    */
-  static Optional<? extends AnnotationValue> unwrapValue(AnnotationMirror mapKey) {
-    MapKey mapKeyAnnotation = mapKey.getAnnotationType().asElement().getAnnotation(MapKey.class);
-    checkArgument(
-        mapKeyAnnotation != null, "%s is not annotated with @MapKey", mapKey.getAnnotationType());
-    return mapKeyAnnotation.unwrapValue()
-        ? Optional.of(getOnlyElement(getAnnotationValuesWithDefaults(mapKey).values()))
+  private static Optional<XAnnotationValue> unwrapValue(XAnnotation mapKey) {
+    XTypeElement mapKeyType = mapKey.getType().getTypeElement();
+    XAnnotation mapKeyAnnotation = mapKeyType.getAnnotation(TypeNames.MAP_KEY);
+    checkArgument(mapKeyAnnotation != null, "%s is not annotated with @MapKey", mapKeyType);
+    return mapKeyAnnotation.getAsBoolean("unwrapValue")
+        ? Optional.of(getOnlyElement(mapKey.getAnnotationValues()))
         : Optional.empty();
   }
 
-  static TypeMirror mapKeyType(XAnnotation mapKeyAnnotation) {
-    return unwrapValue(toJavac(mapKeyAnnotation)).isPresent()
-        ? toJavac(getUnwrappedMapKeyType(mapKeyAnnotation.getType()))
-        : toJavac(mapKeyAnnotation.getType());
+  static XType mapKeyType(XAnnotation mapKey) {
+    return unwrapValue(mapKey).isPresent()
+        ? getUnwrappedMapKeyType(mapKey.getType())
+        : mapKey.getType();
   }
 
   /**
@@ -154,7 +129,7 @@ public final class MapKeys {
    */
   public static CodeBlock getMapKeyExpression(
       ContributionBinding binding, ClassName requestingClass, XProcessingEnv processingEnv) {
-    AnnotationMirror mapKeyAnnotation = binding.mapKeyAnnotation().get();
+    XAnnotation mapKeyAnnotation = toXProcessing(binding.mapKeyAnnotation().get(), processingEnv);
     return MapKeyAccessibility.isMapKeyAccessibleFrom(
             mapKeyAnnotation, requestingClass.packageName())
         ? directMapKeyExpression(mapKeyAnnotation, processingEnv)
@@ -174,26 +149,23 @@ public final class MapKeys {
    *     annotation
    */
   private static CodeBlock directMapKeyExpression(
-      AnnotationMirror mapKey, XProcessingEnv processingEnv) {
-    Optional<? extends AnnotationValue> unwrappedValue = unwrapValue(mapKey);
-    AnnotationExpression annotationExpression = new AnnotationExpression(mapKey);
-
-    if (MoreTypes.asTypeElement(mapKey.getAnnotationType())
-        .getQualifiedName()
-        .contentEquals("dagger.android.AndroidInjectionKey")) {
+      XAnnotation mapKey, XProcessingEnv processingEnv) {
+    Optional<XAnnotationValue> unwrappedValue = unwrapValue(mapKey);
+    if (mapKey.getQualifiedName().contentEquals("dagger.android.AndroidInjectionKey")) {
       XTypeElement unwrappedType =
           DaggerSuperficialValidation.requireTypeElement(
-              processingEnv, (String) unwrappedValue.get().getValue());
+              processingEnv, unwrappedValue.get().asString());
       return CodeBlock.of(
           "$T.of($S)",
           ClassName.get("dagger.android.internal", "AndroidInjectionKeys"),
           unwrappedType.getClassName().reflectionName());
     }
 
+    AnnotationExpression annotationExpression = new AnnotationExpression(mapKey);
     if (unwrappedValue.isPresent()) {
-      TypeMirror unwrappedValueType =
-          getOnlyElement(getAnnotationValuesWithDefaults(mapKey).keySet()).getReturnType();
-      return annotationExpression.getValueExpression(unwrappedValueType, unwrappedValue.get());
+      XType unwrappedValueType =
+          getOnlyElement(mapKey.getType().getTypeElement().getDeclaredMethods()).getReturnType();
+      return annotationExpression.getValueExpression(unwrappedValue.get(), unwrappedValueType);
     } else {
       return annotationExpression.getAnnotationInstanceExpression();
     }
@@ -216,12 +188,13 @@ public final class MapKeys {
       ContributionBinding binding, XProcessingEnv processingEnv) {
     return binding
         .mapKeyAnnotation()
+        .map(mapKey -> toXProcessing(mapKey, processingEnv))
         .filter(mapKey -> !isMapKeyPubliclyAccessible(mapKey))
         .map(
             mapKey ->
                 methodBuilder("create")
                     .addModifiers(PUBLIC, STATIC)
-                    .returns(TypeName.get(mapKeyType(toXProcessing(mapKey, processingEnv))))
+                    .returns(mapKeyType(mapKey).getTypeName())
                     .addStatement("return $L", directMapKeyExpression(mapKey, processingEnv))
                     .build());
   }

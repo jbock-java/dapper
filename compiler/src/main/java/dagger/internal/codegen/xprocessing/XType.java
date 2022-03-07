@@ -42,6 +42,9 @@ public interface XType {
    */
   boolean isAssignableFrom(XType other);
 
+  /** Returns the rawType of this type. */
+  XRawType getRawType();
+
   static boolean isVoid(XType type) {
     return type.isVoid();
   }

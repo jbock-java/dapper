@@ -22,7 +22,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.Map;
 
 /**
  * Identifies annotation types that are used to associate keys with values returned by {@code
@@ -107,8 +106,8 @@ import java.util.Map;
 @Retention(RUNTIME)
 public @interface MapKey {
   /**
-   * True to use the value of the single member of the annotated annotation as the map key; false
-   * to use the annotation instance as the map key.
+   * True to use the value of the single member of the annotated annotation as the map key; false to
+   * use the annotation instance as the map key.
    *
    * <p>If true, the single member must not be an array.
    */

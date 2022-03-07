@@ -17,64 +17,52 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasAnnotationValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasArrayValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasEnumValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasTypeValue;
 
 import dagger.internal.codegen.langmodel.Accessibility;
-import java.util.Collection;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotationValue;
+import dagger.internal.codegen.xprocessing.XType;
 import java.util.List;
 import java.util.function.Predicate;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
-/** Utility class for checking the visibility of an annotation.  */
-public final class MapKeyAccessibility extends SimpleAnnotationValueVisitor8<Boolean, Void> {
-  private final Predicate<TypeMirror> accessibilityChecker;
+/** Utility class for checking the visibility of an annotation. */
+public final class MapKeyAccessibility {
 
-  private MapKeyAccessibility(Predicate<TypeMirror> accessibilityChecker) {
-    this.accessibilityChecker = accessibilityChecker;
+  private MapKeyAccessibility() {}
+
+  private static boolean checkAnnotation(
+      XAnnotation annotation, Predicate<XType> accessibilityChecker) {
+    return checkValues(annotation.getAnnotationValues(), accessibilityChecker);
   }
 
-  @Override
-  public Boolean visitAnnotation(AnnotationMirror annotation, Void aVoid) {
-    // The annotation type is not checked, as the generated code will refer to the @AutoAnnotation
-    // generated type which is always public
-    return visitValues(annotation.getElementValues().values());
+  private static boolean checkValues(
+      List<XAnnotationValue> values, Predicate<XType> accessibilityChecker) {
+    return values.stream().allMatch(value -> checkValue(value, accessibilityChecker));
   }
 
-  @Override
-  public Boolean visitArray(List<? extends AnnotationValue> values, Void aVoid) {
-    return visitValues(values);
+  private static boolean checkValue(XAnnotationValue value, Predicate<XType> accessibilityChecker) {
+    if (hasArrayValue(value)) {
+      return checkValues(value.asAnnotationValueList(), accessibilityChecker);
+    } else if (hasAnnotationValue(value)) {
+      return checkAnnotation(value.asAnnotation(), accessibilityChecker);
+    } else if (hasEnumValue(value)) {
+      return accessibilityChecker.test(value.asEnum().getEnclosingElement().getType());
+    } else if (hasTypeValue(value)) {
+      return accessibilityChecker.test(value.asType());
+    } else {
+      return true;
+    }
   }
 
-  private boolean visitValues(Collection<? extends AnnotationValue> values) {
-    return values.stream().allMatch(value -> value.accept(this, null));
+  public static boolean isMapKeyAccessibleFrom(XAnnotation annotation, String accessingPackage) {
+    return checkAnnotation(annotation, type -> isTypeAccessibleFrom(type, accessingPackage));
   }
 
-  @Override
-  public Boolean visitEnumConstant(VariableElement enumConstant, Void aVoid) {
-    return accessibilityChecker.test(enumConstant.getEnclosingElement().asType());
-  }
-
-  @Override
-  public Boolean visitType(TypeMirror type, Void aVoid) {
-    return accessibilityChecker.test(type);
-  }
-
-  @Override
-  protected Boolean defaultAction(Object o, Void aVoid) {
-    return true;
-  }
-
-  public static boolean isMapKeyAccessibleFrom(
-      AnnotationMirror annotation, String accessingPackage) {
-    return new MapKeyAccessibility(type -> isTypeAccessibleFrom(type, accessingPackage))
-        .visitAnnotation(annotation, null);
-  }
-
-  public static boolean isMapKeyPubliclyAccessible(AnnotationMirror annotation) {
-    return new MapKeyAccessibility(Accessibility::isTypePubliclyAccessible)
-        .visitAnnotation(annotation, null);
+  public static boolean isMapKeyPubliclyAccessible(XAnnotation annotation) {
+    return checkAnnotation(annotation, Accessibility::isTypePubliclyAccessible);
   }
 }

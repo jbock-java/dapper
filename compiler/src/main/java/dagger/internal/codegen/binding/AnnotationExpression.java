@@ -16,26 +16,36 @@
 
 package dagger.internal.codegen.binding;
 
-import static io.jbock.auto.common.AnnotationMirrors.getAnnotationValuesWithDefaults;
-import static io.jbock.auto.common.MoreTypes.asArray;
 import static dagger.internal.codegen.binding.SourceFiles.classFileName;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
-import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
-import static java.util.stream.Collectors.toList;
+import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasAnnotationValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasArrayValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasByteValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasCharValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasDoubleValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasEnumValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasFloatValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasLongValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasShortValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasStringValue;
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasTypeValue;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XType.isArray;
+import static dagger.internal.codegen.xprocessing.XTypes.asArray;
 
-import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
-import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotationValue;
+import dagger.internal.codegen.xprocessing.XElements;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import java.util.List;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
 /**
  * Returns an expression creating an instance of the visited annotation type. Its parameter must be
@@ -48,17 +58,13 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
  * <p>For example, inside an annotation, a nested array of {@code int}s is simply {@code {1, 2, 3}},
  * but in code it would have to be {@code new int[] {1, 2, 3}}.
  */
-public class AnnotationExpression
-    extends SimpleAnnotationValueVisitor8<CodeBlock, AnnotationValue> {
-
-  private final AnnotationMirror annotation;
+public final class AnnotationExpression {
+  private final XAnnotation annotation;
   private final ClassName creatorClass;
 
-  AnnotationExpression(AnnotationMirror annotation) {
+  AnnotationExpression(XAnnotation annotation) {
     this.annotation = annotation;
-    this.creatorClass =
-        getAnnotationCreatorClassName(
-            MoreTypes.asTypeElement(annotation.getAnnotationType()));
+    this.creatorClass = getAnnotationCreatorClassName(annotation.getType().getTypeElement());
   }
 
   /**
@@ -69,107 +75,86 @@ public class AnnotationExpression
     return getAnnotationInstanceExpression(annotation);
   }
 
-  private CodeBlock getAnnotationInstanceExpression(AnnotationMirror annotation) {
+  private CodeBlock getAnnotationInstanceExpression(XAnnotation annotation) {
+    ImmutableMap<String, XType> valueTypesByName =
+        annotation.getType().getTypeElement().getDeclaredMethods().stream()
+            .filter(method -> method.getParameters().isEmpty())
+            .collect(toImmutableMap(XElements::getSimpleName, XMethodElement::getReturnType));
     return CodeBlock.of(
         "$T.$L($L)",
         creatorClass,
-        createMethodName(
-            MoreElements.asType(annotation.getAnnotationType().asElement())),
+        createMethodName(annotation.getType().getTypeElement()),
         makeParametersCodeBlock(
-            getAnnotationValuesWithDefaults(annotation)
-                .entrySet()
-                .stream()
-                .map(entry -> getValueExpression(entry.getKey().getReturnType(), entry.getValue()))
-                .collect(toList())));
+            annotation.getAnnotationValues().stream()
+                .map(
+                    value -> {
+                      String name =
+                          value.getName(); // SUPPRESS_GET_NAME_CHECK: This is not XElement
+                      return getValueExpression(value, valueTypesByName.get(name));
+                    })
+                .collect(toImmutableList())));
   }
 
   /**
    * Returns the name of the generated class that contains the static {@code create} methods for an
    * annotation type.
    */
-  public static ClassName getAnnotationCreatorClassName(TypeElement annotationType) {
-    ClassName annotationTypeName = ClassName.get(annotationType);
+  public static ClassName getAnnotationCreatorClassName(XTypeElement annotationType) {
+    ClassName annotationTypeName = annotationType.getClassName();
     return annotationTypeName
         .topLevelClassName()
         .peerClass(classFileName(annotationTypeName) + "Creator");
   }
 
-  public static String createMethodName(TypeElement annotationType) {
-    return "create" + annotationType.getSimpleName();
+  public static String createMethodName(XTypeElement annotationType) {
+    return "create" + getSimpleName(annotationType);
   }
 
   /**
    * Returns an expression that evaluates to a {@code value} of a given type on an {@code
    * annotation}.
    */
-  CodeBlock getValueExpression(TypeMirror valueType, AnnotationValue value) {
-    CodeBlock codeBlock = visit(value, value);
-    return valueType.getKind() == TypeKind.ARRAY
-        ? CodeBlock.of("new $T[] $L", rawTypeName(asArray(valueType).getComponentType()), codeBlock)
-        : codeBlock;
+  CodeBlock getValueExpression(XAnnotationValue value, XType valueType) {
+    return isArray(valueType)
+        ? CodeBlock.of(
+            "new $T[] $L",
+            asArray(valueType).getComponentType().getRawType().getTypeName(),
+            visit(value))
+        : visit(value);
   }
 
-  @Override
-  public CodeBlock visitEnumConstant(VariableElement c, AnnotationValue p) {
-    return CodeBlock.of("$T.$L", c.getEnclosingElement(), c.getSimpleName());
-  }
-
-  @Override
-  public CodeBlock visitAnnotation(AnnotationMirror a, AnnotationValue p) {
-    return getAnnotationInstanceExpression(a);
-  }
-
-  @Override
-  public CodeBlock visitType(TypeMirror t, AnnotationValue p) {
-    return CodeBlock.of("$T.class", t);
-  }
-
-  @Override
-  public CodeBlock visitString(String s, AnnotationValue p) {
-    return CodeBlock.of("$S", s);
-  }
-
-  @Override
-  public CodeBlock visitByte(byte b, AnnotationValue p) {
-    return CodeBlock.of("(byte) $L", b);
-  }
-
-  @Override
-  public CodeBlock visitChar(char c, AnnotationValue p) {
-    return CodeBlock.of("$L", p);
-  }
-
-  @Override
-  public CodeBlock visitDouble(double d, AnnotationValue p) {
-    return CodeBlock.of("$LD", d);
-  }
-
-  @Override
-  public CodeBlock visitFloat(float f, AnnotationValue p) {
-    return CodeBlock.of("$LF", f);
-  }
-
-  @Override
-  public CodeBlock visitLong(long i, AnnotationValue p) {
-    return CodeBlock.of("$LL", i);
-  }
-
-  @Override
-  public CodeBlock visitShort(short s, AnnotationValue p) {
-    return CodeBlock.of("(short) $L", s);
-  }
-
-  @Override
-  protected CodeBlock defaultAction(Object o, AnnotationValue p) {
-    return CodeBlock.of("$L", o);
-  }
-
-  @Override
-  public CodeBlock visitArray(List<? extends AnnotationValue> values, AnnotationValue p) {
-    ImmutableList.Builder<CodeBlock> codeBlocks = ImmutableList.builder();
-    for (AnnotationValue value : values) {
-      codeBlocks.add(this.visit(value, p));
+  private CodeBlock visit(XAnnotationValue value) {
+    if (hasEnumValue(value)) {
+      return CodeBlock.of(
+          "$T.$L",
+          value.asEnum().getEnclosingElement().getClassName(),
+          getSimpleName(value.asEnum()));
+    } else if (hasAnnotationValue(value)) {
+      return getAnnotationInstanceExpression(value.asAnnotation());
+    } else if (hasTypeValue(value)) {
+      return CodeBlock.of("$T.class", value.asType().getTypeName());
+    } else if (hasStringValue(value)) {
+      return CodeBlock.of("$S", value.asString());
+    } else if (hasByteValue(value)) {
+      return CodeBlock.of("(byte) $L", value.asByte());
+    } else if (hasCharValue(value)) {
+      // TODO(bcorso): This relies on AnnotationValue.toString() to properly output escaped
+      // characters like '\n'. See https://github.com/square/javapoet/issues/698.
+      return CodeBlock.of("$L", toJavac(value));
+    } else if (hasDoubleValue(value)) {
+      return CodeBlock.of("$LD", value.asDouble());
+    } else if (hasFloatValue(value)) {
+      return CodeBlock.of("$LF", value.asFloat());
+    } else if (hasLongValue(value)) {
+      return CodeBlock.of("$LL", value.asLong());
+    } else if (hasShortValue(value)) {
+      return CodeBlock.of("(short) $L", value.asShort());
+    } else if (hasArrayValue(value)) {
+      return CodeBlock.of(
+          "{$L}",
+          value.asAnnotationValueList().stream().map(this::visit).collect(toParametersCodeBlock()));
+    } else {
+      return CodeBlock.of("$L", value.getValue());
     }
-    return CodeBlock.of("{$L}", makeParametersCodeBlock(codeBlocks.build()));
   }
 }

@@ -19,12 +19,12 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
@@ -78,7 +78,7 @@ public abstract class DelegateDeclaration extends BindingDeclaration
           Optional.<XElement>of(bindsMethod),
           Optional.of(contributingModule),
           delegateRequest,
-          wrapOptionalInEquivalence(getMapKey(toJavac(bindsMethod))));
+          wrapOptionalInEquivalence(getMapKey(bindsMethod).map(XConverters::toJavac)));
     }
   }
 }

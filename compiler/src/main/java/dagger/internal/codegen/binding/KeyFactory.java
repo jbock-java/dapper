@@ -16,49 +16,43 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static io.jbock.auto.common.MoreTypes.isType;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
-import static dagger.internal.codegen.binding.MapKeys.mapKeyType;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.Optionals.firstPresent;
 import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
+import static io.jbock.auto.common.MoreTypes.isType;
 import static java.util.Arrays.asList;
 
+import dagger.internal.codegen.base.ContributionType;
+import dagger.internal.codegen.base.FrameworkTypes;
+import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.OptionalType;
+import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
+import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.ImmutableSet;
-import io.jbock.javapoet.ClassName;
-import dagger.Binds;
-import dagger.internal.codegen.base.ContributionType;
-import dagger.internal.codegen.base.FrameworkTypes;
-import dagger.internal.codegen.base.MapType;
-import dagger.internal.codegen.base.RequestKinds;
-import dagger.internal.codegen.base.SetType;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DaggerType;
 import dagger.spi.model.Key;
 import dagger.spi.model.Key.MultibindingContributionIdentifier;
-import dagger.spi.model.RequestKind;
-import java.util.Map;
+import io.jbock.javapoet.ClassName;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
-import jakarta.inject.Inject;
 
 /** A factory for {@code Key}s. */
 public final class KeyFactory {
@@ -190,10 +184,7 @@ public final class KeyFactory {
       case SET:
         return setOf(returnType);
       case MAP:
-        Optional<XType> mapKeyType =
-            getMapKey(method)
-                .map(annotation -> toXProcessing(annotation, processingEnv))
-                .map(annotation -> toXProcessing(mapKeyType(annotation), processingEnv));
+        Optional<XType> mapKeyType = getMapKey(method).map(MapKeys::mapKeyType);
         // TODO(bcorso): We've added a special checkState here since a number of people have run
         // into this particular case, but technically it shouldn't be necessary if we are properly
         // doing superficial validation and deferring on unresolvable types. We should revisit

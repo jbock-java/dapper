@@ -64,6 +64,11 @@ import javax.lang.model.util.SimpleTypeVisitor8;
  */
 public final class Accessibility {
   /** Returns true if the given type can be referenced from any package. */
+  public static boolean isTypePubliclyAccessible(XType type) {
+    return isTypePubliclyAccessible(toJavac(type));
+  }
+
+  /** Returns true if the given type can be referenced from any package. */
   public static boolean isTypePubliclyAccessible(TypeMirror type) {
     return type.accept(new TypeAccessibilityVisitor(Optional.empty()), null);
   }

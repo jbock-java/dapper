@@ -27,7 +27,7 @@ class JavacAnnotation implements XAnnotation {
   @Override
   public XAnnotationValue getAnnotationValue(String methodName) {
     return getAnnotationValues().stream()
-        .filter(it -> it.name().equals(methodName))
+        .filter(it -> it.getName().equals(methodName))
         .findFirst()
         .orElseThrow();
   }

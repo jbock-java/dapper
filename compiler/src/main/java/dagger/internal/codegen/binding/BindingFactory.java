@@ -57,6 +57,7 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -100,8 +101,8 @@ public final class BindingFactory {
    * Returns an {@code dagger.spi.model.BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
-   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class
-   *     and the binding should be for the parameterized type
+   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class and the
+   *     binding should be for the parameterized type
    */
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
@@ -214,7 +215,8 @@ public final class BindingFactory {
         .dependencies(
             dependencyRequestFactory.forRequiredResolvedVariables(
                 method.getParameters(), methodType.getParameterTypes()))
-        .wrappedMapKeyAnnotation(wrapOptionalInEquivalence(getMapKey(method)));
+        .wrappedMapKeyAnnotation(
+            wrapOptionalInEquivalence(getMapKey(method).map(XConverters::toJavac)));
   }
 
   /**
