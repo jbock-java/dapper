@@ -3,15 +3,18 @@ package dagger.internal.codegen.xprocessing;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 
-class JavacEnumEntry extends JavacElement {
+class JavacEnumEntry extends JavacElement implements XEnumEntry {
 
-  private final XEnumTypeElement enumTypeElement;
+  private final XEnumTypeElement enclosingElement;
   private final String name;
 
-  JavacEnumEntry(XProcessingEnv env, Element element, XEnumTypeElement enumTypeElement) {
-    super(env, element);
-    this.enumTypeElement = enumTypeElement;
-    this.name = element.getSimpleName().toString();
+  JavacEnumEntry( //
+      XProcessingEnv env, //
+      Element entryElement, //
+      XEnumTypeElement enclosingElement) {
+    super(env, entryElement);
+    this.enclosingElement = enclosingElement;
+    this.name = entryElement.getSimpleName().toString();
   }
 
   @Override
@@ -20,11 +23,31 @@ class JavacEnumEntry extends JavacElement {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     JavacEnumEntry that = (JavacEnumEntry) o;
-    return enumTypeElement.equals(that.enumTypeElement) && name.equals(that.name);
+    return enclosingElement.equals(that.enclosingElement) && name.equals(that.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), enumTypeElement, name);
+    return Objects.hash(enclosingElement, name);
+  }
+
+  @Override
+  public XMemberContainer getClosestMemberContainer() {
+    return enclosingElement;
+  }
+
+  @Override
+  public String getName() {
+    return element.getSimpleName().toString();
+  }
+
+  @Override
+  public XEnumTypeElement getEnumTypeElement() {
+    return enclosingElement;
+  }
+
+  @Override
+  public XEnumTypeElement getEnclosingElement() {
+    return null;
   }
 }

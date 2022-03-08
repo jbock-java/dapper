@@ -12,4 +12,9 @@ class JavacFieldElement extends JavacVariableElement implements XFieldElement {
   public XTypeElement getEnclosingElement() {
     return containing();
   }
+
+  @Override
+  public XMemberContainer getClosestMemberContainer() {
+    return getEnclosingElement();
+  }
 }

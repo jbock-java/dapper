@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-class JavacElement implements XElement {
+abstract class JavacElement implements XElement {
 
   private final XProcessingEnv env;
-  private final Element element;
+  final Element element;
 
   JavacElement(XProcessingEnv env, Element element) {
     this.env = env;
@@ -45,16 +45,6 @@ class JavacElement implements XElement {
   @Override
   public Element toJavac() {
     return element;
-  }
-
-  // TODO check source
-  @Override
-  public XElement getEnclosingElement() {
-    try {
-      return new DefaultJavacTypeElement(env, MoreElements.asType(element.getEnclosingElement()));
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
   }
 
   @Override

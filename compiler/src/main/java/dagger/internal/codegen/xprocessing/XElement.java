@@ -8,6 +8,12 @@ public interface XElement extends XAnnotated, XHasModifiers {
 
   XElement getEnclosingElement();
 
+  /**
+   * Returns the closest member container.
+   * Could be the element if it's itself a member container.
+   */
+  XMemberContainer getClosestMemberContainer();
+
   static boolean isTypeElement(XElement element) {
     return element instanceof XTypeElement;
   }

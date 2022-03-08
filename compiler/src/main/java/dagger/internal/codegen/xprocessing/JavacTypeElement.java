@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -139,12 +138,7 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
 
   @Override
   public XTypeElement getEnclosingTypeElement() {
-    Element enclosingElement = typeElement.getEnclosingElement();
-    if (!enclosingElement.getKind().isClass() &&
-        !enclosingElement.getKind().isInterface()) {
-      return null;
-    }
-    return env().wrapTypeElement(MoreElements.asType(enclosingElement));
+    return ElementExtKt.getEnclosingType(element, env());
   }
 
   @Override
@@ -254,5 +248,15 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
     } else {
       return new DefaultJavacTypeElement(env, typeElement);
     }
+  }
+
+  @Override
+  public XMemberContainer getEnclosingElement() {
+    return getEnclosingTypeElement();
+  }
+
+  @Override
+  public XMemberContainer getClosestMemberContainer() {
+    return this;
   }
 }

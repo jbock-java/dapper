@@ -1,6 +1,5 @@
 package dagger.internal.codegen.xprocessing;
 
-import io.jbock.auto.common.MoreElements;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
@@ -23,7 +22,7 @@ abstract class JavacExecutableElement extends JavacElement implements XExecutabl
 
   @Override
   public XTypeElement getEnclosingElement() {
-    return env().wrapTypeElement(MoreElements.asType(executableElement.getEnclosingElement()));
+    return ElementExtKt.getEnclosingType(element, env());
   }
 
   public List<XType> getThrownTypes() {
@@ -39,5 +38,10 @@ abstract class JavacExecutableElement extends JavacElement implements XExecutabl
 
   XTypeElement containing() {
     return containing;
+  }
+
+  @Override
+  public XMemberContainer getClosestMemberContainer() {
+    return getEnclosingElement();
   }
 }

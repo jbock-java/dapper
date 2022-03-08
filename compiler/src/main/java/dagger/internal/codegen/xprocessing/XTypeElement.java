@@ -15,6 +15,8 @@ public interface XTypeElement extends XMemberContainer {
 
   String getQualifiedName();
 
+  XMemberContainer getEnclosingElement();
+
   /**
    * SimpleName of the type converted to String.
    */
@@ -25,6 +27,7 @@ public interface XTypeElement extends XMemberContainer {
 
   JavacDeclaredType getType();
 
+  /** The XTypeElement that contains this XTypeElement if it is an inner class/interface. */
   XTypeElement getEnclosingTypeElement();
 
   /**

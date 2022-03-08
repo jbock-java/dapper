@@ -1,9 +1,5 @@
 package dagger.internal.codegen.xprocessing;
 
-import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
-import static dagger.internal.codegen.xprocessing.XElement.isField;
-import static dagger.internal.codegen.xprocessing.XElement.isMethod;
-import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 
 import dagger.internal.codegen.base.Util;
@@ -54,14 +50,12 @@ class CommonProcessorDelegate {
         Set<XElement> annotatedElements =
             Sets.union(
                 roundEnv.getElementsAnnotatedWith(annotation),
-                previousRoundDeferredElementsByAnnotation.getOrDefault(
-                    annotation, Set.of()));
+                previousRoundDeferredElementsByAnnotation.getOrDefault(annotation, Set.of()));
         // Split between valid and invalid elements. Unlike auto-common,
         // validation is only done in the annotated element from the round
         // and not in the closest enclosing type element.
         Map<Boolean, List<XElement>> partition =
-            annotatedElements.stream()
-                .collect(Collectors.partitioningBy(XElement::validate));
+            annotatedElements.stream().collect(Collectors.partitioningBy(XElement::validate));
         deferredElements.addAll(partition.get(false));
         Set<XElement> elements =
             Sets.union(
@@ -134,8 +128,7 @@ class CommonProcessorDelegate {
           for (XAnnotation annotation : element.getAllAnnotations()) {
             String annotationName = annotation.getQualifiedName();
             if (stepAnnotations.contains(annotationName)) {
-              elementsByAnnotation.merge(
-                  annotationName, Set.of(element), Util::mutableUnion);
+              elementsByAnnotation.merge(annotationName, Set.of(element), Util::mutableUnion);
             }
           }
         };
@@ -149,9 +142,7 @@ class CommonProcessorDelegate {
           continue;
         }
         if (enclosedElement instanceof XExecutableElement) {
-          ((XExecutableElement) enclosedElement)
-              .getParameters()
-              .forEach(putStepAnnotatedElements);
+          ((XExecutableElement) enclosedElement).getParameters().forEach(putStepAnnotatedElements);
         }
         putStepAnnotatedElements.accept(enclosedElement);
       }
@@ -161,40 +152,14 @@ class CommonProcessorDelegate {
   }
 
   private String getClosestEnclosingTypeElementName(XElement element) {
-    XTypeElement el = getClosestEnclosingTypeElement(element);
-    if (el == null) {
+    XMemberContainer result = element.getClosestMemberContainer();
+    if (result == null) {
       return null;
     }
-    return el.getQualifiedName();
-  }
-
-  // TODO(b/201308409): Does not work with top-level KSP functions or properties whose
-  //  container are synthetic.
-  private XTypeElement getClosestEnclosingTypeElement(XElement element) {
-    if (isTypeElement(element)) {
-      return (XTypeElement) element;
+    if (!(result instanceof XTypeElement)) {
+      return null;
     }
-    if (isField(element)) {
-      return (XTypeElement) element.getEnclosingElement();
-    }
-    if (isMethod(element)) {
-      return (XTypeElement) element.getEnclosingElement();
-    }
-    if (isConstructor(element)) {
-      return ((XConstructorElement) element).getEnclosingElement();
-    }
-    if (isMethodParameter(element)) {
-      return (XTypeElement) element.getEnclosingElement();
-    }
-    // TODO enum entry
-    env.getMessager()
-        .printMessage(
-            Diagnostic.Kind.WARNING,
-            String.format(
-                "Unable to defer element '%s': Don't know how to find "
-                    + "closest enclosing type element.",
-                element));
-    return null;
+    return ((XTypeElement) result).getQualifiedName();
   }
 
   void reportMissingElements(List<String> missingElementNames) {
