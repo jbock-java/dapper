@@ -447,7 +447,7 @@ public final class ComponentValidator implements ClearableCache {
       asStream(component.getAllMethods())
           .filter(method -> isEntryPoint(method, method.asMemberOf(component.getType())))
           .forEach(
-              method -> addMethodUnlessOverridden(method, entryPoints.getMutable(getSimpleName(method))));
+              method -> addMethodUnlessOverridden(method, entryPoints.getAsSetView(getSimpleName(method))));
 
       asMap(entryPoints).values().stream()
           .filter(methods -> distinctKeys(methods).size() > 1)

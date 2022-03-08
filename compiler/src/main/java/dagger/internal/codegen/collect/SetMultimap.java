@@ -57,7 +57,7 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     return ImmutableSet.copyOf(map.getOrDefault(key, Set.of()));
   }
 
-  public Set<V> getMutable(K key) {
+  public Set<V> getAsSetView(K key) {
     Set<V> current = map.getOrDefault(key, Set.of());
     LinkedHashSet<V> mutable = new LinkedHashSet<>(current);
     map.put(key, mutable);
