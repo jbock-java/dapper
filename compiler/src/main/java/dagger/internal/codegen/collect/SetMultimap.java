@@ -5,6 +5,7 @@ import dagger.internal.codegen.extension.DaggerStreams;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -54,6 +55,13 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
   @Override
   public ImmutableSet<V> get(K key) {
     return ImmutableSet.copyOf(map.getOrDefault(key, Set.of()));
+  }
+
+  public Set<V> getMutable(K key) {
+    Set<V> current = map.getOrDefault(key, Set.of());
+    LinkedHashSet<V> mutable = new LinkedHashSet<>(current);
+    map.put(key, mutable);
+    return mutable;
   }
 
   @Override

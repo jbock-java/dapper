@@ -24,6 +24,7 @@ import static dagger.internal.codegen.base.ComponentCreatorAnnotation.subcompone
 import static dagger.internal.codegen.base.ComponentKind.annotationsFor;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotations;
+import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
@@ -35,8 +36,6 @@ import static dagger.internal.codegen.collect.Multimaps.asMap;
 import static dagger.internal.codegen.collect.Sets.intersection;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
-import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
@@ -44,7 +43,6 @@ import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.Comparator.comparing;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ComponentAnnotation;
@@ -68,7 +66,6 @@ import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
@@ -94,7 +91,6 @@ import javax.lang.model.SourceVersion;
  */
 @Singleton
 public final class ComponentValidator implements ClearableCache {
-  private final XProcessingEnv processingEnv;
   private final DaggerElements elements;
   private final ModuleValidator moduleValidator;
   private final ComponentCreatorValidator creatorValidator;
@@ -108,7 +104,6 @@ public final class ComponentValidator implements ClearableCache {
 
   @Inject
   ComponentValidator(
-      XProcessingEnv processingEnv,
       DaggerElements elements,
       ModuleValidator moduleValidator,
       ComponentCreatorValidator creatorValidator,
@@ -118,7 +113,6 @@ public final class ComponentValidator implements ClearableCache {
       DependencyRequestFactory dependencyRequestFactory,
       DaggerSuperficialValidation superficialValidation,
       KotlinMetadataUtil metadataUtil) {
-    this.processingEnv = processingEnv;
     this.elements = elements;
     this.moduleValidator = moduleValidator;
     this.creatorValidator = creatorValidator;
@@ -450,34 +444,10 @@ public final class ComponentValidator implements ClearableCache {
       // Collect entry point methods that are not overridden by others. If the "same" method is
       // inherited from more than one supertype, each will be in the multimap.
       SetMultimap<String, XMethodElement> entryPoints = HashMultimap.create();
-
-      // TODO(b/201729320): There's a bug in auto-common's MoreElements#overrides(), b/201729320,
-      // which prevents us from using XTypeElement#getAllMethods() here (since that method relies on
-      // MoreElements#overrides() under the hood).
-      //
-      // There's two options here.
-      //    1. Fix the bug in auto-common and update XProcessing's auto-common dependency
-      //    2. Add a new method in XProcessing which relies on Elements#overrides(), which does not
-      //       have this issue. However, this approach risks causing issues for EJC (Eclipse) users.
-      methodsIn(elements.getAllMembers(toJavac(component))).stream()
-          .map(method -> asMethod(toXProcessing(method, processingEnv)))
+      asStream(component.getAllMethods())
           .filter(method -> isEntryPoint(method, method.asMemberOf(component.getType())))
           .forEach(
-              // addMethodUnlessOverridden
-              method -> {
-                String key = getSimpleName(method);
-                Set<XMethodElement> methods = entryPoints.get(key);
-                if (methods.stream()
-                    .noneMatch(existingMethod -> overridesAsDeclared(existingMethod, method))) {
-                  methods.stream()
-                      .filter(existingMethod -> overridesAsDeclared(method, existingMethod))
-                      .forEach(
-                          existingMethod ->
-                              entryPoints.replaceValues(
-                                  key, Sets.difference(entryPoints.get(key), Set.of(method))));
-                  entryPoints.put(key, method);
-                }
-              });
+              method -> addMethodUnlessOverridden(method, entryPoints.getMutable(getSimpleName(method))));
 
       asMap(entryPoints).values().stream()
           .filter(methods -> distinctKeys(methods).size() > 1)
