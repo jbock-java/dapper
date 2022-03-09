@@ -19,27 +19,30 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.BindingFactory;
-import dagger.internal.codegen.binding.ContributionBinding;
-import dagger.internal.codegen.binding.DelegateDeclaration;
-import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.Sets;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.ModuleValidator;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
-import dagger.internal.codegen.validation.ValidationReport;
-import dagger.internal.codegen.writing.ModuleGenerator;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.auto.common.BasicAnnotationProcessor.ProcessingStep;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Sets;
 import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
+import dagger.internal.codegen.base.SourceFileGenerator;
+import dagger.internal.codegen.binding.BindingFactory;
+import dagger.internal.codegen.binding.ContributionBinding;
+import dagger.internal.codegen.binding.DelegateDeclaration;
+import dagger.internal.codegen.binding.ProductionBinding;
+import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.validation.ModuleValidator;
+import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
+import dagger.internal.codegen.validation.ValidationReport;
+import dagger.internal.codegen.writing.InaccessibleMapKeyProxyGenerator;
+import dagger.internal.codegen.writing.ModuleGenerator;
 import java.util.Map;
 import java.util.Set;
+import jakarta.inject.Inject;
 
 /**
  * A {@code ProcessingStep} that validates module classes and generates factories for binding
@@ -50,7 +53,9 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   private final ModuleValidator moduleValidator;
   private final BindingFactory bindingFactory;
   private final SourceFileGenerator<ProvisionBinding> factoryGenerator;
+  private final SourceFileGenerator<ProductionBinding> producerFactoryGenerator;
   private final SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator;
+  private final InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator;
   private final DelegateDeclaration.Factory delegateDeclarationFactory;
   private final Set<XTypeElement> processedModuleElements = Sets.newLinkedHashSet();
 
@@ -60,13 +65,17 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
       ModuleValidator moduleValidator,
       BindingFactory bindingFactory,
       SourceFileGenerator<ProvisionBinding> factoryGenerator,
+      SourceFileGenerator<ProductionBinding> producerFactoryGenerator,
       @ModuleGenerator SourceFileGenerator<XTypeElement> moduleConstructorProxyGenerator,
+      InaccessibleMapKeyProxyGenerator inaccessibleMapKeyProxyGenerator,
       DelegateDeclaration.Factory delegateDeclarationFactory) {
     this.messager = messager;
     this.moduleValidator = moduleValidator;
     this.bindingFactory = bindingFactory;
     this.factoryGenerator = factoryGenerator;
+    this.producerFactoryGenerator = producerFactoryGenerator;
     this.moduleConstructorProxyGenerator = moduleConstructorProxyGenerator;
+    this.inaccessibleMapKeyProxyGenerator = inaccessibleMapKeyProxyGenerator;
     this.delegateDeclarationFactory = delegateDeclarationFactory;
   }
 
@@ -116,6 +125,10 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
     for (XMethodElement method : module.getDeclaredMethods()) {
       if (method.hasAnnotation(TypeNames.PROVIDES)) {
         generate(factoryGenerator, bindingFactory.providesMethodBinding(method, module));
+      } else if (method.hasAnnotation(TypeNames.PRODUCES)) {
+        generate(producerFactoryGenerator, bindingFactory.producesMethodBinding(method, module));
+      } else if (method.hasAnnotation(TypeNames.BINDS)) {
+        inaccessibleMapKeyProxyGenerator.generate(bindsMethodBinding(module, method), messager);
       }
     }
     moduleConstructorProxyGenerator.generate(module, messager);
@@ -124,6 +137,7 @@ final class ModuleProcessingStep extends TypeCheckingProcessingStep<XTypeElement
   private <B extends ContributionBinding> void generate(
       SourceFileGenerator<B> generator, B binding) {
     generator.generate(binding, messager);
+    inaccessibleMapKeyProxyGenerator.generate(binding, messager);
   }
 
   private ContributionBinding bindsMethodBinding(XTypeElement module, XMethodElement method) {

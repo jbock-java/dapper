@@ -18,7 +18,7 @@ XCL+="|/JavacPlugin"
 #XCL+="|"
 
 echo $XCL
-for S in `find ../dagger/java/dagger/internal/codegen/ -name "*.java" | fgrep -v -e "$XCL"`; do
+for S in `find ../dagger/java/dagger/internal/codegen/ -name "*.java" | grep -v -E "$XCL"`; do
   ./fetch internal `basename $S`
 done
 

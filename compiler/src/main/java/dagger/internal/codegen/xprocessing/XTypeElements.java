@@ -16,28 +16,28 @@
 
 package dagger.internal.codegen.xprocessing;
 
-import static dagger.internal.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.Util.asStream;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.base.Util.asStream;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import dagger.internal.codegen.xprocessing.XHasModifiers;
+import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-
-/** A utility class for {@link XTypeElement} helper methods. */
+/** A utility class for {@code XTypeElement} helper methods. */
 public final class XTypeElements {
   private enum Visibility {
     PUBLIC,
     PRIVATE,
     OTHER;
 
-    /** Returns the visibility of the given {@link XTypeElement}. */
+    /** Returns the visibility of the given {@code XTypeElement}. */
     private static Visibility of(XTypeElement element) {
-      requireNonNull(element);
+      checkNotNull(element);
       if (element.isPrivate()) {
         return Visibility.PRIVATE;
       } else if (element.isPublic()) {
@@ -62,7 +62,7 @@ public final class XTypeElements {
   }
 
   /** Returns all non-private, non-static, abstract methods in {@code type}. */
-  public static List<XMethodElement> getAllUnimplementedMethods(XTypeElement type) {
+  public static ImmutableList<XMethodElement> getAllUnimplementedMethods(XTypeElement type) {
     return asStream(type.getAllNonPrivateInstanceMethods())
         .filter(XHasModifiers::isAbstract)
         .collect(toImmutableList());
@@ -81,17 +81,16 @@ public final class XTypeElements {
    * Returns a list of visibilities containing visibility of the given element and the visibility of
    * its enclosing elements.
    */
-  private static Set<Visibility> allVisibilities(XTypeElement element) {
+  private static ImmutableSet<Visibility> allVisibilities(XTypeElement element) {
     checkNotNull(element);
-    Set<Visibility> visibilities = new LinkedHashSet<>();
+    ImmutableSet.Builder<Visibility> visibilities = ImmutableSet.builder();
     XTypeElement currentElement = element;
     while (currentElement != null) {
       visibilities.add(Visibility.of(currentElement));
       currentElement = currentElement.getEnclosingTypeElement();
     }
-    return visibilities;
+    return visibilities.build();
   }
 
-  private XTypeElements() {
-  }
+  private XTypeElements() {}
 }

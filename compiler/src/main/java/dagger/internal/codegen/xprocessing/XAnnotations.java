@@ -18,6 +18,7 @@ package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import dagger.internal.codegen.xprocessing.XAnnotation;
 import io.jbock.auto.common.AnnotationMirrors;
 import io.jbock.javapoet.ClassName;
 
