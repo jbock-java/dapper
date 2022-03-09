@@ -48,6 +48,7 @@ import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.Scope;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
@@ -384,14 +385,18 @@ public final class InjectValidator implements ClearableCache {
       checkInjectIntoPrivateClass(typeElement, builder);
       checkInjectIntoKotlinObject(typeElement, builder);
     }
-    if (typeElement.getSuperType() != null) {
-      superficialValidation.validateSuperTypeOf(typeElement);
-      ValidationReport report =
-          validateForMembersInjection(typeElement.getSuperType().getTypeElement());
-      if (!report.isClean()) {
-        builder.addSubreport(report);
-      }
-    }
+
+    Optional.ofNullable(typeElement.getSuperType())
+        .filter(supertype -> !supertype.getTypeName().equals(TypeName.OBJECT))
+        .ifPresent(
+            supertype -> {
+              superficialValidation.validateSuperTypeOf(typeElement);
+              ValidationReport report = validateForMembersInjection(supertype.getTypeElement());
+              if (!report.isClean()) {
+                builder.addSubreport(report);
+              }
+            });
+
     return builder.build();
   }
 
