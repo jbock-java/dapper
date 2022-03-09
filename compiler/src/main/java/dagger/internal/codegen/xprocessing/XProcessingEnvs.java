@@ -16,8 +16,6 @@
 
 package dagger.internal.codegen.xprocessing;
 
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.javapoet.ClassName;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.

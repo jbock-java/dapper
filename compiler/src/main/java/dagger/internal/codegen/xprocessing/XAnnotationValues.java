@@ -18,7 +18,6 @@ package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.xprocessing.XAnnotationValue;
 import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;

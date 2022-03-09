@@ -16,16 +16,11 @@
 
 package dagger.internal.codegen.xprocessing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.xprocessing.XArrayType;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.xprocessing.XConverters;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import java.util.Optional;

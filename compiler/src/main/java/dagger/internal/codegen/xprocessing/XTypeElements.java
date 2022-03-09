@@ -16,14 +16,11 @@
 
 package dagger.internal.codegen.xprocessing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.base.Util.asStream;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
-import dagger.internal.codegen.xprocessing.XHasModifiers;
-import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 
