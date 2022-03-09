@@ -18,14 +18,14 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
-import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.spi.model.Key;
-import java.util.Optional;
 import jakarta.inject.Inject;
+import java.util.Optional;
 
 /** A {@code BindsOptionalOf} declaration. */
 @AutoValue

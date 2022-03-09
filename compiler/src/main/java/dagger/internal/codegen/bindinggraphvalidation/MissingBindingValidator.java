@@ -16,20 +16,20 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.base.Verify.verify;
-import static dagger.internal.codegen.collect.Iterables.getLast;
 import static dagger.internal.codegen.base.Keys.isValidImplicitProvisionKey;
 import static dagger.internal.codegen.base.Keys.isValidMembersInjectionKey;
 import static dagger.internal.codegen.base.RequestKinds.canBeSatisfiedByProductionBinding;
+import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.binding.DependencyRequestFormatter.DOUBLE_INDENT;
+import static dagger.internal.codegen.collect.Iterables.getLast;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
@@ -42,9 +42,9 @@ import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.ComponentPath;
 import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Key;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
-import jakarta.inject.Inject;
 
 /** Reports errors for missing bindings. */
 final class MissingBindingValidator implements BindingGraphPlugin {

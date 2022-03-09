@@ -16,34 +16,34 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
+import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Multimaps.filterKeys;
-import static dagger.internal.codegen.base.Formatter.INDENT;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSetMultimap;
 import static dagger.spi.model.BindingKind.MULTIBOUND_MAP;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.collect.ImmutableSetMultimap;
-import dagger.internal.codegen.collect.Multimaps;
-import dagger.internal.codegen.collect.SetMultimap;
-import io.jbock.javapoet.TypeName;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.binding.BindingDeclaration;
 import dagger.internal.codegen.binding.BindingDeclarationFormatter;
 import dagger.internal.codegen.binding.BindingNode;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.KeyFactory;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ImmutableSetMultimap;
+import dagger.internal.codegen.collect.Multimaps;
+import dagger.internal.codegen.collect.SetMultimap;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
 import dagger.spi.model.Key;
-import java.util.Set;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
+import java.util.Set;
 
 /**
  * Reports an error for any map binding with either more than one contribution with the same map key

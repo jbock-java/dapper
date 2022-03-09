@@ -19,15 +19,15 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 
-import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.auto.value.AutoValue;
-import io.jbock.auto.value.extension.memoized.Memoized;
 import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Multimap;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
+import io.jbock.auto.value.AutoValue;
+import io.jbock.auto.value.extension.memoized.Memoized;
 
 /**
  * The collection of bindings that have been resolved for a key. For valid graphs, contains exactly

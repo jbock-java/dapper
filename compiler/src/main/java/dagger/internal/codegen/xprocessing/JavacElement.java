@@ -2,7 +2,6 @@ package dagger.internal.codegen.xprocessing;
 
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.SuperficialValidation;
 import io.jbock.javapoet.ClassName;
 import java.util.Collection;

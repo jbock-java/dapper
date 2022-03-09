@@ -19,18 +19,17 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.binding.MapKeys.getUnwrappedMapKeyType;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 
-import dagger.internal.codegen.xprocessing.XMessager;
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.collect.ImmutableSet;
-import io.jbock.javapoet.ClassName;
-import dagger.MapKey;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.MapKeyValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
+import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
+import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
 
 /**

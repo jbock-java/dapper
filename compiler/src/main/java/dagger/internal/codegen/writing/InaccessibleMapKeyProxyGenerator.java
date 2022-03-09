@@ -22,15 +22,15 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XFiler;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.collect.ImmutableList;
-import io.jbock.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.MapKeys;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import javax.lang.model.SourceVersion;
 

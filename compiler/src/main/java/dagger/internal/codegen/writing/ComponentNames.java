@@ -23,11 +23,11 @@ import static dagger.internal.codegen.extension.DaggerCollectors.onlyElement;
 import static java.lang.String.format;
 
 import dagger.internal.codegen.base.CharMatcher;
+import dagger.internal.codegen.base.ComponentCreatorKind;
 import dagger.internal.codegen.base.Splitter;
 import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentCreatorDescriptor;
-import dagger.internal.codegen.base.ComponentCreatorKind;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.KeyFactory;
 import dagger.internal.codegen.collect.ImmutableMap;

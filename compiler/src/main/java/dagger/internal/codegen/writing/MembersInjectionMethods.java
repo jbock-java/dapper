@@ -48,7 +48,6 @@ import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** Manages the member injection methods for a component. */

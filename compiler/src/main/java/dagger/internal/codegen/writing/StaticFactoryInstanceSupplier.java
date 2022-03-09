@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.spi.model.BindingKind.MULTIBOUND_MAP;
-import static dagger.spi.model.BindingKind.MULTIBOUND_SET;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;

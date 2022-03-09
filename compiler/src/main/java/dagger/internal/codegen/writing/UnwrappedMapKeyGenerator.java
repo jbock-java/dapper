@@ -16,12 +16,11 @@
 
 package dagger.internal.codegen.writing;
 
+import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.MapKey;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import java.util.Set;
 import jakarta.inject.Inject;
+import java.util.Set;
 import javax.lang.model.SourceVersion;
 
 /**

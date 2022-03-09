@@ -1,7 +1,6 @@
 package dagger.internal.codegen.xprocessing;
 
 import java.util.Set;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 
 public interface XRoundEnv {

@@ -16,41 +16,41 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.collect.Iterables.getLast;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.Lists;
+import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.javapoet.TypeVariableName;
-import dagger.internal.codegen.base.UniqueNameSet;
-import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
-import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
-import dagger.spi.model.Key;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import jakarta.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 
 /**

@@ -16,17 +16,13 @@
 
 package dagger.internal.codegen.writing;
 
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-import dagger.internal.codegen.xprocessing.XType;
-import dagger.internal.codegen.collect.ImmutableSet;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -35,12 +31,16 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ProvisionBinding;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DependencyRequest;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.CodeBlock;
 import java.util.Collections;
 import javax.lang.model.type.DeclaredType;
 
