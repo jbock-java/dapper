@@ -17,34 +17,36 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
-import static dagger.internal.codegen.base.Util.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
+import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
-import static javax.lang.model.util.ElementFilter.methodsIn;
+import static javax.lang.model.SourceVersion.isKeyword;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.ErrorMessages.ComponentCreatorMessages;
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.ObjectArrays;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.xprocessing.XTypeElements;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 
 /** Validates types annotated with component creator annotations. */
 @Singleton
@@ -52,10 +54,12 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
   private final DaggerTypes types;
+  private final KotlinMetadataUtil metadataUtil;
 
   @Inject
-  ComponentCreatorValidator(DaggerTypes types) {
+  ComponentCreatorValidator(DaggerTypes types, KotlinMetadataUtil metadataUtil) {
     this.types = types;
+    this.metadataUtil = metadataUtil;
   }
 
   @Override
@@ -71,7 +75,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
   private ValidationReport validateUncached(XTypeElement type) {
     ValidationReport.Builder report = ValidationReport.about(type);
 
-    Set<ComponentCreatorAnnotation> creatorAnnotations = getCreatorAnnotations(type);
+    ImmutableSet<ComponentCreatorAnnotation> creatorAnnotations = getCreatorAnnotations(type);
     if (!validateOnlyOneCreatorAnnotation(creatorAnnotations, report)) {
       return report.build();
     }
@@ -85,7 +89,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
   }
 
   private boolean validateOnlyOneCreatorAnnotation(
-      Set<ComponentCreatorAnnotation> creatorAnnotations,
+      ImmutableSet<ComponentCreatorAnnotation> creatorAnnotations,
       ValidationReport.Builder report) {
     // creatorAnnotations should never be empty because this should only ever be called for
     // types that have been found to have some creator annotation
@@ -102,7 +106,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
   }
 
   /**
-   * Validator for a single {@link XTypeElement} that is annotated with a {@code Builder} or {@code
+   * Validator for a single {@code XTypeElement} that is annotated with a {@code Builder} or {@code
    * Factory} annotation.
    */
   private final class ElementValidator {
@@ -122,7 +126,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     /** Validates the creator type. */
-    ValidationReport validate() {
+    final ValidationReport validate() {
       XTypeElement enclosingType = creator.getEnclosingTypeElement();
       if (enclosingType == null || !enclosingType.hasAnnotation(annotation.componentAnnotation())) {
         report.addError(messages.mustBeInComponent());
@@ -162,7 +166,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     private void validateConstructor() {
       List<XConstructorElement> constructors = creator.getConstructors();
 
-      boolean valid;
+      boolean valid = true;
       if (constructors.size() != 1) {
         valid = false;
       } else {
@@ -177,7 +181,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /** Validates basic requirements about the type that are common to both creator kinds. */
     private void validateTypeRequirements() {
-      if (XTypeElements.hasTypeParameters(creator)) {
+      if (hasTypeParameters(creator)) {
         report.addError(messages.generics());
       }
 
@@ -194,6 +198,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     private void validateBuilder() {
+      validateClassMethodName();
       XMethodElement buildMethod = null;
       for (XMethodElement method : getAllUnimplementedMethods(creator)) {
         switch (method.getParameters().size()) {
@@ -232,9 +237,24 @@ public final class ComponentCreatorValidator implements ClearableCache {
       }
     }
 
+    private void validateClassMethodName() {
+      // Only Kotlin class can have method name the same as a Java reserved keyword, so only check
+      // the method name if this class is a Kotlin class.
+      if (metadataUtil.hasMetadata(toJavac(creator))) {
+        metadataUtil
+            .getAllMethodNamesBySignature(toJavac(creator))
+            .forEach(
+                (signature, name) -> {
+                  if (isKeyword(name)) {
+                    report.addError("Can not use a Java keyword as method name: " + signature);
+                  }
+                });
+      }
+    }
+
     private void validateSetterMethod(XMethodElement method) {
       XType returnType = method.asMemberOf(creator.getType()).getReturnType();
-      if (!returnType.isVoid() && !returnType.isAssignableFrom(creator.getType())) {
+      if (!isVoid(returnType) && !types.isSubtype(creator.getType(), returnType)) {
         error(
             method,
             messages.setterMethodsMustReturnVoidOrBuilder(),
@@ -265,7 +285,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     }
 
     private void validateFactory() {
-      List<XMethodElement> abstractMethods = getAllUnimplementedMethods(creator);
+      ImmutableList<XMethodElement> abstractMethods = getAllUnimplementedMethods(creator);
       switch (abstractMethods.size()) {
         case 0:
           report.addError(messages.missingFactoryMethod());
@@ -332,8 +352,8 @@ public final class ComponentCreatorValidator implements ClearableCache {
         // TODO(ronshapiro): Ideally this shouldn't return methods which are redeclared from a
         // supertype, but do not change the return type. We don't have a good/simple way of checking
         // that, and it doesn't seem likely, so the warning won't be too bad.
-        Set<XMethodElement> declaredMethods =
-            new LinkedHashSet<>(component.getDeclaredMethods());
+        ImmutableSet<XMethodElement> declaredMethods =
+            ImmutableSet.copyOf(component.getDeclaredMethods());
         if (!declaredMethods.isEmpty()) {
           report.addWarning(
               messages.factoryMethodReturnsSupertypeWithMissingMethods(
@@ -346,9 +366,9 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     /**
      * Generates one of two error messages. If the method is enclosed in the subject, we target the
-     * error to the method itself. Otherwise, we target the error to the subject and list the method
+     * error to the method itself. Otherwise we target the error to the subject and list the method
      * as an argument. (Otherwise we have no way of knowing if the method is being compiled in this
-     * pass too, so javac might not be able to pinpoint its line of code.)
+     * pass too, so javac might not be able to pinpoint it's line of code.)
      */
     /*
      * For Component.Builder, the prototypical example would be if someone had:
@@ -363,25 +383,11 @@ public final class ComponentCreatorValidator implements ClearableCache {
      * class was included in this compile run.  But that's hard, and this is close enough.
      */
     private void error(
-        XMethodElement method,
-        String enclosedError,
-        String inheritedError,
-        Object extraArg) {
+        XMethodElement method, String enclosedError, String inheritedError, Object... extraArgs) {
       if (method.getEnclosingElement().equals(creator)) {
-        report.addError(String.format(enclosedError, extraArg), method);
+        report.addError(String.format(enclosedError, extraArgs), method);
       } else {
-        report.addError(String.format(inheritedError, extraArg, method));
-      }
-    }
-
-    private void error(
-        XMethodElement method,
-        String enclosedError,
-        String inheritedError) {
-      if (method.getEnclosingElement().equals(creator)) {
-        report.addError(enclosedError, method);
-      } else {
-        report.addError(String.format(inheritedError, method));
+        report.addError(String.format(inheritedError, ObjectArrays.concat(extraArgs, method)));
       }
     }
 
@@ -393,16 +399,6 @@ public final class ComponentCreatorValidator implements ClearableCache {
             messages.methodsMayNotHaveTypeParameters(),
             messages.inheritedMethodsMayNotHaveTypeParameters());
       }
-    }
-
-    /**
-     * Returns all methods defind in {@code componentType} which are not inherited from a supertype.
-     */
-    private Set<ExecutableElement> methodsOnlyInComponent(TypeElement componentType) {
-      // TODO(ronshapiro): Ideally this shouldn't return methods which are redeclared from a
-      // supertype, but do not change the return type. We don't have a good/simple way of checking
-      // that, and it doesn't seem likely, so the warning won't be too bad.
-      return new LinkedHashSet<>(methodsIn(componentType.getEnclosedElements()));
     }
   }
 }

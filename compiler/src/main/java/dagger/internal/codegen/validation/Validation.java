@@ -16,18 +16,16 @@
 
 package dagger.internal.codegen.validation;
 
-import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Qualifier;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Qualifier annotation for the {@link BindingGraphPlugin}s that are used to implement
- * core Dagger validation.
+ * Qualifier annotation for the {@code dagger.spi.model.BindingGraphPlugin}s that are used to
+ * implement core Dagger validation.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface Validation {
-}
+public @interface Validation {}

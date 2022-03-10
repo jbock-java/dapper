@@ -120,7 +120,9 @@ public abstract class TypeCheckingProcessingStep<E extends XElement> implements 
             + "\nIf type '%3$s' is a generated type, check above for compilation errors that may "
             + "have prevented the type from being generated. Otherwise, ensure that type '%3$s' is "
             + "on your classpath.",
-        this.getClass().getSimpleName(), element, exception.typeName());
+        this.getClass().getSimpleName(),
+        element,
+        exception.typeName());
   }
 
   private String knownErrorTypeErrorMessage(

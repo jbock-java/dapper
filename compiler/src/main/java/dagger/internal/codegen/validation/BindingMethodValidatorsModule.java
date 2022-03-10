@@ -36,9 +36,14 @@ public interface BindingMethodValidatorsModule {
   static ImmutableMap<ClassName, BindingMethodValidator> indexValidators(
       ProvidesMethodValidator providesMethodValidator,
       BindsMethodValidator bindsMethodValidator,
-      MultibindsMethodValidator multibindsMethodValidator) {
+      MultibindsMethodValidator multibindsMethodValidator,
+      BindsOptionalOfMethodValidator bindsOptionalOfMethodValidator) {
     Map<ClassName, BindingMethodValidator> result = new LinkedHashMap<>();
-    Stream.of(providesMethodValidator, bindsMethodValidator, multibindsMethodValidator)
+    Stream.of(
+            providesMethodValidator,
+            bindsMethodValidator,
+            multibindsMethodValidator,
+            bindsOptionalOfMethodValidator)
         .forEach(v -> result.put(v.methodAnnotation(), v));
     return ImmutableMap.copyOf(result);
   }

@@ -27,7 +27,7 @@ import io.jbock.javapoet.TypeSpec;
 @AutoValue
 public abstract class ComponentCreatorImplementation {
 
-  /** Creates a new {@link ComponentCreatorImplementation}. */
+  /** Creates a new {@code ComponentCreatorImplementation}. */
   public static ComponentCreatorImplementation create(
       TypeSpec spec, ClassName name, ImmutableMap<ComponentRequirement, FieldSpec> fields) {
     return new AutoValue_ComponentCreatorImplementation(spec, name, fields);

@@ -45,7 +45,8 @@ public final class SuperficialValidator implements ClearableCache {
   public void throwIfNearestEnclosingTypeNotValid(XElement element) {
     Optional<ValidationException> validationException =
         validationExceptions.computeIfAbsent(
-            closestEnclosingTypeElement(element), this::validationExceptionsUncached);
+            closestEnclosingTypeElement(element),
+            this::validationExceptionsUncached);
 
     if (validationException.isPresent()) {
       throw validationException.get();

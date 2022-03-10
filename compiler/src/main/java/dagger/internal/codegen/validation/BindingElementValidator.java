@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.base.Verify.verifyNotNull;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedInjectionType;
+import static dagger.internal.codegen.binding.MapKeys.getMapKeys;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
@@ -83,7 +84,7 @@ public abstract class BindingElementValidator<E extends XElement> {
   }
 
   /**
-   * Returns an error message of the form "&lt;{@code #bindingElements()}&gt; <i>rule</i>", where
+   * Returns an error message of the form "&lt;{@link #bindingElements()}&gt; <i>rule</i>", where
    * <i>rule</i> comes from calling {@code String#format(String, Object...)} on {@code ruleFormat}
    * and the other arguments.
    */
@@ -144,6 +145,7 @@ public abstract class BindingElementValidator<E extends XElement> {
     private ValidationReport validate() {
       checkType();
       checkQualifiers();
+      checkMapKeys();
       checkMultibindings();
       checkScopes();
       checkAdditionalProperties();
@@ -253,13 +255,43 @@ public abstract class BindingElementValidator<E extends XElement> {
       }
     }
 
-    /** Adds an error if the element has more than one {@code Qualifier qualifier} annotation. */
+    /**
+     * Adds an error if the element has more than one {@code Qualifier qualifier} annotation.
+     */
     private void checkQualifiers() {
       if (qualifiers.size() > 1) {
         for (XAnnotation qualifier : qualifiers) {
           report.addError(
-              bindingElements("may not use more than one @Qualifier"), element, qualifier);
+              bindingElements("may not use more than one @Qualifier"),
+              element,
+              qualifier);
         }
+      }
+    }
+
+    /**
+     * Adds an error if an {@code dagger.multibindings.IntoMap @IntoMap} element doesn't have
+     * exactly one {@code dagger.MapKey @MapKey} annotation, or if an element that is {@code
+     * dagger.multibindings.IntoMap @IntoMap} has any.
+     */
+    private void checkMapKeys() {
+      if (!allowsMultibindings.allowsMultibindings()) {
+        return;
+      }
+      ImmutableSet<XAnnotation> mapKeys = getMapKeys(element);
+      if (ContributionType.fromBindingElement(element).equals(ContributionType.MAP)) {
+        switch (mapKeys.size()) {
+          case 0:
+            report.addError(bindingElements("of type map must declare a map key"));
+            break;
+          case 1:
+            break;
+          default:
+            report.addError(bindingElements("may not have more than one map key"));
+            break;
+        }
+      } else if (!mapKeys.isEmpty()) {
+        report.addError(bindingElements("of non map type cannot declare a map key"));
       }
     }
 
@@ -267,8 +299,8 @@ public abstract class BindingElementValidator<E extends XElement> {
      * Adds errors if:
      *
      * <ul>
-     *   <li>the element doesn't allow {@code MultibindingAnnotations multibinding annotations} and
-     *       has any
+     *   <li>the element doesn't allow {@code MultibindingAnnotations multibinding annotations}
+     *       and has any
      *   <li>the element does allow them but has more than one
      *   <li>the element has a multibinding annotation and its {@code dagger.Provides} or {@code
      *       dagger.producers.Produces} annotation has a {@code type} parameter.
@@ -282,7 +314,9 @@ public abstract class BindingElementValidator<E extends XElement> {
         case NO_MULTIBINDINGS:
           for (XAnnotation annotation : multibindingAnnotations) {
             report.addError(
-                bindingElements("cannot have multibinding annotations"), element, annotation);
+                bindingElements("cannot have multibinding annotations"),
+                element,
+                annotation);
           }
           break;
 
@@ -324,8 +358,8 @@ public abstract class BindingElementValidator<E extends XElement> {
     }
 
     /**
-     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes framework
-     * type}.
+     * Adds an error if the {@code #bindingElementType() type} is a {@code FrameworkTypes
+     * framework type}.
      */
     private void checkFrameworkType() {
       if (bindingElementType().filter(FrameworkTypes::isFrameworkType).isPresent()) {

@@ -46,6 +46,7 @@ mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static da
 
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
+replace com.google.common.cache. dagger.internal.codegen.cache.
 replace androidx.room.compiler.processing.compat.XConverters dagger.internal.codegen.xprocessing.XConverters
 replace com.squareup.javapoet. io.jbock.javapoet.
 replace androidx.room.compiler.processing. dagger.internal.codegen.xprocessing.

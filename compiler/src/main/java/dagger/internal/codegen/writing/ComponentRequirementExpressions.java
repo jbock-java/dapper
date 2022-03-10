@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * A central repository of expressions used to access any {@link ComponentRequirement} available to
+ * A central repository of expressions used to access any {@code ComponentRequirement} available to
  * a component.
  */
 @PerComponentImplementation
@@ -97,14 +97,14 @@ public final class ComponentRequirementExpressions {
    * initialize()} methods, where the component constructor parameters are available.
    *
    * <p>When accessing this expression from a subcomponent, this may cause a field to be initialized
-   * or a method to be added in the component that owns this {@link ComponentRequirement}.
+   * or a method to be added in the component that owns this {@code ComponentRequirement}.
    */
   CodeBlock getExpressionDuringInitialization(
       ComponentRequirement componentRequirement, ClassName requestingClass) {
     return getExpression(componentRequirement).getExpressionDuringInitialization(requestingClass);
   }
 
-  /** Returns a field for a {@link ComponentRequirement}. */
+  /** Returns a field for a {@code ComponentRequirement}. */
   private ComponentRequirementExpression createExpression(ComponentRequirement requirement) {
     if (componentShard.componentDescriptor().hasCreator()
         || (graph.factoryMethod().isPresent()
@@ -140,12 +140,12 @@ public final class ComponentRequirementExpressions {
       return MemberSelect.localField(componentShard, fieldName);
     }
 
-    /** Returns the {@link CodeBlock} that initializes the component field during construction. */
+    /** Returns the {@code CodeBlock} that initializes the component field during construction. */
     abstract CodeBlock fieldInitialization(FieldSpec componentField);
   }
 
   /**
-   * A {@link ComponentRequirementExpression} for {@link ComponentRequirement}s that can be
+   * A {@code ComponentRequirementExpression} for {@code ComponentRequirement}s that can be
    * instantiated by the component (i.e. a static class with a no-arg constructor).
    */
   private final class InstantiableModuleField extends AbstractField {
@@ -167,7 +167,7 @@ public final class ComponentRequirementExpressions {
   }
 
   /**
-   * A {@link ComponentRequirementExpression} for {@link ComponentRequirement}s that are passed in
+   * A {@code ComponentRequirementExpression} for {@code ComponentRequirement}s that are passed in
    * as parameters to the component's constructor.
    */
   private final class ComponentParameterField extends AbstractField {

@@ -29,7 +29,7 @@ import javax.lang.model.element.Name;
 final class GwtCompatibility {
 
   /**
-   * Returns a {@code @GwtIncompatible} annotation that is applied to {@code binding}'s {@link
+   * Returns a {@code @GwtIncompatible} annotation that is applied to {@code binding}'s {@code
    * Binding#bindingElement()} or any enclosing type.
    */
   static Optional<AnnotationSpec> gwtIncompatibleAnnotation(Binding binding) {

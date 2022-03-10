@@ -22,7 +22,7 @@ import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 
 /**
- * A {@link Qualifier} for bindings that are associated with a component implementation's parent
+ * A {@code Qualifier} for bindings that are associated with a component implementation's parent
  * component.
  */
 @Retention(RUNTIME)

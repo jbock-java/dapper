@@ -19,12 +19,14 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.base.Util;
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
 import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.spi.model.BindingGraph;
@@ -33,7 +35,7 @@ import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 
-/** Initializes {@link BindingGraphPlugin}s. */
+/** Initializes {@code BindingGraphPlugin}s. */
 public final class ValidationBindingGraphPlugins {
   private final Set<BindingGraphPlugin> plugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
@@ -61,8 +63,8 @@ public final class ValidationBindingGraphPlugins {
     this.processingOptions = processingOptions;
   }
 
-  /** Returns {@link BindingGraphPlugin#supportedOptions()} from all the plugins. */
-  public Set<String> allSupportedOptions() {
+  /** Returns {@code BindingGraphPlugin#supportedOptions()} from all the plugins. */
+  public ImmutableSet<String> allSupportedOptions() {
     return plugins.stream()
         .flatMap(plugin -> plugin.supportedOptions().stream())
         .collect(toImmutableSet());
@@ -80,7 +82,7 @@ public final class ValidationBindingGraphPlugins {
     plugin.initElements(elements);
     Set<String> supportedOptions = plugin.supportedOptions();
     if (!supportedOptions.isEmpty()) {
-      plugin.initOptions(Util.filterKeys(processingOptions, supportedOptions::contains));
+      plugin.initOptions(Maps.filterKeys(processingOptions, supportedOptions::contains));
     }
   }
 
@@ -92,7 +94,7 @@ public final class ValidationBindingGraphPlugins {
 
     boolean isClean = true;
     for (BindingGraphPlugin plugin : plugins) {
-      DiagnosticReporterFactory.DiagnosticReporterImpl reporter =
+      DiagnosticReporterImpl reporter =
           diagnosticReporterFactory.reporter(graph, plugin.pluginName(), errorsAsWarnings);
       plugin.visitGraph(graph, reporter);
       if (reporter.reportedDiagnosticKinds().contains(ERROR)) {

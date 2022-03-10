@@ -58,7 +58,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
-/** Factory for creating {@link ComponentCreatorImplementation} instances. */
+/** Factory for creating {@code ComponentCreatorImplementation} instances. */
 final class ComponentCreatorImplementationFactory {
 
   private final ComponentImplementation componentImplementation;
@@ -95,7 +95,7 @@ final class ComponentCreatorImplementationFactory {
     private final UniqueNameSet fieldNames = new UniqueNameSet();
     private ImmutableMap<ComponentRequirement, FieldSpec> fields;
 
-    /** Builds the {@link ComponentCreatorImplementation}. */
+    /** Builds the {@code ComponentCreatorImplementation}. */
     ComponentCreatorImplementation build() {
       setModifiers();
       setSupertype();
@@ -130,7 +130,7 @@ final class ComponentCreatorImplementationFactory {
     abstract ImmutableMap<ComponentRequirement, String> factoryMethodParameters();
 
     /**
-     * The {@link ComponentRequirement}s that this creator allows users to set. Values are a status
+     * The {@code ComponentRequirement}s that this creator allows users to set. Values are a status
      * for each requirement indicating what's needed for that requirement in the implementation
      * class currently being generated.
      */

@@ -32,7 +32,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 
 /**
- * A {@link jakarta.inject.Provider} creation expression for an anonymous inner class whose
+ * A {@code jakarta.inject.Provider} creation expression for an anonymous inner class whose
  * {@code get()} method returns the expression for an instance binding request for its key.
  */
 final class AnonymousProviderCreationExpression

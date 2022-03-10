@@ -22,7 +22,7 @@ import jakarta.inject.Scope;
 import java.lang.annotation.Retention;
 
 /**
- * A {@link Scope} that encompasses a top-level component implementation and any of its inner
+ * A {@code Scope} that encompasses a top-level component implementation and any of its inner
  * descendant component implementations in the same generated file.
  */
 @Retention(RUNTIME)

@@ -23,14 +23,14 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 
 /**
- * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@link CodeBlock}.
+ * Represents a {@code com.sun.source.tree.MemberSelectTree} as a {@code CodeBlock}.
  */
 abstract class MemberSelect {
 
   /**
-   * Returns a {@link MemberSelect} that accesses the field given by {@code fieldName} owned by
+   * Returns a {@code MemberSelect} that accesses the field given by {@code fieldName} owned by
    * {@code owningClass}. In this context "local" refers to the fact that the field is owned by the
-   * type (or an enclosing type) from which the code block will be used. The returned {@link
+   * type (or an enclosing type) from which the code block will be used. The returned {@code
    * MemberSelect} will not be valid for accessing the field from a different class (regardless of
    * accessibility).
    */
@@ -71,14 +71,14 @@ abstract class MemberSelect {
 
   /**
    * Returns true if the member being selected is static and does not require an instance of
-   * {@link #owningClass()}.
+   * {@code #owningClass()}.
    */
   boolean staticMember() {
     return staticMember;
   }
 
   /**
-   * Returns a {@link CodeBlock} suitable for accessing the member from the given {@code
+   * Returns a {@code CodeBlock} suitable for accessing the member from the given {@code
    * usingClass}.
    */
   abstract CodeBlock getExpressionFor(ClassName usingClass);

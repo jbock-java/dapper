@@ -27,7 +27,6 @@ import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;
-import java.util.Set;
 
 /**
  * Processing step that validates that the {@code BindsInstance} annotation is applied to the
@@ -49,8 +48,8 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   }
 
   @Override
-  public Set<ClassName> annotationClassNames() {
-    return Set.of(TypeNames.BINDS_INSTANCE);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.BINDS_INSTANCE);
   }
 
   @Override

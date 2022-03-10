@@ -24,13 +24,16 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.FrameworkType;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.javapoet.Expression;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
+import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.CodeBlock;
@@ -59,7 +62,10 @@ final class ExperimentalSwitchingProviderDependencyRepresentation {
     this.types = types;
     this.elements = elements;
     this.bindsTypeChecker = new BindsTypeChecker(types, elements);
-    this.type = toJavac(binding.contributedType());
+    this.type =
+        isDelegateSetValuesBinding()
+            ? types.erasure(elements.getTypeElement(TypeNames.COLLECTION).asType())
+            : toJavac(binding.contributedType());
   }
 
   Expression getDependencyExpression(RequestKind requestKind, ProvisionBinding requestingBinding) {
@@ -93,7 +99,8 @@ final class ExperimentalSwitchingProviderDependencyRepresentation {
   }
 
   private boolean isDelegateSetValuesBinding() {
-    return false;
+    return binding.kind().equals(BindingKind.DELEGATE)
+        && binding.contributionType().equals(ContributionType.SET_VALUES);
   }
 
   private boolean usesExplicitTypeCast(Expression expression, RequestKind requestKind) {

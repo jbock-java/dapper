@@ -48,6 +48,7 @@ import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 /** Manages the member injection methods for a component. */
@@ -150,6 +151,11 @@ final class MembersInjectionMethods {
                 .addModifiers(PRIVATE)
                 .returns(membersInjectedTypeName)
                 .addParameter(parameter);
+    TypeElement canIgnoreReturnValue =
+        elements.getTypeElement("com.google.errorprone.annotations.CanIgnoreReturnValue");
+    if (canIgnoreReturnValue != null) {
+      methodBuilder.addAnnotation(ClassName.get(canIgnoreReturnValue));
+    }
     CodeBlock instance = CodeBlock.of("$N", parameter);
     methodBuilder.addCode(
         InjectionSiteMethod.invokeAll(

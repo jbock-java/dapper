@@ -24,7 +24,7 @@ import io.jbock.javapoet.CodeBlock;
 import java.util.function.Supplier;
 
 /**
- * A {@link FrameworkInstanceCreationExpression} that creates an {@link InstanceFactory} for an
+ * A {@code FrameworkInstanceCreationExpression} that creates an {@code InstanceFactory} for an
  * instance.
  */
 final class InstanceFactoryCreationExpression implements FrameworkInstanceCreationExpression {

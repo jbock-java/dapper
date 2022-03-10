@@ -151,6 +151,5 @@ final class StaticMemberSelects {
     }
   }
 
-  private StaticMemberSelects() {
-  }
+  private StaticMemberSelects() {}
 }

@@ -34,8 +34,8 @@ abstract class RequestRepresentation {
   abstract Expression getDependencyExpression(ClassName requestingClass);
 
   /**
-   * Equivalent to {@link #getDependencyExpression} that is used only when the request is for an
-   * implementation of a component method. By default, just delegates to {@link
+   * Equivalent to {@code #getDependencyExpression} that is used only when the request is for an
+   * implementation of a component method. By default, just delegates to {@code
    * #getDependencyExpression}.
    */
   Expression getDependencyExpressionForComponentMethod(

@@ -83,9 +83,7 @@ final class SetRequestRepresentation extends RequestRepresentation {
               .add(maybeTypeParameter(requestingClass))
               .add(
                   "of($L)",
-                  binding
-                      .dependencies()
-                      .stream()
+                  binding.dependencies().stream()
                       .map(dependency -> getContributionExpression(dependency, requestingClass))
                       .collect(toParametersCodeBlock()))
               .build());
@@ -187,7 +185,8 @@ final class SetRequestRepresentation extends RequestRepresentation {
   }
 
   private boolean isSingleValue(DependencyRequest dependency) {
-    return graph.contributionBinding(dependency.key())
+    return graph
+        .contributionBinding(dependency.key())
         .contributionType()
         .equals(ContributionType.SET);
   }

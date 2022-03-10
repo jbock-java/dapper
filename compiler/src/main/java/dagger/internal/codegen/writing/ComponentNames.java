@@ -44,7 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Holds the unique simple names for all components, keyed by their {@link ComponentPath} and {@link
+ * Holds the unique simple names for all components, keyed by their {@code ComponentPath} and {@code
  * Key} of the subcomponent builder.
  */
 public final class ComponentNames {
@@ -70,7 +70,7 @@ public final class ComponentNames {
     this.pathsByCreatorKey = pathsByCreatorKey(keyFactory, graph);
   }
 
-  /** Returns the simple component name for the given {@link ComponentDescriptor}. */
+  /** Returns the simple component name for the given {@code ComponentDescriptor}. */
   ClassName get(ComponentPath componentPath) {
     return componentPath.atRoot()
         ? rootName
@@ -78,7 +78,7 @@ public final class ComponentNames {
   }
 
   /**
-   * Returns the component descriptor for the component with the given subcomponent creator {@link
+   * Returns the component descriptor for the component with the given subcomponent creator {@code
    * Key}.
    */
   ClassName getSubcomponentCreatorName(ComponentPath componentPath, Key creatorKey) {
@@ -93,7 +93,7 @@ public final class ComponentNames {
   }
 
   /**
-   * Returns the simple name for the subcomponent creator implementation for the given {@link
+   * Returns the simple name for the subcomponent creator implementation for the given {@code
    * ComponentDescriptor}.
    */
   ClassName getCreatorName(ComponentPath componentPath) {

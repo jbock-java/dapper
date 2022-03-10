@@ -6,6 +6,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -121,7 +122,11 @@ public abstract class SetMultimap<K, V> implements ImmutableMultimap<K, V> {
     return result == null ? Set.of() : result;
   }
 
-  public void removeAll(K subject) {
-    map.remove(subject);
+  public Set<V> removeAll(K subject) {
+    Set<V> remove = map.remove(subject);
+    if (remove == null) {
+      return Set.of();
+    }
+    return remove;
   }
 }

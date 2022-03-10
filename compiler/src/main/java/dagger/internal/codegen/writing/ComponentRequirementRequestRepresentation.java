@@ -27,8 +27,8 @@ import dagger.internal.codegen.javapoet.Expression;
 import io.jbock.javapoet.ClassName;
 
 /**
- * A binding expression for instances bound with {@link dagger.BindsInstance} and instances of
- * {@linkplain dagger.Component#dependencies() component} and {@linkplain
+ * A binding expression for instances bound with {@code dagger.BindsInstance} and instances of
+ * {@code dagger.Component#dependencies() component} and {@code
  * dagger.producers.ProductionComponent#dependencies() production component dependencies}.
  */
 final class ComponentRequirementRequestRepresentation extends RequestRepresentation {

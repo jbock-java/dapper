@@ -99,13 +99,13 @@ public final class DiagnosticMessageGenerator {
   private final Table<MaybeBinding, DependencyEdge, ImmutableList<Node>> shortestPaths =
       HashBasedTable.create();
 
-  private static <K, V> Function<K, V> memoize(Function<K, V> uncachedAsBaseFunction) {
+  private static <K, V> Function<K, V> memoize(Function<K, V> uncached) {
     // If Android Guava is on the processor path, then c.g.c.b.Function (which LoadingCache
     // implements) does not extend j.u.f.Function.
     // TODO(erichang): Fix current breakages and try to remove this to enforce not having this on
     // processor path.
 
-    return CacheBuilder.newBuilder().build(CacheLoader.from(uncachedAsBaseFunction));
+    return CacheBuilder.newBuilder().build(CacheLoader.from(uncached));
   }
 
   private DiagnosticMessageGenerator(
@@ -235,9 +235,7 @@ public final class DiagnosticMessageGenerator {
           // append the component path to make clear to the user which component it's in.
           ComponentPath componentPath = source(object).componentPath();
           if (!componentPath.atRoot()
-              || !requestElement
-                  .getEnclosingElement()
-                  .equals(componentPath.rootComponent().java())) {
+              || !requestElement.getEnclosingElement().equals(componentPath.rootComponent().java())) {
             element.append(String.format(" [%s]", componentPath));
           }
           return element.toString();

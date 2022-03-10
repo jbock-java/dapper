@@ -25,10 +25,12 @@ import static dagger.internal.codegen.xprocessing.XElement.isField;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.asField;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static dagger.internal.codegen.xprocessing.XTypes.isWildcard;
 
+import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.RequestKinds;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
@@ -187,5 +189,13 @@ final class DependencyRequestValidator {
    */
   // TODO(dpb): Should we disallow Producer entry points in non-production components?
   void checkNotProducer(ValidationReport.Builder report, XVariableElement requestElement) {
+    XType requestType = requestElement.getType();
+    if (FrameworkTypes.isProducerType(requestType)) {
+      report.addError(
+          String.format(
+              "%s may only be injected in @Produces methods",
+              getSimpleName(requestType.getTypeElement())),
+          requestElement);
+    }
   }
 }

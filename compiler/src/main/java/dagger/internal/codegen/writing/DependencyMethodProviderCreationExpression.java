@@ -47,8 +47,8 @@ import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
 
 /**
- * A {@link jakarta.inject.Provider} creation expression for a provision method on a component's
- * {@linkplain dagger.Component#dependencies()} dependency}.
+ * A {@code jakarta.inject.Provider} creation expression for a provision method on a component's
+ * {@code dagger.Component#dependencies()} dependency}.
  */
 // TODO(dpb): Resolve with DependencyMethodProducerCreationExpression.
 final class DependencyMethodProviderCreationExpression

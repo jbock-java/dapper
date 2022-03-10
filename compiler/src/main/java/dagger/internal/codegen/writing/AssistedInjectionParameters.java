@@ -40,10 +40,10 @@ import java.util.List;
 /** Utility class for generating unique assisted parameter names for a component shard. */
 final class AssistedInjectionParameters {
   /**
-   * Returns the list of assisted factory parameters as {@link ParameterSpec}s.
+   * Returns the list of assisted factory parameters as {@code ParameterSpec}s.
    *
    * <p>The type of each parameter will be the resolved type given by the binding key, and the name
-   * of each parameter will be the name given in the {@link
+   * of each parameter will be the name given in the {@code
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
   public static ImmutableList<ParameterSpec> assistedFactoryParameterSpecs(
@@ -64,10 +64,10 @@ final class AssistedInjectionParameters {
   }
 
   /**
-   * Returns the list of assisted parameters as {@link ParameterSpec}s.
+   * Returns the list of assisted parameters as {@code ParameterSpec}s.
    *
    * <p>The type of each parameter will be the resolved type given by the binding key, and the name
-   * of each parameter will be the name given in the {@link
+   * of each parameter will be the name given in the {@code
    * dagger.assisted.AssistedInject}-annotated constructor.
    */
   public static ImmutableList<ParameterSpec> assistedParameterSpecs(

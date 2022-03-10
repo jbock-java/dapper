@@ -25,6 +25,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.binding.ComponentDescriptor;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.binding.InjectionAnnotations;
@@ -177,13 +178,17 @@ final class ComponentHierarchyValidator {
       ValidationReport.Builder report,
       ComponentDescriptor componentDescriptor,
       SetMultimap<ComponentDescriptor, ModuleDescriptor> producerModulesByComponent) {
-    ImmutableSet<ModuleDescriptor> producerModules = ImmutableSet.of();
+    ImmutableSet<ModuleDescriptor> producerModules =
+        componentDescriptor.modules().stream()
+            .filter(module -> module.kind().equals(ModuleKind.PRODUCER_MODULE))
+            .collect(toImmutableSet());
 
     producerModulesByComponent.putAll(componentDescriptor, producerModules);
     for (ComponentDescriptor childComponent : componentDescriptor.childComponents()) {
       validateProductionModuleUniqueness(report, childComponent, producerModulesByComponent);
     }
     producerModulesByComponent.removeAll(componentDescriptor);
+
 
     SetMultimap<ComponentDescriptor, ModuleDescriptor> repeatedModules =
         Multimaps.filterValues(producerModulesByComponent, producerModules::contains);
@@ -199,8 +204,8 @@ final class ComponentHierarchyValidator {
     for (Map.Entry<ComponentDescriptor, Collection<ModuleDescriptor>> entry :
         repeatedModules.asMap().entrySet()) {
       formatter.format("\n  %s also installs: ", entry.getKey().typeElement());
-      COMMA_SEPARATED_JOINER.appendTo(
-          error, Iterables.transform(entry.getValue(), m -> m.moduleElement()));
+      COMMA_SEPARATED_JOINER
+          .appendTo(error, Iterables.transform(entry.getValue(), m -> m.moduleElement()));
     }
 
     report.addError(error.toString());

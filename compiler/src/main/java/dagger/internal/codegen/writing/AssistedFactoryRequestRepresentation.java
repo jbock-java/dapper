@@ -43,7 +43,7 @@ import io.jbock.javapoet.TypeSpec;
 import java.util.Optional;
 
 /**
- * A {@link dagger.internal.codegen.writing.RequestRepresentation} for {@link
+ * A {@code dagger.internal.codegen.writing.RequestRepresentation} for {@code
  * dagger.assisted.AssistedFactory} methods.
  */
 final class AssistedFactoryRequestRepresentation extends RequestRepresentation {

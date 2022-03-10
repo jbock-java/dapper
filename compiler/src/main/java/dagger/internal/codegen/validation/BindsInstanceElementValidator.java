@@ -22,7 +22,10 @@ import dagger.internal.codegen.xprocessing.XElement;
 abstract class BindsInstanceElementValidator<E extends XElement>
     extends BindingElementValidator<E> {
   BindsInstanceElementValidator(InjectionAnnotations injectionAnnotations) {
-    super(AllowsMultibindings.NO_MULTIBINDINGS, AllowsScoping.NO_SCOPING, injectionAnnotations);
+    super(
+        AllowsMultibindings.NO_MULTIBINDINGS,
+        AllowsScoping.NO_SCOPING,
+        injectionAnnotations);
   }
 
   @Override

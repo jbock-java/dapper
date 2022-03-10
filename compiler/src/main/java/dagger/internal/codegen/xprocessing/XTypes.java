@@ -80,8 +80,8 @@ public final class XTypes {
   }
 
   /**
-   * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
-   * {@code Optional} is returned if there is no non-{@code Object} superclass.
+   * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
+   * {@code Optional} is returned if there is no non-{@link Object} superclass.
    */
   public static Optional<XType> nonObjectSuperclass(XType type) {
     return isDeclared(type)

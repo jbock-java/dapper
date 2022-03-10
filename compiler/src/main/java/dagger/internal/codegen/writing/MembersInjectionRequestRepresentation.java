@@ -32,7 +32,7 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterSpec;
 
 /**
- * A binding expression for members injection component methods. See {@link
+ * A binding expression for members injection component methods. See {@code
  * MembersInjectionMethods}.
  */
 final class MembersInjectionRequestRepresentation extends RequestRepresentation {

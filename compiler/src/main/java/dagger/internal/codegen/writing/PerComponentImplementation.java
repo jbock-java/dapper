@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import jakarta.inject.Scope;
 import java.lang.annotation.Retention;
 
-/** A {@link Scope} that encompasses a single component implementation. */
+/** A {@code Scope} that encompasses a single component implementation. */
 @Retention(RUNTIME)
 @Scope
 public @interface PerComponentImplementation {}

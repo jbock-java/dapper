@@ -30,7 +30,7 @@ import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstan
 import dagger.spi.model.DependencyRequest;
 import io.jbock.javapoet.CodeBlock;
 
-/** A framework instance creation expression for a {@link dagger.Binds @Binds} binding. */
+/** A framework instance creation expression for a {@code dagger.Binds @Binds} binding. */
 final class DelegatingFrameworkInstanceCreationExpression
     implements FrameworkInstanceCreationExpression {
 

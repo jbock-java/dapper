@@ -45,6 +45,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
   private final MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory;
   private final MembersInjectorProviderCreationExpression.Factory
       membersInjectorProviderCreationExpressionFactory;
+  private final OptionalFactoryInstanceCreationExpression.Factory
+      optionalFactoryInstanceCreationExpressionFactory;
   private final SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory;
 
   @Inject
@@ -61,6 +63,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
       MapFactoryCreationExpression.Factory mapFactoryCreationExpressionFactory,
       MembersInjectorProviderCreationExpression.Factory
           membersInjectorProviderCreationExpressionFactory,
+      OptionalFactoryInstanceCreationExpression.Factory
+          optionalFactoryInstanceCreationExpressionFactory,
       SetFactoryCreationExpression.Factory setFactoryCreationExpressionFactory) {
     this.componentImplementation = componentImplementation;
     this.componentRequirementExpressions = componentRequirementExpressions;
@@ -74,6 +78,8 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
     this.mapFactoryCreationExpressionFactory = mapFactoryCreationExpressionFactory;
     this.membersInjectorProviderCreationExpressionFactory =
         membersInjectorProviderCreationExpressionFactory;
+    this.optionalFactoryInstanceCreationExpressionFactory =
+        optionalFactoryInstanceCreationExpressionFactory;
     this.setFactoryCreationExpressionFactory = setFactoryCreationExpressionFactory;
   }
 
@@ -120,6 +126,9 @@ final class UnscopedFrameworkInstanceCreationExpressionFactory {
 
       case DELEGATE:
         return delegatingFrameworkInstanceCreationExpressionFactory.create(binding);
+
+      case OPTIONAL:
+        return optionalFactoryInstanceCreationExpressionFactory.create(binding);
 
       case MEMBERS_INJECTOR:
         return membersInjectorProviderCreationExpressionFactory.create((ProvisionBinding) binding);
