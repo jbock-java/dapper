@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.unwrapOptionalEquivalence;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static java.util.Arrays.asList;
 
@@ -29,11 +28,10 @@ import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XTypes;
 import dagger.spi.model.BindingKind;
+import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
-import io.jbock.auto.common.Equivalence;
 import java.util.Optional;
-import javax.lang.model.element.AnnotationMirror;
 
 /**
  * An abstract class for a value object representing the mechanism by which a {@code Key} can be
@@ -44,11 +42,8 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   /** Returns the type that specifies this' nullability, absent if not nullable. */
   public abstract Optional<XType> nullableType();
 
-  public abstract Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation();
-
-  public final Optional<AnnotationMirror> mapKeyAnnotation() {
-    return unwrapOptionalEquivalence(wrappedMapKeyAnnotation());
-  }
+  // Note: We're using DaggerAnnotation instead of XAnnotation for its equals/hashcode
+  public abstract Optional<DaggerAnnotation> mapKey();
 
   /** If {@code #bindingElement()} is a method that returns a primitive type, returns that type. */
   public final Optional<XType> contributedPrimitiveType() {
@@ -127,8 +122,7 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public abstract B nullableType(Optional<XType> nullableType);
 
-    abstract B wrappedMapKeyAnnotation(
-        Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKeyAnnotation);
+    abstract B mapKey(Optional<DaggerAnnotation> mapKey);
 
     public abstract B kind(BindingKind kind);
 

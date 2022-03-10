@@ -26,5 +26,5 @@ import dagger.internal.codegen.binding.BindingGraph;
 public interface ComponentGeneratorModule {
 
   @Binds
-  SourceFileGenerator<BindingGraph> componentGenerator(ComponentGenerator generator);
+  abstract SourceFileGenerator<BindingGraph> componentGenerator(ComponentGenerator generator);
 }

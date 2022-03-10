@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
@@ -57,7 +56,6 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
@@ -66,6 +64,7 @@ import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.BindingKind;
+import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DaggerType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
@@ -215,8 +214,7 @@ public final class BindingFactory {
         .dependencies(
             dependencyRequestFactory.forRequiredResolvedVariables(
                 method.getParameters(), methodType.getParameterTypes()))
-        .wrappedMapKeyAnnotation(
-            wrapOptionalInEquivalence(getMapKey(method).map(XConverters::toJavac)));
+        .mapKey(getMapKey(method).map(DaggerAnnotation::from));
   }
 
   /**
@@ -333,7 +331,7 @@ public final class BindingFactory {
 
   /**
    * Returns a {@code dagger.spi.model.BindingKind#SUBCOMPONENT_CREATOR} binding declared by a
-   * component method that returns a subcomponent builder. Use {{@code
+   * component method that returns a subcomponent builder. Use {{@link
    * #subcomponentCreatorBinding(ImmutableSet)}} for bindings declared using {@code
    * Module#subcomponents()}.
    *
@@ -410,7 +408,7 @@ public final class BindingFactory {
         .contributingModule(delegateDeclaration.contributingModule().get())
         .key(keyFactory.forDelegateBinding(delegateDeclaration, frameworkType))
         .dependencies(delegateDeclaration.delegateRequest())
-        .wrappedMapKeyAnnotation(delegateDeclaration.wrappedMapKey())
+        .mapKey(delegateDeclaration.mapKey())
         .kind(DELEGATE)
         .build();
   }

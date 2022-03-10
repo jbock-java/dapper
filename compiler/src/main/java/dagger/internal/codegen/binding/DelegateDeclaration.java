@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.MoreAnnotationMirrors.wrapOptionalInEquivalence;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 
@@ -24,18 +23,16 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
-import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.element.AnnotationMirror;
 
 /** The declaration for a delegate binding established by a {@code Binds} method. */
 @AutoValue
@@ -43,7 +40,8 @@ public abstract class DelegateDeclaration extends BindingDeclaration
     implements HasContributionType {
   abstract DependencyRequest delegateRequest();
 
-  abstract Optional<Equivalence.Wrapper<AnnotationMirror>> wrappedMapKey();
+  // Note: We're using DaggerAnnotation instead of XAnnotation for its equals/hashcode
+  abstract Optional<DaggerAnnotation> mapKey();
 
   @Memoized
   @Override
@@ -78,7 +76,7 @@ public abstract class DelegateDeclaration extends BindingDeclaration
           Optional.<XElement>of(bindsMethod),
           Optional.of(contributingModule),
           delegateRequest,
-          wrapOptionalInEquivalence(getMapKey(bindsMethod).map(XConverters::toJavac)));
+          getMapKey(bindsMethod).map(DaggerAnnotation::from));
     }
   }
 }

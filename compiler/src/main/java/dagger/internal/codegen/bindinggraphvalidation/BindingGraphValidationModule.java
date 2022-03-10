@@ -23,7 +23,6 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.validation.CompositeBindingGraphPlugin;
 import dagger.internal.codegen.validation.Validation;
 import dagger.spi.model.BindingGraphPlugin;
-import java.util.Set;
 
 /** Binds the set of {@code BindingGraphPlugin}s used to implement Dagger validation. */
 @Module
@@ -31,7 +30,7 @@ public interface BindingGraphValidationModule {
 
   @Provides
   @Validation
-  static Set<BindingGraphPlugin> providePlugins(
+  static ImmutableSet<BindingGraphPlugin> providePlugins(
       CompositeBindingGraphPlugin.Factory factory,
       CompilerOptions compilerOptions,
       DependencyCycleValidator validation1,
@@ -43,17 +42,16 @@ public interface BindingGraphValidationModule {
       NullableBindingValidator validation8,
       SetMultibindingValidator validation10,
       SubcomponentFactoryMethodValidator validation11) {
-    ImmutableSet<BindingGraphPlugin> plugins =
-        ImmutableSet.of(
-            validation1,
-            validation3,
-            validation4,
-            validation5,
-            validation6,
-            validation7,
-            validation8,
-            validation10,
-            validation11);
+    ImmutableSet<BindingGraphPlugin> plugins = ImmutableSet.of(
+        validation1,
+        validation3,
+        validation4,
+        validation5,
+        validation6,
+        validation7,
+        validation8,
+        validation10,
+        validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
       return ImmutableSet.of(factory.create(plugins, "Dagger/Validation"));
     } else {

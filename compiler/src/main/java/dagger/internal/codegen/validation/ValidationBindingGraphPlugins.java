@@ -37,7 +37,7 @@ import java.util.Set;
 
 /** Initializes {@code BindingGraphPlugin}s. */
 public final class ValidationBindingGraphPlugins {
-  private final Set<BindingGraphPlugin> plugins;
+  private final ImmutableSet<BindingGraphPlugin> plugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final XFiler filer;
   private final DaggerTypes types;
@@ -47,7 +47,7 @@ public final class ValidationBindingGraphPlugins {
 
   @Inject
   ValidationBindingGraphPlugins(
-      @Validation Set<BindingGraphPlugin> plugins,
+      @Validation ImmutableSet<BindingGraphPlugin> plugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
       XFiler filer,
       DaggerTypes types,

@@ -22,7 +22,6 @@ import static dagger.internal.codegen.binding.SourceFiles.elementBasedClassName;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -44,6 +43,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.spi.model.DaggerAnnotation;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
@@ -129,7 +129,7 @@ public final class MapKeys {
    */
   public static CodeBlock getMapKeyExpression(
       ContributionBinding binding, ClassName requestingClass, XProcessingEnv processingEnv) {
-    XAnnotation mapKeyAnnotation = toXProcessing(binding.mapKeyAnnotation().get(), processingEnv);
+    XAnnotation mapKeyAnnotation = binding.mapKey().get().xprocessing();
     return MapKeyAccessibility.isMapKeyAccessibleFrom(
             mapKeyAnnotation, requestingClass.packageName())
         ? directMapKeyExpression(mapKeyAnnotation, processingEnv)
@@ -187,8 +187,8 @@ public final class MapKeys {
   public static Optional<MethodSpec> mapKeyFactoryMethod(
       ContributionBinding binding, XProcessingEnv processingEnv) {
     return binding
-        .mapKeyAnnotation()
-        .map(mapKey -> toXProcessing(mapKey, processingEnv))
+        .mapKey()
+        .map(DaggerAnnotation::xprocessing)
         .filter(mapKey -> !isMapKeyPubliclyAccessible(mapKey))
         .map(
             mapKey ->

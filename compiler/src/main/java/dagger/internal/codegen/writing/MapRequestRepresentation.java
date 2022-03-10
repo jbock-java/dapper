@@ -169,9 +169,7 @@ final class MapRequestRepresentation extends RequestRepresentation {
   }
 
   private boolean isImmutableMapBuilderWithExpectedSizeAvailable() {
-    return isImmutableMapAvailable()
-        && processingEnv.requireTypeElement(TypeNames.IMMUTABLE_MAP).getDeclaredMethods().stream()
-            .anyMatch(method -> getSimpleName(method).contentEquals("builderWithExpectedSize"));
+    return false;
   }
 
   private boolean isImmutableMapAvailable() {

@@ -16,39 +16,41 @@
 
 package dagger.internal.codegen.validation;
 
+import static dagger.internal.codegen.collect.Maps.uniqueIndex;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.internal.codegen.collect.ImmutableMap;
+import dagger.multibindings.IntoSet;
 import io.jbock.javapoet.ClassName;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Set;
 
 /**
- * Binds each {@link BindingMethodValidator} into a map, keyed by {@link
+ * Binds each {@code BindingMethodValidator} into a map, keyed by {@code
  * BindingMethodValidator#methodAnnotation()}.
  */
 @Module
 public interface BindingMethodValidatorsModule {
-
   @Provides
   static ImmutableMap<ClassName, BindingMethodValidator> indexValidators(
-      ProvidesMethodValidator providesMethodValidator,
-      BindsMethodValidator bindsMethodValidator,
-      MultibindsMethodValidator multibindsMethodValidator,
-      BindsOptionalOfMethodValidator bindsOptionalOfMethodValidator) {
-    Map<ClassName, BindingMethodValidator> result = new LinkedHashMap<>();
-    Stream.of(
-            providesMethodValidator,
-            bindsMethodValidator,
-            multibindsMethodValidator,
-            bindsOptionalOfMethodValidator)
-        .forEach(v -> result.put(v.methodAnnotation(), v));
-    return ImmutableMap.copyOf(result);
+      Set<BindingMethodValidator> validators) {
+    return uniqueIndex(validators, BindingMethodValidator::methodAnnotation);
   }
 
   @Binds
-  Map<ClassName, BindingMethodValidator> bindIndexValidators(
-      ImmutableMap<ClassName, BindingMethodValidator> validators);
+  @IntoSet
+  BindingMethodValidator provides(ProvidesMethodValidator validator);
+
+  @Binds
+  @IntoSet
+  BindingMethodValidator binds(BindsMethodValidator validator);
+
+  @Binds
+  @IntoSet
+  BindingMethodValidator multibinds(MultibindsMethodValidator validator);
+
+  @Binds
+  @IntoSet
+  BindingMethodValidator bindsOptionalOf(BindsOptionalOfMethodValidator validator);
 }

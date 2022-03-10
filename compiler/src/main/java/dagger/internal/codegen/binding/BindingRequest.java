@@ -28,8 +28,8 @@ import java.util.Optional;
 
 /**
  * A request for a binding, which may be in the form of a request for a dependency to pass to a
- * constructor or module method ({@code RequestKind}) or an internal request for a framework
- * instance ({@code FrameworkType}).
+ * constructor or module method ({@link RequestKind}) or an internal request for a framework
+ * instance ({@link FrameworkType}).
  */
 @AutoValue
 public abstract class BindingRequest {

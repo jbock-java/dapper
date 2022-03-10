@@ -21,7 +21,6 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -192,11 +191,6 @@ final class SetRequestRepresentation extends RequestRepresentation {
   }
 
   private boolean isImmutableSetBuilderWithExpectedSizeAvailable() {
-    if (isImmutableSetAvailable()) {
-      return methodsIn(elements.getTypeElement(TypeNames.IMMUTABLE_SET).getEnclosedElements())
-          .stream()
-          .anyMatch(method -> method.getSimpleName().contentEquals("builderWithExpectedSize"));
-    }
     return false;
   }
 

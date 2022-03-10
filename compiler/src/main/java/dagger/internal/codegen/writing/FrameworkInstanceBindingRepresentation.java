@@ -67,6 +67,7 @@ final class FrameworkInstanceBindingRepresentation {
     switch (request.requestKind()) {
       case INSTANCE:
       case LAZY:
+      case PRODUCED:
       case PROVIDER_OF_LAZY:
         return derivedFromFrameworkInstanceRequestRepresentationFactory.create(
             binding, providerRequestRepresentation, request.requestKind(), FrameworkType.PROVIDER);
