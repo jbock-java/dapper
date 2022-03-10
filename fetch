@@ -12,6 +12,9 @@ fi
 if [[ "internal" == "$1" ]]; then
   INTERNAL=1
   shift
+elif [[ "spi" == "$1" ]]; then
+  SPI=1
+  shift
 fi
 
 one="^[[:space:]]*1[[:space:]]*$"
@@ -29,6 +32,9 @@ for THING in "$@"; do
   if [[ -n $INTERNAL ]]; then
     SOURCE=$(find ../dagger/java/dagger/internal -type f -name $FILE)
     TARGET=$(find compiler/src/main/java/dagger/internal -type f -name $FILE)
+  elif [[ -n $SPI ]]; then
+    SOURCE=$(find ../dagger/java/dagger/spi -type f -name $FILE)
+    TARGET=$(find compiler/src/main/java/dagger/spi -type f -name $FILE)
   else
     SOURCE=$(find ../dagger/java/dagger -type f -name $FILE | fgrep -F -v hilt)
     TARGET=$(find compiler/src/main/java/dagger -type f -name $FILE)
