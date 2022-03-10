@@ -16,10 +16,9 @@
 
 package dagger.internal.codegen.base;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMessager;
 import io.jbock.javapoet.ClassName;
@@ -29,7 +28,7 @@ import java.util.Optional;
  * An exception thrown to indicate that a source file could not be generated.
  *
  * <p>This exception <b>should not</b> be used to report detectable, logical errors as it may mask
- * other errors that might have been caught upon further processing. Use a {@link ValidationReport}
+ * other errors that might have been caught upon further processing. Use a {@code ValidationReport}
  * for that.
  */
 public final class SourceFileGenerationException extends Exception {
@@ -38,7 +37,7 @@ public final class SourceFileGenerationException extends Exception {
   SourceFileGenerationException(
       Optional<ClassName> generatedClassName, Throwable cause, XElement associatedElement) {
     super(createMessage(generatedClassName, cause.getMessage()), cause);
-    this.associatedElement = requireNonNull(associatedElement);
+    this.associatedElement = checkNotNull(associatedElement);
   }
 
   private static String createMessage(Optional<ClassName> generatedClassName, String message) {

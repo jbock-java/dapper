@@ -21,7 +21,7 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.DaggerElement;
 import dagger.spi.model.DependencyRequest;
 
-/** An implementation of {@link DependencyEdge}. */
+/** An implementation of {@code DependencyEdge}. */
 final class DependencyEdgeImpl implements DependencyEdge {
 
   private final DependencyRequest dependencyRequest;

@@ -16,13 +16,16 @@
 
 package dagger.internal.codegen.base;
 
+import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static io.jbock.auto.common.MoreTypes.isType;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.javapoet.ClassName;
-import java.util.List;
+import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -30,27 +33,34 @@ import javax.lang.model.type.TypeMirror;
  * type that the framework itself defines.
  */
 public final class FrameworkTypes {
-  private static final List<ClassName> PROVISION_TYPES =
-      List.of(TypeNames.PROVIDER, TypeNames.LAZY);
+  private static final ImmutableSet<ClassName> PROVISION_TYPES =
+      ImmutableSet.of(TypeNames.PROVIDER, TypeNames.LAZY, TypeNames.MEMBERS_INJECTOR);
+
+  // NOTE(beder): ListenableFuture is not considered a producer framework type because it is not
+  // defined by the framework, so we can't treat it specially in ordinary Dagger.
+  private static final ImmutableSet<ClassName> PRODUCTION_TYPES =
+      ImmutableSet.of(TypeNames.PRODUCED, TypeNames.PRODUCER);
+
+  /** Returns true if the type represents a producer-related framework type. */
+  public static boolean isProducerType(XType type) {
+    return PRODUCTION_TYPES.stream().anyMatch(className -> isTypeOf(type, className));
+  }
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(XType type) {
-    return isFrameworkType(type.toJavac());
+    return isFrameworkType(toJavac(type));
   }
 
   /** Returns true if the type represents a framework type. */
   public static boolean isFrameworkType(TypeMirror type) {
-    if (!isType(type)) {
-      return false;
-    }
-    for (ClassName clazz : FrameworkTypes.PROVISION_TYPES) {
-      if (DaggerTypes.isTypeOf(clazz, type)) {
-        return true;
-      }
-    }
-    return false;
+    return isType(type)
+        && (typeIsOneOf(PROVISION_TYPES, type)
+            || typeIsOneOf(PRODUCTION_TYPES, type));
   }
 
-  private FrameworkTypes() {
+  private static boolean typeIsOneOf(Set<ClassName> classNames, TypeMirror type) {
+    return classNames.stream().anyMatch(className -> isTypeOf(className, type));
   }
+
+  private FrameworkTypes() {}
 }

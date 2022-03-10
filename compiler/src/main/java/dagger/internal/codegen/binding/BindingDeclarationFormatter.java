@@ -25,13 +25,13 @@ import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.isExecutable;
 
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import jakarta.inject.Inject;
-import java.util.List;
 
 /**
- * Formats a {@link BindingDeclaration} into a {@link String} suitable for use in error messages.
+ * Formats a {@code BindingDeclaration} into a {@code String} suitable for use in error messages.
  */
 public final class BindingDeclarationFormatter extends Formatter<BindingDeclaration> {
   private final MethodSignatureFormatter methodSignatureFormatter;
@@ -43,7 +43,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
 
   /**
    * Returns {@code true} for declarations that this formatter can format. Specifically bindings
-   * from subcomponent declarations or those with {@linkplain BindingDeclaration#bindingElement()
+   * from subcomponent declarations or those with {@code BindingDeclaration#bindingElement()
    * binding elements} that are methods, constructors, or types.
    */
   public boolean canFormat(BindingDeclaration bindingDeclaration) {
@@ -86,7 +86,7 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
   }
 
   private String formatSubcomponentDeclaration(SubcomponentDeclaration subcomponentDeclaration) {
-    List<XTypeElement> moduleSubcomponents =
+    ImmutableList<XTypeElement> moduleSubcomponents =
         subcomponentDeclaration.moduleAnnotation().subcomponents();
     int index = moduleSubcomponents.indexOf(subcomponentDeclaration.subcomponentType());
     StringBuilder annotationValue = new StringBuilder();
@@ -106,6 +106,6 @@ public final class BindingDeclarationFormatter extends Formatter<BindingDeclarat
         "@%s(subcomponents = %s) for %s",
         subcomponentDeclaration.moduleAnnotation().simpleName(),
         annotationValue,
-        subcomponentDeclaration.contributingModule().orElseThrow());
+        subcomponentDeclaration.contributingModule().get());
   }
 }

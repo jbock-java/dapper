@@ -23,11 +23,11 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
 
-/** Utilities for {@link Optional}s. */
+/** Utilities for {@code Optional}s. */
 public final class Optionals {
   /**
-   * A {@link Comparator} that puts empty {@link Optional}s before present ones, and compares
-   * present {@link Optional}s by their values.
+   * A {@code Comparator} that puts empty {@code Optional}s before present ones, and compares
+   * present {@code Optional}s by their values.
    */
   public static <C extends Comparable<C>> Comparator<Optional<C>> optionalComparator() {
     return Comparator.comparing((Optional<C> optional) -> optional.isPresent())

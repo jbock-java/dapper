@@ -16,8 +16,7 @@ public class Iterators {
     return iterator.next();
   }
 
-  public static <T> T find(
-      Iterator<T> iterator, Predicate<? super T> predicate) {
+  public static <T> T find(Iterator<T> iterator, Predicate<? super T> predicate) {
     while (iterator.hasNext()) {
       T t = iterator.next();
       if (predicate.test(t)) {
@@ -84,5 +83,28 @@ public class Iterators {
       }
     }
     return -1;
+  }
+
+  /**
+   * Returns the number of elements remaining in {@code iterator}. The iterator will be left
+   * exhausted: its {@code hasNext()} method will return {@code false}.
+   */
+  public static int size(Iterator<?> iterator) {
+    long count = 0L;
+    while (iterator.hasNext()) {
+      iterator.next();
+      count++;
+    }
+    return saturatedCast(count);
+  }
+
+  private static int saturatedCast(long value) {
+    if (value > Integer.MAX_VALUE) {
+      return Integer.MAX_VALUE;
+    }
+    if (value < Integer.MIN_VALUE) {
+      return Integer.MIN_VALUE;
+    }
+    return (int) value;
   }
 }

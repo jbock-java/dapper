@@ -20,6 +20,7 @@ import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.anonymousClassBuilder;
+import static java.util.stream.StreamSupport.stream;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import io.jbock.auto.common.MoreElements;
@@ -29,16 +30,15 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
-import java.util.Collection;
 import java.util.stream.Collector;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-/** Convenience methods for creating {@link CodeBlock}s. */
+/** Convenience methods for creating {@code CodeBlock}s. */
 public final class CodeBlocks {
   /**
-   * Joins {@link CodeBlock} instances in a manner suitable for use as method parameters (or
+   * Joins {@code CodeBlock} instances in a manner suitable for use as method parameters (or
    * arguments).
    */
   public static Collector<CodeBlock, ?, CodeBlock> toParametersCodeBlock() {
@@ -47,32 +47,33 @@ public final class CodeBlocks {
     return CodeBlock.joining(", ");
   }
 
-  /** Concatenates {@link CodeBlock} instances separated by newlines for readability. */
+  /** Concatenates {@code CodeBlock} instances separated by newlines for readability. */
   public static Collector<CodeBlock, ?, CodeBlock> toConcatenatedCodeBlock() {
     return CodeBlock.joining("\n", "", "\n");
   }
 
-  /** Returns a comma-separated version of {@code codeBlocks} as one unified {@link CodeBlock}. */
-  public static CodeBlock makeParametersCodeBlock(Collection<CodeBlock> codeBlocks) {
-    return codeBlocks.stream().collect(toParametersCodeBlock());
+  /** Returns a comma-separated version of {@code codeBlocks} as one unified {@code CodeBlock}. */
+  public static CodeBlock makeParametersCodeBlock(Iterable<CodeBlock> codeBlocks) {
+    return stream(codeBlocks.spliterator(), false).collect(toParametersCodeBlock());
   }
 
   /**
-   * Returns a comma-separated {@link CodeBlock} using the name of every parameter in {@code
+   * Returns a comma-separated {@code CodeBlock} using the name of every parameter in {@code
    * parameters}.
    */
-  public static CodeBlock parameterNames(Collection<ParameterSpec> parameters) {
-    return parameters.stream()
+  public static CodeBlock parameterNames(Iterable<ParameterSpec> parameters) {
+    // TODO(ronshapiro): Add DaggerStreams.stream(Iterable)
+    return stream(parameters.spliterator(), false)
         .map(p -> CodeBlock.of("$N", p))
         .collect(toParametersCodeBlock());
   }
 
   /**
-   * Returns one unified {@link CodeBlock} which joins each item in {@code codeBlocks} with a
+   * Returns one unified {@code CodeBlock} which joins each item in {@code codeBlocks} with a
    * newline.
    */
-  public static CodeBlock concat(Collection<CodeBlock> codeBlocks) {
-    return codeBlocks.stream().collect(toConcatenatedCodeBlock());
+  public static CodeBlock concat(Iterable<CodeBlock> codeBlocks) {
+    return stream(codeBlocks.spliterator(), false).collect(toConcatenatedCodeBlock());
   }
 
   /** Adds an annotation to a method. */
@@ -81,8 +82,8 @@ public final class CodeBlocks {
   }
 
   /**
-   * Returns an anonymous {@code Provider} class with the single {@code
-   * Provider#get()} method that returns the given {@code expression}.
+   * Returns an anonymous {@code jakarta.inject.Provider} class with the single {@code
+   * javax.inject.Provider#get()} method that returns the given {@code expression}.
    */
   public static CodeBlock anonymousProvider(Expression expression) {
     // More of a precondition check that the type Provider is parameterized with is a DeclaredType
@@ -92,8 +93,8 @@ public final class CodeBlocks {
   }
 
   /**
-   * Returns an anonymous {@code Provider} class with the single {@code
-   * Provider#get()} method implemented by {@code body}.
+   * Returns an anonymous {@code jakarta.inject.Provider} class with the single {@code
+   * javax.inject.Provider#get()} method implemented by {@code body}.
    */
   public static CodeBlock anonymousProvider(TypeName providedType, CodeBlock body) {
     return CodeBlock.of(
@@ -124,7 +125,11 @@ public final class CodeBlocks {
     return CodeBlock.of("$T", type);
   }
 
-  /** Returns a javadoc {@literal @link} tag that poins to the given {@link ExecutableElement}. */
+  public static CodeBlock stringLiteral(String toWrap) {
+    return CodeBlock.of("$S", toWrap);
+  }
+
+  /** Returns a javadoc {@literal @link} tag that poins to the given {@code ExecutableElement}. */
   public static CodeBlock javadocLinkTo(ExecutableElement executableElement) {
     CodeBlock.Builder builder =
         CodeBlock.builder()
@@ -154,6 +159,5 @@ public final class CodeBlocks {
     return builder.add(")}").build();
   }
 
-  private CodeBlocks() {
-  }
+  private CodeBlocks() {}
 }

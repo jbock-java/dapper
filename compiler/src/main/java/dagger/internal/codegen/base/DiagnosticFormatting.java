@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Utility methods for formatting diagnostics to the {@link javax.annotation.processing.Messager}.
+ * Utility methods for formatting diagnostics to the {@code javax.annotation.processing.Messager}.
  */
 public final class DiagnosticFormatting {
 
@@ -36,9 +36,11 @@ public final class DiagnosticFormatting {
               + "((?:" // Start a group with a non-capturing or part
               + "java[.]lang"
               + "|java[.]util"
-              + "|jakarta[.]inject"
+              + "|javax[.]inject"
               + "|dagger"
               + "|dagger[.]multibindings"
+              + "|com[.]google[.]common[.]base"
+              + "|com[.]google[.]common[.]collect"
               + ")[.])" // Always end with a literal .
               + "[A-Z]"); // What we want to match on but not capture.
 
@@ -66,6 +68,5 @@ public final class DiagnosticFormatting {
     return result.toString();
   }
 
-  private DiagnosticFormatting() {
-  }
+  private DiagnosticFormatting() {}
 }

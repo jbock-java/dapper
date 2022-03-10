@@ -36,7 +36,8 @@ import jakarta.inject.Inject;
 final class SetMultibindingValidator implements BindingGraphPlugin {
 
   @Inject
-  SetMultibindingValidator() {}
+  SetMultibindingValidator() {
+  }
 
   @Override
   public String pluginName() {

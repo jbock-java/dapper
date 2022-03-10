@@ -17,8 +17,7 @@ package dagger.internal.codegen.base;
 import java.util.Objects;
 
 public final class Preconditions {
-  private Preconditions() {
-  }
+  private Preconditions() {}
 
   /**
    * Ensures the truth of an expression involving one or more parameters to the calling method.
@@ -51,8 +50,7 @@ public final class Preconditions {
    *
    * @since 20.0 (varargs overload since 2.0)
    */
-  public static void checkArgument(
-      boolean b, String errorMessageTemplate, Object p1) {
+  public static void checkArgument(boolean b, String errorMessageTemplate, Object p1) {
     if (!b) {
       throw new IllegalArgumentException(String.format(errorMessageTemplate, p1));
     }
@@ -63,8 +61,7 @@ public final class Preconditions {
    *
    * @since 20.0 (varargs overload since 2.0)
    */
-  public static void checkArgument(
-      boolean b, String errorMessageTemplate, Object p1, Object p2) {
+  public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2) {
     if (!b) {
       throw new IllegalArgumentException(String.format(errorMessageTemplate, p1, p2));
     }
@@ -116,8 +113,7 @@ public final class Preconditions {
    *
    * @since 20.0 (varargs overload since 2.0)
    */
-  public static void checkState(
-      boolean b, String errorMessageTemplate, Object p1, Object p2) {
+  public static void checkState(boolean b, String errorMessageTemplate, Object p1, Object p2) {
     if (!b) {
       throw new IllegalStateException(String.format(errorMessageTemplate, p1, p2));
     }
@@ -130,11 +126,7 @@ public final class Preconditions {
    * @since 20.0 (varargs overload since 2.0)
    */
   public static void checkState(
-      boolean b,
-      String errorMessageTemplate,
-      Object p1,
-      Object p2,
-      Object p3) {
+      boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) {
     if (!b) {
       throw new IllegalStateException(String.format(errorMessageTemplate, p1, p2, p3));
     }
@@ -150,5 +142,23 @@ public final class Preconditions {
 
   public static <T> T checkNotNull(T obj, String errorMessageTemplate, Object p1) {
     return Objects.requireNonNull(obj, () -> String.format(errorMessageTemplate, p1));
+  }
+
+  public static int checkElementIndex(int index, int size) {
+    // Carefully optimized for execution by hotspot (explanatory comment above)
+    if (index < 0 || index >= size) {
+      throw new IndexOutOfBoundsException(badElementIndex(index, size, "index"));
+    }
+    return index;
+  }
+
+  private static String badElementIndex(int index, int size, String desc) {
+    if (index < 0) {
+      return String.format("%s (%d) must not be negative", desc, index);
+    } else if (size < 0) {
+      throw new IllegalArgumentException("negative size: " + size);
+    } else { // index >= size
+      return String.format("%s (%d) must be less than size (%d)", desc, index, size);
+    }
   }
 }

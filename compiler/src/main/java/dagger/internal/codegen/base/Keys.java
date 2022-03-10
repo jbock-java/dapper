@@ -28,7 +28,7 @@ import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.Key;
 import java.util.Optional;
 
-/** Utility methods related to {@link Key}s. */
+/** Utility methods related to {@code Key}s. */
 public final class Keys {
   public static boolean isValidMembersInjectionKey(Key key) {
     return !key.qualifier().isPresent()

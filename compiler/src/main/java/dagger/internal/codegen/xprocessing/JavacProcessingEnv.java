@@ -52,6 +52,11 @@ public class JavacProcessingEnv implements XProcessingEnv {
   }
 
   @Override
+  public Map<String, String> getOptions() {
+    return delegate.getOptions();
+  }
+
+  @Override
   public XMessager getMessager() {
     return new JavacMessager(delegate.getMessager());
   }

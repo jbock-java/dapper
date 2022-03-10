@@ -33,14 +33,14 @@ import javax.lang.model.element.Modifier;
 
 /**
  * An abstract type for classes representing a Dagger binding. Particularly, contains the element
- * that generated the binding and the {@link DependencyRequest} instances that are required to
+ * that generated the binding and the {@code DependencyRequest} instances that are required to
  * satisfy the binding, but leaves the specifics of the <i>mechanism</i> of the binding to the
  * subtypes.
  */
 public abstract class Binding extends BindingDeclaration {
 
   /**
-   * Returns {@code true} if using this binding requires an instance of the {@link
+   * Returns {@code true} if using this binding requires an instance of the {@code
    * #contributingModule()}.
    */
   public boolean requiresModuleInstance() {
@@ -52,7 +52,7 @@ public abstract class Binding extends BindingDeclaration {
   }
 
   /**
-   * Returns {@code true} if this binding may provide {@code null} instead of an instance of {@link
+   * Returns {@code true} if this binding may provide {@code null} instead of an instance of {@code
    * #key()}. Nullable bindings cannot be requested from {@code DependencyRequest#isNullable()
    * non-nullable dependency requests}.
    */
@@ -61,22 +61,22 @@ public abstract class Binding extends BindingDeclaration {
   /** The kind of binding this instance represents. */
   public abstract BindingKind kind();
 
-  /** The {@link BindingType} of this binding. */
+  /** The {@code BindingType} of this binding. */
   public abstract BindingType bindingType();
 
-  /** The {@link FrameworkType} of this binding. */
+  /** The {@code FrameworkType} of this binding. */
   public final FrameworkType frameworkType() {
     return FrameworkType.forBindingType(bindingType());
   }
 
   /**
-   * The explicit set of {@link DependencyRequest dependencies} required to satisfy this binding as
+   * The explicit set of {@code DependencyRequest dependencies} required to satisfy this binding as
    * defined by the user-defined injection sites.
    */
   public abstract ImmutableSet<DependencyRequest> explicitDependencies();
 
   /**
-   * The set of {@link DependencyRequest dependencies} that are added by the framework rather than a
+   * The set of {@code DependencyRequest dependencies} that are added by the framework rather than a
    * user-defined injection site. This returns an unmodifiable set.
    */
   public ImmutableSet<DependencyRequest> implicitDependencies() {
@@ -94,8 +94,8 @@ public abstract class Binding extends BindingDeclaration {
           });
 
   /**
-   * The set of {@link DependencyRequest dependencies} required to satisfy this binding. This is the
-   * union of {@link #explicitDependencies()} and {@link #implicitDependencies()}. This returns an
+   * The set of {@code DependencyRequest dependencies} required to satisfy this binding. This is the
+   * union of {@code #explicitDependencies()} and {@code #implicitDependencies()}. This returns an
    * unmodifiable set.
    */
   public final ImmutableSet<DependencyRequest> dependencies() {
@@ -103,8 +103,8 @@ public abstract class Binding extends BindingDeclaration {
   }
 
   /**
-   * If this binding's key's type parameters are different from those of the {@link
-   * #bindingTypeElement()}, this is the binding for the {@link #bindingTypeElement()}'s unresolved
+   * If this binding's key's type parameters are different from those of the {@code
+   * #bindingTypeElement()}, this is the binding for the {@code #bindingTypeElement()}'s unresolved
    * type.
    */
   public abstract Optional<? extends Binding> unresolved();

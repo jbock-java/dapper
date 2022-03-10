@@ -21,7 +21,7 @@ import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.DaggerExecutableElement;
 
-/** An implementation of {@link ChildFactoryMethodEdge}. */
+/** An implementation of {@code ChildFactoryMethodEdge}. */
 public final class ChildFactoryMethodEdgeImpl implements ChildFactoryMethodEdge {
 
   private final DaggerExecutableElement factoryMethod;

@@ -40,6 +40,7 @@ public interface BindingGraphValidationModule {
       InjectBindingValidator validation5,
       MapMultibindingValidator validation6,
       MissingBindingValidator validation7,
+      NullableBindingValidator validation8,
       SetMultibindingValidator validation10,
       SubcomponentFactoryMethodValidator validation11) {
     ImmutableSet<BindingGraphPlugin> plugins =
@@ -50,6 +51,7 @@ public interface BindingGraphValidationModule {
             validation5,
             validation6,
             validation7,
+            validation8,
             validation10,
             validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {

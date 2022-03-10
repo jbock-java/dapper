@@ -619,7 +619,7 @@ class ScopingValidationTest {
         .hadErrorContaining(
             message(
                 "test.UnscopedComponent (unscoped) cannot depend on scoped components:",
-                "    @Singleton test.ScopedComponent"));
+                "    @jakarta.inject.Singleton test.ScopedComponent"));
   }
 
   @Test

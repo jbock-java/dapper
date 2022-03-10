@@ -20,34 +20,33 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import dagger.internal.codegen.SpiModule.ProcessorClassLoader;
+import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.spi.model.BindingGraphPlugin;
+import dagger.multibindings.IntoSet;
 import jakarta.inject.Singleton;
 import java.util.Map;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 
-/** Bindings that depend on the {@link ProcessingEnvironment}. */
+/** Bindings that depend on the {@code XProcessingEnv}. */
 @Module
 interface ProcessingEnvironmentModule {
   @Binds
-  @Reusable
-    // to avoid parsing options more than once
+  @Reusable // to avoid parsing options more than once
   CompilerOptions bindCompilerOptions(
       ProcessingEnvironmentCompilerOptions processingEnvironmentCompilerOptions);
 
   @Provides
   @ProcessingOptions
   static Map<String, String> processingOptions(XProcessingEnv xProcessingEnv) {
-    return xProcessingEnv.toJavac().getOptions();
+    return xProcessingEnv.getOptions();
   }
 
   @Provides
@@ -62,27 +61,24 @@ interface ProcessingEnvironmentModule {
 
   @Provides
   static SourceVersion sourceVersion(XProcessingEnv xProcessingEnv) {
-    return xProcessingEnv.toJavac().getSourceVersion();
+    return XConverters.toJavac(xProcessingEnv).getSourceVersion();
   }
 
   @Provides
   @Singleton
   static DaggerElements daggerElements(XProcessingEnv xProcessingEnv) {
     return new DaggerElements(
-        xProcessingEnv.toJavac().getElementUtils(),
-        xProcessingEnv.toJavac().getTypeUtils());
+        XConverters.toJavac(xProcessingEnv).getElementUtils(),
+        XConverters.toJavac(xProcessingEnv).getTypeUtils());
   }
 
   @Provides
   @Singleton
-  static DaggerTypes daggerTypes(
-      XProcessingEnv xProcessingEnv, DaggerElements elements) {
-    return new DaggerTypes(xProcessingEnv.toJavac().getTypeUtils(), elements);
+  static DaggerTypes daggerTypes(XProcessingEnv xProcessingEnv, DaggerElements elements) {
+    return new DaggerTypes(XConverters.toJavac(xProcessingEnv).getTypeUtils(), elements);
   }
 
-  @Provides
-  @ProcessorClassLoader
-  static ClassLoader processorClassloader() {
-    return BindingGraphPlugin.class.getClassLoader();
-  }
+  @Binds
+  @IntoSet
+  ClearableCache daggerElementAsClearableCache(DaggerElements elements);
 }

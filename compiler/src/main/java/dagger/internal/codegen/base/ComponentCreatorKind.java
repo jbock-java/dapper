@@ -16,30 +16,25 @@
 
 package dagger.internal.codegen.base;
 
-import java.util.Locale;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_UNDERSCORE;
 
 /** Enumeration of the different kinds of component creators. */
 public enum ComponentCreatorKind {
   /** {@code @Component.Builder} or one of its subcomponent/production variants. */
-  BUILDER("Builder"),
+  BUILDER,
 
   /** {@code @Component.Factory} or one of its subcomponent/production variants. */
-  FACTORY("Factory"),
+  FACTORY,
   ;
-
-  private final String typeName;
-
-  ComponentCreatorKind(String typeName) {
-    this.typeName = typeName;
-  }
 
   /** Name to use as (or as part of) a type name for a creator of this kind. */
   public String typeName() {
-    return typeName;
+    return UPPER_UNDERSCORE.to(UPPER_CAMEL, name());
   }
 
   /** Name to use for a component's static method returning a creator of this kind. */
   public String methodName() {
-    return name().toLowerCase(Locale.ROOT);
+    return Ascii.toLowerCase(name());
   }
 }

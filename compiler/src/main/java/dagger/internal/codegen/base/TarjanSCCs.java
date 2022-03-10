@@ -16,17 +16,17 @@
 
 package dagger.internal.codegen.base;
 
+import static dagger.internal.codegen.base.Preconditions.checkState;
 import static java.lang.Math.min;
 
+import dagger.internal.codegen.collect.ImmutableCollection;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.collect.Sets;
 import io.jbock.common.graph.SuccessorsFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,12 +40,12 @@ public final class TarjanSCCs {
 
   /** Returns the set of strongly connected components in reverse topological order. */
   public static <NodeT> ImmutableSet<ImmutableSet<NodeT>> compute(
-      Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
+      ImmutableCollection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
     return new TarjanSCC<>(nodes, successorsFunction).compute();
   }
 
   private static class TarjanSCC<NodeT> {
-    private final Collection<NodeT> nodes;
+    private final ImmutableCollection<NodeT> nodes;
     private final SuccessorsFunction<NodeT> successorsFunction;
     private final Deque<NodeT> stack;
     private final Set<NodeT> onStack;
@@ -53,24 +53,23 @@ public final class TarjanSCCs {
     private final Map<NodeT, Integer> lowLinks;
     private final List<ImmutableSet<NodeT>> stronglyConnectedComponents = new ArrayList<>();
 
-    TarjanSCC(Collection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
+    TarjanSCC(ImmutableCollection<NodeT> nodes, SuccessorsFunction<NodeT> successorsFunction) {
       this.nodes = nodes;
       this.successorsFunction = successorsFunction;
       this.stack = new ArrayDeque<>(nodes.size());
-      int capacity = Math.max(16, (int) (1.5 * nodes.size()));
-      this.onStack = new HashSet<>(capacity);
-      this.indexes = new HashMap<>(capacity);
-      this.lowLinks = new HashMap<>(capacity);
+      this.onStack = Sets.newHashSetWithExpectedSize(nodes.size());
+      this.indexes = Maps.newHashMapWithExpectedSize(nodes.size());
+      this.lowLinks = Maps.newHashMapWithExpectedSize(nodes.size());
     }
 
     private ImmutableSet<ImmutableSet<NodeT>> compute() {
-      Preconditions.checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
+      checkState(indexes.isEmpty(), "TarjanSCC#compute() can only be called once per instance!");
       for (NodeT node : nodes) {
         if (!indexes.containsKey(node)) {
           stronglyConnect(node);
         }
       }
-      return ImmutableSet.copyOf(new LinkedHashSet<>(stronglyConnectedComponents));
+      return ImmutableSet.copyOf(stronglyConnectedComponents);
     }
 
     private void stronglyConnect(NodeT node) {
@@ -88,25 +87,24 @@ public final class TarjanSCCs {
         } else if (onStack.contains(successor)) {
           // Successor is on the stack and hence in the current SCC.
           lowLinks.put(node, min(lowLinks.get(node), indexes.get(successor)));
+        } else {
+          // Successor is not on the stack and hence in an already processed SCC, so ignore.
         }
-        // else:
-        //   Successor is not on the stack and hence in an already processed SCC, so ignore.
       }
 
       // If node is the root of the SCC, pop the stack until reaching the root to get all SCC nodes.
       if (lowLinks.get(node).equals(indexes.get(node))) {
-        Set<NodeT> scc = new LinkedHashSet<>();
+        ImmutableSet.Builder<NodeT> scc = ImmutableSet.builder();
         NodeT currNode;
         do {
           currNode = stack.pop();
           onStack.remove(currNode);
           scc.add(currNode);
         } while (!node.equals(currNode));
-        stronglyConnectedComponents.add(ImmutableSet.copyOf(scc));
+        stronglyConnectedComponents.add(scc.build());
       }
     }
   }
 
-  private TarjanSCCs() {
-  }
+  private TarjanSCCs() {}
 }

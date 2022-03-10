@@ -140,8 +140,7 @@ public final class DaggerTypes implements Types {
   }
 
   /**
-   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first
-   * order.
+   * Returns the {@code #directSupertypes(TypeMirror) supertype}s of a type in breadth-first order.
    */
   public Iterable<TypeMirror> supertypes(TypeMirror type) {
     return Traverser.<TypeMirror>forGraph(this::directSupertypes).breadthFirst(type);

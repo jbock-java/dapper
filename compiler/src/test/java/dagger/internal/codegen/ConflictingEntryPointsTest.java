@@ -169,7 +169,7 @@ public final class ConflictingEntryPointsTest {
             message(
                 "conflicting entry point declarations:",
                 "    Object test.Base1.foo()",
-                "    @Named(\"foo\") Object test.Base2.foo()"))
+                "    @jakarta.inject.Named(\"foo\") Object test.Base2.foo()"))
         .inFile(component)
         .onLineContaining("interface TestComponent ");
   }

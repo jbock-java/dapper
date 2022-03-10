@@ -33,9 +33,9 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Checks the assignability of one type to another, given a {@link ContributionType} context. This
+ * Checks the assignability of one type to another, given a {@code ContributionType} context. This
  * is used by {@code dagger.internal.codegen.validation.BindsMethodValidator} to validate that the
- * right-hand- side of a {@link dagger.Binds} method is valid, as well as in {@code
+ * right-hand- side of a {@code dagger.Binds} method is valid, as well as in {@code
  * dagger.internal.codegen.writing.DelegateRequestRepresentation} when the right-hand-side in
  * generated code might be an erased type due to accessibility.
  */
@@ -51,7 +51,7 @@ public final class BindsTypeChecker {
   }
 
   /**
-   * Checks the assignability of {@code rightHandSide} to {@code leftHandSide} given a {@link
+   * Checks the assignability of {@code rightHandSide} to {@code leftHandSide} given a {@code
    * ContributionType} context.
    */
   public boolean isAssignable(
@@ -60,7 +60,7 @@ public final class BindsTypeChecker {
   }
 
   /**
-   * Checks the assignability of {@code rightHandSide} to {@code leftHandSide} given a {@link
+   * Checks the assignability of {@code rightHandSide} to {@code leftHandSide} given a {@code
    * ContributionType} context.
    */
   public boolean isAssignable(
@@ -73,6 +73,16 @@ public final class BindsTypeChecker {
     switch (contributionType) {
       case UNIQUE:
         return leftHandSide;
+      case SET:
+        DeclaredType parameterizedSetType = types.getDeclaredType(setElement(), leftHandSide);
+        return methodParameterType(parameterizedSetType, "add");
+      case SET_VALUES:
+        // TODO(b/211774331): The left hand side type should be limited to Set types.
+        return methodParameterType(MoreTypes.asDeclared(leftHandSide), "addAll");
+      case MAP:
+        DeclaredType parameterizedMapType =
+            types.getDeclaredType(mapElement(), unboundedWildcard(), leftHandSide);
+        return methodParameterTypes(parameterizedMapType, "put").get(1);
     }
     throw new AssertionError("Unknown contribution type: " + contributionType);
   }
@@ -80,10 +90,10 @@ public final class BindsTypeChecker {
   private ImmutableList<TypeMirror> methodParameterTypes(DeclaredType type, String methodName) {
     ImmutableList.Builder<ExecutableElement> methodsForName = ImmutableList.builder();
     for (ExecutableElement method :
-      // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
-      // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
-      // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
-      // getLocalAndInheritedMethods ensures that the method will always be present.
+        // type.asElement().getEnclosedElements() is not used because some non-standard JDKs (e.g.
+        // J2CL) don't redefine Set.add() (whose only purpose of being redefined in the standard JDK
+        // is documentation, and J2CL's implementation doesn't declare docs for JDK types).
+        // getLocalAndInheritedMethods ensures that the method will always be present.
         elements.getLocalAndInheritedMethods(MoreTypes.asTypeElement(type))) {
       if (method.getSimpleName().contentEquals(methodName)) {
         methodsForName.add(method);

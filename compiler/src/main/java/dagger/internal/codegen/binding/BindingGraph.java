@@ -227,7 +227,7 @@ public abstract class BindingGraph {
     BindingGraph bindingGraph = new AutoValue_BindingGraph(componentNode, topLevelBindingGraph);
 
     ImmutableSet<ModuleDescriptor> modules =
-        ImmutableSet.copyOf(((ComponentNodeImpl) componentNode).componentDescriptor().modules());
+        ((ComponentNodeImpl) componentNode).componentDescriptor().modules();
 
     ImmutableSet<ModuleDescriptor> inheritedModules =
         parent.isPresent()

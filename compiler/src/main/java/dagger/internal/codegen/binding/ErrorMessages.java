@@ -21,28 +21,35 @@ import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.ComponentCreatorAnnotation;
 import dagger.internal.codegen.base.ComponentKind;
+import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 /** The collection of error messages to be reported back to users. */
 public final class ErrorMessages {
+
+  private static final UnaryOperator<String> PRODUCTION =
+      s ->
+          s.replace("component", "production component")
+              .replace("Component", "ProductionComponent");
 
   private static final UnaryOperator<String> SUBCOMPONENT =
       s -> s.replace("component", "subcomponent").replace("Component", "Subcomponent");
 
   private static final UnaryOperator<String> FACTORY = s -> s.replace("Builder", "Factory");
 
-  private static final Map<ComponentKind, Function<String, String>>
+  private static final ImmutableMap<ComponentKind, Function<String, String>>
       COMPONENT_TRANSFORMATIONS =
-      Map.of(
-          ComponentKind.COMPONENT, UnaryOperator.identity(),
-          ComponentKind.SUBCOMPONENT, SUBCOMPONENT);
+          ImmutableMap.of(
+              ComponentKind.COMPONENT, UnaryOperator.identity(),
+              ComponentKind.SUBCOMPONENT, SUBCOMPONENT,
+              ComponentKind.PRODUCTION_COMPONENT, PRODUCTION,
+              ComponentKind.PRODUCTION_SUBCOMPONENT, PRODUCTION.andThen(SUBCOMPONENT));
 
   public static ComponentMessages componentMessagesFor(ComponentKind componentKind) {
     return new ComponentMessages(COMPONENT_TRANSFORMATIONS.get(componentKind));
@@ -50,13 +57,14 @@ public final class ErrorMessages {
 
   public static ComponentMessages componentMessagesFor(ComponentAnnotation componentAnnotation) {
     return new ComponentMessages(
-        transformation(componentAnnotation.isSubcomponent()));
+        transformation(componentAnnotation.isProduction(), componentAnnotation.isSubcomponent()));
   }
 
   public static ComponentCreatorMessages creatorMessagesFor(
       ComponentCreatorAnnotation creatorAnnotation) {
     Function<String, String> transformation =
         transformation(
+            creatorAnnotation.isProductionCreatorAnnotation(),
             creatorAnnotation.isSubcomponentCreatorAnnotation());
     switch (creatorAnnotation.creatorKind()) {
       case BUILDER:
@@ -67,8 +75,10 @@ public final class ErrorMessages {
     throw new AssertionError(creatorAnnotation);
   }
 
-  private static Function<String, String> transformation(boolean isSubcomponent) {
-    return isSubcomponent ? SUBCOMPONENT : UnaryOperator.identity();
+  private static Function<String, String> transformation(
+      boolean isProduction, boolean isSubcomponent) {
+    Function<String, String> transformation = isProduction ? PRODUCTION : UnaryOperator.identity();
+    return isSubcomponent ? transformation.andThen(SUBCOMPONENT) : transformation;
   }
 
   private abstract static class Messages {
@@ -89,7 +99,7 @@ public final class ErrorMessages {
       super(transformation);
     }
 
-    public String moreThanOne() {
+    public final String moreThanOne() {
       return process("@Component has more than one @Component.Builder or @Component.Factory: %s");
     }
   }
@@ -204,9 +214,9 @@ public final class ErrorMessages {
               + "%4$s",
           componentBuilder.getQualifiedName(),
           getSimpleName(buildMethod),
-          returnType,
+          returnType.getTypeName(),
           component.getQualifiedName(),
-          additionalMethods.stream().map(XMethodElement::toString).collect(Collectors.joining(", ")));
+          Joiner.on(", ").join(additionalMethods));
     }
 
     public final String bindsInstanceNotAllowedOnBothSetterMethodAndParameter() {
@@ -348,6 +358,5 @@ public final class ErrorMessages {
     }
   }
 
-  private ErrorMessages() {
-  }
+  private ErrorMessages() {}
 }

@@ -38,7 +38,7 @@ public enum ComponentKind {
   PRODUCER_MODULE(TypeNames.PRODUCER_MODULE);
 
   private static final ImmutableSet<ComponentKind> PRODUCER_KINDS =
-      ImmutableSet.of();
+      ImmutableSet.of(PRODUCTION_COMPONENT, PRODUCTION_SUBCOMPONENT, PRODUCER_MODULE);
 
   /** Returns the annotations for components of the given kinds. */
   public static ImmutableSet<ClassName> annotationsFor(Iterable<ComponentKind> kinds) {

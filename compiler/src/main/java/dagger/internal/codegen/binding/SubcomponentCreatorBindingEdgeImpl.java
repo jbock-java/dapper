@@ -16,24 +16,22 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Util.getOnlyElement;
+import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
+import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static java.util.stream.Collectors.joining;
 
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.spi.model.BindingGraph.SubcomponentCreatorBindingEdge;
 import dagger.spi.model.DaggerTypeElement;
 import io.jbock.javapoet.ClassName;
-import java.util.Optional;
-import java.util.Set;
 
-/** An implementation of {@link SubcomponentCreatorBindingEdge}. */
+/** An implementation of {@code SubcomponentCreatorBindingEdge}. */
 public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCreatorBindingEdge {
-
-  private final Set<SubcomponentDeclaration> subcomponentDeclarations;
+  private final ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations;
 
   SubcomponentCreatorBindingEdgeImpl(
-      Set<SubcomponentDeclaration> subcomponentDeclarations) {
+      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations) {
     this.subcomponentDeclarations = subcomponentDeclarations;
   }
 
@@ -41,19 +39,19 @@ public final class SubcomponentCreatorBindingEdgeImpl implements SubcomponentCre
   public ImmutableSet<DaggerTypeElement> declaringModules() {
     return subcomponentDeclarations.stream()
         .map(SubcomponentDeclaration::contributingModule)
-        .flatMap(Optional::stream)
+        .flatMap(presentValues())
         .map(DaggerTypeElement::from)
-        .collect(DaggerStreams.toImmutableSet());
+        .collect(toImmutableSet());
   }
 
   @Override
   public String toString() {
     return "subcomponent declared by "
         + (subcomponentDeclarations.size() == 1
-        ? getOnlyElement(declaringModules()).className().canonicalName()
-        : declaringModules().stream()
-        .map(DaggerTypeElement::className)
-        .map(ClassName::canonicalName)
-        .collect(joining(", ", "{", "}")));
+            ? getOnlyElement(declaringModules()).className().canonicalName()
+            : declaringModules().stream()
+                .map(DaggerTypeElement::className)
+                .map(ClassName::canonicalName)
+                .collect(joining(", ", "{", "}")));
   }
 }

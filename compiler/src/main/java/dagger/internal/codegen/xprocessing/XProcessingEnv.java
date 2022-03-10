@@ -4,6 +4,7 @@ import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.TypeName;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -26,6 +27,9 @@ public interface XProcessingEnv {
   Elements getElementUtils();
 
   Types getTypeUtils();
+
+  /** List of options passed into the annotation processor */
+  Map<String, String> getOptions();
 
   default JavacType wrap(TypeMirror typeMirror) {
     switch (typeMirror.getKind()) {

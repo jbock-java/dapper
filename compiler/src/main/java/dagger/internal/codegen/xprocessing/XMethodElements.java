@@ -1,4 +1,3 @@
-package dagger.internal.codegen.xprocessing;
 /*
  * Copyright (C) 2021 The Dagger Authors.
  *
@@ -15,8 +14,10 @@ package dagger.internal.codegen.xprocessing;
  * limitations under the License.
  */
 
+package dagger.internal.codegen.xprocessing;
+
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-/** A utility class for {@link XMethodElement} helper methods. */
+/** A utility class for {@code XMethodElement} helper methods. */
 public final class XMethodElements {
 
   /** Returns the type this method is enclosed in. */

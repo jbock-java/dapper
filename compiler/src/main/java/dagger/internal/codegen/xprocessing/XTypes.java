@@ -27,7 +27,7 @@ import java.util.Optional;
 import javax.lang.model.type.TypeKind;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-/** A utility class for {@link XType} helper methods. */
+/** A utility class for {@code XType} helper methods. */
 public final class XTypes {
 
   /** Returns {@code true} if the given type is a raw type of a parameterized type. */
@@ -37,7 +37,7 @@ public final class XTypes {
         && !type.getTypeElement().getType().getTypeArguments().isEmpty();
   }
 
-  /** Returns the given {@code type} as an {@link XArrayType}. */
+  /** Returns the given {@code type} as an {@code XArrayType}. */
   public static XArrayType asArray(XType type) {
     return (XArrayType) type;
   }
@@ -80,8 +80,8 @@ public final class XTypes {
   }
 
   /**
-   * Returns the non-{@link Object} superclass of the type with the proper type parameters. An empty
-   * {@link Optional} is returned if there is no non-{@link Object} superclass.
+   * Returns the non-{@code Object} superclass of the type with the proper type parameters. An empty
+   * {@code Optional} is returned if there is no non-{@code Object} superclass.
    */
   public static Optional<XType> nonObjectSuperclass(XType type) {
     return isDeclared(type)

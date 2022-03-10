@@ -16,22 +16,22 @@
 
 package dagger.internal.codegen.componentgenerator;
 
+import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.writing.ComponentNames.getRootComponentClassName;
 
-import dagger.Component;
-import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
+import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
-import java.util.List;
 import java.util.Optional;
+import javax.lang.model.SourceVersion;
 
-/** Generates the implementation of the abstract types annotated with {@link Component}. */
+/** Generates the implementation of the abstract types annotated with {@code Component}. */
 final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   private final TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory;
 
@@ -39,8 +39,9 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   ComponentGenerator(
       XFiler filer,
       DaggerElements elements,
+      SourceVersion sourceVersion,
       TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory) {
-    super(filer, elements);
+    super(filer, elements, sourceVersion);
     this.topLevelImplementationComponentFactory = topLevelImplementationComponentFactory;
   }
 
@@ -50,21 +51,21 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   }
 
   @Override
-  public List<TypeSpec.Builder> topLevelTypes(BindingGraph bindingGraph) {
+  public ImmutableList<TypeSpec.Builder> topLevelTypes(BindingGraph bindingGraph) {
     ComponentImplementation componentImplementation =
         topLevelImplementationComponentFactory
             .create(bindingGraph)
             .currentImplementationSubcomponentBuilder()
             .bindingGraph(bindingGraph)
             .parentImplementation(Optional.empty())
-            .parentBindingExpressions(Optional.empty())
+            .parentRequestRepresentations(Optional.empty())
             .parentRequirementExpressions(Optional.empty())
             .build()
             .componentImplementation();
-    Preconditions.checkState(
+    verify(
         componentImplementation
             .name()
             .equals(getRootComponentClassName(bindingGraph.componentDescriptor())));
-    return List.of(componentImplementation.generate().toBuilder());
+    return ImmutableList.of(componentImplementation.generate().toBuilder());
   }
 }

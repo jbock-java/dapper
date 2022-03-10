@@ -47,8 +47,7 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
   private final Map<ComponentNode, Set<XTypeElement>> inheritedModulesCache = new HashMap<>();
 
   @Inject
-  SubcomponentFactoryMethodValidator() {
-  }
+  SubcomponentFactoryMethodValidator() {}
 
   @Override
   public String pluginName() {
@@ -123,9 +122,9 @@ final class SubcomponentFactoryMethodValidator implements BindingGraphPlugin {
         componentNode.componentPath().atRoot()
             ? ImmutableSet.of()
             : graph
-            .componentNode(componentNode.componentPath().parent())
-            .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
-            .get();
+                .componentNode(componentNode.componentPath().parent())
+                .map(parent -> union(ownedModules(parent, graph), inheritedModules(parent, graph)))
+                .get();
   }
 
   private void reportMissingModuleParameters(

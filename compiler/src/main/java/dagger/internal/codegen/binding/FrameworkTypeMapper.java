@@ -19,27 +19,48 @@ package dagger.internal.codegen.binding;
 import dagger.spi.model.RequestKind;
 
 /**
- * A mapper for associating a {@link RequestKind} to a {@link FrameworkType}, dependent on the type
- * of code to be generated.
+ * A mapper for associating a {@code RequestKind} to a {@code FrameworkType}, dependent on the type
+ * of code to be generated (e.g., for {@code Provider} or {@code Producer}).
  */
 public enum FrameworkTypeMapper {
   FOR_PROVIDER() {
     @Override
-    public FrameworkType getFrameworkType() {
-      return FrameworkType.PROVIDER;
+    public FrameworkType getFrameworkType(RequestKind requestKind) {
+      switch (requestKind) {
+        case INSTANCE:
+        case PROVIDER:
+        case PROVIDER_OF_LAZY:
+        case LAZY:
+          return FrameworkType.PROVIDER;
+        case PRODUCED:
+        case PRODUCER:
+          throw new IllegalArgumentException(requestKind.toString());
+        default:
+          throw new AssertionError(requestKind);
+      }
+    }
+  },
+  FOR_PRODUCER() {
+    @Override
+    public FrameworkType getFrameworkType(RequestKind requestKind) {
+      switch (requestKind) {
+        case INSTANCE:
+        case PRODUCED:
+        case PRODUCER:
+          return FrameworkType.PRODUCER_NODE;
+        case PROVIDER:
+        case PROVIDER_OF_LAZY:
+        case LAZY:
+          return FrameworkType.PROVIDER;
+        default:
+          throw new AssertionError(requestKind);
+      }
     }
   };
-
-  public static FrameworkTypeMapper forBindingType() {
-    return FOR_PROVIDER;
-  }
 
   public static FrameworkTypeMapper forBindingType(BindingType bindingType) {
     return FOR_PROVIDER;
   }
 
-  public abstract FrameworkType getFrameworkType();
-  public FrameworkType getFrameworkType(RequestKind requestKind) {
-    return getFrameworkType();
-  }
+  public abstract FrameworkType getFrameworkType(RequestKind requestKind);
 }

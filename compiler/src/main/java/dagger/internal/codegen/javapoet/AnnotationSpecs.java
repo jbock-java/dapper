@@ -16,14 +16,15 @@
 
 package dagger.internal.codegen.javapoet;
 
-import dagger.internal.codegen.base.Preconditions;
-import io.jbock.javapoet.AnnotationSpec;
-import java.util.EnumSet;
-import java.util.Set;
+import static dagger.internal.codegen.base.Preconditions.checkArgument;
 
-/** Static factories to create {@link AnnotationSpec}s. */
+import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.collect.Lists;
+import io.jbock.javapoet.AnnotationSpec;
+
+/** Static factories to create {@code AnnotationSpec}s. */
 public final class AnnotationSpecs {
-  /** Values for an {@link SuppressWarnings} annotation. */
+  /** Values for an {@code SuppressWarnings} annotation. */
   public enum Suppression {
     RAWTYPES("rawtypes"),
     UNCHECKED("unchecked"),
@@ -37,19 +38,18 @@ public final class AnnotationSpecs {
     }
   }
 
-  /** Creates an {@link AnnotationSpec} for {@link SuppressWarnings}. */
+  /** Creates an {@code AnnotationSpec} for {@code SuppressWarnings}. */
   public static AnnotationSpec suppressWarnings(Suppression first, Suppression... rest) {
-    return suppressWarnings(EnumSet.of(first, rest));
+    return suppressWarnings(ImmutableSet.copyOf(Lists.asList(first, rest)));
   }
 
-  /** Creates an {@link AnnotationSpec} for {@link SuppressWarnings}. */
-  public static AnnotationSpec suppressWarnings(Set<Suppression> suppressions) {
-    Preconditions.checkArgument(!suppressions.isEmpty());
+  /** Creates an {@code AnnotationSpec} for {@code SuppressWarnings}. */
+  public static AnnotationSpec suppressWarnings(ImmutableSet<Suppression> suppressions) {
+    checkArgument(!suppressions.isEmpty());
     AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
     suppressions.forEach(suppression -> builder.addMember("value", "$S", suppression.value));
     return builder.build();
   }
 
-  private AnnotationSpecs() {
-  }
+  private AnnotationSpecs() {}
 }

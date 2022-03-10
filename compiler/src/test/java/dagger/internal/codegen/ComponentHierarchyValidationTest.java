@@ -58,7 +58,7 @@ public class ComponentHierarchyValidationTest {
     Compilation compilation = daggerCompiler().compile(component, subcomponent);
     assertThat(compilation).failed();
     assertThat(compilation).hadErrorContaining("conflicting scopes");
-    assertThat(compilation).hadErrorContaining("test.Parent also has @Singleton");
+    assertThat(compilation).hadErrorContaining("test.Parent also has @jakarta.inject.Singleton");
 
     Compilation withoutScopeValidation =
         compilerWithOptions("-Adagger.disableInterComponentScopeValidation=none")

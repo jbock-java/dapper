@@ -25,11 +25,10 @@ import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
-
-/** A utility class for {@link MethodSpec} helper methods. */
+/** A utility class for {@code MethodSpec} helper methods. */
 public final class MethodSpecs {
 
-  /** Returns a {@link MethodSpec} that overrides the given method. */
+  /** Returns a {@code MethodSpec} that overrides the given method. */
   public static MethodSpec.Builder overriding(XMethodElement method, XType owner) {
     XMethodType methodType = method.asMemberOf(owner);
     MethodSpec.Builder builder =
@@ -52,6 +51,5 @@ public final class MethodSpecs {
     return builder;
   }
 
-  private MethodSpecs() {
-  }
+  private MethodSpecs() {}
 }

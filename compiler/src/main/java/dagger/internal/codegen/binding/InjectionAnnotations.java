@@ -320,17 +320,11 @@ public final class InjectionAnnotations {
   }
 
   private static boolean hasQualifierAnnotation(XAnnotation annotation) {
-    return annotation
-        .getType()
-        .getTypeElement()
-        .hasAnyAnnotation(TypeNames.QUALIFIER);
+    return annotation.getType().getTypeElement().hasAnyAnnotation(TypeNames.QUALIFIER);
   }
 
   private static boolean hasScopeAnnotation(XAnnotation annotation) {
-    return annotation
-        .getType()
-        .getTypeElement()
-        .hasAnyAnnotation(TypeNames.SCOPE);
+    return annotation.getType().getTypeElement().hasAnyAnnotation(TypeNames.SCOPE);
   }
 
   /** Returns true if the given element is annotated with {@code Inject}. */
@@ -340,8 +334,7 @@ public final class InjectionAnnotations {
 
   /** Returns true if the given element is annotated with {@code Inject}. */
   public static boolean hasInjectOrAssistedInjectAnnotation(XElement element) {
-    return element.hasAnyAnnotation(
-        TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+    return element.hasAnyAnnotation(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   /**

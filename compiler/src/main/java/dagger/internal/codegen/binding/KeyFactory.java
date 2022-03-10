@@ -396,8 +396,8 @@ public final class KeyFactory {
 
   /**
    * If {@code key}'s type is {@code Optional<T>} for some {@code T}, returns a key with the same
-   * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, XType)}
-   * extracted} from {@code T}.
+   * qualifier whose type is {@code RequestKinds#extractKeyType(RequestKind, XType)} extracted} from
+   * {@code T}.
    */
   Optional<Key> unwrapOptional(Key key) {
     if (!OptionalType.isOptional(key)) {

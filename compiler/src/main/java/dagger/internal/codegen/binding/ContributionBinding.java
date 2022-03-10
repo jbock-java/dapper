@@ -119,8 +119,7 @@ public abstract class ContributionBinding extends Binding implements HasContribu
 
     public final B clearBindingElement() {
       return bindingElement(Optional.empty());
-    }
-    ;
+    };
 
     abstract B contributingModule(XTypeElement contributingModule);
 

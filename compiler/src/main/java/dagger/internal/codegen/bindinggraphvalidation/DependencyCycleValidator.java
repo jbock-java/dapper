@@ -148,7 +148,7 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
         ERROR,
         dependencyToReport,
         errorMessage(cycle.shift(cycleStartNode), bindingGraph)
-            // The actual dependency trace is included from the reportDependency call.
+        // The actual dependency trace is included from the reportDependency call.
             + "\n\nThe cycle is requested via:");
   }
 
@@ -188,18 +188,16 @@ final class DependencyCycleValidator implements BindingGraphPlugin {
             .collect(toImmutableList())
             .reverse();
     dependencyRequestFormatter.formatIndentedList(message, cycleRequests, 0);
-    message
-        .append("\n")
+    message.append("\n")
         .append(dependencyRequestFormatter.format(cycleRequests.get(0)))
         .append("\n")
-        .append(Formatter.INDENT)
-        .append("...");
+        .append(Formatter.INDENT).append("...");
     return message.toString();
   }
 
   /**
-   * Returns one of the edges between two nodes that doesn't {@code #breaksCycle(DependencyEdge,
-   * BindingGraph) break} a cycle.
+   * Returns one of the edges between two nodes that doesn't {@code
+   * #breaksCycle(DependencyEdge, BindingGraph) break} a cycle.
    */
   private DependencyEdge nonCycleBreakingEdge(EndpointPair<Node> endpointPair, BindingGraph graph) {
     return graph.network().edgesConnecting(endpointPair.source(), endpointPair.target()).stream()

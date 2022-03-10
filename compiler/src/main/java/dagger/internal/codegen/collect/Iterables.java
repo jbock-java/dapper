@@ -126,4 +126,11 @@ public class Iterables {
         ? ((List<T>) iterable).get(position)
         : Iterators.get(iterable.iterator(), position);
   }
+
+  /** Returns the number of elements in {@code iterable}. */
+  public static int size(Iterable<?> iterable) {
+    return (iterable instanceof Collection)
+        ? ((Collection<?>) iterable).size()
+        : Iterators.size(iterable.iterator());
+  }
 }

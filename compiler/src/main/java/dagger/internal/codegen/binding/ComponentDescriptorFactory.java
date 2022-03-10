@@ -169,8 +169,7 @@ public final class ComponentDescriptorFactory {
 
     ImmutableSet<Scope> scopes = injectionAnnotations.getScopes(typeElement);
     if (componentAnnotation.isProduction()) {
-      scopes =
-          ImmutableSet.<Scope>builder().addAll(scopes).build();
+      scopes = ImmutableSet.<Scope>builder().addAll(scopes).build();
     }
 
     return ComponentDescriptor.create(

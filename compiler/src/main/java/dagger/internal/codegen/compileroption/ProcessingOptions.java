@@ -22,10 +22,9 @@ import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 
 /**
- * A qualifier for the {@link javax.annotation.processing.ProcessingEnvironment#getOptions()
+ * A qualifier for the {@code javax.annotation.processing.ProcessingEnvironment#getOptions()
  * processing options} passed to the current invocation of {@code javac}.
  */
 @Retention(RUNTIME)
 @Qualifier
-public @interface ProcessingOptions {
-}
+public @interface ProcessingOptions {}

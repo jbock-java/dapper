@@ -52,7 +52,7 @@ public abstract class ComponentNodeImpl implements ComponentNode {
 
   @Override
   public ImmutableSet<Scope> scopes() {
-    return ImmutableSet.copyOf(componentDescriptor().scopes());
+    return componentDescriptor().scopes();
   }
 
   public abstract ComponentDescriptor componentDescriptor();

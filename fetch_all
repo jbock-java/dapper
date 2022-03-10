@@ -23,6 +23,9 @@ XCL+="|Hjar"
 XCL+="|/ImmediateFuture"
 XCL+="|/DependencyMethodProducer"
 XCL+="|/ServiceLoaders"
+XCL+="|/codegen/base/Util"
+XCL+="|/SourceFileGenerator"
+XCL+="|/DaggerStreams"
 #XCL+="|"
 
 echo $XCL

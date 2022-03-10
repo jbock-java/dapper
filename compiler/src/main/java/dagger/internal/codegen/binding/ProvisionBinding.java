@@ -20,20 +20,18 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.spi.model.BindingKind.COMPONENT_PROVISION;
 import static dagger.spi.model.BindingKind.PROVISION;
 
-import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
-import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
 import java.util.Optional;
 
-/** A value object representing the mechanism by which a {@link Key} can be provided. */
+/** A value object representing the mechanism by which a {@code Key} can be provided. */
 @AutoValue
 public abstract class ProvisionBinding extends ContributionBinding {
 
@@ -60,7 +58,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
   }
 
   /**
-   * {@link InjectionSite}s for all {@code @Inject} members if {@link #kind()} is {@link
+   * {@code InjectionSite}s for all {@code @Inject} members if {@code #kind()} is {@code
    * BindingKind#INJECTION}, otherwise empty.
    */
   public abstract ImmutableSortedSet<InjectionSite> injectionSites();
@@ -79,8 +77,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
   public abstract Optional<Scope> scope();
 
   public static Builder builder() {
-    return new $AutoValue_ProvisionBinding.Builder()
-        .contributionType(ContributionType.UNIQUE)
+    return new AutoValue_ProvisionBinding.Builder()
         .provisionDependencies(ImmutableSet.of())
         .injectionSites(ImmutableSortedSet.of());
   }
@@ -114,7 +111,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
   @Override
   public abstract boolean equals(Object obj);
 
-  /** A {@link ProvisionBinding} builder. */
+  /** A {@code ProvisionBinding} builder. */
   @AutoValue.Builder
   public abstract static class Builder
       extends ContributionBinding.Builder<ProvisionBinding, Builder> {
