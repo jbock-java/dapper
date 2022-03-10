@@ -33,8 +33,8 @@ for THING in "$@"; do
     SOURCE=$(find ../dagger/java/dagger/internal -type f -name $FILE)
     TARGET=$(find compiler/src/main/java/dagger/internal -type f -name $FILE)
   elif [[ -n $SPI ]]; then
-    SOURCE=$(find ../dagger/java/dagger/spi -type f -name $FILE)
-    TARGET=$(find compiler/src/main/java/dagger/spi -type f -name $FILE)
+    SOURCE=$(find ../dagger/java/dagger/spi/model -type f -name $FILE)
+    TARGET=$(find compiler/src/main/java/dagger/spi/model -type f -name $FILE)
   else
     SOURCE=$(find ../dagger/java/dagger -type f -name $FILE | fgrep -F -v hilt)
     TARGET=$(find compiler/src/main/java/dagger -type f -name $FILE)
