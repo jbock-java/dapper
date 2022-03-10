@@ -16,13 +16,13 @@
 
 package dagger.internal;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Lazy;
 import jakarta.inject.Provider;
 
 /**
- * A {@link Provider} of {@link Lazy} instances that each delegate to a given {@link Provider}.
+ * A {@code Provider} of {@code Lazy} instances that each delegate to a given {@code Provider}.
  */
 public final class ProviderOfLazy<T> implements Provider<Lazy<T>> {
 
@@ -34,8 +34,8 @@ public final class ProviderOfLazy<T> implements Provider<Lazy<T>> {
   }
 
   /**
-   * Returns a new instance of {@link Lazy Lazy&lt;T&gt;}, which calls {@link Provider#get()} at
-   * most once on the {@link Provider} held by this object.
+   * Returns a new instance of {@code Lazy Lazy&lt;T&gt;}, which calls {@code Provider#get()} at
+   * most once on the {@code Provider} held by this object.
    */
   @Override
   public Lazy<T> get() {
@@ -43,12 +43,12 @@ public final class ProviderOfLazy<T> implements Provider<Lazy<T>> {
   }
 
   /**
-   * Creates a new {@link Provider Provider&lt;Lazy&lt;T&gt;&gt;} that decorates the given
-   * {@link Provider}.
+   * Creates a new {@code Provider Provider&lt;Lazy&lt;T&gt;&gt;} that decorates the given
+   * {@code Provider}.
    *
    * @see #get()
    */
   public static <T> Provider<Lazy<T>> create(Provider<T> provider) {
-    return new ProviderOfLazy<T>(requireNonNull(provider));
+    return new ProviderOfLazy<T>(checkNotNull(provider));
   }
 }

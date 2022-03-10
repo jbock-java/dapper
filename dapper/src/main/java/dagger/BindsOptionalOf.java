@@ -19,9 +19,6 @@ package dagger;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.internal.Beta;
-import jakarta.inject.Inject;
-import jakarta.inject.Qualifier;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -44,11 +41,11 @@ import java.lang.annotation.Target;
  *
  * <ul>
  *   <li>must be {@code abstract}
- *   <li>may have a {@linkplain Qualifier qualifier} annotation
+ *   <li>may have a {@code Qualifier qualifier} annotation
  *   <li>must not return {@code void}
  *   <li>must not have parameters
  *   <li>must not throw exceptions
- *   <li>must not return an unqualified type with an {@link Inject @Inject}-annotated constructor,
+ *   <li>must not return an unqualified type with an {@code Inject @Inject}-annotated constructor,
  *       since such a type is always present
  * </ul>
  *
@@ -64,7 +61,7 @@ import java.lang.annotation.Target;
  *
  * <p>If there is a binding for {@code Foo}, and that binding is {@code @Nullable}, then it is a
  * compile-time error to inject {@code Optional<Foo>}, because {@code Optional} cannot contain
- * {@code null}. You can always inject the other forms, because {@code Provider} and {@link Lazy}
+ * {@code null}. You can always inject the other forms, because {@code Provider} and {@code Lazy}
  * can always return {@code null} from their {@code get()} methods.
  *
  * <p>Explicit bindings for any of the above will conflict with a {@code @BindsOptionalOf} binding.
@@ -82,7 +79,6 @@ import java.lang.annotation.Target;
  * <p>You can inject either {@code com.google.common.base.Optional} or {@code java.util.Optional}.
  */
 @Documented
-@Beta
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface BindsOptionalOf {}

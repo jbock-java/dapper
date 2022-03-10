@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 /**
  * The method's return type is {@code Set<T>} and all values are contributed to the set. The {@code
  * Set<T>} produced from the accumulation of values will be immutable. An example use is to provide
- * a default empty set binding, which is otherwise not possible using {@link IntoSet}.
+ * a default empty set binding, which is otherwise not possible using {@code IntoSet}.
  *
  * @see <a href="https://dagger.dev/multibindings#set-multibindings">Set multibinding</a>
  */

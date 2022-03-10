@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a {@link dagger.MembersInjector} method for injecting a field with the signature of the
+ * Marks a {@code dagger.MembersInjector} method for injecting a field with the signature of the
  * field intended to inject.
  */
 @Retention(RetentionPolicy.CLASS)

@@ -18,10 +18,9 @@ package dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.internal.Beta;
+import jakarta.inject.Scope;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import jakarta.inject.Scope;
 
 /**
  * A scope that indicates that the object returned by a binding may be (but might not be) reused.
@@ -32,7 +31,6 @@ import jakarta.inject.Scope;
  * @see <a href="https://dagger.dev/users-guide#reusable-scope">Reusable Scope</a>
  */
 @Documented
-@Beta
 @Retention(RUNTIME)
 @Scope
 public @interface Reusable {}

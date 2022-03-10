@@ -20,14 +20,13 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.internal.Beta;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method on a {@linkplain Component.Builder component builder} or a parameter on a
- * {@linkplain Component.Factory component factory} as binding an instance to some key within the
+ * Marks a method on a {@code Component.Builder component builder} or a parameter on a
+ * {@code Component.Factory component factory} as binding an instance to some key within the
  * component.
  *
  * <p>For example:
@@ -69,5 +68,4 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target({METHOD, PARAMETER})
-@Beta
 public @interface BindsInstance {}

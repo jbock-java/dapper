@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * A {@link MapKey} annotation for maps with {@code Class<?>} keys.
+ * A {@code MapKey} annotation for maps with {@code Class<?>} keys.
  *
  * <p>If your map's keys can be constrained, consider using a custom annotation instead, with a
  * member whose type is {@code Class<? extends Something>}.

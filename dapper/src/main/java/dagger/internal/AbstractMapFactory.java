@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * An {@code abstract} {@link Factory} implementation used to implement {@link Map} bindings.
+ * An {@code abstract} {@code Factory} implementation used to implement {@code Map} bindings.
  *
  * @param <K> the key type of the map that this provides
  * @param <V> the type that each contributing factory
@@ -38,12 +38,12 @@ abstract class AbstractMapFactory<K, V, V2> implements Factory<Map<K, V2>> {
     this.contributingMap = unmodifiableMap(map);
   }
 
-  /** The map of {@link Provider}s that contribute to this map binding. */
+  /** The map of {@code Provider}s that contribute to this map binding. */
   final Map<K, Provider<V>> contributingMap() {
     return contributingMap;
   }
 
-  /** A builder for {@link AbstractMapFactory}. */
+  /** A builder for {@code AbstractMapFactory}. */
   public abstract static class Builder<K, V, V2> {
     final LinkedHashMap<K, Provider<V>> map;
 

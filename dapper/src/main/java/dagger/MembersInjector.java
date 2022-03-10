@@ -22,7 +22,7 @@ package dagger;
  *
  * @param <T> type to inject members of
  *
- * @since 2.0 (since 1.0 without the provision that {@link #injectMembers} cannot accept
+ * @since 2.0 (since 1.0 without the provision that {@code #injectMembers} cannot accept
  *      {@code null})
  */
 public interface MembersInjector<T> {
@@ -31,7 +31,7 @@ public interface MembersInjector<T> {
    * Injects dependencies into the fields and methods of {@code instance}. Ignores the presence or
    * absence of an injectable constructor.
    *
-   * <p>Whenever a {@link Component} creates an instance, it performs this injection automatically
+   * <p>Whenever a {@code Component} creates an instance, it performs this injection automatically
    * (after first performing constructor injection), so if you're able to let the component create
    * all your objects for you, you'll never need to use this method.
    *

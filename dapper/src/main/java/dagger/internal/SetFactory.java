@@ -23,16 +23,16 @@ import static dagger.internal.Preconditions.checkNotNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
 
+import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import jakarta.inject.Provider;
 
 /**
- * A {@link Factory} implementation used to implement {@link Set} bindings. This factory always
- * returns a new {@link Set} instance for each call to {@link #get} (as required by {@link Factory})
- * whose elements are populated by subsequent calls to their {@link Provider#get} methods.
+ * A {@code Factory} implementation used to implement {@code Set} bindings. This factory always
+ * returns a new {@code Set} instance for each call to {@code #get} (as required by {@code Factory})
+ * whose elements are populated by subsequent calls to their {@code Provider#get} methods.
  */
 public final class SetFactory<T> implements Factory<Set<T>> {
   private static final Factory<Set<Object>> EMPTY_FACTORY = InstanceFactory.create(emptySet());
@@ -43,7 +43,7 @@ public final class SetFactory<T> implements Factory<Set<T>> {
   }
 
   /**
-   * Constructs a new {@link Builder} for a {@link SetFactory} with {@code individualProviderSize}
+   * Constructs a new {@code Builder} for a {@code SetFactory} with {@code individualProviderSize}
    * individual {@code Provider<T>} and {@code collectionProviderSize} {@code
    * Provider<Collection<T>>} instances.
    */
@@ -54,7 +54,7 @@ public final class SetFactory<T> implements Factory<Set<T>> {
   /**
    * A builder to accumulate {@code Provider<T>} and {@code Provider<Collection<T>>} instances.
    * These are only intended to be single-use and from within generated code. Do <em>NOT</em> add
-   * providers after calling {@link #build()}.
+   * providers after calling {@code #build()}.
    */
   public static final class Builder<T> {
     private final List<Provider<T>> individualProviders;
@@ -101,9 +101,9 @@ public final class SetFactory<T> implements Factory<Set<T>> {
   }
 
   /**
-   * Returns a {@link Set} that contains the elements given by each of the providers.
+   * Returns a {@code Set} that contains the elements given by each of the providers.
    *
-   * @throws NullPointerException if any of the delegate {@link Set} instances or elements therein
+   * @throws NullPointerException if any of the delegate {@code Set} instances or elements therein
    *     are {@code null}
    */
   @Override

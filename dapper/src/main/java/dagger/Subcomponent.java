@@ -24,9 +24,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * A subcomponent that inherits the bindings from a parent {@link Component} or
- * {@link Subcomponent}. The details of how to associate a subcomponent with a parent are described
- * in the documentation for {@link Component}.
+ * A subcomponent that inherits the bindings from a parent {@code Component} or
+ * {@code Subcomponent}. The details of how to associate a subcomponent with a parent are described
+ * in the documentation for {@code Component}.
  *
  * @since 2.0
  */
@@ -35,8 +35,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Subcomponent {
   /**
-   * A list of classes annotated with {@link Module} whose bindings are used to generate the
-   * subcomponent implementation.  Note that through the use of {@link Module#includes} the full set
+   * A list of classes annotated with {@code Module} whose bindings are used to generate the
+   * subcomponent implementation.  Note that through the use of {@code Module#includes} the full set
    * of modules used to implement the subcomponent may include more modules that just those listed
    * here.
    */
@@ -45,8 +45,8 @@ public @interface Subcomponent {
   /**
    * A builder for a subcomponent.
    *
-   * <p>This follows all the rules of {@link Component.Builder}, except it must appear in classes
-   * annotated with {@link Subcomponent} instead of {@code Component}.
+   * <p>This follows all the rules of {@code Component.Builder}, except it must appear in classes
+   * annotated with {@code Subcomponent} instead of {@code Component}.
    *
    * <p>If a subcomponent defines a builder, its parent component(s) will have a binding for that
    * builder type, allowing an instance or {@code Provider} of that builder to be injected or
@@ -60,8 +60,8 @@ public @interface Subcomponent {
   /**
    * A factory for a subcomponent.
    *
-   * <p>This follows all the rules of {@link Component.Factory}, except it must appear in classes
-   * annotated with {@link Subcomponent} instead of {@code Component}.
+   * <p>This follows all the rules of {@code Component.Factory}, except it must appear in classes
+   * annotated with {@code Subcomponent} instead of {@code Component}.
    *
    * <p>If a subcomponent defines a factory, its parent component(s) will have a binding for that
    * factory type, allowing an instance of that factory to be injected or returned from a method on

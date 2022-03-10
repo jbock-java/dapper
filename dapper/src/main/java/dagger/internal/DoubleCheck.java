@@ -22,7 +22,7 @@ import dagger.Lazy;
 import jakarta.inject.Provider;
 
 /**
- * A {@link Lazy} and {@link Provider} implementation that memoizes the value returned from a
+ * A {@code Lazy} and {@code Provider} implementation that memoizes the value returned from a
  * delegate using the double-check idiom described in Item 71 of <i>Effective Java 2</i>.
  */
 public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
@@ -58,7 +58,7 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
   /**
    * Checks to see if creating the new instance has resulted in a recursive call. If it has, and the
    * new instance is the same as the current instance, return the instance. However, if the new
-   * instance differs from the current instance, an {@link IllegalStateException} is thrown.
+   * instance differs from the current instance, an {@code IllegalStateException} is thrown.
    */
   private static Object reentrantCheck(Object currentInstance, Object newInstance) {
     boolean isReentrant = currentInstance != UNINITIALIZED;
@@ -70,7 +70,7 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
     return newInstance;
   }
 
-  /** Returns a {@link Provider} that caches the value from the given delegate provider. */
+  /** Returns a {@code Provider} that caches the value from the given delegate provider. */
   // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> delegate)"
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Provider<T> provider(P delegate) {
@@ -83,12 +83,13 @@ public final class DoubleCheck<T> implements Provider<T>, Lazy<T> {
     return new DoubleCheck<T>(delegate);
   }
 
-  /** Returns a {@link Lazy} that caches the value from the given provider. */
+  /** Returns a {@code Lazy} that caches the value from the given provider. */
   // This method is declared this way instead of "<T> Lazy<T> lazy(Provider<T> delegate)"
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Lazy<T> lazy(P provider) {
     if (provider instanceof Lazy) {
-      @SuppressWarnings("unchecked") final Lazy<T> lazy = (Lazy<T>) provider;
+      @SuppressWarnings("unchecked")
+      final Lazy<T> lazy = (Lazy<T>) provider;
       // Avoids memoizing a value that is already memoized.
       // NOTE: There is a pathological case where Provider<P> may implement Lazy<L>, but P and L
       // are different types using covariant return on get(). Right now this is used with

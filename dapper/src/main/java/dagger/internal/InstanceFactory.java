@@ -16,22 +16,22 @@
 
 package dagger.internal;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.Preconditions.checkNotNull;
 
 import dagger.Lazy;
 
 /**
- * A {@link Factory} implementation that returns a single instance for all invocations of {@link
+ * A {@code Factory} implementation that returns a single instance for all invocations of {@code
  * #get}.
  *
- * <p>Note that while this is a {@link Factory} implementation, and thus unscoped, each call to
- * {@link #get} will always return the same instance. As such, any scoping applied to this factory
+ * <p>Note that while this is a {@code Factory} implementation, and thus unscoped, each call to
+ * {@code #get} will always return the same instance. As such, any scoping applied to this factory
  * is redundant and unnecessary. However, using this with {@code DoubleCheck#provider} is valid and
  * may be desired for testing or contractual guarantees.
  */
 public final class InstanceFactory<T> implements Factory<T>, Lazy<T> {
   public static <T> Factory<T> create(T instance) {
-    return new InstanceFactory<T>(requireNonNull(instance, "instance cannot be null"));
+    return new InstanceFactory<T>(checkNotNull(instance, "instance cannot be null"));
   }
 
   public static <T> Factory<T> createNullable(T instance) {

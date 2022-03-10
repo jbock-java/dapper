@@ -25,14 +25,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * A {@link Factory} implementation used to implement {@link Map} bindings. This factory returns a
- * {@code Map<K, V>} when calling {@link #get} (as specified by {@link Factory}).
+ * A {@code Factory} implementation used to implement {@code Map} bindings. This factory returns a
+ * {@code Map<K, V>} when calling {@code #get} (as specified by {@code Factory}).
  */
 public final class MapFactory<K, V> extends AbstractMapFactory<K, V, V> {
   private static final Provider<Map<Object, Object>> EMPTY =
       InstanceFactory.create(Collections.emptyMap());
 
-  /** Returns a new {@link Builder} */
+  /** Returns a new {@code Builder} */
   public static <K, V> Builder<K, V> builder(int size) {
     return new Builder<>(size);
   }
@@ -60,7 +60,7 @@ public final class MapFactory<K, V> extends AbstractMapFactory<K, V, V> {
     return unmodifiableMap(result);
   }
 
-  /** A builder for {@link MapFactory}. */
+  /** A builder for {@code MapFactory}. */
   public static final class Builder<K, V> extends AbstractMapFactory.Builder<K, V, V> {
     private Builder(int size) {
       super(size);
@@ -78,7 +78,7 @@ public final class MapFactory<K, V> extends AbstractMapFactory<K, V, V> {
       return this;
     }
 
-    /** Returns a new {@link MapProviderFactory}. */
+    /** Returns a new {@code MapProviderFactory}. */
     public MapFactory<K, V> build() {
       return new MapFactory<>(map);
     }

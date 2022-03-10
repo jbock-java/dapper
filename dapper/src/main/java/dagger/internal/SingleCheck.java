@@ -16,12 +16,12 @@
 
 package dagger.internal;
 
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.Preconditions.checkNotNull;
 
 import jakarta.inject.Provider;
 
 /**
- * A {@link Provider} implementation that memoizes the result of another {@link Provider} using
+ * A {@code Provider} implementation that memoizes the result of another {@code Provider} using
  * simple lazy initialization, not the double-checked lock pattern.
  */
 public final class SingleCheck<T> implements Provider<T> {
@@ -57,7 +57,7 @@ public final class SingleCheck<T> implements Provider<T> {
     return (T) local;
   }
 
-  /** Returns a {@link Provider} that caches the value from the given delegate provider. */
+  /** Returns a {@code Provider} that caches the value from the given delegate provider. */
   // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> provider)" 
   // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
   public static <P extends Provider<T>, T> Provider<T> provider(P provider) {
@@ -65,6 +65,6 @@ public final class SingleCheck<T> implements Provider<T> {
     if (provider instanceof SingleCheck || provider instanceof DoubleCheck) {
       return provider;
     }
-    return new SingleCheck<T>(requireNonNull(provider));
+    return new SingleCheck<T>(checkNotNull(provider));
   }
 }

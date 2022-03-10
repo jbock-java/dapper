@@ -16,20 +16,18 @@
 
 package dagger.internal;
 
-import dagger.Provides;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import jakarta.inject.Scope;
 
 /**
- * An {@linkplain Scope unscoped} {@link Provider}. While a {@link Provider} <i>may</i> apply
+ * An {@code Scope unscoped} {@code Provider}. While a {@code Provider} <i>may</i> apply
  * scoping semantics while providing an instance, a factory implementation is guaranteed to exercise
- * the binding logic ({@link Inject} constructors, {@link Provides} methods) upon each call to
- * {@link #get}.
+ * the binding logic ({@link Inject} constructors, {@code Provides} methods) upon each call to
+ * {@code #get}.
  *
- * <p>Note that while subsequent calls to {@link #get} will create new instances for bindings such
- * as those created by {@link Inject} constructors, a new instance is not guaranteed by all
- * bindings. For example, {@link Provides} methods may be implemented in ways that return the same
+ * <p>Note that while subsequent calls to {@code #get} will create new instances for bindings such
+ * as those created by {@code Inject} constructors, a new instance is not guaranteed by all
+ * bindings. For example, {@code Provides} methods may be implemented in ways that return the same
  * instance for each call.
  */
 public interface Factory<T> extends Provider<T> {

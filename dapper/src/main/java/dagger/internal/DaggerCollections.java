@@ -28,13 +28,15 @@ import java.util.Set;
  * code.
  */
 public final class DaggerCollections {
-  /** The maximum value for a signed 32-bit integer that is equal to a power of 2. */
+  /**
+   * The maximum value for a signed 32-bit integer that is equal to a power of 2.
+   */
   private static final int MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2);
 
   private DaggerCollections() {}
 
   /**
-   * Returns a new list that is pre-sized to {@code size}, or {@link Collections#emptyList()} if
+   * Returns a new list that is pre-sized to {@code size}, or {@code Collections#emptyList()} if
    * empty. The list returned is never intended to grow beyond {@code size}, so adding to a list
    * when the size is 0 is an error.
    */
@@ -45,7 +47,9 @@ public final class DaggerCollections {
     return new ArrayList<T>(size);
   }
 
-  /** Returns true if at least one pair of items in {@code list} are equals. */
+  /**
+   * Returns true if at least one pair of items in {@code list} are equals.
+   */
   public static boolean hasDuplicates(List<?> list) {
     if (list.size() < 2) {
       return false;
@@ -55,7 +59,7 @@ public final class DaggerCollections {
   }
 
   /**
-   * Creates a {@link HashSet} instance, with a high enough "intial capcity" that it <em>should</em>
+   * Creates a {@code HashSet} instance, with a high enough "intial capcity" that it <em>should</em>
    * hold {@code expectedSize} elements without growth.
    */
   static <T> HashSet<T> newHashSetWithExpectedSize(int expectedSize) {
@@ -63,7 +67,7 @@ public final class DaggerCollections {
   }
 
   /**
-   * Creates a {@link LinkedHashMap} instance, with a high enough "initial capacity" that it
+   * Creates a {@code LinkedHashMap} instance, with a high enough "initial capacity" that it
    * <em>should</em> hold {@code expectedSize} elements without growth.
    */
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMapWithExpectedSize(int expectedSize) {

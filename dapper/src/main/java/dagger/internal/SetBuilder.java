@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A fluent builder class that returns a {@link Set}. Used in component implementations where a set
+ * A fluent builder class that returns a {@code Set}. Used in component implementations where a set
  * must be created in one fluent statement for inlined request fulfillments.
  */
 public final class SetBuilder<T> {
@@ -41,7 +41,7 @@ public final class SetBuilder<T> {
   /**
    * {@code estimatedSize} is the number of bindings which contribute to the set. They may each
    * provide {@code [0..n)} instances to the set. Because the final size is unknown, {@code
-   * contributions} are collected in a list and only hashed in {@link #build()}.
+   * contributions} are collected in a list and only hashed in {@code #build()}.
    */
   public static <T> SetBuilder<T> newSetBuilder(int estimatedSize) {
     return new SetBuilder<T>(estimatedSize);

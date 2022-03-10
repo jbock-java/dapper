@@ -24,9 +24,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a parameter within an {@link AssistedInject}-annotated constructor.
+ * Annotates a parameter within an {@code AssistedInject}-annotated constructor.
  *
- * <p>See {@link AssistedInject}.
+ * <p>See {@code AssistedInject}.
  */
 @Documented
 @Retention(RUNTIME)
@@ -34,22 +34,22 @@ import java.lang.annotation.Target;
 public @interface Assisted {
 
   /**
-   * Returns an identifier for an {@link Assisted} parameter.
+   * Returns an identifier for an {@code Assisted} parameter.
    *
-   * <p>Within an {@link AssistedInject} constructor, each {@link Assisted} parameter must be
+   * <p>Within an {@code AssistedInject} constructor, each {@code Assisted} parameter must be
    * uniquely defined by the combination of its identifier and type. If no identifier is specified,
    * the default identifier is an empty string. Thus, the following parameters are equivalent within
-   * an {@link AssistedInject} constructor:
+   * an {@code AssistedInject} constructor:
    *
    * <ul>
    *   <li> {@code @Assisted Foo foo}
    *   <li> {@code @Assisted("") Foo foo}
    * </ul>
    *
-   * <p>Within an {@link AssistedFactory} method, each parameter must match an {@link Assisted}
-   * parameter in the associated {@link AssistedInject} constructor (i.e. identifier + type).
+   * <p>Within an {@code AssistedFactory} method, each parameter must match an {@code Assisted}
+   * parameter in the associated {@code AssistedInject} constructor (i.e. identifier + type).
    * A parameter with no {@code @Assisted} annotation will be assigned the default identifier. Thus,
-   * the following parameters are equivalent within an {@link AssistedFactory} method:
+   * the following parameters are equivalent within an {@code AssistedFactory} method:
    *
    * <ul>
    *   <li> {@code Foo foo}

@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * Annotates the constuctor of a type that will be created via assisted injection.
  *
  * <p>Note that an assisted injection type cannot be scoped. In addition, assisted injection
- * requires the use of a factory annotated with {@link AssistedFactory} (see the example below).
+ * requires the use of a factory annotated with {@code AssistedFactory} (see the example below).
  *
  * <p>Example usage:
  *
@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
  * {@code Config} manually rather than having Dagger create it for us. This can be done using
  * assisted injection.
  *
- * <p>To start, we annotate the {@code DataService} constructor with {@link AssistedInject} and we
- * annotate the {@code Config} parameter with {@link Assisted}, as shown below:
+ * <p>To start, we annotate the {@code DataService} constructor with {@code AssistedInject} and we
+ * annotate the {@code Config} parameter with {@code Assisted}, as shown below:
  *
  * <pre><code>
  *   final class DataService {
@@ -53,7 +53,7 @@ import java.lang.annotation.Target;
  * </code></pre>
  *
  * <p>Next, we define a factory for the assisted type, {@code DataService}, and annotate it with
- * {@link AssistedFactory}. The factory must contain a single abstract, non-default method which
+ * {@code AssistedFactory}. The factory must contain a single abstract, non-default method which
  * takes in all of the assisted parameters (in order) and returns the assisted type.
  *
  * <pre><code>

@@ -24,7 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/** A {@link MapKey} annotation for maps with {@code long} keys. */
+/** A {@code MapKey} annotation for maps with {@code long} keys. */
 @Documented
 // While METHOD is the only valid target for Dagger, FIELD was added to support Hilt's
 // @BindValueIntoMap and TYPE was added to support external extension types since it likely won't

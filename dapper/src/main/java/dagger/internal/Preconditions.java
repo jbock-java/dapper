@@ -1,7 +1,23 @@
+/*
+ * Copyright (C) 2016 The Dagger Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dagger.internal;
 
 /**
- * An adaptation of Guava's Preconditions that is specially tailored
+ * An adaptation of Guava's {@code com.google.common.base.Preconditions} that is specially tailored
  * to support checks applied in Dagger's generated code.
  */
 public final class Preconditions {
@@ -43,7 +59,7 @@ public final class Preconditions {
    */
   public static <T> T checkNotNullFromProvides(T reference) {
     if (reference == null) {
-      throw new NullPointerException("Cannot return null from a non-@Nullable @Provides method");
+      throw new NullPointerException("Cannot return null from a non-@Provides method");
     }
     return reference;
   }
@@ -57,7 +73,7 @@ public final class Preconditions {
    */
   public static <T> T checkNotNullFromComponent(T reference) {
     if (reference == null) {
-      throw new NullPointerException("Cannot return null from a non-@Nullable component method");
+      throw new NullPointerException("Cannot return null from a non-component method");
     }
     return reference;
   }
@@ -70,8 +86,8 @@ public final class Preconditions {
    *     message is formed by replacing the single {@code %s} placeholder in the template with
    *     {@code errorMessageArg}.
    * @param errorMessageArg the argument to be substituted into the message template. Converted to a
-   *     string using {@link String#valueOf(Object)}, except for {@link Class} objects, which use
-   *     {@link Class#getCanonicalName()}.
+   *     string using {@code String#valueOf(Object)}, except for {@code Class} objects, which use
+   *     {@code Class#getCanonicalName()}.
    * @return the non-null reference that was validated
    * @throws NullPointerException if {@code reference} is null
    * @throws IllegalArgumentException if {@code errorMessageTemplate} doesn't contain exactly one
@@ -108,6 +124,5 @@ public final class Preconditions {
     }
   }
 
-  private Preconditions() {
-  }
+  private Preconditions() {}
 }

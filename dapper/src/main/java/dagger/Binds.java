@@ -24,11 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates <em>abstract</em> methods of a {@link Module} that delegate bindings. For example, to
- * bind {@link java.util.Random} to {@link java.security.SecureRandom} a module could declare the
+ * Annotates <em>abstract</em> methods of a {@code Module} that delegate bindings. For example, to
+ * bind {@code java.util.Random} to {@code java.security.SecureRandom} a module could declare the
  * following: {@code @Binds abstract Random bindRandom(SecureRandom secureRandom);}
  *
- * <p>{@code @Binds} methods are a drop-in replacement for {@link Provides} methods that simply
+ * <p>{@code @Binds} methods are a drop-in replacement for {@code Provides} methods that simply
  * return an injected parameter. Prefer {@code @Binds} because the generated implementation is
  * likely to be more efficient.
  *
@@ -36,11 +36,28 @@ import java.lang.annotation.Target;
  *
  * <ul>
  *   <li>Must be {@code abstract}.
- *   <li>May be {@linkplain jakarta.inject.Scope scoped}.
- *   <li>May be {@linkplain jakarta.inject.Qualifier qualified}.
+ *   <li>May be {@code javax.inject.Scope scoped}.
+ *   <li>May be {@code javax.inject.Qualifier qualified}.
  *   <li>Must have a single parameter whose type is assignable to the return type. The return type
  *       declares the bound type (just as it would for a {@literal @}{@link dagger.Provides} method)
  *       and the parameter is the type to which it is bound.
+ *       <p>For {@code dagger.multibindings multibindings}, assignability is checked in similar
+ *       ways:
+ *       <dl>
+ *         <dt>{@code dagger.multibindings.IntoSet}
+ *         <dd>The parameter must be assignable to the only parameter of {@code java.util.Set#add}
+ *             when viewed as a member of the return type — the parameter must be assignable to the
+ *             return type.
+ *         <dt>{@code dagger.multibindings.ElementsIntoSet}
+ *         <dd>The parameter must be assignable to the only parameter of {@code
+ *             java.util.Set#addAll} when viewed as a member of the return type — if the return type
+ *             is {@code Set<E>}, the parameter must be assignable to {@code Collection<? extends
+ *             E>}.
+ *         <dt>{@code dagger.multibindings.IntoMap}
+ *         <dd>The parameter must be assignable to the {@code value} parameter of {@code
+ *             java.util.Map#put} when viewed as a member of a {@code java.util.Map} in which {@code
+ *             V} is bound to the return type — the parameter must be assignable to the return type
+ *       </dl>
  * </ul>
  */
 @Documented

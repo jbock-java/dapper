@@ -24,22 +24,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates an abstract class or interface used to create an instance of a type via an {@link
+ * Annotates an abstract class or interface used to create an instance of a type via an {@code
  * AssistedInject} constructor.
  *
- * <p>An {@link AssistedFactory}-annotated type must obey the following constraints:
+ * <p>An {@code AssistedFactory}-annotated type must obey the following constraints:
  *
  * <ul>
  *   <li>The type must be an abstract class or interface,
  *   <li>The type must contain exactly one abstract, non-default method whose
  *       <ul>
  *         <li>return type must exactly match the type of an assisted injection type, and
- *         <li>parameters must match the exact list of {@link Assisted} parameters in the assisted
+ *         <li>parameters must match the exact list of {@code Assisted} parameters in the assisted
  *             injection type's constructor (and in the same order).
  *       </ul>
  * </ul>
  *
- * See {@link AssistedInject}
+ * See {@code AssistedInject}
  */
 @Documented
 @Retention(RUNTIME)

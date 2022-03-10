@@ -106,8 +106,8 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface MapKey {
   /**
-   * True to use the value of the single member of the annotated annotation as the map key; false to
-   * use the annotation instance as the map key.
+   * True to use the value of the single member of the annotated annotation as the map key; false
+   * to use the annotation instance as the map key.
    *
    * <p>If true, the single member must not be an array.
    */

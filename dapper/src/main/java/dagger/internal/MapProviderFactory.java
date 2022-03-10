@@ -21,13 +21,13 @@ import jakarta.inject.Provider;
 import java.util.Map;
 
 /**
- * A {@link Factory} implementation used to implement {@link Map} bindings. This factory returns a
- * {@code Map<K, Provider<V>>} when calling {@link #get} (as specified by {@link Factory}).
+ * A {@code Factory} implementation used to implement {@code Map} bindings. This factory returns a
+ * {@code Map<K, Provider<V>>} when calling {@code #get} (as specified by {@code Factory}).
  */
 public final class MapProviderFactory<K, V> extends AbstractMapFactory<K, V, Provider<V>>
     implements Lazy<Map<K, Provider<V>>> {
 
-  /** Returns a new {@link Builder} */
+  /** Returns a new {@code Builder} */
   public static <K, V> Builder<K, V> builder(int size) {
     return new Builder<>(size);
   }
@@ -45,7 +45,7 @@ public final class MapProviderFactory<K, V> extends AbstractMapFactory<K, V, Pro
     return contributingMap();
   }
 
-  /** A builder for {@link MapProviderFactory}. */
+  /** A builder for {@code MapProviderFactory}. */
   public static final class Builder<K, V> extends AbstractMapFactory.Builder<K, V, Provider<V>> {
     private Builder(int size) {
       super(size);
@@ -63,7 +63,7 @@ public final class MapProviderFactory<K, V> extends AbstractMapFactory<K, V, Pro
       return this;
     }
 
-    /** Returns a new {@link MapProviderFactory}. */
+    /** Returns a new {@code MapProviderFactory}. */
     public MapProviderFactory<K, V> build() {
       return new MapProviderFactory<>(map);
     }

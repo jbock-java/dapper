@@ -18,7 +18,7 @@ package dagger;
 
 /**
  * A handle to a lazily-computed value. Each {@code Lazy} computes its value on
- * the first call to {@link #get()} and remembers that same value for all
+ * the first call to {@code #get()} and remembers that same value for all
  * subsequent calls to {@code get()}.
  *
  * <p>All implementations are expected to be thread-safe and compute their value at most once.
@@ -62,7 +62,7 @@ package dagger;
  * </code></pre>
  *
  * <h3>Provider Injection</h3>
- * This class injects a {@linkplain jakarta.inject.Provider provider} for the
+ * This class injects a {@code javax.inject.Provider provider} for the
  * integer. It calls {@code Provider.get()} 3 times and prints each result:
  * <pre><code>
  *   final class ProviderCounter {
@@ -139,7 +139,7 @@ package dagger;
  *   101
  *   101
  * </code></pre>
- * Use {@link jakarta.inject.Singleton @Singleton} to share one instance among all
+ * Use {@code jakarta.inject.Singleton @Singleton} to share one instance among all
  * clients, and {@code Lazy} for lazy computation in a single client.
  */
 public interface Lazy<T> {

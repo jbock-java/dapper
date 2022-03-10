@@ -42,8 +42,21 @@ if [[ -n $SPI ]]; then
     ./fetch spi `basename $S`
   done
 elif [[ -n $INTERNAL ]]; then
-  for S in `find ../dagger/java/dagger/internal/ -maxdepth 1 -name "*.java" | grep -v -E "$XCL"`; do
-    ./fetch internal `basename $S`
+  for S in `find ../dagger/java/dagger/ -maxdepth 1 -name "*.java"`; do
+    cp $S dapper/src/main/java/dagger/$(basename $S)
+    ./imports dapper/src/main/java/dagger/$(basename $S)
+  done
+  for S in `find ../dagger/java/dagger/assisted/ -maxdepth 1 -name "*.java"`; do
+    cp $S dapper/src/main/java/dagger/assisted/$(basename $S)
+    ./imports dapper/src/main/java/dagger/assisted/$(basename $S)
+  done
+  for S in `find ../dagger/java/dagger/multibindings/ -maxdepth 1 -name "*.java"`; do
+    cp $S dapper/src/main/java/dagger/multibindings/$(basename $S)
+    ./imports dapper/src/main/java/dagger/multibindings/$(basename $S)
+  done	
+  for S in `find ../dagger/java/dagger/internal/ -maxdepth 1 -name "*.java"`; do
+    cp $S dapper/src/main/java/dagger/internal/$(basename $S)
+    ./imports dapper/src/main/java/dagger/internal/$(basename $S)
   done
 else
   for S in `find ../dagger/java/dagger/internal/codegen/ -name "*.java" | grep -v -E "$XCL"`; do
