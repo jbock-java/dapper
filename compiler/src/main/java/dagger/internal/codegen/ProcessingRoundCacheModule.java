@@ -16,44 +16,49 @@
 
 package dagger.internal.codegen;
 
+import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ModuleDescriptor;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.AnyBindingMethodValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.InjectValidator;
 import dagger.internal.codegen.validation.SuperficialValidator;
-import java.util.Set;
+import dagger.multibindings.IntoSet;
 
 /**
- * Binding contributions to a set of {@link ClearableCache}s that will be cleared at the end of each
+ * Binding contributions to a set of {@code ClearableCache}s that will be cleared at the end of each
  * processing round.
  */
 @Module
 interface ProcessingRoundCacheModule {
+  @Binds
+  @IntoSet
+  ClearableCache anyBindingMethodValidator(AnyBindingMethodValidator cache);
 
-  @Provides
-  static Set<ClearableCache> clearableCaches(
-      AnyBindingMethodValidator anyBindingMethodValidator,
-      InjectValidator injectValidator,
-      ModuleDescriptor.Factory moduleDescriptorFactory,
-      BindingGraphFactory bindingGraphFactory,
-      ComponentValidator componentValidator,
-      ComponentCreatorValidator componentCreatorValidator,
-      SuperficialValidator superficialValidator,
-      DaggerElements elements) {
-    return Set.of(
-        anyBindingMethodValidator,
-        injectValidator,
-        moduleDescriptorFactory,
-        bindingGraphFactory,
-        componentValidator,
-        componentCreatorValidator,
-        superficialValidator,
-        elements);
-  }
+  @Binds
+  @IntoSet
+  ClearableCache injectValidator(InjectValidator cache);
+
+  @Binds
+  @IntoSet
+  ClearableCache moduleDescriptorFactory(ModuleDescriptor.Factory cache);
+
+  @Binds
+  @IntoSet
+  ClearableCache bindingGraphFactory(BindingGraphFactory cache);
+
+  @Binds
+  @IntoSet
+  ClearableCache componentValidator(ComponentValidator cache);
+
+  @Binds
+  @IntoSet
+  ClearableCache componentCreatorValidator(ComponentCreatorValidator cache);
+
+  @Binds
+  @IntoSet
+  ClearableCache superficialValidator(SuperficialValidator cache);
 }
