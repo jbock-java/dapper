@@ -38,8 +38,7 @@ if [[ -n $SPI ]]; then
     ./fetch internal `basename $S`
   done
 else
-  for S in `find ../dagger/java/dagger/spi/ -name "*.java" | grep -v -E "$XCL"`; do
-    ./fetch spi `basename $S`
+  for S in `find ../dagger/java/dagger/internal/codegen/ -name "*.java" | grep -v -E "$XCL"`; do
+    ./fetch internal `basename $S`
   done
 fi
-
