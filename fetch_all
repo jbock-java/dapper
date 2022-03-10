@@ -28,13 +28,20 @@ XCL+="|/SourceFileGenerator"
 XCL+="|/DaggerStreams"
 #XCL+="|"
 
-if [[ "spi" == "$1" ]]; then
+if [[ "internal" == "$1" ]]; then
+  INTERNAL=1
+  shift
+elif [[ "spi" == "$1" ]]; then
   SPI=1
   shift
 fi
 
 if [[ -n $SPI ]]; then
-  for S in `find ../dagger/java/dagger/internal/codegen/ -name "*.java" | grep -v -E "$XCL"`; do
+  for S in `find ../dagger/java/dagger/spi/ -name "*.java" | grep -v -E "$XCL"`; do
+    ./fetch spi `basename $S`
+  done
+elif [[ -n $INTERNAL ]]; then
+  for S in `find ../dagger/java/dagger/internal/ -maxdepth 1 -name "*.java" | grep -v -E "$XCL"`; do
     ./fetch internal `basename $S`
   done
 else
