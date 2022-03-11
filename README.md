@@ -12,22 +12,27 @@ with some modifications:
 * remove internal guava dependency
 * remove the `experimental_turbine_hjar` compiler option
 
-Dapper processes only `jakarta.inject` annotations, but ignores their `javax.inject` counterparts.
+Dapper uses `jakarta.inject` annotations and ignores their `javax.inject` counterparts.
+Existing dagger projects can use the following script to replace the imports:
 
-For modular applications, add this to `module-info.java`:
+```bash
+for F in `find src/main/java -name "*.java"`; do
+  for N in Singleton Scope Inject Qualifier Provider; do
+    sed -i .bak "s/^import javax.inject.$N;$/import jakarta.inject.$N;/" $F
+  done
+  rm ${F}.bak
+done
+```
 
-````java
+If you have a modular java build, add this to `module-info.java`:
+
+```java
 requires dagger;
-````
+```
 
-For gradle build, add this to `build.gradle`:
+The gradle config is as follows:
 
-````groovy
-implementation('io.github.jbock-java:dapper:2.41.1')
-annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.1')
-````
-
-See also:
-
-* [modular-thermosiphon](https://github.com/jbock-java/modular-thermosiphon) (maven sample)
-* [javatests](https://github.com/jbock-java/dapper-javatests) (integration tests)
+```groovy
+implementation('io.github.jbock-java:dapper:2.41.2')
+annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.2')
+```
