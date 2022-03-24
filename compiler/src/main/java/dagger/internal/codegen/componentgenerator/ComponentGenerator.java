@@ -16,9 +16,6 @@
 
 package dagger.internal.codegen.componentgenerator;
 
-import static dagger.internal.codegen.base.Verify.verify;
-import static dagger.internal.codegen.writing.ComponentNames.getRootComponentClassName;
-
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.collect.ImmutableList;
@@ -62,10 +59,6 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
             .parentRequirementExpressions(Optional.empty())
             .build()
             .componentImplementation();
-    verify(
-        componentImplementation
-            .name()
-            .equals(getRootComponentClassName(bindingGraph.componentDescriptor())));
     return ImmutableList.of(componentImplementation.generate().toBuilder());
   }
 }

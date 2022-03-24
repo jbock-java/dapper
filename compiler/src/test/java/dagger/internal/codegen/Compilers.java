@@ -17,11 +17,9 @@
 package dagger.internal.codegen;
 
 import static io.jbock.testing.compile.Compiler.javac;
-import static java.util.stream.Collectors.toList;
 
 import dagger.internal.codegen.base.Util;
 import io.jbock.testing.compile.Compiler;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,19 +28,10 @@ import javax.annotation.processing.Processor;
 
 /** {@link Compiler} instances for testing Dagger. */
 public final class Compilers {
-  private static final String GUAVA = "guava";
-
-  static final List<File> CLASS_PATH_WITHOUT_GUAVA_OPTION =
-      Arrays.stream(System.getProperty("java.class.path").split("[" + System.getProperty("path.separator") + "]", -1))
-          .filter(jar -> !jar.contains(GUAVA))
-          // Remove Bazel's runner deploy jar which leaks Guava classes into the classpath and
-          // the compile testing tests.
-          .filter(jar -> !jar.contains("Runner_deploy.jar"))
-          .map(File::new)
-          .collect(toList());
 
   static final List<String> DEFAULT_JAVACOPTS =
       List.of(
+          "-Adagger.generatedClassExtendsComponent=enabled",
           "-Adagger.experimentalDaggerErrorMessages=enabled");
 
   /**
@@ -69,10 +58,8 @@ public final class Compilers {
   }
 
   public static Compiler compilerWithOptions(Iterable<String> options) {
-    return daggerCompiler()
-        .withOptions(Util.concat(DEFAULT_JAVACOPTS, Util.listOf(options)));
+    return daggerCompiler().withOptions(Util.concat(DEFAULT_JAVACOPTS, Util.listOf(options)));
   }
 
-  private Compilers() {
-  }
+  private Compilers() {}
 }
