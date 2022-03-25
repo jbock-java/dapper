@@ -16,28 +16,32 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.writing.ComponentNames.getTopLevelClassName;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
-import static dagger.internal.codegen.writing.ComponentNames.getTopLevelClassName;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
+import dagger.internal.codegen.base.UniqueNameSet;
+import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.collect.ListMultimap;
 import dagger.internal.codegen.collect.MultimapBuilder;
-import io.jbock.javapoet.FieldSpec;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.TypeSpec;
-import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 
 /** Represents the implementation of the generated holder for the components. */
 @PerGeneratedFile
 public final class ComponentWrapperImplementation implements GeneratedImplementation {
   private final BindingGraph graph;
+  private final ClassName name;
+  private final UniqueNameSet componentClassNames = new UniqueNameSet();
   private final ListMultimap<FieldSpecKind, FieldSpec> fieldSpecsMap =
       MultimapBuilder.enumKeys(FieldSpecKind.class).arrayListValues().build();
   private final ListMultimap<MethodSpecKind, MethodSpec> methodSpecsMap =
@@ -48,6 +52,17 @@ public final class ComponentWrapperImplementation implements GeneratedImplementa
   @Inject
   ComponentWrapperImplementation(@TopLevel BindingGraph graph) {
     this.graph = graph;
+    this.name = ComponentNames.getTopLevelClassName(graph.componentDescriptor());
+  }
+
+  @Override
+  public ClassName name() {
+    return name;
+  }
+
+  @Override
+  public String getUniqueClassName(String name) {
+    return componentClassNames.getUniqueName(name);
   }
 
   @Override

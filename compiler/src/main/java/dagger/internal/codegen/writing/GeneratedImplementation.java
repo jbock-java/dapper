@@ -16,15 +16,22 @@
 
 package dagger.internal.codegen.writing;
 
-import io.jbock.javapoet.FieldSpec;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.TypeSpec;
 import dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.TypeSpec;
 
 /** Represents the implementation of a generated class. */
 public interface GeneratedImplementation {
+  /** Returns the name of the component. */
+  ClassName name();
+
+  /** Returns a new, unique method name for the component based on the given name. */
+  String getUniqueClassName(String name);
+
   /** Adds the given field to the generated implementation. */
   void addField(FieldSpecKind fieldKind, FieldSpec fieldSpec);
 
