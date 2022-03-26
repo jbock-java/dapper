@@ -31,7 +31,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import dagger.internal.codegen.base.UniqueNameSet;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.Lists;
@@ -47,7 +46,6 @@ import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.javapoet.TypeVariableName;
-import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -83,13 +81,10 @@ final class SwitchingProviders {
 
   private final ShardImplementation shardImplementation;
   private final DaggerTypes types;
-  private final UniqueNameSet switchingProviderNames = new UniqueNameSet();
 
-  @Inject
-  SwitchingProviders(ComponentImplementation componentImplementation, DaggerTypes types) {
-    // Currently, the SwitchingProviders types are only added to the componentShard.
-    this.shardImplementation = checkNotNull(componentImplementation).getComponentShard();
-    this.types = checkNotNull(types);
+  SwitchingProviders(ShardImplementation shardImplementation, DaggerTypes types) {
+    this.shardImplementation = shardImplementation;
+    this.types = types;
   }
 
   /** Returns the framework instance creation expression for an inner switching provider class. */
@@ -107,7 +102,7 @@ final class SwitchingProviders {
 
   private SwitchingProviderBuilder getSwitchingProviderBuilder() {
     if (switchingProviderBuilders.size() % MAX_CASES_PER_CLASS == 0) {
-      String name = switchingProviderNames.getUniqueName("SwitchingProvider");
+      String name = shardImplementation.getUniqueClassName("SwitchingProvider");
       SwitchingProviderBuilder switchingProviderBuilder =
           new SwitchingProviderBuilder(shardImplementation.name().nestedClass(name));
       shardImplementation.addTypeSupplier(switchingProviderBuilder::build);

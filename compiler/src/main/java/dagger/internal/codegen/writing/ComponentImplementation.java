@@ -468,6 +468,7 @@ public final class ComponentImplementation {
     private final UniqueNameSet componentClassNames = new UniqueNameSet();
     private final UniqueNameSet assistedParamNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
+    private final SwitchingProviders switchingProviders;
     private final Map<Key, CodeBlock> cancellations = new LinkedHashMap<>();
     private final Map<VariableElement, String> uniqueAssistedName = new LinkedHashMap<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
@@ -483,6 +484,8 @@ public final class ComponentImplementation {
 
     private ShardImplementation(ClassName name) {
       this.name = name;
+      this.switchingProviders = new SwitchingProviders(this, types);
+
       if (graph.componentDescriptor().isProduction()) {
         claimMethodName(CANCELLATION_LISTENER_METHOD_NAME);
       }
@@ -509,6 +512,11 @@ public final class ComponentImplementation {
               .nestedClass(
                   topLevelImplementation()
                       .getUniqueClassName(getComponentShard().name().simpleName() + "Shard")));
+    }
+
+    /** Returns the {@code SwitchingProviders} class for this shard. */
+    public SwitchingProviders getSwitchingProviders() {
+      return switchingProviders;
     }
 
     /** Returns the {@code ComponentImplementation} that owns this shard. */
