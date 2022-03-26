@@ -267,7 +267,7 @@ public final class ComponentImplementation {
   private final Optional<ComponentImplementation> parent;
   private final ChildComponentImplementationFactory childComponentImplementationFactory;
   private final Provider<GeneratedImplementation> topLevelImplementationProvider;
-  private final Provider<ComponentRequestRepresentations> bindingExpressionsProvider;
+  private final Provider<ComponentRequestRepresentations> componentRequestRepresentationsProvider;
   private final Provider<ComponentCreatorImplementationFactory>
       componentCreatorImplementationFactoryProvider;
   private final BindingGraph graph;
@@ -285,7 +285,7 @@ public final class ComponentImplementation {
       ChildComponentImplementationFactory childComponentImplementationFactory,
       // Inject as Provider<> to prevent a cycle.
       @TopLevel Provider<GeneratedImplementation> topLevelImplementationProvider,
-      Provider<ComponentRequestRepresentations> bindingExpressionsProvider,
+      Provider<ComponentRequestRepresentations> componentRequestRepresentationsProvider,
       Provider<ComponentCreatorImplementationFactory> componentCreatorImplementationFactoryProvider,
       BindingGraph graph,
       ComponentNames componentNames,
@@ -296,7 +296,7 @@ public final class ComponentImplementation {
     this.parent = parent;
     this.childComponentImplementationFactory = childComponentImplementationFactory;
     this.topLevelImplementationProvider = topLevelImplementationProvider;
-    this.bindingExpressionsProvider = bindingExpressionsProvider;
+    this.componentRequestRepresentationsProvider = componentRequestRepresentationsProvider;
     this.componentCreatorImplementationFactoryProvider =
         componentCreatorImplementationFactoryProvider;
     this.graph = graph;
@@ -469,6 +469,7 @@ public final class ComponentImplementation {
     private final UniqueNameSet assistedParamNames = new UniqueNameSet();
     private final List<CodeBlock> initializations = new ArrayList<>();
     private final SwitchingProviders switchingProviders;
+    private final ExperimentalSwitchingProviders experimentalSwitchingProviders;
     private final Map<Key, CodeBlock> cancellations = new LinkedHashMap<>();
     private final Map<VariableElement, String> uniqueAssistedName = new LinkedHashMap<>();
     private final List<CodeBlock> componentRequirementInitializations = new ArrayList<>();
@@ -485,6 +486,8 @@ public final class ComponentImplementation {
     private ShardImplementation(ClassName name) {
       this.name = name;
       this.switchingProviders = new SwitchingProviders(this, types);
+      this.experimentalSwitchingProviders =
+          new ExperimentalSwitchingProviders(this, componentRequestRepresentationsProvider, types);
 
       if (graph.componentDescriptor().isProduction()) {
         claimMethodName(CANCELLATION_LISTENER_METHOD_NAME);
@@ -517,6 +520,11 @@ public final class ComponentImplementation {
     /** Returns the {@code SwitchingProviders} class for this shard. */
     public SwitchingProviders getSwitchingProviders() {
       return switchingProviders;
+    }
+
+    /** Returns the {@code ExperimentalSwitchingProviders} class for this shard. */
+    public ExperimentalSwitchingProviders getExperimentalSwitchingProviders() {
+      return experimentalSwitchingProviders;
     }
 
     /** Returns the {@code ComponentImplementation} that owns this shard. */
@@ -902,7 +910,9 @@ public final class ComponentImplementation {
       Set<MethodSignature> signatures = Sets.newHashSet();
       for (ComponentMethodDescriptor method : graph.componentDescriptor().entryPointMethods()) {
         if (signatures.add(MethodSignature.forComponentMethod(method, componentType))) {
-          addMethod(COMPONENT_METHOD, bindingExpressionsProvider.get().getComponentMethod(method));
+          addMethod(
+              COMPONENT_METHOD,
+              componentRequestRepresentationsProvider.get().getComponentMethod(method));
         }
       }
     }
