@@ -16,22 +16,27 @@
 
 package dagger.internal.codegen;
 
+import dagger.testing.golden.GoldenFile;
+import dagger.testing.golden.GoldenFileExtension;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import javax.tools.JavaFileObject;
+
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import io.jbock.testing.compile.Compilation;
-import io.jbock.testing.compile.JavaFileObjects;
-import javax.tools.JavaFileObject;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-
+@ExtendWith(GoldenFileExtension.class)
 class AssistedFactoryTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void testAssistedFactory(CompilerMode compilerMode) {
+  void testAssistedFactory(CompilerMode compilerMode, GoldenFile goldenFile) {
     JavaFileObject foo =
         JavaFileObjects.forSourceLines(
             "test.Foo",
@@ -79,69 +84,9 @@ class AssistedFactoryTest {
     Compilation compilation =
         compilerWithOptions(compilerMode.javacopts()).compile(foo, bar, fooFactory, component);
     assertThat(compilation).succeeded();
-    JavaFileObject generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerTestComponent")
-            .addLines("package test;")
-            .addLines(GeneratedLines.generatedAnnotations())
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "final class DaggerTestComponent implements TestComponent {",
-                "  private Provider<FooFactory> fooFactoryProvider;",
-                "  private final DaggerTestComponent testComponent = this;",
-                "",
-                "  @Override",
-                "  public FooFactory fooFactory() {",
-                "    return fooFactoryProvider.get();",
-                "  }",
-                "",
-                "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize() {",
-                "    this.fooFactoryProvider = SingleCheck.provider(new SwitchingProvider<FooFactory>(testComponent, 0));",
-                "  }",
-                "",
-                "  private static final class SwitchingProvider<T> implements Provider<T> {",
-                "    private final DaggerTestComponent testComponent;",
-                "    private final int id;",
-                "",
-                "    @SuppressWarnings(\"unchecked\")",
-                "    @Override",
-                "    public T get() {",
-                "      switch (id) {",
-                "        case 0: // test.FooFactory ",
-                "        return (T) new FooFactory() {",
-                "          @Override",
-                "          public Foo create(String str) {",
-                "            return new Foo(str, new Bar());",
-                "          }",
-                "        };",
-                "",
-                "        default: throw new AssertionError(id);",
-                "      }",
-                "    }",
-                "  }",
-                "}")
-            .addLinesIn(
-                DEFAULT_MODE,
-                "final class DaggerTestComponent implements TestComponent {",
-                "  private Foo_Factory fooProvider;",
-                "  private Provider<FooFactory> fooFactoryProvider;",
-                "",
-                "  @Override",
-                "  public FooFactory fooFactory() {",
-                "    return fooFactoryProvider.get();",
-                "  }",
-                "",
-                "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize() {",
-                "    this.fooProvider = Foo_Factory.create(Bar_Factory.create());",
-                "    this.fooFactoryProvider = FooFactory_Impl.create(fooProvider);",
-                "  }",
-                "}")
-            .build();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
+        .containsLines(goldenFile.get("test.DaggerTestComponent", compilerMode));
   }
 
   @EnumSource(CompilerMode.class)

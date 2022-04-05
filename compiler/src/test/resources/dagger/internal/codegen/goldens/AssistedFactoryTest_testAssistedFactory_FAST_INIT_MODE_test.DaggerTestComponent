@@ -12,7 +12,6 @@ import javax.annotation.processing.Generated;
     "rawtypes"
 })
 final class DaggerTestComponent implements TestComponent {
-  private Foo_Factory fooProvider;
   private Provider<FooFactory> fooFactoryProvider;
   private final DaggerTestComponent testComponent = this;
 
@@ -37,8 +36,7 @@ final class DaggerTestComponent implements TestComponent {
 
   @SuppressWarnings("unchecked")
   private void initialize() {
-    this.fooProvider = Foo_Factory.create(Bar_Factory.create());
-    this.fooFactoryProvider = FooFactory_Impl.create(fooProvider);
+    this.fooFactoryProvider = SingleCheck.provider(new SwitchingProvider<FooFactory>(testComponent, 0));
   }
 
   static final class Builder {
@@ -47,6 +45,33 @@ final class DaggerTestComponent implements TestComponent {
 
     public TestComponent build() {
       return new DaggerTestComponent();
+    }
+  }
+
+  private static final class SwitchingProvider<T> implements Provider<T> {
+    private final DaggerTestComponent testComponent;
+
+    private final int id;
+
+    SwitchingProvider(DaggerTestComponent testComponent, int id) {
+      this.testComponent = testComponent;
+      this.id = id;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T get() {
+      switch (id) {
+        case 0: // test.FooFactory 
+        return (T) new FooFactory() {
+          @Override
+          public Foo create(String str) {
+            return new Foo(str, new Bar());
+          }
+        };
+
+        default: throw new AssertionError(id);
+      }
     }
   }
 }
