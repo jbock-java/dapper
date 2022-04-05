@@ -11,15 +11,8 @@ import javax.annotation.processing.Generated;
     "unchecked",
     "rawtypes"
 })
-final class DaggerTestComponent implements TestComponent {
-  private Foo_Factory fooProvider;
-  private Provider<FooFactory> fooFactoryProvider;
-  private final DaggerTestComponent testComponent = this;
-
+final class DaggerTestComponent {
   private DaggerTestComponent() {
-
-    initialize();
-
   }
 
   public static Builder builder() {
@@ -30,23 +23,37 @@ final class DaggerTestComponent implements TestComponent {
     return new Builder().build();
   }
 
-  @Override
-  public FooFactory fooFactory() {
-    return fooFactoryProvider.get();
-  }
-
-  @SuppressWarnings("unchecked")
-  private void initialize() {
-    this.fooProvider = Foo_Factory.create(Bar_Factory.create());
-    this.fooFactoryProvider = FooFactory_Impl.create(fooProvider);
-  }
-
   static final class Builder {
     private Builder() {
     }
 
     public TestComponent build() {
-      return new DaggerTestComponent();
+      return new TestComponentImpl();
+    }
+  }
+
+  private static final class TestComponentImpl implements TestComponent {
+    private Foo_Factory fooProvider;
+
+    private Provider<FooFactory> fooFactoryProvider;
+
+    private final TestComponentImpl testComponentImpl = this;
+
+    private TestComponentImpl() {
+
+      initialize();
+
+    }
+
+    @Override
+    public FooFactory fooFactory() {
+      return fooFactoryProvider.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize() {
+      this.fooProvider = Foo_Factory.create(Bar_Factory.create());
+      this.fooFactoryProvider = FooFactory_Impl.create(fooProvider);
     }
   }
 }

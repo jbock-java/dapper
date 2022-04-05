@@ -82,7 +82,7 @@ class AssistedFactoryTest {
             "  FooFactory fooFactory();",
             "}");
     Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts()).compile(foo, bar, fooFactory, component);
+        compilerWithOptions(compilerMode.javacopts(false)).compile(foo, bar, fooFactory, component);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
