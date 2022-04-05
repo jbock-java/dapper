@@ -16,20 +16,24 @@
 
 package dagger.internal.codegen;
 
-import static io.jbock.testing.compile.Compiler.javac;
-
 import dagger.internal.codegen.base.Util;
 import io.jbock.testing.compile.Compiler;
+
+import javax.annotation.processing.Processor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.processing.Processor;
+
+import static io.jbock.testing.compile.Compiler.javac;
 
 /** {@link Compiler} instances for testing Dagger. */
 public final class Compilers {
 
   static final List<String> DEFAULT_JAVACOPTS =
+      List.of("-Adagger.experimentalDaggerErrorMessages=enabled");
+
+  static final List<String> JAVACOPTS_GENERATED_CLASS_EXTENDS_COMPONENT =
       List.of(
           "-Adagger.generatedClassExtendsComponent=enabled",
           "-Adagger.experimentalDaggerErrorMessages=enabled");
@@ -42,7 +46,7 @@ public final class Compilers {
     List<Processor> processors = new ArrayList<>();
     processors.add(new ComponentProcessor());
     Collections.addAll(processors, extraProcessors);
-    return javac().withProcessors(processors).withOptions(DEFAULT_JAVACOPTS);
+    return javac().withProcessors(processors).withOptions(JAVACOPTS_GENERATED_CLASS_EXTENDS_COMPONENT);
   }
 
   public static Compiler compilerWithOptions(CompilerMode... compilerModes) {
@@ -61,5 +65,6 @@ public final class Compilers {
     return daggerCompiler().withOptions(Util.concat(DEFAULT_JAVACOPTS, Util.listOf(options)));
   }
 
-  private Compilers() {}
+  private Compilers() {
+  }
 }

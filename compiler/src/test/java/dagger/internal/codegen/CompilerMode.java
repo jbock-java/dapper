@@ -18,14 +18,13 @@ package dagger.internal.codegen;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** The configuration options for compiler modes. */
 enum CompilerMode {
   DEFAULT_MODE,
   FAST_INIT_MODE("-Adagger.fastInit=enabled");
-
-  static final List<Object[]> TEST_PARAMETERS =
-      List.of(new Object[][] {{CompilerMode.DEFAULT_MODE}, {CompilerMode.FAST_INIT_MODE}});
 
   private final List<String> javacopts;
 
@@ -35,7 +34,13 @@ enum CompilerMode {
 
   /** Returns the javacopts for this compiler mode. */
   List<String> javacopts() {
-    return javacopts;
+    return Stream.concat(javacopts.stream(), Stream.of("-Adagger.generatedClassExtendsComponent=enabled"))
+        .collect(Collectors.toList());
+  }
+
+  /** Returns the javacopts for this compiler mode. */
+  List<String> javacopts(boolean generatedClassExtends) {
+    return generatedClassExtends ? javacopts() : javacopts;
   }
 
   /**

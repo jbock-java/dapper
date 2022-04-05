@@ -319,7 +319,7 @@ class ComponentShardTest {
     Set<String> options = new LinkedHashSet<>();
     options.add("-Adagger.generatedClassExtendsComponent=DISABLED");
     options.add("-Adagger.keysPerComponentShard=" + BINDINGS_PER_SHARD);
-    options.addAll(compilerMode.javacopts());
+    options.addAll(compilerMode.javacopts(false));
     return compilerWithOptions(options);
   }
 }
