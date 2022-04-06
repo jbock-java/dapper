@@ -18,7 +18,6 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XType.isVoid;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -51,32 +50,20 @@ final class MembersInjectionRequestRepresentation extends RequestRepresentation 
     throw new UnsupportedOperationException(binding.toString());
   }
 
-  // TODO(ronshapiro): This class doesn't need to be a RequestRepresentation, as
-  // getDependencyExpression() should never be called for members injection methods. It's probably
-  // better suited as a method on MembersInjectionMethods
   @Override
-  protected CodeBlock getComponentMethodImplementation(
+  protected Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     XMethodElement methodElement = componentMethod.methodElement();
     ParameterSpec parameter =
         ParameterSpec.get(toJavac(getOnlyElement(methodElement.getParameters())));
-
-    if (binding.injectionSites().isEmpty()) {
-      return isVoid(methodElement.getReturnType())
-          ? CodeBlock.of("")
-          : CodeBlock.of("return $N;", parameter);
-    } else {
-      ClassName requestingClass = component.name();
-      return isVoid(methodElement.getReturnType())
-          ? CodeBlock.of("$L;", membersInjectionInvocation(parameter, requestingClass).codeBlock())
-          : CodeBlock.of(
-              "return $L;", membersInjectionInvocation(parameter, requestingClass).codeBlock());
-    }
+    return membersInjectionMethods.getInjectExpression(
+        binding.key(), CodeBlock.of("$N", parameter), component.name());
   }
 
-  private Expression membersInjectionInvocation(ParameterSpec target, ClassName requestingClass) {
-    return membersInjectionMethods.getInjectExpression(
-        binding.key(), CodeBlock.of("$N", target), requestingClass);
+  // TODO(bcorso): Consider making this a method on all RequestRepresentations.
+  /** Returns the binding associated with this {@code RequestRepresentation}. */
+  MembersInjectionBinding binding() {
+    return binding;
   }
 
   @AssistedFactory

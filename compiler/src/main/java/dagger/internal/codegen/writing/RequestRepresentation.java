@@ -19,7 +19,6 @@ package dagger.internal.codegen.writing;
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.javapoet.Expression;
 import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
 
 /** A factory of code expressions used to access a single request for a binding in a component. */
 // TODO(bcorso): Rename this to RequestExpression?
@@ -41,18 +40,5 @@ abstract class RequestRepresentation {
   Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     return getDependencyExpression(component.name());
-  }
-
-  /**
-   * Returns an expression for the implementation of a component method with the given request.
-   *
-   * @param component the component that will contain the implemented method
-   */
-  CodeBlock getComponentMethodImplementation(
-      ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
-    // By default, just delegate to #getDependencyExpression().
-    return CodeBlock.of(
-        "return $L;",
-        getDependencyExpressionForComponentMethod(componentMethod, component).codeBlock());
   }
 }

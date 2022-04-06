@@ -30,7 +30,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
-import static dagger.internal.codegen.langmodel.Accessibility.isProtectedMemberOf;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
@@ -81,13 +80,11 @@ import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.Key;
 import dagger.spi.model.RequestKind;
 import io.jbock.auto.common.MoreElements;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -592,39 +589,19 @@ public final class ComponentImplementation {
      * Returns an accessible type for this shard implementation, returns Object if the type is not
      * accessible.
      *
-     * <p>This method checks accessibility for public types and package private types, and it also
-     * checks protected types' accessibility.
+     * <p>This method checks accessibility for public types and package private types.
      */
     TypeMirror accessibleType(TypeMirror type) {
-      // Returns the original type if the type is accessible from this shard, or returns original
-      // type's raw type if only its raw type is accessible. Otherwise, returns Object.
-      TypeMirror castedType = types.accessibleType(type, name());
-      // Previous check marks protected type as inaccessible, so a second check is needed to check
-      // if the type is protected type and accessible.
-      if (TypeName.get(castedType).equals(TypeName.OBJECT) && isTypeAccessible(type)) {
-        castedType = type;
-      }
-      return castedType;
+      return types.accessibleType(type, name());
     }
 
     /**
      * Returns {@code true} if {@code type} is accessible from the generated component.
      *
-     * <p>This method checks accessibility for public types and package private types, and it also
-     * checks protected types' accessibility.
+     * <p>This method checks accessibility for public types and package private types.
      */
     boolean isTypeAccessible(TypeMirror type) {
-      if (isTypeAccessibleFrom(type, name.packageName())) {
-        return true;
-      }
-      // Check if the type is protected and accessible from current component.
-      if (type instanceof DeclaredType
-          && isProtectedMemberOf(
-              MoreTypes.asDeclared(type),
-              getComponentImplementation().componentDescriptor().typeElement())) {
-        return true;
-      }
-      return false;
+      return isTypeAccessibleFrom(type, name.packageName());
     }
 
     // TODO(dpb): Consider taking FieldSpec, and returning identical FieldSpec with unique name?
