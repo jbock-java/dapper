@@ -16,23 +16,28 @@
 
 package dagger.internal.codegen;
 
+import dagger.internal.codegen.base.Util;
+import dagger.testing.golden.GoldenFile;
+import dagger.testing.golden.GoldenFileExtension;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import javax.tools.JavaFileObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static dagger.internal.codegen.Compilers.daggerCompiler;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
-import dagger.internal.codegen.base.Util;
-import io.jbock.testing.compile.Compilation;
-import io.jbock.testing.compile.JavaFileObjects;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.tools.JavaFileObject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-
+@ExtendWith(GoldenFileExtension.class)
 class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
@@ -128,7 +133,7 @@ class ComponentProcessorTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void simpleComponent(CompilerMode compilerMode) {
+  void simpleComponent(CompilerMode compilerMode, GoldenFile goldenFile) {
     JavaFileObject injectableTypeFile = JavaFileObjects.forSourceLines("test.SomeInjectableType",
         "package test;",
         "",
@@ -151,81 +156,13 @@ class ComponentProcessorTest {
         "  Provider<SomeInjectableType> someInjectableTypeProvider();",
         "}");
 
-    JavaFileObject generatedComponent =
-        compilerMode
-            .javaFileBuilder("test.DaggerSimpleComponent")
-            .addLines(
-                "package test;",
-                "")
-            .addLines(GeneratedLines.generatedImports(
-                "import dagger.Lazy;",
-                "import dagger.internal.DoubleCheck;",
-                "import jakarta.inject.Provider;"))
-            .addLines("")
-            .addLines(GeneratedLines.generatedAnnotations())
-            .addLines(
-                "final class DaggerSimpleComponent implements SimpleComponent {",
-                "  private final DaggerSimpleComponent simpleComponent = this;")
-            .addLinesIn(
-                FAST_INIT_MODE,
-                "  @Override",
-                "  public SomeInjectableType someInjectableType() {",
-                "    return someInjectableTypeProvider.get();",
-                "  }",
-                "",
-                "  @Override",
-                "  public Lazy<SomeInjectableType> lazySomeInjectableType() {",
-                "    return DoubleCheck.lazy(someInjectableTypeProvider);",
-                "  }",
-                "",
-                "  @Override",
-                "  public Provider<SomeInjectableType> someInjectableTypeProvider() {",
-                "    return someInjectableTypeProvider;",
-                "  }",
-                "",
-                "  @SuppressWarnings(\"unchecked\")",
-                "  private void initialize() {",
-                "    this.someInjectableTypeProvider = new SwitchingProvider<>(simpleComponent, 0);",
-                "  }",
-                "",
-                "  private static final class SwitchingProvider<T> implements Provider<T> {",
-                "    private final DaggerSimpleComponent simpleComponent;",
-                "",
-                "    @SuppressWarnings(\"unchecked\")",
-                "    @Override",
-                "    public T get() {",
-                "      switch (id) {",
-                "        case 0: // test.SomeInjectableType ",
-                "        return (T) new SomeInjectableType();",
-                "        default: throw new AssertionError(id);",
-                "      }",
-                "    }")
-            .addLinesIn(
-                DEFAULT_MODE,
-                "  @Override",
-                "  public SomeInjectableType someInjectableType() {",
-                "    return new SomeInjectableType();",
-                "  }",
-                "",
-                "  @Override",
-                "  public Lazy<SomeInjectableType> lazySomeInjectableType() {",
-                "    return DoubleCheck.lazy(SomeInjectableType_Factory.create());",
-                "  }",
-                "",
-                "  @Override",
-                "  public Provider<SomeInjectableType> someInjectableTypeProvider() {",
-                "    return SomeInjectableType_Factory.create();",
-                "  }",
-                "}")
-            .build();
-
     Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts())
+        compilerWithOptions(compilerMode.javacopts(false))
             .compile(injectableTypeFile, componentFile);
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerSimpleComponent")
-        .containsLines(generatedComponent);
+        .containsLines(goldenFile.get("test.DaggerSimpleComponent", compilerMode));
   }
 
   @EnumSource(CompilerMode.class)

@@ -1,0 +1,77 @@
+package test;
+
+final class DaggerSimpleComponent {
+  private DaggerSimpleComponent() {
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static SimpleComponent create() {
+    return new Builder().build();
+  }
+
+  static final class Builder {
+    private Builder() {
+    }
+
+    public SimpleComponent build() {
+      return new SimpleComponentImpl();
+    }
+  }
+
+  private static final class SimpleComponentImpl implements SimpleComponent {
+    private Provider<SomeInjectableType> someInjectableTypeProvider;
+    private final SimpleComponentImpl simpleComponentImpl = this;
+
+    private SimpleComponentImpl() {
+
+      initialize();
+
+    }
+
+    @Override
+    public SomeInjectableType someInjectableType() {
+      return someInjectableTypeProvider.get();
+    }
+
+    @Override
+    public Lazy<SomeInjectableType> lazySomeInjectableType() {
+      return DoubleCheck.lazy(someInjectableTypeProvider);
+    }
+
+    @Override
+    public Provider<SomeInjectableType> someInjectableTypeProvider() {
+      return someInjectableTypeProvider;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize() {
+      this.someInjectableTypeProvider = new SwitchingProvider<>(simpleComponentImpl, 0);
+    }
+
+    private static final class SwitchingProvider<T> implements Provider<T> {
+      private final SimpleComponentImpl simpleComponentImpl;
+
+      private final int id;
+
+      SwitchingProvider(SimpleComponentImpl simpleComponentImpl, int id) {
+        this.simpleComponentImpl = simpleComponentImpl;
+        this.id = id;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public T get() {
+        switch (id) {
+          case 0: // test.SomeInjectableType 
+          return (T) new SomeInjectableType();
+
+          default: throw new AssertionError(id);
+        }
+      }
+    }
+  }
+}
+
