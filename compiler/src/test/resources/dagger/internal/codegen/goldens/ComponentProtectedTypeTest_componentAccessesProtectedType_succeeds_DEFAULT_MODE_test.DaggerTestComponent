@@ -1,0 +1,46 @@
+package test;
+
+public final class DaggerTestComponent {
+  private DaggerTestComponent() {
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static TestComponent create() {
+    return new Builder().build();
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public TestComponent build() {
+      return new TestComponentImpl();
+    }
+  }
+
+  private static final class TestComponentImpl extends TestComponent {
+    private Provider<test.sub.TestComponentBase.ProtectedType> protectedTypeProvider;
+
+    private final TestComponentImpl testComponentImpl = this;
+
+    private TestComponentImpl() {
+
+      initialize();
+
+    }
+
+    @Override
+    test.sub.TestComponentBase.ProtectedType provideProtectedType() {
+      return protectedTypeProvider.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize() {
+      this.protectedTypeProvider = DoubleCheck.provider(TestComponentBase_ProtectedType_Factory.create(TestComponentBase_Dep_Factory.create()));
+    }
+  }
+}
+

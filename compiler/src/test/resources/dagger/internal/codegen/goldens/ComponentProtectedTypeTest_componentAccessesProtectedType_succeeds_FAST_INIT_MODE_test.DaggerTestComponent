@@ -1,0 +1,68 @@
+package test;
+
+public final class DaggerTestComponent {
+  private DaggerTestComponent() {
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static TestComponent create() {
+    return new Builder().build();
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public TestComponent build() {
+      return new TestComponentImpl();
+    }
+  }
+
+  private static final class TestComponentImpl extends TestComponent {
+    private Provider<test.sub.TestComponentBase.ProtectedType> protectedTypeProvider;
+
+    private final TestComponentImpl testComponentImpl = this;
+
+    private TestComponentImpl() {
+
+      initialize();
+
+    }
+
+    @Override
+    test.sub.TestComponentBase.ProtectedType provideProtectedType() {
+      return protectedTypeProvider.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize() {
+      this.protectedTypeProvider = DoubleCheck.provider(new SwitchingProvider<test.sub.TestComponentBase.ProtectedType>(testComponentImpl, 0));
+    }
+
+    private static final class SwitchingProvider<T> implements Provider<T> {
+      private final TestComponentImpl testComponentImpl;
+
+      private final int id;
+
+      SwitchingProvider(TestComponentImpl testComponentImpl, int id) {
+        this.testComponentImpl = testComponentImpl;
+        this.id = id;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public T get() {
+        switch (id) {
+          case 0: // test.sub.TestComponentBase.ProtectedType 
+          return (T) TestComponentBase_ProtectedType_Factory.newInstance(TestComponentBase_Dep_Factory.newInstance());
+
+          default: throw new AssertionError(id);
+        }
+      }
+    }
+  }
+}
+

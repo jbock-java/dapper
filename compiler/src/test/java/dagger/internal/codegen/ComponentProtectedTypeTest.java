@@ -19,20 +19,21 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
 
+import dagger.testing.golden.GoldenFile;
+import dagger.testing.golden.GoldenFileExtension;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+@ExtendWith(GoldenFileExtension.class)
 final class ComponentProtectedTypeTest {
 
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
-  void componentAccessesProtectedType_succeeds(CompilerMode compilerMode) {
+  void componentAccessesProtectedType_succeeds(CompilerMode compilerMode, GoldenFile goldenFile) {
     JavaFileObject baseSrc =
         JavaFileObjects.forSourceLines(
             "test.sub.TestComponentBase",
@@ -75,27 +76,13 @@ final class ComponentProtectedTypeTest {
             // a type.
             "  abstract TestComponentBase.ProtectedType provideProtectedType();",
             "}");
-    List<String> generatedComponent = new ArrayList<>();
-    Collections.addAll(generatedComponent,
-        "package test;",
-        "");
-    Collections.addAll(generatedComponent, GeneratedLines.generatedAnnotations());
-    Collections.addAll(generatedComponent,
-        "public final class DaggerTestComponent extends TestComponent {",
-        "  private Provider<test.sub.TestComponentBase.ProtectedType> protectedTypeProvider;",
-        "",
-        "  @Override",
-        "  test.sub.TestComponentBase.ProtectedType provideProtectedType() {",
-        "    return protectedTypeProvider.get();",
-        "  }",
-        "}");
 
     Compilation compilation =
-        compilerWithOptions(compilerMode.javacopts()).compile(baseSrc, componentSrc);
+        compilerWithOptions(compilerMode.javacopts(false)).compile(baseSrc, componentSrc);
 
     assertThat(compilation).succeeded();
     assertThat(compilation)
         .generatedSourceFile("test.DaggerTestComponent")
-        .containsLines(generatedComponent);
+        .containsLines(goldenFile.get("test.DaggerTestComponent", compilerMode));
   }
 }
