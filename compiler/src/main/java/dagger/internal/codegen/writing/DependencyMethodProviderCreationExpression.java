@@ -16,6 +16,8 @@
 
 package dagger.internal.codegen.writing;
 
+import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
+import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
@@ -53,7 +55,6 @@ import io.jbock.javapoet.TypeName;
 // TODO(dpb): Resolve with DependencyMethodProducerCreationExpression.
 final class DependencyMethodProviderCreationExpression
     implements FrameworkInstanceCreationExpression {
-
   private final ShardImplementation shardImplementation;
   private final ComponentRequirementExpressions componentRequirementExpressions;
   private final CompilerOptions compilerOptions;
@@ -104,18 +105,13 @@ final class DependencyMethodProviderCreationExpression
       getMethod.addAnnotation(binding.nullableType().get().getTypeElement().getClassName());
     }
 
-    // We need to use the componentShard here since the generated type is static and shards are
-    // not static classes so it can't be nested inside the shard.
-    ShardImplementation componentShard =
-        shardImplementation.getComponentImplementation().getComponentShard();
     ClassName factoryClassName =
-        componentShard
+        shardImplementation
             .name()
             .nestedClass(
-                dependency().typeElement().getQualifiedName().replace('.', '_')
-                    + "_"
-                    + getSimpleName(provisionMethod));
-    componentShard.addType(
+                shardImplementation.getUniqueClassName(
+                    LOWER_CAMEL.to(UPPER_CAMEL, getSimpleName(provisionMethod) + "Provider")));
+    shardImplementation.addType(
         COMPONENT_PROVISION_FACTORY,
         classBuilder(factoryClassName)
             .addSuperinterface(providerOf(keyType))
