@@ -21,6 +21,7 @@ import dagger.testing.golden.GoldenFile;
 import dagger.testing.golden.GoldenFileExtension;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -131,6 +132,7 @@ class ComponentProcessorTest {
         .hadErrorContaining("Dagger does not support injection into private classes");
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void simpleComponent(CompilerMode compilerMode, GoldenFile goldenFile) {
@@ -165,6 +167,7 @@ class ComponentProcessorTest {
         .containsLines(goldenFile.get("test.DaggerSimpleComponent", compilerMode));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentWithScope(CompilerMode compilerMode) {
@@ -254,6 +257,7 @@ class ComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentWithModule(CompilerMode compilerMode) {
@@ -353,6 +357,7 @@ class ComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentWithAbstractModule(CompilerMode compilerMode) {
@@ -786,6 +791,7 @@ class ComponentProcessorTest {
         .succeeded();
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void membersInjection(CompilerMode compilerMode) {
@@ -853,6 +859,7 @@ class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentInjection(CompilerMode compilerMode) {
@@ -921,6 +928,7 @@ class ComponentProcessorTest {
         .containsLines(generatedComponent);
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentDependency(CompilerMode compilerMode) {
@@ -1162,6 +1170,7 @@ class ComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void ignoresDependencyMethodsFromObject(CompilerMode compilerMode) {
@@ -1255,6 +1264,7 @@ class ComponentProcessorTest {
         .containsLines(List.of(generatedComponent));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void resolutionOrder(CompilerMode compilerMode) {
@@ -1824,6 +1834,7 @@ class ComponentProcessorTest {
         .onLineContaining("interface TestComponent");
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void privateMethodUsedOnlyInChildDoesNotUseQualifiedThis(CompilerMode compilerMode) {
@@ -1891,6 +1902,7 @@ class ComponentProcessorTest {
         .containsLines(List.of(expectedPattern));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void componentMethodInChildCallsComponentMethodInParent(CompilerMode compilerMode) {
@@ -2159,6 +2171,7 @@ class ComponentProcessorTest {
     assertThat(compilation).succeeded();
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void providerComponentType(CompilerMode compilerMode) {

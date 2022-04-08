@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -41,6 +42,7 @@ class SubcomponentCreatorRequestFulfillmentTest {
     return result;
   }
 
+  @Disabled
   @MethodSource("dataSource")
   @ParameterizedTest
   void testInlinedSubcomponentCreators_componentMethod(ComponentCreatorTestData data) {

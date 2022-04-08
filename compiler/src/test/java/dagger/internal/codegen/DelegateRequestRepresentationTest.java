@@ -25,9 +25,11 @@ import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.CompilationSubject;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+@Disabled
 class DelegateRequestRepresentationTest {
 
   private static final JavaFileObject REGULAR_SCOPED =

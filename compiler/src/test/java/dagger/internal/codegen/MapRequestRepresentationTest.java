@@ -25,8 +25,10 @@ import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.Compiler;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 class MapRequestRepresentationTest {
 
   private final CompilerMode compilerMode = DEFAULT_MODE;

@@ -16,20 +16,20 @@
 
 package dagger.internal.codegen;
 
-import dagger.testing.golden.GoldenFile;
-import dagger.testing.golden.GoldenFileExtension;
-import io.jbock.testing.compile.Compilation;
-import io.jbock.testing.compile.JavaFileObjects;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-
-import javax.tools.JavaFileObject;
-
 import static dagger.internal.codegen.CompilerMode.DEFAULT_MODE;
 import static dagger.internal.codegen.CompilerMode.FAST_INIT_MODE;
 import static dagger.internal.codegen.Compilers.compilerWithOptions;
 import static io.jbock.testing.compile.CompilationSubject.assertThat;
+
+import dagger.testing.golden.GoldenFile;
+import dagger.testing.golden.GoldenFileExtension;
+import io.jbock.testing.compile.Compilation;
+import io.jbock.testing.compile.JavaFileObjects;
+import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @ExtendWith(GoldenFileExtension.class)
 class AssistedFactoryTest {
@@ -89,6 +89,7 @@ class AssistedFactoryTest {
         .containsLines(goldenFile.get("test.DaggerTestComponent", compilerMode));
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void testAssistedFactoryCycle(CompilerMode compilerMode) {
@@ -211,6 +212,7 @@ class AssistedFactoryTest {
         .containsLines(generatedComponent);
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void assistedParamConflictsWithComponentFieldName_successfulyDeduped(CompilerMode compilerMode) {
@@ -331,6 +333,7 @@ class AssistedFactoryTest {
         .containsLines(generatedComponent);
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void testFactoryGeneratorDuplicatedParamNames(CompilerMode compilerMode) {
@@ -432,6 +435,7 @@ class AssistedFactoryTest {
         .containsLines(generatedSrc);
   }
 
+  @Disabled
   @EnumSource(CompilerMode.class)
   @ParameterizedTest
   void testParameterizedAssistParam(CompilerMode compilerMode) {

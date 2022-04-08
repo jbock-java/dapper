@@ -21,21 +21,15 @@ public final class DaggerTestComponent {
     }
   }
 
-  private static final class TestComponentImpl extends TestComponent {
+  private static final class TestComponentImplShard {
     @SuppressWarnings("rawtypes")
     private Provider protectedTypeProvider;
 
-    private final TestComponentImpl testComponentImpl = this;
+    private final TestComponentImpl testComponentImpl;
 
-    private TestComponentImpl() {
-
+    private TestComponentImplShard(TestComponentImpl testComponentImpl) {
+      this.testComponentImpl = testComponentImpl;
       initialize();
-
-    }
-
-    @Override
-    test.sub.TestComponentBase.ProtectedType provideProtectedType() {
-      return (test.sub.TestComponentBase.ProtectedType) protectedTypeProvider.get();
     }
 
     @SuppressWarnings("unchecked")
@@ -63,6 +57,22 @@ public final class DaggerTestComponent {
           default: throw new AssertionError(id);
         }
       }
+    }
+  }
+
+  private static final class TestComponentImpl extends TestComponent {
+    private final TestComponentImplShard testComponentImplShard;
+
+    private final TestComponentImpl testComponentImpl = this;
+
+    private TestComponentImpl() {
+
+      testComponentImplShard = new TestComponentImplShard(testComponentImpl);
+    }
+
+    @Override
+    test.sub.TestComponentBase.ProtectedType provideProtectedType() {
+      return (test.sub.TestComponentBase.ProtectedType) testComponentImpl.testComponentImplShard.protectedTypeProvider.get();
     }
   }
 }

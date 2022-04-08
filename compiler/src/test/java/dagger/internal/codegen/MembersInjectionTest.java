@@ -21,12 +21,14 @@ import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import io.jbock.testing.compile.Compilation;
 import io.jbock.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class MembersInjectionTest {
 
   private final CompilerMode compilerMode = CompilerMode.DEFAULT_MODE;
 
+  @Disabled
   @Test
   void parentClass_injectedMembersInSupertype() {
     JavaFileObject childFile = JavaFileObjects.forSourceLines("test.Child",
