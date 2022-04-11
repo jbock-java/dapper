@@ -37,6 +37,12 @@ import javax.lang.model.element.ElementKind;
 public final class XElements {
 
   // TODO(bcorso): Replace usages with getJvmName() once it exists.
+  /** Returns the simple name of the member container. */
+  public static String getSimpleName(XMemberContainer memberContainer) {
+    return memberContainer.getClassName().simpleName();
+  }
+
+  // TODO(bcorso): Replace usages with getJvmName() once it exists.
   /** Returns the simple name of the element. */
   public static String getSimpleName(XElement element) {
     return toJavac(element).getSimpleName().toString();

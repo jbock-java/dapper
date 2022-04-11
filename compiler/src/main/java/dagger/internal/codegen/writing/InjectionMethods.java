@@ -62,6 +62,7 @@ import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
 import io.jbock.auto.common.MoreElements;
@@ -146,7 +147,7 @@ final class InjectionMethods {
     static CodeBlock invoke(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
-        Function<VariableElement, String> uniqueAssistedParameterName,
+        Function<XVariableElement, String> uniqueAssistedParameterName,
         ClassName requestingClass,
         Optional<CodeBlock> moduleReference,
         CompilerOptions compilerOptions,
@@ -164,7 +165,7 @@ final class InjectionMethods {
     static ImmutableList<CodeBlock> invokeArguments(
         ProvisionBinding binding,
         Function<DependencyRequest, CodeBlock> dependencyUsage,
-        Function<VariableElement, String> uniqueAssistedParameterName) {
+        Function<XVariableElement, String> uniqueAssistedParameterName) {
       ImmutableMap<XExecutableParameterElement, DependencyRequest> dependencyRequestMap =
           binding.provisionDependencies().stream()
               .collect(
@@ -176,7 +177,7 @@ final class InjectionMethods {
       XExecutableElement method = asExecutable(binding.bindingElement().get());
       for (XExecutableParameterElement parameter : method.getParameters()) {
         if (isAssistedParameter(parameter)) {
-          arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(toJavac(parameter))));
+          arguments.add(CodeBlock.of("$L", uniqueAssistedParameterName.apply(parameter)));
         } else if (dependencyRequestMap.containsKey(parameter)) {
           DependencyRequest request = dependencyRequestMap.get(parameter);
           arguments.add(dependencyUsage.apply(request));

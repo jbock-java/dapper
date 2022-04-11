@@ -56,11 +56,11 @@ import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
@@ -76,11 +76,9 @@ import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.VariableElement;
 
 /**
  * Generates {@code Factory} implementations from {@code ProvisionBinding} instances for {@code
@@ -245,15 +243,15 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     UniqueNameSet uniqueFieldNames = new UniqueNameSet();
     ImmutableMap<DependencyRequest, FieldSpec> frameworkFields = frameworkFields(binding);
     frameworkFields.values().forEach(field -> uniqueFieldNames.claim(field.name));
-    Map<VariableElement, ParameterSpec> assistedParameters =
+    ImmutableMap<XVariableElement, ParameterSpec> assistedParameters =
         assistedParameters(binding).stream()
             .collect(
                 toImmutableMap(
-                    XConverters::toJavac,
-                    element ->
+                    parameter -> parameter,
+                    parameter ->
                         ParameterSpec.builder(
-                                element.getType().getTypeName(),
-                                uniqueFieldNames.getUniqueName(getSimpleName(element)))
+                                parameter.getType().getTypeName(),
+                                uniqueFieldNames.getUniqueName(getSimpleName(parameter)))
                             .build()));
     TypeName providedTypeName = providedTypeName(binding);
     MethodSpec.Builder getMethod =

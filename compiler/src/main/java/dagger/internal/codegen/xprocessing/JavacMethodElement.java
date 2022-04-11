@@ -34,6 +34,11 @@ class JavacMethodElement extends JavacExecutableElement implements XMethodElemen
   }
 
   @Override
+  public String getJvmName() {
+    return element.getSimpleName().toString();
+  }
+
+  @Override
   public boolean isAccessibleFrom(String packageName) {
     if (isPublic() || isProtected()) {
       return true;

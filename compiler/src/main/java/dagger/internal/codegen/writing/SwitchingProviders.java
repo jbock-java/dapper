@@ -23,7 +23,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -139,7 +138,7 @@ final class SwitchingProviders {
           //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
           (binding.scope().isPresent() || binding.kind().equals(BindingKind.ASSISTED_FACTORY))
               ? CodeBlock.of(
-                  "$T", shardImplementation.accessibleType(toJavac(binding.contributedType())))
+                  "$T", shardImplementation.accessibleType(binding.contributedType()).getTypeName())
               : "",
           shardImplementation.componentFieldsByImplementation().values().stream()
               .map(field -> CodeBlock.of("$N", field))

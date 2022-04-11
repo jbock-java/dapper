@@ -6,6 +6,8 @@ public interface XMethodElement extends XExecutableElement {
 
   String getName();
 
+  String getJvmName();
+
   boolean isAccessibleFrom(String packageName);
 
   boolean isStaticInterfaceMethod();

@@ -18,7 +18,6 @@ package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asConstructor;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 
@@ -91,7 +90,7 @@ final class AssistedInjectionParameters {
         assistedParameterSpecs.add(
             ParameterSpec.builder(
                     paramType.getTypeName(),
-                    shardImplementation.getUniqueFieldNameForAssistedParam(toJavac(paramElement)))
+                    shardImplementation.getUniqueFieldNameForAssistedParam(paramElement))
                 .build());
       }
     }

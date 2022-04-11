@@ -23,7 +23,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -38,6 +37,7 @@ import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
+import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Keeps track of all provider expression requests for a component.
@@ -171,15 +170,14 @@ final class ExperimentalSwitchingProviders {
           throw new IllegalArgumentException("Unexpected binding kind: " + binding.kind());
       }
 
-      TypeMirror castedType =
-          shardImplementation.accessibleType(toJavac(binding.contributedType()));
+      XType castedType = shardImplementation.accessibleType(binding.contributedType());
       return CodeBlock.of(
           "new $T<$L>($L)",
           switchingProviderType,
           // Add the type parameter explicitly when the binding is scoped because Java can't resolve
           // the type when wrapped. For example, the following will error:
           //   fooProvider = DoubleCheck.provider(new SwitchingProvider<>(1));
-          CodeBlock.of("$T", castedType),
+          CodeBlock.of("$T", castedType.getTypeName()),
           switchingProviderDependencies.isEmpty()
               ? CodeBlock.of("$L", switchIds.get(key))
               : CodeBlock.of("$L, $L", switchIds.get(key), switchingProviderDependencies));
