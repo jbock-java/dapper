@@ -48,12 +48,11 @@ import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.DaggerAnnotation;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
@@ -74,19 +73,16 @@ import javax.lang.model.SourceVersion;
  * Generates {@code MembersInjector} implementations from {@code MembersInjectionBinding} instances.
  */
 public final class MembersInjectorGenerator extends SourceFileGenerator<MembersInjectionBinding> {
-  private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
+  private final XProcessingEnv processingEnv;
 
   @Inject
   MembersInjectorGenerator(
       XFiler filer,
       DaggerElements elements,
-      DaggerTypes types,
       SourceVersion sourceVersion,
-      KotlinMetadataUtil metadataUtil) {
+      XProcessingEnv processingEnv) {
     super(filer, elements, sourceVersion);
-    this.types = types;
-    this.metadataUtil = metadataUtil;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -203,10 +199,9 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
             binding.injectionSites(),
             generatedTypeName,
             CodeBlock.of("instance"),
-            binding.key().type().java(),
+            binding.key().type().xprocessing(),
             frameworkFieldUsages(binding.dependencies(), dependencyFields)::get,
-            types,
-            metadataUtil));
+            processingEnv));
 
     if (usesRawFrameworkTypes) {
       injectMembersBuilder.addAnnotation(suppressWarnings(UNCHECKED));
@@ -215,7 +210,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
 
     for (InjectionSite injectionSite : binding.injectionSites()) {
       if (injectionSite.enclosingTypeElement().equals(binding.membersInjectedType())) {
-        injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite, metadataUtil));
+        injectorTypeBuilder.addMethod(InjectionSiteMethod.create(injectionSite));
       }
     }
 

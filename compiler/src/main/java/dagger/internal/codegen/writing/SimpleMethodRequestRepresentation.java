@@ -151,8 +151,7 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
             shardImplementation::getUniqueFieldNameForAssistedParam,
             requestingClass,
             moduleReference(requestingClass),
-            compilerOptions,
-            metadataUtil),
+            compilerOptions),
         requestingClass);
   }
 

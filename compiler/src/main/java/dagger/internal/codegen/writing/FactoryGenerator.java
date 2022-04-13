@@ -51,13 +51,12 @@ import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
@@ -85,22 +84,19 @@ import javax.lang.model.SourceVersion;
  * Inject} constructors.
  */
 public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding> {
-  private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
-  private final KotlinMetadataUtil metadataUtil;
+  private final XProcessingEnv processingEnv;
 
   @Inject
   FactoryGenerator(
       XFiler filer,
       SourceVersion sourceVersion,
-      DaggerTypes types,
       DaggerElements elements,
       CompilerOptions compilerOptions,
-      KotlinMetadataUtil metadataUtil) {
+      XProcessingEnv processingEnv) {
     super(filer, elements, sourceVersion);
-    this.types = types;
     this.compilerOptions = compilerOptions;
-    this.metadataUtil = metadataUtil;
+    this.processingEnv = processingEnv;
   }
 
   @Override
@@ -140,7 +136,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
     factoryBuilder.addMethod(getMethod(binding));
     addCreateMethod(binding, factoryBuilder);
 
-    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions, metadataUtil));
+    factoryBuilder.addMethod(ProvisionMethod.create(binding, compilerOptions));
     gwtIncompatibleAnnotation(binding).ifPresent(factoryBuilder::addAnnotation);
 
     return factoryBuilder;
@@ -272,8 +268,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
             param -> assistedParameters.get(param).name,
             generatedClassNameForBinding(binding),
             moduleParameter(binding).map(module -> CodeBlock.of("$N", module)),
-            compilerOptions,
-            metadataUtil);
+            compilerOptions);
 
     if (binding.kind().equals(PROVISION)) {
       binding
@@ -291,10 +286,9 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
                   binding.injectionSites(),
                   generatedClassNameForBinding(binding),
                   instance,
-                  binding.key().type().java(),
+                  binding.key().type().xprocessing(),
                   frameworkFieldUsages(binding.dependencies(), frameworkFields)::get,
-                  types,
-                  metadataUtil))
+                  processingEnv))
           .addStatement("return $L", instance);
     } else {
       getMethod.addStatement("return $L", invokeNewInstance);

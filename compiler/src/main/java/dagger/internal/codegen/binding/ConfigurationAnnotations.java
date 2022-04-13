@@ -29,11 +29,7 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
-import java.util.List;
 import java.util.Optional;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
 
 /**
  * Utility methods related to dagger configuration annotations (e.g.: {@code Component} and {@code
@@ -62,17 +58,6 @@ public final class ConfigurationAnnotations {
 
   public static Optional<XType> getNullableType(XElement element) {
     return getNullableAnnotation(element).map(XAnnotation::getType);
-  }
-
-  /** Returns the first type that specifies this' nullability, or empty if none. */
-  public static Optional<DeclaredType> getNullableType(Element element) {
-    List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
-    for (AnnotationMirror mirror : mirrors) {
-      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
-        return Optional.of(mirror.getAnnotationType());
-      }
-    }
-    return Optional.empty();
   }
 
   /** Returns the enclosed types annotated with the given annotation. */

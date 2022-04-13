@@ -33,11 +33,11 @@ import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
+import dagger.internal.codegen.xprocessing.XType;
+import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -47,8 +47,6 @@ import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 /** Manages the member injection methods for a component. */
 @PerComponentImplementation
@@ -58,24 +56,18 @@ final class MembersInjectionMethods {
   private final ComponentImplementation componentImplementation;
   private final ComponentRequestRepresentations bindingExpressions;
   private final BindingGraph graph;
-  private final DaggerElements elements;
-  private final DaggerTypes types;
-  private final KotlinMetadataUtil metadataUtil;
+  private final XProcessingEnv processingEnv;
 
   @Inject
   MembersInjectionMethods(
       ComponentImplementation componentImplementation,
       ComponentRequestRepresentations bindingExpressions,
       BindingGraph graph,
-      DaggerElements elements,
-      DaggerTypes types,
-      KotlinMetadataUtil metadataUtil) {
+      XProcessingEnv processingEnv) {
     this.componentImplementation = componentImplementation;
     this.bindingExpressions = bindingExpressions;
     this.graph = graph;
-    this.elements = elements;
-    this.types = types;
-    this.metadataUtil = metadataUtil;
+    this.processingEnv = processingEnv;
   }
 
   /**
@@ -122,32 +114,32 @@ final class MembersInjectionMethods {
 
   private Expression injectMethodExpression(Binding binding, boolean useStaticInjectionMethod) {
     ShardImplementation shardImplementation = componentImplementation.shardImplementation(binding);
-    TypeMirror keyType = binding.key().type().java();
-    TypeMirror membersInjectedType =
+    XType keyType = binding.key().type().xprocessing();
+    XType membersInjectedType =
         isTypeAccessibleFrom(keyType, shardImplementation.name().packageName())
             ? keyType
-            : elements.getTypeElement(TypeName.OBJECT).asType();
-    TypeName membersInjectedTypeName = TypeName.get(membersInjectedType);
+            : processingEnv.requireType(TypeName.OBJECT);
     String bindingTypeName = getSimpleName(binding.bindingTypeElement().get());
     // TODO(ronshapiro): include type parameters in this name e.g. injectFooOfT, and outer class
     // simple names Foo.Builder -> injectFooBuilder
     String methodName = shardImplementation.getUniqueMethodName("inject" + bindingTypeName);
-    ParameterSpec parameter = ParameterSpec.builder(membersInjectedTypeName, "instance").build();
+    ParameterSpec parameter =
+        ParameterSpec.builder(membersInjectedType.getTypeName(), "instance").build();
     MethodSpec.Builder methodBuilder =
         useStaticInjectionMethod
             ? methodBuilder(methodName)
                 .addModifiers(PRIVATE, STATIC)
-                .returns(membersInjectedTypeName)
+                .returns(membersInjectedType.getTypeName())
                 .addParameter(parameter)
                 .addParameter(Object[].class, "dependencies")
             : methodBuilder(methodName)
                 .addModifiers(PRIVATE)
-                .returns(membersInjectedTypeName)
+                .returns(membersInjectedType.getTypeName())
                 .addParameter(parameter);
-    TypeElement canIgnoreReturnValue =
-        elements.getTypeElement("com.google.errorprone.annotations.CanIgnoreReturnValue");
+    XTypeElement canIgnoreReturnValue =
+        processingEnv.findTypeElement("com.google.errorprone.annotations.CanIgnoreReturnValue");
     if (canIgnoreReturnValue != null) {
-      methodBuilder.addAnnotation(ClassName.get(canIgnoreReturnValue));
+      methodBuilder.addAnnotation(canIgnoreReturnValue.getClassName());
     }
     CodeBlock instance = CodeBlock.of("$N", parameter);
     methodBuilder.addCode(
@@ -165,8 +157,7 @@ final class MembersInjectionMethods {
                         : bindingExpressions.getDependencyArgumentExpression(
                             request, shardImplementation.name()))
                     .codeBlock(),
-            types,
-            metadataUtil));
+            processingEnv));
     methodBuilder.addStatement("return $L", instance);
 
     MethodSpec method = methodBuilder.build();

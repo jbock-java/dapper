@@ -23,6 +23,7 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
+import io.jbock.javapoet.TypeVariableName;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@code XTypeElement} helper methods. */
@@ -43,6 +44,14 @@ public final class XTypeElements {
         return Visibility.OTHER;
       }
     }
+  }
+
+  // TODO(bcorso): Consider XParameterizable interface to handle both methods and types.
+  /** Returns the type arguments for the given type as a list of {@code TypeVariableName}. */
+  public static ImmutableList<TypeVariableName> typeVariableNames(XTypeElement typeElement) {
+    return toJavac(typeElement).getTypeParameters().stream()
+        .map(TypeVariableName::get)
+        .collect(toImmutableList());
   }
 
   /** Returns {@code true} if the given element is nested. */

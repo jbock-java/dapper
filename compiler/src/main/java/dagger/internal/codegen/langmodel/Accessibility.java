@@ -243,10 +243,20 @@ public final class Accessibility {
   }
 
   /** Returns true if the raw type of {@code type} is accessible from the given package. */
+  public static boolean isRawTypeAccessible(XType type, String requestingPackage) {
+    return isRawTypeAccessible(toJavac(type), requestingPackage);
+  }
+
+  /** Returns true if the raw type of {@code type} is accessible from the given package. */
   public static boolean isRawTypeAccessible(TypeMirror type, String requestingPackage) {
     return type.getKind() == TypeKind.DECLARED
         ? isElementAccessibleFrom(asElement(type), requestingPackage)
         : isTypeAccessibleFrom(type, requestingPackage);
+  }
+
+  /** Returns true if the raw type of {@code type} is accessible from any package. */
+  public static boolean isRawTypePubliclyAccessible(XType type) {
+    return isRawTypePubliclyAccessible(toJavac(type));
   }
 
   /** Returns true if the raw type of {@code type} is accessible from any package. */

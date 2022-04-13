@@ -16,11 +16,28 @@
 
 package dagger.internal.codegen.xprocessing;
 
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+
 import io.jbock.javapoet.ClassName;
 
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@code XProcessingEnvs} helper methods. */
 public final class XProcessingEnvs {
+
+  /** Returns the erasure of the given type. */
+  public static XType erasure(XType type, XProcessingEnv processingEnv) {
+    return toXProcessing(
+        toJavac(processingEnv).getTypeUtils().erasure(toJavac(type)), // ALLOW_TYPES_ELEMENTS
+        processingEnv);
+  }
+
+  /** Returns {@code true} if {@code type1} is a subtype of {@code type2}. */
+  public static boolean isSubtype(XType type1, XType type2, XProcessingEnv processingEnv) {
+    return toJavac(processingEnv)
+        .getTypeUtils() // ALLOW_TYPES_ELEMENTS
+        .isSubtype(toJavac(type1), toJavac(type2));
+  }
 
   /** Returns the type this method is enclosed in. */
   public static XType wrapType(ClassName wrapper, XType type, XProcessingEnv processingEnv) {
