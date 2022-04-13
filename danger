@@ -1,0 +1,17 @@
+#!/bin/bash
+
+die () {
+    echo "$*"
+    exit 1
+}
+
+dang=()
+dang+=("SetRequestRepresentation.java")
+dang+=("MapRequestRepresentation.java")
+dang+=("ComponentValidator.java")
+
+for S in ${dang[@]}; do
+    if [[ -n `git status | fgrep $S` ]]; then
+        echo "Danger: $S"
+    fi
+done
