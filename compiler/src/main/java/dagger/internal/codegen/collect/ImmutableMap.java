@@ -29,7 +29,7 @@ public class ImmutableMap<X, Y> extends AbstractMap<X, Y> {
   }
 
   public static class Builder<X, Y> {
-    private Map<X, Y> delegate = new LinkedHashMap<>();
+    private final Map<X, Y> delegate = new LinkedHashMap<>();
 
     Map<X, Y> delegate() {
       return delegate;

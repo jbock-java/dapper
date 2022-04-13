@@ -18,13 +18,17 @@ package dagger.internal.codegen.langmodel;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static io.jbock.auto.common.MoreElements.getPackage;
 import static io.jbock.auto.common.MoreTypes.asElement;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -264,6 +268,26 @@ public final class Accessibility {
     return type.getKind() == TypeKind.DECLARED
         ? isElementPubliclyAccessible(asElement(type))
         : isTypePubliclyAccessible(type);
+  }
+
+  /**
+   * Returns an accessible type in {@code requestingClass}'s package based on {@code type}:
+   *
+   * <ul>
+   *   <li>If {@code type} is accessible from the package, returns it.
+   *   <li>If not, but {@code type}'s raw type is accessible from the package, returns the raw type.
+   *   <li>Otherwise returns {@code Object}.
+   * </ul>
+   */
+  public static XType accessibleType(
+      XType type, ClassName requestingClass, XProcessingEnv processingEnv) {
+    if (isTypeAccessibleFrom(type, requestingClass.packageName())) {
+      return type;
+    } else if (isDeclared(type) && isRawTypeAccessible(type, requestingClass.packageName())) {
+      return processingEnv.getDeclaredType(type.getTypeElement());
+    } else {
+      return processingEnv.requireType(TypeName.OBJECT);
+    }
   }
 
   private Accessibility() {}

@@ -21,8 +21,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.FrameworkType;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 
 /** Binding expression for provider instances. */
 final class ProviderInstanceRequestRepresentation extends FrameworkInstanceRequestRepresentation {
@@ -31,9 +30,8 @@ final class ProviderInstanceRequestRepresentation extends FrameworkInstanceReque
   ProviderInstanceRequestRepresentation(
       @Assisted ContributionBinding binding,
       @Assisted FrameworkInstanceSupplier frameworkInstanceSupplier,
-      DaggerTypes types,
-      DaggerElements elements) {
-    super(binding, frameworkInstanceSupplier, types, elements);
+      XProcessingEnv processingEnv) {
+    super(binding, frameworkInstanceSupplier, processingEnv);
   }
 
   @Override

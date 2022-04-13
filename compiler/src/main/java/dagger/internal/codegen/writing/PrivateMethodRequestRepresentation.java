@@ -17,8 +17,8 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.langmodel.Accessibility.accessibleType;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.PRIVATE_METHOD;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
@@ -28,14 +28,11 @@ import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.BindingRequest;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.TypeName;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * A binding expression that wraps the dependency expressions in a private, no-arg method.
@@ -49,7 +46,6 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   private final RequestRepresentation wrappedRequestRepresentation;
   private final CompilerOptions compilerOptions;
   private final XProcessingEnv processingEnv;
-  private final DaggerTypes types;
   private String methodName;
 
   @AssistedInject
@@ -59,16 +55,14 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
       @Assisted RequestRepresentation wrappedRequestRepresentation,
       ComponentImplementation componentImplementation,
       XProcessingEnv processingEnv,
-      DaggerTypes types,
       CompilerOptions compilerOptions) {
-    super(componentImplementation.shardImplementation(binding), types);
+    super(componentImplementation.shardImplementation(binding), processingEnv);
     this.binding = checkNotNull(binding);
     this.request = checkNotNull(request);
     this.wrappedRequestRepresentation = checkNotNull(wrappedRequestRepresentation);
     this.shardImplementation = componentImplementation.shardImplementation(binding);
     this.compilerOptions = compilerOptions;
     this.processingEnv = processingEnv;
-    this.types = types;
   }
 
   @Override
@@ -77,14 +71,14 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
   }
 
   @Override
-  protected TypeMirror returnType() {
+  protected XType returnType() {
     if (request.isRequestKind(RequestKind.INSTANCE)
         && binding.contributedPrimitiveType().isPresent()) {
-      return toJavac(binding.contributedPrimitiveType().get());
+      return binding.contributedPrimitiveType().get();
     }
 
     XType requestedType = request.requestedType(binding.contributedType(), processingEnv);
-    return types.accessibleType(requestedType, shardImplementation.name());
+    return accessibleType(requestedType, shardImplementation.name(), processingEnv);
   }
 
   private String methodName() {
@@ -97,7 +91,7 @@ final class PrivateMethodRequestRepresentation extends MethodRequestRepresentati
           PRIVATE_METHOD,
           methodBuilder(methodName)
               .addModifiers(PRIVATE)
-              .returns(TypeName.get(returnType()))
+              .returns(returnType().getTypeName())
               .addStatement(
                   "return $L",
                   wrappedRequestRepresentation

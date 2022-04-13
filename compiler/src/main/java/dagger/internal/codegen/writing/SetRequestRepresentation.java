@@ -34,22 +34,19 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.Expression;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DependencyRequest;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import java.util.Collections;
-import javax.lang.model.type.DeclaredType;
 
 /** A binding expression for multibound sets. */
 final class SetRequestRepresentation extends RequestRepresentation {
   private final ProvisionBinding binding;
   private final BindingGraph graph;
   private final ComponentRequestRepresentations componentRequestRepresentations;
-  private final DaggerTypes types;
-  private final DaggerElements elements;
+  private final XProcessingEnv processingEnv;
   private final boolean isExperimentalMergedMode;
 
   @AssistedInject
@@ -58,13 +55,11 @@ final class SetRequestRepresentation extends RequestRepresentation {
       BindingGraph graph,
       ComponentImplementation componentImplementation,
       ComponentRequestRepresentations componentRequestRepresentations,
-      DaggerTypes types,
-      DaggerElements elements) {
+      XProcessingEnv processingEnv) {
     this.binding = binding;
     this.graph = graph;
     this.componentRequestRepresentations = componentRequestRepresentations;
-    this.types = types;
-    this.elements = elements;
+    this.processingEnv = processingEnv;
     this.isExperimentalMergedMode =
         componentImplementation.compilerMode().isExperimentalMergedMode();
   }
@@ -82,7 +77,9 @@ final class SetRequestRepresentation extends RequestRepresentation {
               .add(maybeTypeParameter(requestingClass))
               .add(
                   "of($L)",
-                  binding.dependencies().stream()
+                  binding
+                      .dependencies()
+                      .stream()
                       .map(dependency -> getContributionExpression(dependency, requestingClass))
                       .collect(toParametersCodeBlock()))
               .build());
@@ -127,15 +124,15 @@ final class SetRequestRepresentation extends RequestRepresentation {
         }
         instantiation.add(".build()");
         return Expression.create(
-            isImmutableSetAvailable ? immutableSetType() : binding.key().type().java(),
+            isImmutableSetAvailable ? immutableSetType() : binding.key().type().xprocessing(),
             instantiation.build());
     }
   }
 
-  private DeclaredType immutableSetType() {
-    return types.getDeclaredType(
-        elements.getTypeElement(TypeNames.IMMUTABLE_SET),
-        toJavac(SetType.from(binding.key()).elementType()));
+  private XType immutableSetType() {
+    return processingEnv.getDeclaredType(
+        processingEnv.requireTypeElement(TypeNames.IMMUTABLE_SET),
+        SetType.from(binding.key()).elementType());
   }
 
   private CodeBlock getContributionExpression(
@@ -168,7 +165,7 @@ final class SetRequestRepresentation extends RequestRepresentation {
   private Expression collectionsStaticFactoryInvocation(
       ClassName requestingClass, CodeBlock methodInvocation) {
     return Expression.create(
-        binding.key().type().java(),
+        binding.key().type().xprocessing(),
         CodeBlock.builder()
             .add("$T.", Collections.class)
             .add(maybeTypeParameter(requestingClass))
@@ -184,8 +181,7 @@ final class SetRequestRepresentation extends RequestRepresentation {
   }
 
   private boolean isSingleValue(DependencyRequest dependency) {
-    return graph
-        .contributionBinding(dependency.key())
+    return graph.contributionBinding(dependency.key())
         .contributionType()
         .equals(ContributionType.SET);
   }

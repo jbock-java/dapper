@@ -25,8 +25,9 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessible;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.erasure;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isAssignable;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 
 import dagger.internal.codegen.binding.Binding;
@@ -41,9 +42,9 @@ import dagger.internal.codegen.binding.MembersInjectionBinding;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.RequestKind;
@@ -54,7 +55,6 @@ import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.lang.model.type.TypeMirror;
 
 /** A central repository of code expressions used to access any binding available to a component. */
 @PerComponentImplementation
@@ -72,7 +72,7 @@ public final class ComponentRequestRepresentations {
   private final ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory;
   private final ExperimentalSwitchingProviderDependencyRepresentation.Factory
       experimentalSwitchingProviderDependencyRepresentationFactory;
-  private final DaggerTypes types;
+  private final XProcessingEnv processingEnv;
   private final Map<Binding, BindingRepresentation> representations = new HashMap<>();
   private final Map<Binding, ExperimentalSwitchingProviderDependencyRepresentation>
       experimentalSwitchingProviderDependencyRepresentations = new HashMap<>();
@@ -87,7 +87,7 @@ public final class ComponentRequestRepresentations {
       ProvisionBindingRepresentation.Factory provisionBindingRepresentationFactory,
       ExperimentalSwitchingProviderDependencyRepresentation.Factory
           experimentalSwitchingProviderDependencyRepresentationFactory,
-      DaggerTypes types) {
+      XProcessingEnv processingEnv) {
     this.parent = parent;
     this.graph = graph;
     this.componentImplementation = componentImplementation;
@@ -97,7 +97,7 @@ public final class ComponentRequestRepresentations {
     this.experimentalSwitchingProviderDependencyRepresentationFactory =
         experimentalSwitchingProviderDependencyRepresentationFactory;
     this.componentRequirementExpressions = checkNotNull(componentRequirementExpressions);
-    this.types = types;
+    this.processingEnv = processingEnv;
   }
 
   /**
@@ -176,14 +176,14 @@ public final class ComponentRequestRepresentations {
   Expression getDependencyArgumentExpression(
       DependencyRequest dependencyRequest, ClassName requestingClass) {
 
-    TypeMirror dependencyType = dependencyRequest.key().type().java();
+    XType dependencyType = dependencyRequest.key().type().xprocessing();
     BindingRequest bindingRequest = bindingRequest(dependencyRequest);
     Expression dependencyExpression = getDependencyExpression(bindingRequest, requestingClass);
 
     if (dependencyRequest.kind().equals(RequestKind.INSTANCE)
         && !isTypeAccessibleFrom(dependencyType, requestingClass.packageName())
         && isRawTypeAccessible(dependencyType, requestingClass.packageName())) {
-      return dependencyExpression.castTo(types.erasure(dependencyType));
+      return dependencyExpression.castTo(erasure(dependencyType, processingEnv));
     }
 
     return dependencyExpression;
@@ -241,7 +241,7 @@ public final class ComponentRequestRepresentations {
     // for types that have protected accessibility to the component but are not accessible to other
     // classes, e.g. shards, that may need to handle the implementation of the binding.
     XType returnType = componentMethod.methodElement().getReturnType();
-    return !isVoid(returnType) && !types.isAssignable(expression.type(), toJavac(returnType))
+    return !isVoid(returnType) && !isAssignable(expression.type(), returnType, processingEnv)
         ? expression.castTo(returnType)
         : expression;
   }

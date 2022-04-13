@@ -22,7 +22,8 @@ import static dagger.internal.codegen.base.RequestKinds.requestType;
 import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.erasure;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isAssignable;
 import static dagger.spi.model.BindingKind.DELEGATE;
 
 import dagger.assisted.Assisted;
@@ -33,14 +34,11 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.javapoet.Expression;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import javax.lang.model.type.TypeMirror;
 
 /** A {@code dagger.internal.codegen.writing.RequestRepresentation} for {@code @Binds} methods. */
 final class DelegateRequestRepresentation extends RequestRepresentation {
@@ -48,7 +46,6 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
   private final RequestKind requestKind;
   private final ComponentRequestRepresentations componentRequestRepresentations;
   private final XProcessingEnv processingEnv;
-  private final DaggerTypes types;
   private final BindsTypeChecker bindsTypeChecker;
 
   @AssistedInject
@@ -56,15 +53,13 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
       @Assisted ContributionBinding binding,
       @Assisted RequestKind requestKind,
       ComponentRequestRepresentations componentRequestRepresentations,
-      XProcessingEnv processingEnv,
-      DaggerTypes types,
-      DaggerElements elements) {
+      BindsTypeChecker bindsTypeChecker,
+      XProcessingEnv processingEnv) {
     this.binding = checkNotNull(binding);
     this.requestKind = checkNotNull(requestKind);
     this.componentRequestRepresentations = componentRequestRepresentations;
     this.processingEnv = processingEnv;
-    this.types = types;
-    this.bindsTypeChecker = new BindsTypeChecker(types, elements);
+    this.bindsTypeChecker = bindsTypeChecker;
   }
 
   /**
@@ -107,7 +102,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
       BindsTypeChecker bindsTypeChecker) {
     // delegateExpression.type() could be Object if expression is satisfied with a raw
     // Provider's get() method.
-    TypeMirror contributedType = toJavac(binding.contributedType());
+    XType contributedType = binding.contributedType();
     return !bindsTypeChecker.isAssignable(
             delegateExpression.type(), contributedType, binding.contributionType())
         && isTypeAccessibleFrom(contributedType, requestingClass.packageName());
@@ -122,10 +117,10 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
    */
   // TODO(ronshapiro): this probably can be generalized for usage in InjectionMethods
   private Expression castToRawTypeIfNecessary(Expression delegateExpression, XType desiredType) {
-    if (types.isAssignable(delegateExpression.type(), toJavac(desiredType))) {
+    if (isAssignable(delegateExpression.type(), desiredType, processingEnv)) {
       return delegateExpression;
     }
-    Expression castedExpression = delegateExpression.castTo(types.erasure(toJavac(desiredType)));
+    Expression castedExpression = delegateExpression.castTo(erasure(desiredType, processingEnv));
     // Casted raw type provider expression has to be wrapped parentheses, otherwise there
     // will be an error when DerivedFromFrameworkInstanceRequestRepresentation appends a `get()` to
     // it.

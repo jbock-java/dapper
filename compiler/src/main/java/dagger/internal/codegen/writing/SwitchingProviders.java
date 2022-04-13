@@ -34,7 +34,6 @@ import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.javapoet.CodeBlocks;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.writing.ComponentImplementation.ShardImplementation;
 import dagger.internal.codegen.writing.FrameworkFieldInitializer.FrameworkInstanceCreationExpression;
 import dagger.spi.model.BindingKind;
@@ -78,11 +77,9 @@ final class SwitchingProviders {
       new LinkedHashMap<>();
 
   private final ShardImplementation shardImplementation;
-  private final DaggerTypes types;
 
-  SwitchingProviders(ShardImplementation shardImplementation, DaggerTypes types) {
+  SwitchingProviders(ShardImplementation shardImplementation) {
     this.shardImplementation = checkNotNull(shardImplementation);
-    this.types = checkNotNull(types);
   }
 
   /** Returns the framework instance creation expression for an inner switching provider class. */
@@ -154,7 +151,7 @@ final class SwitchingProviders {
       CodeBlock instanceCodeBlock =
           unscopedInstanceRequestRepresentation
               .getDependencyExpression(switchingProviderType)
-              .box(types)
+              .box()
               .codeBlock();
 
       return CodeBlock.builder()
