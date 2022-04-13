@@ -771,13 +771,7 @@ public final class ComponentImplementation implements GeneratedImplementation {
   }
 
   private boolean shouldPropagateCancellationToParent() {
-    return parent.isPresent()
-        && parent
-            .get()
-            .componentDescriptor()
-            .cancellationPolicy()
-            .map(policy -> policy.fromSubcomponents().equals(PROPAGATE))
-            .orElse(false);
+    return false;
   }
 
   /**
