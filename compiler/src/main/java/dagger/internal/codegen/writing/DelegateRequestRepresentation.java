@@ -112,8 +112,8 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
    * If {@code delegateExpression} can be assigned to {@code desiredType} safely, then {@code
    * delegateExpression} is returned unchanged. If the {@code delegateExpression} is already a raw
    * type, returns {@code delegateExpression} as well, as casting would have no effect. Otherwise,
-   * returns a {@code Expression#castTo(TypeMirror) casted} version of {@code delegateExpression} to
-   * the raw type of {@code desiredType}.
+   * returns a {@code Expression#castTo(XType) casted} version of {@code delegateExpression} to the
+   * raw type of {@code desiredType}.
    */
   // TODO(ronshapiro): this probably can be generalized for usage in InjectionMethods
   private Expression castToRawTypeIfNecessary(Expression delegateExpression, XType desiredType) {

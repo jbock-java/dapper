@@ -20,7 +20,7 @@ import static dagger.internal.codegen.binding.BindingRequest.bindingRequest;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -154,7 +154,8 @@ final class SetRequestRepresentation extends RequestRepresentation {
     // "addAll()" method expects a collection. For example, ".addAll((Collection)
     // provideInaccessibleSetOfFoo.get())"
     return (!isSingleValue(dependency)
-            && !isTypeAccessibleFrom(binding.key().type().java(), requestingClass.packageName())
+            && !isTypeAccessibleFrom(
+                binding.key().type().xprocessing(), requestingClass.packageName())
             // TODO(wanyingd): Replace instanceof checks with validation on the binding.
             && (bindingExpression instanceof DerivedFromFrameworkInstanceRequestRepresentation
                 || bindingExpression instanceof DelegateRequestRepresentation))
@@ -175,7 +176,7 @@ final class SetRequestRepresentation extends RequestRepresentation {
 
   private CodeBlock maybeTypeParameter(ClassName requestingClass) {
     XType elementType = SetType.from(binding.key()).elementType();
-    return isTypeAccessibleFrom(toJavac(elementType), requestingClass.packageName())
+    return isTypeAccessibleFrom(elementType, requestingClass.packageName())
         ? CodeBlock.of("<$T>", elementType.getTypeName())
         : CodeBlock.of("");
   }
