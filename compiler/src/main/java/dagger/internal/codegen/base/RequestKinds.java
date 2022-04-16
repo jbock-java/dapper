@@ -17,25 +17,21 @@
 package dagger.internal.codegen.base;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
+import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.javapoet.TypeNames.lazyOf;
 import static dagger.internal.codegen.javapoet.TypeNames.listenableFutureOf;
 import static dagger.internal.codegen.javapoet.TypeNames.producedOf;
 import static dagger.internal.codegen.javapoet.TypeNames.producerOf;
 import static dagger.internal.codegen.javapoet.TypeNames.providerOf;
 import static dagger.internal.codegen.langmodel.DaggerTypes.checkTypePresent;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isTypeOf;
-import static dagger.internal.codegen.langmodel.DaggerTypes.unwrapType;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XProcessingEnvs.wrapType;
+import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 import static dagger.spi.model.RequestKind.LAZY;
 import static dagger.spi.model.RequestKind.PRODUCED;
 import static dagger.spi.model.RequestKind.PRODUCER;
 import static dagger.spi.model.RequestKind.PROVIDER;
-import static dagger.spi.model.RequestKind.PROVIDER_OF_LAZY;
-import static io.jbock.auto.common.MoreTypes.asDeclared;
-import static io.jbock.auto.common.MoreTypes.isType;
-import static javax.lang.model.type.TypeKind.DECLARED;
 
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.javapoet.TypeNames;
@@ -44,7 +40,6 @@ import dagger.internal.codegen.xprocessing.XType;
 import dagger.spi.model.RequestKind;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
-import javax.lang.model.type.TypeMirror;
 
 /** Utility methods for {@code RequestKind}s. */
 public final class RequestKinds {
@@ -104,28 +99,21 @@ public final class RequestKinds {
 
   /** Returns the {@code RequestKind} that matches the wrapping types (if any) of {@code type}. */
   public static RequestKind getRequestKind(XType type) {
-    return getRequestKind(toJavac(type));
-  }
-
-  /** Returns the {@code RequestKind} that matches the wrapping types (if any) of {@code type}. */
-  public static RequestKind getRequestKind(TypeMirror type) {
     checkTypePresent(type);
-    if (!isType(type) // TODO(b/147320669): isType check can be removed once this bug is fixed.
-            || !type.getKind().equals(DECLARED)
-            || asDeclared(type).getTypeArguments().isEmpty()) {
+    if (!isDeclared(type) || type.getTypeArguments().isEmpty()) {
       // If the type is not a declared type (i.e. class or interface) with type arguments, then we
       // know it can't be a parameterized type of one of the framework classes, so return INSTANCE.
       return RequestKind.INSTANCE;
     }
-    for (RequestKind kind : FRAMEWORK_CLASSES.keySet()) {
-      if (isTypeOf(frameworkClassName(kind), type)) {
-        if (kind.equals(PROVIDER) && getRequestKind(unwrapType(type)).equals(LAZY)) {
-          return PROVIDER_OF_LAZY;
-        }
-        return kind;
-      }
+
+    if (isTypeOf(type, TypeNames.PROVIDER) && isTypeOf(unwrapType(type), TypeNames.LAZY)) {
+      return RequestKind.PROVIDER_OF_LAZY;
     }
-    return RequestKind.INSTANCE;
+
+    return FRAMEWORK_CLASSES.keySet().stream()
+        .filter(kind -> isTypeOf(type, FRAMEWORK_CLASSES.get(kind)))
+        .collect(toOptional())
+        .orElse(RequestKind.INSTANCE);
   }
 
   /**
@@ -148,31 +136,6 @@ public final class RequestKinds {
       case PROVIDER_OF_LAZY:
         return extractKeyType(LAZY, extractKeyType(PROVIDER, type));
       default:
-        return unwrapType(type);
-    }
-  }
-
-  /**
-   * Unwraps the framework class(es) of {@code requestKind} from {@code type}. If {@code
-   * requestKind} is {@code RequestKind#INSTANCE}, this acts as an identity function.
-   *
-   * @throws TypeNotPresentException if {@code type} is an {@code javax.lang.model.type.ErrorType},
-   *     which may mean that the type will be generated in a later round of processing
-   * @throws IllegalArgumentException if {@code type} is not wrapped with {@code requestKind}'s
-   *     framework class(es).
-   */
-  public static TypeMirror extractKeyType(TypeMirror type) {
-    return extractKeyType(getRequestKind(type), type);
-  }
-
-  private static TypeMirror extractKeyType(RequestKind requestKind, TypeMirror type) {
-    switch (requestKind) {
-      case INSTANCE:
-        return type;
-      case PROVIDER_OF_LAZY:
-        return extractKeyType(LAZY, extractKeyType(PROVIDER, type));
-      default:
-        checkArgument(isType(type));
         return unwrapType(type);
     }
   }
