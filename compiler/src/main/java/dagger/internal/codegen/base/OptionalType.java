@@ -33,7 +33,7 @@ import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 
 /**
- * Information about an {@code Optional} {@code TypeMirror}.
+ * Information about an {@code Optional} type.
  *
  * <p>{@code com.google.common.base.Optional} and {@code java.util.Optional} are supported.
  */

@@ -39,12 +39,14 @@ import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.cache.CacheBuilder;
 import dagger.internal.codegen.cache.CacheLoader;
+import dagger.internal.codegen.cache.LoadingCache;
 import dagger.internal.codegen.collect.HashBasedTable;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.collect.Table;
 import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.xprocessing.XElement;
 import dagger.spi.model.Binding;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.DependencyEdge;
@@ -59,7 +61,6 @@ import jakarta.inject.Inject;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Function;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /** Helper class for generating diagnostic messages. */
@@ -178,7 +179,7 @@ public final class DiagnosticMessageGenerator {
       ImmutableSet<DependencyEdge> entryPoints) {
     StringBuilder message = new StringBuilder();
     // Print any dependency requests that aren't shown as part of the dependency trace.
-    ImmutableSet<Element> requestsToPrint =
+    ImmutableSet<XElement> requestsToPrint =
         requests.stream()
             // if printing entry points, skip entry points and the traced request
             .filter(
@@ -187,7 +188,7 @@ public final class DiagnosticMessageGenerator {
                         || (!request.isEntryPoint() && !isTracedRequest(dependencyTrace, request)))
             .map(request -> request.dependencyRequest().requestElement())
             .flatMap(presentValues())
-            .map(DaggerElement::java)
+            .map(DaggerElement::xprocessing)
             .collect(toImmutableSet());
     if (!requestsToPrint.isEmpty()) {
       message
@@ -228,17 +229,19 @@ public final class DiagnosticMessageGenerator {
       new Formatter<DependencyEdge>() {
         @Override
         public String format(DependencyEdge object) {
-          Element requestElement = object.dependencyRequest().requestElement().get().java();
-          StringBuilder element = new StringBuilder(elementToString(requestElement));
+          XElement requestElement = object.dependencyRequest().requestElement().get().xprocessing();
+          StringBuilder builder = new StringBuilder(elementToString(requestElement));
 
           // For entry points declared in subcomponents or supertypes of the root component,
           // append the component path to make clear to the user which component it's in.
           ComponentPath componentPath = source(object).componentPath();
           if (!componentPath.atRoot()
-              || !requestElement.getEnclosingElement().equals(componentPath.rootComponent().java())) {
-            element.append(String.format(" [%s]", componentPath));
+              || !requestElement
+                  .getEnclosingElement()
+                  .equals(componentPath.rootComponent().xprocessing())) {
+            builder.append(String.format(" [%s]", componentPath));
           }
-          return element.toString();
+          return builder.toString();
         }
       };
 

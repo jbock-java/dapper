@@ -28,7 +28,7 @@ import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 
-/** Information about a {@code java.util.Map} {@code TypeMirror}. */
+/** Information about a {@code java.util.Map} type. */
 @AutoValue
 public abstract class MapType {
   private XType type;
