@@ -16,21 +16,14 @@
 
 package dagger.internal.codegen.javapoet;
 
-import static dagger.internal.codegen.javapoet.CodeBlocks.javadocLinkTo;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static io.jbock.common.truth.Truth.assertThat;
-import static javax.lang.model.element.ElementKind.METHOD;
 
 import io.jbock.javapoet.CodeBlock;
-import io.jbock.testing.compile.CompilationExtension;
 import java.util.stream.Stream;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.util.Elements;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Tests for {@link CodeBlocks}. */
-@ExtendWith(CompilationExtension.class)
 final class CodeBlocksTest {
   private static final CodeBlock objectO = CodeBlock.of("$T o", Object.class);
   private static final CodeBlock stringS = CodeBlock.of("$T s", String.class);
@@ -50,21 +43,5 @@ final class CodeBlocksTest {
   @Test
   void testToParametersCodeBlock_oneElement() {
     assertThat(Stream.of(objectO).collect(toParametersCodeBlock())).isEqualTo(objectO);
-  }
-
-  @Test
-  void testJavadocLinkTo(Elements elements) {
-    ExecutableElement equals =
-        elements
-            .getTypeElement(Object.class.getCanonicalName())
-            .getEnclosedElements()
-            .stream()
-            .filter(element -> element.getKind().equals(METHOD))
-            .map(ExecutableElement.class::cast)
-            .filter(method -> method.getSimpleName().contentEquals("equals"))
-            .findFirst()
-            .orElseThrow();
-    assertThat(javadocLinkTo(equals))
-        .isEqualTo(CodeBlock.of("{@link $T#equals($T)}", Object.class, Object.class));
   }
 }

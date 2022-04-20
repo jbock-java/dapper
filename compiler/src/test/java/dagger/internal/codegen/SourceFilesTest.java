@@ -20,6 +20,7 @@ import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static io.jbock.common.truth.Truth.assertThat;
 
 import dagger.internal.codegen.binding.SourceFiles;
+import io.jbock.javapoet.ClassName;
 import io.jbock.testing.compile.CompilationExtension;
 import java.util.List;
 import javax.lang.model.element.TypeElement;
@@ -50,15 +51,15 @@ public final class SourceFilesTest {
   @Test
   public void testSimpleVariableName_typeCollisions() {
     // a handful of boxed types
-    assertThat(simpleVariableName(typeElementFor(Long.class))).isEqualTo("l");
-    assertThat(simpleVariableName(typeElementFor(Double.class))).isEqualTo("d");
+    assertThat(simpleVariableName(ClassName.get(Long.class))).isEqualTo("l");
+    assertThat(simpleVariableName(ClassName.get(Double.class))).isEqualTo("d");
     // not a boxed type type, but a custom type might collide
-    assertThat(simpleVariableName(typeElementFor(Int.class))).isEqualTo("i");
+    assertThat(simpleVariableName(ClassName.get(Int.class))).isEqualTo("i");
     // void is the weird pseudo-boxed type
-    assertThat(simpleVariableName(typeElementFor(Void.class))).isEqualTo("v");
+    assertThat(simpleVariableName(ClassName.get(Void.class))).isEqualTo("v");
     // reflective types
-    assertThat(simpleVariableName(typeElementFor(Class.class))).isEqualTo("clazz");
-    assertThat(simpleVariableName(typeElementFor(Package.class))).isEqualTo("pkg");
+    assertThat(simpleVariableName(ClassName.get(Class.class))).isEqualTo("clazz");
+    assertThat(simpleVariableName(ClassName.get(Package.class))).isEqualTo("pkg");
   }
 
   private static final class For {
@@ -69,13 +70,13 @@ public final class SourceFilesTest {
 
   @Test
   public void testSimpleVariableName_randomKeywords() {
-    assertThat(simpleVariableName(typeElementFor(For.class))).isEqualTo("for_");
-    assertThat(simpleVariableName(typeElementFor(Goto.class))).isEqualTo("goto_");
+    assertThat(simpleVariableName(ClassName.get(For.class))).isEqualTo("for_");
+    assertThat(simpleVariableName(ClassName.get(Goto.class))).isEqualTo("goto_");
   }
 
   @Test
   public void testSimpleVariableName() {
-    assertThat(simpleVariableName(typeElementFor(Object.class))).isEqualTo("object");
-    assertThat(simpleVariableName(typeElementFor(List.class))).isEqualTo("list");
+    assertThat(simpleVariableName(ClassName.get(Object.class))).isEqualTo("object");
+    assertThat(simpleVariableName(ClassName.get(List.class))).isEqualTo("list");
   }
 }
