@@ -19,9 +19,7 @@ package dagger.internal.codegen.javapoet;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeSpec;
-import javax.lang.model.element.TypeElement;
 
 /** Convenience methods for use with JavaPoet's {@code TypeSpec}. */
 public final class TypeSpecs {
@@ -34,28 +32,16 @@ public final class TypeSpecs {
    */
   public static TypeSpec.Builder addSupertype(
       TypeSpec.Builder typeBuilder, XTypeElement supertype) {
-    return addSupertype(typeBuilder, toJavac(supertype));
-  }
-
-  /**
-   * If {@code supertype} is a class, adds it as a superclass for {@code typeBuilder}; if it is an
-   * interface, adds it as a superinterface.
-   *
-   * @return {@code typeBuilder}
-   */
-  public static TypeSpec.Builder addSupertype(TypeSpec.Builder typeBuilder, TypeElement supertype) {
-    switch (supertype.getKind()) {
-      case CLASS:
-        return typeBuilder
-            .superclass(ClassName.get(supertype))
-            .avoidClashesWithNestedClasses(supertype);
-      case INTERFACE:
-        return typeBuilder
-            .addSuperinterface(ClassName.get(supertype))
-            .avoidClashesWithNestedClasses(supertype);
-      default:
-        throw new AssertionError(supertype + " is neither a class nor an interface.");
+    if (supertype.isClass()) {
+      return typeBuilder
+          .superclass(supertype.getClassName())
+          .avoidClashesWithNestedClasses(toJavac(supertype));
+    } else if (supertype.isInterface()) {
+      return typeBuilder
+          .addSuperinterface(supertype.getClassName())
+          .avoidClashesWithNestedClasses(toJavac(supertype));
     }
+    throw new AssertionError(supertype + " is neither a class nor an interface.");
   }
 
   private TypeSpecs() {}

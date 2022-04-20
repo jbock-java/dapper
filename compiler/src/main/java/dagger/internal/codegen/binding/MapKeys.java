@@ -21,12 +21,11 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.binding.SourceFiles.elementBasedClassName;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
-import static io.jbock.auto.common.MoreElements.asExecutable;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -141,7 +140,7 @@ public final class MapKeys {
    *
    * <p>This method assumes the map key will be accessible in the context that the returned {@code
    * CodeBlock} is used. Use {@code #getMapKeyExpression(ContributionBinding, ClassName,
-   * DaggerElements)} when that assumption is not guaranteed.
+   * XProcessingEnv)} when that assumption is not guaranteed.
    *
    * @throws IllegalArgumentException if the element is annotated with more than one {@code MapKey}
    *     annotation
@@ -173,10 +172,10 @@ public final class MapKeys {
 
   /**
    * Returns the {@code ClassName} in which {@code #mapKeyFactoryMethod(ContributionBinding,
-   * DaggerTypes, DaggerElements)} is generated.
+   * XProcessingEnv)} is generated.
    */
   public static ClassName mapKeyProxyClassName(ContributionBinding binding) {
-    return elementBasedClassName(asExecutable(toJavac(binding.bindingElement().get())), "MapKey");
+    return elementBasedClassName(asExecutable(binding.bindingElement().get()), "MapKey");
   }
 
   /**

@@ -26,25 +26,20 @@ import static dagger.internal.codegen.collect.Collections2.transform;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getMethodDescriptor;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
+import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static io.jbock.auto.common.MoreElements.asExecutable;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.ModuleKind;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.xprocessing.XElement;
-import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
@@ -103,7 +98,6 @@ public abstract class ModuleDescriptor {
   @Singleton
   public static final class Factory implements ClearableCache {
     private final XProcessingEnv processingEnv;
-    private final DaggerElements elements;
     private final BindingFactory bindingFactory;
     private final MultibindingDeclaration.Factory multibindingDeclarationFactory;
     private final DelegateDeclaration.Factory bindingDelegateDeclarationFactory;
@@ -115,7 +109,6 @@ public abstract class ModuleDescriptor {
     @Inject
     Factory(
         XProcessingEnv processingEnv,
-        DaggerElements elements,
         BindingFactory bindingFactory,
         MultibindingDeclaration.Factory multibindingDeclarationFactory,
         DelegateDeclaration.Factory bindingDelegateDeclarationFactory,
@@ -123,7 +116,6 @@ public abstract class ModuleDescriptor {
         OptionalBindingDeclaration.Factory optionalBindingDeclarationFactory,
         DaggerSuperficialValidation superficialValidation) {
       this.processingEnv = processingEnv;
-      this.elements = elements;
       this.bindingFactory = bindingFactory;
       this.multibindingDeclarationFactory = multibindingDeclarationFactory;
       this.bindingDelegateDeclarationFactory = bindingDelegateDeclarationFactory;
@@ -144,10 +136,7 @@ public abstract class ModuleDescriptor {
       ImmutableSet.Builder<OptionalBindingDeclaration> optionalDeclarations =
           ImmutableSet.builder();
 
-      methodsIn(elements.getAllMembers(toJavac(moduleElement))).stream()
-          .map(method -> toXProcessing(method, processingEnv))
-          .filter(XElement::isMethod)
-          .map(XElements::asMethod)
+      XTypeElements.getAllMethods(moduleElement).stream()
           .forEach(
               moduleMethod -> {
                 if (moduleMethod.hasAnnotation(TypeNames.PROVIDES)) {
@@ -187,15 +176,10 @@ public abstract class ModuleDescriptor {
         XTypeElement companionModule, ImmutableSet.Builder<ContributionBinding> bindings) {
       ImmutableSet<String> bindingElementDescriptors =
           bindings.build().stream()
-              .map(
-                  binding ->
-                      getMethodDescriptor(asExecutable(toJavac(binding.bindingElement().get()))))
+              .map(binding -> getMethodDescriptor(asMethod(binding.bindingElement().get())))
               .collect(toImmutableSet());
 
-      methodsIn(elements.getAllMembers(toJavac(companionModule))).stream()
-          .map(method -> toXProcessing(method, processingEnv))
-          .filter(XElement::isMethod)
-          .map(XElements::asMethod)
+      XTypeElements.getAllMethods(companionModule).stream()
           // Binding methods in companion objects with @JvmStatic are mirrored in the enclosing
           // class, therefore we should ignore it or else it'll be a duplicate binding.
           .filter(method -> !method.hasAnnotation(TypeNames.JVM_STATIC))

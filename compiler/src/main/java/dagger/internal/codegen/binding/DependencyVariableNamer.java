@@ -17,30 +17,30 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.internal.codegen.base.Ascii;
 import dagger.internal.codegen.base.CaseFormat;
 import dagger.spi.model.DependencyRequest;
-import io.jbock.auto.common.MoreTypes;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Picks a reasonable name for what we think is being provided from the variable name associated
- * with the {@code DependencyRequest}.  I.e. strips out words like "lazy" and "provider" if we
- * believe that those refer to {@code Lazy} and {@code Provider} rather than the type being
- * provided.
+ * with the {@code DependencyRequest}. I.e. strips out words like "lazy" and "provider" if we
+ * believe that those refer to {@code dagger.Lazy} and {@code jakarta.inject.Provider} rather than the
+ * type being provided.
  */
-//TODO(gak): develop the heuristics to get better names
+// TODO(gak): develop the heuristics to get better names
 final class DependencyVariableNamer {
   private static final Pattern LAZY_PROVIDER_PATTERN = Pattern.compile("lazy(\\w+)Provider");
 
   static String name(DependencyRequest dependency) {
     if (!dependency.requestElement().isPresent()) {
-      return simpleVariableName(MoreTypes.asTypeElement(dependency.key().type().java()));
+      return simpleVariableName(dependency.key().type().xprocessing().getTypeElement());
     }
 
-    String variableName = dependency.requestElement().get().java().getSimpleName().toString();
+    String variableName = getSimpleName(dependency.requestElement().get().xprocessing());
     if (Ascii.isUpperCase(variableName.charAt(0))) {
       variableName = toLowerCamel(variableName);
     }
