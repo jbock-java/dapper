@@ -19,7 +19,6 @@ package dagger.internal.codegen.binding;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
 import static dagger.internal.codegen.binding.SourceFiles.generatedMonitoringModuleName;
@@ -53,6 +52,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import dagger.spi.model.Scope;
@@ -136,7 +136,7 @@ public final class BindingGraphFactory implements ClearableCache {
       // we've already added with the binding element removed since that is the only thing
       // allowed to differ.
       HashMultimap<String, ContributionBinding> dedupeBindings = HashMultimap.create();
-      asStream(dependency.typeElement().getAllMethods())
+      XTypeElements.getAllMethods(dependency.typeElement()).stream()
           // MembersInjection methods aren't "provided" explicitly, so ignore them.
           .filter(ComponentDescriptor::isComponentContributionMethod)
           .forEach(

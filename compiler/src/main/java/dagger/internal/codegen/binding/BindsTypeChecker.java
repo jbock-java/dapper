@@ -16,7 +16,6 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.onlyElement;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
@@ -29,6 +28,7 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingEnvs;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import jakarta.inject.Inject;
 
 /**
@@ -76,7 +76,7 @@ public final class BindsTypeChecker {
 
   private ImmutableList<XType> methodParameterTypes(XType type, String methodName) {
     return ImmutableList.copyOf(
-        asStream(type.getTypeElement().getAllMethods())
+        XTypeElements.getAllMethods(type.getTypeElement()).stream()
             .filter(method -> methodName.contentEquals(getSimpleName(method)))
             .collect(onlyElement())
             .asMemberOf(type)

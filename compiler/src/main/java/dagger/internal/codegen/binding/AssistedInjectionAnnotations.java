@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
@@ -38,6 +37,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.BindingKind;
 import io.jbock.auto.common.MoreElements;
@@ -58,7 +58,7 @@ public final class AssistedInjectionAnnotations {
 
   /** Returns the list of abstract factory methods for the given factory {@code XTypeElement}. */
   public static ImmutableSet<XMethodElement> assistedFactoryMethods(XTypeElement factory) {
-    return asStream(factory.getAllNonPrivateInstanceMethods())
+    return XTypeElements.getAllNonPrivateInstanceMethods(factory).stream()
         .filter(XHasModifiers::isAbstract)
         .filter(method -> !method.isJavaDefault())
         .collect(toImmutableSet());

@@ -23,7 +23,6 @@ import static dagger.internal.codegen.base.ComponentCreatorKind.BUILDER;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.Suppliers.memoize;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
@@ -79,6 +78,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import dagger.spi.model.BindingGraph.Node;
 import dagger.spi.model.Key;
@@ -833,7 +833,7 @@ public final class ComponentImplementation {
     // TODO(bcorso): This can be removed once we delete generatedClassExtendsComponent flag.
     private void validateMethodNameDoesNotOverrideGeneratedCreator(String creatorName) {
       // Check if there is any client added method has the same signature as generated creatorName.
-      asStream(graph.componentTypeElement().getAllMethods())
+      XTypeElements.getAllMethods(graph.componentTypeElement()).stream()
           .filter(method -> getSimpleName(method).contentEquals(creatorName))
           .filter(method -> method.getParameters().isEmpty())
           .filter(method -> !method.isStatic())

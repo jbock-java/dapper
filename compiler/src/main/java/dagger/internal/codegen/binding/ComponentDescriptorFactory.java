@@ -22,7 +22,6 @@ import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnot
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.creatorAnnotationsFor;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.isSubcomponentCreator;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
@@ -44,6 +43,7 @@ import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.Scope;
 import jakarta.inject.Inject;
 import java.util.Optional;
@@ -109,7 +109,7 @@ public final class ComponentDescriptorFactory {
     ImmutableMap.Builder<XMethodElement, ComponentRequirement> dependenciesByDependencyMethod =
         ImmutableMap.builder();
     for (ComponentRequirement componentDependency : componentDependencies) {
-      asStream(componentDependency.typeElement().getAllMethods())
+      XTypeElements.getAllMethods(componentDependency.typeElement()).stream()
           .filter(ComponentDescriptor::isComponentContributionMethod)
           .forEach(method -> dependenciesByDependencyMethod.put(method, componentDependency));
     }

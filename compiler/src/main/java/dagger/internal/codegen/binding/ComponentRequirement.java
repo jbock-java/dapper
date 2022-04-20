@@ -18,7 +18,6 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.binding.SourceFiles.simpleVariableName;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
@@ -33,6 +32,7 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.Key;
 import io.jbock.auto.value.AutoValue;
@@ -152,7 +152,7 @@ public abstract class ComponentRequirement {
     if (typeElement().isKotlinObject() || typeElement().isCompanionObject()) {
       return false;
     }
-    return asStream(typeElement().getAllNonPrivateInstanceMethods())
+    return XTypeElements.getAllNonPrivateInstanceMethods(typeElement()).stream()
         .filter(this::isBindingMethod)
         .anyMatch(method -> !method.isAbstract() && !method.isStatic());
   }

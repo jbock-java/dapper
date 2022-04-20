@@ -24,7 +24,6 @@ import static dagger.internal.codegen.base.ComponentCreatorAnnotation.subcompone
 import static dagger.internal.codegen.base.ComponentKind.annotationsFor;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotation;
 import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotations;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.enclosedAnnotatedTypes;
@@ -68,6 +67,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import io.jbock.javapoet.ClassName;
@@ -444,10 +444,10 @@ public final class ComponentValidator implements ClearableCache {
       // Collect entry point methods that are not overridden by others. If the "same" method is
       // inherited from more than one supertype, each will be in the multimap.
       SetMultimap<String, XMethodElement> entryPoints = HashMultimap.create();
-      asStream(component.getAllMethods())
+      XTypeElements.getAllMethods(component).stream()
           .filter(method -> isEntryPoint(method, method.asMemberOf(component.getType())))
           .forEach(
-              method -> addMethodUnlessOverridden(method, entryPoints.getAsSetView(getSimpleName(method))));
+              method -> addMethodUnlessOverridden(method, entryPoints.get(getSimpleName(method))));
 
       asMap(entryPoints).values().stream()
           .filter(methods -> distinctKeys(methods).size() > 1)

@@ -20,7 +20,6 @@ import static dagger.internal.codegen.base.ComponentAnnotation.isComponentAnnota
 import static dagger.internal.codegen.base.ComponentAnnotation.subcomponentAnnotation;
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.base.ModuleAnnotation.isModuleAnnotation;
-import static dagger.internal.codegen.base.Util.asStream;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.binding.ConfigurationAnnotations.getSubcomponentCreator;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
@@ -59,6 +58,7 @@ import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
+import dagger.internal.codegen.xprocessing.XTypeElements;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.Scope;
 import io.jbock.javapoet.ClassName;
@@ -546,13 +546,13 @@ public final class ModuleValidator {
    * binding methods are considered {@code static}, requiring no module instance.
    */
   private boolean requiresModuleInstance(XTypeElement module) {
-    // Note: We use XTypeElement#getAllMethods() rather than XTypeElement#getDeclaredMethods() here
+    // Note: We use XTypeElements#getAllMethods() rather than XTypeElement#getDeclaredMethods() here
     // because we need to include binding methods declared in supertypes because unlike most other
     // validations being done in this class, which assume that supertype binding methods will be
     // validated in a separate call to the validator since the supertype itself must be a @Module,
     // we need to look at all the binding methods in the module's type hierarchy here.
     return !(module.isKotlinObject() || module.isCompanionObject())
-        && !asStream(module.getAllMethods())
+        && !XTypeElements.getAllMethods(module).stream()
             .filter(anyBindingMethodValidator::isBindingMethod)
             .allMatch(method -> method.isAbstract() || method.isStatic());
   }
