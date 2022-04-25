@@ -28,6 +28,7 @@ import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.javapoet.ClassName;
@@ -196,6 +197,19 @@ public final class DaggerElements implements Elements, ClearableCache {
     return element.getAnnotationMirrors().stream()
         .filter(input -> isAnnotationPresent(input.getAnnotationType().asElement(), annotationName))
         .collect(toImmutableSet());
+  }
+
+  /**
+   * Returns the field descriptor of the given {@code element}.
+   *
+   * <p>This is useful for matching Kotlin Metadata JVM Signatures with elements from the AST.
+   *
+   * <p>For reference, see the <a
+   * href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2">JVM
+   * specification, section 4.3.2</a>.
+   */
+  public static String getFieldDescriptor(XFieldElement element) {
+    return getFieldDescriptor(toJavac(element));
   }
 
   /**

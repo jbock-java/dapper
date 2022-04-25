@@ -24,7 +24,6 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.onlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isField;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
@@ -320,11 +319,17 @@ public final class InjectionAnnotations {
   }
 
   private static boolean hasQualifierAnnotation(XAnnotation annotation) {
-    return annotation.getType().getTypeElement().hasAnyAnnotation(TypeNames.QUALIFIER);
+    return annotation
+        .getType()
+        .getTypeElement()
+        .hasAnyAnnotation(TypeNames.QUALIFIER);
   }
 
   private static boolean hasScopeAnnotation(XAnnotation annotation) {
-    return annotation.getType().getTypeElement().hasAnyAnnotation(TypeNames.SCOPE);
+    return annotation
+        .getType()
+        .getTypeElement()
+        .hasAnyAnnotation(TypeNames.SCOPE);
   }
 
   /** Returns true if the given element is annotated with {@code Inject}. */
@@ -334,7 +339,8 @@ public final class InjectionAnnotations {
 
   /** Returns true if the given element is annotated with {@code Inject}. */
   public static boolean hasInjectOrAssistedInjectAnnotation(XElement element) {
-    return element.hasAnyAnnotation(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
+    return element.hasAnyAnnotation(
+        TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   /**
@@ -385,7 +391,6 @@ public final class InjectionAnnotations {
                   .getSyntheticPropertyAnnotations(field, TypeNames.QUALIFIER)
                   .stream(),
               Stream.of())
-          .map(annotation -> toXProcessing(annotation, processingEnv))
           .collect(toImmutableSet());
     }
   }

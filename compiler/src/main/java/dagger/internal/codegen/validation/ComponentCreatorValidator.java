@@ -19,7 +19,6 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreatorAnnotations;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
@@ -240,9 +239,9 @@ public final class ComponentCreatorValidator implements ClearableCache {
     private void validateClassMethodName() {
       // Only Kotlin class can have method name the same as a Java reserved keyword, so only check
       // the method name if this class is a Kotlin class.
-      if (metadataUtil.hasMetadata(toJavac(creator))) {
+      if (metadataUtil.hasMetadata(creator)) {
         metadataUtil
-            .getAllMethodNamesBySignature(toJavac(creator))
+            .getAllMethodNamesBySignature(creator)
             .forEach(
                 (signature, name) -> {
                   if (isKeyword(name)) {
