@@ -31,17 +31,16 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.SourceFiles;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.langmodel.Accessibility;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.SourceVersion;
 
 /** Convenience methods for generating and using module constructor proxy methods. */
 public final class ModuleProxies {
@@ -54,9 +53,8 @@ public final class ModuleProxies {
       extends SourceFileGenerator<XTypeElement> {
 
     @Inject
-    ModuleConstructorProxyGenerator(
-        XFiler filer, DaggerElements elements, SourceVersion sourceVersion) {
-      super(filer, elements, sourceVersion);
+    ModuleConstructorProxyGenerator(XFiler filer, XProcessingEnv processingEnv) {
+      super(filer, processingEnv);
     }
 
     @Override

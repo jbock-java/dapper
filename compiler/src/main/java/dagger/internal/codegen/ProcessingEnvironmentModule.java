@@ -33,7 +33,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.multibindings.IntoSet;
 import jakarta.inject.Singleton;
 import java.util.Map;
-import javax.lang.model.SourceVersion;
 
 /** Bindings that depend on the {@code XProcessingEnv}. */
 @Module
@@ -57,11 +56,6 @@ interface ProcessingEnvironmentModule {
   @Provides
   static XFiler filer(CompilerOptions compilerOptions, XProcessingEnv xProcessingEnv) {
     return xProcessingEnv.getFiler();
-  }
-
-  @Provides
-  static SourceVersion sourceVersion(XProcessingEnv xProcessingEnv) {
-    return XConverters.toJavac(xProcessingEnv).getSourceVersion();
   }
 
   @Provides

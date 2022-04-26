@@ -30,10 +30,10 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -43,7 +43,6 @@ import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.lang.model.SourceVersion;
 
 /**
  * Generates classes that create annotation instances for an annotation type. The generated class
@@ -77,8 +76,8 @@ public class AnnotationCreatorGenerator extends SourceFileGenerator<XTypeElement
       ClassName.get("com.google.auto.value", "AutoAnnotation");
 
   @Inject
-  AnnotationCreatorGenerator(XFiler filer, DaggerElements elements, SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+  AnnotationCreatorGenerator(XFiler filer, XProcessingEnv processingEnv) {
+    super(filer, processingEnv);
   }
 
   @Override

@@ -26,13 +26,11 @@ import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.MapKeys;
 import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
-import javax.lang.model.SourceVersion;
 
 /**
  * Generates a class that exposes a non-{@code public} {@code
@@ -43,12 +41,8 @@ public final class InaccessibleMapKeyProxyGenerator
   private final XProcessingEnv processingEnv;
 
   @Inject
-  InaccessibleMapKeyProxyGenerator(
-      XProcessingEnv processingEnv,
-      XFiler filer,
-      DaggerElements elements,
-      SourceVersion sourceVersion) {
-    super(filer, elements, sourceVersion);
+  InaccessibleMapKeyProxyGenerator(XProcessingEnv processingEnv, XFiler filer) {
+    super(filer, processingEnv);
     this.processingEnv = processingEnv;
   }
 

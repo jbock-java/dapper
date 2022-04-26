@@ -19,14 +19,13 @@ package dagger.internal.codegen.componentgenerator;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.collect.ImmutableList;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.ComponentImplementation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.lang.model.SourceVersion;
 
 /** Generates the implementation of the abstract types annotated with {@code Component}. */
 final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
@@ -35,10 +34,9 @@ final class ComponentGenerator extends SourceFileGenerator<BindingGraph> {
   @Inject
   ComponentGenerator(
       XFiler filer,
-      DaggerElements elements,
-      SourceVersion sourceVersion,
+      XProcessingEnv processingEnv,
       TopLevelImplementationComponent.Factory topLevelImplementationComponentFactory) {
-    super(filer, elements, sourceVersion);
+    super(filer, processingEnv);
     this.topLevelImplementationComponentFactory = topLevelImplementationComponentFactory;
   }
 

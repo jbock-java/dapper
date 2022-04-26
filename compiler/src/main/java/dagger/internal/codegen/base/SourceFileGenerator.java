@@ -16,27 +16,26 @@
 
 package dagger.internal.codegen.base;
 
-
+import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static java.util.Objects.requireNonNull;
+import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
+import dagger.internal.codegen.collect.ImmutableList;
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
-import javax.lang.model.SourceVersion;
 
 /**
  * A template class that provides a framework for properly handling IO while generating source files
@@ -49,19 +48,15 @@ public abstract class SourceFileGenerator<T> {
   private static final String GENERATED_COMMENTS = "https://github.com/jbock-java/dapper";
 
   private final XFiler filer;
-  private final DaggerElements elements;
+  private final XProcessingEnv processingEnv;
 
-  public SourceFileGenerator(XFiler filer, DaggerElements elements) {
-    this.filer = requireNonNull(filer);
-    this.elements = requireNonNull(elements);
-  }
-
-  public SourceFileGenerator(XFiler filer, DaggerElements elements, SourceVersion sourceVersion) {
-    this(filer, elements);
+  public SourceFileGenerator(XFiler filer, XProcessingEnv processingEnv) {
+    this.filer = checkNotNull(filer);
+    this.processingEnv = checkNotNull(processingEnv);
   }
 
   public SourceFileGenerator(SourceFileGenerator<T> delegate) {
-    this(delegate.filer, delegate.elements);
+    this(delegate.filer, delegate.processingEnv);
   }
 
   /**
@@ -82,13 +77,17 @@ public abstract class SourceFileGenerator<T> {
       try {
         buildJavaFile(input, type).writeTo(toJavac(filer));
       } catch (Exception e) {
+        // if the code above threw a SFGE, use that
+        Throwables.propagateIfPossible(e, SourceFileGenerationException.class);
+        // otherwise, throw a new one
         throw new SourceFileGenerationException(Optional.empty(), e, originatingElement(input));
       }
     }
   }
 
   private JavaFile buildJavaFile(T input, TypeSpec.Builder typeSpecBuilder) {
-    typeSpecBuilder.addOriginatingElement(toJavac(originatingElement(input)));
+    XElement originatingElement = originatingElement(input);
+    typeSpecBuilder.addOriginatingElement(toJavac(originatingElement));
     AnnotationSpec generatedAnnotation =
         AnnotationSpec.builder(Constants.GENERATED)
             .addMember("value", "$S", "dagger.internal.codegen.ComponentProcessor")
@@ -99,18 +98,12 @@ public abstract class SourceFileGenerator<T> {
     // TODO(b/134590785): remove this and only suppress annotations locally, if necessary
     typeSpecBuilder.addAnnotation(
         AnnotationSpecs.suppressWarnings(
-            Stream.of(warningSuppressions(), Set.of(UNCHECKED), Set.of(RAWTYPES))
-                .flatMap(Set::stream)
+            Stream.concat(warningSuppressions().stream(), Stream.of(UNCHECKED, RAWTYPES))
                 .collect(DaggerStreams.toImmutableSet())));
 
+    String packageName = closestEnclosingTypeElement(originatingElement).getPackageName();
     JavaFile.Builder javaFileBuilder =
-        JavaFile.builder(
-                elements
-                    .getPackageOf(toJavac(originatingElement(input)))
-                    .getQualifiedName()
-                    .toString(),
-                typeSpecBuilder.build())
-            .skipJavaLangImports(true);
+        JavaFile.builder(packageName, typeSpecBuilder.build()).skipJavaLangImports(true);
     return javaFileBuilder.build();
   }
 
@@ -118,16 +111,16 @@ public abstract class SourceFileGenerator<T> {
   public abstract XElement originatingElement(T input);
 
   /**
-   * Returns {@link TypeSpec.Builder types} be generated for {@code T}, or an empty list if no types
+   * Returns {@code TypeSpec.Builder types} be generated for {@code T}, or an empty list if no types
    * should be generated.
    *
    * <p>Every type will be generated in its own file.
    */
-  public abstract List<TypeSpec.Builder> topLevelTypes(T input);
+  public abstract ImmutableList<TypeSpec.Builder> topLevelTypes(T input);
 
-  /** Returns {@link Suppression}s that are applied to files generated by this generator. */
+  /** Returns {@code Suppression}s that are applied to files generated by this generator. */
   // TODO(b/134590785): When suppressions are removed locally, remove this and inline the usages
-  protected Set<Suppression> warningSuppressions() {
-    return Set.of();
+  protected ImmutableSet<Suppression> warningSuppressions() {
+    return ImmutableSet.of();
   }
 }

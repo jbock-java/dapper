@@ -48,7 +48,6 @@ import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
@@ -67,7 +66,6 @@ import io.jbock.javapoet.TypeSpec;
 import io.jbock.javapoet.TypeVariableName;
 import jakarta.inject.Inject;
 import java.util.Map.Entry;
-import javax.lang.model.SourceVersion;
 
 /**
  * Generates {@code MembersInjector} implementations from {@code MembersInjectionBinding} instances.
@@ -78,10 +76,8 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   @Inject
   MembersInjectorGenerator(
       XFiler filer,
-      DaggerElements elements,
-      SourceVersion sourceVersion,
       XProcessingEnv processingEnv) {
-    super(filer, elements, sourceVersion);
+    super(filer, processingEnv);
     this.processingEnv = processingEnv;
   }
 

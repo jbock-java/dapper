@@ -28,6 +28,7 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isPreJava8SourceVersion;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -45,7 +46,6 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
@@ -55,6 +55,7 @@ import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import io.jbock.javapoet.ClassName;
@@ -70,31 +71,27 @@ import jakarta.inject.Inject;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.lang.model.SourceVersion;
 
 /** An annotation processor for {@code dagger.assisted.AssistedFactory}-annotated types. */
 final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTypeElement> {
+  private final XProcessingEnv processingEnv;
   private final XMessager messager;
   private final XFiler filer;
-  private final SourceVersion sourceVersion;
-  private final DaggerElements elements;
   private final DaggerTypes types;
   private final BindingFactory bindingFactory;
   private final SuperficialValidator superficialValidator;
 
   @Inject
   AssistedFactoryProcessingStep(
+      XProcessingEnv processingEnv,
       XMessager messager,
       XFiler filer,
-      SourceVersion sourceVersion,
-      DaggerElements elements,
       DaggerTypes types,
       BindingFactory bindingFactory,
       SuperficialValidator superficialValidator) {
+    this.processingEnv = processingEnv;
     this.messager = messager;
     this.filer = filer;
-    this.sourceVersion = sourceVersion;
-    this.elements = elements;
     this.types = types;
     this.bindingFactory = bindingFactory;
     this.superficialValidator = superficialValidator;
@@ -226,7 +223,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
   /** Generates an implementation of the {@code dagger.assisted.AssistedFactory}-annotated class. */
   private final class AssistedFactoryImplGenerator extends SourceFileGenerator<ProvisionBinding> {
     AssistedFactoryImplGenerator() {
-      super(filer, elements, sourceVersion);
+      super(filer, processingEnv);
     }
 
     @Override
@@ -325,7 +322,7 @@ final class AssistedFactoryProcessingStep extends TypeCheckingProcessingStep<XTy
                       "return $T.$Lcreate(new $T($N))",
                       INSTANCE_FACTORY,
                       // Java 7 type inference requires the method call provide the exact type here.
-                      sourceVersion.compareTo(SourceVersion.RELEASE_7) <= 0
+                      isPreJava8SourceVersion(processingEnv)
                           ? CodeBlock.of("<$T>", types.accessibleType(metadata.factoryType(), name))
                           : CodeBlock.of(""),
                       name,

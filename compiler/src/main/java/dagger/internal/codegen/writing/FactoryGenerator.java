@@ -51,7 +51,6 @@ import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.Lists;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -77,7 +76,6 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.lang.model.SourceVersion;
 
 /**
  * Generates {@code Factory} implementations from {@code ProvisionBinding} instances for {@code
@@ -90,11 +88,9 @@ public final class FactoryGenerator extends SourceFileGenerator<ProvisionBinding
   @Inject
   FactoryGenerator(
       XFiler filer,
-      SourceVersion sourceVersion,
-      DaggerElements elements,
       CompilerOptions compilerOptions,
       XProcessingEnv processingEnv) {
-    super(filer, elements, sourceVersion);
+    super(filer, processingEnv);
     this.compilerOptions = compilerOptions;
     this.processingEnv = processingEnv;
   }
