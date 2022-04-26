@@ -29,7 +29,7 @@ import javax.lang.model.SourceVersion;
 /** A utility class for {@code XProcessingEnvs} helper methods. */
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 public final class XProcessingEnvs {
-  /** Returns {@code true} if the sources are being compiled on a javac and the version is <= 8. */
+  /** Returns {@code true} if the sources are being compiled on a javac and the version is &lt; 8. */
   public static boolean isPreJava8SourceVersion(XProcessingEnv processingEnv) {
     Optional<SourceVersion> javaSourceVersion = javaSourceVersion(processingEnv);
     return javaSourceVersion.isPresent()
