@@ -19,6 +19,7 @@ package dagger.internal.codegen;
 import static io.jbock.common.truth.Truth.assertThat;
 
 import dagger.internal.codegen.langmodel.DaggerElements;
+import dagger.internal.codegen.xprocessing.XElements;
 import io.jbock.testing.compile.CompilationExtension;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -232,14 +233,14 @@ public class ElementDescriptorsTest {
   private Set<String> getFieldDescriptors(String className) {
     TypeElement testElement = elements.getTypeElement(className);
     return ElementFilter.fieldsIn(testElement.getEnclosedElements()).stream()
-        .map(DaggerElements::getFieldDescriptor)
+        .map(XElements::getFieldDescriptor)
         .collect(Collectors.toSet());
   }
 
   private Set<String> getMethodDescriptors(String className) {
     TypeElement testElement = elements.getTypeElement(className);
     return ElementFilter.methodsIn(testElement.getEnclosedElements()).stream()
-        .map(DaggerElements::getMethodDescriptor)
+        .map(XElements::getMethodDescriptor)
         .collect(Collectors.toSet());
   }
 }
