@@ -20,15 +20,10 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
-import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.extension.Optionals.firstPresent;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
-import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
-import static io.jbock.auto.common.MoreTypes.isType;
 import static java.util.Arrays.asList;
 
 import dagger.internal.codegen.base.ContributionType;
@@ -87,13 +82,6 @@ public final class KeyFactory {
     return forMethod(componentMethod, componentMethod.getReturnType());
   }
 
-  Key forProductionComponentMethod(XMethodElement componentMethod) {
-    XType returnType = componentMethod.getReturnType();
-    XType keyType =
-        isFutureType(returnType) ? getOnlyElement(returnType.getTypeArguments()) : returnType;
-    return forMethod(componentMethod, keyType);
-  }
-
   Key forSubcomponentCreatorMethod(
       XMethodElement subcomponentCreatorMethod, XType declaredContainer) {
     checkArgument(isDeclared(declaredContainer));
@@ -132,19 +120,6 @@ public final class KeyFactory {
     XMethodType methodType = method.asMemberOf(contributingModule.getType());
     ContributionType contributionType = ContributionType.fromBindingElement(method);
     XType returnType = methodType.getReturnType();
-    if (frameworkClassName.isPresent()
-        && frameworkClassName.get().equals(TypeNames.PRODUCER)
-        && isType(toJavac(returnType))) {
-      if (isFutureType(methodType.getReturnType())) {
-        returnType = getOnlyElement(returnType.getTypeArguments());
-      } else if (contributionType.equals(ContributionType.SET_VALUES)
-          && SetType.isSet(returnType)) {
-        SetType setType = SetType.from(returnType);
-        if (isFutureType(setType.elementType())) {
-          returnType = setOf(unwrapType(setType.elementType()));
-        }
-      }
-    }
     XType keyType = bindingMethodKeyType(returnType, method, contributionType, frameworkClassName);
     Key key = forMethod(method, keyType);
     return contributionType.equals(ContributionType.UNIQUE)

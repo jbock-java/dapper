@@ -21,6 +21,7 @@ import static dagger.internal.codegen.base.ModuleAnnotation.moduleAnnotations;
 import static dagger.internal.codegen.base.Verify.verify;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isSubtype;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 
 import dagger.internal.codegen.base.ComponentCreatorAnnotation;
@@ -31,11 +32,11 @@ import dagger.internal.codegen.collect.ImmutableSetMultimap;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.Multimap;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
@@ -152,7 +153,9 @@ public abstract class ComponentCreatorDescriptor {
 
   /** Creates a new {@code ComponentCreatorDescriptor} for the given creator {@code type}. */
   public static ComponentCreatorDescriptor create(
-      XTypeElement creator, DaggerTypes types, DependencyRequestFactory dependencyRequestFactory) {
+      XTypeElement creator,
+      XProcessingEnv processingEnv,
+      DependencyRequestFactory dependencyRequestFactory) {
     XType componentType = creator.getEnclosingTypeElement().getType();
 
     ImmutableSetMultimap.Builder<ComponentRequirement, XMethodElement> setterMethods =
@@ -160,7 +163,7 @@ public abstract class ComponentCreatorDescriptor {
     XMethodElement factoryMethod = null;
     for (XMethodElement method : getAllUnimplementedMethods(creator)) {
       XMethodType resolvedMethodType = method.asMemberOf(creator.getType());
-      if (types.isSubtype(componentType, resolvedMethodType.getReturnType())) {
+      if (isSubtype(componentType, resolvedMethodType.getReturnType(), processingEnv)) {
         verify(factoryMethod == null); // validation should have ensured there's only 1.
         factoryMethod = method;
       } else {

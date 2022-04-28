@@ -19,6 +19,7 @@ package dagger.internal.codegen.validation;
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.base.Predicates.equalTo;
 import static dagger.internal.codegen.base.Verify.verify;
+import static dagger.internal.codegen.binding.SourceFiles.DECLARATION_ORDER;
 import static dagger.internal.codegen.collect.Iterables.filter;
 import static dagger.internal.codegen.collect.Iterables.getLast;
 import static dagger.internal.codegen.collect.Iterables.indexOf;
@@ -28,7 +29,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static dagger.internal.codegen.extension.DaggerStreams.presentValues;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.DECLARATION_ORDER;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 import static java.util.Collections.min;
@@ -40,7 +40,6 @@ import dagger.internal.codegen.base.Formatter;
 import dagger.internal.codegen.binding.DependencyRequestFormatter;
 import dagger.internal.codegen.cache.CacheBuilder;
 import dagger.internal.codegen.cache.CacheLoader;
-import dagger.internal.codegen.cache.LoadingCache;
 import dagger.internal.codegen.collect.HashBasedTable;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
@@ -377,7 +376,7 @@ public final class DiagnosticMessageGenerator {
    */
   private Comparator<DependencyEdge> requestElementDeclarationOrder() {
     return comparing(
-        edge -> edge.dependencyRequest().requestElement().get().java(), DECLARATION_ORDER);
+        edge -> edge.dependencyRequest().requestElement().get().xprocessing(), DECLARATION_ORDER);
   }
 
   private Node source(Edge edge) {

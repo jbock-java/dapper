@@ -25,11 +25,12 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.type.TypeKind;
 
 /** A utility class for {@code XProcessingEnvs} helper methods. */
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 public final class XProcessingEnvs {
-  /** Returns {@code true} if the sources are being compiled on a javac and the version is &lt; 8. */
+  /** Returns {@code true} if the sources are being compiled on a javac and the version is <= 8. */
   public static boolean isPreJava8SourceVersion(XProcessingEnv processingEnv) {
     Optional<SourceVersion> javaSourceVersion = javaSourceVersion(processingEnv);
     return javaSourceVersion.isPresent()
@@ -42,6 +43,20 @@ public final class XProcessingEnvs {
    */
   private static Optional<SourceVersion> javaSourceVersion(XProcessingEnv processingEnv) {
     return Optional.of(toJavac(processingEnv).getSourceVersion());
+  }
+
+  /**
+   * Returns {@code true} if {@code overrider} overrides {@code overridden} from within {@code type}
+   */
+  // TODO(bcorso): Investigate why XMethodElement#overrides() throws an exception in some cases.
+  public static boolean javacOverrides(
+      XMethodElement overrider,
+      XMethodElement overridden,
+      XTypeElement type,
+      XProcessingEnv processingEnv) {
+    return toJavac(processingEnv)
+        .getElementUtils() // ALLOW_TYPES_ELEMENTS
+        .overrides(toJavac(overrider), toJavac(overridden), toJavac(type));
   }
 
   /** Returns a new unbounded wildcard type argument, i.e. {@code <?>}. */
@@ -122,6 +137,24 @@ public final class XProcessingEnvs {
     return toXProcessing(
         toJavac(processingEnv).getTypeUtils().erasure(toJavac(type)), // ALLOW_TYPES_ELEMENTS
         processingEnv);
+  }
+
+  /** Returns a primitive int {@code XType}. */
+  public static XType getPrimitiveIntType(XProcessingEnv processingEnv) {
+    return toXProcessing(
+        toJavac(processingEnv)
+            .getTypeUtils() // ALLOW_TYPES_ELEMENTS
+            .getPrimitiveType(TypeKind.INT),
+        processingEnv);
+  }
+
+  // TODO(bcorso): XProcessing currently only supports XType#isSameType().
+  /** Returns {@code true} if {@code type1} is a subtype of {@code type2}. */
+  public static boolean isSameType(
+      XMethodType type1, XMethodType type2, XProcessingEnv processingEnv) {
+    return toJavac(processingEnv)
+        .getTypeUtils() // ALLOW_TYPES_ELEMENTS
+        .isSameType(toJavac(type1), toJavac(type2));
   }
 
   /** Returns {@code true} if {@code type1} is a subtype of {@code type2}. */

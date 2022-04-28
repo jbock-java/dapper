@@ -17,9 +17,9 @@
 package dagger.internal.codegen.validation;
 
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import jakarta.inject.Inject;
@@ -28,11 +28,11 @@ import java.util.List;
 /** A validator for {@code MapKey} annotations. */
 // TODO(dpb,gak): Should unwrapped MapKeys be required to have their single member be named "value"?
 public final class MapKeyValidator {
-  private final DaggerElements elements;
+  private final XProcessingEnv processingEnv;
 
   @Inject
-  MapKeyValidator(DaggerElements elements) {
-    this.elements = elements;
+  MapKeyValidator(XProcessingEnv processingEnv) {
+    this.processingEnv = processingEnv;
   }
 
   public ValidationReport validate(XTypeElement element) {
@@ -60,6 +60,6 @@ public final class MapKeyValidator {
   }
 
   private boolean autoAnnotationIsMissing() {
-    return elements.getTypeElement("com.google.auto.value.AutoAnnotation") == null;
+    return processingEnv.findTypeElement("com.google.auto.value.AutoAnnotation") == null;
   }
 }

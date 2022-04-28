@@ -9,6 +9,7 @@ dang=()
 dang+=("SetRequestRepresentation.java")
 dang+=("MapRequestRepresentation.java")
 dang+=("ComponentValidator.java")
+dang+=("TypeNames.java")
 
 for S in ${dang[@]}; do
     if [[ -n `git status | fgrep $S` ]]; then

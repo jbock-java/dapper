@@ -17,28 +17,27 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.langmodel.DaggerElements.DECLARATION_ORDER;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.binding.SourceFiles.DECLARATION_ORDER;
 import static dagger.internal.codegen.xprocessing.XElement.isField;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asField;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.javacOverrides;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.nonObjectSuperclass;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.LinkedHashMultimap;
 import dagger.internal.codegen.collect.SetMultimap;
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElement;
+import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XFieldElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import jakarta.inject.Inject;
@@ -52,12 +51,13 @@ import java.util.Set;
 /** A factory for {@code Binding} objects. */
 final class InjectionSiteFactory {
 
-  private final DaggerElements elements;
+  private final XProcessingEnv processingEnv;
   private final DependencyRequestFactory dependencyRequestFactory;
 
   @Inject
-  InjectionSiteFactory(DaggerElements elements, DependencyRequestFactory dependencyRequestFactory) {
-    this.elements = elements;
+  InjectionSiteFactory(
+      XProcessingEnv processingEnv, DependencyRequestFactory dependencyRequestFactory) {
+    this.processingEnv = processingEnv;
     this.dependencyRequestFactory = dependencyRequestFactory;
   }
 
@@ -88,7 +88,7 @@ final class InjectionSiteFactory {
             .thenComparing(InjectionSite::kind)
             // then sort by whichever element comes first in the parent
             // this isn't necessary, but makes the processor nice and predictable
-            .thenComparing(injectionSite -> toJavac(injectionSite.element()), DECLARATION_ORDER),
+            .thenComparing(InjectionSite::element, DECLARATION_ORDER),
         injectionSites);
   }
 
@@ -117,8 +117,7 @@ final class InjectionSiteFactory {
       XTypeElement enclosingType = closestEnclosingTypeElement(method);
       for (XMethodElement subclassMethod : subclassMethodMap.get(getSimpleName(method))) {
         if (method != subclassMethod
-            && elements.overrides(
-                toJavac(subclassMethod), toJavac(method), toJavac(enclosingType))) {
+            && javacOverrides(subclassMethod, method, enclosingType, processingEnv)) {
           return Optional.empty();
         }
       }
@@ -142,8 +141,8 @@ final class InjectionSiteFactory {
 
     private boolean shouldBeInjected(XElement injectionSite) {
       return InjectionAnnotations.hasInjectAnnotation(injectionSite)
-          && !toJavac(injectionSite).getModifiers().contains(PRIVATE)
-          && !toJavac(injectionSite).getModifiers().contains(STATIC);
+          && !XElements.isPrivate(injectionSite)
+          && !XElements.isStatic(injectionSite);
     }
   }
 }

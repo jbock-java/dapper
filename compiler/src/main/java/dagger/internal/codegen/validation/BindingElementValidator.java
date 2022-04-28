@@ -37,12 +37,10 @@ import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XElements;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.Scope;
 import io.jbock.javapoet.ClassName;
-import jakarta.inject.Inject;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,9 +50,6 @@ import java.util.Optional;
 public abstract class BindingElementValidator<E extends XElement> {
   private static final ImmutableSet<ClassName> MULTIBINDING_ANNOTATIONS =
       ImmutableSet.of(TypeNames.INTO_SET, TypeNames.ELEMENTS_INTO_SET, TypeNames.INTO_MAP);
-
-  // TODO(bcorso): Inject this directly into InjectionAnnotations instead of using field injection.
-  @Inject XProcessingEnv processingEnv;
 
   private final AllowsMultibindings allowsMultibindings;
   private final AllowsScoping allowsScoping;

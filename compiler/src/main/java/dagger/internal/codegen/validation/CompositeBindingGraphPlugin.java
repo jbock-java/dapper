@@ -22,7 +22,7 @@ import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.collect.Lists.asList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerElements.transitivelyEncloses;
+import static dagger.internal.codegen.xprocessing.XElements.transitivelyEncloses;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.spi.model.BindingGraph;

@@ -26,6 +26,7 @@ import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isSubtype;
 
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
@@ -34,7 +35,6 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.Accessibility;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XAnnotation;
 import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
@@ -64,7 +64,6 @@ import javax.tools.Diagnostic.Kind;
 @Singleton
 public final class InjectValidator implements ClearableCache {
   private final XProcessingEnv processingEnv;
-  private final DaggerTypes types;
   private final CompilerOptions compilerOptions;
   private final DependencyRequestValidator dependencyRequestValidator;
   private final Optional<Diagnostic.Kind> privateAndStaticInjectionDiagnosticKind;
@@ -76,14 +75,12 @@ public final class InjectValidator implements ClearableCache {
   @Inject
   InjectValidator(
       XProcessingEnv processingEnv,
-      DaggerTypes types,
       DependencyRequestValidator dependencyRequestValidator,
       CompilerOptions compilerOptions,
       InjectionAnnotations injectionAnnotations,
       DaggerSuperficialValidation superficialValidation) {
     this(
         processingEnv,
-        types,
         compilerOptions,
         dependencyRequestValidator,
         Optional.empty(),
@@ -93,14 +90,12 @@ public final class InjectValidator implements ClearableCache {
 
   private InjectValidator(
       XProcessingEnv processingEnv,
-      DaggerTypes types,
       CompilerOptions compilerOptions,
       DependencyRequestValidator dependencyRequestValidator,
       Optional<Kind> privateAndStaticInjectionDiagnosticKind,
       InjectionAnnotations injectionAnnotations,
       DaggerSuperficialValidation superficialValidation) {
     this.processingEnv = processingEnv;
-    this.types = types;
     this.compilerOptions = compilerOptions;
     this.dependencyRequestValidator = dependencyRequestValidator;
     this.privateAndStaticInjectionDiagnosticKind = privateAndStaticInjectionDiagnosticKind;
@@ -124,7 +119,6 @@ public final class InjectValidator implements ClearableCache {
         ? this
         : new InjectValidator(
             processingEnv,
-            types,
             compilerOptions,
             dependencyRequestValidator,
             Optional.of(Diagnostic.Kind.ERROR),
@@ -156,8 +150,7 @@ public final class InjectValidator implements ClearableCache {
         builder.addError(
             String.format(
                 "Type %s may only contain one injected constructor. Found: %s",
-                typeElement,
-                injectConstructors),
+                typeElement, injectConstructors),
             typeElement);
     }
 
@@ -176,9 +169,11 @@ public final class InjectValidator implements ClearableCache {
 
     ClassName injectAnnotation =
         getAnyAnnotation(
-            constructorElement,
-            TypeNames.INJECT,
-            TypeNames.ASSISTED_INJECT).map(XAnnotations::getClassName).get();
+                constructorElement,
+                TypeNames.INJECT,
+                TypeNames.ASSISTED_INJECT)
+            .map(XAnnotations::getClassName)
+            .get();
 
     if (constructorElement.isPrivate()) {
       builder.addError(
@@ -327,8 +322,10 @@ public final class InjectValidator implements ClearableCache {
 
     // No need to resolve thrown types since we're only checking existence.
     if (!methodElement.getThrownTypes().isEmpty()) {
-      builder.addError("Methods with @Inject may not throw checked exceptions. "
-          + "Please wrap your exceptions in a RuntimeException instead.", methodElement);
+      builder.addError(
+          "Methods with @Inject may not throw checked exceptions. "
+              + "Please wrap your exceptions in a RuntimeException instead.",
+          methodElement);
     }
 
     for (XExecutableParameterElement parameter : methodElement.getParameters()) {
@@ -406,7 +403,10 @@ public final class InjectValidator implements ClearableCache {
     XType error = processingEnv.findType(TypeNames.ERROR);
     superficialValidation.validateThrownTypesOf(constructorElement);
     return !constructorElement.getThrownTypes().stream()
-        .allMatch(type -> types.isSubtype(type, runtimeException) || types.isSubtype(type, error));
+        .allMatch(
+            type ->
+                isSubtype(type, runtimeException, processingEnv)
+                    || isSubtype(type, error, processingEnv));
   }
 
   private void checkInjectIntoPrivateClass(XElement element, ValidationReport.Builder builder) {

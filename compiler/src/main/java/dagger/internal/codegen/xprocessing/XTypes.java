@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XType.isArray;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
@@ -29,6 +30,20 @@ import javax.lang.model.type.TypeKind;
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@code XType} helper methods. */
 public final class XTypes {
+
+  /**
+   * Throws {@code TypeNotPresentException} if {@code type} is an {@code
+   * javax.lang.model.type.ErrorType}.
+   */
+  public static void checkTypePresent(XType type) {
+    if (isArray(type)) {
+      checkTypePresent(asArray(type).getComponentType());
+    } else if (isDeclared(type)) {
+      type.getTypeArguments().forEach(XTypes::checkTypePresent);
+    } else if (type.isError()) {
+      throw new TypeNotPresentException(type.toString(), null);
+    }
+  }
 
   /** Returns {@code true} if the given type is a raw type of a parameterized type. */
   public static boolean isRawParameterizedType(XType type) {

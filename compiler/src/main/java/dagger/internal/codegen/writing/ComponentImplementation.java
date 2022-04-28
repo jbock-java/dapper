@@ -30,11 +30,9 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
-import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
 import static dagger.internal.codegen.xprocessing.MethodSpecHelper.overriding;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
@@ -71,7 +69,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.javapoet.TypeSpecs;
-import dagger.internal.codegen.langmodel.DaggerTypes;
+import dagger.internal.codegen.langmodel.Accessibility;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -268,7 +266,6 @@ public final class ComponentImplementation {
   private final BindingGraph graph;
   private final ComponentNames componentNames;
   private final CompilerOptions compilerOptions;
-  private final DaggerTypes types;
   private final ImmutableMap<ComponentImplementation, FieldSpec> componentFieldsByImplementation;
   private final XMessager messager;
   private final CompilerMode compilerMode;
@@ -285,7 +282,6 @@ public final class ComponentImplementation {
       BindingGraph graph,
       ComponentNames componentNames,
       CompilerOptions compilerOptions,
-      DaggerTypes types,
       XMessager messager,
       XProcessingEnv processingEnv) {
     this.parent = parent;
@@ -297,7 +293,6 @@ public final class ComponentImplementation {
     this.graph = graph;
     this.componentNames = componentNames;
     this.compilerOptions = compilerOptions;
-    this.types = types;
     this.processingEnv = processingEnv;
 
     // The first group of keys belong to the component itself. We call this the componentShard.
@@ -589,7 +584,7 @@ public final class ComponentImplementation {
      * <p>This method checks accessibility for public types and package private types.
      */
     XType accessibleType(XType type) {
-      return toXProcessing(types.accessibleType(toJavac(type), name()), processingEnv);
+      return Accessibility.accessibleType(type, name(), processingEnv);
     }
 
     /**
@@ -598,7 +593,7 @@ public final class ComponentImplementation {
      * <p>This method checks accessibility for public types and package private types.
      */
     boolean isTypeAccessible(XType type) {
-      return isTypeAccessibleFrom(type, name.packageName());
+      return Accessibility.isTypeAccessibleFrom(type, name.packageName());
     }
 
     // TODO(dpb): Consider taking FieldSpec, and returning identical FieldSpec with unique name?

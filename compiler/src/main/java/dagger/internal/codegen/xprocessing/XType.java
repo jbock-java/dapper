@@ -52,4 +52,9 @@ public interface XType {
   static boolean isArray(XType type) {
     return type.isArray();
   }
+
+  /**
+   * Returns true if this is an error type.
+   */
+  boolean isError();
 }

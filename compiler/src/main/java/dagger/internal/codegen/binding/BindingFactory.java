@@ -23,13 +23,14 @@ import static dagger.internal.codegen.binding.ConfigurationAnnotations.getNullab
 import static dagger.internal.codegen.binding.MapKeys.getMapKey;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.asVariable;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.erasure;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isSameType;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.spi.model.BindingKind.ASSISTED_FACTORY;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
@@ -53,13 +54,13 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XConstructorType;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.internal.codegen.xprocessing.XVariableElement;
@@ -76,7 +77,7 @@ import java.util.function.BiFunction;
 
 /** A factory for {@code Binding} objects. */
 public final class BindingFactory {
-  private final DaggerTypes types;
+  private final XProcessingEnv processingEnv;
   private final KeyFactory keyFactory;
   private final DependencyRequestFactory dependencyRequestFactory;
   private final InjectionSiteFactory injectionSiteFactory;
@@ -84,12 +85,12 @@ public final class BindingFactory {
 
   @Inject
   BindingFactory(
-      DaggerTypes types,
+      XProcessingEnv processingEnv,
       KeyFactory keyFactory,
       DependencyRequestFactory dependencyRequestFactory,
       InjectionSiteFactory injectionSiteFactory,
       InjectionAnnotations injectionAnnotations) {
-    this.types = types;
+    this.processingEnv = processingEnv;
     this.keyFactory = keyFactory;
     this.dependencyRequestFactory = dependencyRequestFactory;
     this.injectionSiteFactory = injectionSiteFactory;
@@ -100,8 +101,8 @@ public final class BindingFactory {
    * Returns an {@code dagger.spi.model.BindingKind#INJECTION} binding.
    *
    * @param constructorElement the {@code @Inject}-annotated constructor
-   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class and the
-   *     binding should be for the parameterized type
+   * @param resolvedEnclosingType the parameterized type if the constructor is for a generic class
+   *     and the binding should be for the parameterized type
    */
   // TODO(dpb): See if we can just pass the parameterized type and not also the constructor.
   public ProvisionBinding injectionBinding(
@@ -202,7 +203,7 @@ public final class BindingFactory {
           Key key,
           BiFunction<XMethodElement, XTypeElement, C> create) {
     XMethodType methodType = method.asMemberOf(contributedBy.getType());
-    if (!types.isSameType(toJavac(methodType), toJavac(method.getExecutableType()))) {
+    if (!isSameType(methodType, method.getExecutableType(), processingEnv)) {
       checkState(isTypeElement(method.getEnclosingElement()));
       builder.unresolved(create.apply(method, asTypeElement(method.getEnclosingElement())));
     }
@@ -490,10 +491,10 @@ public final class BindingFactory {
 
   private void checkIsSameErasedType(XType type1, XType type2) {
     checkState(
-        types.isSameType(types.erasure(toJavac(type1)), types.erasure(toJavac(type2))),
+        erasure(type1, processingEnv).isSameType(erasure(type2, processingEnv)),
         "erased expected type: %s, erased actual type: %s",
-        types.erasure(toJavac(type1)),
-        types.erasure(toJavac(type2)));
+        erasure(type1, processingEnv),
+        erasure(type2, processingEnv));
   }
 
   private static boolean hasNonDefaultTypeParameters(XType type) {

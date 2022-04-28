@@ -37,7 +37,6 @@ import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescri
 import dagger.internal.codegen.collect.ImmutableBiMap;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XMethodType;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -51,7 +50,6 @@ import java.util.Optional;
 /** A factory for {@code ComponentDescriptor}s. */
 public final class ComponentDescriptorFactory {
   private final XProcessingEnv processingEnv;
-  private final DaggerTypes types;
   private final DependencyRequestFactory dependencyRequestFactory;
   private final ModuleDescriptor.Factory moduleDescriptorFactory;
   private final InjectionAnnotations injectionAnnotations;
@@ -60,13 +58,11 @@ public final class ComponentDescriptorFactory {
   @Inject
   ComponentDescriptorFactory(
       XProcessingEnv processingEnv,
-      DaggerTypes types,
       DependencyRequestFactory dependencyRequestFactory,
       ModuleDescriptor.Factory moduleDescriptorFactory,
       InjectionAnnotations injectionAnnotations,
       DaggerSuperficialValidation superficialValidation) {
     this.processingEnv = processingEnv;
-    this.types = types;
     this.dependencyRequestFactory = dependencyRequestFactory;
     this.moduleDescriptorFactory = moduleDescriptorFactory;
     this.injectionAnnotations = injectionAnnotations;
@@ -165,7 +161,7 @@ public final class ComponentDescriptorFactory {
             ? Optional.empty()
             : Optional.of(
                 ComponentCreatorDescriptor.create(
-                    getOnlyElement(enclosedCreators), types, dependencyRequestFactory));
+                    getOnlyElement(enclosedCreators), processingEnv, dependencyRequestFactory));
 
     ImmutableSet<Scope> scopes = injectionAnnotations.getScopes(typeElement);
     if (componentAnnotation.isProduction()) {

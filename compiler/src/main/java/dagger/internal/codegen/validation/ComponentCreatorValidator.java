@@ -20,6 +20,7 @@ import static dagger.internal.codegen.base.ComponentCreatorAnnotation.getCreator
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
+import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isSubtype;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static dagger.internal.codegen.xprocessing.XTypeElements.getAllUnimplementedMethods;
 import static dagger.internal.codegen.xprocessing.XTypeElements.hasTypeParameters;
@@ -35,10 +36,10 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ObjectArrays;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XConstructorElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import jakarta.inject.Inject;
@@ -52,12 +53,12 @@ import java.util.Map;
 public final class ComponentCreatorValidator implements ClearableCache {
 
   private final Map<XTypeElement, ValidationReport> reports = new HashMap<>();
-  private final DaggerTypes types;
+  private final XProcessingEnv processingEnv;
   private final KotlinMetadataUtil metadataUtil;
 
   @Inject
-  ComponentCreatorValidator(DaggerTypes types, KotlinMetadataUtil metadataUtil) {
-    this.types = types;
+  ComponentCreatorValidator(XProcessingEnv processingEnv, KotlinMetadataUtil metadataUtil) {
+    this.processingEnv = processingEnv;
     this.metadataUtil = metadataUtil;
   }
 
@@ -253,7 +254,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
 
     private void validateSetterMethod(XMethodElement method) {
       XType returnType = method.asMemberOf(creator.getType()).getReturnType();
-      if (!isVoid(returnType) && !types.isSubtype(creator.getType(), returnType)) {
+      if (!isVoid(returnType) && !isSubtype(creator.getType(), returnType, processingEnv)) {
         error(
             method,
             messages.setterMethodsMustReturnVoidOrBuilder(),
@@ -331,7 +332,7 @@ public final class ComponentCreatorValidator implements ClearableCache {
     private boolean validateFactoryMethodReturnType(XMethodElement method) {
       XTypeElement component = creator.getEnclosingTypeElement();
       XType returnType = method.asMemberOf(creator.getType()).getReturnType();
-      if (!types.isSubtype(component.getType(), returnType)) {
+      if (!isSubtype(component.getType(), returnType, processingEnv)) {
         error(
             method,
             messages.factoryMethodMustReturnComponentType(),

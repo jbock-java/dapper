@@ -17,16 +17,15 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraphPlugin;
 import jakarta.inject.Inject;
@@ -38,8 +37,7 @@ public final class ExternalBindingGraphPlugins {
   private final ImmutableSet<BindingGraphPlugin> plugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
   private final XFiler filer;
-  private final DaggerTypes types;
-  private final DaggerElements elements;
+  private final XProcessingEnv processingEnv;
   private final Map<String, String> processingOptions;
 
   @Inject
@@ -47,14 +45,12 @@ public final class ExternalBindingGraphPlugins {
       ImmutableSet<BindingGraphPlugin> plugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
       XFiler filer,
-      DaggerTypes types,
-      DaggerElements elements,
+      XProcessingEnv processingEnv,
       @ProcessingOptions Map<String, String> processingOptions) {
     this.plugins = plugins;
     this.diagnosticReporterFactory = diagnosticReporterFactory;
     this.filer = filer;
-    this.types = types;
-    this.elements = elements;
+    this.processingEnv = processingEnv;
     this.processingOptions = processingOptions;
   }
 
@@ -72,9 +68,9 @@ public final class ExternalBindingGraphPlugins {
   }
 
   private void initializePlugin(BindingGraphPlugin plugin) {
-    plugin.initFiler(XConverters.toJavac(filer));
-    plugin.initTypes(types);
-    plugin.initElements(elements);
+    plugin.initFiler(toJavac(filer));
+    plugin.initTypes(toJavac(processingEnv).getTypeUtils()); // ALLOW_TYPES_ELEMENTS
+    plugin.initElements(toJavac(processingEnv).getElementUtils()); // ALLOW_TYPES_ELEMENTS
     Set<String> supportedOptions = plugin.supportedOptions();
     if (!supportedOptions.isEmpty()) {
       plugin.initOptions(Maps.filterKeys(processingOptions, supportedOptions::contains));

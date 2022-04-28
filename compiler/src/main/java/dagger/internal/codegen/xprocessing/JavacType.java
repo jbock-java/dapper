@@ -72,7 +72,12 @@ abstract class JavacType implements XType {
 
   @Override
   public XRawType getRawType() {
-    return null;
+    return new JavacRawType(env, this);
+  }
+
+  @Override
+  public boolean isError() {
+    return typeMirror.getKind() == TypeKind.ERROR;
   }
 
   @Override

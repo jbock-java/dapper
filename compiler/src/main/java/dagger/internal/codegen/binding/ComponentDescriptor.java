@@ -21,7 +21,6 @@ import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.langmodel.DaggerTypes.isFutureType;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
@@ -381,10 +380,5 @@ public abstract class ComponentDescriptor {
         && !isVoid(method.getReturnType())
         && !method.getEnclosingElement().getClassName().equals(TypeName.OBJECT)
         && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(getSimpleName(method));
-  }
-
-  /** Returns {@code true} if a method could be a component production entry point. */
-  static boolean isComponentProductionMethod(XMethodElement method) {
-    return isComponentContributionMethod(method) && isFutureType(method.getReturnType());
   }
 }

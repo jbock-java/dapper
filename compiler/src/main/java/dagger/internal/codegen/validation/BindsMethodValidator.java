@@ -29,8 +29,8 @@ import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XVariableElement;
 import jakarta.inject.Inject;
@@ -42,20 +42,21 @@ final class BindsMethodValidator extends BindingMethodValidator {
 
   @Inject
   BindsMethodValidator(
-      DaggerTypes types,
       BindsTypeChecker bindsTypeChecker,
-      DependencyRequestValidator dependencyRequestValidator,
       DaggerSuperficialValidation superficialValidation,
+      XProcessingEnv processingEnv,
+
+      DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
-        types,
         TypeNames.BINDS,
         ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
-        dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
         ALLOWS_MULTIBINDINGS,
         ALLOWS_SCOPING,
+        processingEnv,
+        dependencyRequestValidator,
         injectionAnnotations);
     this.bindsTypeChecker = bindsTypeChecker;
     this.superficialValidation = superficialValidation;

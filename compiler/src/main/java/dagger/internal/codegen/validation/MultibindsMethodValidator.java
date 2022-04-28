@@ -28,8 +28,8 @@ import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import jakarta.inject.Inject;
 
@@ -39,18 +39,18 @@ class MultibindsMethodValidator extends BindingMethodValidator {
   /** Creates a validator for {@code dagger.multibindings.Multibinds @Multibinds} methods. */
   @Inject
   MultibindsMethodValidator(
-      DaggerTypes types,
+      XProcessingEnv processingEnv,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
-        types,
         TypeNames.MULTIBINDS,
         ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
-        dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
         NO_MULTIBINDINGS,
         NO_SCOPING,
+        processingEnv,
+        dependencyRequestValidator,
         injectionAnnotations);
   }
 

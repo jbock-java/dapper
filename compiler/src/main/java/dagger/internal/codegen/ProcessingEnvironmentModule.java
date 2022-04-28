@@ -20,18 +20,12 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
-import dagger.internal.codegen.langmodel.DaggerElements;
-import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.multibindings.IntoSet;
-import jakarta.inject.Singleton;
 import java.util.Map;
 
 /** Bindings that depend on the {@code XProcessingEnv}. */
@@ -57,22 +51,4 @@ interface ProcessingEnvironmentModule {
   static XFiler filer(CompilerOptions compilerOptions, XProcessingEnv xProcessingEnv) {
     return xProcessingEnv.getFiler();
   }
-
-  @Provides
-  @Singleton
-  static DaggerElements daggerElements(XProcessingEnv xProcessingEnv) {
-    return new DaggerElements(
-        XConverters.toJavac(xProcessingEnv).getElementUtils(),
-        XConverters.toJavac(xProcessingEnv).getTypeUtils());
-  }
-
-  @Provides
-  @Singleton
-  static DaggerTypes daggerTypes(XProcessingEnv xProcessingEnv, DaggerElements elements) {
-    return new DaggerTypes(XConverters.toJavac(xProcessingEnv).getTypeUtils(), elements);
-  }
-
-  @Binds
-  @IntoSet
-  ClearableCache daggerElementAsClearableCache(DaggerElements elements);
 }

@@ -26,8 +26,8 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.xprocessing.XMethodElement;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import jakarta.inject.Inject;
 
@@ -37,18 +37,18 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
 
   @Inject
   BindsOptionalOfMethodValidator(
-      DaggerTypes types,
+      XProcessingEnv processingEnv,
       DependencyRequestValidator dependencyRequestValidator,
       InjectionAnnotations injectionAnnotations) {
     super(
-        types,
         TypeNames.BINDS_OPTIONAL_OF,
         ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
-        dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,
         NO_MULTIBINDINGS,
         NO_SCOPING,
+        processingEnv,
+        dependencyRequestValidator,
         injectionAnnotations);
     this.injectionAnnotations = injectionAnnotations;
   }
