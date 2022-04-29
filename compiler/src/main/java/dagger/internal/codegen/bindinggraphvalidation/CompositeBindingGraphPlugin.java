@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.bindinggraphvalidation;
 
 import static dagger.internal.codegen.base.ElementFormatter.elementToString;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
@@ -24,7 +24,11 @@ import static dagger.internal.codegen.collect.Lists.asList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.transitivelyEncloses;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
 import dagger.spi.model.BindingGraph.ComponentNode;
@@ -32,7 +36,6 @@ import dagger.spi.model.BindingGraph.DependencyEdge;
 import dagger.spi.model.BindingGraph.MaybeBinding;
 import dagger.spi.model.BindingGraphPlugin;
 import dagger.spi.model.DiagnosticReporter;
-import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -45,32 +48,20 @@ import javax.tools.Diagnostic;
  * Combines many {@code BindingGraphPlugin} implementations. This helps reduce spam by combining
  * all of the messages that are reported on the root component.
  */
-public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
-
-  private final ImmutableSet<BindingGraphPlugin> plugins;
-  private final String pluginName;
-  private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
-
-  /** Factory class for {@code CompositeBindingGraphPlugin}. */
-  public static final class Factory {
-    private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
-
-    @Inject Factory(DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
-      this.messageGeneratorFactory = messageGeneratorFactory;
-    }
-
-    public CompositeBindingGraphPlugin create(
-        ImmutableSet<BindingGraphPlugin> plugins, String pluginName) {
-      return new CompositeBindingGraphPlugin(plugins, pluginName, messageGeneratorFactory);
-    }
+final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
+  @AssistedFactory
+  interface Factory {
+    CompositeBindingGraphPlugin create(ImmutableSet<BindingGraphPlugin> plugins);
   }
 
-  private CompositeBindingGraphPlugin(
-      ImmutableSet<BindingGraphPlugin> plugins,
-      String pluginName,
+  private final ImmutableSet<BindingGraphPlugin> plugins;
+  private final DiagnosticMessageGenerator.Factory messageGeneratorFactory;
+
+  @AssistedInject
+  CompositeBindingGraphPlugin(
+      @Assisted ImmutableSet<BindingGraphPlugin> plugins,
       DiagnosticMessageGenerator.Factory messageGeneratorFactory) {
     this.plugins = plugins;
-    this.pluginName = pluginName;
     this.messageGeneratorFactory = messageGeneratorFactory;
   }
 
@@ -113,7 +104,7 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
 
   @Override
   public String pluginName() {
-    return pluginName;
+    return "Dagger/Validation";
   }
 
   // TODO(erichang): This kind of breaks some of the encapsulation by relying on or repeating

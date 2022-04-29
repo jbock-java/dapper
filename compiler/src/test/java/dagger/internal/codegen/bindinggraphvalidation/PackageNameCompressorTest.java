@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.bindinggraphvalidation;
 
-import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_FOOTER;
-import static dagger.internal.codegen.validation.PackageNameCompressor.LEGEND_HEADER;
+import static dagger.internal.codegen.bindinggraphvalidation.PackageNameCompressor.LEGEND_FOOTER;
+import static dagger.internal.codegen.bindinggraphvalidation.PackageNameCompressor.LEGEND_HEADER;
 import static io.jbock.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;

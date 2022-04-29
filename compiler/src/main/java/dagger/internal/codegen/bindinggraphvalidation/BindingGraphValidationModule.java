@@ -16,11 +16,10 @@
 
 package dagger.internal.codegen.bindinggraphvalidation;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.Module;
 import dagger.Provides;
-import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
-import dagger.internal.codegen.validation.CompositeBindingGraphPlugin;
 import dagger.internal.codegen.validation.Validation;
 import dagger.spi.model.BindingGraphPlugin;
 
@@ -53,7 +52,7 @@ public interface BindingGraphValidationModule {
         validation10,
         validation11);
     if (compilerOptions.experimentalDaggerErrorMessages()) {
-      return ImmutableSet.of(factory.create(plugins, "Dagger/Validation"));
+      return ImmutableSet.of(factory.create(plugins));
     } else {
       return plugins;
     }
