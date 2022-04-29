@@ -18,7 +18,6 @@ package dagger.internal.codegen;
 
 import static io.jbock.common.truth.Truth.assertThat;
 
-import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.xprocessing.XElements;
 import io.jbock.testing.compile.CompilationExtension;
 import java.util.ArrayList;
