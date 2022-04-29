@@ -17,7 +17,6 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
-import static dagger.internal.codegen.binding.SourceFiles.DECLARATION_ORDER;
 import static dagger.internal.codegen.xprocessing.XElement.isField;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.asField;
@@ -27,6 +26,7 @@ import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XProcessingEnvs.javacOverrides;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.nonObjectSuperclass;
+import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
@@ -41,10 +41,9 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -65,14 +64,16 @@ final class InjectionSiteFactory {
   ImmutableSortedSet<InjectionSite> getInjectionSites(XType type) {
     checkArgument(isDeclared(type));
     Set<InjectionSite> injectionSites = new HashSet<>();
-    List<XTypeElement> ancestors = new ArrayList<>();
     InjectionSiteVisitor injectionSiteVisitor = new InjectionSiteVisitor();
+    Map<XTypeElement, Integer> enclosingTypeElementOrder = new HashMap<>();
+    Map<XElement, Integer> enclosedElementOrder = new HashMap<>();
     for (Optional<XType> currentType = Optional.of(type);
         currentType.isPresent();
         currentType = nonObjectSuperclass(currentType.get())) {
       XTypeElement typeElement = currentType.get().getTypeElement();
-      ancestors.add(typeElement);
+      enclosingTypeElementOrder.put(typeElement, enclosingTypeElementOrder.size());
       for (XElement enclosedElement : typeElement.getEnclosedElements()) {
+        enclosedElementOrder.put(enclosedElement, enclosedElementOrder.size());
         injectionSiteVisitor
             .visit(enclosedElement, currentType.get())
             .ifPresent(injectionSites::add);
@@ -80,15 +81,14 @@ final class InjectionSiteFactory {
     }
     return ImmutableSortedSet.copyOf(
         // supertypes before subtypes
-        Comparator.comparing(
-                (InjectionSite injectionSite) ->
-                    ancestors.indexOf(injectionSite.enclosingTypeElement()))
-            .reversed()
+        comparing(
+                InjectionSite::enclosingTypeElement,
+                comparing(enclosingTypeElementOrder::get).reversed())
             // fields before methods
             .thenComparing(InjectionSite::kind)
             // then sort by whichever element comes first in the parent
             // this isn't necessary, but makes the processor nice and predictable
-            .thenComparing(InjectionSite::element, DECLARATION_ORDER),
+            .thenComparing(InjectionSite::element, comparing(enclosedElementOrder::get)),
         injectionSites);
   }
 
