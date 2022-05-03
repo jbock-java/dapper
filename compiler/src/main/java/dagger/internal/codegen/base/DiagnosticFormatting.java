@@ -52,7 +52,7 @@ public final class DiagnosticFormatting {
    * parameterized) type, and should NOT be used with arbitrary text, especially prose error
    * messages.
    *
-   * <p>TODO(user): Tighten these to take type representations (mirrors and elements) to avoid
+   * <p>TODO(cgruber): Tighten these to take type representations (mirrors and elements) to avoid
    * accidental mis-use by running errors through this method.
    */
   public static String stripCommonTypePrefixes(String type) {

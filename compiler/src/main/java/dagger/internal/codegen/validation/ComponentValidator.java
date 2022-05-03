@@ -460,7 +460,10 @@ public final class ComponentValidator implements ClearableCache {
               == methods.size(),
           "expected each method to be declared on a different type: %s",
           methods);
-      StringBuilder message = new StringBuilder("conflicting entry point declarations:");
+      StringBuilder message = new StringBuilder("Found conflicting entry point declarations. "
+          + "Getter methods on the component with the same name and signature must be for the "
+          + "same binding key since the generated component can only implement the method once. "
+          + "Found:");
       methodSignatureFormatter
           .typedFormatter(component.getType())
           .formatIndentedList(
