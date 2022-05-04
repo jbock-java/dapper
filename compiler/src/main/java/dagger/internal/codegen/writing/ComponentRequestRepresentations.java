@@ -27,8 +27,8 @@ import static dagger.internal.codegen.langmodel.Accessibility.isRawTypeAccessibl
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XProcessingEnvs.erasure;
-import static dagger.internal.codegen.xprocessing.XProcessingEnvs.isAssignable;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
+import static dagger.internal.codegen.xprocessing.XTypes.isAssignableTo;
 
 import dagger.internal.codegen.binding.Binding;
 import dagger.internal.codegen.binding.BindingGraph;
@@ -241,7 +241,7 @@ public final class ComponentRequestRepresentations {
     // for types that have protected accessibility to the component but are not accessible to other
     // classes, e.g. shards, that may need to handle the implementation of the binding.
     XType returnType = componentMethod.methodElement().getReturnType();
-    return !isVoid(returnType) && !isAssignable(expression.type(), returnType, processingEnv)
+    return !isVoid(returnType) && !isAssignableTo(expression.type(), returnType)
         ? expression.castTo(returnType)
         : expression;
   }
