@@ -24,17 +24,15 @@ import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAss
 import static dagger.internal.codegen.binding.SourceFiles.generatedMonitoringModuleName;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
+import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static dagger.spi.model.BindingKind.ASSISTED_INJECTION;
 import static dagger.spi.model.BindingKind.DELEGATE;
 import static dagger.spi.model.BindingKind.INJECTION;
 import static dagger.spi.model.BindingKind.OPTIONAL;
 import static dagger.spi.model.BindingKind.SUBCOMPONENT_CREATOR;
 import static dagger.spi.model.RequestKind.MEMBERS_INJECTION;
-import static io.jbock.auto.common.MoreTypes.isType;
-import static io.jbock.auto.common.MoreTypes.isTypeOf;
 import static java.util.function.Predicate.isEqual;
 
-import dagger.MembersInjector;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
@@ -404,16 +402,14 @@ public final class BindingGraphFactory implements ClearableCache {
       }
 
       // Add members injector binding
-      if (isType(requestKey.type().java())
-          && isTypeOf(MembersInjector.class, requestKey.type().java())) {
+      if (isTypeOf(requestKey.type().xprocessing(), TypeNames.MEMBERS_INJECTOR)) {
         injectBindingRegistry
             .getOrFindMembersInjectorProvisionBinding(requestKey)
             .ifPresent(bindings::add);
       }
 
       // Add Assisted Factory binding
-      if (isType(requestKey.type().java())
-          && isDeclared(requestKey.type().xprocessing())
+      if (isDeclared(requestKey.type().xprocessing())
           && isAssistedFactoryType(requestKey.type().xprocessing().getTypeElement())) {
         bindings.add(
             bindingFactory.assistedFactoryBinding(

@@ -26,6 +26,7 @@ import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 import static dagger.internal.codegen.xprocessing.XElement.isTypeElement;
 import static dagger.internal.codegen.xprocessing.XElement.isVariableElement;
 import static java.util.stream.Collectors.joining;
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -104,6 +105,10 @@ public final class XElements {
       return optionalClosestEnclosingTypeElement(asMethodParameter(element).getEnclosingElement());
     }
     return Optional.empty();
+  }
+
+  public static boolean isAbstract(XElement element) {
+    return toJavac(element).getModifiers().contains(ABSTRACT);
   }
 
   public static boolean isPrivate(XElement element) {

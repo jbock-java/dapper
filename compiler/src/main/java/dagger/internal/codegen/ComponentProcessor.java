@@ -40,7 +40,6 @@ import dagger.internal.codegen.validation.InjectBindingRegistryModule;
 import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
-import dagger.internal.codegen.xprocessing.XConverters;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XProcessingEnvConfig;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
@@ -192,8 +191,7 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
 
   @Override
   public void postRound(XProcessingEnv env, XRoundEnv roundEnv) {
-    // TODO(bcorso): Add a way to determine if processing is over without converting to Javac here.
-    if (!XConverters.toJavac(roundEnv).processingOver()) {
+    if (!roundEnv.isProcessingOver()) {
       try {
         injectBindingRegistry.generateSourcesForRequiredBindings(
             factoryGenerator, membersInjectorGenerator);

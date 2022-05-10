@@ -22,7 +22,6 @@ import static dagger.internal.codegen.binding.InjectionAnnotations.injectedConst
 import static dagger.internal.codegen.binding.SourceFiles.factoryNameForElement;
 import static dagger.internal.codegen.binding.SourceFiles.membersInjectorNameForType;
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toXProcessing;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 import static dagger.internal.codegen.xprocessing.XElements.getAnyAnnotation;
 import static dagger.internal.codegen.xprocessing.XMethodElements.hasTypeParameters;
@@ -205,10 +204,7 @@ public final class InjectValidator implements ClearableCache {
       }
 
       for (Scope scope : injectionAnnotations.getScopes(constructorElement)) {
-        builder.addError(
-            scopeErrorMsg,
-            constructorElement,
-            toXProcessing(scope.scopeAnnotation().java(), processingEnv));
+        builder.addError(scopeErrorMsg, constructorElement, scope.scopeAnnotation().xprocessing());
       }
     }
 
@@ -254,14 +250,14 @@ public final class InjectValidator implements ClearableCache {
         builder.addError(
             "A type with an @AssistedInject-annotated constructor cannot be scoped",
             enclosingElement,
-            toXProcessing(scope.scopeAnnotation().java(), processingEnv));
+            scope.scopeAnnotation().xprocessing());
       }
     } else if (scopes.size() > 1) {
       for (Scope scope : scopes) {
         builder.addError(
             "A single binding may not declare more than one @Scope",
             enclosingElement,
-            toXProcessing(scope.scopeAnnotation().java(), processingEnv));
+            scope.scopeAnnotation().xprocessing());
       }
     }
 

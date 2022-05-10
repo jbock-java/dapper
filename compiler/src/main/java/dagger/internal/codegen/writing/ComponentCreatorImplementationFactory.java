@@ -23,6 +23,7 @@ import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.TypeSpecs.addSupertype;
 import static dagger.internal.codegen.langmodel.Accessibility.isElementAccessibleFrom;
+import static dagger.internal.codegen.xprocessing.MethodSpecs.overriding;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.TypeSpec.classBuilder;
@@ -42,7 +43,6 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.xprocessing.MethodSpecs;
 import dagger.internal.codegen.xprocessing.XElements;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XType;
@@ -401,7 +401,7 @@ final class ComponentCreatorImplementationFactory {
 
     @Override
     protected MethodSpec.Builder factoryMethodBuilder() {
-      return MethodSpecs.overriding(creatorDescriptor.factoryMethod(), creatorType());
+      return overriding(creatorDescriptor.factoryMethod(), creatorType());
     }
 
     private RequirementStatus requirementStatus(ComponentRequirement requirement) {
@@ -433,7 +433,7 @@ final class ComponentCreatorImplementationFactory {
     @Override
     protected MethodSpec.Builder setterMethodBuilder(ComponentRequirement requirement) {
       XMethodElement supertypeMethod = creatorDescriptor.setterMethods().get(requirement);
-      MethodSpec.Builder method = MethodSpecs.overriding(supertypeMethod, creatorType());
+      MethodSpec.Builder method = overriding(supertypeMethod, creatorType());
       if (!isVoid(supertypeMethod.getReturnType())) {
         // Take advantage of covariant returns so that we don't have to worry about type variables
         method.returns(componentImplementation.getCreatorName());

@@ -41,7 +41,6 @@ import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
-import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.TypeName;
@@ -162,10 +161,8 @@ final class SimpleMethodRequestRepresentation extends RequestRepresentation {
       // Java 7 type inference can't figure out that instance in
       // injectParameterized(Parameterized_Factory.newParameterized()) is Parameterized<T> and not
       // Parameterized<Object>
-      if (!MoreTypes.asDeclared(provisionBinding.key().type().java())
-          .getTypeArguments()
-          .isEmpty()) {
-        TypeName keyType = TypeName.get(provisionBinding.key().type().java());
+      if (!provisionBinding.key().type().xprocessing().getTypeArguments().isEmpty()) {
+        TypeName keyType = provisionBinding.key().type().xprocessing().getTypeName();
         instance = CodeBlock.of("($T) ($T) $L", keyType, rawTypeName(keyType), instance);
       }
     }

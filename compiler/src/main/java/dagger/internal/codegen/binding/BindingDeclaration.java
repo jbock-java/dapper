@@ -18,6 +18,7 @@ package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.Optionals.emptiesLast;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static java.util.Comparator.comparing;
 
 import dagger.internal.codegen.xprocessing.XElement;
@@ -52,7 +53,7 @@ public abstract class BindingDeclaration {
           .thenComparing(
               (BindingDeclaration declaration) -> declaration.bindingElement(),
               emptiesLast(
-                  comparing((XElement element) -> toJavac(element).getSimpleName().toString())
+                  comparing((XElement element) -> getSimpleName(element))
                       .thenComparing((XElement element) -> toJavac(element).asType().toString())));
 
   /** The {@code Key} of this declaration. */
