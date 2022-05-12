@@ -17,12 +17,13 @@
 package dagger.internal.codegen.binding;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XMethodTypes.getThrownTypes;
 
 import dagger.internal.codegen.binding.ComponentDescriptor.ComponentMethodDescriptor;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.xprocessing.XMethodType;
+import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.internal.codegen.xprocessing.XType;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.TypeName;
@@ -38,15 +39,15 @@ public abstract class MethodSignature {
   abstract ImmutableList<TypeName> thrownTypes();
 
   public static MethodSignature forComponentMethod(
-      ComponentMethodDescriptor componentMethod, XType componentType) {
+      ComponentMethodDescriptor componentMethod,
+      XType componentType,
+      XProcessingEnv processingEnv) {
     XMethodType methodType = componentMethod.methodElement().asMemberOf(componentType);
     return new AutoValue_MethodSignature(
         getSimpleName(componentMethod.methodElement()),
-        toJavac(methodType).getParameterTypes().stream()
-            .map(TypeName::get)
-            .collect(toImmutableList()),
-        toJavac(methodType).getThrownTypes().stream()
-            .map(TypeName::get)
+        methodType.getParameterTypes().stream().map(XType::getTypeName).collect(toImmutableList()),
+        getThrownTypes(methodType, processingEnv).stream()
+            .map(XType::getTypeName)
             .collect(toImmutableList()));
   }
 }

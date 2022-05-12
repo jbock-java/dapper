@@ -31,7 +31,7 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
-import static dagger.internal.codegen.xprocessing.MethodSpecHelper.overriding;
+import static dagger.internal.codegen.xprocessing.MethodSpecs.overriding;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
@@ -874,7 +874,8 @@ public final class ComponentImplementation {
       XType componentType = graph.componentTypeElement().getType();
       Set<MethodSignature> signatures = Sets.newHashSet();
       for (ComponentMethodDescriptor method : graph.componentDescriptor().entryPointMethods()) {
-        if (signatures.add(MethodSignature.forComponentMethod(method, componentType))) {
+        if (signatures.add(
+            MethodSignature.forComponentMethod(method, componentType, processingEnv))) {
           addMethod(
               COMPONENT_METHOD,
               componentRequestRepresentationsProvider.get().getComponentMethod(method));
