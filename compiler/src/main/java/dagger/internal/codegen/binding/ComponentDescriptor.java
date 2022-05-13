@@ -271,8 +271,7 @@ public abstract class ComponentDescriptor {
   }
 
   @Memoized
-  ImmutableMap<BindingRequest, ComponentMethodDescriptor>
-      firstMatchingComponentMethods() {
+  ImmutableMap<BindingRequest, ComponentMethodDescriptor> firstMatchingComponentMethods() {
     Map<BindingRequest, ComponentMethodDescriptor> methods = new HashMap<>();
     for (ComponentMethodDescriptor method : entryPointMethods()) {
       methods.putIfAbsent(BindingRequest.bindingRequest(method.dependencyRequest().get()), method);
@@ -282,8 +281,7 @@ public abstract class ComponentDescriptor {
 
   /** The entry point methods on the component type. Each has a {@code DependencyRequest}. */
   public final ImmutableSet<ComponentMethodDescriptor> entryPointMethods() {
-    return componentMethods()
-        .stream()
+    return componentMethods().stream()
         .filter(method -> method.dependencyRequest().isPresent())
         .collect(toImmutableSet());
   }
@@ -380,5 +378,10 @@ public abstract class ComponentDescriptor {
         && !isVoid(method.getReturnType())
         && !method.getEnclosingElement().getClassName().equals(TypeName.OBJECT)
         && !NON_CONTRIBUTING_OBJECT_METHOD_NAMES.contains(getSimpleName(method));
+  }
+
+  /** Returns {@code true} if a method could be a component production entry point. */
+  static boolean isComponentProductionMethod(XMethodElement method) {
+    return false;
   }
 }
