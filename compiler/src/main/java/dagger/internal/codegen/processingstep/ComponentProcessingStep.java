@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.base.ComponentAnnotation.allComponentAnnotations;
 import static dagger.internal.codegen.base.ComponentAnnotation.rootComponentAnnotations;
@@ -33,7 +33,6 @@ import dagger.internal.codegen.validation.BindingGraphValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentDescriptorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XTypeElement;

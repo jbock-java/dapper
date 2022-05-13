@@ -18,8 +18,6 @@ package dagger.internal.codegen;
 
 import dagger.BindsInstance;
 import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.SourceFileGenerationException;
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -29,15 +27,12 @@ import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
-import dagger.internal.codegen.validation.BindingMethodProcessingStep;
+import dagger.internal.codegen.processingstep.ProcessingStepsModule;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
-import dagger.internal.codegen.validation.BindsInstanceProcessingStep;
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
 import dagger.internal.codegen.validation.InjectBindingRegistryModule;
-import dagger.internal.codegen.validation.MultibindingAnnotationsProcessingStep;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -60,7 +55,7 @@ import javax.lang.model.SourceVersion;
  * <p>TODO(gak): give this some better documentation
  */
 public class ComponentProcessor extends JavacBasicAnnotationProcessor {
-  private static XProcessingEnvConfig envConfig(Map<String, String> options) {
+  private static XProcessingEnvConfig envConfig(Map<String, String> options)  {
     return new XProcessingEnvConfig.Builder().disableAnnotatedElementValidation(true).build();
   }
 
@@ -157,35 +152,6 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
       ProcessorComponent create(
           @BindsInstance XProcessingEnv xProcessingEnv,
           @BindsInstance ImmutableSet<BindingGraphPlugin> externalPlugins);
-    }
-  }
-
-  @Module
-  interface ProcessingStepsModule {
-    @Provides
-    static ImmutableList<XProcessingStep> processingSteps(
-        MapKeyProcessingStep mapKeyProcessingStep,
-        InjectProcessingStep injectProcessingStep,
-        AssistedInjectProcessingStep assistedInjectProcessingStep,
-        AssistedFactoryProcessingStep assistedFactoryProcessingStep,
-        AssistedProcessingStep assistedProcessingStep,
-        MultibindingAnnotationsProcessingStep multibindingAnnotationsProcessingStep,
-        BindsInstanceProcessingStep bindsInstanceProcessingStep,
-        ModuleProcessingStep moduleProcessingStep,
-        ComponentProcessingStep componentProcessingStep,
-        BindingMethodProcessingStep bindingMethodProcessingStep,
-        CompilerOptions compilerOptions) {
-      return ImmutableList.of(
-          mapKeyProcessingStep,
-          injectProcessingStep,
-          assistedInjectProcessingStep,
-          assistedFactoryProcessingStep,
-          assistedProcessingStep,
-          multibindingAnnotationsProcessingStep,
-          bindsInstanceProcessingStep,
-          moduleProcessingStep,
-          componentProcessingStep,
-          bindingMethodProcessingStep);
     }
   }
 

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 
 import dagger.internal.codegen.collect.ImmutableSet;
+import dagger.internal.codegen.validation.AnyBindingMethodValidator;
 import dagger.internal.codegen.xprocessing.XMessager;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import io.jbock.javapoet.ClassName;

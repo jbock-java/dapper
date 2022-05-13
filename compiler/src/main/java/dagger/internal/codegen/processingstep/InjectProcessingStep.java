@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isField;
@@ -27,7 +27,6 @@ import dagger.internal.codegen.binding.InjectBindingRegistry;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.xprocessing.XElement;
 import io.jbock.javapoet.ClassName;
 import jakarta.inject.Inject;

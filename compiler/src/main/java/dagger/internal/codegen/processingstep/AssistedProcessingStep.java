@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.assistedFactoryMethod;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedFactoryType;
@@ -27,7 +27,6 @@ import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.xprocessing.XExecutableElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;

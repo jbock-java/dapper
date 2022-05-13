@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 

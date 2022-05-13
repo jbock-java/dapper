@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen.validation;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElement.isMethodParameter;
 
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.validation.BindsInstanceMethodValidator;
+import dagger.internal.codegen.validation.BindsInstanceParameterValidator;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XExecutableParameterElement;
 import dagger.internal.codegen.xprocessing.XMessager;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dagger.internal.codegen;
+package dagger.internal.codegen.processingstep;
 
 import static dagger.internal.codegen.binding.MapKeys.getUnwrappedMapKeyType;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
@@ -22,7 +22,6 @@ import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.MapKeyValidator;
-import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;

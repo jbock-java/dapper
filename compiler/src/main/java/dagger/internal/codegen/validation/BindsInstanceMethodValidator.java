@@ -32,7 +32,9 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
-final class BindsInstanceMethodValidator extends BindsInstanceElementValidator<XMethodElement> {
+/** Validates {@code BindsInstance} usages on builder methods. */
+public final class BindsInstanceMethodValidator
+    extends BindsInstanceElementValidator<XMethodElement> {
   private final DaggerSuperficialValidation superficialValidation;
 
   @Inject

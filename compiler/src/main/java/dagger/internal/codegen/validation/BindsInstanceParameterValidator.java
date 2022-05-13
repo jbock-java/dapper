@@ -26,7 +26,8 @@ import dagger.internal.codegen.xprocessing.XType;
 import jakarta.inject.Inject;
 import java.util.Optional;
 
-final class BindsInstanceParameterValidator
+/** Validates {@code BindsInstance} usages on factory method parameters. */
+public final class BindsInstanceParameterValidator
     extends BindsInstanceElementValidator<XExecutableParameterElement> {
   @Inject
   BindsInstanceParameterValidator(InjectionAnnotations injectionAnnotations) {

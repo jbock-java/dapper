@@ -25,7 +25,6 @@ import dagger.internal.codegen.validation.AnyBindingMethodValidator;
 import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.InjectValidator;
-import dagger.internal.codegen.validation.SuperficialValidator;
 import dagger.multibindings.IntoSet;
 
 /**
@@ -57,8 +56,4 @@ interface ProcessingRoundCacheModule {
   @Binds
   @IntoSet
   ClearableCache componentCreatorValidator(ComponentCreatorValidator cache);
-
-  @Binds
-  @IntoSet
-  ClearableCache superficialValidator(SuperficialValidator cache);
 }

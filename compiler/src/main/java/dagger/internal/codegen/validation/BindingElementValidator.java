@@ -70,7 +70,7 @@ public abstract class BindingElementValidator<E extends XElement> {
   }
 
   /** Returns a {@code ValidationReport} for {@code element}. */
-  final ValidationReport validate(E element) {
+  public final ValidationReport validate(E element) {
     return reentrantComputeIfAbsent(cache, element, this::validateUncached);
   }
 
