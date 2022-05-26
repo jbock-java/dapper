@@ -20,7 +20,7 @@ import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
 import dagger.internal.codegen.base.Preconditions;
 import dagger.internal.codegen.xprocessing.XAnnotation;
-import io.jbock.auto.common.AnnotationMirrors;
+import dagger.internal.codegen.xprocessing.XAnnotations;
 import io.jbock.auto.common.Equivalence;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.javapoet.ClassName;
@@ -29,20 +29,16 @@ import javax.lang.model.element.AnnotationMirror;
 /** Wrapper type for an annotation. */
 @AutoValue
 public abstract class DaggerAnnotation {
-  private XAnnotation annotation;
 
   public static DaggerAnnotation from(XAnnotation annotation) {
     Preconditions.checkNotNull(annotation);
-    DaggerAnnotation daggerAnnotation =
-        new AutoValue_DaggerAnnotation(AnnotationMirrors.equivalence().wrap(toJavac(annotation)));
-    daggerAnnotation.annotation = annotation;
-    return daggerAnnotation;
+    return new AutoValue_DaggerAnnotation(XAnnotations.equivalence().wrap(annotation));
   }
 
-  abstract Equivalence.Wrapper<AnnotationMirror> annotationMirror();
+  abstract Equivalence.Wrapper<XAnnotation> equivalenceWrapper();
 
   public DaggerTypeElement annotationTypeElement() {
-    return DaggerTypeElement.from(annotation.getType().getTypeElement());
+    return DaggerTypeElement.from(xprocessing().getType().getTypeElement());
   }
 
   public ClassName className() {
@@ -50,17 +46,15 @@ public abstract class DaggerAnnotation {
   }
 
   public XAnnotation xprocessing() {
-    return annotation;
+    return equivalenceWrapper().get();
   }
 
   public AnnotationMirror java() {
-    return toJavac(annotation);
+    return toJavac(xprocessing());
   }
 
-  // TODO(b/204390647): We'll need to update to auto-common to 1.2 before using AnnotationMirrors.
-  @SuppressWarnings("AnnotationMirrorToString")
   @Override
   public final String toString() {
-    return java().toString();
+    return XAnnotations.toString(xprocessing());
   }
 }

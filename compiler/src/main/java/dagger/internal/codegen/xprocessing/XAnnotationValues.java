@@ -18,6 +18,7 @@ package dagger.internal.codegen.xprocessing;
 
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 
+import io.jbock.auto.common.Equivalence;
 import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -167,6 +168,48 @@ public final class XAnnotationValues {
     public Kind visitArray(List<? extends AnnotationValue> vals, Void p) {
       return Kind.ARRAY;
     }
+  }
+
+  private static final Equivalence<XAnnotationValue> XANNOTATION_VALUE_EQUIVALENCE =
+      new Equivalence<XAnnotationValue>() {
+        @Override
+        protected boolean doEquivalent(XAnnotationValue left, XAnnotationValue right) {
+          if (hasAnnotationValue(left)) {
+            return hasAnnotationValue(right)
+                && XAnnotations.equivalence().equivalent(left.asAnnotation(), right.asAnnotation());
+          } else if (hasArrayValue(left)) {
+            return hasArrayValue(right)
+                && XAnnotationValues.equivalence()
+                    .pairwise()
+                    .equivalent(left.asAnnotationValueList(), right.asAnnotationValueList());
+          } else if (hasTypeValue(left)) {
+            return hasTypeValue(right)
+                && XTypes.equivalence().equivalent(left.asType(), right.asType());
+          }
+          return left.getValue().equals(right.getValue());
+        }
+
+        @Override
+        protected int doHash(XAnnotationValue value) {
+          if (hasAnnotationValue(value)) {
+            return XAnnotations.equivalence().hash(value.asAnnotation());
+          } else if (hasArrayValue(value)) {
+            return XAnnotationValues.equivalence().pairwise().hash(value.asAnnotationValueList());
+          } else if (hasTypeValue(value)) {
+            return XTypes.equivalence().hash(value.asType());
+          }
+          return value.getValue().hashCode();
+        }
+
+        @Override
+        public String toString() {
+          return "XAnnotationValues.equivalence()";
+        }
+      };
+
+  /** Returns an {@code Equivalence} for {@code XAnnotationValue}. */
+  public static Equivalence<XAnnotationValue> equivalence() {
+    return XANNOTATION_VALUE_EQUIVALENCE;
   }
 
   private XAnnotationValues() {}
