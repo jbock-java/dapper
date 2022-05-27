@@ -19,9 +19,6 @@ package dagger.spi.model;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.processing.Filer;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 // TODO(bcorso): Move this into dagger/spi?
 /**
@@ -37,41 +34,12 @@ public interface BindingGraphPlugin {
   void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter);
 
   /**
-   * Initializes this plugin with a {@code Filer} that it can use to write Java or other files based
-   * on the binding graph. This will be called once per instance of this plugin, before any graph is
+   * Initializes this plugin with a {@code DaggerProcessingEnv}.
+   *
+   * <p>This will be called once per instance of this plugin, before any graph is
    * {@code #visitGraph(BindingGraph, DiagnosticReporter) visited}.
-   *
-   * @see javax.annotation.processing.ProcessingEnvironment#getFiler()
    */
-  default void initFiler(Filer filer) {}
-
-  /**
-   * Initializes this plugin with a {@code Types} instance. This will be called once per instance of
-   * this plugin, before any graph is {@code #visitGraph(BindingGraph, DiagnosticReporter)
-   * visited}.
-   *
-   * @see javax.annotation.processing.ProcessingEnvironment#getTypeUtils()
-   */
-  default void initTypes(Types types) {}
-
-  /**
-   * Initializes this plugin with a {@code Elements} instance. This will be called once per instance
-   * of this plugin, before any graph is {@code #visitGraph(BindingGraph, DiagnosticReporter)
-   * visited}.
-   *
-   * @see javax.annotation.processing.ProcessingEnvironment#getElementUtils()
-   */
-  default void initElements(Elements elements) {}
-
-  /**
-   * Initializes this plugin with a filtered view of the options passed on the {@code javac}
-   * command-line for all keys from {@code #supportedOptions()}. This will be called once per
-   * instance of this plugin, before any graph is {@code #visitGraph(BindingGraph,
-   * DiagnosticReporter) visited}.
-   *
-   * @see javax.annotation.processing.ProcessingEnvironment#getOptions()
-   */
-  default void initOptions(Map<String, String> options) {}
+  default void init(DaggerProcessingEnv processingEnv, Map<String, String> options) {}
 
   /**
    * Returns the annotation-processing options that this plugin uses to configure behavior.
@@ -83,9 +51,9 @@ public interface BindingGraphPlugin {
   }
 
   /**
-   * A distinguishing name of the plugin that will be used in diagnostics printed to the {@code
-   * Messager}. By default, the {@code Class#getCanonicalName() fully qualified name} of the
-   * plugin is used.
+   * A distinguishing name of the plugin that will be used in diagnostics printed to the messager.
+   * By default, the {@code Class#getCanonicalName() fully qualified name} of the plugin is
+   * used.
    */
   default String pluginName() {
     return getClass().getCanonicalName();

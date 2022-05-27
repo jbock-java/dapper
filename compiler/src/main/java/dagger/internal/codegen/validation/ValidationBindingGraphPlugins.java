@@ -17,19 +17,19 @@
 package dagger.internal.codegen.validation;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.compileroption.ProcessingOptions;
 import dagger.internal.codegen.compileroption.ValidationType;
 import dagger.internal.codegen.validation.DiagnosticReporterFactory.DiagnosticReporterImpl;
-import dagger.internal.codegen.xprocessing.XFiler;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
 import dagger.spi.model.BindingGraph;
 import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.DaggerProcessingEnv;
 import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +38,6 @@ import java.util.Set;
 public final class ValidationBindingGraphPlugins {
   private final ImmutableSet<BindingGraphPlugin> plugins;
   private final DiagnosticReporterFactory diagnosticReporterFactory;
-  private final XFiler filer;
   private final XProcessingEnv processingEnv;
   private final CompilerOptions compilerOptions;
   private final Map<String, String> processingOptions;
@@ -47,13 +46,11 @@ public final class ValidationBindingGraphPlugins {
   ValidationBindingGraphPlugins(
       @Validation ImmutableSet<BindingGraphPlugin> plugins,
       DiagnosticReporterFactory diagnosticReporterFactory,
-      XFiler filer,
       XProcessingEnv processingEnv,
       CompilerOptions compilerOptions,
       @ProcessingOptions Map<String, String> processingOptions) {
     this.plugins = plugins;
     this.diagnosticReporterFactory = diagnosticReporterFactory;
-    this.filer = filer;
     this.processingEnv = processingEnv;
     this.compilerOptions = compilerOptions;
     this.processingOptions = processingOptions;
@@ -69,17 +66,16 @@ public final class ValidationBindingGraphPlugins {
   /** Initializes the plugins. */
   // TODO(ronshapiro): Should we validate the uniqueness of plugin names?
   public void initializePlugins() {
-    plugins.forEach(this::initializePlugin);
+    DaggerProcessingEnv daggerProcessingEnv = DaggerProcessingEnv.from(processingEnv);
+    plugins.forEach(plugin -> plugin.init(daggerProcessingEnv, pluginOptions(plugin)));
   }
 
-  private void initializePlugin(BindingGraphPlugin plugin) {
-    plugin.initFiler(toJavac(filer));
-    plugin.initTypes(toJavac(processingEnv).getTypeUtils()); // ALLOW_TYPES_ELEMENTS
-    plugin.initElements(toJavac(processingEnv).getElementUtils()); // ALLOW_TYPES_ELEMENTS
+  /** Returns the filtered map of processing options supported by the given plugin. */
+  private ImmutableMap<String, String> pluginOptions(BindingGraphPlugin plugin) {
     Set<String> supportedOptions = plugin.supportedOptions();
-    if (!supportedOptions.isEmpty()) {
-      plugin.initOptions(Maps.filterKeys(processingOptions, supportedOptions::contains));
-    }
+    return supportedOptions.isEmpty()
+        ? ImmutableMap.of()
+        : ImmutableMap.copyOf(Maps.filterKeys(processingOptions, supportedOptions::contains));
   }
 
   /** Returns {@code false} if any of the plugins reported an error. */
