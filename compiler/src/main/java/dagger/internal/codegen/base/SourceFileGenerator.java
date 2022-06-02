@@ -19,12 +19,11 @@ package dagger.internal.codegen.base;
 import static dagger.internal.codegen.base.Preconditions.checkNotNull;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
+import dagger.internal.DaggerGenerated;
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.internal.codegen.extension.DaggerStreams;
 import dagger.internal.codegen.javapoet.AnnotationSpecs;
 import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.xprocessing.XElement;
@@ -35,7 +34,6 @@ import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * A template class that provides a framework for properly handling IO while generating source files
@@ -75,7 +73,7 @@ public abstract class SourceFileGenerator<T> {
   public void generate(T input) throws SourceFileGenerationException {
     for (TypeSpec.Builder type : topLevelTypes(input)) {
       try {
-        buildJavaFile(input, type).writeTo(toJavac(filer));
+        filer.write(buildJavaFile(input, type), XFiler.Mode.Isolating);
       } catch (Exception e) {
         // if the code above threw a SFGE, use that
         Throwables.propagateIfPossible(e, SourceFileGenerationException.class);
@@ -87,7 +85,8 @@ public abstract class SourceFileGenerator<T> {
 
   private JavaFile buildJavaFile(T input, TypeSpec.Builder typeSpecBuilder) {
     XElement originatingElement = originatingElement(input);
-    typeSpecBuilder.addOriginatingElement(toJavac(originatingElement));
+    typeSpecBuilder.addOriginatingElement(originatingElement.toJavac());
+    typeSpecBuilder.addAnnotation(DaggerGenerated.class);
     AnnotationSpec generatedAnnotation =
         AnnotationSpec.builder(Constants.GENERATED)
             .addMember("value", "$S", "dagger.internal.codegen.ComponentProcessor")
@@ -98,8 +97,11 @@ public abstract class SourceFileGenerator<T> {
     // TODO(b/134590785): remove this and only suppress annotations locally, if necessary
     typeSpecBuilder.addAnnotation(
         AnnotationSpecs.suppressWarnings(
-            Stream.concat(warningSuppressions().stream(), Stream.of(UNCHECKED, RAWTYPES))
-                .collect(DaggerStreams.toImmutableSet())));
+            ImmutableSet.<Suppression>builder()
+                .addAll(warningSuppressions())
+                .add(UNCHECKED)
+                .add(RAWTYPES)
+                .build()));
 
     String packageName = closestEnclosingTypeElement(originatingElement).getPackageName();
     JavaFile.Builder javaFileBuilder =
