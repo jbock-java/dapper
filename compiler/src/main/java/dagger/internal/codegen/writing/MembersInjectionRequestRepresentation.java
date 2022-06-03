@@ -17,7 +17,7 @@
 package dagger.internal.codegen.writing;
 
 import static dagger.internal.codegen.collect.Iterables.getOnlyElement;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.JavaPoetExt.getParameterSpec;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -54,8 +54,7 @@ final class MembersInjectionRequestRepresentation extends RequestRepresentation 
   protected Expression getDependencyExpressionForComponentMethod(
       ComponentMethodDescriptor componentMethod, ComponentImplementation component) {
     XMethodElement methodElement = componentMethod.methodElement();
-    ParameterSpec parameter =
-        ParameterSpec.get(toJavac(getOnlyElement(methodElement.getParameters())));
+    ParameterSpec parameter = getParameterSpec(getOnlyElement(methodElement.getParameters()));
     return membersInjectionMethods.getInjectExpression(
         binding.key(), CodeBlock.of("$N", parameter), component.name());
   }

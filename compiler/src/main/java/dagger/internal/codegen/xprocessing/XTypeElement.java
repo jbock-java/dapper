@@ -30,10 +30,25 @@ public interface XTypeElement extends XMemberContainer {
   /** The XTypeElement that contains this XTypeElement if it is an inner class/interface. */
   XTypeElement getEnclosingTypeElement();
 
+  /** The super interfaces implemented by this class. */
+  List<XType> getSuperInterfaces();
+
   /**
    * The super type of this element if it represents a class.
    */
   XType getSuperType();
+
+  /**
+   * The direct super types of this element.
+   *
+   * See [JLS 4.10.2](https://docs.oracle.com/javase/specs/jls/se18/html/jls-4.html#jls-4.10.2)
+   */
+  List<XType> getSuperTypes();
+
+  /**
+   * The super class of this element if it represents a class.
+   */
+  XType getSuperClass();
 
   boolean isClass();
 
@@ -57,8 +72,6 @@ public interface XTypeElement extends XMemberContainer {
   List<XConstructorElement> getConstructors();
 
   List<XTypeElement> getSuperInterfaceElements();
-
-  XType superType();
 
   /**
    * methods declared in this type

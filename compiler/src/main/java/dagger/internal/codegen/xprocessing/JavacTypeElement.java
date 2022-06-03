@@ -4,6 +4,7 @@ import dagger.internal.codegen.base.Util;
 import io.jbock.auto.common.MoreElements;
 import io.jbock.auto.common.MoreTypes;
 import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -89,7 +90,7 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
         }
       }
       // Next, visit all super class methods.
-      XType superType = type.superType();
+      XType superType = type.getSuperType();
       if (superType != null) {
         XTypeElement superTypeTypeElement = superType.getTypeElement();
         if (superTypeTypeElement != null) {
@@ -152,6 +153,13 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
   }
 
   @Override
+  public List<XType> getSuperInterfaces() {
+    return typeElement.getInterfaces().stream()
+        .map(it -> env().wrap(it))
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public boolean isAnnotationClass() {
     return typeElement.getKind() == ElementKind.ANNOTATION_TYPE;
   }
@@ -173,15 +181,6 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
     return typeElement.getInterfaces().stream()
         .map(it -> env().wrapTypeElement(MoreTypes.asTypeElement(it)))
         .collect(Collectors.toList());
-  }
-
-  @Override
-  public XType superType() {
-    TypeMirror superclass = typeElement.getSuperclass();
-    if (superclass.getKind().equals(TypeKind.NONE)) {
-      return null;
-    }
-    return env().wrap(superclass);
   }
 
   @Override
@@ -226,6 +225,37 @@ abstract class JavacTypeElement extends JavacElement implements XTypeElement {
     } else {
       return env().wrap(superClass);
     }
+  }
+
+  @Override
+  public XType getSuperClass() {
+    // javac models non-existing types as TypeKind.NONE but we prefer to make it nullable.
+    // just makes more sense and safer as we don't need to check for none.
+
+    // The result value is a JavacType instead of JavacDeclaredType to gracefully handle
+    // cases where super is an error type.
+    TypeMirror superClass = typeElement.getSuperclass();
+    if (superClass.getKind() == TypeKind.NONE) {
+      return null;
+    } else {
+      return env().wrap(superClass);
+    }
+  }
+
+  @Override
+  public List<XType> getSuperTypes() {
+    List<XType> result = new ArrayList<>();
+    List<XType> superInterfaces = getSuperInterfaces();
+    if (isInterface() && superInterfaces.isEmpty()) {
+      result.add(env().requireType(TypeName.OBJECT));
+    } else {
+      XType superClass = getSuperClass();
+      if (superClass != null) {
+        result.add(superClass);
+      }
+      result.addAll(superInterfaces);
+    }
+    return result;
   }
 
   @Override
