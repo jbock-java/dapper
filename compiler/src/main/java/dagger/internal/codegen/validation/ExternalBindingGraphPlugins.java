@@ -69,6 +69,11 @@ public final class ExternalBindingGraphPlugins {
 
   /** Returns {@code false} if any of the plugins reported an error. */
   boolean visit(BindingGraph graph) {
+    // Return early to avoid converting the binding graph when there are no externl plugins.
+    if (plugins.isEmpty()) {
+      return true;
+    }
+
     boolean isClean = true;
     for (BindingGraphPlugin plugin : plugins) {
       DiagnosticReporterImpl reporter =
