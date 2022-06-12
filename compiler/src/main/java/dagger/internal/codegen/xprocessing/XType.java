@@ -57,4 +57,16 @@ public interface XType {
    * Returns true if this is an error type.
    */
   boolean isError();
+
+  XProcessingEnv env();
+
+  /**
+   * Returns `true` if this is the None type.
+   */
+   boolean isNone();
+
+  /**
+   * If this is a wildcard with an extends bound, returns that bounded typed.
+   */
+  XType extendsBound();
 }

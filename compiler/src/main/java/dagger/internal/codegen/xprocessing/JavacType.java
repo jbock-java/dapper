@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.SimpleTypeVisitor8;
 
 abstract class JavacType implements XType {
 
@@ -34,7 +36,7 @@ abstract class JavacType implements XType {
     return env.toJavac().getTypeUtils().isSameType(typeMirror, other.toJavac());
   }
 
-  XProcessingEnv env() {
+  public XProcessingEnv env() {
     return env;
   }
 
@@ -58,14 +60,10 @@ abstract class JavacType implements XType {
   @Override
   public List<XType> getSuperTypes() {
     List<? extends TypeMirror> superTypes = env.getTypeUtils().directSupertypes(typeMirror);
-    return superTypes.stream()
-        .map(env::wrap)
-        .collect(Collectors.toList());
+    return superTypes.stream().map(env::wrap).collect(Collectors.toList());
   }
 
-  /**
-   * Returns {@code true} if this type can be assigned from {@code other}
-   */
+  /** Returns {@code true} if this type can be assigned from {@code other} */
   public boolean isAssignableFrom(XType other) {
     return env.toJavac().getTypeUtils().isAssignable(other.toJavac(), typeMirror);
   }
@@ -81,9 +79,39 @@ abstract class JavacType implements XType {
   }
 
   @Override
+  public boolean isNone() {
+    return typeMirror.getKind() == TypeKind.NONE;
+  }
+
+  private static TypeMirror extendsBound(TypeMirror m) {
+    return m.accept(
+        new SimpleTypeVisitor8<TypeMirror, Void>() {
+          @Override
+          public TypeMirror visitWildcard(WildcardType type, Void ignored) {
+            TypeMirror bound = type.getExtendsBound();
+            if (bound != null) {
+              return bound;
+            }
+            return type.getSuperBound();
+          }
+        },
+        null);
+  }
+
+  @Override
+  public XType extendsBound() {
+    TypeMirror it = extendsBound(this.typeMirror);
+    if (it == null) {
+      return null;
+    }
+    return env.wrap(it);
+  }
+
+  @Override
   public XType boxed() {
     if (typeMirror.getKind().isPrimitive()) {
-      return env.wrap(env.getTypeUtils().boxedClass(MoreTypes.asPrimitiveType(typeMirror)).asType());
+      return env.wrap(
+          env.getTypeUtils().boxedClass(MoreTypes.asPrimitiveType(typeMirror)).asType());
     }
     if (typeMirror.getKind() == TypeKind.VOID) {
       return env.wrap(env.getElementUtils().getTypeElement("java.lang.Void").asType());

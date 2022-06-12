@@ -102,4 +102,8 @@ public class XConverters {
   public static ProcessingEnvironment toJavac(XProcessingEnv env) {
     return env.toJavac();
   }
+
+  public static XProcessingEnv getProcessingEnv(XType type) {
+    return type.env();
+  }
 }
