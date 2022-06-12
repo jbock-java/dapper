@@ -135,4 +135,13 @@ public interface XProcessingEnv {
     }
     return result;
   }
+
+  enum Backend {
+    JAVAC,
+    KSP
+  }
+
+  default Backend getBackend() {
+    return Backend.JAVAC;
+  }
 }

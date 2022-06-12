@@ -16,69 +16,22 @@
 
 package dagger.internal.codegen;
 
-import dagger.BindsInstance;
-import dagger.Component;
-import dagger.internal.codegen.base.ClearableCache;
-import dagger.internal.codegen.base.SourceFileGenerationException;
-import dagger.internal.codegen.base.SourceFileGenerator;
-import dagger.internal.codegen.binding.InjectBindingRegistry;
-import dagger.internal.codegen.binding.MembersInjectionBinding;
-import dagger.internal.codegen.binding.ProvisionBinding;
-import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModule;
-import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions;
-import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
-import dagger.internal.codegen.processingstep.ProcessingStepsModule;
-import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
-import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
-import dagger.internal.codegen.validation.InjectBindingRegistryModule;
-import dagger.internal.codegen.validation.ValidationBindingGraphPlugins;
 import dagger.internal.codegen.xprocessing.JavacBasicAnnotationProcessor;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XProcessingEnvConfig;
 import dagger.internal.codegen.xprocessing.XProcessingStep;
 import dagger.internal.codegen.xprocessing.XRoundEnv;
 import dagger.spi.model.BindingGraphPlugin;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.lang.model.SourceVersion;
 
 /**
- * The annotation processor responsible for generating the classes that drive the Dagger 2.0
+ * The Javac annotation processor responsible for generating the classes that drive the Dagger
  * implementation.
- *
- * <p>TODO(gak): give this some better documentation
  */
-public class ComponentProcessor extends JavacBasicAnnotationProcessor {
-  private static XProcessingEnvConfig envConfig(Map<String, String> options)  {
-    return new XProcessingEnvConfig.Builder().disableAnnotatedElementValidation(true).build();
-  }
-
-  private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
-
-  @Inject InjectBindingRegistry injectBindingRegistry;
-  @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
-  @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject ImmutableList<XProcessingStep> processingSteps;
-  @Inject ValidationBindingGraphPlugins validationBindingGraphPlugins;
-  @Inject ExternalBindingGraphPlugins externalBindingGraphPlugins;
-  @Inject Set<ClearableCache> clearableCaches;
-
-  public ComponentProcessor() {
-    super(ComponentProcessor::envConfig);
-    this.testingPlugins = Optional.empty();
-  }
-
-  private ComponentProcessor(Iterable<BindingGraphPlugin> testingPlugins) {
-    super(ComponentProcessor::envConfig);
-    this.testingPlugins = Optional.of(ImmutableSet.copyOf(testingPlugins));
-  }
-
+public final class ComponentProcessor extends JavacBasicAnnotationProcessor {
   /**
    * Creates a component processor that uses given {@code BindingGraphPlugin}s instead of loading
    * them from a {@code java.util.ServiceLoader}.
@@ -92,14 +45,28 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
    * them from a {@code java.util.ServiceLoader}.
    */
   public static ComponentProcessor forTesting(Iterable<BindingGraphPlugin> testingPlugins) {
-    return new ComponentProcessor(testingPlugins);
+    return new ComponentProcessor(Optional.of(ImmutableSet.copyOf(testingPlugins)));
+  }
+
+  private final DelegateComponentProcessor delegate = new DelegateComponentProcessor();
+  private final Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins;
+
+  public ComponentProcessor() {
+    this(Optional.empty());
+  }
+
+  private ComponentProcessor(Optional<ImmutableSet<BindingGraphPlugin>> testingPlugins) {
+    super(options -> DelegateComponentProcessor.PROCESSING_ENV_CONFIG);
+    this.testingPlugins = testingPlugins;
   }
 
   @Override
   public void initialize(XProcessingEnv env) {
-    ProcessorComponent.factory()
-        .create(env, testingPlugins.orElseGet(this::loadExternalPlugins))
-        .inject(this);
+    delegate.initialize(env, testingPlugins.orElseGet(() -> loadExternalPlugins(env)));
+  }
+
+  private static ImmutableSet<BindingGraphPlugin> loadExternalPlugins(XProcessingEnv env) {
+    return ServiceLoaders.loadServices(env, BindingGraphPlugin.class);
   }
 
   @Override
@@ -111,60 +78,18 @@ public class ComponentProcessor extends JavacBasicAnnotationProcessor {
   public ImmutableSet<String> getSupportedOptions() {
     return ImmutableSet.<String>builder()
         .addAll(ProcessingEnvironmentCompilerOptions.supportedOptions())
-        .addAll(validationBindingGraphPlugins.allSupportedOptions())
-        .addAll(externalBindingGraphPlugins.allSupportedOptions())
+        .addAll(delegate.validationBindingGraphPlugins.allSupportedOptions())
+        .addAll(delegate.externalBindingGraphPlugins.allSupportedOptions())
         .build();
   }
 
   @Override
   public Iterable<XProcessingStep> processingSteps() {
-    validationBindingGraphPlugins.initializePlugins();
-    externalBindingGraphPlugins.initializePlugins();
-
-    return processingSteps;
-  }
-
-  private ImmutableSet<BindingGraphPlugin> loadExternalPlugins() {
-    return ImmutableSet.of();
-  }
-
-  @Singleton
-  @Component(
-      modules = {
-        BindingGraphValidationModule.class,
-        BindingMethodValidatorsModule.class,
-        ComponentGeneratorModule.class,
-        InjectBindingRegistryModule.class,
-        ProcessingEnvironmentModule.class,
-        ProcessingRoundCacheModule.class,
-        ProcessingStepsModule.class,
-        SourceFileGeneratorsModule.class,
-      })
-  interface ProcessorComponent {
-    void inject(ComponentProcessor processor);
-
-    static Factory factory() {
-      return DaggerComponentProcessor_ProcessorComponent.factory();
-    }
-
-    @Component.Factory
-    interface Factory {
-      ProcessorComponent create(
-          @BindsInstance XProcessingEnv xProcessingEnv,
-          @BindsInstance ImmutableSet<BindingGraphPlugin> externalPlugins);
-    }
+    return delegate.processingSteps();
   }
 
   @Override
   public void postRound(XProcessingEnv env, XRoundEnv roundEnv) {
-    if (!roundEnv.isProcessingOver()) {
-      try {
-        injectBindingRegistry.generateSourcesForRequiredBindings(
-            factoryGenerator, membersInjectorGenerator);
-      } catch (SourceFileGenerationException e) {
-        e.printMessageTo(env.getMessager());
-      }
-    }
-    clearableCaches.forEach(ClearableCache::clearCache);
+    delegate.postRound(env, roundEnv);
   }
 }
