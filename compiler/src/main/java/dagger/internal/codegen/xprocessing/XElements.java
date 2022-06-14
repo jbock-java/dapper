@@ -62,10 +62,22 @@ public final class XElements {
     return memberContainer.getClassName().simpleName();
   }
 
-  // TODO(bcorso): Replace usages with getJvmName() once it exists.
   /** Returns the simple name of the element. */
   public static String getSimpleName(XElement element) {
-    return toJavac(element).getSimpleName().toString();
+    if (isTypeElement(element)) {
+      return asTypeElement(element)
+          .getName(); // SUPPRESS_GET_NAME_CHECK: This uses java simple name implementation under
+      // the hood.
+    } else if (isVariableElement(element)) {
+      return asVariable(element).getName(); // SUPPRESS_GET_NAME_CHECK
+    } else if (isEnumEntry(element)) {
+      return asEnumEntry(element).getName(); // SUPPRESS_GET_NAME_CHECK
+    } else if (isMethod(element)) {
+      return asMethod(element).getJvmName();
+    } else if (isConstructor(element)) {
+      return "<init>";
+    }
+    throw new AssertionError("No simple name for: " + element);
   }
 
   /**
@@ -178,6 +190,10 @@ public final class XElements {
   public static XFieldElement asField(XElement element) {
     checkState(isField(element));
     return (XFieldElement) element;
+  }
+
+  public static XEnumEntry asEnumEntry(XElement element) {
+    return (XEnumEntry) element;
   }
 
   public static XVariableElement asVariable(XElement element) {
