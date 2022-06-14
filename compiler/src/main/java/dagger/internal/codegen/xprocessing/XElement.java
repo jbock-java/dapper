@@ -42,4 +42,6 @@ public interface XElement extends XAnnotated, XHasModifiers {
    * Returns true if all types referenced by this element are valid, i.e. resolvable.
    */
   boolean validate();
+
+  XProcessingEnv env();
 }

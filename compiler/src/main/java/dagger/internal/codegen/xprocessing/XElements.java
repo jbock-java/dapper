@@ -19,6 +19,7 @@ package dagger.internal.codegen.xprocessing;
 import static dagger.internal.codegen.base.Preconditions.checkArgument;
 import static dagger.internal.codegen.base.Preconditions.checkState;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.xprocessing.XConverters.getProcessingEnv;
 import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElement.isConstructor;
 import static dagger.internal.codegen.xprocessing.XElement.isField;
@@ -134,8 +135,16 @@ public final class XElements {
     return (XHasModifiers) element;
   }
 
+  // Note: This method always returns `false` but I'd rather not remove it from our codebase since
+  // if XProcessing adds package elements to their model I'd like to catch it here and fail early.
   public static boolean isPackage(XElement element) {
-    return toJavac(element).getKind() == ElementKind.PACKAGE;
+    // Currently, XProcessing doesn't represent package elements so this method always returns
+    // false, but we check the state in Javac just to be sure. There's nothing to check in KSP since
+    // there is no concept of package elements in KSP.
+    if (getProcessingEnv(element).getBackend() == XProcessingEnv.Backend.JAVAC) {
+      checkState(toJavac(element).getKind() != ElementKind.PACKAGE);
+    }
+    return false;
   }
 
   public static boolean isEnumEntry(XElement element) {

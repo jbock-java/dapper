@@ -123,7 +123,8 @@ abstract class JavacElement implements XElement {
         .orElse(null);
   }
 
-  final XProcessingEnv env() {
+  @Override
+  public final XProcessingEnv env() {
     return env;
   }
 }

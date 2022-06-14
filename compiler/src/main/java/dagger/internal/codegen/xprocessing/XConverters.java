@@ -19,11 +19,13 @@ public class XConverters {
     return env.wrapTypeElement(typeElement);
   }
 
-  public static XExecutableElement toXProcessing(ExecutableElement executableElement, XProcessingEnv env) {
+  public static XExecutableElement toXProcessing(
+      ExecutableElement executableElement, XProcessingEnv env) {
     return env.wrapExecutableElement(executableElement);
   }
 
-  public static XVariableElement toXProcessing(VariableElement variableElement, XProcessingEnv env) {
+  public static XVariableElement toXProcessing(
+      VariableElement variableElement, XProcessingEnv env) {
     return env.wrapVariableElement(variableElement);
   }
 
@@ -42,15 +44,16 @@ public class XConverters {
       return toXProcessing((VariableElement) element, env);
     }
     throw new IllegalStateException(
-        String.format("Don't know how to convert element of type '%s' to a XElement", element.getClass()));
+        String.format(
+            "Don't know how to convert element of type '%s' to a XElement", element.getClass()));
   }
 
   /**
    * Returns an {@code XType} for the given {@code TypeMirror}.
    *
-   * Warning: This method should be used only for migration since the returned {@code XType} will be
-   * missing nullability information. Calling {@code XType#nullability} on these types will result in
-   * an {@code IllegalStateException}.
+   * <p>Warning: This method should be used only for migration since the returned {@code XType} will
+   * be missing nullability information. Calling {@code XType#nullability} on these types will
+   * result in an {@code IllegalStateException}.
    */
   public static XType toXProcessing(TypeMirror type, XProcessingEnv env) {
     return env.wrap(type);
@@ -99,11 +102,16 @@ public class XConverters {
   public static RoundEnvironment toJavac(XRoundEnv roundEnv) {
     return roundEnv.toJavac();
   }
+
   public static ProcessingEnvironment toJavac(XProcessingEnv env) {
     return env.toJavac();
   }
 
   public static XProcessingEnv getProcessingEnv(XType type) {
     return type.env();
+  }
+
+  public static XProcessingEnv getProcessingEnv(XElement element) {
+    return element.env();
   }
 }
