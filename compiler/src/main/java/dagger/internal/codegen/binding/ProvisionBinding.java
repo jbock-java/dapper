@@ -24,6 +24,8 @@ import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.ImmutableSortedSet;
 import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.errorprone.CanIgnoreReturnValue;
+import dagger.internal.codegen.errorprone.CheckReturnValue;
 import dagger.spi.model.BindingKind;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
@@ -32,6 +34,7 @@ import io.jbock.auto.value.extension.memoized.Memoized;
 import java.util.Optional;
 
 /** A value object representing the mechanism by which a {@code Key} can be provided. */
+@CheckReturnValue
 @AutoValue
 public abstract class ProvisionBinding extends ContributionBinding {
 
@@ -116,6 +119,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
   public abstract static class Builder
       extends ContributionBinding.Builder<ProvisionBinding, Builder> {
 
+    @CanIgnoreReturnValue
     @Override
     public Builder dependencies(Iterable<DependencyRequest> dependencies) {
       return provisionDependencies(dependencies);
@@ -125,6 +129,7 @@ public abstract class ProvisionBinding extends ContributionBinding {
 
     public abstract Builder injectionSites(ImmutableSortedSet<InjectionSite> injectionSites);
 
+    @CanIgnoreReturnValue // TODO(kak): remove this once open-source checkers understand AutoValue
     @Override
     public abstract Builder unresolved(ProvisionBinding unresolved);
 

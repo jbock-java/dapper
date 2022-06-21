@@ -24,7 +24,6 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElement.isMethod;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isVoid;
-import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.base.Suppliers;
@@ -36,8 +35,6 @@ import dagger.internal.codegen.errorprone.CanIgnoreReturnValue;
 import dagger.internal.codegen.errorprone.CheckReturnValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
-import dagger.internal.codegen.xprocessing.XProcessingEnv;
-import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
 import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Scope;
@@ -61,6 +58,7 @@ import java.util.stream.Stream;
  * represent a synthetic component for the module, where there is an entry point for each binding in
  * the module.
  */
+@CheckReturnValue
 @AutoValue
 public abstract class ComponentDescriptor {
   /** Creates a {@code ComponentDescriptor}. */
@@ -328,22 +326,6 @@ public abstract class ComponentDescriptor {
     /** The subcomponent for subcomponent factory methods and subcomponent creator methods. */
     public abstract Optional<ComponentDescriptor> subcomponent();
 
-    /**
-     * Returns the return type of {@code #methodElement()} as resolved in the {@code
-     * ComponentDescriptor#typeElement() component type}. If there are no type variables in the
-     * return type, this is the equivalent of {@code methodElement().getReturnType()}.
-     */
-    public XType resolvedReturnType(XProcessingEnv processingEnv) {
-      checkState(dependencyRequest().isPresent());
-
-      XType returnType = methodElement().getReturnType();
-      if (isPrimitive(returnType) || isVoid(returnType)) {
-        return returnType;
-      }
-      return BindingRequest.bindingRequest(dependencyRequest().get())
-          .requestedType(dependencyRequest().get().key().type().xprocessing(), processingEnv);
-    }
-
     /** A {@code ComponentMethodDescriptor}builder for a method. */
     public static Builder builder(XMethodElement method) {
       return new AutoValue_ComponentDescriptor_ComponentMethodDescriptor.Builder()
@@ -352,19 +334,23 @@ public abstract class ComponentDescriptor {
 
     /** A builder of {@code ComponentMethodDescriptor}s. */
     @AutoValue.Builder
-    @CanIgnoreReturnValue
     public interface Builder {
       /** @see ComponentMethodDescriptor#methodElement() */
       Builder methodElement(XMethodElement methodElement);
 
-      /** @see ComponentMethodDescriptor#dependencyRequest() */
+      /**
+       * @see ComponentMethodDescriptor#dependencyRequest()
+       */
+      @CanIgnoreReturnValue // TODO(kak): remove this once open-source checkers understand AutoValue
       Builder dependencyRequest(DependencyRequest dependencyRequest);
 
-      /** @see ComponentMethodDescriptor#subcomponent() */
+      /**
+       * @see ComponentMethodDescriptor#subcomponent()
+       */
+      @CanIgnoreReturnValue // TODO(kak): remove this once open-source checkers understand AutoValue
       Builder subcomponent(ComponentDescriptor subcomponent);
 
       /** Builds the descriptor. */
-      @CheckReturnValue
       ComponentMethodDescriptor build();
     }
   }

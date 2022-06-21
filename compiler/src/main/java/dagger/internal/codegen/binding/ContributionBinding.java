@@ -23,6 +23,8 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.ContributionType.HasContributionType;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
+import dagger.internal.codegen.errorprone.CanIgnoreReturnValue;
+import dagger.internal.codegen.errorprone.CheckReturnValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
@@ -37,6 +39,7 @@ import java.util.Optional;
  * An abstract class for a value object representing the mechanism by which a {@code Key} can be
  * contributed to a dependency graph.
  */
+@CheckReturnValue
 public abstract class ContributionBinding extends Binding implements HasContributionType {
 
   /** Returns the type that specifies this' nullability, absent if not nullable. */
@@ -98,32 +101,44 @@ public abstract class ContributionBinding extends Binding implements HasContribu
    * ContributionBinding}.
    */
   public abstract static class Builder<C extends ContributionBinding, B extends Builder<C, B>> {
+    @CanIgnoreReturnValue
     public abstract B dependencies(Iterable<DependencyRequest> dependencies);
 
+    @CanIgnoreReturnValue
     public B dependencies(DependencyRequest... dependencies) {
       return dependencies(asList(dependencies));
     }
 
+    @CanIgnoreReturnValue
     public abstract B unresolved(C unresolved);
 
+    @CanIgnoreReturnValue
     public abstract B contributionType(ContributionType contributionType);
 
+    @CanIgnoreReturnValue
     public abstract B bindingElement(XElement bindingElement);
 
+    @CanIgnoreReturnValue
     abstract B bindingElement(Optional<XElement> bindingElement);
 
+    @CanIgnoreReturnValue
     public final B clearBindingElement() {
       return bindingElement(Optional.empty());
     };
 
+    @CanIgnoreReturnValue
     abstract B contributingModule(XTypeElement contributingModule);
 
+    @CanIgnoreReturnValue
     public abstract B key(Key key);
 
+    @CanIgnoreReturnValue
     public abstract B nullableType(Optional<XType> nullableType);
 
+    @CanIgnoreReturnValue
     abstract B mapKey(Optional<DaggerAnnotation> mapKey);
 
+    @CanIgnoreReturnValue
     public abstract B kind(BindingKind kind);
 
     abstract C build();
