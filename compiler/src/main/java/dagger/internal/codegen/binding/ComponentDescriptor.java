@@ -32,6 +32,8 @@ import dagger.internal.codegen.collect.ImmutableBiMap;
 import dagger.internal.codegen.collect.ImmutableMap;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Maps;
+import dagger.internal.codegen.errorprone.CanIgnoreReturnValue;
+import dagger.internal.codegen.errorprone.CheckReturnValue;
 import dagger.internal.codegen.xprocessing.XElement;
 import dagger.internal.codegen.xprocessing.XMethodElement;
 import dagger.internal.codegen.xprocessing.XProcessingEnv;
@@ -350,6 +352,7 @@ public abstract class ComponentDescriptor {
 
     /** A builder of {@code ComponentMethodDescriptor}s. */
     @AutoValue.Builder
+    @CanIgnoreReturnValue
     public interface Builder {
       /** @see ComponentMethodDescriptor#methodElement() */
       Builder methodElement(XMethodElement methodElement);
@@ -361,6 +364,7 @@ public abstract class ComponentDescriptor {
       Builder subcomponent(ComponentDescriptor subcomponent);
 
       /** Builds the descriptor. */
+      @CheckReturnValue
       ComponentMethodDescriptor build();
     }
   }
