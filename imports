@@ -43,6 +43,8 @@ mysed "s/^import com.google.common.base.Supplier;/import java.util.function.Supp
 mysed "s/^import com.google.common.base.Function;/import java.util.function.Function;/"
 mysed "s/^import com.google.common.base.Predicate;/import java.util.function.Predicate;/"
 mysed "s/^import static kotlin.streams.jdk8.StreamsKt.asStream;/import static dagger.internal.codegen.base.Util.asStream;/"
+mysed "s/^import com.google.errorprone.annotations.CheckReturnValue;/import dagger.internal.codegen.errorprone.CheckReturnValue;/"
+mysed "s/^import com.google.errorprone.annotations.CanIgnoreReturnValue;/import dagger.internal.codegen.errorprone.CanIgnoreReturnValue;/"
 
 replace com.google.auto.common. io.jbock.auto.common.
 replace com.google.common.base. dagger.internal.codegen.base.
@@ -59,10 +61,6 @@ replace com.google.auto.value.extension.memoized.Memoized io.jbock.auto.value.ex
 replace dagger.internal.codegen.xprocessing.XTypeKt dagger.internal.codegen.xprocessing.XType
 replace dagger.internal.codegen.xprocessing.XElementKt dagger.internal.codegen.xprocessing.XElement
 
-delete "^import com.google.errorprone.annotations.CheckReturnValue;"
-delete "@CheckReturnValue"
-delete "^import com.google.errorprone.annotations.CanIgnoreReturnValue;"
-delete "@CanIgnoreReturnValue"
 delete "^import com.google.common.annotations.Beta;"
 delete "@Beta"
 delete "^import com.google.common.annotations.GwtCompatible;"
