@@ -32,7 +32,6 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind.COMPONENT_METHOD;
 import static dagger.internal.codegen.xprocessing.MethodSpecs.overriding;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static io.jbock.javapoet.MethodSpec.constructorBuilder;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
@@ -62,7 +61,6 @@ import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.collect.Iterables;
 import dagger.internal.codegen.collect.ListMultimap;
 import dagger.internal.codegen.collect.Lists;
-import dagger.internal.codegen.collect.Maps;
 import dagger.internal.codegen.collect.MultimapBuilder;
 import dagger.internal.codegen.collect.Sets;
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -89,7 +87,6 @@ import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -844,14 +841,12 @@ public final class ComponentImplementation {
 
     private void createSubcomponentFactoryMethod(XMethodElement factoryMethod) {
       checkState(parent.isPresent());
-      Collection<ParameterSpec> params =
-          Maps.transformValues(
-                  graph.factoryMethodParameters(),
-                  parameter -> ParameterSpec.get(toJavac(parameter)))
-              .values();
       XType parentType = parent.get().graph().componentTypeElement().getType();
       MethodSpec.Builder method = overriding(factoryMethod, parentType);
-      params.forEach(
+      // Use the parameter names from the overriding method, which may be different from the
+      // parameter names at the declaration site if it is pulled in as a class dependency from a
+      // separate build unit (see https://github.com/google/dagger/issues/3401).
+      method.parameters.forEach(
           param -> method.addStatement("$T.checkNotNull($N)", Preconditions.class, param));
       method.addStatement(
           "return new $T($L)",
@@ -862,7 +857,7 @@ public final class ComponentImplementation {
                       creatorComponentFields().stream()
                           .map(field -> ParameterSpec.builder(field.type, field.name).build())
                           .collect(toImmutableList()))
-                  .addAll(params)
+                  .addAll(method.parameters)
                   .build()));
 
       parent.get().getComponentShard().addMethod(COMPONENT_METHOD, method.build());
