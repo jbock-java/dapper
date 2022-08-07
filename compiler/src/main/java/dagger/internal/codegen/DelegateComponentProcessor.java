@@ -29,6 +29,7 @@ import dagger.internal.codegen.bindinggraphvalidation.BindingGraphValidationModu
 import dagger.internal.codegen.collect.ImmutableList;
 import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.componentgenerator.ComponentGeneratorModule;
+import dagger.internal.codegen.errorprone.CheckReturnValue;
 import dagger.internal.codegen.processingstep.ProcessingStepsModule;
 import dagger.internal.codegen.validation.BindingMethodValidatorsModule;
 import dagger.internal.codegen.validation.ExternalBindingGraphPlugins;
@@ -79,6 +80,9 @@ final class DelegateComponentProcessor {
       } catch (SourceFileGenerationException e) {
         e.printMessageTo(env.getMessager());
       }
+    } else {
+      validationBindingGraphPlugins.endPlugins();
+      externalBindingGraphPlugins.endPlugins();
     }
     clearableCaches.forEach(ClearableCache::clearCache);
   }
@@ -100,6 +104,7 @@ final class DelegateComponentProcessor {
 
     @Component.Factory
     interface Factory {
+      @CheckReturnValue
       Injector create(
           @BindsInstance XProcessingEnv processingEnv,
           @BindsInstance ImmutableSet<BindingGraphPlugin> legacyExternalPlugins);

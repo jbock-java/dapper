@@ -76,14 +76,18 @@ public final class ExternalBindingGraphPlugins {
 
     boolean isClean = true;
     for (BindingGraphPlugin plugin : plugins) {
-      DiagnosticReporterImpl reporter =
+      DiagnosticReporterImpl spiReporter =
           diagnosticReporterFactory.reporter(
               graph, plugin.pluginName(), /* reportErrorsAsWarnings= */ false);
-      plugin.visitGraph(graph, reporter);
-      if (reporter.reportedDiagnosticKinds().contains(ERROR)) {
+      plugin.visitGraph(graph, spiReporter);
+      if (spiReporter.reportedDiagnosticKinds().contains(ERROR)) {
         isClean = false;
       }
     }
     return isClean;
+  }
+
+  public void endPlugins() {
+    plugins.forEach(BindingGraphPlugin::onPluginEnd);
   }
 }
