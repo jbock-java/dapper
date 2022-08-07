@@ -16,19 +16,18 @@
 
 package dagger.internal.codegen.binding;
 
-import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.base.CaseFormat.LOWER_CAMEL;
 import static dagger.internal.codegen.base.CaseFormat.UPPER_CAMEL;
 import static dagger.internal.codegen.binding.SourceFiles.protectAgainstKeywords;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
+import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XTypes.isDeclared;
 import static dagger.internal.codegen.xprocessing.XTypes.isPrimitive;
 
+import dagger.internal.codegen.collect.ImmutableSet;
 import dagger.internal.codegen.xprocessing.XArrayType;
 import dagger.internal.codegen.xprocessing.XType;
 import dagger.internal.codegen.xprocessing.XTypeElement;
-import dagger.internal.codegen.collect.ImmutableSet;
-import dagger.spi.model.DependencyRequest;
 import dagger.spi.model.Key;
 import java.util.Iterator;
 
@@ -50,7 +49,7 @@ public final class KeyVariableNamer {
 
   public static String name(Key key) {
     if (key.multibindingContributionIdentifier().isPresent()) {
-      return key.multibindingContributionIdentifier().get().bindingElement();
+      return key.multibindingContributionIdentifier().get().bindingMethod();
     }
 
     StringBuilder builder = new StringBuilder();
