@@ -114,4 +114,8 @@ public class XConverters {
   public static XProcessingEnv getProcessingEnv(XElement element) {
     return element.env();
   }
+
+  public static XProcessingEnv getProcessingEnv(XAnnotation annotation) {
+    return annotation.env();
+  }
 }

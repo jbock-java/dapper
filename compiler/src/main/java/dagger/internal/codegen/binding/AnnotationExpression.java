@@ -21,18 +21,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.CodeBlocks.toParametersCodeBlock;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasAnnotationValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasArrayValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasByteValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasCharValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasDoubleValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasEnumValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasFloatValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasLongValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasShortValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasStringValue;
-import static dagger.internal.codegen.xprocessing.XAnnotationValues.hasTypeValue;
-import static dagger.internal.codegen.xprocessing.XConverters.toJavac;
+import static dagger.internal.codegen.xprocessing.XAnnotations.characterLiteralWithSingleQuotes;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 import static dagger.internal.codegen.xprocessing.XType.isArray;
 import static dagger.internal.codegen.xprocessing.XTypes.asArray;
@@ -124,32 +113,31 @@ public final class AnnotationExpression {
   }
 
   private CodeBlock visit(XAnnotationValue value) {
-    if (hasEnumValue(value)) {
+    if (value.hasEnumValue()) {
       return CodeBlock.of(
           "$T.$L",
           value.asEnum().getEnclosingElement().getClassName(),
           getSimpleName(value.asEnum()));
-    } else if (hasAnnotationValue(value)) {
+    } else if (value.hasAnnotationValue()) {
       return getAnnotationInstanceExpression(value.asAnnotation());
-    } else if (hasTypeValue(value)) {
+    } else if (value.hasTypeValue()) {
       return CodeBlock.of("$T.class", value.asType().getTypeName());
-    } else if (hasStringValue(value)) {
+    } else if (value.hasStringValue()) {
       return CodeBlock.of("$S", value.asString());
-    } else if (hasByteValue(value)) {
+    } else if (value.hasByteValue()) {
       return CodeBlock.of("(byte) $L", value.asByte());
-    } else if (hasCharValue(value)) {
-      // TODO(bcorso): This relies on AnnotationValue.toString() to properly output escaped
-      // characters like '\n'. See https://github.com/square/javapoet/issues/698.
-      return CodeBlock.of("$L", toJavac(value));
-    } else if (hasDoubleValue(value)) {
+    } else if (value.hasCharValue()) {
+      // TODO(bcorso): Replace when https://github.com/square/javapoet/issues/698 is fixed.
+      return CodeBlock.of("$L", characterLiteralWithSingleQuotes(value.asChar()));
+    } else if (value.hasDoubleValue()) {
       return CodeBlock.of("$LD", value.asDouble());
-    } else if (hasFloatValue(value)) {
+    } else if (value.hasFloatValue()) {
       return CodeBlock.of("$LF", value.asFloat());
-    } else if (hasLongValue(value)) {
+    } else if (value.hasLongValue()) {
       return CodeBlock.of("$LL", value.asLong());
-    } else if (hasShortValue(value)) {
+    } else if (value.hasShortValue()) {
       return CodeBlock.of("(short) $L", value.asShort());
-    } else if (hasArrayValue(value)) {
+    } else if (value.hasListValue()) {
       return CodeBlock.of(
           "{$L}",
           value.asAnnotationValueList().stream().map(this::visit).collect(toParametersCodeBlock()));

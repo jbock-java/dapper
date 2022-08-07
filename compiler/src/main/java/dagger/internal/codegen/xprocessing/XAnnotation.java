@@ -25,6 +25,8 @@ public interface XAnnotation {
 
   AnnotationMirror toJavac();
 
+  XProcessingEnv env();
+
   /** The simple name of the annotation class. */
   String getName();
 

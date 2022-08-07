@@ -118,6 +118,11 @@ class JavacAnnotationValue implements XAnnotationValue {
     return (boolean) valueProvider.get();
   }
 
+  @Override
+  public char asChar() {
+    return (char) valueProvider.get();
+  }
+
   private static final SimpleAnnotationValueVisitor8<Object, VisitorData> UNWRAP_VISITOR =
       new SimpleAnnotationValueVisitor8<>() {
         @Override

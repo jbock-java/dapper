@@ -1,5 +1,7 @@
 package dagger.internal.codegen.xprocessing;
 
+import static dagger.internal.codegen.xprocessing.XAnnotationValues.getKind;
+
 import java.util.List;
 import javax.lang.model.element.AnnotationValue;
 
@@ -57,4 +59,63 @@ public interface XAnnotationValue {
 
   /** Returns the value as a {@code Boolean}. */
   boolean asBoolean();
+
+  char asChar();
+
+  // TODO copy hasX methods from xprocessing
+  default boolean hasBooleanValue() {
+    return getKind(this) == XAnnotationValues.Kind.BOOLEAN;
+  }
+
+  default boolean hasByteValue() {
+    return getKind(this) == XAnnotationValues.Kind.BYTE;
+  }
+
+  default boolean hasCharValue() {
+    return getKind(this) == XAnnotationValues.Kind.CHAR;
+  }
+
+  default boolean hasDoubleValue() {
+    return getKind(this) == XAnnotationValues.Kind.DOUBLE;
+  }
+
+  default boolean hasFloatValue() {
+    return getKind(this) == XAnnotationValues.Kind.FLOAT;
+  }
+
+  default boolean hasIntValue() {
+    return getKind(this) == XAnnotationValues.Kind.INT;
+  }
+
+  default boolean hasLongValue() {
+    return getKind(this) == XAnnotationValues.Kind.LONG;
+  }
+
+  default boolean hasShortValue() {
+    return getKind(this) == XAnnotationValues.Kind.SHORT;
+  }
+
+  default boolean hasStringValue() {
+    return getKind(this) == XAnnotationValues.Kind.STRING;
+  }
+
+  default boolean hasTypeValue() {
+    return getKind(this) == XAnnotationValues.Kind.TYPE;
+  }
+
+  default boolean hasEnumValue() {
+    return getKind(this) == XAnnotationValues.Kind.ENUM_CONSTANT;
+  }
+
+  default boolean hasAnnotationValue() {
+    return getKind(this) == XAnnotationValues.Kind.ANNOTATION;
+  }
+
+  default boolean hasArrayValue() {
+    return getKind(this) == XAnnotationValues.Kind.ARRAY;
+  }
+
+  default boolean hasListValue() {
+    return false; // TODO
+  }
 }

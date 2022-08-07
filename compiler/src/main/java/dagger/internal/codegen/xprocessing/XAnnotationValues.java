@@ -29,7 +29,7 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 // TODO(bcorso): Consider moving these methods into XProcessing library.
 /** A utility class for {@code XAnnotationValue} helper methods. */
 public final class XAnnotationValues {
-  private enum Kind {
+  enum Kind {
     BOOLEAN,
     BYTE,
     CHAR,
@@ -44,42 +44,6 @@ public final class XAnnotationValues {
     ANNOTATION,
     ARRAY,
   };
-
-  public static boolean hasBooleanValue(XAnnotationValue value) {
-    return getKind(value) == Kind.BOOLEAN;
-  }
-
-  public static boolean hasByteValue(XAnnotationValue value) {
-    return getKind(value) == Kind.BYTE;
-  }
-
-  public static boolean hasCharValue(XAnnotationValue value) {
-    return getKind(value) == Kind.CHAR;
-  }
-
-  public static boolean hasDoubleValue(XAnnotationValue value) {
-    return getKind(value) == Kind.DOUBLE;
-  }
-
-  public static boolean hasFloatValue(XAnnotationValue value) {
-    return getKind(value) == Kind.FLOAT;
-  }
-
-  public static boolean hasIntValue(XAnnotationValue value) {
-    return getKind(value) == Kind.INT;
-  }
-
-  public static boolean hasLongValue(XAnnotationValue value) {
-    return getKind(value) == Kind.LONG;
-  }
-
-  public static boolean hasShortValue(XAnnotationValue value) {
-    return getKind(value) == Kind.SHORT;
-  }
-
-  public static boolean hasStringValue(XAnnotationValue value) {
-    return getKind(value) == Kind.STRING;
-  }
 
   public static boolean hasTypeValue(XAnnotationValue value) {
     return getKind(value) == Kind.TYPE;
@@ -96,8 +60,8 @@ public final class XAnnotationValues {
   public static boolean hasArrayValue(XAnnotationValue value) {
     return getKind(value) == Kind.ARRAY;
   }
-
-  private static Kind getKind(XAnnotationValue value) {
+  
+  static Kind getKind(XAnnotationValue value) {
     return KindVisitor.INSTANCE.visit(toJavac(value));
   }
 

@@ -19,6 +19,7 @@ package dagger.spi.model;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import dagger.internal.codegen.base.Joiner;
+import dagger.internal.codegen.xprocessing.XAnnotations;
 import io.jbock.auto.value.AutoValue;
 import io.jbock.auto.value.extension.memoized.Memoized;
 import java.util.Optional;
@@ -88,7 +89,10 @@ public abstract class Key {
     return Joiner.on(' ')
         .skipNulls()
         .join(
-            qualifier().map(MoreAnnotationMirrors::toStableString).orElse(null),
+            qualifier()
+                .map(DaggerAnnotation::xprocessing)
+                .map(XAnnotations::toStableString)
+                .orElse(null),
             type(),
             multibindingContributionIdentifier().orElse(null));
   }
